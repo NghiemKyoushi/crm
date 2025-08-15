@@ -1,4 +1,4 @@
-import DashboardPage from "@/app/features/dashboard/views/login";
+import DashboardPage from "@/features/dashboard/views/dashboard";
 
 export default function Dashboard() {
   return <DashboardPage/>;

@@ -1,0 +1,9 @@
+{
+  "login":{
+    "signIn": "Sign In",
+     "email":"Email",
+    "password":"Mật khẩu",
+    "pleaseEnterEmail":"Vui lòng nhập email!",
+    "pleaseEnterPassword":"Vui lòng nhập mật khẩu!"
+  }
+}

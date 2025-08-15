@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Layout, Layout as AntLayout } from "antd";
+import { Layout } from "antd";
 
 export const metadata: Metadata = {
   title: "OrderSystem",
@@ -15,8 +14,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
         <Layout style={{ minHeight: "100vh" }}>
           <Sidebar />
           <Layout>
@@ -25,7 +22,6 @@ export default function RootLayout({
               style={{
                 flex: 1,
                 margin: "24px",
-                // background: "#fff",
                 padding: 24,
               }}
             >
@@ -33,7 +29,5 @@ export default function RootLayout({
             </div>
           </Layout>
         </Layout>
-      </body>
-    </html>
   );
 }

@@ -1,0 +1,9 @@
+{
+  "login":{
+    "signIn": "Sign In",
+    "email":"Email",
+    "password":"Password",
+    "pleaseEnterEmail":"Please enter email",
+    "pleaseEnterPassword":"Please enter password"
+  }
+}

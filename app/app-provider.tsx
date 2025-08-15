@@ -18,7 +18,7 @@ export default function AppProvider({ children }: ProviderProps): JSX.Element {
           <Suspense fallback={<div>Loading...</div>}>
             {/* <Toaster /> */}
             <div className="min-h-dvh">
-              <div className={'max-w-[650px] mx-auto overflow-x-hidden'}>{children}</div>
+              <div className={'overflow-x-hidden'}>{children}</div>
             </div>
           </Suspense>
         </ErrorBoundaryWrapper>

@@ -1,0 +1,18 @@
+/* Ẩn dấu sao của Ant Design */
+.ant-form-item-label > label.ant-form-item-required::before {
+  display: none !important;
+}
+
+/* Một số style nhẹ để form đẹp hơn */
+.ant-input-affix-wrapper {
+  padding: 6px 11px;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(90deg, #4f8cff, #1d6fff);
+  border: none;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(90deg, #5b95ff, #2a77ff);
+}
