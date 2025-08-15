@@ -1,9 +1,24 @@
+import { API_TYPE_CONST } from "@/constants/api-type";
 import axios from "axios";
-console.log('NEXT_PUBLIC_ROOT_STATIC_URL', process.env.NEXT_PUBLIC_ROOT_STATIC_URL);
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
-  withCredentials: true, 
+  withCredentials: true,
+  headers: {
+    "Accept-Language": "vn",
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Requested-With",
+    "X-Platform": "1",
+    "X-Device-Id": "dev-1",
+    "X-Device-Name": "TestDevice",
+    "X-Os-Version": "14",
+    "X-Os": "Android",
+    "X-Ip": "127.0.0.1",
+    "X-Location": "HN",
+  },
 });
 
 let isRefreshing = false;
@@ -38,7 +53,6 @@ api.interceptors.response.use(
     // Nếu 401 và chưa thử refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (originalRequest.url.includes("/login") || originalRequest.url.includes("/auth/generate/access-token")) {
-        // Nếu login hoặc refresh token fail → logout
         localStorage.clear();
         window.location.href = "/login";
         return Promise.reject(error);
@@ -66,10 +80,17 @@ api.interceptors.response.use(
       }
 
       try {
-        const res = await api.post("/auth/generate/access-token", { refreshToken });
-        const newAccessToken = res.data.accessToken;
-        localStorage.setItem("accessToken", newAccessToken);
-        processQueue(null, newAccessToken);
+        const newAccessToken = await api.post(
+            API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
+            {}, 
+            {
+              headers: {
+                Authorization: `Bearer ${refreshToken}`,
+              },
+            }
+          );  
+        localStorage.setItem("accessToken", newAccessToken.data.data.token);
+        processQueue(null, newAccessToken.data.data.token);
         originalRequest.headers["Authorization"] = "Bearer " + newAccessToken;
         return api(originalRequest);
       } catch (err) {

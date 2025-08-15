@@ -1,9 +1,11 @@
 import React from "react";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import "./login.css"; // file css custom
 import { useLogin } from "../hooks";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface LoginFormValues {
   email: string;
@@ -13,25 +15,31 @@ interface LoginFormValues {
 const LoginForm: React.FC = () => {
   const [form] = Form.useForm<LoginFormValues>();
   const { t } = useTranslation();
+  const router = useRouter();
 
-  const { mutate: login, isPending, error } = useLogin();
+  const loginMutation = useLogin();
 
-  const onFinish = (values: { email: string; password: string }) => {    
-    login(values, {
+  const onFinish = (values: { email: string; password: string }) => {
+    loginMutation.mutate(values, {
       onSuccess: () => {
-        // message.success("Đăng nhập thành công!");
-        window.location.href = "/dashboard"; // hoặc router.push
+        toast.success('Đăng nhập thành công!', {
+          position: 'top-right',
+        });
+        // messageApi.open({
+        //   type: 'success',
+        //   content: 'Đăng nhập thành công!',
+        // });
+        router.push('user-management')
       },
-      onError: (err: unknown) => {
-        console.log('err', err);
-        
-        // const errMsg =
-        //   err instanceof Error
-        //     ? err.message
-        //     : "Đăng nhập thất bại. Vui lòng thử lại.";
-        // message.error(errMsg);
+      onError: () => {
+        toast.error('Đăng nhập thất bại!', {
+          position: 'top-right',
+        });
       },
     });
+  };
+
+  const onFinishFailed = () => {
   };
 
   return (
@@ -39,6 +47,7 @@ const LoginForm: React.FC = () => {
       form={form}
       name="login"
       onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
       layout="vertical"
       style={{
         padding: "2rem",
@@ -83,14 +92,13 @@ const LoginForm: React.FC = () => {
         />
       </Form.Item>
 
-      <Form.Item style={{ marginTop: "1.5rem" }}>
+      <Form.Item className="mt-6 flex justify-center">
         <Button
           type="primary"
           htmlType="submit"
-          block
           size="large"
           style={{ borderRadius: "6px" }}
-          loading={isPending}
+          loading={loginMutation.isPending}
         >
           SIGN IN
         </Button>

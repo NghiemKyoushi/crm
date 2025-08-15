@@ -15,11 +15,9 @@ export function WithAuth<P extends JSX.IntrinsicAttributes>(
 
     useEffect(() => {
       const token = storage.getItem(KEY_STORAGE.TOKEN);
-      const user = storage.getItem(KEY_STORAGE.USER_INFO);
-
-      // if (!token || !user) {
-      //   logout();
-      // }
+      if (!token) {
+        logout();
+      }
     }, [router]);
 
     return <WrappedComponent {...props} />;

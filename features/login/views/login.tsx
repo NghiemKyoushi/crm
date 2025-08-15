@@ -1,17 +1,9 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useUserStore } from "@/stores/user-info-store";
 import LoginForm from "../components/login-form";
 import Image from "next/image";
 import logoCRM from "@/assets/login/logo_crm.jpg";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { user } = useUserStore();
-  useEffect(() => {
-    if (user) router.replace("/home");
-  }, [user]);
 
   return (
     <div className="relative w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">

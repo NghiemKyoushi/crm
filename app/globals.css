@@ -19,3 +19,19 @@ html, body, #root {
   height: 100%;
   margin: 0;
 }
+:where(.ant-menu-light .ant-menu-item-selected) {
+  background-color: #EFF6FF !important; 
+  color: #000 !important; 
+}
+
+:where(.ant-menu-light .ant-menu-item-selected) .ant-menu-item-icon {
+  color: #3B82F6 !important;
+}
+
+:where(.ant-menu-light .ant-menu-item .ant-menu-item-icon) {
+  color: #6B7280 !important; /* xám */
+}
+
+:where(.ant-menu-light .ant-menu-item-selected) .ant-menu-title-content {
+  color: #000 !important;
+}

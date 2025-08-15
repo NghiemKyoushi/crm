@@ -1,21 +1,20 @@
 import { storage } from "@/lib/storage";
-import { useUserStore } from "@/stores/user-info-store";
+// import { useUserStore } from "@/stores/user-info-store";
 
 export const isAuthenticated = () => {
-  const user = useUserStore.getState().user;
-  return !!user;
+  if (typeof window === "undefined") return false; // tránh lỗi SSR
+  const accessToken = localStorage.getItem("accessToken");
+  return !!accessToken;
 };
 
 export const useAuth = () => {
-  const { user, clearUser } = useUserStore();
 
   const logout = async () => {
     window.location.href = "/login";
     await storage.clear();
-    clearUser();
   };
   return {
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated: isAuthenticated,
   };
 };
