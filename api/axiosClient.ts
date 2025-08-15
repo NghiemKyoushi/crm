@@ -46,27 +46,27 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  res => res,
+  async err => {
+    const originalRequest = err.config;
+    const logout = () => {
+      localStorage.clear();
+      window.location.href = "/login";
+    };
 
-    // Nếu 401 và chưa thử refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url.includes("/login") || originalRequest.url.includes("/auth/generate/access-token")) {
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(error);
+    if (err.response?.status === 401 && !originalRequest._retry) {
+      if (/(\/login|\/auth\/generate\/access-token)$/.test(originalRequest.url)) {
+        logout();
+        return Promise.reject(err);
       }
 
       if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers["Authorization"] = "Bearer " + token;
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
       }
 
       originalRequest._retry = true;
@@ -74,36 +74,31 @@ api.interceptors.response.use(
 
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(error);
+        logout();
+        return Promise.reject(err);
       }
 
       try {
-        const newAccessToken = await api.post(
-            API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
-            {}, 
-            {
-              headers: {
-                Authorization: `Bearer ${refreshToken}`,
-              },
-            }
-          );  
-        localStorage.setItem("accessToken", newAccessToken.data.data.token);
-        processQueue(null, newAccessToken.data.data.token);
-        originalRequest.headers["Authorization"] = "Bearer " + newAccessToken;
+        const res = await api.post(API_TYPE_CONST.GENERATE_ACCESS_TOKEN, {}, {
+          headers: { Authorization: `Bearer ${refreshToken}` }
+        });
+
+        const token = res.data.data.token;
+        localStorage.setItem("accessToken", token);
+        processQueue(null, token);
+
+        originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(err);
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
+        logout();
+        return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
       }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
