@@ -19,7 +19,7 @@ export default function LoginPage() {
           className="rounded-full shadow-sm"
         />
       </div>
-
+      
       <div className="pointer-events-none absolute rounded-full blur-3xl opacity-20 bg-sky-200" />
       <div className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full blur-3xl opacity-20 bg-indigo-200" />
       <div className="relative rounded-[32px] bg-white max-w-sm w-full mx-10 shadow-xl overflow-hidden min-h-[380px] flex items-center justify-center">

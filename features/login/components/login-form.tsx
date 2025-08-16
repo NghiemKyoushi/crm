@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import AntdButton from "@/components/ButtonComponent";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface LoginFormValues {
   email: string;
@@ -107,9 +108,14 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
           {t("login.signIn")}
         </AntdButton>
       </Form.Item>
-
-      <Form.Item shouldUpdate={false} className="text-center">
-        <div className="cursor-pointer text-blue-500 " onClick={onForgot}>{t("login.forgotPassword")}</div>
+      <Form.Item
+        shouldUpdate={false}
+        className="flex flex-row justify-center items-center text-center gap-2"
+      >
+        <div className="cursor-pointer text-blue-500" onClick={onForgot}>
+          {t("login.forgotPassword")}
+        </div>
+        <div className="flex flex-row justify-center items-center text-center"><LanguageSwitcher /></div>
       </Form.Item>
     </Form>
   );

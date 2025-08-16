@@ -5,10 +5,11 @@ import { Form, Input, Button, Modal, Space } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { useForgotPassword, useResendOTP, useVerifyOTP } from "../hooks";
+import { useCreateNewPassword, useForgotPassword, useResendOTP } from "../hooks";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+// import Image from "next/image";
+// import logoCRM from "@/assets/login/logo_crm.jpg";
 interface ForgotPasswordFormValues {
   email: string;
 }
@@ -23,9 +24,10 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
   const [otpModalVisible, setOtpModalVisible] = useState(false);
   const [otpValue, setOtpValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const forgotPassMutation = useForgotPassword();
-  const verifyOTPMutation = useVerifyOTP();
+  const createNewPasswordMutation = useCreateNewPassword();
   const resendOTPMutation = useResendOTP();
 
   const onFinish = (values: { email: string }) => {
@@ -37,10 +39,9 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
-        console.log('err', err);
-        if(err.status === 409){
-          toast.error("Hãy đợi 5 phút rồi thử lại! ");
-        }else{
+        if (err.status === 409) {
+          toast.error("Hãy đợi 5 phút rồi thử lại!");
+        } else {
           toast.error("Email không tồn tại!");
         }
       },
@@ -48,16 +49,26 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
   };
 
   const handleOtpConfirm = () => {
-    verifyOTPMutation.mutate(
-      { email: emailValue, otp: otpValue },
+    if (!newPassword) {
+      toast.error("Vui lòng nhập mật khẩu mới!");
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      toast.error("Mật khẩu phải chứa cả chữ và số, tối thiểu 8 ký tự!");
+      return;
+    }
+    createNewPasswordMutation.mutate(
+      { email: emailValue, otp: otpValue, new_password: newPassword },
       {
         onSuccess: () => {
-          toast.success("Xác nhận OTP thành công , password mới đã được reset !");
+          toast.success("Xác nhận OTP thành công, mật khẩu mới đã được reset!");
           setOtpModalVisible(false);
           props.onBack();
         },
         onError: () => {
-          toast.error("OTP không chính xác!");
+          toast.error("OTP hoặc mật khẩu không hợp lệ!");
         },
       }
     );
@@ -70,15 +81,8 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         onSuccess: () => {
           toast.success("OTP mới đã được gửi!");
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onError: (err: any) => {
-           if(err.status === 409){
-          toast.error("Hãy đợi 5 phút rồi thử lại! ");
-        }else{
-           toast.error("Hãy đợi 5 phút rồi thử lại! ");
-        }
-          
-          
+        onError: () => {
+          toast.error("Hãy đợi 5 phút rồi thử lại!");
         },
       }
     );
@@ -97,24 +101,20 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           background: "white",
           borderRadius: "30px",
           boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-          border: "3px solid transparent",
-          transition: "all 0.3s ease",
         }}
       >
-        <div className="flex items-start justify-between mb-3">
-          <Button
-            type="link"
-            onClick={props.onBack}
-            className="flex items-start gap-2"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="to-blue-400" />
-          </Button>
-
-          <h2 className="font-bold text-2xl mb-0 bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent tracking-wide">
+       
+          <div className="flex items-start justify-between">
+            <Button
+              type="link"
+              onClick={props.onBack}
+              className="flex items-start gap-2"
+            >
+              <FontAwesomeIcon icon={faArrowLeft} />
+            </Button>
+          <h2 className="font-bold text-2xl mb-0 bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent">
             {t("login.forgotPassword")}
           </h2>
-
-          {/* để cân bằng 2 bên (giữ title ở giữa) */}
           <div className="w-8" />
         </div>
 
@@ -134,7 +134,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           />
         </Form.Item>
 
-        <Form.Item className="!mt-10 flex justify-center text-[14px] rounded-md">
+        <Form.Item className="!mt-10 flex justify-center">
           <Button type="primary" htmlType="submit" size="large">
             Gửi mã xác nhận
           </Button>
@@ -153,10 +153,10 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
       >
         <div className="text-center p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Xác thực OTP
+            Xác thực OTP và mật khẩu mới
           </h3>
           <p className="mb-6 text-sm text-gray-500">
-            Nhập mã OTP 6 số đã gửi đến email của bạn
+            Nhập mã OTP 6 số và mật khẩu mới
           </p>
 
           {/* Input OTP */}
@@ -165,18 +165,26 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             value={otpValue}
             onChange={(val) => setOtpValue(val)}
             size="large"
-            className="flex justify-center gap-2"
-            style={{ width: "100%", justifyContent: "center" }}
+            className="flex justify-center gap-2 mb-4"
+          />
+
+          {/* Input New Password */}
+          <Input.Password
+            placeholder="Mật khẩu mới"
+            size="large"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="mt-4 mb-2.5"
           />
 
           {/* Buttons */}
-          <Space direction="vertical" className="w-full mt-7">
+          <Space direction="vertical" className="w-full mt-4">
             <Button
               type="primary"
               size="middle"
               block
               className="rounded-lg"
-              loading={verifyOTPMutation.isPending}
+              loading={createNewPasswordMutation.isPending}
               onClick={handleOtpConfirm}
             >
               Xác nhận
