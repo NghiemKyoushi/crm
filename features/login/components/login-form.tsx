@@ -108,15 +108,14 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
           {t("login.signIn")}
         </AntdButton>
       </Form.Item>
-      <Form.Item
-        shouldUpdate={false}
+      <div
         className="flex flex-row justify-center items-center text-center gap-2"
       >
         <div className="cursor-pointer text-blue-500" onClick={onForgot}>
           {t("login.forgotPassword")}
         </div>
         <div className="flex flex-row justify-center items-center text-center"><LanguageSwitcher /></div>
-      </Form.Item>
+      </div>
     </Form>
   );
 };
