@@ -28,3 +28,22 @@ export const logout = () => {
   window.location.href = "/login";
 };
 
+export const forgotPassword  = async (email: string) => {  
+  const res = await api.post(API_TYPE_CONST.FORGOT_PASSWORD, { email, auth_type: 1 });
+  
+  return res.data; 
+}
+
+
+export const verifyOtp  = async (email: string, otp: string) => {  
+  const res = await api.post(API_TYPE_CONST.VERIFY_OTP, { email, auth_type: 1, otp });
+  
+  return res.data; 
+}
+
+export const resendOtp  = async (email: string) => {  
+  const res = await api.post(API_TYPE_CONST.RESEND_VERIFY_OTP, { email, auth_type: 1 });
+  
+  return res.data; 
+}
+

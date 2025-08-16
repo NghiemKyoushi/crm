@@ -4,6 +4,17 @@
     "email":"Email",
     "password":"Password",
     "pleaseEnterEmail":"Please enter email",
-    "pleaseEnterPassword":"Please enter password"
+    "pleaseEnterPassword":"Please enter password",
+    "forgotPassword":"Forgot password"
+  },
+    "menu": {
+    "dashboard": "Dashboard",
+    "orders": "Orders Management",
+    "finance": "Finance Management",
+    "userManagement": "User Management",
+    "auction": "Auction System",
+    "products": "Product Types & Fees",
+    "settings": "System Settings"
   }
+   
 }
