@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Form, Input, Button, Modal, Space } from "antd";
 import { MailOutlined } from "@ant-design/icons";

@@ -1,11 +1,14 @@
-import React from "react";
-import { Form, Input, Button } from "antd";
+"use client";
+
+import React, { useCallback } from "react";
+import { Form, Input } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import "./login.css"; // file css custom
+import "./login.css";
 import { useLogin } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import AntdButton from "@/components/ButtonComponent";
 
 interface LoginFormValues {
   email: string;
@@ -16,34 +19,34 @@ interface LoginFormProps {
   onForgot: () => void;
 }
 
-const LoginForm = (props: LoginFormProps) => {
+const LoginForm = ({ onForgot }: LoginFormProps) => {
   const [form] = Form.useForm<LoginFormValues>();
   const { t } = useTranslation();
   const router = useRouter();
-
   const loginMutation = useLogin();
 
-  const onFinish = (values: { email: string; password: string }) => {
-    loginMutation.mutate(values, {
-      onSuccess: () => {
-        toast.success("Đăng nhập thành công!", {
-          position: "top-right",
-        });
-        // messageApi.open({
-        //   type: 'success',
-        //   content: 'Đăng nhập thành công!',
-        // });
-        router.push("user-management");
-      },
-      onError: () => {
-        toast.error("Đăng nhập thất bại!", {
-          position: "top-right",
-        });
-      },
-    });
-  };
+  // callback submit thành công
+  const onFinish = useCallback(
+    (values: LoginFormValues) => {
+      loginMutation.mutate(values, {
+        onSuccess: () => {
+          toast.success("Đăng nhập thành công!", { position: "top-right" });
+          router.push("user-management");
+        },
+        onError: () => {
+          toast.error("Đăng nhập thất bại!", { position: "top-right" });
+        },
+      });
+    },
+    [loginMutation, router]
+  );
 
-  const onFinishFailed = () => {};
+  // callback submit lỗi validate
+  const onFinishFailed = useCallback(() => {
+    toast.error("Vui lòng kiểm tra lại thông tin!", {
+      position: "top-right",
+    });
+  }, []);
 
   return (
     <Form
@@ -84,7 +87,7 @@ const LoginForm = (props: LoginFormProps) => {
 
       <Form.Item
         name="password"
-        label={<span style={{ fontWeight: 600 }}> {t("login.password")}</span>}
+        label={<span style={{ fontWeight: 600 }}>{t("login.password")}</span>}
         rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
       >
         <Input.Password
@@ -95,25 +98,22 @@ const LoginForm = (props: LoginFormProps) => {
         />
       </Form.Item>
 
-      <Form.Item className="mt-6 flex justify-center">
-        <Button
-          type="primary"
-          htmlType="submit"
-          size="large"
+      <Form.Item shouldUpdate={false} className="mt-6 flex justify-center">
+        <AntdButton
+          type="submit"
           style={{ borderRadius: "6px" }}
           loading={loginMutation.isPending}
         >
           {t("login.signIn")}
-        </Button>
+        </AntdButton>
       </Form.Item>
 
-      <Form.Item className="text-center">
-        <Button type="link" onClick={props.onForgot}>
-          {t("login.forgotPassword")}
-        </Button>
+      <Form.Item shouldUpdate={false} className="text-center">
+        <div className="cursor-pointer text-blue-500 " onClick={onForgot}>{t("login.forgotPassword")}</div>
       </Form.Item>
     </Form>
   );
 };
 
-export default LoginForm;
+// Chỉ re-render khi prop onForgot thay đổi
+export default React.memo(LoginForm);
