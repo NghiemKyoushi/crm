@@ -47,3 +47,10 @@ export const resendOtp  = async (email: string) => {
   return res.data; 
 }
 
+export const createNewPassword  = async (email: string,otp: string, new_password: string) => {  
+  const res = await api.post(API_TYPE_CONST.CREATE_NEW_PASSWORD, { email, otp , new_password:new_password,  auth_type: 1, phone_number:null });
+  
+  return res.data; 
+}
+
+
