@@ -1,9 +1,19 @@
 {
-  "login":{
-    "signIn": "Sign In",
-     "email":"Email",
-    "password":"Mật khẩu",
-    "pleaseEnterEmail":"Vui lòng nhập email!",
-    "pleaseEnterPassword":"Vui lòng nhập mật khẩu!"
+  "login": {
+    "signIn": "Đăng nhập",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "pleaseEnterEmail": "Vui lòng nhập email!",
+    "pleaseEnterPassword": "Vui lòng nhập mật khẩu!",
+    "forgotPassword": "Quên mật khẩu"
+  },
+  "menu": {
+    "dashboard": "Bảng điều khiển",
+    "orders": "Quản lý Đơn hàng",
+    "finance": "Quản lý Tài chính",
+    "userManagement": "Quản lý Người dùng",
+    "auction": "Hệ thống Đấu giá",
+    "products": "Loại sản phẩm & Phí",
+    "settings": "Cài đặt Hệ thống"
   }
 }

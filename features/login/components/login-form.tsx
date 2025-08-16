@@ -12,7 +12,11 @@ interface LoginFormValues {
   password: string;
 }
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  onForgot: () => void;
+}
+
+const LoginForm = (props: LoginFormProps) => {
   const [form] = Form.useForm<LoginFormValues>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -22,25 +26,24 @@ const LoginForm: React.FC = () => {
   const onFinish = (values: { email: string; password: string }) => {
     loginMutation.mutate(values, {
       onSuccess: () => {
-        toast.success('Đăng nhập thành công!', {
-          position: 'top-right',
+        toast.success("Đăng nhập thành công!", {
+          position: "top-right",
         });
         // messageApi.open({
         //   type: 'success',
         //   content: 'Đăng nhập thành công!',
         // });
-        router.push('user-management')
+        router.push("user-management");
       },
       onError: () => {
-        toast.error('Đăng nhập thất bại!', {
-          position: 'top-right',
+        toast.error("Đăng nhập thất bại!", {
+          position: "top-right",
         });
       },
     });
   };
 
-  const onFinishFailed = () => {
-  };
+  const onFinishFailed = () => {};
 
   return (
     <Form
@@ -60,12 +63,12 @@ const LoginForm: React.FC = () => {
       }}
     >
       <h2 className="text-center mb-6 font-bold text-2xl bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent tracking-wide">
-        {t('login.signIn')}
+        {t("login.signIn")}
       </h2>
 
       <Form.Item
         name="email"
-        label={<span style={{ fontWeight: 600 }}>Email</span>}
+        label={<span style={{ fontWeight: 600 }}>{t("login.email")}</span>}
         rules={[
           { required: true, message: "Vui lòng nhập email!" },
           { type: "email", message: "Email không hợp lệ!" },
@@ -74,20 +77,20 @@ const LoginForm: React.FC = () => {
         <Input
           size="large"
           prefix={<MailOutlined />}
-          placeholder="Email"
+          placeholder={t("login.email")}
           style={{ borderRadius: "6px" }}
         />
       </Form.Item>
 
       <Form.Item
         name="password"
-        label={<span style={{ fontWeight: 600 }}>Password</span>}
+        label={<span style={{ fontWeight: 600 }}> {t("login.password")}</span>}
         rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
       >
         <Input.Password
           size="large"
           prefix={<LockOutlined />}
-          placeholder="Password"
+          placeholder={t("login.password")}
           style={{ borderRadius: "6px" }}
         />
       </Form.Item>
@@ -100,7 +103,13 @@ const LoginForm: React.FC = () => {
           style={{ borderRadius: "6px" }}
           loading={loginMutation.isPending}
         >
-          SIGN IN
+          {t("login.signIn")}
+        </Button>
+      </Form.Item>
+
+      <Form.Item className="text-center">
+        <Button type="link" onClick={props.onForgot}>
+          {t("login.forgotPassword")}
         </Button>
       </Form.Item>
     </Form>

@@ -1,14 +1,26 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Space } from 'antd';
+import { Dropdown } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
+  const [language, setLanguage] = useState(i18n.language || 'vi');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang) {
+      i18n.changeLanguage(savedLang);
+      setLanguage(savedLang);
+    }
+  }, [i18n]);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('language', lng);
+    setLanguage(lng);
   };
 
   const items = [
@@ -25,9 +37,19 @@ const LanguageSwitcher = () => {
   ];
 
   return (
-    <Dropdown menu={{ items }} placement="bottomRight" >
-      <a onClick={(e) => e.preventDefault()} className="flex items-center justify-center cursor-pointer h-10 w-10">
-          <GlobalOutlined style={{ fontSize: 25 }} />
+    <Dropdown
+      menu={{
+        items,
+        selectedKeys: [language], // ✅ highlight option đang chọn
+      }}
+      placement="bottomRight"
+    >
+      <a
+        onClick={(e) => e.preventDefault()}
+        className="flex items-center justify-center cursor-pointer h-10 w-10"
+        title={language === 'vi' ? 'Tiếng Việt' : 'English'}
+      >
+        <GlobalOutlined style={{ fontSize: 25 }} />
       </a>
     </Dropdown>
   );

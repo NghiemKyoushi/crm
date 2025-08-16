@@ -16,48 +16,52 @@ import {
   faTags,
   faCog,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 const { Sider } = Layout;
-const menuItems = [
-  {
-    key: "/dashboard",
-    icon: <FontAwesomeIcon icon={faTachometerAlt} />,
-    label: <Link href="/dashboard">Dashboard</Link>,
-  },
-  {
-    key: "/orders",
-    icon: <FontAwesomeIcon icon={faShoppingCart} />,
-    label: "Quản lý Đơn hàng",
-  },
-  {
-    key: "/finance",
-    icon: <FontAwesomeIcon icon={faWallet} />,
-    label: "Quản lý Tài chính",
-  },
-  {
-    key: "/user-management",
-    icon: <FontAwesomeIcon icon={faUsers} />,
-    label: <Link href="/user-management">Quản lý Người dùng</Link>,
-  },
-  {
-    key: "/auction",
-    icon: <FontAwesomeIcon icon={faGavel} />,
-    label: "Hệ thống Đấu giá",
-  },
-  {
-    key: "/products",
-    icon: <FontAwesomeIcon icon={faTags} />,
-    label: "Loại sản phẩm & Phí",
-  },
-  {
-    key: "/settings",
-    icon: <FontAwesomeIcon icon={faCog} />,
-    label: "Cài đặt Hệ thống",
-  },
-];
+
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+    const { t } = useTranslation();
+
+   const menuItems = [
+    {
+      key: "/dashboard",
+      icon: <FontAwesomeIcon icon={faTachometerAlt} />,
+      label: <Link href="/dashboard">{t("menu.dashboard")}</Link>,
+    },
+    {
+      key: "/orders",
+      icon: <FontAwesomeIcon icon={faShoppingCart} />,
+      label: t("menu.orders"),
+    },
+    {
+      key: "/finance",
+      icon: <FontAwesomeIcon icon={faWallet} />,
+      label: t("menu.finance"),
+    },
+    {
+      key: "/user-management",
+      icon: <FontAwesomeIcon icon={faUsers} />,
+      label: <Link href="/user-management">{t("menu.userManagement")}</Link>,
+    },
+    {
+      key: "/auction",
+      icon: <FontAwesomeIcon icon={faGavel} />,
+      label: t("menu.auction"),
+    },
+    {
+      key: "/products",
+      icon: <FontAwesomeIcon icon={faTags} />,
+      label: t("menu.products"),
+    },
+    {
+      key: "/settings",
+      icon: <FontAwesomeIcon icon={faCog} />,
+      label: t("menu.settings"),
+    },
+  ];
   return (
     <Sider
       width={256}
