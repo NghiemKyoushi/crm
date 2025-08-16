@@ -36,7 +36,7 @@ export const forgotPassword  = async (email: string) => {
 
 
 export const verifyOtp  = async (email: string, otp: string) => {  
-  const res = await api.post(API_TYPE_CONST.VERIFY_OTP, { email, auth_type: 1, otp });
+  const res = await api.post(API_TYPE_CONST.VERIFY_OTP, { email, auth_type: 1, otp, phone_number: null });
   
   return res.data; 
 }
