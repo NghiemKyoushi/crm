@@ -16,3 +16,7 @@
 .ant-btn-primary:hover {
   background: linear-gradient(90deg, #5b95ff, #2a77ff);
 }
+
+.ant-input-password-icon {
+  transition: none !important;
+}
