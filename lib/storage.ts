@@ -1,4 +1,3 @@
-import { backUpStorage, restoreStorage } from './utils';
 
 export const safeStorage = {
   setItem: (key: string, value: string) => {
@@ -49,9 +48,7 @@ export const storage = {
   },
 
   clear: () => {
-    const backup = backUpStorage();
     safeStorage.clear();
-    restoreStorage(backup);
   },
 
   // getUserInfo() {

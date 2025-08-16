@@ -1,24 +1,24 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
 
-export const loginRequest  = async (email: string, password: string) => {
-    console.log('check3333444',API_TYPE_CONST);
-    
-  const res = await api.post(API_TYPE_CONST.LOGIN, { email, password });  
-  const { refreshToken } = res.data;
-
+export const loginRequest  = async (email: string, password: string) => {    
+  const res = await api.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });
+  const refreshToken = res.data.data.refresh_token;
   if (!refreshToken) {
     throw new Error("Không nhận được refreshToken từ API");
   }
+
   localStorage.setItem("refreshToken", refreshToken);
-
-  const tokenRes = await api.post(API_TYPE_CONST.GENERATE_ACCESS_TOKEN, { refreshToken });
-  const { accessToken } = tokenRes.data;
-
-  if (!accessToken) {
-    throw new Error("Không nhận được accessToken từ API");
-  }
-  localStorage.setItem("accessToken", accessToken);
+  const accessToken = await api.post(
+    API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
+    {}, 
+    {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    }
+  );  
+  localStorage.setItem("accessToken", accessToken.data.data.token);
   return { refreshToken, accessToken };
 };
 

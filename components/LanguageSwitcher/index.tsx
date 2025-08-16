@@ -25,11 +25,9 @@ const LanguageSwitcher = () => {
   ];
 
   return (
-    <Dropdown menu={{ items }} placement="bottomRight">
-      <a onClick={(e) => e.preventDefault()}>
-        <Space>
-          <GlobalOutlined style={{ fontSize: 20 }} />
-        </Space>
+    <Dropdown menu={{ items }} placement="bottomRight" >
+      <a onClick={(e) => e.preventDefault()} className="flex items-center justify-center cursor-pointer h-10 w-10">
+          <GlobalOutlined style={{ fontSize: 25 }} />
       </a>
     </Dropdown>
   );
