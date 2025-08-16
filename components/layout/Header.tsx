@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Layout, Avatar, Button, Dropdown } from "antd";
-import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { LogoutOutlined } from "@ant-design/icons";
 import LanguageSwitcher from "../LanguageSwitcher";
 import { storage } from "@/lib/storage";
 import { useRouter } from "next/navigation";
