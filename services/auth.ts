@@ -22,10 +22,11 @@ export const loginRequest  = async (email: string, password: string) => {
   return { refreshToken, accessToken };
 };
 
-export const logout = () => {
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("accessToken");
-  window.location.href = "/login";
+export const logout = async () => {
+  await api.post(API_TYPE_CONST.LOGOUT);
+  // localStorage.removeItem("refreshToken");
+  // localStorage.removeItem("accessToken");
+  // window.location.href = "/login";
 };
 
 export const forgotPassword  = async (email: string) => {  

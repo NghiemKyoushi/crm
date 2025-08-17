@@ -11,7 +11,7 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="pt-20 pl-[256px] pr-6">
+    <div className="pt-20 pl-[256px]">
       <Row gutter={[16, 16]}>
         <Col span={6}>
           <Card>
