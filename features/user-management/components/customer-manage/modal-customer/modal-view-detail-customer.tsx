@@ -2,6 +2,9 @@
 
 import React from "react";
 import { Modal, Tabs, Button } from "antd";
+import HistoryOrderTab from "./tab/history-order";
+import HistoryPaymentTab from "./tab/history-payment";
+import ShippingFeeConfig from "./tab/fee-privacy-setting";
 
 interface CustomerDetailModalProps {
   visible: boolean;
@@ -43,6 +46,10 @@ export default function CustomerDetailModal({
           <span className="text-blue-600">{customer.name}</span>
         </span>
       }
+      bodyStyle={{
+        maxHeight: "70vh",   // Chiều cao tối đa ~70% màn hình
+        overflowY: "auto",   // Cho phép scroll dọc
+      }}
     >
       <Tabs defaultActiveKey="overview">
         <TabPane tab="Tổng quan" key="overview">
@@ -122,15 +129,15 @@ export default function CustomerDetailModal({
         </TabPane>
 
         <TabPane tab="Lịch sử Đơn hàng" key="orders">
-          <div>Coming soon...</div>
+          <HistoryOrderTab/>
         </TabPane>
 
         <TabPane tab="Lịch sử Giao dịch" key="transactions">
-          <div>Coming soon...</div>
+          <HistoryPaymentTab/>
         </TabPane>
 
         <TabPane tab="Cài đặt Phí riêng" key="fees">
-          <div>Coming soon...</div>
+          <ShippingFeeConfig/>
         </TabPane>
 
         <TabPane tab="Ghi chú Nội bộ" key="notes">

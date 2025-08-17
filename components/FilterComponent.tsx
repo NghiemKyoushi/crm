@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
-// import type { FormInstance } from "antd/es/form";
 import moment from "moment";
 
 type FilterValues = {
@@ -27,25 +26,35 @@ const OrderFilter: React.FC<OrderFilterProps> = ({ onFilter }) => {
   };
 
   return (
-    <Form form={form} layout="inline" onFinish={handleFinish} className="mb-4">
-      <Form.Item name="orderCode">
-        <Input placeholder="Tìm theo mã đơn..." />
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleFinish}
+      className="mb-4 w-full flex flex-row gap-3"
+      style={{ width: "100%" }}
+    >
+      <Form.Item name="orderCode" style={{ width: "100%" }} >
+        <Input placeholder="Tìm theo mã đơn..." style={{ width: "100%" }} />
       </Form.Item>
 
-      <Form.Item name="status">
-        <Select placeholder="-- Lọc trạng thái --" allowClear style={{ minWidth: 150 }}>
+      <Form.Item name="status" style={{ width: "100%" }}>
+        <Select
+          placeholder="-- Lọc trạng thái --"
+          allowClear
+          style={{ width: "100%" }}
+        >
           <Select.Option value="pending">Chờ thanh toán</Select.Option>
           <Select.Option value="paid">Đã thanh toán</Select.Option>
           <Select.Option value="cancel">Đã hủy</Select.Option>
         </Select>
       </Form.Item>
 
-      <Form.Item name="date">
-        <DatePicker format="DD/MM/YYYY" />
+      <Form.Item name="date" style={{ width: "100%" }} >
+        <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
       </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
+      <Form.Item style={{ width: "100%" }}>
+        <Button type="primary" htmlType="submit" block>
           Lọc
         </Button>
       </Form.Item>
