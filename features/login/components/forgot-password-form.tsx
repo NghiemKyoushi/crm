@@ -8,8 +8,8 @@ import { toast } from "react-toastify";
 import { useCreateNewPassword, useForgotPassword, useResendOTP } from "../hooks";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import Image from "next/image";
-// import logoCRM from "@/assets/login/logo_crm.jpg";
+import Image from "next/image";
+import logoCRM from "@/assets/login/logo_crm.jpg";
 interface ForgotPasswordFormValues {
   email: string;
 }
@@ -96,13 +96,22 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         onFinish={onFinish}
         layout="vertical"
         style={{
-          minHeight: "380px",
+          minHeight:'500px',
           padding: "2rem",
           background: "white",
           borderRadius: "30px",
           boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
         }}
       >
+         <div className="flex justify-center z-50">
+        <Image
+          src={logoCRM}
+          alt="CRM Logo"
+          width={150}
+          height={150}
+          className="!mt-[-1rem]"
+        />
+      </div>
        
           <div className="flex items-start justify-between">
             <Button
@@ -134,14 +143,12 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           />
         </Form.Item>
 
-        <Form.Item className="!mt-10 flex justify-center">
+        <Form.Item className="!mt-40 flex justify-center">
           <Button type="primary" htmlType="submit" size="large">
             Gửi mã xác nhận
           </Button>
         </Form.Item>
       </Form>
-
-      {/* OTP Modal */}
       <Modal
         title={null}
         open={otpModalVisible}
@@ -158,8 +165,6 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           <p className="mb-6 text-sm text-gray-500">
             Nhập mã OTP 6 số và mật khẩu mới
           </p>
-
-          {/* Input OTP */}
           <Input.OTP
             length={6}
             value={otpValue}
@@ -167,8 +172,6 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             size="large"
             className="flex justify-center gap-2 mb-4"
           />
-
-          {/* Input New Password */}
           <Input.Password
             placeholder="Mật khẩu mới"
             size="large"
@@ -176,8 +179,6 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             onChange={(e) => setNewPassword(e.target.value)}
             className="mt-4 mb-2.5"
           />
-
-          {/* Buttons */}
           <Space direction="vertical" className="w-full mt-4">
             <Button
               type="primary"

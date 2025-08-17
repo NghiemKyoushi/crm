@@ -35,3 +35,19 @@ html, body, #root {
 :where(.ant-menu-light .ant-menu-item-selected) .ant-menu-title-content {
   color: #000 !important;
 }
+
+.ant-tabs-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+  font-weight: 500;
+}
+.ant-tabs-tab-active {
+  color: #2563eb; 
+}
+.ant-tabs-ink-bar {
+  background-color: #2563eb; 
+}
+.ant-tabs-nav {
+  margin-bottom: 0;
+}

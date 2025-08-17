@@ -1,6 +1,12 @@
-'use client';
-
 import { Tabs } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUser,
+  faHeadset,
+  faUsers,
+  faLayerGroup,
+  faUserShield,
+} from '@fortawesome/free-solid-svg-icons';
 import CustomerTable from './customer-table';
 import SalesPage from '../sale-manage/sales-page';
 
@@ -9,10 +15,58 @@ export default function CustomerPage() {
     <div className="p-4">
       <Tabs
         defaultActiveKey="1"
+        tabBarGutter={32} // khoảng cách giữa các tab
         items={[
-          { key: '1', label: 'Quản lý Khách hàng', children: <CustomerTable /> },
-          { key: '2', label: 'Quản lý Sales', children: <SalesPage/> },
-          { key: '3', label: 'Nhân viên & Vai trò', children: 'Nhân viên content' },
+          {
+            key: '1',
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faUser} />
+                Quản lý Khách hàng
+              </span>
+            ),
+            children: <CustomerTable />,
+          },
+          {
+            key: '2',
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faHeadset} />
+                Quản lý Sales
+              </span>
+            ),
+            children: <SalesPage />,
+          },
+          {
+            key: '3',
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faUsers} />
+                Nhân viên & Vai trò
+              </span>
+            ),
+            children: 'Nhân viên content',
+          },
+          {
+            key: '4',
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faLayerGroup} />
+                Phân loại khách hàng
+              </span>
+            ),
+            children: 'Phân loại content',
+          },
+          {
+            key: '5',
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faUserShield} />
+                Vai trò & phân quyền
+              </span>
+            ),
+            children: 'Vai trò content',
+          },
         ]}
       />
     </div>
