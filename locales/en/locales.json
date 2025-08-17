@@ -1,20 +1,19 @@
 {
-  "login":{
+  "login": {
     "signIn": "Sign In",
-    "email":"Email",
-    "password":"Password",
-    "pleaseEnterEmail":"Please enter email",
-    "pleaseEnterPassword":"Please enter password",
-    "forgotPassword":"Forgot password"
+    "email": "Email",
+    "password": "Password",
+    "pleaseEnterEmail": "Please enter email",
+    "pleaseEnterPassword": "Please enter password",
+    "forgotPassword": "Forgot password"
   },
-    "menu": {
+  "menu": {
     "dashboard": "Dashboard",
     "orders": "Orders Management",
     "finance": "Finance Management",
     "userManagement": "User Management",
-    "auction": "Auction System",
+    "action": "Action System",
     "products": "Product Types & Fees",
     "settings": "System Settings"
   }
-   
 }

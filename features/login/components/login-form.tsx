@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import AntdButton from "@/components/ButtonComponent";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Image from "next/image";
+import logoCRM from "@/assets/login/logo_crm.jpg";
 
 interface LoginFormValues {
   email: string;
@@ -53,6 +55,7 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
     <Form
       form={form}
       name="login"
+      autoComplete="off"
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       layout="vertical"
@@ -66,6 +69,15 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
         transition: "all 0.3s ease",
       }}
     >
+      <div className="flex justify-center z-50">
+        <Image
+          src={logoCRM}
+          alt="CRM Logo"
+          width={150}
+          height={150}
+          className="!mt-[1-rem]"
+        />
+      </div>
       <h2 className="text-center mb-6 font-bold text-2xl bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent tracking-wide">
         {t("login.signIn")}
       </h2>
@@ -108,13 +120,13 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
           {t("login.signIn")}
         </AntdButton>
       </Form.Item>
-      <div
-        className="flex flex-row justify-center items-center text-center gap-2"
-      >
+      <div className="flex flex-row justify-center items-center text-center gap-2">
         <div className="cursor-pointer text-blue-500" onClick={onForgot}>
           {t("login.forgotPassword")}
         </div>
-        <div className="flex flex-row justify-center items-center text-center"><LanguageSwitcher /></div>
+        <div className="flex flex-row justify-center items-center text-center">
+          <LanguageSwitcher />
+        </div>
       </div>
     </Form>
   );
