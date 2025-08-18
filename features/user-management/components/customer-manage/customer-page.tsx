@@ -10,6 +10,7 @@ import {
 import CustomerTable from './customer-table';
 import SalesPage from '../sale-manage/sales-page';
 import StaffManagePage from '../staff-manage/staff-manage-page';
+import CategoryCustomerPage from '../category-customer/category-page';
 
 export default function CustomerPage() {
   return (
@@ -56,7 +57,7 @@ export default function CustomerPage() {
                 Phân loại khách hàng
               </span>
             ),
-            children: 'Phân loại content',
+            children: <CategoryCustomerPage/>,
           },
           {
             key: '5',

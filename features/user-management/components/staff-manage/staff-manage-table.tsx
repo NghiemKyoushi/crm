@@ -1,4 +1,3 @@
-import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

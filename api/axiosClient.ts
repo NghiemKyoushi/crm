@@ -68,20 +68,24 @@ api.interceptors.response.use(
           return api(originalRequest);
         });
       }
-
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = localStorage.getItem("refreshToken");      
       if (!refreshToken) {
         logout();
         return Promise.reject(err);
       }
 
       try {
-        const res = await api.post(API_TYPE_CONST.GENERATE_ACCESS_TOKEN, {}, {
-          headers: { Authorization: `Bearer ${refreshToken}` }
-        });
+        const res = await axios.post(
+          API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
+          {},
+          {
+            baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
+            headers: { Authorization: `Bearer ${refreshToken}` },
+          }
+        );
 
         const token = res.data.data.token;
         localStorage.setItem("accessToken", token);
