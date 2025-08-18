@@ -92,6 +92,7 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
       >
         <Input
           size="large"
+          autoComplete="username"
           prefix={<MailOutlined />}
           placeholder={t("login.email")}
           style={{ borderRadius: "6px" }}
@@ -100,18 +101,21 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
 
       <Form.Item
         name="password"
+        preserve
         label={<span style={{ fontWeight: 600 }}>{t("login.password")}</span>}
         rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+        shouldUpdate={false}
       >
         <Input.Password
           size="large"
           prefix={<LockOutlined />}
+          autoComplete="new-password"
           placeholder={t("login.password")}
           style={{ borderRadius: "6px" }}
         />
       </Form.Item>
 
-      <Form.Item shouldUpdate={false} className="mt-6 flex justify-center">
+      <Form.Item className="mt-6 flex justify-center">
         <AntdButton
           type="submit"
           style={{ borderRadius: "6px" }}

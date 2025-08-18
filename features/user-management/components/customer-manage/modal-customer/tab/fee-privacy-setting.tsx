@@ -4,6 +4,8 @@ import React from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Table, Input, Select, Button, Card } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { faPlane, faShip, faTags } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type GoodsFee = {
   name: string;
@@ -58,15 +60,23 @@ export default function ShippingFeeConfig() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <h1>Cài đặt Phí & Vận chuyển Riêng</h1>
+      <p>Gán các mức phí dịch vụ đặc biệt cho khách hàng này. Các cài đặt này sẽ **ghi đè** lên chính sách mặc định của hệ thống.</p>
       {/* --- Chính sách phí theo loại hàng hóa --- */}
       <Card
-      className="!mb-3"
-        title="Chính sách Phí theo Loại Hàng Hóa"
+        className="!mb-3"
+        title={
+          <span>
+            <FontAwesomeIcon icon={faTags} className="mr-2 text-blue-800" />
+              Chính sách Phí theo Loại Hàng Hóa
+          </span>
+        }
         extra={
           <Button
             type="primary"
-            icon={<PlusOutlined />}
+            icon={<PlusOutlined className="!font-bold"/>}
             onClick={() => append({ name: "", fee: "" })}
+            className="!bg-green-500 !font-bold"
           >
             Thêm
           </Button>
@@ -115,6 +125,7 @@ export default function ShippingFeeConfig() {
             },
             {
               title: "Hành động",
+              align: "center",
               render: (_, __, index) => (
                 <Button
                   danger
@@ -127,7 +138,15 @@ export default function ShippingFeeConfig() {
         />
       </Card>
 
-      <Card  title="✈️ Chính sách Vận chuyển AIR" className="bg-blue-50 !mb-3">
+      <Card
+        title={
+          <span>
+            <FontAwesomeIcon icon={faPlane} className="mr-2 text-blue-800" />
+            Chính sách Vận chuyển AIR
+          </span>
+        }
+        className="!mb-3 [&_.ant-card-head]:!bg-blue-100 [&_.ant-card-head-title]:!text-blue-800"
+      >
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">
@@ -168,7 +187,15 @@ export default function ShippingFeeConfig() {
         </div>
       </Card>
 
-      <Card title="🚢 Chính sách Vận chuyển SEA" className="bg-blue-50 ">
+      <Card
+        title={
+          <span>
+            <FontAwesomeIcon icon={faShip} className="mr-2 text-blue-800" />
+            Chính sách Vận chuyển SEA
+          </span>
+        }
+        className="!mb-3 [&_.ant-card-head]:!bg-green-100 [&_.ant-card-head-title]:!text-green-800"
+      >
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">

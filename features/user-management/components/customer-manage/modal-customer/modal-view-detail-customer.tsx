@@ -5,6 +5,7 @@ import { Modal, Tabs, Button } from "antd";
 import HistoryOrderTab from "./tab/history-order";
 import HistoryPaymentTab from "./tab/history-payment";
 import ShippingFeeConfig from "./tab/fee-privacy-setting";
+import Notes from "./tab/internal-note";
 
 interface CustomerDetailModalProps {
   visible: boolean;
@@ -141,7 +142,7 @@ export default function CustomerDetailModal({
         </TabPane>
 
         <TabPane tab="Ghi chú Nội bộ" key="notes">
-          <div>Coming soon...</div>
+          <Notes/>
         </TabPane>
       </Tabs>
     </Modal>

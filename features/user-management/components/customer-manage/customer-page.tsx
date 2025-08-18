@@ -9,6 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import CustomerTable from './customer-table';
 import SalesPage from '../sale-manage/sales-page';
+import StaffManagePage from '../staff-manage/staff-manage-page';
 
 export default function CustomerPage() {
   return (
@@ -42,10 +43,10 @@ export default function CustomerPage() {
             label: (
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon icon={faUsers} />
-                Nhân viên & Vai trò
+                  Quản lý Nhân viên 
               </span>
             ),
-            children: 'Nhân viên content',
+            children: <StaffManagePage/>,
           },
           {
             key: '4',
