@@ -1,11 +1,20 @@
 "use client";
 import LoginForm from "../components/login-form";
 import ForgotPasswordForm from "../components/forgot-password-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [isForgot, setIsForgot] = useState(false);
 
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      router.replace("/user-management");
+    }
+  }, [router]);
   return (
     <div className="relative w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
       <div className="pointer-events-none absolute rounded-full blur-3xl opacity-20 bg-sky-200" />

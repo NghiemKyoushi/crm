@@ -8,6 +8,7 @@ export type UserProfile = {
   phone_number: string;
   full_name: string;
   birthday: string;
+  profile_image_id: string;
 };
 export type Password = {
   old_password: string;

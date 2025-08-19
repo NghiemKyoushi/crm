@@ -1,8 +1,31 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
+import axios from "axios";
 
+
+const apiAuth = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
+  withCredentials: true,
+  headers: {
+    "Accept-Language": "vn",
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Requested-With",
+    "X-Platform": "1",
+    "X-Device-Id": "dev-1",
+    "X-Device-Name": "TestDevice",
+    "X-Os-Version": "14",
+    "X-Os": "Android",
+    "X-Ip": "127.0.0.1",
+    "X-Location": "HN",
+  },
+});
 export const loginRequest  = async (email: string, password: string) => {    
-  const res = await api.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });
+  const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });
+  console.log('res', res);
+  
   const refreshToken = res.data.data.refresh_token;
   if (!refreshToken) {
     throw new Error("Không nhận được refreshToken từ API");

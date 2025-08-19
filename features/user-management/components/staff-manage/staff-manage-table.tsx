@@ -11,6 +11,7 @@ import { Tag, Button, Dropdown, Menu } from "antd";
 import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useState } from "react";
+import PopupConfirm from "@/components/PopupConfirm";
 
 interface Employee {
   key: string;
@@ -20,79 +21,6 @@ interface Employee {
   role: string;
   status: "active" | "inactive";
 }
-
-const columns: ColumnsType<Employee> = [
-  {
-    title: "Họ và tên",
-    dataIndex: "fullName",
-    key: "fullName",
-    render: (text: string) => <span className="font-medium">{text}</span>,
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-  },
-  {
-    title: "Số điện thoại",
-    dataIndex: "phone",
-    key: "phone",
-  },
-  {
-    title: "Vai trò",
-    dataIndex: "role",
-    key: "role",
-    render: (role: string) => (
-      <Dropdown
-        menu={{
-          items: [
-            { key: "sales", label: "Sales" },
-            { key: "accounting", label: "Kế toán" },
-            { key: "warehouse", label: "Nhân viên kho" },
-            { key: "admin", label: "Admin" },
-          ],
-        }}
-      >
-        <span className="cursor-pointer">{role} ⌄</span>
-      </Dropdown>
-    ),
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    render: (status: Employee["status"]) =>
-      status === "active" ? (
-        <Tag color="green">Hoạt động</Tag>
-      ) : (
-        <Tag color="red">Đã khóa</Tag>
-      ),
-  },
-  {
-    title: "Hành động",
-    key: "actions",
-    render: () => (
-      <div className="flex gap-3 text-[16px]">
-        <FontAwesomeIcon
-          icon={faEdit}
-          className="cursor-pointer text-blue-500 hover:text-blue-700"
-        />
-        <FontAwesomeIcon
-          icon={faKey}
-          className="cursor-pointer text-gray-600 hover:text-gray-800"
-        />
-        <FontAwesomeIcon
-          icon={faLock}
-          className="cursor-pointer text-amber-500 hover:text-amber-700"
-        />
-        <FontAwesomeIcon
-          icon={faTrash}
-          className="cursor-pointer text-red-500 hover:text-red-700"
-        />
-      </div>
-    ),
-  },
-];
 
 const data: Employee[] = [
   {
@@ -130,8 +58,111 @@ const data: Employee[] = [
 ];
 
 export default function StaffManageTable() {
-      const [open, setOpen] = useState(false);
-    
+  const [open, setOpen] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [modalType, setModalType] = useState<
+    "reset" | "lock" | "delete" | null
+  >(null);
+
+  const handleConfirm = () => {
+    if (modalType === "reset") {
+      console.log("Reset mật khẩu cho");
+    } else if (modalType === "lock") {
+      console.log("Khoá user");
+    } else if (modalType === "delete") {
+      console.log("Xoá user");
+    }
+    setOpen(false);
+  };
+  const columns: ColumnsType<Employee> = [
+    {
+      title: "Họ và tên",
+      dataIndex: "fullName",
+      key: "fullName",
+      render: (text: string) => <span className="font-medium">{text}</span>,
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      render: (role: string) => (
+        <Dropdown
+          menu={{
+            items: [
+              { key: "sales", label: "Sales" },
+              { key: "accounting", label: "Kế toán" },
+              { key: "warehouse", label: "Nhân viên kho" },
+              { key: "admin", label: "Admin" },
+            ],
+          }}
+        >
+          <span className="cursor-pointer">{role} ⌄</span>
+        </Dropdown>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status: Employee["status"]) =>
+        status === "active" ? (
+          <Tag color="green">Hoạt động</Tag>
+        ) : (
+          <Tag color="red">Đã khóa</Tag>
+        ),
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: () => (
+        <div className="flex gap-3 text-[16px]">
+          <FontAwesomeIcon
+            icon={faEdit}
+            className="cursor-pointer text-blue-500 hover:text-blue-700"
+          />
+          {/* Reset password */}
+          <FontAwesomeIcon
+            icon={faKey}
+            className="cursor-pointer text-gray-600 hover:text-gray-800"
+            onClick={() => {
+              setModalType("reset");
+              setOpenConfirm(true);
+            }}
+          />
+
+          {/* Lock user */}
+          <FontAwesomeIcon
+            icon={faLock}
+            className="cursor-pointer text-amber-500 hover:text-amber-700"
+            onClick={() => {
+              setModalType("lock");
+              setOpenConfirm(true);
+            }}
+          />
+
+          {/* Delete user */}
+          <FontAwesomeIcon
+            icon={faTrash}
+            className="cursor-pointer text-red-500 hover:text-red-700"
+            onClick={() => {
+              setModalType("delete");
+              setOpenConfirm(true);
+            }}
+          />
+        </div>
+      ),
+    },
+  ];
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
@@ -151,7 +182,35 @@ export default function StaffManageTable() {
         pagination={false}
         rowHeight={50}
       />
-      <ModalStaffAdd  open={open} onClose={()=> setOpen(false)}/>
+      <ModalStaffAdd open={open} onClose={() => setOpen(false)} />
+      <PopupConfirm
+        open={openConfirm}
+        type={modalType as "reset" | "lock" | "delete"} // ✅ truyền type để đổi style
+        title={
+          modalType === "reset"
+            ? "Xác nhận reset mật khẩu"
+            : modalType === "lock"
+            ? "Xác nhận khoá tài khoản"
+            : "Xác nhận xoá tài khoản"
+        }
+        content={
+          modalType === "reset"
+            ? `Bạn có chắc chắn muốn reset mật khẩu cho tài khoản này?`
+            : modalType === "lock"
+            ? `Bạn có chắc chắn muốn khoá tài khoản này?`
+            : `Bạn có chắc chắn muốn xoá tài khoản này?`
+        }
+        onConfirm={handleConfirm}
+        onCancel={() => setOpenConfirm(false)}
+        confirmText={
+          modalType === "delete"
+            ? "Xoá"
+            : modalType === "lock"
+            ? "Khoá"
+            : "Reset"
+        }
+        cancelText="Huỷ"
+      />
     </div>
   );
 }

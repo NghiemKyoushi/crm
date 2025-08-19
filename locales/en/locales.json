@@ -5,7 +5,19 @@
     "password": "Password",
     "pleaseEnterEmail": "Please enter email",
     "pleaseEnterPassword": "Please enter password",
-    "forgotPassword": "Forgot password"
+    "forgotPassword": "Forgot password",
+    "success": "Login successful!",
+    "failed": "Login failed!",
+    "pleaseCheckInformation":"Please check information!!"
+  },
+  "validation": {
+    "email": {
+      "required": "Please enter your email!",
+      "invalid": "Invalid email!"
+    },
+    "password": {
+      "required": "Please enter your password!"
+    }
   },
   "menu": {
     "dashboard": "Dashboard",

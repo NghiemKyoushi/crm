@@ -28,16 +28,15 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
   const router = useRouter();
   const loginMutation = useLogin();
 
-  // callback submit thành công
   const onFinish = useCallback(
     (values: LoginFormValues) => {
       loginMutation.mutate(values, {
         onSuccess: () => {
-          toast.success("Đăng nhập thành công!", { position: "top-right" });
+          toast.success(t("login.success"), { position: "top-right" });
           router.push("user-management");
         },
         onError: () => {
-          toast.error("Đăng nhập thất bại!", { position: "top-right" });
+          toast.error(t("login.failed"), { position: "top-right" });
         },
       });
     },
@@ -46,7 +45,7 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
 
   // callback submit lỗi validate
   const onFinishFailed = useCallback(() => {
-    toast.error("Vui lòng kiểm tra lại thông tin!", {
+    toast.error(t('login.pleaseCheckInformation'), {
       position: "top-right",
     });
   }, []);
@@ -86,8 +85,8 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
         name="email"
         label={<span style={{ fontWeight: 600 }}>{t("login.email")}</span>}
         rules={[
-          { required: true, message: "Vui lòng nhập email!" },
-          { type: "email", message: "Email không hợp lệ!" },
+          { required: true, message: t("validation.email.required") },
+          { type: "email", message: t("validation.email.invalid") },
         ]}
       >
         <Input
@@ -103,7 +102,7 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
         name="password"
         preserve
         label={<span style={{ fontWeight: 600 }}>{t("login.password")}</span>}
-        rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+        rules={[{ required: true, message: t("validation.password.required") }]}
         shouldUpdate={false}
       >
         <Input.Password
