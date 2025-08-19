@@ -5,7 +5,11 @@ import { Form, Input, Button, Modal, Space } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { useCreateNewPassword, useForgotPassword, useResendOTP } from "../hooks";
+import {
+  useCreateNewPassword,
+  useForgotPassword,
+  useResendOTP,
+} from "../hooks";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -20,11 +24,10 @@ interface LoginFormProps {
 const ForgotPasswordForm = (props: LoginFormProps) => {
   const [form] = Form.useForm<ForgotPasswordFormValues>();
   const { t } = useTranslation();
+  const [otpForm] = Form.useForm();
 
   const [otpModalVisible, setOtpModalVisible] = useState(false);
-  const [otpValue, setOtpValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
-  const [newPassword, setNewPassword] = useState("");
 
   const forgotPassMutation = useForgotPassword();
   const createNewPasswordMutation = useCreateNewPassword();
@@ -49,29 +52,21 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
   };
 
   const handleOtpConfirm = () => {
-    if (!newPassword) {
-      toast.error("Vui lòng nhập mật khẩu mới!");
-      return;
-    }
-
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      toast.error("Mật khẩu phải chứa cả chữ và số, tối thiểu 8 ký tự!");
-      return;
-    }
-    createNewPasswordMutation.mutate(
-      { email: emailValue, otp: otpValue, new_password: newPassword },
-      {
-        onSuccess: () => {
-          toast.success("Xác nhận OTP thành công, mật khẩu mới đã được reset!");
-          setOtpModalVisible(false);
-          props.onBack();
-        },
-        onError: () => {
-          toast.error("OTP hoặc mật khẩu không hợp lệ!");
-        },
-      }
-    );
+    otpForm.validateFields().then((values) => {
+      createNewPasswordMutation.mutate(
+        { email: emailValue, otp: values.otp, new_password: values.newPassword },
+        {
+          onSuccess: () => {
+            toast.success("Xác nhận OTP thành công, mật khẩu mới đã được reset!");
+            setOtpModalVisible(false);
+            props.onBack();
+          },
+          onError: () => {
+            toast.error("OTP hoặc mật khẩu không hợp lệ!");
+          },
+        }
+      );
+    });
   };
 
   const handleResendOtp = () => {
@@ -96,31 +91,31 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         onFinish={onFinish}
         layout="vertical"
         style={{
-          minHeight:'500px',
+          minHeight: "500px",
           padding: "2rem",
           background: "white",
           borderRadius: "30px",
           boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
         }}
       >
-         <div className="flex justify-center z-50">
-        <Image
-          src={logoCRM}
-          alt="CRM Logo"
-          width={150}
-          height={150}
-          className="!mt-[-1rem]"
-        />
-      </div>
-       
-          <div className="flex items-start justify-between">
-            <Button
-              type="link"
-              onClick={props.onBack}
-              className="flex items-start gap-2"
-            >
-              <FontAwesomeIcon icon={faArrowLeft} />
-            </Button>
+        <div className="flex justify-center z-50">
+          <Image
+            src={logoCRM}
+            alt="CRM Logo"
+            width={150}
+            height={150}
+            className="!mt-[-1rem]"
+          />
+        </div>
+
+        <div className="flex items-start justify-between">
+          <Button
+            type="link"
+            onClick={props.onBack}
+            className="flex items-start gap-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </Button>
           <h2 className="font-bold text-2xl mb-0 bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent">
             {t("login.forgotPassword")}
           </h2>
@@ -149,6 +144,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           </Button>
         </Form.Item>
       </Form>
+
       <Modal
         title={null}
         open={otpModalVisible}
@@ -158,50 +154,72 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         width={360}
         className="rounded-2xl"
       >
-        <div className="text-center p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Xác thực OTP và mật khẩu mới
-          </h3>
-          <p className="mb-6 text-sm text-gray-500">
-            Nhập mã OTP 6 số và mật khẩu mới
-          </p>
-          <Input.OTP
-            length={6}
-            value={otpValue}
-            onChange={(val) => setOtpValue(val)}
-            size="large"
-            className="flex justify-center gap-2 mb-4"
-          />
-          <Input.Password
-            placeholder="Mật khẩu mới"
-            size="large"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="mt-4 mb-2.5"
-          />
-          <Space direction="vertical" className="w-full mt-4">
-            <Button
-              type="primary"
-              size="middle"
-              block
-              className="rounded-lg"
-              loading={createNewPasswordMutation.isPending}
-              onClick={handleOtpConfirm}
+        <Form form={otpForm} layout="vertical" onFinish={handleOtpConfirm}>
+          <div className="text-center p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Xác thực OTP và mật khẩu mới
+            </h3>
+            <p className="mb-6 text-sm text-gray-500">
+              Nhập mã OTP 6 số và mật khẩu mới
+            </p>
+
+            {/* OTP */}
+            <Form.Item
+              name="otp"
+              rules={[
+                { required: true, message: "Vui lòng nhập OTP" },
+                { len: 6, message: "OTP phải có đúng 6 số" },
+              ]}
             >
-              Xác nhận
-            </Button>
-            <Button
-              type="default"
-              size="middle"
-              block
-              className="rounded-lg"
-              loading={resendOTPMutation.isPending}
-              onClick={handleResendOtp}
+              <Input.OTP
+                length={6}
+                size="large"
+                className="flex justify-center gap-2 mb-4"
+              />
+            </Form.Item>
+
+            {/* Password */}
+            <Form.Item
+              name="newPassword"
+              rules={[
+                { required: true, message: "Nhập mật khẩu mới" },
+                {
+                  pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
+                  message: "8-20 ký tự, gồm chữ và số",
+                },
+              ]}
             >
-              Gửi lại OTP
-            </Button>
-          </Space>
-        </div>
+              <Input.Password
+                placeholder="Mật khẩu mới"
+                size="large"
+                className="mt-4 mb-2.5"
+              />
+            </Form.Item>
+
+            <Space direction="vertical" className="w-full mt-4">
+              <Button
+                type="primary"
+                size="middle"
+                block
+                className="rounded-lg"
+                htmlType="submit"
+                loading={createNewPasswordMutation.isPending}
+              >
+                Xác nhận
+              </Button>
+              <Button
+                type="default"
+                size="middle"
+                block
+                className="rounded-lg"
+                loading={resendOTPMutation.isPending}
+                onClick={handleResendOtp}
+              >
+                Gửi lại OTP
+              </Button>
+            </Space>
+          </div>
+        </Form>
       </Modal>
     </>
   );

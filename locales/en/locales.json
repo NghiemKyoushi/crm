@@ -5,7 +5,19 @@
     "password": "Password",
     "pleaseEnterEmail": "Please enter email",
     "pleaseEnterPassword": "Please enter password",
-    "forgotPassword": "Forgot password"
+    "forgotPassword": "Forgot password",
+    "success": "Login successful!",
+    "failed": "Login failed!",
+    "pleaseCheckInformation":"Please check information!!"
+  },
+  "validation": {
+    "email": {
+      "required": "Please enter your email!",
+      "invalid": "Invalid email!"
+    },
+    "password": {
+      "required": "Please enter your password!"
+    }
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -15,5 +27,50 @@
     "action": "Action System",
     "products": "Product Types & Fees",
     "settings": "System Settings"
+  },
+  "tabs": {
+    "customer": "Customer Management",
+    "sales": "Sales Management",
+    "staff": "Staff Management",
+    "categoryCustomer": "Customer Categories",
+    "role": "Roles & Permissions"
+  },
+  "customerTable": {
+    "name": "Customer Name",
+    "type": "Category",
+    "sales": "Responsible Sales",
+    "debt": "Debt (VND)",
+    "actions": "Actions",
+    "view360": "view 360°",
+    "customerType": {
+      "vip": "VIP",
+      "silver": "Silver",
+      "gold": "Gold"
+    }
+  },
+  "customerManage": {
+    "customerOverview": {
+      "totalOrders": "Total Orders",
+      "totalSpent": "Total Spending",
+      "currentDebt": "Current Debt",
+      "addressBook": "Address Book",
+      "addAddress": "+ Add Address",
+      "default": "Default",
+      "bankAccount": "Bank Account",
+      "addBankAccount": "+ Add Account",
+      "accountNumber": "Account No.",
+      "accountOwner": "Account Owner",
+      "contactInfo": "Contact Information",
+      "assignedStaff": "Assigned Staff",
+      "change": "Change"
+    },
+    "detailTitle": "Customer Details",
+    "tabs": {
+      "overview": "Overview",
+      "orders": "Order History",
+      "transactions": "Transaction History",
+      "fees": "Custom Fee Settings",
+      "notes": "Internal Notes"
+    }
   }
 }

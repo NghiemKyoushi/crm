@@ -39,13 +39,30 @@ export const Header: React.FC = () => {
         </Button>
       ),
     },
+    {
+      key: "userprofile",
+      label: (
+        <Button
+          type="text"
+          icon={<FontAwesomeIcon icon={faUser} />}
+          onClick={() => router.push("/user-profile")}
+          style={{ padding: 0 }}
+        >
+          User profile
+        </Button>
+      ),
+    },
   ];
+
   return (
-    <AntHeader className="!fixed !top-0 !left-[256px] !right-0 !h-16 !bg-white !p-6  flex justify-between items-center z-40 gap-4">
+    <AntHeader
+      className="!fixed !top-0 !left-[256px] !right-0 !h-16 
+             !bg-white !p-6 flex justify-between items-center 
+             z-40 gap-4 border-b border-gray-200 shadow-sm"
+    >
       <div className="text-lg font-semibold text-left">
         {currentMenu ? t(`menu.${currentMenu.label}`) : "OrderSystem"}
       </div>
-
       <div className="flex items-center justify-center align-middle content-center">
         <Dropdown
           menu={{ items: menuItem }}

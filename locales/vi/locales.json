@@ -5,7 +5,20 @@
     "password": "Mật khẩu",
     "pleaseEnterEmail": "Vui lòng nhập email!",
     "pleaseEnterPassword": "Vui lòng nhập mật khẩu!",
-    "forgotPassword": "Quên mật khẩu"
+    "forgotPassword": "Quên mật khẩu",
+    "success": "Đăng nhập thành công!",
+    "failed": "Đăng nhập thất bại!",
+    "pleaseCheckInformation":"Vui lòng kiểm tra lại thông tin!"
+
+  },
+  "validation": {
+    "email": {
+      "required": "Vui lòng nhập email!",
+      "invalid": "Email không hợp lệ!"
+    },
+    "password": {
+      "required": "Vui lòng nhập mật khẩu!"
+    }
   },
   "menu": {
     "dashboard": "Bảng điều khiển",
@@ -15,5 +28,50 @@
     "action": "Hệ thống Đấu giá",
     "products": "Loại sản phẩm & Phí",
     "settings": "Cài đặt Hệ thống"
+  },
+  "tabs": {
+    "customer": "Quản lý Khách hàng",
+    "sales": "Quản lý Sales",
+    "staff": "Quản lý Nhân viên",
+    "categoryCustomer": "Phân loại khách hàng",
+    "role": "Vai trò & phân quyền"
+  },
+  "customerTable": {
+    "name": "Tên Khách hàng",
+    "type": "Phân loại",
+    "sales": "Sales phụ trách",
+    "debt": "Công nợ (VND)",
+    "actions": "Hành động",
+    "view360": "Xem chi tiết 360°",
+    "customerType": {
+      "vip": "VIP",
+      "silver": "Bạc",
+      "gold": "Vàng"
+    }
+  },
+  "customerManage": {
+    "customerOverview": {
+      "totalOrders": "Tổng số Đơn hàng",
+      "totalSpent": "Tổng chi tiêu",
+      "currentDebt": "Công nợ hiện tại",
+      "addressBook": "Sổ địa chỉ",
+      "addAddress": "+ Thêm địa chỉ",
+      "default": "Mặc định",
+      "bankAccount": "Tài khoản ngân hàng",
+      "addBankAccount": "+ Thêm tài khoản",
+      "accountNumber": "STK",
+      "accountOwner": "Chủ TK",
+      "contactInfo": "Thông tin liên hệ",
+      "assignedStaff": "Nhân viên phụ trách",
+      "change": "Thay đổi"
+    },
+    "detailTitle": "Chi tiết Khách hàng",
+    "tabs": {
+      "overview": "Tổng quan",
+      "orders": "Lịch sử Đơn hàng",
+      "transactions": "Lịch sử Giao dịch",
+      "fees": "Cài đặt Phí riêng",
+      "notes": "Ghi chú Nội bộ"
+    }
   }
 }
