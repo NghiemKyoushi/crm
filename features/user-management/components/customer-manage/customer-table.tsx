@@ -5,6 +5,7 @@ import CustomerTypeSelect from './customer-type-select';
 import TableComponent from '@/components/TableComponent';
 import CustomerDetailModal from './modal-customer/modal-view-detail-customer';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Customer {
   key: string;
@@ -23,6 +24,7 @@ const data: Customer[] = [
 
 export default function CustomerTable() {
   const [isOpenDetail, setIsOpenDetail] = useState(false);
+  const { t } = useTranslation();
 
   const handleClickPopupdetail =() =>{
     setIsOpenDetail(true);
@@ -32,23 +34,23 @@ export default function CustomerTable() {
   }
   const columns: ColumnsType<Customer> = [
     {
-      title: 'Tên Khách hàng',
+      title: t("customerTable.name"),
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Phân loại',
+      title: t("customerTable.type"),
       dataIndex: 'type',
       key: 'type',
       render: (_, record) => <CustomerTypeSelect value={record.type} />,
     },
     {
-      title: 'Sales phụ trách',
+      title: t("customerTable.sales"),
       dataIndex: 'sales',
       key: 'sales',
     },
     {
-      title: 'Công nợ (VND)',
+      title: t("customerTable.debt"),
       dataIndex: 'debt',
       key: 'debt',
       render: (value) => (
@@ -58,7 +60,7 @@ export default function CustomerTable() {
       ),
     },
     {
-      title: 'Hành động',
+      title: t("customerTable.actions"),
       key: 'actions',
       render: () => <div className='cursor-pointer' onClick={()=> handleClickPopupdetail()}><CustomerRowActions /></div>,
     },

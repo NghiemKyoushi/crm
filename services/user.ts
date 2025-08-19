@@ -12,7 +12,7 @@ export const updateUserProfile = async (param: UserProfile) => {
     full_name: param.full_name,
     email:param.email,
     phone_number: '0123456789',
-    birthday:'12122222',
+    birthday:'1990-09-09',
   }
   console.log('body', body);
 
