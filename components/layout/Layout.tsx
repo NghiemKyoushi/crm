@@ -22,7 +22,7 @@ export default function RootLayout({
               style={{
                 flex: 1,
                 margin: "24px",
-                padding: 24,
+                padding: "24px 0px 24px 40px",
               }}
             >
               {children}
