@@ -10,11 +10,18 @@ export const getUserProfile = async (): Promise<UserProfile> => {
 export const updateUserProfile = async (param: UserProfile) => {
   const body = {
     full_name: param.full_name,
+<<<<<<< Updated upstream
     email: param.email,
     phone_number: null,
     birthday: null,
   };
   console.log("body", body);
+=======
+    email:param.email,
+    phone_number: '0123456789',
+    birthday:'1990-09-09',
+  }
+>>>>>>> Stashed changes
 
   const res = await api.put(API_TYPE_CONST.GET_PROFILE, body);
   return res.data.data;
