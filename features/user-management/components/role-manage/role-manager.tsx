@@ -1,49 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Checkbox } from "antd";
 import clsx from "clsx";
 import { permissionsGrouped, RoleFormValues, RoleModal } from "./role-modal";
-
-interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
-}
-
-const initialRoles: Role[] = [
-  {
-    id: "1",
-    name: "Super Administrator",
-    permissions: [
-      "order:view",
-      "order:manage",
-      "finance:approve",
-      "finance:debt",
-      "finance:bank",
-      "user:customer",
-      "user:staff",
-      "system:full",
-    ],
-  },
-  { id: "2", name: "Sales", permissions: ["order:view", "order:manage"] },
-  { id: "3", name: "Kế toán", permissions: ["finance:approve", "finance:debt"] },
-  { id: "4", name: "Nhân viên kho", permissions: ["order:view"] },
-];
+import { useListRole } from "../../hooks/staff-manage";
+import { Role } from "@/types/roles";
 
 export const RoleManager: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>(initialRoles);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(roles[0]);
+  // const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [selectedRole, setSelectedRole] = useState<Role | null>();
   const [openModal, setOpenModal] = useState(false);
-
+  
+    const { data } = useListRole();
   const handleAddRole = (data: RoleFormValues) => {
     const newRole: Role = {
-      id: String(Date.now()),
-      name: data.name,
+      role_name: data.name,
       permissions: data.permissions,
     };
-    setRoles((prev) => [...prev, newRole]);
+    // setRoles((prev) => [...prev, newRole]);
   };
+
+  useEffect(()=>{
+    if(data){
+      setSelectedRole(data[0])
+
+    }
+  },[data])
 
   return (
     <div className="flex gap-6 w-full">
@@ -55,16 +38,16 @@ export const RoleManager: React.FC = () => {
           </Button>
         </div>
         <div className="space-y-1">
-          {roles.map((role) => (
+          {data && data.map((role: Role) => (
             <div
-              key={role.id}
+              key={role.role_id}
               className={clsx(
                 "cursor-pointer px-3 py-2 rounded hover:bg-gray-100 min-h-12 flex items-center align-middle ",
-                selectedRole?.id === role.id && "bg-blue-100 text-blue-700 font-medium"
+                selectedRole?.role_id === role.role_id && "bg-blue-100 text-blue-700 font-medium"
               )}
               onClick={() => setSelectedRole(role)}
             >
-              {role.name}
+              {role.role_name}
             </div>
           ))}
         </div>
@@ -75,7 +58,7 @@ export const RoleManager: React.FC = () => {
     <>
       <h3 className="font-semibold text-lg mb-4">
         Quyền hạn cho vai trò:{" "}
-        <span className="text-blue-600">{selectedRole.name}</span>
+        {/* <span className="text-blue-600">{selectedRole.name}</span> */}
       </h3>
 
       {/* Duyệt qua từng nhóm */}
@@ -103,11 +86,11 @@ export const RoleManager: React.FC = () => {
         <Button
           type="primary"
           onClick={() => {
-            setRoles((prev) =>
-              prev.map((r) =>
-                r.id === selectedRole.id ? selectedRole : r
-              )
-            );
+            // setRoles((prev) =>
+            //   prev.map((r) =>
+            //     r.id === selectedRole.id ? selectedRole : r
+            //   )
+            // );
           }}
         >
           Lưu thay đổi

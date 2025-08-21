@@ -20,6 +20,8 @@ export const API_TYPE_CONST = {
   CREATE_SALE:`${FEATURE}/add-sales`,
   LIST_STAFF: `${FEATURE}/staff`,
   ADD_STAFF: `${FEATURE}/admin/staff`,
-  UPDATE_STAFF:  `${FEATURE}admin/staff/`,
+  UPDATE_STAFF:  `${FEATURE}/admin/staff/`,
+  LIST_CATEGORY: `${FEATURE}/admin/customer-categories`,
+  ROLES: `${FEATURE}/admin/roles`,
 
 } as const;

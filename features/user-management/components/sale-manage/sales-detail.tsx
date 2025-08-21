@@ -1,5 +1,6 @@
 import TableComponent from '@/components/TableComponent';
 import { Tabs, Card, Typography, InputNumber, Button } from 'antd';
+import UserMultiSelect from './select-multi';
 
 const { Text } = Typography;
 
@@ -23,15 +24,6 @@ export default function SalesDetail({ salesId }: SalesDetailProps) {
 
   const customerData: Customer[] = [
     { key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },
-    { key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
-    { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },{ key: "1", name: "Nguyễn Văn A", zaloGroup: "Link nhóm Zalo" },
     { key: "2", name: "Lê Thị D", zaloGroup: "Link nhóm Zalo" },
   ];
 
@@ -122,11 +114,11 @@ export default function SalesDetail({ salesId }: SalesDetailProps) {
                   </Text>
                 {/* Input tìm kiếm khách hàng */}
                 <div className="flex gap-2 mb-2">
-                  <input
+                  {/* <input
                     className="border rounded p-2 flex-1"
                     placeholder="Tìm khách hàng chưa có sales..."
-                  />
-                  <Button type="primary">+</Button>
+                  /> */}
+                  <UserMultiSelect/>
                 </div>
 
                 {/* Bảng khách hàng đã gán */}

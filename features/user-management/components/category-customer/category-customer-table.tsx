@@ -2,68 +2,60 @@ import { useState } from "react";
 import { Button, Form, Tag } from "antd";
 import AddCustomerTypeModal from "./modal-edit-category-customer";
 import TableComponent from "@/components/TableComponent";
+import {
+  useCreateNewCateGoryCus,
+  useListCateGoryCus,
+} from "../../hooks/staff-manage";
+import { ColumnsType } from "antd/es/table";
+import { Category, CategoryRequest } from "@/types/category-customer";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface CustomerType {
-  key: string;
-  name: string;
-  description: string;
-  count: number;
-  color: string;
-}
-
-const initialData: CustomerType[] = [
-  {
-    key: "1",
-    name: "VIP",
-    description: "Khách hàng thân thiết, chi tiêu cao",
-    count: 15,
-    color: "gold",
-  },
-  {
-    key: "2",
-    name: "Bạc",
-    description: "Khách hàng thường xuyên",
-    count: 52,
-    color: "geekblue",
-  },
-  {
-    key: "3",
-    name: "Đồng",
-    description: "Khách hàng mới",
-    count: 120,
-    color: "volcano",
-  },
-];
 
 export default function CategoryCustomerTable() {
-  const [data, setData] = useState<CustomerType[]>(initialData);
   const [open, setOpen] = useState(false);
-  const [form] = Form.useForm();
+  const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
 
-  const handleAdd = () => {
-    form.validateFields().then((values) => {
-      const newItem: CustomerType = {
-        key: Date.now().toString(),
-        name: values.name,
-        description: values.description,
-        count: 0,
-        color: "blue", // mặc định, có thể tùy logic sau
-      };
-      setData([...data, newItem]);
-      form.resetFields();
-      setOpen(false);
-    });
+  const { data, isLoading, error } = useListCateGoryCus({
+    page,
+    page_size: 10,
+    search: undefined,
+  });
+
+  const createNewCateMutation = useCreateNewCateGoryCus();
+  const handleAdd = (dataForm: CategoryRequest) => {
+    const { category_name, description, deposit_percentage } = dataForm;
+    createNewCateMutation.mutate(
+      {
+        category_name,
+        description,
+        deposit_percentage,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Tạo loại khách hàng mới thành công!");
+          queryClient.invalidateQueries({ queryKey: ["listCate"] });
+          setOpen(false);
+        },
+        onError: () => {
+          toast.error("Tạo loại khách hàng mới thất bại");
+        },
+      }
+    );
   };
 
-  const columns = [
+  const handleChangePage = (pageNumber: number) => {
+    setPage(pageNumber);
+  };
+
+  const columns: ColumnsType<Category> = [
     {
       title: "Tên Loại",
-      dataIndex: "name",
-      key: "name",
-      render: (text: string, record: CustomerType) => (
-        <Tag color={record.color} className="font-semibold text-[13px] px-3 py-1">
-          {text}
-        </Tag>
+      dataIndex: "category_name",
+      key: "category_name",
+      render: (text: string) => (
+        <Tag className="font-semibold text-[13px] px-3 py-1">{text}</Tag>
       ),
     },
     {
@@ -73,8 +65,8 @@ export default function CategoryCustomerTable() {
     },
     {
       title: "Số lượng KH",
-      dataIndex: "count",
-      key: "count",
+      dataIndex: "customer_count",
+      key: "customer_count",
     },
     {
       title: "Hành động",
@@ -104,18 +96,18 @@ export default function CategoryCustomerTable() {
 
       <TableComponent
         columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowKey="key"
+        dataSource={data?.data || []}
         rowHeight={50}
-
+        pageSize={10}
+        page={data?.current_page || 0}
+        onPageChange={handleChangePage}
+        response={data}
       />
-     <AddCustomerTypeModal
+      <AddCustomerTypeModal
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={handleAdd}
       />
-     
     </div>
   );
 }
