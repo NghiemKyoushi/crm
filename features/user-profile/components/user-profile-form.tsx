@@ -11,6 +11,7 @@ import {
   Checkbox,
   Avatar,
   message,
+  DatePicker,
 } from "antd";
 import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -23,6 +24,7 @@ import {
 } from "../hooks/user-profile";
 import { toast } from "react-toastify";
 import { VIEW_IMAGE } from "@/constants/api-type";
+import dayjs from "dayjs";
 
 type FormValues = {
   fullName: string;
@@ -30,6 +32,7 @@ type FormValues = {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+  birthday: string;
 };
 
 const { Title, Text } = Typography;
@@ -69,6 +72,8 @@ const schema = yup.object({
         .required("Vui lòng nhập lại mật khẩu mới"),
     otherwise: (schema) => schema.notRequired(),
   }),
+    birthday:yup.string().required("Nhập ngày sinh"),
+
 });
 
 export default function UserProfileForm() {
@@ -83,13 +88,14 @@ export default function UserProfileForm() {
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    resolver: yupResolver(schema) as Resolver<FormValues>,
+    resolver: yupResolver(schema) as unknown as Resolver<FormValues>,
     defaultValues: {
       fullName: "",
       email: "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
+      birthday:""
     },
   });
 
@@ -276,6 +282,27 @@ export default function UserProfileForm() {
                 />
               </div>
             </div>
+            <div>
+    <label className="block mb-1 font-medium">Ngày sinh</label>
+    <Controller
+      name="birthday"
+      control={control}
+      render={({ field }) => (
+        <DatePicker
+          {...field}
+          format="YYYY-MM-DD"
+          value={field.value ? dayjs(field.value) : null}
+          onChange={(date) => field.onChange(date ? date.toISOString() : null)}
+          className="w-full"
+        />
+      )}
+    />
+    {errors.birthday && (
+      <p className="text-red-500 text-xs mt-1">
+        {errors.birthday.message}
+      </p>
+    )}
+  </div>
           </div>
         </Card>
 

@@ -14,7 +14,6 @@ export const updateUserProfile = async (param: UserProfile) => {
     phone_number: null,
     birthday: null,
   };
-  console.log("body", body);
 
   const res = await api.put(API_TYPE_CONST.GET_PROFILE, body);
   return res.data.data;
