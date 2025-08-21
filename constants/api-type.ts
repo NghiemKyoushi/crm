@@ -2,6 +2,7 @@ const AUTH_PREFIX = "users/v1/auth";
 const ONBOARD = "users/v1/onboard";
 const PROFILE ="users/v1/profile";
 const MEDIA="medias/v1/files";
+const FEATURE="features/v1";
 export const VIEW_IMAGE="medias/v1/files/view/thumb/"
 export const API_TYPE_CONST = {
   LOGIN: `${AUTH_PREFIX}/login`,
@@ -15,5 +16,10 @@ export const API_TYPE_CONST = {
   UPDATE_AVARTAR: `/users/v1/profile/me/avatar`,
   CHANGE_PASSWORD:`/users/v1/users/change-password`,
   UPLOAD_IMAGE:`${MEDIA}/upload`,
-  
+  LIST_SALE:`${FEATURE}/sales`,
+  CREATE_SALE:`${FEATURE}/add-sales`,
+  LIST_STAFF: `${FEATURE}/staff`,
+  ADD_STAFF: `${FEATURE}/admin/staff`,
+  UPDATE_STAFF:  `${FEATURE}admin/staff/`,
+
 } as const;
