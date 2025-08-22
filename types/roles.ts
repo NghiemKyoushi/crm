@@ -10,3 +10,15 @@ export interface Role {
 export interface RoleResponse {
   data: Role[];
 }
+
+export type Permission = {
+  permission: string;
+  description: string;
+  category: string;
+  is_system: boolean;
+};
+
+export type PermissionGroup = {
+  category: string;
+  permissions: Permission[];
+};

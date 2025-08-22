@@ -23,5 +23,7 @@ export const API_TYPE_CONST = {
   UPDATE_STAFF:  `${FEATURE}/admin/staff/`,
   LIST_CATEGORY: `${FEATURE}/admin/customer-categories`,
   ROLES: `${FEATURE}/admin/roles`,
+  PERMISSION_GROUP:`${FEATURE}/admin/roles/permissions/categories`,
+  PERMISSION:`${FEATURE}/admin/roles/permissions`,
 
 } as const;

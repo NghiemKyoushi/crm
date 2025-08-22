@@ -104,6 +104,9 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
           </div>
         )}
       </div>
+      <AddSalesModal employees={[{  id: 'string',
+  name: 'string',
+  email: 'email'}]} onClose={()=> setOpen(false)} open={open} onSubmit={()=>{}}/>
     </div>
   );
 }

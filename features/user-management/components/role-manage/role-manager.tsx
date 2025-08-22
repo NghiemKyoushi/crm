@@ -6,13 +6,13 @@ import clsx from "clsx";
 import { permissionsGrouped, RoleFormValues, RoleModal } from "./role-modal";
 import { useListRole } from "../../hooks/staff-manage";
 import { Role } from "@/types/roles";
+import { getListPermiss, getListRoleGroup } from "../../apis/staff-manage";
 
 export const RoleManager: React.FC = () => {
   // const [roles, setRoles] = useState<Role[]>(initialRoles);
   const [selectedRole, setSelectedRole] = useState<Role | null>();
   const [openModal, setOpenModal] = useState(false);
-  
-    const { data } = useListRole();
+  const { data } = useListRole();
   const handleAddRole = (data: RoleFormValues) => {
     const newRole: Role = {
       role_name: data.name,
@@ -21,12 +21,21 @@ export const RoleManager: React.FC = () => {
     // setRoles((prev) => [...prev, newRole]);
   };
 
+  
+
   useEffect(()=>{
     if(data){
       setSelectedRole(data[0])
 
     }
   },[data])
+  const handleCallPer = async () =>{
+    await getListRoleGroup();
+   await getListPermiss()
+  }
+  useEffect(()=>{
+    handleCallPer()
+  },[])
 
   return (
     <div className="flex gap-6 w-full">

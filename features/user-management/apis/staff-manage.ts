@@ -2,6 +2,7 @@ import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
 import { CategoryRequest, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
+import { Permission, PermissionGroup } from "@/types/roles";
 import { getListStaffParams, NewUserType } from "@/types/staff-manage-type";
 
 export const getListStaff = async (params: getListStaffParams) => {
@@ -39,3 +40,42 @@ export const getListRoles = async () => {
   const res = await api.get(API_TYPE_CONST.ROLES);  
   return res.data.data;
 };
+
+
+export const getListRoleGroup = async () => {
+  const res = await api.get(API_TYPE_CONST.PERMISSION_GROUP);  
+  return res.data.data;
+};
+export const getListPermiss = async () => {
+  const res = await api.get(API_TYPE_CONST.PERMISSION);  
+  return res.data.data;
+};
+
+export function groupPermissions(permissions: Permission[]): PermissionGroup[] {
+  const map: Record<string, Permission[]> = {};
+  permissions.forEach(p => {
+    if (!map[p.category]) map[p.category] = [];
+    map[p.category].push(p);
+  });
+
+  return Object.entries(map).map(([category, permissions]) => ({
+    category,
+    permissions,
+  }));
+}
+export function renderCategoryName(code: string) {
+  switch (code) {
+    case "ORDER_MANAGEMENT":
+      return "Quản lý Đơn hàng";
+    case "FINANCIAL_MANAGEMENT":
+    case "FINANCE":
+      return "Quản lý Tài chính";
+    case "USER_MANAGEMENT":
+      return "Quản lý Người dùng";
+    case "SYSTEM_ADMIN":
+    case "SYSTEM_SETTINGS":
+      return "Cài đặt Hệ thống";
+    default:
+      return code;
+  }
+}

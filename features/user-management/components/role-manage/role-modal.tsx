@@ -1,7 +1,9 @@
 "use client";
 
-import { Modal, Checkbox, Form, Input } from "antd";
+import { Modal, Checkbox, Form, Input, Spin } from "antd";
 import { Controller, useForm } from "react-hook-form";
+import { getListPermiss, groupPermissions, renderCategoryName } from "../../apis/staff-manage";
+import { useEffect, useState } from "react";
 
 interface RoleModalProps {
   open: boolean;
@@ -48,21 +50,48 @@ export const RoleModal: React.FC<RoleModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const { control, handleSubmit, reset } = useForm<RoleFormValues>({
+   const { control, handleSubmit, reset } = useForm<RoleFormValues>({
     defaultValues: {
       name: "",
       permissions: [],
     },
   });
+ const [loading, setLoading] = useState(false);
+  const [grouped, setGrouped] = useState<
+    { category: string; permissions: { label: string; value: string }[] }[]
+  >([]);
+
+  // Fetch permissions on open
+  useEffect(() => {
+    if (!open) return;
+    const fetchPermissions = async () => {
+      setLoading(true);
+      try {
+        const res = await getListPermiss(); // ← [{ permission, description, category, ... }]
+        const groupedData = groupPermissions(res).map((g) => ({
+          category: renderCategoryName(g.category),
+          permissions: g.permissions.map((p) => ({
+            label: p.description,
+            value: p.permission,
+          })),
+        }));        
+        setGrouped(groupedData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPermissions();
+  }, [open]);
 
   const handleOk = (data: RoleFormValues) => {
+    console.log('data');
+    
     onSubmit(data);
     reset();
     onClose();
   };
-
   return (
-    <Modal
+   <Modal
       title="Thêm Vai trò mới"
       open={open}
       onCancel={onClose}
@@ -76,33 +105,46 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             name="name"
             control={control}
             rules={{ required: "Tên vai trò là bắt buộc" }}
-            render={({ field }) => (
-              <Input placeholder="VD: Quản lý Kho" {...field} />
+            render={({ field, fieldState }) => (
+              <>
+                <Input placeholder="VD: Quản lý Kho" {...field} />
+                {fieldState.error && (
+                  <span className="text-red-500 text-sm">
+                    {fieldState.error.message}
+                  </span>
+                )}
+              </>
             )}
           />
         </Form.Item>
+
         <Form.Item label="Quyền hạn">
           <Controller
             name="permissions"
             control={control}
             render={({ field }) => (
               <div className="space-y-4">
-                {permissionsGrouped.map((group) => (
-                  <div key={group.group}>
-                    <h4 className="font-medium mb-2">{group.group}</h4>
-                    <Checkbox.Group
-                      options={group.items}
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="flex flex-col gap-2"
-                    />
-                  </div>
-                ))}
+                {loading ? (
+                  <Spin />
+                ) : (
+                  grouped.map((group, index) => (
+                    <div key={index}>
+                      <h4 className="font-medium mb-2">{group.category}</h4>
+                      <Checkbox.Group
+                        options={group.permissions}
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="flex flex-col gap-2"
+                      />
+                    </div>
+                  ))
+                )}
               </div>
             )}
           />
         </Form.Item>
       </Form>
+     
     </Modal>
   );
 };
