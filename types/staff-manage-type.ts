@@ -24,7 +24,7 @@ export interface UserData {
 
 export interface NewUserType {
   full_name: string;
-  active: boolean;
+  active: string | boolean;
   email: string;
   phone_number: string;
   role_id: string;

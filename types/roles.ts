@@ -1,5 +1,5 @@
 export interface Role {
-  role_id: number;
+  role_id: string;
   role_name: string;
   description: string;
   permissions: string[];
@@ -22,3 +22,10 @@ export type PermissionGroup = {
   category: string;
   permissions: Permission[];
 };
+
+export interface RoleRequest {
+    role_name: string;
+    description: string;
+    permissions: string[];
+    is_active: boolean;
+  }

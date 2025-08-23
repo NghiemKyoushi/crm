@@ -12,52 +12,10 @@ import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useState } from "react";
 import PopupConfirm from "@/components/PopupConfirm";
-import { useListStaff } from "../../hooks/staff-manage";
-import { UserData } from "@/types/staff-manage-type";
-
-interface Employee {
-  key: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: "active" | "inactive";
-}
-
-// const data: Employee[] = [
-//   {
-//     key: "1",
-//     fullName: "Hoàng An Nhiên",
-//     email: "nhien.ha@company.com",
-//     phone: "0901234567",
-//     role: "Sales",
-//     status: "active",
-//   },
-//   {
-//     key: "2",
-//     fullName: "Lê Minh Tuấn",
-//     email: "tuan.lm@company.com",
-//     phone: "0912345678",
-//     role: "Kế toán",
-//     status: "active",
-//   },
-//   {
-//     key: "3",
-//     fullName: "Phạm Thị Mai",
-//     email: "mai.pt@company.com",
-//     phone: "0987654321",
-//     role: "Nhân viên kho",
-//     status: "inactive",
-//   },
-//   {
-//     key: "4",
-//     fullName: "Trần Văn Hùng",
-//     email: "hung.tv@company.com",
-//     phone: "0934567890",
-//     role: "Admin",
-//     status: "active",
-//   },
-// ];
+import { useCreateNewStaff, useDetailStaff, useListStaff } from "../../hooks/staff-manage";
+import { NewUserType, UserData } from "@/types/staff-manage-type";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function StaffManageTable() {
   const [open, setOpen] = useState(false);
@@ -66,15 +24,22 @@ export default function StaffManageTable() {
     "reset" | "lock" | "delete" | null
   >(null);
   const [page, setPage] = useState(0);
-  const { data, isLoading, error } = useListStaff({
+  const createNewStaffMutation = useCreateNewStaff();
+  const queryClient = useQueryClient();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const { data: detailStaff } = useDetailStaff(selectedId);
+
+  const { data } = useListStaff({
     page,
     page_size: 10,
     active: true,
-    search: undefined,
+    search: '',
   });
-   const handleChangePage = (pageNumber: number) => {
+  const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber);
   };
+  
 
   const handleConfirm = () => {
     if (modalType === "reset") {
@@ -86,6 +51,35 @@ export default function StaffManageTable() {
     }
     setOpen(false);
   };
+
+  const handleSubmitData =(data: NewUserType)=>{
+    const { email, active, full_name, phone_number, role_id, password } = data;
+    createNewStaffMutation.mutate(
+      {
+        email,
+        full_name,
+        active,
+        phone_number,
+        role_id,
+        password,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Tạo nhân viên mới thành công!");
+          queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+        },
+        onError: () => {
+          toast.error("Tạo nhân viên mới thất bại");
+        },
+      }
+    );
+  }
+
+  const handleOpenEdit = (id: number)=>{
+    setSelectedId(id.toString()); 
+    setOpen(true);
+
+  }
   const columns: ColumnsType<UserData> = [
     {
       title: "Họ và tên",
@@ -118,31 +112,35 @@ export default function StaffManageTable() {
             ],
           }}
         >
-          <span className="cursor-pointer">{role} ⌄</span>
+          <span className="cursor-pointer">{role}</span>
         </Dropdown>
       ),
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status: Employee["status"]) =>
-        status === "active" ? (
-          <Tag color="green">Hoạt động</Tag>
-        ) : (
-          <Tag color="red">Đã khóa</Tag>
-        ),
+      dataIndex: "active",
+      key: "active",
+      render: (active: boolean) => (
+        <>
+          {active ? (
+            <Tag color="green">Hoạt động</Tag>
+          ) : (
+            <Tag color="red">Đã khóa</Tag>
+          )}
+        </>
+      ),
     },
     {
       title: "Hành động",
       key: "actions",
-      render: () => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (_: any, record: UserData) => (
         <div className="flex gap-3 text-[16px]">
           <FontAwesomeIcon
             icon={faEdit}
+            onClick={()=> handleOpenEdit(record.user_id)}
             className="cursor-pointer text-blue-500 hover:text-blue-700"
           />
-          {/* Reset password */}
           <FontAwesomeIcon
             icon={faKey}
             className="cursor-pointer text-gray-600 hover:text-gray-800"
@@ -151,8 +149,6 @@ export default function StaffManageTable() {
               setOpenConfirm(true);
             }}
           />
-
-          {/* Lock user */}
           <FontAwesomeIcon
             icon={faLock}
             className="cursor-pointer text-amber-500 hover:text-amber-700"
@@ -161,8 +157,6 @@ export default function StaffManageTable() {
               setOpenConfirm(true);
             }}
           />
-
-          {/* Delete user */}
           <FontAwesomeIcon
             icon={faTrash}
             className="cursor-pointer text-red-500 hover:text-red-700"
@@ -175,31 +169,34 @@ export default function StaffManageTable() {
       ),
     },
   ];
- 
+
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Danh sách Nhân viên</h2>
         <Button
           type="primary"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            setSelectedId(null);
+          }}
           icon={<FontAwesomeIcon icon={faUserPlus} />}
           className="!bg-green-500 !hover:bg-green-600 !font-medium"
         >
           Thêm nhân viên
         </Button>
       </div>
-        <TableComponent
-          columns={columns}
-          dataSource={data?.data || []}
-          rowHeight={50}
-          pageSize={10}
-          page={data?.current_page || 0}
-          onPageChange={handleChangePage }
-          response={data}
+      <TableComponent
+        columns={columns}
+        dataSource={data?.data || []}
+        rowHeight={40}
+        pageSize={5}
+        page={data?.current_page || 0}
+        onPageChange={handleChangePage}
+        response={data}
       />
-      
-      <ModalStaffAdd open={open} onClose={() => setOpen(false)} />
+
+      <ModalStaffAdd initialValues={detailStaff} handleSubmitDataUser={handleSubmitData} open={open} onClose={() => setOpen(false)} />
       <PopupConfirm
         open={openConfirm}
         type={modalType as "reset" | "lock" | "delete"}

@@ -13,6 +13,7 @@ interface RoleModalProps {
 
 export interface RoleFormValues {
   name: string;
+  description:string;
   permissions: string[];
 }
 
@@ -53,6 +54,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
    const { control, handleSubmit, reset } = useForm<RoleFormValues>({
     defaultValues: {
       name: "",
+      description:"",
       permissions: [],
     },
   });
@@ -108,6 +110,23 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             render={({ field, fieldState }) => (
               <>
                 <Input placeholder="VD: Quản lý Kho" {...field} />
+                {fieldState.error && (
+                  <span className="text-red-500 text-sm">
+                    {fieldState.error.message}
+                  </span>
+                )}
+              </>
+            )}
+          />
+        </Form.Item>
+        <Form.Item label="Mô tả">
+          <Controller
+            name="description"
+            control={control}
+            rules={{ required: "Mô tả là bắt buộc" }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input placeholder="VD: Role để làm" {...field} />
                 {fieldState.error && (
                   <span className="text-red-500 text-sm">
                     {fieldState.error.message}

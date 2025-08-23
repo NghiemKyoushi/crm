@@ -1,37 +1,57 @@
 import { useForm, Controller } from "react-hook-form";
 import { Modal, Button, Input } from "antd";
 import { CategoryRequest } from "@/types/category-customer";
+import { useEffect } from "react";
 
 interface AddCustomerTypeModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: CategoryRequest) => void;
+  onSubmit: (data: CategoryRequest, isEdit: boolean) => void;
+  initialData?: CategoryRequest | null;
 }
 
 export default function AddCustomerTypeModal({
   open,
   onClose,
   onSubmit,
+  initialData,
 }: AddCustomerTypeModalProps) {
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<CategoryRequest>();
+  } = useForm<CategoryRequest>({
+    defaultValues: {
+      category_name: "",
+      description: "",
+    },
+  });
+
+  // Khi mở modal hoặc initialData thay đổi thì reset form
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData); // set giá trị để edit
+    } else {
+      reset({ category_name: "", description: "" });
+    }
+  }, [initialData, reset, open]);
 
   const submitHandler = (data: CategoryRequest) => {
-    console.log("data", data);
-    onSubmit(data);
+    onSubmit(data, !!initialData); // 👈 truyền flag edit/create
     reset();
     onClose();
   };
+
+  const isEdit = !!initialData;
 
   return (
     <Modal
       title={
         <div className="flex justify-between items-center border-b border-gray-200 pb-2">
-          <span className="font-semibold text-lg">Thêm Loại khách hàng mới</span>
+          <span className="font-semibold text-lg">
+            {isEdit ? "Chỉnh sửa Loại khách hàng" : "Thêm Loại khách hàng mới"}
+          </span>
         </div>
       }
       open={open}
@@ -48,9 +68,12 @@ export default function AddCustomerTypeModal({
             render={({ field }) => <Input placeholder="VD: Vàng" {...field} />}
           />
           {errors.category_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.category_name.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.category_name.message}
+            </p>
           )}
         </div>
+
         <div>
           <label className="block mb-1 font-medium">Mô tả</label>
           <Controller
@@ -68,33 +91,11 @@ export default function AddCustomerTypeModal({
           )}
         </div>
 
-        {/* % Đặt cọc */}
-        {/* <div>
-          <label className="block mb-1 font-medium">% Đặt cọc (AIR)</label>
-          <Controller
-            name="deposit_percentage"
-            control={control}
-            rules={{
-              required: "Vui lòng nhập % đặt cọc",
-              min: { value: 1, message: "Phải lớn hơn 0" },
-              max: { value: 100, message: "Không được quá 100" },
-            }}
-            render={({ field }) => (
-              <Input type="number" placeholder="VD: 80" {...field} />
-            )}
-          />
-          {errors.deposit_percentage && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.deposit_percentage.message}
-            </p>
-          )}
-        </div> */}
-
         {/* Buttons */}
         <div className="flex justify-end gap-2 mt-6">
           <Button onClick={onClose}>Hủy</Button>
           <Button type="primary" htmlType="submit">
-            Thêm Loại
+            {isEdit ? "Cập nhật" : "Thêm Loại"}
           </Button>
         </div>
       </form>

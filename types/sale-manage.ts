@@ -11,4 +11,8 @@ export interface UserSaleResponse{
   current_page: number;
   page_size: number;
 }
+export interface AddCustomerTosaleModel {
+  customer_id: number;
+  sale_id: number;
+}
 

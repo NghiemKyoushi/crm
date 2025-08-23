@@ -1,37 +1,41 @@
 import { Button, List, Spin } from "antd";
 import { useEffect, useRef, useState } from "react";
-import AddSalesModal from "./modal-sales-add";
+import AddSalesModal, { Employee } from "./modal-sales-add";
 import { getListSaleStaff } from "../../apis/staff-manage";
 import { UserSaleItem } from "@/types/sale-manage";
+import { useCreateSaleStaff } from "../../hooks/staff-manage";
+import { toast } from "react-toastify";
 
 interface SalesListProps {
-  selected: number;
-  onSelect: (id: number) => void;
+  selected?: number;
+  onSelect: (id: number, name: string ) => void;
 }
 
 export default function SalesList({ selected, onSelect }: SalesListProps) {
   const [open, setOpen] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [salesData, setSalesData] = useState<UserSaleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const listRef = useRef<HTMLDivElement | null>(null);
+  const createNewSaleMutation = useCreateSaleStaff();
 
-  const fetchSales = async (pageNum: number) => {
+  const fetchSales = async (pageNum: number, reset: boolean = false) => {
     setLoading(true);
     try {
-      // 🔥 call API
       const res = await getListSaleStaff({
         page: pageNum,
         page_size: 10,
         search: undefined,
       });
-
+  
       if (res.data.length === 0) {
         setHasMore(false);
       } else {
-        setSalesData((prev) => [...prev, ...res.data]);
+        setSalesData((prev) =>
+          reset ? res.data : [...prev, ...res.data]
+        );
       }
     } finally {
       setLoading(false);
@@ -42,7 +46,12 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
     fetchSales(page);
   }, [page]);
 
-  // detect scroll bottom
+  useEffect(() => {
+    if(salesData){
+      onSelect(salesData[0]?.user_id, salesData[0]?.full_name)
+    }
+  }, [salesData]);
+
   const handleScroll = () => {
     if (!listRef.current || loading || !hasMore) return;
 
@@ -53,6 +62,19 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
     }
   };
 
+  const handleSubmit = (data: Employee[]) => {
+    const listId: string[] = data.map((item) => item.id.toString()) as string[];
+    createNewSaleMutation.mutate(listId, {
+      onSuccess: () => {
+        toast.success("Thêm nhân viên sale thành công!");
+        fetchSales(0, true); 
+      },
+      onError: () => {
+        toast.error("Thêm nhân viên sale thất bại");
+      },
+    });
+    setOpen(false);
+  };
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-center mb-4">
@@ -64,7 +86,7 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
 
       <div
         ref={listRef}
-        className="max-h-[400px] overflow-y-auto"
+        className="max-h-[300px] overflow-y-auto"
         onScroll={handleScroll}
       >
         <List
@@ -72,7 +94,7 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
           dataSource={salesData}
           renderItem={(item) => (
             <List.Item
-              onClick={() => onSelect(item.user_id)}
+              onClick={() => onSelect(item.user_id, item.full_name)}
               className={`cursor-pointer rounded !p-4 border-l-4 ${
                 selected === item.user_id
                   ? "bg-blue-100 border-blue-500"
@@ -87,7 +109,7 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
                 {item.full_name}
               </div>
               <div className="text-gray-500 text-sm">
-                Đang quản lý ... Khách hàng
+                Đang quản lý {item.total} Khách hàng
               </div>
             </List.Item>
           )}
@@ -104,9 +126,11 @@ export default function SalesList({ selected, onSelect }: SalesListProps) {
           </div>
         )}
       </div>
-      <AddSalesModal employees={[{  id: 'string',
-  name: 'string',
-  email: 'email'}]} onClose={()=> setOpen(false)} open={open} onSubmit={()=>{}}/>
+      <AddSalesModal
+        onClose={() => setOpen(false)}
+        open={open}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

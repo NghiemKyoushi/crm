@@ -2,17 +2,27 @@ import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
 import { CategoryRequest, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
-import { Permission, PermissionGroup } from "@/types/roles";
+import { addressModel, bankAccountModel, CustomerNoteParams, CustomerParam } from "@/types/customer-type";
+import { Permission, PermissionGroup, RoleRequest } from "@/types/roles";
+import { AddCustomerTosaleModel } from "@/types/sale-manage";
 import { getListStaffParams, NewUserType } from "@/types/staff-manage-type";
 
 export const getListStaff = async (params: getListStaffParams) => {
   const res = await api.get(API_TYPE_CONST.LIST_STAFF, { params });
-  return res.data;
+  return res.data.data;
 };
 
 export const createNewStaff = async (params: NewUserType) => {
-  const res = await api.post(API_TYPE_CONST.ADD_STAFF, params);
+  const res = await api.post(API_TYPE_CONST.ADD_STAFF, {
+    ...params,
+    active: params.active ? "true" : "false",
+  });
   return res.data;
+};
+
+export const getDetailStaff = async (id: string) => {
+  const res = await api.get(`${API_TYPE_CONST.ADD_STAFF}/${id}`);
+  return res.data.data;
 };
 
 export const getListCateCustomer = async (params: getListCateParams) => {
@@ -30,30 +40,81 @@ export const createNewCateCustomer = async (params: CategoryRequest) => {
   return res.data;
 };
 
+export const updateCateCustomer = async (params: CategoryRequest, id: string) => {
+  const res = await api.put(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`, {
+    ...params,
+    cancellation_fee: 0,
+    service_fee_percentage: 0,
+    deposit_percentage: 0,
+  });
+  return res.data;
+};
 
 export const getListSaleStaff = async (params: getPagination) => {
   const res = await api.get(API_TYPE_CONST.LIST_SALE, { params });
   return res.data.data;
 };
 
-export const getListRoles = async () => {
-  const res = await api.get(API_TYPE_CONST.ROLES);  
+export const addSaleStaff = async (ids: string[] ) => {
+  const res = await api.post(API_TYPE_CONST.CREATE_SALE, { ids });
   return res.data.data;
 };
 
+export const getListRoles = async () => {
+  const res = await api.get(API_TYPE_CONST.ROLES);
+  return res.data.data;
+};
+
+export const createRole = async (body: RoleRequest) => {
+  const res = await api.post(API_TYPE_CONST.ROLES, body);
+  return res.data.data;
+};
 
 export const getListRoleGroup = async () => {
-  const res = await api.get(API_TYPE_CONST.PERMISSION_GROUP);  
+  const res = await api.get(API_TYPE_CONST.PERMISSION_GROUP);
   return res.data.data;
 };
 export const getListPermiss = async () => {
-  const res = await api.get(API_TYPE_CONST.PERMISSION);  
+  const res = await api.get(API_TYPE_CONST.PERMISSION);
+  return res.data.data;
+};
+
+export const addAddressCustomer = async (body: addressModel, id:string) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_ADDRESS}${id}`, body);
+  return res.data.data;
+};
+
+export const addBankCustomer = async (body: bankAccountModel, id:string) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_ACCOUNT_BANK}${id}`, body);
+  return res.data.data;
+};
+
+export const addCustomerNote = async (content: string, id: string ) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_CUSTOMER_NOTE}${id}`, {content});
+  return res.data.data;
+};
+export const getListCustomersNote= async (params:CustomerNoteParams,id: string) => {
+  const res = await api.get(`${API_TYPE_CONST.CUSTOMER_NOTE}${id}`, {params});
+  return res.data.data;
+};
+export const getListCustomers= async (params: CustomerParam) => {
+  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST, {params});
+  return res.data.data;
+};
+
+export const getDetailCustomer= async (id: string) => {
+  const res = await api.get(`${API_TYPE_CONST.CUSTOMER_LIST}/${id}`);
+  return res.data.data;
+};
+
+export const addCustomerForSale = async (body: AddCustomerTosaleModel ) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_SALE_RESPONSIBILITY}`, body);
   return res.data.data;
 };
 
 export function groupPermissions(permissions: Permission[]): PermissionGroup[] {
   const map: Record<string, Permission[]> = {};
-  permissions.forEach(p => {
+  permissions.forEach((p) => {
     if (!map[p.category]) map[p.category] = [];
     map[p.category].push(p);
   });

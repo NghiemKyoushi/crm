@@ -75,6 +75,7 @@
   },
   "staffManage": {
     "addNewStaff": "Thêm Nhân viên mới",
+    "editNewStaff": "Chỉnh sửa",
     "fullName": "Họ và tên",
     "fullNameRequired": "Vui lòng nhập họ tên",
     "email": "Email",
