@@ -1,7 +1,7 @@
 export type getListStaffParams = {
   page: number;
   page_size: number;
-  active: boolean;
+  active?: boolean;
   search?: string;
 };
 
@@ -15,7 +15,7 @@ export type getListStaffResponse = {
 
 export interface UserData {
   full_name: string;
-  active: boolean;
+  active?: boolean;
   user_id: number;
   email: string;
   phone_number: string;
@@ -24,7 +24,7 @@ export interface UserData {
 
 export interface NewUserType {
   full_name: string;
-  active: string | boolean;
+  active?: string | boolean;
   email: string;
   phone_number: string;
   role_id: string;

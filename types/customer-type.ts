@@ -68,6 +68,8 @@ export interface addressModel {
   address: string;
   phone_number: string;
   receive_name: string;
+  is_default?: boolean;
+  id?:number;
 }
 
 export interface bankAccountModel {

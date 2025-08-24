@@ -62,7 +62,9 @@
       "accountOwner": "Account Owner",
       "contactInfo": "Contact Information",
       "assignedStaff": "Assigned Staff",
-      "change": "Change"
+      "change": "Change",
+      "addDefaultAddress":"Add default address"
+
     },
     "detailTitle": "Customer Details",
     "tabs": {

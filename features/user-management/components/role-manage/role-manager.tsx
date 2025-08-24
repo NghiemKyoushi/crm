@@ -1,22 +1,39 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Card, Checkbox } from "antd";
+import { Button, Checkbox } from "antd";
 import clsx from "clsx";
-import { permissionsGrouped, RoleFormValues, RoleModal } from "./role-modal";
+import { RoleFormValues, RoleModal } from "./role-modal";
 import { useCreateNewRole, useListRole } from "../../hooks/staff-manage";
 import { Role } from "@/types/roles";
 import { getListPermiss, getListRoleGroup } from "../../apis/staff-manage";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
+interface PermissionGroup {
+  group_id: number;
+  group_name: string;
+  permissions: {
+    permission: string;
+    description: string;
+    group_id: number;
+    is_system: boolean;
+    name: string;
+  }[];
+}
+
 export const RoleManager: React.FC = () => {
-  // const [roles, setRoles] = useState<Role[]>(initialRoles);
-  const [selectedRole, setSelectedRole] = useState<Role | null>();
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const { data } = useListRole();
   const queryClient = useQueryClient();
   const createRoleMutation = useCreateNewRole();
+
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>(
+    []
+  );
+
   const handleAddRole = (data: RoleFormValues) => {
     const { description, name, permissions } = data;
     createRoleMutation.mutate(
@@ -36,7 +53,6 @@ export const RoleManager: React.FC = () => {
         },
       }
     );
-
   };
 
   useEffect(() => {
@@ -44,10 +60,13 @@ export const RoleManager: React.FC = () => {
       setSelectedRole(data[0]);
     }
   }, [data]);
+
   const handleCallPer = async () => {
-    await getListRoleGroup();
+    const groups = await getListPermiss();
+    setPermissionGroups(groups);
     await getListPermiss();
   };
+
   useEffect(() => {
     handleCallPer();
   }, []);
@@ -57,7 +76,11 @@ export const RoleManager: React.FC = () => {
       <div className="w-1/3 bg-white shadow rounded p-3">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold">Các Vai trò</h3>
-          <Button size="middle" type="primary" onClick={() => setOpenModal(true)}>
+          <Button
+            size="middle"
+            type="primary"
+            onClick={() => setOpenModal(true)}
+          >
             + Thêm vai trò
           </Button>
         </div>
@@ -78,45 +101,63 @@ export const RoleManager: React.FC = () => {
             ))}
         </div>
       </div>
-
       <div className="w-3/4 bg-white shadow rounded p-4">
         {selectedRole ? (
           <>
             <h3 className="font-semibold text-lg mb-4">
-              Quyền hạn cho vai trò:{" "}
-              {/* <span className="text-blue-600">{selectedRole.name}</span> */}
+              Quyền hạn cho vai trò:
+              <span className="text-blue-600">{selectedRole.role_name}</span>
             </h3>
+            {permissionGroups.map((group) => {
+              // lấy danh sách permission đang active của role cho group này
+              const roleGroup = selectedRole?.groups?.find(
+                (g: any) => g.id === group.group_id
+              );
+              const activePermissions =
+                roleGroup?.permissions
+                  .filter((p: any) => p.active)
+                  .map((p: any) => p.name) || [];
 
-            {/* Duyệt qua từng nhóm */}
-            <div className="space-y-4">
-              {permissionsGrouped.map((group) => (
-                <div key={group.group}>
-                  <h4 className="font-medium mb-2">{group.group}</h4>
+              return (
+                <div key={group.group_id}>
+                  <h4 className="font-medium mb-2">{group.group_name}</h4>
                   <Checkbox.Group
-                    options={group.items}
-                    value={selectedRole.permissions}
+                    options={group.permissions.map((p) => ({
+                      label: p.description,
+                      value: p.permission, // dùng "permission" từ list gốc
+                    }))}
+                    value={activePermissions} // dùng "name" từ role detail
                     onChange={(checkedValues) => {
                       setSelectedRole((prev) =>
                         prev
-                          ? { ...prev, permissions: checkedValues as string[] }
+                          ? {
+                              ...prev,
+                              groups: prev.groups.map((g: any) => {
+                                if (g.id !== group.group_id) return g;
+
+                                return {
+                                  ...g,
+                                  permissions: g.permissions.map((p: any) => ({
+                                    ...p,
+                                    active: checkedValues.includes(p.name), // so sánh bằng "name"
+                                  })),
+                                };
+                              }),
+                            }
                           : prev
                       );
                     }}
-                    className="flex flex-col  gap-2"
+                    className="flex flex-col gap-2"
                   />
                 </div>
-              ))}
-            </div>
+              );
+            })}
 
             <div className="flex justify-end mt-4">
               <Button
                 type="primary"
                 onClick={() => {
-                  // setRoles((prev) =>
-                  //   prev.map((r) =>
-                  //     r.id === selectedRole.id ? selectedRole : r
-                  //   )
-                  // );
+                  console.log("Lưu quyền:", selectedRole);
                 }}
               >
                 Lưu thay đổi

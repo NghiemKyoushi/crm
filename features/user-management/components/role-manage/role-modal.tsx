@@ -2,107 +2,124 @@
 
 import { Modal, Checkbox, Form, Input, Spin } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { getListPermiss, groupPermissions, renderCategoryName } from "../../apis/staff-manage";
+import { getListPermiss } from "../../apis/staff-manage";
 import { useEffect, useState } from "react";
 
 interface RoleModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: RoleFormValues) => void;
+  onSubmit: (data: RoleFormValues) => Promise<void> | void;
 }
 
 export interface RoleFormValues {
   name: string;
-  description:string;
+  description: string;
   permissions: string[];
 }
 
-export const permissionsGrouped = [
-  {
-    group: "Quản lý Đơn hàng",
-    items: [
-      { label: "Xem tất cả đơn hàng", value: "order:view" },
-      { label: "Tạo/Sửa/Hủy đơn hàng", value: "order:manage" },
-    ],
-  },
-  {
-    group: "Quản lý Tài chính",
-    items: [
-      { label: "Duyệt lệnh nạp/rút tiền", value: "finance:approve" },
-      { label: "Quản lý công nợ & đối soát", value: "finance:debt" },
-      { label: "Quản lý tài khoản ngân hàng công ty", value: "finance:bank" },
-    ],
-  },
-  {
-    group: "Quản lý Người dùng",
-    items: [
-      { label: "Quản lý khách hàng & phân loại", value: "user:customer" },
-      { label: "Quản lý nhân viên & vai trò", value: "user:staff" },
-    ],
-  },
-  {
-    group: "Cài đặt Hệ thống",
-    items: [{ label: "Toàn quyền truy cập cài đặt", value: "system:full" }],
-  },
-];
+// Map group_name sang tiếng Việt
+const CATEGORY_LABELS: Record<string, string> = {
+  ORDER_MANAGEMENT: "Quản lý Đơn hàng",
+  FINANCIAL_MANAGEMENT: "Quản lý Tài chính",
+  FINANCE: "Quản lý Tài chính",
+  USER_MANAGEMENT: "Quản lý Người dùng",
+  SYSTEM_ADMIN: "Cài đặt Hệ thống",
+  SYSTEM_SETTINGS: "Cài đặt Hệ thống",
+};
+
+function renderCategoryName(code: string) {
+  return CATEGORY_LABELS[code] || code || "Chưa phân loại";
+}
+
+// Map data từ API sang format cho Checkbox.Group
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapPermissionsFromApi(apiData: any[]) {
+  if (!Array.isArray(apiData)) return [];
+
+  return apiData.map((group) => ({
+    id: group.group_id,
+    category: renderCategoryName(group.group_name),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    permissions: (group.permissions || []).map((p: any) => ({
+      label: p.description || p.permission || "Không rõ",
+      value: p.permission?.toString() || "",
+    })),
+  }));
+}
 
 export const RoleModal: React.FC<RoleModalProps> = ({
   open,
   onClose,
   onSubmit,
 }) => {
-   const { control, handleSubmit, reset } = useForm<RoleFormValues>({
+  const { control, handleSubmit, reset } = useForm<RoleFormValues>({
     defaultValues: {
       name: "",
-      description:"",
+      description: "",
       permissions: [],
     },
   });
- const [loading, setLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const [grouped, setGrouped] = useState<
-    { category: string; permissions: { label: string; value: string }[] }[]
+    {
+      id: number;
+      category: string;
+      permissions: { label: string; value: string }[];
+    }[]
   >([]);
 
-  // Fetch permissions on open
+  // Fetch permissions khi mở modal
   useEffect(() => {
     if (!open) return;
+
     const fetchPermissions = async () => {
       setLoading(true);
       try {
-        const res = await getListPermiss(); // ← [{ permission, description, category, ... }]
-        const groupedData = groupPermissions(res).map((g) => ({
-          category: renderCategoryName(g.category),
-          permissions: g.permissions.map((p) => ({
-            label: p.description,
-            value: p.permission,
-          })),
-        }));        
-        setGrouped(groupedData);
+        const res = await getListPermiss(); // API trả về [{ group_id, group_name, permissions: [] }]
+        setGrouped(mapPermissionsFromApi(res));
+      } catch (error) {
+        console.error("Fetch permissions error:", error);
+        setGrouped([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchPermissions();
-  }, [open]);
 
-  const handleOk = (data: RoleFormValues) => {
-    console.log('data');
-    
-    onSubmit(data);
-    reset();
-    onClose();
+    fetchPermissions();
+
+    // reset form mỗi lần mở modal
+    reset({
+      name: "",
+      description: "",
+      permissions: [],
+    });
+  }, [open, reset]);
+
+  const handleOk = async (data: RoleFormValues) => {
+    try {
+      await onSubmit(data); // hỗ trợ async submit
+      reset();
+      onClose();
+    } catch (error) {
+      console.error("Submit role error:", error);
+    }
   };
+
   return (
-   <Modal
+    <Modal
       title="Thêm Vai trò mới"
       open={open}
       onCancel={onClose}
       onOk={handleSubmit(handleOk)}
       okText="Thêm Vai trò"
       cancelText="Hủy"
+      destroyOnClose
+      width={500}
     >
-      <Form layout="vertical" className="space-y-4">
-        <Form.Item label="Tên Vai trò">
+      <Form layout="vertical" className="">
+        {/* Tên vai trò */}
+        <Form.Item label="Tên Vai trò" required className="!mb-0.5">
           <Controller
             name="name"
             control={control}
@@ -119,14 +136,15 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             )}
           />
         </Form.Item>
-        <Form.Item label="Mô tả">
+
+        <Form.Item label="Mô tả" required className="!mb-0.5">
           <Controller
             name="description"
             control={control}
             rules={{ required: "Mô tả là bắt buộc" }}
             render={({ field, fieldState }) => (
               <>
-                <Input placeholder="VD: Role để làm" {...field} />
+                <Input placeholder="VD: Vai trò cho quản lý kho" {...field} />
                 {fieldState.error && (
                   <span className="text-red-500 text-sm">
                     {fieldState.error.message}
@@ -136,7 +154,6 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             )}
           />
         </Form.Item>
-
         <Form.Item label="Quyền hạn">
           <Controller
             name="permissions"
@@ -144,26 +161,43 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             render={({ field }) => (
               <div className="space-y-4">
                 {loading ? (
-                  <Spin />
-                ) : (
-                  grouped.map((group, index) => (
-                    <div key={index}>
-                      <h4 className="font-medium mb-2">{group.category}</h4>
+                  <div className="flex justify-center py-4">
+                    <Spin />
+                  </div>
+                ) : grouped.length > 0 ? (
+                  grouped.map((group) => (
+                    <div key={group.id} className="!mb-0.5 p-1 rounded-md">
+                      <h4 className="font-medium ">{group.category}</h4>
                       <Checkbox.Group
                         options={group.permissions}
-                        value={field.value}
-                        onChange={field.onChange}
+                        value={field.value?.filter((v) =>
+                          group.permissions.some((p) => p.value === v)
+                        )} // chỉ giữ những quyền thuộc group này
+                        onChange={(checkedValues) => {
+                          // bỏ hết quyền của group hiện tại ra khỏi field.value
+                          const otherValues =
+                            field.value?.filter(
+                              (v) =>
+                                !group.permissions.some((p) => p.value === v)
+                            ) || [];
+
+                          // thêm lại các quyền vừa tick ở group này
+                          field.onChange([...otherValues, ...checkedValues]);
+                        }}
                         className="flex flex-col gap-2"
                       />
                     </div>
                   ))
+                ) : (
+                  <p className="text-gray-500">
+                    Không có quyền nào để hiển thị
+                  </p>
                 )}
               </div>
             )}
           />
         </Form.Item>
       </Form>
-     
     </Modal>
   );
 };

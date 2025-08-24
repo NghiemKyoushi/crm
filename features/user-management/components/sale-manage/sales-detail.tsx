@@ -7,7 +7,9 @@ import { useCustomerForSale, useListCustomer } from "../../hooks/staff-manage";
 import { useState } from "react";
 import CustomerTypeSelect from "../customer-manage/customer-type-select";
 import { toast } from "react-toastify";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { removeAssignCustomerForSale } from "../../apis/staff-manage";
+import PopupUnassignConfirm from "./modal-remove-assign";
 
 const { Text } = Typography;
 
@@ -17,16 +19,27 @@ interface SalesDetailProps {
 }
 
 export default function SalesDetail({ salesId, name }: SalesDetailProps) {
-  const salesInfo = {
-    name,
-    revenue: 150_000_000,
-    commission: 7_500_000,
-    rate: 5,
-  };
-
   const [page, setPage] = useState(0);
   const customerForSaleMutation = useCustomerForSale();
   const queryClient = useQueryClient();
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+
+  const handleConfirmUnassign = () => {
+    if (!selectedId) return;
+    removeAssignMutation.mutate(selectedId)
+    setOpenConfirm(false);
+  };
+
+  const removeAssignMutation = useMutation({
+    mutationFn: (id: string) => removeAssignCustomerForSale(id),
+    onSuccess: () => {
+      toast.success("Huỷ gán khách hàng thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+    },
+    onError: () => toast.error("Huỷ gán khách hàng thất bại"),
+  });
 
   const { data } = useListCustomer({
     page,
@@ -34,6 +47,10 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
     category_id: undefined,
     sale_id: salesId,
   });
+  const handleUnassign = (id: string) => {
+    setSelectedId(id);
+    setOpenConfirm(true);
+  };
   const columns: ColumnsType<CustomerModel> = [
     {
       title: "Khách hàng",
@@ -66,7 +83,7 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
         <Button
           type="primary"
           danger
-          onClick={() => console.log(record.user_id)}
+          onClick={() => handleUnassign(record.user_id.toString())}
         >
           Hủy gán
         </Button>
@@ -75,12 +92,11 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
   ];
 
   const handleChangePage = (pageNumber: number) => {
-    setPage(pageNumber);
+    setPage(pageNumber - 1);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAddCustomerForSale = (ids: any[]) => {
-    console.log("check", ids);
     if (ids.length === 0) return;
     const getIds = ids.map((item) => item?.key);
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -102,7 +118,7 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <h3 className="font-semibold text-lg mb-4">
-        Chi tiết: <span className="text-blue-600">{salesInfo.name}</span>
+        Chi tiết: <span className="text-blue-600">{name}</span>
       </h3>
 
       <Tabs
@@ -159,8 +175,6 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
                 <div className="flex gap-2 mb-2">
                   <UserMultiSelect onAssign={handleAddCustomerForSale} />
                 </div>
-
-                {/* Bảng khách hàng đã gán */}
                 <div>
                   <Text strong className="mb-2 block">
                     Danh sách khách hàng đã gán ({data?.data.length})
@@ -175,6 +189,11 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
                     response={data}
                   />
                 </div>
+                <PopupUnassignConfirm
+                  open={openConfirm}
+                  onConfirm={handleConfirmUnassign}
+                  onCancel={() => setOpenConfirm(false)}
+                />
               </div>
             ),
           },

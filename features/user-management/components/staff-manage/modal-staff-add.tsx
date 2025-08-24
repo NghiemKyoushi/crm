@@ -72,7 +72,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
       title={
         <div className="flex justify-between items-center border-b border-gray-200 pb-2">
           <span className="font-semibold text-lg">
-            {initialValues ? t("staffManage.editStaff") : t("staffManage.addNewStaff")}
+            {initialValues ? t("staffManage.editNewStaff") : t("staffManage.addNewStaff")}
           </span>
         </div>
       }

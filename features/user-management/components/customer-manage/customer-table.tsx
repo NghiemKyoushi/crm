@@ -76,7 +76,7 @@ export default function CustomerTable() {
   ];
 
   const handleChangePage = (pageNumber: number) => {
-    setPage(pageNumber);
+    setPage(pageNumber - 1);
   };
 
   return (

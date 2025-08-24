@@ -11,6 +11,7 @@ import { CustomerNoteDetail } from "@/types/customer-type";
 import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
+
 interface NotesProps {
   selectedId: string;
 }
@@ -20,7 +21,7 @@ const Notes = ({ selectedId }: NotesProps) => {
   const createNewNoteMutation = useAddNote();
   const [newNote, setNewNote] = useState("");
 
-  // 🟢 dùng infinite query để load more
+  // 🟢 Infinite Query để load more
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["customerNotes", selectedId],
@@ -33,8 +34,7 @@ const Notes = ({ selectedId }: NotesProps) => {
           selectedId
         ),
       initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        // lastPage trả về dạng { data, total_pages, current_page ... }
+      getNextPageParam: (lastPage) => {
         if (lastPage.current_page + 1 < lastPage.total_pages) {
           return lastPage.current_page + 1;
         }
@@ -44,6 +44,7 @@ const Notes = ({ selectedId }: NotesProps) => {
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
+
     createNewNoteMutation.mutate(
       { content: newNote.trim(), id: selectedId },
       {
@@ -63,8 +64,29 @@ const Notes = ({ selectedId }: NotesProps) => {
 
   const notes = data?.pages.flatMap((page) => page.data) || [];
 
+  // 🔹 Tạo items cho Timeline theo chuẩn mới
+  const timelineItems = notes.map((note: CustomerNoteDetail, index) => ({
+    key: note.id,
+    color: index === 0 ? "blue" : "gray",
+    dot: (
+      <span
+        className={`w-2 h-2 rounded-full inline-block ml-0.5 mt-0.5 ${
+          index === 0 ? "bg-blue-500" : "bg-gray-400"
+        }`}
+      />
+    ),
+    children: (
+      <div>
+        <p className="font-medium mt-2">
+          {note.author_name} - {dayjs.utc(note.created_at).format("DD/MM/YYYY HH:mm")}
+        </p>
+        <p>{note.content}</p>
+      </div>
+    ),
+  }));
+
   return (
-    <div className=" bg-white rounded-xl ">
+    <div className="bg-white rounded-xl p-1">
       {/* Thêm ghi chú */}
       <div className="mb-4">
         <Input.TextArea
@@ -87,36 +109,14 @@ const Notes = ({ selectedId }: NotesProps) => {
           {isLoading ? (
             <Spin />
           ) : (
-            <Timeline mode="left">
-              {notes.map((note: CustomerNoteDetail, index) => (
-                <Timeline.Item
-                  key={note.id}
-                  color={index === 0 ? "blue" : "gray"}
-                  dot={
-                    <span
-                      className={`w-2 h-2 rounded-full inline-block ml-0.5 mt-0.5 ${
-                        index === 0 ? "bg-blue-500" : "bg-gray-400"
-                      }`}
-                    />
-                  }
-                >
-                  <p className="font-medium mt-2">
-                    {note.author_name} -{" "}
-                    {dayjs.utc(note.created_at).format("DD/MM/YYYY HH:mm")}
-                    </p>
-                  <p>{note.content}</p>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+            <Timeline mode="left" items={timelineItems} />
           )}
         </div>
+
         {/* Load more */}
         {hasNextPage && (
           <div className="flex justify-center mt-3">
-            <Button
-              onClick={() => fetchNextPage()}
-              loading={isFetchingNextPage}
-            >
+            <Button onClick={() => fetchNextPage()} loading={isFetchingNextPage}>
               Xem thêm
             </Button>
           </div>

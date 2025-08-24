@@ -1,6 +1,6 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
@@ -116,6 +116,13 @@ export const useAddAddress = () => {
   return useMutation({
     mutationFn: ({ data, id }: { data: addressModel; id: string }) =>
       addAddressCustomer(data, id),
+  });
+};
+
+export const useDefaultAddress = () => {
+  return useMutation({
+    mutationFn: ({ address_id, id }: { address_id: number; id: string }) =>
+      addDefaultAddress(address_id, id),
   });
 };
 

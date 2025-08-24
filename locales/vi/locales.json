@@ -62,7 +62,8 @@
       "accountOwner": "Chủ TK",
       "contactInfo": "Thông tin liên hệ",
       "assignedStaff": "Nhân viên phụ trách",
-      "change": "Thay đổi"
+      "change": "Thay đổi",
+      "addDefaultAddress":"Thêm địa chỉ mặc định"
     },
     "detailTitle": "Chi tiết Khách hàng",
     "tabs": {

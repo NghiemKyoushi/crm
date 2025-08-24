@@ -73,7 +73,7 @@ export default function CategoryCustomerTable() {
   }
 
   const handleChangePage = (pageNumber: number) => {
-    setPage(pageNumber);
+    setPage(pageNumber - 1);
   };
 
   const columns: ColumnsType<Category> = [
@@ -114,7 +114,6 @@ export default function CategoryCustomerTable() {
             />
           </Tooltip>
 
-          {/* Chỉnh sửa phân loại */}
           <Tooltip title="Chỉnh sửa phân loại">
             <Button
             onClick={()=>{

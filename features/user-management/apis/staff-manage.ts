@@ -20,6 +20,14 @@ export const createNewStaff = async (params: NewUserType) => {
   return res.data;
 };
 
+export const updateStaff = async (params: NewUserType, id:string) => {
+  const res = await api.put(`${API_TYPE_CONST.ADD_STAFF}/${id}`, {
+    ...params,
+    active: params.active ? "true" : "false",
+  });
+  return res.data;
+};
+
 export const getDetailStaff = async (id: string) => {
   const res = await api.get(`${API_TYPE_CONST.ADD_STAFF}/${id}`);
   return res.data.data;
@@ -72,8 +80,9 @@ export const createRole = async (body: RoleRequest) => {
 
 export const getListRoleGroup = async () => {
   const res = await api.get(API_TYPE_CONST.PERMISSION_GROUP);
-  return res.data.data;
+  return res.data;
 };
+
 export const getListPermiss = async () => {
   const res = await api.get(API_TYPE_CONST.PERMISSION);
   return res.data.data;
@@ -81,6 +90,11 @@ export const getListPermiss = async () => {
 
 export const addAddressCustomer = async (body: addressModel, id:string) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_ADDRESS}${id}`, body);
+  return res.data.data;
+};
+
+export const addDefaultAddress = async (address_id: number, id:string) => {
+  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_ADDRESS}${id}`, {address_id});
   return res.data.data;
 };
 
@@ -112,16 +126,45 @@ export const addCustomerForSale = async (body: AddCustomerTosaleModel ) => {
   return res.data.data;
 };
 
-export function groupPermissions(permissions: Permission[]): PermissionGroup[] {
+export const removeAssignCustomerForSale = async (id: string ) => {
+  const res = await api.get(`${API_TYPE_CONST.REMOVE_ASSIGN}${id}`);
+  return res.data.data;
+};
+
+export const deleteAcount = async (id: string ) => {
+  const res = await api.delete(`${API_TYPE_CONST.DELETE_ACCOUNT}${id}`);
+  return res.data.data;
+};
+
+export const lockAcount = async (id: string ) => {
+  const res = await api.put(`${API_TYPE_CONST.LOCK_ACCOUNT}${id}`);
+  return res.data.data;
+};
+
+export const unlockAcount = async (id: string ) => {
+  const res = await api.put(`${API_TYPE_CONST.UNLOCK_ACCOUNT}${id}`);
+  return res.data.data;
+};
+
+export const resetPassAccount = async (id: string ) => {
+  const res = await api.put(`${API_TYPE_CONST.RESET_PASSWORD}${id}`);
+  return res.data.data;
+};
+
+export function groupPermissions(permissions?: Permission[]): PermissionGroup[] {
+  if (!Array.isArray(permissions)) return [];
+
   const map: Record<string, Permission[]> = {};
+
   permissions.forEach((p) => {
-    if (!map[p.category]) map[p.category] = [];
-    map[p.category].push(p);
+    const category = p.category || "UNCATEGORIZED";
+    if (!map[category]) map[category] = [];
+    map[category].push(p);
   });
 
-  return Object.entries(map).map(([category, permissions]) => ({
+  return Object.entries(map).map(([category, items]) => ({
     category,
-    permissions,
+    permissions: items,
   }));
 }
 export function renderCategoryName(code: string) {

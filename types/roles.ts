@@ -5,6 +5,8 @@ export interface Role {
   permissions: string[];
   is_active: boolean;
   user_count: number | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  groups: any;
 }
 
 export interface RoleResponse {
