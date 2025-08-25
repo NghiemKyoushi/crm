@@ -128,7 +128,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
             <Controller
               name="phone_number"
               control={control}
-              rules={{ required: t("staffManage.phoneRequired") }}
+              rules={{ required: t("staffManage.phoneNumberRequired") }}
               render={({ field }) => <Input {...field} />}
             />
             {errors.phone_number && (
