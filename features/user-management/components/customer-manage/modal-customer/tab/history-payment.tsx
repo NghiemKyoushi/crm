@@ -1,6 +1,6 @@
 import OrderFilter from "@/components/FilterComponent";
 import TableComponent from "@/components/TableComponent";
-import { Select, Tag } from "antd";
+// import { Select, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 
 export interface Transaction {
@@ -77,12 +77,13 @@ export default function HistoryPaymentTab() {
     <>
       <OrderFilter onFilter={onFilter} />
       <TableComponent
-        headerHeight={44}
-        rowHeight={48}
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-      />
+              headerHeight={44}
+              rowHeight={48}
+              columns={columns}
+              dataSource={data}
+              pagination={false} response={undefined} page={0} onPageChange={function (page: number): void {
+                  throw new Error("Function not implemented.");
+              } }      />
     </>
   );
 }

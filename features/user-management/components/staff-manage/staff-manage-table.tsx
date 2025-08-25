@@ -12,73 +12,163 @@ import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useState } from "react";
 import PopupConfirm from "@/components/PopupConfirm";
-
-interface Employee {
-  key: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: "active" | "inactive";
-}
-
-const data: Employee[] = [
-  {
-    key: "1",
-    fullName: "Hoàng An Nhiên",
-    email: "nhien.ha@company.com",
-    phone: "0901234567",
-    role: "Sales",
-    status: "active",
-  },
-  {
-    key: "2",
-    fullName: "Lê Minh Tuấn",
-    email: "tuan.lm@company.com",
-    phone: "0912345678",
-    role: "Kế toán",
-    status: "active",
-  },
-  {
-    key: "3",
-    fullName: "Phạm Thị Mai",
-    email: "mai.pt@company.com",
-    phone: "0987654321",
-    role: "Nhân viên kho",
-    status: "inactive",
-  },
-  {
-    key: "4",
-    fullName: "Trần Văn Hùng",
-    email: "hung.tv@company.com",
-    phone: "0934567890",
-    role: "Admin",
-    status: "active",
-  },
-];
+import {
+  useCreateNewStaff,
+  useDetailStaff,
+  useListStaff,
+} from "../../hooks/staff-manage";
+import { NewUserType, UserData } from "@/types/staff-manage-type";
+import { toast } from "react-toastify";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  deleteAcount,
+  lockAcount,
+  resetPassAccount,
+  unlockAcount,
+  updateStaff,
+} from "../../apis/staff-manage";
 
 export default function StaffManageTable() {
   const [open, setOpen] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [modalType, setModalType] = useState<
-    "reset" | "lock" | "delete" | null
+    "reset" | "lock" | "delete" | "unlock" | null
   >(null);
+  const [page, setPage] = useState(0);
+  const createNewStaffMutation = useCreateNewStaff();
+  const queryClient = useQueryClient();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const { data: detailStaff } = useDetailStaff(selectedId);
+
+  const { data } = useListStaff({
+    page,
+    page_size: 10,
+    search: "",
+  });
+
+  const handleChangePage = (pageNumber: number) => {    
+    setPage(pageNumber - 1);
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAcount(id),
+    onSuccess: () => {
+      toast.success("Xoá tài khoản thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+    },
+    onError: () => toast.error("Xoá tài khoản thất bại"),
+  });
+
+  const lockMutation = useMutation({
+    mutationFn: (id: string) => lockAcount(id),
+    onSuccess: () => {
+      toast.success("Khoá tài khoản thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+    },
+    onError: () => toast.error("Khoá tài khoản thất bại"),
+  });
+
+  const unlockMutation = useMutation({
+    mutationFn: (id: string) => unlockAcount(id),
+    onSuccess: () => {
+      toast.success("Mở khoá tài khoản thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+    },
+    onError: () => toast.error("Mở khoá tài khoản thất bại"),
+  });
+
+  const resetPassMutation = useMutation({
+    mutationFn: (id: string) => resetPassAccount(id),
+    onSuccess: () => {
+      toast.success("Reset mật khẩu thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+    },
+    onError: () => toast.error("Reset mật khẩu tài khoản thất bại"),
+  });
 
   const handleConfirm = () => {
-    if (modalType === "reset") {
-      console.log("Reset mật khẩu cho");
+    if (!selectedId) return;
+
+    if (modalType === "delete") {
+      deleteMutation.mutate(selectedId);
     } else if (modalType === "lock") {
-      console.log("Khoá user");
-    } else if (modalType === "delete") {
-      console.log("Xoá user");
+      lockMutation.mutate(selectedId);
+    } else if (modalType === "reset") {
+      resetPassMutation.mutate(selectedId);
     }
-    setOpen(false);
+    if (modalType === "unlock") {
+      unlockMutation.mutate(selectedId);
+    }
+    setOpenConfirm(false);
   };
-  const columns: ColumnsType<Employee> = [
+
+  const handleOpenConfirm = (
+    type: "reset" | "lock" | "delete" | "unlock",
+    id: string
+  ) => {
+    setModalType(type);
+    setSelectedId(id);
+    setOpenConfirm(true);
+  };
+
+  const updateStaffMutation = useMutation({
+    mutationFn: ({ param, id }: { param: NewUserType; id: string }) =>
+      updateStaff(param, id),
+    onSuccess: () => {
+      toast.success("Cập nhật tài khoản thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+    },
+    onError: () => toast.error("Cập nhật tài khoản thất bại"),
+  });
+
+  const handleSubmitData = (data: NewUserType) => {
+    const { email, active, full_name, phone_number, role_id, password } = data;
+    if (detailStaff && selectedId) {
+      if (selectedId)
+        updateStaffMutation.mutate({
+          param: {
+            email,
+            full_name,
+            active,
+            phone_number,
+            role_id,
+            password: detailStaff.password,
+          },
+          id: selectedId,
+        });
+    } else {
+      createNewStaffMutation.mutate(
+        {
+          email,
+          full_name,
+          active,
+          phone_number,
+          role_id,
+          password,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Tạo nhân viên mới thành công!");
+            queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+          },
+          onError: () => {
+            toast.error("Tạo nhân viên mới thất bại");
+          },
+        }
+      );
+    }
+  };
+
+  const handleOpenEdit = (id: number) => {
+    setSelectedId(id.toString());
+    setOpen(true);
+  };
+  const columns: ColumnsType<UserData> = [
     {
       title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
+      dataIndex: "full_name",
+      key: "full_name",
       render: (text: string) => <span className="font-medium">{text}</span>,
     },
     {
@@ -88,13 +178,13 @@ export default function StaffManageTable() {
     },
     {
       title: "Số điện thoại",
-      dataIndex: "phone",
-      key: "phone",
+      dataIndex: "phone_number",
+      key: "phone_number",
     },
     {
       title: "Vai trò",
-      dataIndex: "role",
-      key: "role",
+      dataIndex: "role_name",
+      key: "role_name",
       render: (role: string) => (
         <Dropdown
           menu={{
@@ -106,70 +196,81 @@ export default function StaffManageTable() {
             ],
           }}
         >
-          <span className="cursor-pointer">{role} ⌄</span>
+          <span className="cursor-pointer">{role}</span>
         </Dropdown>
       ),
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status: Employee["status"]) =>
-        status === "active" ? (
-          <Tag color="green">Hoạt động</Tag>
-        ) : (
-          <Tag color="red">Đã khóa</Tag>
-        ),
+      dataIndex: "active",
+      key: "active",
+      render: (active: boolean) => (
+        <>
+          {active ? (
+            <Tag color="green">Hoạt động</Tag>
+          ) : (
+            <Tag color="red">Đã khóa</Tag>
+          )}
+        </>
+      ),
     },
     {
       title: "Hành động",
       key: "actions",
-      render: () => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (_: any, record: UserData) => (
         <div className="flex gap-3 text-[16px]">
           <FontAwesomeIcon
             icon={faEdit}
+            onClick={() => handleOpenEdit(record.user_id)}
             className="cursor-pointer text-blue-500 hover:text-blue-700"
           />
-          {/* Reset password */}
           <FontAwesomeIcon
             icon={faKey}
             className="cursor-pointer text-gray-600 hover:text-gray-800"
-            onClick={() => {
-              setModalType("reset");
-              setOpenConfirm(true);
-            }}
+            onClick={() =>
+              handleOpenConfirm("reset", record.user_id.toString())
+            }
           />
-
-          {/* Lock user */}
-          <FontAwesomeIcon
-            icon={faLock}
-            className="cursor-pointer text-amber-500 hover:text-amber-700"
-            onClick={() => {
-              setModalType("lock");
-              setOpenConfirm(true);
-            }}
-          />
-
-          {/* Delete user */}
+          {record.active ? (
+            <FontAwesomeIcon
+              icon={faLock}
+              className="cursor-pointer text-amber-500 hover:text-amber-700"
+              onClick={() =>
+                handleOpenConfirm("lock", record.user_id.toString())
+              }
+            />
+          ) : (
+            <FontAwesomeIcon
+              icon={faLock}
+              className="cursor-pointer text-green-500 hover:text-green-700"
+              onClick={() => {
+                handleOpenConfirm("unlock", record.user_id.toString());
+              }}
+            />
+          )}
           <FontAwesomeIcon
             icon={faTrash}
             className="cursor-pointer text-red-500 hover:text-red-700"
-            onClick={() => {
-              setModalType("delete");
-              setOpenConfirm(true);
-            }}
+            onClick={() =>
+              handleOpenConfirm("delete", record.user_id.toString())
+            }
           />
         </div>
       ),
     },
   ];
+
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Danh sách Nhân viên</h2>
         <Button
           type="primary"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            setSelectedId(null);
+          }}
           icon={<FontAwesomeIcon icon={faUserPlus} />}
           className="!bg-green-500 !hover:bg-green-600 !font-medium"
         >
@@ -178,19 +279,32 @@ export default function StaffManageTable() {
       </div>
       <TableComponent
         columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowHeight={50}
+        dataSource={data?.data || []}
+        rowHeight={40}
+        pageSize={10}
+        page={ data && data?.current_page + 1 || 0}
+        onPageChange={handleChangePage}
+        response={data}
       />
-      <ModalStaffAdd open={open} onClose={() => setOpen(false)} />
+
+      <ModalStaffAdd
+        initialValues={detailStaff}
+        handleSubmitDataUser={handleSubmitData}
+        open={open}
+        onClose={() => {
+          setSelectedId(null), setOpen(false);
+        }}
+      />
       <PopupConfirm
         open={openConfirm}
-        type={modalType as "reset" | "lock" | "delete"} // ✅ truyền type để đổi style
+        type={modalType as "reset" | "lock" | "delete" | "unlock"}
         title={
           modalType === "reset"
             ? "Xác nhận reset mật khẩu"
             : modalType === "lock"
             ? "Xác nhận khoá tài khoản"
+            : modalType === "unlock"
+            ? "Xác nhận mở khoá tài khoản"
             : "Xác nhận xoá tài khoản"
         }
         content={
@@ -198,6 +312,8 @@ export default function StaffManageTable() {
             ? `Bạn có chắc chắn muốn reset mật khẩu cho tài khoản này?`
             : modalType === "lock"
             ? `Bạn có chắc chắn muốn khoá tài khoản này?`
+            : modalType === "unlock"
+            ? `Bạn có chắc chắn muốn mở khoá tài khoản này?`
             : `Bạn có chắc chắn muốn xoá tài khoản này?`
         }
         onConfirm={handleConfirm}
@@ -207,6 +323,8 @@ export default function StaffManageTable() {
             ? "Xoá"
             : modalType === "lock"
             ? "Khoá"
+            : modalType === "unlock"
+            ? "Mở khoá"
             : "Reset"
         }
         cancelText="Huỷ"

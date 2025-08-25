@@ -2,6 +2,7 @@ const AUTH_PREFIX = "users/v1/auth";
 const ONBOARD = "users/v1/onboard";
 const PROFILE ="users/v1/profile";
 const MEDIA="medias/v1/files";
+const FEATURE="features/v1";
 export const VIEW_IMAGE="medias/v1/files/view/thumb/"
 export const API_TYPE_CONST = {
   LOGIN: `${AUTH_PREFIX}/login`,
@@ -15,5 +16,27 @@ export const API_TYPE_CONST = {
   UPDATE_AVARTAR: `/users/v1/profile/me/avatar`,
   CHANGE_PASSWORD:`/users/v1/users/change-password`,
   UPLOAD_IMAGE:`${MEDIA}/upload`,
-  
+  LIST_SALE:`${FEATURE}/admin/sales`,
+  CREATE_SALE:`${FEATURE}/admin/sales/add-sales`,
+  LIST_STAFF: `${FEATURE}/admin/staff`,
+  ADD_STAFF: `${FEATURE}/admin/staff`,
+  UPDATE_STAFF:  `${FEATURE}/admin/staff/`,
+  LIST_CATEGORY: `${FEATURE}/admin/customer-categories`,
+  ROLES: `${FEATURE}/admin/roles`,
+  UPDATE_ROLE: `${FEATURE}/admin/roles/`,
+  PERMISSION_GROUP:`${FEATURE}/admin/roles/permissions/categories`,
+  PERMISSION:`${FEATURE}/admin/roles/permissions`,
+  CUSTOMER_LIST:`${FEATURE}/admin/customer`,
+  ADD_ADDRESS: `${FEATURE}/admin/customer/add-shipping-address/`,
+  ADD_ACCOUNT_BANK: `${FEATURE}/admin/customer/add-bank-user/`,
+  CUSTOMER_NOTE: `${FEATURE}/admin/customer/get-notes/`,
+  ADD_CUSTOMER_NOTE: `${FEATURE}/admin/customer/add-notes/`,
+  BANK_INFO: `${FEATURE}/admin/bank-informations`,
+  ADD_SALE_RESPONSIBILITY: `${FEATURE}/admin/customer/add-sale-to-customer`,
+  REMOVE_ASSIGN: `${FEATURE}/admin/customer/unassign-customer-sale/`,
+  DELETE_ACCOUNT: `${FEATURE}/admin/users/`,
+  LOCK_ACCOUNT: `${FEATURE}/admin/users/deactivate/`,
+  UNLOCK_ACCOUNT: `${FEATURE}/admin/users/activate/`,
+  RESET_PASSWORD: `${FEATURE}/admin/users/reset-password/`,
+  ADD_DEFAULT_ADDRESS: `${FEATURE}/admin/customer/set-default/`
 } as const;

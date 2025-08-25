@@ -30,10 +30,11 @@ export const Header: React.FC = () => {
       key: "logout",
       label: (
         <Button
-          type="text"
+          type="dashed"
           icon={<LogoutOutlined />}
           onClick={handleLogout}
-          style={{ padding: 0 }}
+          
+          style={{width: "100%", }}
         >
           Logout
         </Button>
@@ -43,10 +44,10 @@ export const Header: React.FC = () => {
       key: "userprofile",
       label: (
         <Button
-          type="text"
+          type="primary"
           icon={<FontAwesomeIcon icon={faUser} />}
           onClick={() => router.push("/user-profile")}
-          style={{ padding: 0 }}
+          style={{ width: "100%", }}
         >
           User profile
         </Button>
@@ -66,7 +67,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center justify-center align-middle content-center">
         <Dropdown
           menu={{ items: menuItem }}
-          trigger={["click", "hover"]}
+          trigger={["click"]}
           placement="bottomRight"
         >
           <Avatar

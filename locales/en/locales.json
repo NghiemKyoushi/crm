@@ -8,7 +8,7 @@
     "forgotPassword": "Forgot password",
     "success": "Login successful!",
     "failed": "Login failed!",
-    "pleaseCheckInformation":"Please check information!!"
+    "pleaseCheckInformation": "Please check information!!"
   },
   "validation": {
     "email": {
@@ -62,7 +62,9 @@
       "accountOwner": "Account Owner",
       "contactInfo": "Contact Information",
       "assignedStaff": "Assigned Staff",
-      "change": "Change"
+      "change": "Change",
+      "addDefaultAddress":"Add default address"
+
     },
     "detailTitle": "Customer Details",
     "tabs": {
@@ -72,5 +74,28 @@
       "fees": "Custom Fee Settings",
       "notes": "Internal Notes"
     }
+  },
+  "staffManage": {
+    "addNewStaff": "Add New Staff",
+    "editNewStaff": "Edit New Staff",
+    "fullName": "Full Name",
+    "fullNameRequired": "Please enter full name",
+    "email": "Email",
+    "emailRequired": "Please enter email",
+    "phoneNumberRequired": "Please enter phone number",
+    "emailInvalid": "Invalid email address",
+    "phone": "Phone Number",
+    "password": "Password",
+    "passwordPlaceholder": "Leave blank if unchanged",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "role": "Role",
+    "roleAdmin": "Admin",
+    "roleSales": "Sales",
+    "roleAccounting": "Accounting",
+    "roleWarehouse": "Warehouse Staff",
+    "cancel": "Cancel",
+    "save": "Save"
   }
 }

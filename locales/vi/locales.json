@@ -8,8 +8,7 @@
     "forgotPassword": "Quên mật khẩu",
     "success": "Đăng nhập thành công!",
     "failed": "Đăng nhập thất bại!",
-    "pleaseCheckInformation":"Vui lòng kiểm tra lại thông tin!"
-
+    "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!"
   },
   "validation": {
     "email": {
@@ -63,7 +62,8 @@
       "accountOwner": "Chủ TK",
       "contactInfo": "Thông tin liên hệ",
       "assignedStaff": "Nhân viên phụ trách",
-      "change": "Thay đổi"
+      "change": "Thay đổi",
+      "addDefaultAddress":"Thêm địa chỉ mặc định"
     },
     "detailTitle": "Chi tiết Khách hàng",
     "tabs": {
@@ -73,5 +73,28 @@
       "fees": "Cài đặt Phí riêng",
       "notes": "Ghi chú Nội bộ"
     }
+  },
+  "staffManage": {
+    "addNewStaff": "Thêm Nhân viên mới",
+    "editNewStaff": "Chỉnh sửa",
+    "fullName": "Họ và tên",
+    "fullNameRequired": "Vui lòng nhập họ tên",
+    "email": "Email",
+    "emailRequired": "Vui lòng nhập email",
+    "emailInvalid": "Email không hợp lệ",
+    "phoneNumberRequired": "Vui lòng nhập số điện thoại",
+    "phone": "Số điện thoại",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Để trống nếu không thay đổi",
+    "status": "Trạng thái",
+    "statusActive": "Hoạt động",
+    "statusInactive": "Đã khóa",
+    "role": "Vai trò",
+    "roleAdmin": "Admin",
+    "roleSales": "Sales",
+    "roleAccounting": "Kế toán",
+    "roleWarehouse": "Nhân viên kho",
+    "cancel": "Hủy",
+    "save": "Lưu"
   }
 }

@@ -21,7 +21,9 @@ export default function CustomerPage() {
     <div className="p-4">
       <Tabs
         defaultActiveKey="1"
-        tabBarGutter={32} // khoảng cách giữa các tab
+        tabBarGutter={30} 
+        destroyInactiveTabPane
+
         items={[
           {
             key: "1",

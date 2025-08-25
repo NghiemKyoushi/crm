@@ -102,8 +102,9 @@ export default function HistoryOrderTab() {
         rowHeight={48}
         columns={columns}
         dataSource={data}
-        pagination={false}
-      />
+        pagination={false} response={undefined} page={0} onPageChange={function (page: number): void {
+          throw new Error("Function not implemented.");
+        } }      />
     </>
   );
 }

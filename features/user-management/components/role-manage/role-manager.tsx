@@ -1,123 +1,208 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
-import { Button, Card, Checkbox } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Checkbox } from "antd";
 import clsx from "clsx";
-import { permissionsGrouped, RoleFormValues, RoleModal } from "./role-modal";
+import { RoleFormValues, RoleModal } from "./role-modal";
+import {
+  useCreateNewRole,
+  useListRole,
+  useUpdateRole,
+} from "../../hooks/staff-manage";
+import { Role } from "@/types/roles";
+import { getListPermiss } from "../../apis/staff-manage";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
+interface PermissionGroup {
+  group_id: number;
+  group_name: string;
+  permissions: {
+    permission: string;
+    description: string;
+    group_id: number;
+    is_system: boolean;
+    name: string;
+  }[];
 }
 
-const initialRoles: Role[] = [
-  {
-    id: "1",
-    name: "Super Administrator",
-    permissions: [
-      "order:view",
-      "order:manage",
-      "finance:approve",
-      "finance:debt",
-      "finance:bank",
-      "user:customer",
-      "user:staff",
-      "system:full",
-    ],
-  },
-  { id: "2", name: "Sales", permissions: ["order:view", "order:manage"] },
-  { id: "3", name: "Kế toán", permissions: ["finance:approve", "finance:debt"] },
-  { id: "4", name: "Nhân viên kho", permissions: ["order:view"] },
-];
-
 export const RoleManager: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>(initialRoles);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(roles[0]);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const { data } = useListRole();
+  const queryClient = useQueryClient();
+  const createRoleMutation = useCreateNewRole();
+  const updateRoleMutation = useUpdateRole();
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>(
+    []
+  );
 
   const handleAddRole = (data: RoleFormValues) => {
-    const newRole: Role = {
-      id: String(Date.now()),
-      name: data.name,
-      permissions: data.permissions,
-    };
-    setRoles((prev) => [...prev, newRole]);
+    const { description, name, permissions } = data;
+    createRoleMutation.mutate(
+      {
+        description,
+        role_name: name,
+        permissions,
+        is_active: true,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Tạo vai trò mới thành công!");
+          queryClient.invalidateQueries({ queryKey: ["listRole"] });
+        },
+        onError: () => {
+          toast.error("Tạo vai trò mới thất bại");
+        },
+      }
+    );
   };
+
+  const hadnleUpdateRole = (roleSelect: Role) => {
+    if (selectedRole) {
+      const activePermissionNames = roleSelect.groups.flatMap(
+        (group: { permissions: any[] }) =>
+          group.permissions.filter((p) => p.active).map((p) => p.name)
+      );
+      updateRoleMutation.mutate(
+        {
+          param:{
+            
+          description: selectedRole?.description,
+          role_name: selectedRole?.role_name,
+          permissions: activePermissionNames,
+          is_active: true,
+         
+          },
+          id: selectedRole.role_id,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Cập nhật vai trò thành công");
+            queryClient.invalidateQueries({ queryKey: ["listRole"] });
+          },
+          onError: () => {
+            toast.error("Cập nhật vai trò thất bại");
+          },
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (data) {
+      setSelectedRole(data[0]);
+    }
+  }, [data]);
+
+  const handleCallPer = async () => {
+    const groups = await getListPermiss();
+    setPermissionGroups(groups);
+    await getListPermiss();
+  };
+
+  useEffect(() => {
+    handleCallPer();
+  }, []);
 
   return (
     <div className="flex gap-6 w-full">
-      <div className="w-1/4 bg-white shadow rounded p-3">
+      <div className="w-1/3 bg-white shadow rounded p-3">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold">Các Vai trò</h3>
-          <Button type="primary" onClick={() => setOpenModal(true)}>
-            + Thêm Vai trò
+          <Button
+            size="middle"
+            type="primary"
+            onClick={() => setOpenModal(true)}
+          >
+            + Thêm vai trò
           </Button>
         </div>
-        <div className="space-y-1">
-          {roles.map((role) => (
-            <div
-              key={role.id}
-              className={clsx(
-                "cursor-pointer px-3 py-2 rounded hover:bg-gray-100 min-h-12 flex items-center align-middle ",
-                selectedRole?.id === role.id && "bg-blue-100 text-blue-700 font-medium"
-              )}
-              onClick={() => setSelectedRole(role)}
-            >
-              {role.name}
-            </div>
-          ))}
+        <div className="space-y-1 max-h-[400px] overflow-y-auto">
+          {data &&
+            data.map((role: Role) => (
+              <div
+                key={role.role_id}
+                className={clsx(
+                  "cursor-pointer px-3 py-2 rounded hover:bg-gray-100 min-h-12 flex items-center align-middle ",
+                  selectedRole?.role_id === role.role_id &&
+                    "bg-blue-100 text-blue-700 font-medium"
+                )}
+                onClick={() => setSelectedRole(role)}
+              >
+                {role.role_name}
+              </div>
+            ))}
         </div>
       </div>
+      <div className="w-3/4 bg-white shadow rounded p-4">
+        {selectedRole ? (
+          <>
+            <h3 className="font-semibold text-lg mb-4">
+              Quyền hạn cho vai trò:
+              <span className="text-blue-600">{selectedRole.role_name}</span>
+            </h3>
+            {permissionGroups.map((group) => {
+              // lấy danh sách permission đang active của role cho group này
+              const roleGroup = selectedRole?.groups?.find(
+                (g: any) => g.id === group.group_id
+              );
+              const activePermissions =
+                roleGroup?.permissions
+                  .filter((p: any) => p.active)
+                  .map((p: any) => p.name) || [];
 
-     <div className="w-3/4 bg-white shadow rounded p-4">
-  {selectedRole ? (
-    <>
-      <h3 className="font-semibold text-lg mb-4">
-        Quyền hạn cho vai trò:{" "}
-        <span className="text-blue-600">{selectedRole.name}</span>
-      </h3>
+              return (
+                <div key={group.group_id}>
+                  <h4 className="font-medium mb-2">{group.group_name}</h4>
+                  <Checkbox.Group
+                    options={group.permissions.map((p) => ({
+                      label: p.description,
+                      value: p.permission, // dùng "permission" từ list gốc
+                    }))}
+                    value={activePermissions} // dùng "name" từ role detail
+                    onChange={(checkedValues) => {
+                      setSelectedRole((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              groups: prev.groups.map((g: any) => {
+                                if (g.id !== group.group_id) return g;
 
-      {/* Duyệt qua từng nhóm */}
-      <div className="space-y-4">
-        {permissionsGrouped.map((group) => (
-          <div key={group.group}>
-            <h4 className="font-medium mb-2">{group.group}</h4>
-            <Checkbox.Group
-              options={group.items}
-              value={selectedRole.permissions}
-              onChange={(checkedValues) => {
-                setSelectedRole((prev) =>
-                  prev
-                    ? { ...prev, permissions: checkedValues as string[] }
-                    : prev
-                );
-              }}
-              className="flex flex-col  gap-2"
-            />
-          </div>
-        ))}
+                                return {
+                                  ...g,
+                                  permissions: g.permissions.map((p: any) => ({
+                                    ...p,
+                                    active: checkedValues.includes(p.name), // so sánh bằng "name"
+                                  })),
+                                };
+                              }),
+                            }
+                          : prev
+                      );
+                    }}
+                    className="flex flex-col gap-2"
+                  />
+                </div>
+              );
+            })}
+
+            <div className="flex justify-end mt-4">
+              <Button
+                type="primary"
+                onClick={() => {
+                  hadnleUpdateRole(selectedRole);
+                }}
+              >
+                Lưu thay đổi
+              </Button>
+            </div>
+          </>
+        ) : (
+          <p>Chọn một vai trò để xem chi tiết</p>
+        )}
       </div>
-
-      <div className="flex justify-end mt-4">
-        <Button
-          type="primary"
-          onClick={() => {
-            setRoles((prev) =>
-              prev.map((r) =>
-                r.id === selectedRole.id ? selectedRole : r
-              )
-            );
-          }}
-        >
-          Lưu thay đổi
-        </Button>
-      </div>
-    </>
-  ) : (
-    <p>Chọn một vai trò để xem chi tiết</p>
-  )}
-</div>
 
       <RoleModal
         open={openModal}
