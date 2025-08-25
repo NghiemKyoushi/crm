@@ -119,9 +119,11 @@ export default function CustomerDetailModal({
           </span>
         </span>
       }
-      bodyStyle={{
-        maxHeight: "75vh", 
-        overflowY: "auto", 
+      styles={{
+        body: {
+          maxHeight: "75vh",
+          overflowY: "auto",
+        },
       }}
     >
       <Tabs defaultActiveKey="overview">

@@ -78,6 +78,12 @@ export const createRole = async (body: RoleRequest) => {
   return res.data.data;
 };
 
+export const updateRole = async (body: RoleRequest, id: string) => {
+  const res = await api.put(`${API_TYPE_CONST.ROLES}/${id}`, body);
+  return res.data.data;
+};
+
+
 export const getListRoleGroup = async () => {
   const res = await api.get(API_TYPE_CONST.PERMISSION_GROUP);
   return res.data;

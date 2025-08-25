@@ -16,9 +16,11 @@ const { Text } = Typography;
 interface SalesDetailProps {
   salesId?: number;
   name: string;
+  refetchSales: () => void;
+
 }
 
-export default function SalesDetail({ salesId, name }: SalesDetailProps) {
+export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailProps) {
   const [page, setPage] = useState(0);
   const customerForSaleMutation = useCustomerForSale();
   const queryClient = useQueryClient();
@@ -37,6 +39,7 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
     onSuccess: () => {
       toast.success("Huỷ gán khách hàng thành công!");
       queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+      refetchSales();
     },
     onError: () => toast.error("Huỷ gán khách hàng thất bại"),
   });
@@ -107,6 +110,7 @@ export default function SalesDetail({ salesId, name }: SalesDetailProps) {
           onSuccess: () => {
             toast.success("Gán khách hàng thành công!");
             queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+            refetchSales();
           },
           onError: () => {
             toast.error("Gán khách hàng thất bại");

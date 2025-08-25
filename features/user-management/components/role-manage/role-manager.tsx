@@ -5,9 +5,13 @@ import React, { useEffect, useState } from "react";
 import { Button, Checkbox } from "antd";
 import clsx from "clsx";
 import { RoleFormValues, RoleModal } from "./role-modal";
-import { useCreateNewRole, useListRole } from "../../hooks/staff-manage";
+import {
+  useCreateNewRole,
+  useListRole,
+  useUpdateRole,
+} from "../../hooks/staff-manage";
 import { Role } from "@/types/roles";
-import { getListPermiss, getListRoleGroup } from "../../apis/staff-manage";
+import { getListPermiss } from "../../apis/staff-manage";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -29,7 +33,7 @@ export const RoleManager: React.FC = () => {
   const { data } = useListRole();
   const queryClient = useQueryClient();
   const createRoleMutation = useCreateNewRole();
-
+  const updateRoleMutation = useUpdateRole();
   const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>(
     []
   );
@@ -53,6 +57,37 @@ export const RoleManager: React.FC = () => {
         },
       }
     );
+  };
+
+  const hadnleUpdateRole = (roleSelect: Role) => {
+    if (selectedRole) {
+      const activePermissionNames = roleSelect.groups.flatMap(
+        (group: { permissions: any[] }) =>
+          group.permissions.filter((p) => p.active).map((p) => p.name)
+      );
+      updateRoleMutation.mutate(
+        {
+          param:{
+            
+          description: selectedRole?.description,
+          role_name: selectedRole?.role_name,
+          permissions: activePermissionNames,
+          is_active: true,
+         
+          },
+          id: selectedRole.role_id,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Cập nhật vai trò thành công");
+            queryClient.invalidateQueries({ queryKey: ["listRole"] });
+          },
+          onError: () => {
+            toast.error("Cập nhật vai trò thất bại");
+          },
+        }
+      );
+    }
   };
 
   useEffect(() => {
@@ -157,7 +192,7 @@ export const RoleManager: React.FC = () => {
               <Button
                 type="primary"
                 onClick={() => {
-                  console.log("Lưu quyền:", selectedRole);
+                  hadnleUpdateRole(selectedRole);
                 }}
               >
                 Lưu thay đổi

@@ -22,7 +22,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
     handleSubmit,
     control,
     reset,
-    watch,
+    // watch,
     formState: { errors },
   } = useForm<NewUserType>({
     defaultValues: {
@@ -38,7 +38,6 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
       ...initialValues,
     },
   });
-  console.log('initialValues?.active', watch());
 
   const { data: listRole } = useListRole();
 

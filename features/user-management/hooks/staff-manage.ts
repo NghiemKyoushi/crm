@@ -1,6 +1,6 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateRole } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
@@ -80,6 +80,13 @@ export const useCreateNewRole = () => {
   return useMutation({
     mutationFn: (param: RoleRequest) =>
       createRole(param),
+  });
+};
+
+export const useUpdateRole = () => {
+  return useMutation({
+    mutationFn: ({ param, id }: { param: RoleRequest; id: string }) =>
+      updateRole(param, id),
   });
 };
 
