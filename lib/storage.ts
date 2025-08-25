@@ -27,6 +27,7 @@ const _get = <T>(key: string): T | null => {
   const value = safeStorage.getItem(key);
   try {
     return value ? (JSON.parse(value) as T) : null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return value as T;
   }

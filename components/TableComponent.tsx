@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Table, Pagination } from "antd";
 import type { ColumnsType, TableProps } from "antd/es/table";
 
