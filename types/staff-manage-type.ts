@@ -28,5 +28,5 @@ export interface NewUserType {
   email: string;
   phone_number: string;
   role_id: string;
-  password: string;
+  password?: string;
 }

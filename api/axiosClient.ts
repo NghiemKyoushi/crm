@@ -1,4 +1,5 @@
 import { API_TYPE_CONST } from "@/constants/api-type";
+import i18n from "@/locales/i18n";
 import axios from "axios";
 
 const api = axios.create({
@@ -46,8 +47,16 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  res => res,
+  (res) => {
+    if (res?.data?.message && typeof res.data.message === "string") {
+      res.data.localizedMessage = i18n.t(res.data.message);
+    }
+    return res;
+  },
   async err => {
+    if (err.response?.data?.message) {
+      err.response.data.localizedMessage = i18n.t(err.response.data.message);
+    }
     const originalRequest = err.config;
     const logout = () => {
       localStorage.clear();

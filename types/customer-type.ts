@@ -76,8 +76,9 @@ export interface bankAccountModel {
   account_holder_name: string;
   account_number: string;
   active: boolean;
-  bank_id: number;
+  id: number;
   bank_name?: string;
+  default?: boolean;
 }
 
 export interface CustomerNoteParams {

@@ -7,6 +7,7 @@ export interface Category {
     service_fee_percentage: number;
     cancellation_fee: number;
     is_delete: boolean;
+    color: string;
   }
   
   export interface CategoryResponse {

@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Checkbox } from "antd";
 import clsx from "clsx";
-import { RoleFormValues, RoleModal } from "./role-modal";
+import { renderCategoryName, RoleFormValues, RoleModal } from "./role-modal";
 import {
   useCreateNewRole,
   useListRole,
@@ -155,13 +155,13 @@ export const RoleManager: React.FC = () => {
 
               return (
                 <div key={group.group_id}>
-                  <h4 className="font-medium mb-2">{group.group_name}</h4>
+                  <h4 className="font-medium !mb-3 !mt-3">{renderCategoryName(group.group_name)}</h4>
                   <Checkbox.Group
                     options={group.permissions.map((p) => ({
                       label: p.description,
-                      value: p.permission, // dùng "permission" từ list gốc
+                      value: p.permission, 
                     }))}
-                    value={activePermissions} // dùng "name" từ role detail
+                    value={activePermissions} 
                     onChange={(checkedValues) => {
                       setSelectedRole((prev) =>
                         prev
@@ -174,7 +174,7 @@ export const RoleManager: React.FC = () => {
                                   ...g,
                                   permissions: g.permissions.map((p: any) => ({
                                     ...p,
-                                    active: checkedValues.includes(p.name), // so sánh bằng "name"
+                                    active: checkedValues.includes(p.name), 
                                   })),
                                 };
                               }),
@@ -182,7 +182,7 @@ export const RoleManager: React.FC = () => {
                           : prev
                       );
                     }}
-                    className="flex flex-col gap-2"
+                    className="flex flex-col gap-3"
                   />
                 </div>
               );

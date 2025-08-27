@@ -63,8 +63,7 @@
       "contactInfo": "Contact Information",
       "assignedStaff": "Assigned Staff",
       "change": "Change",
-      "addDefaultAddress":"Add default address"
-
+      "addDefaultAddress": "Add default address"
     },
     "detailTitle": "Customer Details",
     "tabs": {
@@ -96,6 +95,34 @@
     "roleAccounting": "Accounting",
     "roleWarehouse": "Warehouse Staff",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "tableColumn": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "role": "Role",
+      "roles": {
+        "sales": "Sales",
+        "accounting": "Accounting",
+        "warehouse": "Warehouse Staff",
+        "admin": "Admin"
+      },
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "customerCate": {
+    "name": "Category Name",
+    "description": "Description",
+    "customerCount": "Customer Count",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editPolicy": "Edit Policy",
+    "editCategory": "Edit Category"
   }
 }

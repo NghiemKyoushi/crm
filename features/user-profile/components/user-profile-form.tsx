@@ -22,6 +22,7 @@ import {
   useUpdatePassword,
   useUpdateUserProfile,
   useUserProfile,
+  useUserRole,
 } from "../hooks/user-profile";
 import { toast } from "react-toastify";
 import { VIEW_IMAGE } from "@/constants/api-type";
@@ -42,10 +43,34 @@ type PasswordFormValues = {
   confirmPassword: string;
 };
 
+interface Permission {
+  id: number;
+  name: string;
+  description: string;
+  active: boolean;
+  group_id: number;
+}
+
+interface Group {
+  id: number;
+  name: string;
+  description: string;
+  permissions: Permission[];
+}
+export interface RoleDetail {
+  role_id: number;
+  role_name: string;
+  description: string;
+  groups: Group[];
+}
+
 // ✅ Validation cho từng form
 const profileSchema = yup.object({
   fullName: yup.string().required("Họ và tên không được để trống"),
-  email: yup.string().email("Email không hợp lệ").required("Email không được để trống"),
+  email: yup
+    .string()
+    .email("Email không hợp lệ")
+    .required("Email không được để trống"),
   phoneNumber: yup.string().required("Số điện thoại không được để trống"),
   birthday: yup.string().required("Nhập ngày sinh"),
 });
@@ -56,7 +81,10 @@ const passwordSchema = yup.object({
     .string()
     .min(8, "Mật khẩu mới phải có ít nhất 8 ký tự")
     .max(20, "Mật khẩu mới không được vượt quá 20 ký tự")
-    .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/, "Mật khẩu phải chứa ít nhất 1 chữ cái và 1 chữ số")
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
+      "Mật khẩu phải chứa ít nhất 1 chữ cái và 1 chữ số"
+    )
     .required("Vui lòng nhập mật khẩu mới"),
   confirmPassword: yup
     .string()
@@ -69,6 +97,7 @@ export default function UserProfileForm() {
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
   const { data } = useUserProfile();
+  const { data: listRole } = useUserRole();
   const { mutate: updateProfile } = useUpdateUserProfile();
   const { mutate: changePassword } = useUpdatePassword();
 
@@ -140,27 +169,24 @@ export default function UserProfileForm() {
 
     const preview = await getBase64(file);
     setProfileImage(preview);
-    setProfileFile(file);
-    return false;
+    await uploadAvatar(file);
+    toast.success("Upload avatar thành công");
   };
 
   // ✅ Submit Profile
   const onSubmitProfile: SubmitHandler<ProfileFormValues> = async (values) => {
     try {
-      if (profileFile) {
-        await uploadAvatar(profileFile);
-        toast.success("Upload avatar thành công");
-      }
       updateProfile(
         {
           full_name: values.fullName,
           email: values.email,
           phone_number: values.phoneNumber,
           birthday: values.birthday,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         {
-          onSuccess: () => toast.success("Cập nhật thông tin cá nhân thành công!"),
+          onSuccess: () =>
+            toast.success("Cập nhật thông tin cá nhân thành công!"),
           onError: () => toast.error("Cập nhật thất bại"),
         }
       );
@@ -170,12 +196,14 @@ export default function UserProfileForm() {
   };
 
   // ✅ Submit Password
-  const onSubmitPassword: SubmitHandler<PasswordFormValues> = async (values) => {
+  const onSubmitPassword: SubmitHandler<PasswordFormValues> = async (
+    values
+  ) => {
     changePassword(
       {
         old_password: values.currentPassword,
         new_password: values.newPassword,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       {
         onSuccess: () => {
@@ -197,7 +225,7 @@ export default function UserProfileForm() {
       </Card> */}
 
       <Tabs
-        className="bg-white"
+        className="bg-white !p-5"
         defaultActiveKey="1"
         items={[
           {
@@ -205,7 +233,7 @@ export default function UserProfileForm() {
             label: "Thông tin cơ bản",
             children: (
               <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
-                <Card>
+                <Card className="!border-0 !shadow-none">
                   <div className="flex items-start flex-col gap-6">
                     <div className="flex flex-row items-center gap-2">
                       <Avatar
@@ -215,16 +243,25 @@ export default function UserProfileForm() {
                         className="bg-gray-200"
                       />
                       <div className="flex flex-col justify-center items-center">
-                        <Upload showUploadList={false} beforeUpload={handleBeforeUpload}>
-                          <Button icon={<UploadOutlined />}>Thay đổi ảnh đại diện</Button>
+                        <Upload
+                          showUploadList={false}
+                          beforeUpload={handleBeforeUpload}
+                        >
+                          <Button icon={<UploadOutlined />}>
+                            Thay đổi ảnh đại diện
+                          </Button>
                         </Upload>
-                        <p className="text-[12px] text-gray-500">JPG, GIF hoặc PNG. Tối đa 2MB.</p>
+                        <p className="text-[12px] text-gray-500">
+                          JPG, GIF hoặc PNG. Tối đa 2MB.
+                        </p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6 w-full">
                       <div>
-                        <label className="block mb-1 font-medium">Họ và Tên</label>
+                        <label className="block mb-1 font-medium">
+                          Họ và Tên
+                        </label>
                         <Controller
                           name="fullName"
                           control={profileControl}
@@ -237,7 +274,9 @@ export default function UserProfileForm() {
                         )}
                       </div>
                       <div>
-                        <label className="block mb-1 font-medium">Địa chỉ email</label>
+                        <label className="block mb-1 font-medium">
+                          Địa chỉ email
+                        </label>
                         <Controller
                           name="email"
                           control={profileControl}
@@ -245,7 +284,9 @@ export default function UserProfileForm() {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 font-medium">Số điện thoại</label>
+                        <label className="block mb-1 font-medium">
+                          Số điện thoại
+                        </label>
                         <Controller
                           name="phoneNumber"
                           control={profileControl}
@@ -258,7 +299,9 @@ export default function UserProfileForm() {
                         )}
                       </div>
                       <div>
-                        <label className="block mb-1 font-medium">Ngày sinh</label>
+                        <label className="block mb-1 font-medium">
+                          Ngày sinh
+                        </label>
                         <Controller
                           name="birthday"
                           control={profileControl}
@@ -266,9 +309,12 @@ export default function UserProfileForm() {
                             <DatePicker
                               {...field}
                               format="YYYY-MM-DD"
+                              placeholder="YYYY-MM-DD"
                               value={field.value ? dayjs(field.value) : null}
                               onChange={(date) =>
-                                field.onChange(date ? date.format("YYYY-MM-DD") : "")
+                                field.onChange(
+                                  date ? date.format("YYYY-MM-DD") : ""
+                                )
                               }
                               className="w-full"
                             />
@@ -281,7 +327,7 @@ export default function UserProfileForm() {
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-end mt-4 w-full">
                       <Button type="primary" htmlType="submit" className="px-6">
                         Lưu thông tin
                       </Button>
@@ -295,42 +341,66 @@ export default function UserProfileForm() {
             key: "2",
             label: "Vai trò & Quyền hạn",
             children: (
-              <Card>
+              // <Card className="!border-0 !shadow-none">
+              //   <p className="mb-4">
+              //     Vai trò hiện tại của bạn là:{" "}
+              //     <span className="text-blue-600 font-semibold">Super Administrator</span>
+              //   </p>
+              //   <div className="grid grid-cols-2 gap-4">
+              //     <div>
+              //       <p className="font-medium mb-2">Quản lý Đơn hàng</p>
+              //       <Checkbox defaultChecked disabled>
+              //         Xem tất cả đơn hàng
+              //       </Checkbox>
+              //       <br />
+              //       <Checkbox defaultChecked disabled>
+              //         Tạo/Sửa/Hủy đơn hàng
+              //       </Checkbox>
+              //     </div>
+              //     <div>
+              //       <p className="font-medium mb-2">Quản lý Người dùng</p>
+              //       <Checkbox defaultChecked disabled>
+              //         Quản lý khách hàng
+              //       </Checkbox>
+              //       <br />
+              //       <Checkbox defaultChecked disabled>
+              //         Quản lý nhân viên & vai trò
+              //       </Checkbox>
+              //     </div>
+              //     <div>
+              //       <p className="font-medium mb-2">Quản lý Tài chính</p>
+              //       <Checkbox disabled>Duyệt lệnh nạp/rút tiền</Checkbox>
+              //       <br />
+              //       <Checkbox disabled>Quản lý công nợ & đối soát</Checkbox>
+              //     </div>
+              //     <div>
+              //       <p className="font-medium mb-2">Cài đặt hệ thống</p>
+              //       <Checkbox disabled>Toàn quyền cài đặt</Checkbox>
+              //     </div>
+              //   </div>
+              // </Card>
+              <Card className="!border-0 !shadow-none">
                 <p className="mb-4">
                   Vai trò hiện tại của bạn là:{" "}
-                  <span className="text-blue-600 font-semibold">Super Administrator</span>
+                  <span className="text-blue-600 font-semibold">
+                    {listRole && listRole.role_name}
+                  </span>
                 </p>
+
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="font-medium mb-2">Quản lý Đơn hàng</p>
-                    <Checkbox defaultChecked disabled>
-                      Xem tất cả đơn hàng
-                    </Checkbox>
-                    <br />
-                    <Checkbox defaultChecked disabled>
-                      Tạo/Sửa/Hủy đơn hàng
-                    </Checkbox>
-                  </div>
-                  <div>
-                    <p className="font-medium mb-2">Quản lý Người dùng</p>
-                    <Checkbox defaultChecked disabled>
-                      Quản lý khách hàng
-                    </Checkbox>
-                    <br />
-                    <Checkbox defaultChecked disabled>
-                      Quản lý nhân viên & vai trò
-                    </Checkbox>
-                  </div>
-                  <div>
-                    <p className="font-medium mb-2">Quản lý Tài chính</p>
-                    <Checkbox disabled>Duyệt lệnh nạp/rút tiền</Checkbox>
-                    <br />
-                    <Checkbox disabled>Quản lý công nợ & đối soát</Checkbox>
-                  </div>
-                  <div>
-                    <p className="font-medium mb-2">Cài đặt hệ thống</p>
-                    <Checkbox disabled>Toàn quyền cài đặt</Checkbox>
-                  </div>
+                  {listRole &&
+                    listRole.groups.map((group) => (
+                      <div key={group.id}>
+                        <p className="font-medium mb-2">{group.description}</p>
+                        {group.permissions.map((perm) => (
+                          <div key={perm.id}>
+                            <Checkbox checked={perm.active} disabled>
+                              {perm.description}
+                            </Checkbox>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
                 </div>
               </Card>
             ),
@@ -340,10 +410,12 @@ export default function UserProfileForm() {
             label: "Đổi mật khẩu",
             children: (
               <form onSubmit={handlePasswordSubmit(onSubmitPassword)}>
-                <Card>
-                  <div className="flex flex-col gap-3 w-1/3">
+                <Card className="!border-0 !shadow-none">
+                  <div className="flex flex-col gap-3 w-2/4">
                     <div>
-                      <label className="block mb-1 font-medium">Mật khẩu hiện tại</label>
+                      <label className="block mb-1 font-medium">
+                        Mật khẩu hiện tại
+                      </label>
                       <Controller
                         name="currentPassword"
                         control={passwordControl}
@@ -356,7 +428,9 @@ export default function UserProfileForm() {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-1 font-medium">Mật khẩu mới</label>
+                      <label className="block mb-1 font-medium">
+                        Mật khẩu mới
+                      </label>
                       <Controller
                         name="newPassword"
                         control={passwordControl}
@@ -369,7 +443,9 @@ export default function UserProfileForm() {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-1 font-medium">Xác nhận mật khẩu mới</label>
+                      <label className="block mb-1 font-medium">
+                        Xác nhận mật khẩu mới
+                      </label>
                       <Controller
                         name="confirmPassword"
                         control={passwordControl}

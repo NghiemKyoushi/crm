@@ -27,7 +27,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   SYSTEM_SETTINGS: "Cài đặt Hệ thống",
 };
 
-function renderCategoryName(code: string) {
+export function renderCategoryName(code: string) {
   return CATEGORY_LABELS[code] || code || "Chưa phân loại";
 }
 
