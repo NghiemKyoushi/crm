@@ -8,12 +8,15 @@ import {
   bankAccountModel,
   CustomerDetail,
 } from "@/types/customer-type";
+import AddSalesModal, { Employee } from "./modal/modal-sales-add";
 
 interface OverviewTabProps {
   customer: CustomerDetail;
   handleSubmitDataAddressDetail: (data: addressModel) => void;
   handleSubmitDataBankDetail: (data: bankAccountModel) => void;
-  handleSetDefaultAddress: (addressId: string) => void; // callback set mặc định
+  handleSetDefaultAddress: (addressId: string) => void;
+  handleSetDefaultBank: (bankId: string) => void;
+  handleChangeSaleAdd: (saleInfo: Employee) => void;
 }
 
 export default function OverviewTab(props: OverviewTabProps) {
@@ -22,14 +25,22 @@ export default function OverviewTab(props: OverviewTabProps) {
     handleSubmitDataAddressDetail,
     handleSubmitDataBankDetail,
     handleSetDefaultAddress,
+    handleChangeSaleAdd,
+    handleSetDefaultBank,
   } = props;
   const { t } = useTranslation();
   const [isOpenAddress, setIsOpenAddress] = useState(false);
   const [isOpenBank, setIsOpenBank] = useState(false);
   const [isOpenSetDefault, setIsOpenSetDefault] = useState(false);
+  const [isOpenSaleAdd, setIsOpenSaleAdd] = useState(false);
+  const [isOpenSetDefaultBank, setIsOpenSetDefaultBank] = useState(false);
 
   const [selectedDefaultAddress, setSelectedDefaultAddress] = useState(
     customer.shipping_addresses.find((a) => a.is_default)?.id || ""
+  );
+
+  const [selectedDefaultBank, setSelectedDefaultBank] = useState(
+    customer.bank_accounts.find((a) => a.default)?.id || ""
   );
 
   const handleSubmitDataAddress = (data: addressModel) => {
@@ -45,10 +56,25 @@ export default function OverviewTab(props: OverviewTabProps) {
       setIsOpenAddress(false);
     }, 1000);
   };
+
   const handleChangeDefaultAddress = () => {
     if (selectedDefaultAddress) {
       handleSetDefaultAddress(selectedDefaultAddress.toString());
       setIsOpenSetDefault(false);
+    }
+  };
+
+  const handleChangeDefaultBank = () => {
+    if (selectedDefaultAddress) {
+      handleSetDefaultBank(selectedDefaultBank.toString());
+      setIsOpenSetDefaultBank(false);
+    }
+  };
+
+  const handleChangeSaleResponsibiity = (saleInfo: Employee) => {
+    if (saleInfo) {
+      setIsOpenSaleAdd(false);
+      handleChangeSaleAdd(saleInfo);
     }
   };
 
@@ -87,25 +113,25 @@ export default function OverviewTab(props: OverviewTabProps) {
               <span className="font-semibold">
                 {t("customerManage.customerOverview.addressBook")}
               </span>
-             <div>
-             <Button
-                onClick={() => setIsOpenAddress(true)}
-                type="link"
-                className="text-blue-600 p-0"
-              >
-                {t("customerManage.customerOverview.addAddress")}
-              </Button>
-
-              {customer.shipping_addresses.length > 0 && (
+              <div>
                 <Button
-                  onClick={() => setIsOpenSetDefault(true)}
+                  onClick={() => setIsOpenAddress(true)}
                   type="link"
                   className="text-blue-600 p-0"
                 >
-                  +{t("customerManage.customerOverview.addDefaultAddress")}
+                  {t("customerManage.customerOverview.addAddress")}
                 </Button>
-              )}
-             </div>
+
+                {customer.shipping_addresses.length > 0 && (
+                  <Button
+                    onClick={() => setIsOpenSetDefault(true)}
+                    type="link"
+                    className="text-blue-600 p-0"
+                  >
+                    +{t("customerManage.customerOverview.addDefaultAddress")}
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="text-sm">
               <div className="font-bold">Nhà riêng</div>
@@ -139,23 +165,40 @@ export default function OverviewTab(props: OverviewTabProps) {
               >
                 {t("customerManage.customerOverview.addBankAccount")}
               </Button>
+
+              {customer.bank_accounts.length > 0 && (
+                <Button
+                  onClick={() => setIsOpenSetDefaultBank(true)}
+                  type="link"
+                  className="text-blue-600 p-0"
+                >
+                  {/* +{t("customerManage.customerOverview.addDefaultAddress")} */}
+                  + Thêm tài khoản mặc định
+                </Button>
+              )}
             </div>
             <div className="text-sm">
-              {customer.shipping_addresses.length !== 0 && (
-                <>
-                  <div className="font-bold">
-                    {customer.bank_accounts.at(-1)?.bank_name}
-                  </div>
-                  <div>
-                    {t("customerManage.customerOverview.accountNumber")}:{" "}
-                    {customer.bank_accounts.at(-1)?.account_number}
-                  </div>
-                  <div>
-                    {t("customerManage.customerOverview.accountOwner")}:{" "}
-                    {customer.bank_accounts.at(-1)?.account_holder_name}
-                  </div>
-                </>
-              )}
+              {customer.bank_accounts.length > 0 &&
+                (() => {
+                  const defaultBank = customer.bank_accounts.find(
+                    (bank) => bank.default
+                  );
+                  return defaultBank ? (
+                    <>
+                      <div className="font-bold">
+                        {defaultBank.bank_name}
+                      </div>
+                      <div>
+                        {t("customerManage.customerOverview.accountNumber")}:{" "}
+                        {defaultBank.account_number}
+                      </div>
+                      <div>
+                        {t("customerManage.customerOverview.accountOwner")}:{" "}
+                        {defaultBank.account_holder_name}
+                      </div>
+                    </>
+                  ) : null;
+                })()}
             </div>
           </div>
         </div>
@@ -180,7 +223,11 @@ export default function OverviewTab(props: OverviewTabProps) {
                 {customer.sale_profile?.job}
               </div>
             </div>
-            <Button type="link" className="text-blue-600 p-0">
+            <Button
+              type="link"
+              className="text-blue-600 p-0"
+              onClick={() => setIsOpenSaleAdd(true)}
+            >
               {t("customerManage.customerOverview.change")}
             </Button>
           </div>
@@ -196,13 +243,18 @@ export default function OverviewTab(props: OverviewTabProps) {
         open={isOpenBank}
         onClose={() => setIsOpenBank(false)}
       />
+      <AddSalesModal
+        open={isOpenSaleAdd}
+        onClose={() => setIsOpenSaleAdd(false)}
+        onSubmit={handleChangeSaleResponsibiity}
+      />
       <Modal
         title={t("customerManage.customerOverview.addDefaultAddress")}
         open={isOpenSetDefault}
         onCancel={() => setIsOpenSetDefault(false)}
         onOk={handleChangeDefaultAddress}
       >
-        <div className="max-h-64 overflow-y-auto">
+        <div className="!max-h-72 !min-h-72 overflow-y-auto">
           <Radio.Group
             onChange={(e) => setSelectedDefaultAddress(e.target.value)}
             value={selectedDefaultAddress}
@@ -214,6 +266,36 @@ export default function OverviewTab(props: OverviewTabProps) {
                   <div className="font-medium">{addr.address}</div>
                   <div className="text-xs text-gray-500">
                     {addr.phone_number}
+                  </div>
+                </div>
+              </Radio>
+            ))}
+          </Radio.Group>
+        </div>
+      </Modal>
+
+      <Modal
+        title={t("customerManage.customerOverview.addDefaultAddress")}
+        open={isOpenSetDefaultBank}
+        onCancel={() => setIsOpenSetDefaultBank(false)}
+        onOk={handleChangeDefaultBank}
+      >
+        <div className="!max-h-72 !min-h-72 overflow-y-auto">
+          <Radio.Group
+            onChange={(e) => {
+              setSelectedDefaultBank(e.target.value);
+            }}
+            value={selectedDefaultBank}
+            className="!flex !flex-col !gap-2"
+          >
+            {customer.bank_accounts.map((addr) => (
+              <Radio key={addr.id} value={addr.id}>
+                <div>
+                  <div className="font-medium">
+                    {addr.account_holder_name}-{addr.bank_name}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {addr.account_number}
                   </div>
                 </div>
               </Radio>

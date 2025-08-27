@@ -2,17 +2,26 @@ import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
 import {
   getUserProfile,
+  getUserRole,
   updatePassword,
   updateUserProfile,
 } from "@/services/user";
+import { RoleRequest } from "@/types/roles";
 import { Password, UserProfile } from "@/types/user";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { RoleDetail } from "../components/user-profile-form";
 
 export const useUserProfile = () => {
   return useQuery<UserProfile>({
     queryKey: ["userProfile"],
     queryFn: getUserProfile,
     // staleTime: 5 * 60 * 1000,    // cache 5 phút
+  });
+};
+export const useUserRole = () => {
+  return useQuery<RoleDetail>({
+    queryKey: ["userRole"],
+    queryFn: getUserRole,
   });
 };
 

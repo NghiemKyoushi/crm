@@ -38,5 +38,8 @@ export const API_TYPE_CONST = {
   LOCK_ACCOUNT: `${FEATURE}/admin/users/deactivate/`,
   UNLOCK_ACCOUNT: `${FEATURE}/admin/users/activate/`,
   RESET_PASSWORD: `${FEATURE}/admin/users/reset-password/`,
-  ADD_DEFAULT_ADDRESS: `${FEATURE}/admin/customer/set-default/`
+  ADD_DEFAULT_ADDRESS: `${FEATURE}/admin/customer/set-default/`,
+  ADD_DEFAULT_BANK: `${FEATURE}/admin/customer/set-default-banking/`,
+  ROLE_USER: `${PROFILE}/user/role`
+
 } as const;

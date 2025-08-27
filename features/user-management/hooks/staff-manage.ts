@@ -1,10 +1,10 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateRole } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateRole } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
-import { Role, RoleRequest, RoleResponse } from "@/types/roles";
+import { Role, RoleRequest } from "@/types/roles";
 import { addressModel, bankAccountModel, CustomerDetail, CustomerNoteParams, CustomerParam, CustomerResponse } from "@/types/customer-type";
 
 export const useListStaff = (params: getListStaffParams) => {
@@ -51,6 +51,13 @@ export const useUpdateCateGoryCus = () => {
   return useMutation({
     mutationFn: ({ param, id }: { param: CategoryRequest; id: string }) =>
       updateCateCustomer(param, id),
+  });
+};
+
+export const useDeleteCateGoryCus = () => {
+  return useMutation({
+    mutationFn: ({ id }: {id: string }) =>
+      deleteCateCustomer(id),
   });
 };
 
@@ -130,6 +137,13 @@ export const useDefaultAddress = () => {
   return useMutation({
     mutationFn: ({ address_id, id }: { address_id: number; id: string }) =>
       addDefaultAddress(address_id, id),
+  });
+};
+
+export const useDefaultBank = () => {
+  return useMutation({
+    mutationFn: ({ bank_id, id }: { bank_id: number; id: string }) =>
+      addDefaultBank(bank_id, id),
   });
 };
 

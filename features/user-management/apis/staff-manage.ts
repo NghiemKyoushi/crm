@@ -58,6 +58,11 @@ export const updateCateCustomer = async (params: CategoryRequest, id: string) =>
   return res.data;
 };
 
+export const deleteCateCustomer = async ( id: string) => {
+  const res = await api.delete(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`);
+  return res.data;
+};
+
 export const getListSaleStaff = async (params: getPagination) => {
   const res = await api.get(API_TYPE_CONST.LIST_SALE, { params });
   return res.data.data;
@@ -101,6 +106,11 @@ export const addAddressCustomer = async (body: addressModel, id:string) => {
 
 export const addDefaultAddress = async (address_id: number, id:string) => {
   const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_ADDRESS}${id}`, {address_id});
+  return res.data.data;
+};
+
+export const addDefaultBank = async (bank_id: number, id:string) => {
+  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_BANK}${id}`, {bank_id});
   return res.data.data;
 };
 

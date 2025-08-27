@@ -16,12 +16,15 @@ import {
 import {
   useAddAddress,
   useAddBank,
+  useCustomerForSale,
   useDefaultAddress,
+  useDefaultBank,
   useDetailCustomer,
 } from "@/features/user-management/hooks/staff-manage";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDetailCustomer } from "@/features/user-management/apis/staff-manage";
+import { Employee } from "./tab/modal/modal-sales-add";
 
 interface CustomerDetailModalProps {
   visible: boolean;
@@ -41,6 +44,9 @@ export default function CustomerDetailModal({
   const addBankMutation = useAddBank();
   const addAddressMutation = useAddAddress();
   const addDefaultAddressMutation = useDefaultAddress();
+  const addDefaultBankMutation = useDefaultBank();
+  const customerForSaleMutation = useCustomerForSale();
+
   const queryClient = useQueryClient();
   const [customer, setCustomer] = useState<CustomerDetail>();
   useEffect(() => {
@@ -59,9 +65,10 @@ export default function CustomerDetailModal({
           });
           setCustomer(updatedCustomer);
         },
-        onError: () => {
-          toast.error("Tạo địa chỉ mới thất bại");
-        },
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
       }
     );
   };
@@ -78,9 +85,10 @@ export default function CustomerDetailModal({
           });
           setCustomer(updatedCustomer);
         },
-        onError: () => {
-          toast.error("Thêm tài khoản mới thất bại");
-        },
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
       }
     );
   };
@@ -97,9 +105,50 @@ export default function CustomerDetailModal({
           });
           setCustomer(updatedCustomer);
         },
-        onError: () => {
-          toast.error("Cập nhật địa chỉ mặc định thất bại");
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
+      }
+    );
+  };
+
+  const handleSetDefaultBank = (bankId: string) => {
+    addDefaultBankMutation.mutate(
+      { bank_id: +bankId, id: selectedId },
+      {
+        onSuccess: async () => {
+          toast.success("Cập nhật tài khoản ngân hàng mặc định thành công!");
+          const updatedCustomer = await queryClient.fetchQuery({
+            queryKey: ["detailCustomer", selectedId],
+            queryFn: () => getDetailCustomer(selectedId),
+          });
+          setCustomer(updatedCustomer);
         },
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
+      }
+    );
+  };
+
+  const handleChangeSaleAdd = (saleinfo: Employee) => {
+    customerForSaleMutation.mutate(
+      { customer_id: +selectedId, sale_id: +saleinfo.id },
+      {
+        onSuccess: async () => {
+          toast.success("Cập nhật địa chỉ mặc định thành công!");
+          const updatedCustomer = await queryClient.fetchQuery({
+            queryKey: ["detailCustomer", selectedId],
+            queryFn: () => getDetailCustomer(selectedId),
+          });
+          setCustomer(updatedCustomer);
+        },
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
       }
     );
   };
@@ -134,6 +183,8 @@ export default function CustomerDetailModal({
               handleSubmitDataBankDetail={handleSubmitDataBankDetail}
               customer={customer}
               handleSetDefaultAddress={handleSetDefaultAddress}
+              handleSetDefaultBank = {handleSetDefaultBank}
+              handleChangeSaleAdd={handleChangeSaleAdd}
             />
           )}
         </TabPane>
