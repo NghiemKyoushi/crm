@@ -140,17 +140,13 @@ export default function UserProfileForm() {
 
     const preview = await getBase64(file);
     setProfileImage(preview);
-    setProfileFile(file);
-    return false;
+    await uploadAvatar(file);
+    toast.success("Upload avatar thành công");
   };
 
   // ✅ Submit Profile
   const onSubmitProfile: SubmitHandler<ProfileFormValues> = async (values) => {
     try {
-      if (profileFile) {
-        await uploadAvatar(profileFile);
-        toast.success("Upload avatar thành công");
-      }
       updateProfile(
         {
           full_name: values.fullName,
@@ -197,7 +193,7 @@ export default function UserProfileForm() {
       </Card> */}
 
       <Tabs
-        className="bg-white"
+        className="bg-white !p-5"
         defaultActiveKey="1"
         items={[
           {
@@ -205,7 +201,7 @@ export default function UserProfileForm() {
             label: "Thông tin cơ bản",
             children: (
               <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
-                <Card>
+                <Card className="!border-0 !shadow-none">
                   <div className="flex items-start flex-col gap-6">
                     <div className="flex flex-row items-center gap-2">
                       <Avatar
@@ -266,6 +262,7 @@ export default function UserProfileForm() {
                             <DatePicker
                               {...field}
                               format="YYYY-MM-DD"
+                              placeholder="YYYY-MM-DD"
                               value={field.value ? dayjs(field.value) : null}
                               onChange={(date) =>
                                 field.onChange(date ? date.format("YYYY-MM-DD") : "")
@@ -281,7 +278,7 @@ export default function UserProfileForm() {
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-end mt-4 w-full">
                       <Button type="primary" htmlType="submit" className="px-6">
                         Lưu thông tin
                       </Button>
@@ -295,7 +292,7 @@ export default function UserProfileForm() {
             key: "2",
             label: "Vai trò & Quyền hạn",
             children: (
-              <Card>
+              <Card className="!border-0 !shadow-none">
                 <p className="mb-4">
                   Vai trò hiện tại của bạn là:{" "}
                   <span className="text-blue-600 font-semibold">Super Administrator</span>
@@ -340,8 +337,8 @@ export default function UserProfileForm() {
             label: "Đổi mật khẩu",
             children: (
               <form onSubmit={handlePasswordSubmit(onSubmitPassword)}>
-                <Card>
-                  <div className="flex flex-col gap-3 w-1/3">
+                <Card className="!border-0 !shadow-none">
+                  <div className="flex flex-col gap-3 w-2/4">
                     <div>
                       <label className="block mb-1 font-medium">Mật khẩu hiện tại</label>
                       <Controller

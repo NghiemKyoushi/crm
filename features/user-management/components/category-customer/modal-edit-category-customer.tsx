@@ -21,29 +21,34 @@ export default function AddCustomerTypeModal({
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<CategoryRequest>({
     defaultValues: {
       category_name: "",
       description: "",
+      color: "#000000",
     },
   });
 
-  // Khi mở modal hoặc initialData thay đổi thì reset form
   useEffect(() => {
     if (initialData) {
-      reset(initialData); // set giá trị để edit
+      reset({
+        ...initialData,
+        color: initialData.color || "#000000", 
+      });
     } else {
-      reset({ category_name: "", description: "" });
+      reset({ category_name: "", description: "", color: "#000000" });
     }
   }, [initialData, reset, open]);
 
   const submitHandler = (data: CategoryRequest) => {
-    onSubmit(data, !!initialData); // 👈 truyền flag edit/create
+    onSubmit(data, !!initialData); 
     reset();
     onClose();
   };
 
   const isEdit = !!initialData;
+  const pickedColor = watch("color"); 
 
   return (
     <Modal
@@ -89,6 +94,23 @@ export default function AddCustomerTypeModal({
               {errors.description.message}
             </p>
           )}
+        </div>
+
+        {/* Pick color */}
+        <div>
+          <label className="block mb-1 font-medium">Chọn màu</label>
+          <Controller
+            name="color"
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="color"
+                {...field}
+                style={{ width: "60px", height: "40px", padding: 0, border:'none' }}
+              />
+            )}
+          />
+          <p className="mt-2 text-sm">Mã màu: <span className="font-mono">{pickedColor}</span></p>
         </div>
 
         {/* Buttons */}

@@ -31,7 +31,7 @@ export function useUpdatePassword() {
 export const uploadAvatar = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("type", "1");
+    // formData.append("type", "1");
   
     const uploadRes = await api.post(API_TYPE_CONST.UPLOAD_IMAGE, formData, {
       headers: {

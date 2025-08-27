@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ColumnsType } from "antd/es/table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,7 +8,7 @@ import {
   faTrash,
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { Tag, Button, Dropdown, Menu } from "antd";
+import { Tag, Button, Dropdown, Menu, Select } from "antd";
 import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useState } from "react";
@@ -15,6 +16,7 @@ import PopupConfirm from "@/components/PopupConfirm";
 import {
   useCreateNewStaff,
   useDetailStaff,
+  useListRole,
   useListStaff,
 } from "../../hooks/staff-manage";
 import { NewUserType, UserData } from "@/types/staff-manage-type";
@@ -39,6 +41,7 @@ export default function StaffManageTable() {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const { data: listRole } = useListRole();
   const { data: detailStaff } = useDetailStaff(selectedId);
 
   const { data } = useListStaff({
@@ -185,20 +188,37 @@ export default function StaffManageTable() {
       title: "Vai trò",
       dataIndex: "role_name",
       key: "role_name",
-      render: (role: string) => (
-        <Dropdown
-          menu={{
-            items: [
-              { key: "sales", label: "Sales" },
-              { key: "accounting", label: "Kế toán" },
-              { key: "warehouse", label: "Nhân viên kho" },
-              { key: "admin", label: "Admin" },
-            ],
-          }}
-        >
-          <span className="cursor-pointer">{role}</span>
-        </Dropdown>
-      ),
+      render: (role: string, record: UserData) => {
+        if (listRole) {
+          return (
+            <Select
+            size="middle" 
+              value={role} // 👈 giá trị đang hiển thị
+              style={{ width: 160 }}
+              onChange={(value, option) => {
+                console.log('value', value);
+                 if (value) {
+                  updateStaffMutation.mutate({
+                    param: {
+                      email: record.email,
+                      full_name: record.full_name,
+                      active: record.active,
+                      phone_number: record.phone_number,
+                      role_id: value,
+                    },
+                    id: record.user_id.toString(),
+                  });
+                }
+              }}
+              options={listRole.map((r: any) => ({
+                value: r.role_id,     // 👈 dùng role_id làm value
+                label: r.role_name,   // 👈 hiển thị role_name
+              }))}
+            />
+          );
+        }
+        return null;
+      },
     },
     {
       title: "Trạng thái",
