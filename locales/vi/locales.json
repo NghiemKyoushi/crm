@@ -63,7 +63,7 @@
       "contactInfo": "Thông tin liên hệ",
       "assignedStaff": "Nhân viên phụ trách",
       "change": "Thay đổi",
-      "addDefaultAddress":"Thêm địa chỉ mặc định"
+      "addDefaultAddress": "Thêm địa chỉ mặc định"
     },
     "detailTitle": "Chi tiết Khách hàng",
     "tabs": {
@@ -95,6 +95,34 @@
     "roleAccounting": "Kế toán",
     "roleWarehouse": "Nhân viên kho",
     "cancel": "Hủy",
-    "save": "Lưu"
-  }
+    "save": "Lưu",
+    "tableColumn": {
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "phoneNumber": "Số điện thoại",
+      "role": "Vai trò",
+      "roles": {
+        "sales": "Sales",
+        "accounting": "Kế toán",
+        "warehouse": "Nhân viên kho",
+        "admin": "Admin"
+      },
+      "status": "Trạng thái",
+      "statusActive": "Hoạt động",
+      "statusInactive": "Đã khóa",
+      "actions": "Hành động",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa"
+    }
+  },
+  "customerCate": {
+      "name": "Tên Loại",
+      "description": "Mô tả",
+      "customerCount": "Số lượng KH",
+      "actions": "Hành động",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "editPolicy": "Sửa Chính sách",
+      "editCategory": "Chỉnh sửa phân loại"
+    }
 }

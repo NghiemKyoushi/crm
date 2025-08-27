@@ -8,12 +8,14 @@ import {
   bankAccountModel,
   CustomerDetail,
 } from "@/types/customer-type";
+import AddSalesModal, { Employee } from "./modal/modal-sales-add";
 
 interface OverviewTabProps {
   customer: CustomerDetail;
   handleSubmitDataAddressDetail: (data: addressModel) => void;
   handleSubmitDataBankDetail: (data: bankAccountModel) => void;
-  handleSetDefaultAddress: (addressId: string) => void; // callback set mặc định
+  handleSetDefaultAddress: (addressId: string) => void; 
+  handleChangeSaleAdd: (saleInfo: Employee) => void; 
 }
 
 export default function OverviewTab(props: OverviewTabProps) {
@@ -22,11 +24,13 @@ export default function OverviewTab(props: OverviewTabProps) {
     handleSubmitDataAddressDetail,
     handleSubmitDataBankDetail,
     handleSetDefaultAddress,
+    handleChangeSaleAdd
   } = props;
   const { t } = useTranslation();
   const [isOpenAddress, setIsOpenAddress] = useState(false);
   const [isOpenBank, setIsOpenBank] = useState(false);
   const [isOpenSetDefault, setIsOpenSetDefault] = useState(false);
+  const [isOpenSaleAdd, setIsOpenSaleAdd] = useState(false);
 
   const [selectedDefaultAddress, setSelectedDefaultAddress] = useState(
     customer.shipping_addresses.find((a) => a.is_default)?.id || ""
@@ -45,10 +49,20 @@ export default function OverviewTab(props: OverviewTabProps) {
       setIsOpenAddress(false);
     }, 1000);
   };
+
   const handleChangeDefaultAddress = () => {
     if (selectedDefaultAddress) {
       handleSetDefaultAddress(selectedDefaultAddress.toString());
       setIsOpenSetDefault(false);
+    }
+  };
+
+  const handleChangeSaleResponsibiity = (saleInfo: Employee) => {
+    if (saleInfo) {
+      console.log('saleInfo', saleInfo);
+            setIsOpenSaleAdd(false);
+
+      handleChangeSaleAdd(saleInfo);
     }
   };
 
@@ -172,7 +186,7 @@ export default function OverviewTab(props: OverviewTabProps) {
 
           <div className="bg-white shadow rounded p-4 flex justify-between items-center">
             <div>
-              <div className="font-semibold">
+              <div className="font-semibold" >
                 {t("customerManage.customerOverview.assignedStaff")}
               </div>
               <div className="text-sm">{customer.sale_profile?.full_name}</div>
@@ -180,7 +194,7 @@ export default function OverviewTab(props: OverviewTabProps) {
                 {customer.sale_profile?.job}
               </div>
             </div>
-            <Button type="link" className="text-blue-600 p-0">
+            <Button type="link" className="text-blue-600 p-0" onClick={()=> setIsOpenSaleAdd(true)}>
               {t("customerManage.customerOverview.change")}
             </Button>
           </div>
@@ -195,6 +209,11 @@ export default function OverviewTab(props: OverviewTabProps) {
         onSubmit={handleSubmitDataBank}
         open={isOpenBank}
         onClose={() => setIsOpenBank(false)}
+      />
+      <AddSalesModal
+          open={isOpenSaleAdd}
+          onClose={()=> setIsOpenSaleAdd(false)}
+          onSubmit={handleChangeSaleResponsibiity}
       />
       <Modal
         title={t("customerManage.customerOverview.addDefaultAddress")}

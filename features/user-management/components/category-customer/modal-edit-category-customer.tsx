@@ -2,6 +2,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Modal, Button, Input } from "antd";
 import { CategoryRequest } from "@/types/category-customer";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface AddCustomerTypeModalProps {
   open: boolean;
@@ -16,6 +17,7 @@ export default function AddCustomerTypeModal({
   onSubmit,
   initialData,
 }: AddCustomerTypeModalProps) {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -28,10 +30,9 @@ export default function AddCustomerTypeModal({
     },
   });
 
-  // Khi mở modal hoặc initialData thay đổi thì reset form
   useEffect(() => {
     if (initialData) {
-      reset(initialData); // set giá trị để edit
+      reset(initialData); 
     } else {
       reset({ category_name: "", description: "" });
     }
@@ -60,7 +61,7 @@ export default function AddCustomerTypeModal({
     >
       <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Tên Loại</label>
+          <label className="block mb-1 font-medium">{t("customerCate.name")}</label>
           <Controller
             name="category_name"
             control={control}

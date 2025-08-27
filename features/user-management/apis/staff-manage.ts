@@ -58,6 +58,11 @@ export const updateCateCustomer = async (params: CategoryRequest, id: string) =>
   return res.data;
 };
 
+export const deleteCateCustomer = async ( id: string) => {
+  const res = await api.delete(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`);
+  return res.data;
+};
+
 export const getListSaleStaff = async (params: getPagination) => {
   const res = await api.get(API_TYPE_CONST.LIST_SALE, { params });
   return res.data.data;

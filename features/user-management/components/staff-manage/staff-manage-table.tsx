@@ -27,6 +27,7 @@ import {
   unlockAcount,
   updateStaff,
 } from "../../apis/staff-manage";
+import { useTranslation } from "react-i18next";
 
 export default function StaffManageTable() {
   const [open, setOpen] = useState(false);
@@ -38,6 +39,7 @@ export default function StaffManageTable() {
   const createNewStaffMutation = useCreateNewStaff();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const { data: detailStaff } = useDetailStaff(selectedId);
 
@@ -47,7 +49,7 @@ export default function StaffManageTable() {
     search: "",
   });
 
-  const handleChangePage = (pageNumber: number) => {    
+  const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
 
@@ -57,7 +59,8 @@ export default function StaffManageTable() {
       toast.success("Xoá tài khoản thành công!");
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
-    onError: () => toast.error("Xoá tài khoản thất bại"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
   const lockMutation = useMutation({
@@ -66,7 +69,8 @@ export default function StaffManageTable() {
       toast.success("Khoá tài khoản thành công!");
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
-    onError: () => toast.error("Khoá tài khoản thất bại"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
   const unlockMutation = useMutation({
@@ -75,7 +79,8 @@ export default function StaffManageTable() {
       toast.success("Mở khoá tài khoản thành công!");
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
-    onError: () => toast.error("Mở khoá tài khoản thất bại"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
   const resetPassMutation = useMutation({
@@ -84,7 +89,8 @@ export default function StaffManageTable() {
       toast.success("Reset mật khẩu thành công!");
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
-    onError: () => toast.error("Reset mật khẩu tài khoản thất bại"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
   const handleConfirm = () => {
@@ -119,7 +125,8 @@ export default function StaffManageTable() {
       toast.success("Cập nhật tài khoản thành công!");
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
-    onError: () => toast.error("Cập nhật tài khoản thất bại"),
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
   const handleSubmitData = (data: NewUserType) => {
@@ -152,9 +159,11 @@ export default function StaffManageTable() {
             toast.success("Tạo nhân viên mới thành công!");
             queryClient.invalidateQueries({ queryKey: ["listStaff"] });
           },
-          onError: () => {
-            toast.error("Tạo nhân viên mới thất bại");
-          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
         }
       );
     }
@@ -280,9 +289,9 @@ export default function StaffManageTable() {
       <TableComponent
         columns={columns}
         dataSource={data?.data || []}
-        rowHeight={40}
+        rowHeight={45}
         pageSize={10}
-        page={ data && data?.current_page + 1 || 0}
+        page={(data && data?.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={data}
       />
