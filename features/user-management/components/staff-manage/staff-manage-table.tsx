@@ -201,12 +201,12 @@ export default function StaffManageTable() {
         if (listRole) {
           return (
             <Select
-            size="middle" 
+              size="middle"
               value={role} // 👈 giá trị đang hiển thị
               style={{ width: 160 }}
               onChange={(value, option) => {
-                console.log('value', value);
-                 if (value) {
+                console.log("value", value);
+                if (value) {
                   updateStaffMutation.mutate({
                     param: {
                       email: record.email,
@@ -220,8 +220,8 @@ export default function StaffManageTable() {
                 }
               }}
               options={listRole.map((r: any) => ({
-                value: r.role_id,     // 👈 dùng role_id làm value
-                label: r.role_name,   // 👈 hiển thị role_name
+                value: r.role_id, // 👈 dùng role_id làm value
+                label: r.role_name, // 👈 hiển thị role_name
               }))}
             />
           );
@@ -314,6 +314,8 @@ export default function StaffManageTable() {
         page={(data && data?.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={data}
+        fontSize={14}
+        headerHeight={44}
       />
 
       <ModalStaffAdd

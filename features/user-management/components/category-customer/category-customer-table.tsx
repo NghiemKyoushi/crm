@@ -154,7 +154,7 @@ export default function CategoryCustomerTable() {
                   category_name: record.category_name,
                   description: record.description,
                   deposit_percentage: record.deposit_percentage,
-                  color: record.color
+                  color: record.color,
                 });
                 setOpen(true);
               }}
@@ -211,6 +211,8 @@ export default function CategoryCustomerTable() {
         page={(data && data?.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={data}
+        fontSize={14}
+        headerHeight={44}
       />
       <AddCustomerTypeModal
         open={open}

@@ -90,6 +90,8 @@ export default function CustomerTable() {
         page={data?.current_page || 0}
         onPageChange={handleChangePage}
         response={data}
+        fontSize={14}
+        headerHeight={44}
       />
       {selectedId && (
         <CustomerDetailModal

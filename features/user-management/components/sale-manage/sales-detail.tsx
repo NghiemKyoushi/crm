@@ -17,20 +17,22 @@ interface SalesDetailProps {
   salesId?: number;
   name: string;
   refetchSales: () => void;
-
 }
 
-export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailProps) {
+export default function SalesDetail({
+  salesId,
+  name,
+  refetchSales,
+}: SalesDetailProps) {
   const [page, setPage] = useState(0);
   const customerForSaleMutation = useCustomerForSale();
   const queryClient = useQueryClient();
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-
   const handleConfirmUnassign = () => {
     if (!selectedId) return;
-    removeAssignMutation.mutate(selectedId)
+    removeAssignMutation.mutate(selectedId);
     setOpenConfirm(false);
   };
 
@@ -191,6 +193,8 @@ export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailP
                     page={data?.current_page || 0}
                     onPageChange={handleChangePage}
                     response={data}
+                    fontSize={14}
+                    headerHeight={44}
                   />
                 </div>
                 <PopupUnassignConfirm
