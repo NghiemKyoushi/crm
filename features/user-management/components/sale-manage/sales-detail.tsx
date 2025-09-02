@@ -1,5 +1,5 @@
 import TableComponent from "@/components/TableComponent";
-import { Tabs, Card, Typography, InputNumber, Button } from "antd";
+import { Tabs, Card, Typography, InputNumber, Button, Tag } from "antd";
 import UserMultiSelect from "./select-multi";
 import { ColumnsType } from "antd/es/table";
 import { CustomerModel } from "@/types/customer-type";
@@ -67,7 +67,15 @@ export default function SalesDetail({
       dataIndex: "category_name",
       key: "category_name",
       render: (_, record) => (
-        <CustomerTypeSelect value={record.category_name} />
+        <Tag
+          style={{
+            backgroundColor: record.color ? record.color : '#000000',
+            color: "#fff",
+          }}
+          className="font-semibold text-[13px] px-3 py-1"
+        >
+          {record.category_name}
+        </Tag>
       ),
     },
     {

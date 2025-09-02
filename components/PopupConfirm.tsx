@@ -4,11 +4,12 @@ import {
   LockOutlined,
   DeleteOutlined,
   KeyOutlined,
-  UnlockOutlined, // 👈 thêm icon unlock
+  UnlockOutlined, 
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { ReactNode } from "react";
 
-type ConfirmType = "reset" | "lock" | "delete" | "unlock" | "default"; // 👈 thêm unlock
+type ConfirmType = "reset" | "lock" | "delete" | "unlock" | "default" | "confirm"; // 👈 thêm unlock
 
 interface ConfirmModalProps {
   open: boolean;
@@ -56,6 +57,10 @@ export default function PopupConfirm({
     default: {
       icon: <ExclamationCircleOutlined className="text-3xl !text-yellow-500" />,
       confirmBtn: "bg-blue-500 hover:bg-blue-600 text-white",
+    },
+    confirm: {
+      icon: <CheckCircleOutlined className="text-3xl !text-green-500" />, 
+      confirmBtn: "bg-green-500 hover:bg-green-600 text-white",
     },
   };
 

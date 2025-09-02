@@ -40,6 +40,10 @@ export const API_TYPE_CONST = {
   RESET_PASSWORD: `${FEATURE}/admin/users/reset-password/`,
   ADD_DEFAULT_ADDRESS: `${FEATURE}/admin/customer/set-default/`,
   ADD_DEFAULT_BANK: `${FEATURE}/admin/customer/set-default-banking/`,
-  ROLE_USER: `${PROFILE}/user/role`
+  ROLE_USER: `${PROFILE}/user/role`,
+  UPDATE_CATE_FOR_CUSTOMER: `${FEATURE}/admin/customer/add-customer-category/`,
+  LIST_TOPUP: `${FEATURE}/admin/topups`,
+  LIST_WITHDRAW :`${FEATURE}/admin/withdrawal/requests`,
+  ADD_TOPUP_MANUAL:`${FEATURE}/admin/topups/manual`
 
 } as const;

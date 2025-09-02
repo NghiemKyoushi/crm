@@ -1,18 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Input,
-  Select,
-  DatePicker,
-  Form,
-  message,
-  SelectProps,
-} from "antd";
+import React from "react";
+import { Button, Input, Select, DatePicker, Form, message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import { DepositParams } from "@/types/deposit-type";
-import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
@@ -22,35 +13,20 @@ interface FilterSectionProps {
 const FilterSection = (props: FilterSectionProps) => {
   const { onFilter } = props;
   const [form] = Form.useForm();
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
-  const [options, setOptions] = useState<SelectProps["options"]>([]);
 
-  const { data } = useListCustomer({
-    page,
-    page_size: 10,
-    category_id: undefined,
-    search: search || undefined,
-  });
-
-  useEffect(() => {
-    if (data?.data) {
-      setOptions(
-        data.data.map((user: any) => ({
-          value: user.user_id,
-          label: `${user.full_name}`,
-        }))
-      );
-    }
-  }, [data]);
   const onFinish = async (values: any) => {
-    const payload: DepositParams = {
+    const payload = {
       ...values,
-      fromDate: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      toDate: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      status: values.status,
+      date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
     };
-    onFilter(payload);
+
+    console.log("📌 Filter payload:", payload);
+
+    try {
+      toast.success("Gửi request lọc thành công!");
+    } catch (err) {
+      toast.error("Có lỗi khi gọi API");
+    }
   };
 
   return (
@@ -58,14 +34,7 @@ const FilterSection = (props: FilterSectionProps) => {
       <Form form={form} onFinish={onFinish}>
         <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
           <Form.Item name="keyword" className="mb-0">
-            <Select
-              showSearch
-              placeholder="Nhập tên khách hàng"
-              filterOption={false}
-              onSearch={(e) => setSearch(e)}
-              options={options}
-              className="w-full !h-11"
-            />
+            <Input placeholder="Mã lệnh, Mã KH..." className="w-full h-11" />
           </Form.Item>
 
           <Form.Item name="status" className="mb-0">
