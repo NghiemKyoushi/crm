@@ -1,5 +1,5 @@
 import TableComponent from "@/components/TableComponent";
-import { Tabs, Card, Typography, InputNumber, Button } from "antd";
+import { Tabs, Card, Typography, InputNumber, Button, Tag } from "antd";
 import UserMultiSelect from "./select-multi";
 import { ColumnsType } from "antd/es/table";
 import { CustomerModel } from "@/types/customer-type";
@@ -17,20 +17,22 @@ interface SalesDetailProps {
   salesId?: number;
   name: string;
   refetchSales: () => void;
-
 }
 
-export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailProps) {
+export default function SalesDetail({
+  salesId,
+  name,
+  refetchSales,
+}: SalesDetailProps) {
   const [page, setPage] = useState(0);
   const customerForSaleMutation = useCustomerForSale();
   const queryClient = useQueryClient();
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-
   const handleConfirmUnassign = () => {
     if (!selectedId) return;
-    removeAssignMutation.mutate(selectedId)
+    removeAssignMutation.mutate(selectedId);
     setOpenConfirm(false);
   };
 
@@ -65,7 +67,15 @@ export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailP
       dataIndex: "category_name",
       key: "category_name",
       render: (_, record) => (
-        <CustomerTypeSelect value={record.category_name} />
+        <Tag
+          style={{
+            backgroundColor: record.color ? record.color : '#000000',
+            color: "#fff",
+          }}
+          className="font-semibold text-[13px] px-3 py-1"
+        >
+          {record.category_name}
+        </Tag>
       ),
     },
     {
@@ -191,6 +201,8 @@ export default function SalesDetail({ salesId, name,refetchSales }: SalesDetailP
                     page={data?.current_page || 0}
                     onPageChange={handleChangePage}
                     response={data}
+                    fontSize={14}
+                    headerHeight={44}
                   />
                 </div>
                 <PopupUnassignConfirm

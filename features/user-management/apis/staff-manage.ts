@@ -58,6 +58,13 @@ export const updateCateCustomer = async (params: CategoryRequest, id: string) =>
   return res.data;
 };
 
+export const updateCateforCustomer = async (category_id: number, id: number) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.UPDATE_CATE_FOR_CUSTOMER}${id}?category_id=${category_id}`
+  );
+  return res.data;
+};
+
 export const deleteCateCustomer = async ( id: string) => {
   const res = await api.delete(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`);
   return res.data;

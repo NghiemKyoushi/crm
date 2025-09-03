@@ -2,7 +2,7 @@
 
 import { Select, Button } from "antd";
 import { useState, useEffect } from "react";
-import { useListCustomer, useListCustomerWithSearch } from "../../hooks/staff-manage"; // hook query khách hàng
+import {  useListCustomerWithSearch } from "../../hooks/staff-manage"; // hook query khách hàng
 import { CustomerModel } from "@/types/customer-type";
 
 interface UserOption {
@@ -31,7 +31,7 @@ export default function UserMultiSelect({ onAssign }: UserMultiSelectProps) {
   useEffect(() => {
     if (data) {
       const mapped = data.data.map((u: CustomerModel) => ({
-        label: u.full_name,
+        label: u.full_name + " - " + u.email,
         value: u.user_id.toString(),
       }));
       setOptions(mapped);

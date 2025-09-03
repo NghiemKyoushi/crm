@@ -100,6 +100,7 @@ export default function HistoryOrderTab() {
       <TableComponent
         headerHeight={44}
         rowHeight={48}
+        fontSize={14}
         columns={columns}
         dataSource={data}
         pagination={false} response={undefined} page={0} onPageChange={function (page: number): void {

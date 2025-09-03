@@ -1,6 +1,6 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateRole } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/category-customer";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
@@ -17,9 +17,9 @@ export const useListStaff = (params: getListStaffParams) => {
 
 export const useDetailStaff = (id: string | null) => {
   return useQuery<NewUserType>({
-    queryKey: ["detailStaff", id], // nên đưa id vào queryKey để cache riêng
+    queryKey: ["detailStaff", id], 
     queryFn: () => getDetailStaff(id as string),
-    enabled: !!id, // ✅ chỉ gọi khi có id
+    enabled: !!id, 
   });
 };
 
@@ -51,6 +51,13 @@ export const useUpdateCateGoryCus = () => {
   return useMutation({
     mutationFn: ({ param, id }: { param: CategoryRequest; id: string }) =>
       updateCateCustomer(param, id),
+  });
+};
+
+export const useUpdateCateGoryForEachCus = () => {
+  return useMutation({
+    mutationFn: ({ category_id, id }: { category_id: number; id: number }) =>
+      updateCateforCustomer(category_id, id),
   });
 };
 

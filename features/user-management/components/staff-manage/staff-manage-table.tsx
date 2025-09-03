@@ -7,8 +7,9 @@ import {
   faLock,
   faTrash,
   faUserPlus,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
-import { Tag, Button, Dropdown, Menu, Select } from "antd";
+import { Tag, Button, Dropdown, Menu, Select, Input } from "antd";
 import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useState } from "react";
@@ -42,6 +43,7 @@ export default function StaffManageTable() {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { t } = useTranslation();
+  const [search, setSearch] = useState<string>(""); // 👈 thêm search state
 
   const { data: listRole } = useListRole();
   const { data: detailStaff } = useDetailStaff(selectedId);
@@ -49,8 +51,13 @@ export default function StaffManageTable() {
   const { data } = useListStaff({
     page,
     page_size: 10,
-    search: "",
+    search: search || undefined,
   });
+
+  const handleSearch = () => {
+    setPage(0); // reset về trang 1 khi search
+    queryClient.invalidateQueries({ queryKey: ["listStaff"] });
+  };
 
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
@@ -178,35 +185,34 @@ export default function StaffManageTable() {
   };
   const columns: ColumnsType<UserData> = [
     {
-      title: "Họ và tên",
+      title: t("staffManage.fullName"),
       dataIndex: "full_name",
       key: "full_name",
       render: (text: string) => <span className="font-medium">{text}</span>,
     },
     {
-      title: "Email",
+      title: t("staffManage.email"),
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Số điện thoại",
+      title: t("staffManage.phoneNumber"),
       dataIndex: "phone_number",
       key: "phone_number",
     },
     {
-      title: "Vai trò",
+      title: t("staffManage.role"),
       dataIndex: "role_name",
       key: "role_name",
       render: (role: string, record: UserData) => {
         if (listRole) {
           return (
             <Select
-            size="middle" 
+              size="middle"
               value={role} // 👈 giá trị đang hiển thị
               style={{ width: 160 }}
               onChange={(value, option) => {
-                console.log('value', value);
-                 if (value) {
+                if (value) {
                   updateStaffMutation.mutate({
                     param: {
                       email: record.email,
@@ -220,8 +226,8 @@ export default function StaffManageTable() {
                 }
               }}
               options={listRole.map((r: any) => ({
-                value: r.role_id,     // 👈 dùng role_id làm value
-                label: r.role_name,   // 👈 hiển thị role_name
+                value: r.role_id, 
+                label: r.role_name,
               }))}
             />
           );
@@ -230,23 +236,22 @@ export default function StaffManageTable() {
       },
     },
     {
-      title: "Trạng thái",
+      title: t("staffManage.status"),
       dataIndex: "active",
       key: "active",
       render: (active: boolean) => (
         <>
           {active ? (
-            <Tag color="green">Hoạt động</Tag>
+            <Tag color="green">{t("staffManage.active")}</Tag>
           ) : (
-            <Tag color="red">Đã khóa</Tag>
+            <Tag color="red">{t("staffManage.locked")}</Tag>
           )}
         </>
       ),
     },
     {
-      title: "Hành động",
+      title: t("staffManage.actions"),
       key: "actions",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: UserData) => (
         <div className="flex gap-3 text-[16px]">
           <FontAwesomeIcon
@@ -293,7 +298,7 @@ export default function StaffManageTable() {
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Danh sách Nhân viên</h2>
+        <h2 className="text-lg font-semibold">{t("staffManage.title")}</h2>
         <Button
           type="primary"
           onClick={() => {
@@ -303,7 +308,22 @@ export default function StaffManageTable() {
           icon={<FontAwesomeIcon icon={faUserPlus} />}
           className="!bg-green-500 !hover:bg-green-600 !font-medium"
         >
-          Thêm nhân viên
+          {t("staffManage.addStaff")}
+        </Button>
+      </div>
+      <div className="flex gap-2 mb-4">
+        <Input
+          placeholder={t("staffManage.searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onPressEnter={handleSearch}
+        />
+        <Button
+          type="primary"
+          icon={<FontAwesomeIcon icon={faSearch} />}
+          onClick={handleSearch}
+        >
+          {t("staffManage.search")}
         </Button>
       </div>
       <TableComponent
@@ -314,6 +334,8 @@ export default function StaffManageTable() {
         page={(data && data?.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={data}
+        fontSize={14}
+        headerHeight={44}
       />
 
       <ModalStaffAdd
@@ -329,34 +351,34 @@ export default function StaffManageTable() {
         type={modalType as "reset" | "lock" | "delete" | "unlock"}
         title={
           modalType === "reset"
-            ? "Xác nhận reset mật khẩu"
+            ? t("staffManage.confirmReset")
             : modalType === "lock"
-            ? "Xác nhận khoá tài khoản"
+            ? t("staffManage.confirmLock")
             : modalType === "unlock"
-            ? "Xác nhận mở khoá tài khoản"
-            : "Xác nhận xoá tài khoản"
+            ? t("staffManage.confirmUnlock")
+            : t("staffManage.confirmDelete")
         }
         content={
           modalType === "reset"
-            ? `Bạn có chắc chắn muốn reset mật khẩu cho tài khoản này?`
+            ? t("staffManage.resetContent")
             : modalType === "lock"
-            ? `Bạn có chắc chắn muốn khoá tài khoản này?`
+            ? t("staffManage.lockContent")
             : modalType === "unlock"
-            ? `Bạn có chắc chắn muốn mở khoá tài khoản này?`
-            : `Bạn có chắc chắn muốn xoá tài khoản này?`
+            ? t("staffManage.unlockContent")
+            : t("staffManage.deleteContent")
         }
         onConfirm={handleConfirm}
         onCancel={() => setOpenConfirm(false)}
         confirmText={
           modalType === "delete"
-            ? "Xoá"
+            ?  t("staffManage.delete")
             : modalType === "lock"
-            ? "Khoá"
+            ? t("staffManage.lock")
             : modalType === "unlock"
-            ? "Mở khoá"
-            : "Reset"
+            ? t("staffManage.unlock")
+            : t("staffManage.reset")
         }
-        cancelText="Huỷ"
+        cancelText={t("staffManage.cancel")}
       />
     </div>
   );

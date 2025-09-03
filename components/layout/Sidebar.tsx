@@ -23,7 +23,7 @@ const { Sider } = Layout;
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
   { key: "/orders", icon: faShoppingCart, label: "orders" },
-  { key: "/finance", icon: faWallet, label: "finance" },
+  { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   { key: "/auction", icon: faGavel, label: "action" },
   { key: "/products", icon: faTags, label: "products" },
