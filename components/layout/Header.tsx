@@ -27,29 +27,28 @@ export const Header: React.FC = () => {
 
   const menuItem = [
     {
-      key: "logout",
-      label: (
-        <Button
-          type="dashed"
-          icon={<LogoutOutlined />}
-          onClick={handleLogout}
-          
-          style={{width: "100%", }}
-        >
-          Logout
-        </Button>
-      ),
-    },
-    {
       key: "userprofile",
       label: (
         <Button
           type="primary"
           icon={<FontAwesomeIcon icon={faUser} />}
           onClick={() => router.push("/user-profile")}
-          style={{ width: "100%", }}
+          style={{ width: "100%" }}
         >
           User profile
+        </Button>
+      ),
+    },
+    {
+      key: "logout",
+      label: (
+        <Button
+          type="dashed"
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+          style={{ width: "100%" }}
+        >
+          Logout
         </Button>
       ),
     },

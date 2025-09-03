@@ -49,6 +49,9 @@
     }
   },
   "customerManage": {
+    "search": "Tìm kiếm",
+    "placeholder": "Tìm kiếm khách hàng...",
+    "title":"Danh sách Khách hàng",
     "customerOverview": {
       "totalOrders": "Tổng số Đơn hàng",
       "totalSpent": "Tổng chi tiêu",
@@ -113,16 +116,44 @@
       "actions": "Hành động",
       "edit": "Chỉnh sửa",
       "delete": "Xóa"
+    },
+    "title": "Danh sách Nhân viên",
+    "phoneNumber": "Số điện thoại",
+    "active": "Hoạt động",
+    "locked": "Đã khóa",
+    "actions": "Hành động",
+    "addStaff": "Thêm nhân viên",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm kiếm nhân viên...",
+    "confirmDelete": "Xác nhận xoá tài khoản",
+    "confirmLock": "Xác nhận khoá tài khoản",
+    "confirmUnlock": "Xác nhận mở khoá tài khoản",
+    "confirmReset": "Xác nhận reset mật khẩu",
+    "deleteContent": "Bạn có chắc chắn muốn xoá tài khoản này?",
+    "lockContent": "Bạn có chắc chắn muốn khoá tài khoản này?",
+    "unlockContent": "Bạn có chắc chắn muốn mở khoá tài khoản này?",
+    "resetContent": "Bạn có chắc chắn muốn reset mật khẩu cho tài khoản này?",
+    "delete": "Xoá",
+    "lock": "Khoá",
+    "unlock": "Mở khoá",
+    "reset": "Reset",
+    "toast": {
+      "createSuccess": "Tạo nhân viên mới thành công!",
+      "updateSuccess": "Cập nhật tài khoản thành công!",
+      "deleteSuccess": "Xoá tài khoản thành công!",
+      "lockSuccess": "Khoá tài khoản thành công!",
+      "unlockSuccess": "Mở khoá tài khoản thành công!",
+      "resetSuccess": "Reset mật khẩu thành công!"
     }
   },
   "customerCate": {
-      "name": "Tên Loại",
-      "description": "Mô tả",
-      "customerCount": "Số lượng KH",
-      "actions": "Hành động",
-      "edit": "Chỉnh sửa",
-      "delete": "Xóa",
-      "editPolicy": "Sửa Chính sách",
-      "editCategory": "Chỉnh sửa phân loại"
-    }
+    "name": "Tên Loại",
+    "description": "Mô tả",
+    "customerCount": "Số lượng KH",
+    "actions": "Hành động",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "editPolicy": "Sửa Chính sách",
+    "editCategory": "Chỉnh sửa phân loại"
+  }
 }

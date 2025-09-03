@@ -14,6 +14,7 @@ export interface CustomerModel {
   debt_amount: number;
   sale_name: string;
   category_id: number;
+  email: string;
 }
 
 export interface CustomerResponse {
@@ -78,9 +79,10 @@ export interface bankAccountModel {
   account_holder_name: string;
   account_number: string;
   active: boolean;
-  id: number;
+  id?: number;
   bank_name?: string;
   default?: boolean;
+  bank_id?: number;
 }
 
 export interface CustomerNoteParams {

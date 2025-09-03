@@ -1,18 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Input,
-  Select,
-  DatePicker,
-  Form,
-  message,
-  SelectProps,
-} from "antd";
+import { Button, Select, DatePicker, Form, SelectProps } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { DepositParams } from "@/types/deposit-type";
 import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
+const { RangePicker } = DatePicker;
 
 const { Option } = Select;
 
@@ -43,13 +36,15 @@ const FilterSection = (props: FilterSectionProps) => {
       );
     }
   }, [data]);
-  const onFinish = async (values: any) => {
+
+  const onFinish = async (values: any) => {  
     const payload: DepositParams = {
       ...values,
-      fromDate: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      toDate: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+      fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
+      toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
     };
+  
     onFilter(payload);
   };
 
@@ -70,15 +65,19 @@ const FilterSection = (props: FilterSectionProps) => {
 
           <Form.Item name="status" className="mb-0">
             <Select placeholder="-- Trạng thái --" className="w-full !h-11">
-              <Option value="pending">Chờ xác nhận</Option>
-              <Option value="confirmed">Đã xác nhận</Option>
-              <Option value="canceled">Đã hủy</Option>
-              <Option value="manual">Nạp tay</Option>
+              <Option value="PENDDING">Chờ xác nhận</Option>
+              <Option value="COMPLETED">Đã xác nhận</Option>
+              <Option value="CANCELED">Đã hủy</Option>
+              <Option value="MANUAL">Nạp tay</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item name="date" className="mb-0">
-            <DatePicker placeholder="Chọn ngày" className="w-full h-11" />
+          <Form.Item name="dateRange" className="mb-0">
+            <RangePicker
+              placeholder={["Từ ngày", "Đến ngày"]}
+              className="w-full h-11"
+              format="YYYY-MM-DD"
+            />
           </Form.Item>
 
           <Form.Item className="mb-0">

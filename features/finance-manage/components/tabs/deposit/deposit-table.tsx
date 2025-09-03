@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import TableComponent, { PaginatedResponse } from "@/components/TableComponent";
+import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./deposit-filter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
@@ -10,64 +10,76 @@ import { Tag, Button, Space } from "antd";
 import CancelReasonModal from "./modal/modal-cancel-statement";
 import PopupConfirm from "@/components/PopupConfirm";
 import TransactionHistoryModal from "./modal/modal-history";
-import { useListTopups } from "@/features/finance-manage/hooks";
-import { DepositItem, DepositRequest } from "@/types/deposit-type";
+import { mapDepositResponseToPaginatedResponse, useListTopups } from "@/features/finance-manage/hooks";
+import {
+  DepositItem,
+  DepositParams,
+  DepositRequest,
+} from "@/types/deposit-type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { createTopupManual } from "@/features/finance-manage/apis";
-
-// export interface DepositRecord {
-//   id: string;
-//   orderCode: string;
-//   customer: string;
-//   amount: number;
-//   createdAt: string;
-//   handler: string;
-//   handledAt?: string;
-//   status: "pending" | "confirmed" | "canceled" | "manual";
-// }
+import dayjs from "dayjs";
 
 const DepositTable = ({}) => {
-  const [page, setPage] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const { t } = useTranslation();
-
-  const {data} = useListTopups({
-    page,
+  const [params, setParams] = useState<DepositParams>({
+    page: 0,
     size: 10,
   });
-  
-  const handlePageChange = (p: number) => {
-    setPage(p);
+  const { data } = useListTopups(params);
+
+  const handleSearch = (values: DepositParams) => {
+    
+    const newParams: DepositParams = {
+      ...params,
+      depositCode: values.depositCode,
+      status: values.status,
+      fromDate: values.fromDate,
+      toDate: values.toDate,
+      page: 0,
+    };
+    setParams(newParams);
   };
 
+  const handlePageChange = (p: number) => {
+    setParams((prev) => ({
+      ...prev,
+      page: p - 1,   
+    }));
+  };
 
   const columns: ColumnsType<DepositItem> = [
     {
       title: "Mã Lệnh",
-      dataIndex: "orderCode",
-      key: "orderCode",
+      dataIndex: "deposit_code",
+      key: "deposit_code",
     },
     {
       title: "Khách hàng (UserID)",
-      dataIndex: "customer",
-      key: "customer",
+      dataIndex: "user_id",
+      key: "user_id",
     },
     {
       title: "Số tiền (VND)",
-      dataIndex: "amount",
-      key: "amount",
+      dataIndex: "amount_vnd",
+      key: "amount_vnd",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
     },
     {
       title: "Ngày tạo",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value: string) => {
+        if (!value) return "-";
+        return dayjs(value).format("DD-MM-YYYY");
+      },
     },
     {
       title: "Người xử lý",
@@ -85,25 +97,25 @@ const DepositTable = ({}) => {
       key: "status",
       render: (status: DepositItem["status"]) => {
         switch (status) {
-          case "pending":
+          case "PENDING":
             return (
               <Tag className="!rounded-3xl" color="gold">
                 Chờ xác nhận
               </Tag>
             );
-          case "confirmed":
+          case "COMPLETED":
             return (
               <Tag className="!rounded-3xl" color="green">
                 Đã xác nhận
               </Tag>
             );
-          case "canceled":
+          case "CANCELED":
             return (
               <Tag className="!rounded-3xl" color="red">
                 Đã hủy
               </Tag>
             );
-          case "manual":
+          case "MANUAL":
             return (
               <Tag className="!rounded-3xl" color="blue">
                 Nạp tay
@@ -119,7 +131,7 @@ const DepositTable = ({}) => {
       key: "action",
       render: (_, record) => (
         <Space>
-          {record.status === "pending" && (
+          {record.status === "PENDING" && (
             <>
               <Button
                 className="!bg-green-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
@@ -138,7 +150,7 @@ const DepositTable = ({}) => {
               </Button>
             </>
           )}
-          {["confirmed", "canceled", "manual"].includes(record.status) && (
+          {["CANCELED", "COMPLETED", "MANUAL"].includes(record.status) && (
             <div>
               <Button
                 type="link"
@@ -166,9 +178,9 @@ const DepositTable = ({}) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
-  const handleCreateTopupManual = (value: DepositRequest ) =>{
-    createTopupManualMutation.mutate(value)
-  }
+  const handleCreateTopupManual = (value: DepositRequest) => {
+    createTopupManualMutation.mutate(value);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -182,12 +194,12 @@ const DepositTable = ({}) => {
           <FontAwesomeIcon icon={faPlusCircle} /> Nạp tiền Thủ công
         </Button>
       </div>
-      <DepositFilter onFilter={(f: any) => console.log("Filter", f)} />
+      <DepositFilter onFilter={handleSearch} />
       <TableComponent
         columns={columns}
         dataSource={data?.content || []}
-        response={data?.pageable as unknown as PaginatedResponse<any>}
-        page={page}
+        response={data ? mapDepositResponseToPaginatedResponse<DepositItem>(data) : undefined}
+        page={params.page ?  params.page + 1 :  0}
         rowHeight={45}
         onPageChange={handlePageChange}
         fontSize={14}

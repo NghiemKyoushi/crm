@@ -43,6 +43,7 @@ const LanguageSwitcher = () => {
         selectedKeys: [language],
       }}
       placement="bottomRight"
+      trigger={['click']}
     >
       <a
         onClick={(e) => e.preventDefault()}

@@ -44,6 +44,7 @@ export const API_TYPE_CONST = {
   UPDATE_CATE_FOR_CUSTOMER: `${FEATURE}/admin/customer/add-customer-category/`,
   LIST_TOPUP: `${FEATURE}/admin/topups`,
   LIST_WITHDRAW :`${FEATURE}/admin/withdrawal/requests`,
-  ADD_TOPUP_MANUAL:`${FEATURE}/admin/topups/manual`
+  ADD_TOPUP_MANUAL:`${FEATURE}/admin/topups/manual`,
+  BANK_LIST_DEPOSIT: `${FEATURE}/admin/bank-accounts`
 
 } as const;

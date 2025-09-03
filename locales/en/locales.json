@@ -49,6 +49,9 @@
     }
   },
   "customerManage": {
+    "search": "Search",
+    "placeholder": "Find customer",
+    "title":"Customer List",
     "customerOverview": {
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spending",
@@ -113,6 +116,34 @@
       "actions": "Actions",
       "edit": "Edit",
       "delete": "Delete"
+    },
+    "title": "Staff List",
+    "phoneNumber": "Phone Number",
+    "active": "Active",
+    "locked": "Locked",
+    "actions": "Actions",
+    "addStaff": "Add Staff",
+    "search": "Search",
+    "searchPlaceholder": "Search staff...",
+    "confirmDelete": "Confirm delete account",
+    "confirmLock": "Confirm lock account",
+    "confirmUnlock": "Confirm unlock account",
+    "confirmReset": "Confirm reset password",
+    "deleteContent": "Are you sure you want to delete this account?",
+    "lockContent": "Are you sure you want to lock this account?",
+    "unlockContent": "Are you sure you want to unlock this account?",
+    "resetContent": "Are you sure you want to reset the password for this account?",
+    "delete": "Delete",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "reset": "Reset",
+    "toast": {
+      "createSuccess": "Staff created successfully!",
+      "updateSuccess": "Account updated successfully!",
+      "deleteSuccess": "Account deleted successfully!",
+      "lockSuccess": "Account locked successfully!",
+      "unlockSuccess": "Account unlocked successfully!",
+      "resetSuccess": "Password reset successfully!"
     }
   },
   "customerCate": {

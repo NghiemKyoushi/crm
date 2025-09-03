@@ -3,8 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Modal, Input, Select, Button, Form, message } from "antd";
 import type { SelectProps } from "antd";
 import axios from "axios";
-import { DepositRequest } from "@/types/deposit-type";
+import {
+  BankAccount,
+  BankAccountListResponse,
+  BankDepositRequest,
+  DepositRequest,
+} from "@/types/deposit-type";
 import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
+import { getListBankCreateAccount } from "@/features/finance-manage/apis";
 
 interface User {
   id: string;
@@ -26,6 +32,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<SelectProps["options"]>([]);
   const [search, setSearch] = useState("");
+  const [banks, setBanks] = useState<any[]>([]);
 
   const [page, setPage] = useState(0);
 
@@ -47,6 +54,31 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     }
   }, [data]);
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const params: BankDepositRequest = {
+          page: 0,
+          size: 10,
+        };
+        const data: BankAccountListResponse = await getListBankCreateAccount(
+          params
+        );
+        console.log("data");
+
+        const opts = data.content.map((acc: BankAccount) => ({
+          label: `${acc.bank_name} - ${acc.account_number}`,
+          value: acc.id, // value unique
+        }));
+        setBanks(opts || []);
+      } catch (err) {
+        console.error("Failed to fetch bank list:", err);
+      }
+    };
+
+    fetchBanks();
+  }, []);
+
   const [form] = Form.useForm();
 
   const handleSubmit = async () => {
@@ -54,11 +86,11 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       const values = await form.validateFields();
       setLoading(true);
       onConfirm({
-        amoun_vnd: values.amount,
-        bank_transaction_id: values.companyAccount,
+        amoun_vnd: +values.amount,
+        bank_transaction_id: values.transactionCode,
         company_bank_account_id: values.companyAccount,
         note: values.reason,
-        user_id: values.userId,
+        user_id: +values.userId,
         reason: values.reason,
       });
       setLoading(false);
@@ -107,12 +139,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           name="companyAccount"
           rules={[{ required: true, message: "Chọn tài khoản!" }]}
         >
-          <Select
-            options={[
-              { label: "Vietcombank - 0123456789", value: "vcb-0123456789" },
-              { label: "Techcombank - 9876543210", value: "tcb-9876543210" },
-            ]}
-          />
+          <Select options={banks} />
         </Form.Item>
 
         {/* Mã giao dịch */}
@@ -121,7 +148,21 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           label="Mã giao dịch (từ sao kê)"
           name="transactionCode"
         >
-          <Input placeholder="VD: FT240814..." />
+          <Input
+            placeholder="VD: FT240814..."
+            addonAfter={
+              <Button
+                type="dashed"
+                size="small"
+                onClick={() => {
+                  const code = `FT${Date.now()}`;
+                  form.setFieldValue("transactionCode", code);
+                }}
+              >
+                Tạo mã
+              </Button>
+            }
+          />
         </Form.Item>
 
         {/* Lý do nạp tiền */}

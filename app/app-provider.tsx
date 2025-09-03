@@ -5,6 +5,7 @@ import React, { JSX, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundaryWrapper from '@/components/common/error-boundary';
 import { ToastContainer } from 'react-toastify';
+import { PermissionProvider } from '@/components/layout/PermissionContext';
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ export default function AppProvider({ children }: ProviderProps): JSX.Element {
           <Suspense fallback={<div>Loading...</div>}>
             <ToastContainer />
             <div className="min-h-dvh">
-              <div className={'overflow-x-hidden'}>{children}</div>
+              <div className={'overflow-x-hidden'}> 
+    {children}
+  </div>
             </div>
           </Suspense>
         </ErrorBoundaryWrapper>

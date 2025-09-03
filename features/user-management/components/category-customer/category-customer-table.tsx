@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Form, Tag, Tooltip } from "antd";
+import { Button, Form, Input, Tag, Tooltip } from "antd";
 import AddCustomerTypeModal from "./modal-edit-category-customer";
 import TableComponent from "@/components/TableComponent";
 import {
@@ -13,7 +13,7 @@ import { Category, CategoryRequest } from "@/types/category-customer";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTags, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faSearch, faTags, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 
@@ -23,17 +23,23 @@ export default function CategoryCustomerTable() {
   const [id, setId] = useState("");
   const { t } = useTranslation();
   const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
+  const [search, setSearch] = useState<string>(""); // 👈 thêm search state
 
   const queryClient = useQueryClient();
   const [editingCate, setEditingCate] = useState<CategoryRequest | null>(null);
   const { data } = useListCateGoryCus({
     page,
     page_size: 10,
-    search: undefined,
+    search: search || undefined,
   });
   const updateCateMutation = useUpdateCateGoryCus();
   const deleteCateMutation = useDeleteCateGoryCus();
   const createNewCateMutation = useCreateNewCateGoryCus();
+
+  const handleSearch = () => {
+    setPage(0); // reset về trang 1 khi search
+    queryClient.invalidateQueries({ queryKey: ["listCate"] });
+  };
   const handleAdd = (dataForm: CategoryRequest) => {
     const { category_name, description, deposit_percentage } = dataForm;
     createNewCateMutation.mutate(
@@ -200,6 +206,22 @@ export default function CategoryCustomerTable() {
           className="!bg-blue-500 !hover:bg-blue-600 !font-medium"
         >
           + Thêm Loại mới
+        </Button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        <Input
+          placeholder="Tìm kiếm nhân viên..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onPressEnter={handleSearch}
+        />
+        <Button
+          type="primary"
+          icon={<FontAwesomeIcon icon={faSearch} />}
+          onClick={handleSearch}
+        >
+          Tìm kiếm
         </Button>
       </div>
 

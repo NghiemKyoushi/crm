@@ -31,6 +31,8 @@ export default function CategorySelect({ value, onChange }: any) {
 
   return (
     <Select
+    className="no-border-select"
+
       style={{
         width: 150, 
         // width: "fit-content", 

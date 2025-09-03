@@ -60,3 +60,46 @@ export interface DepositRequest {
   reason: string;
   note: string;
 }
+
+export interface BankDepositRequest {
+    page?: number;
+    size?: number;
+}
+
+export interface BankAccount {
+    id: number;
+    bank_name: string;
+    bank_code: string;
+    account_number: string;
+    account_holder: string;
+    daily_limit_vnd: number;
+    is_active: boolean;
+    created_at: string;   
+    updated_at: string;   
+    is_deleted: boolean | null;
+  }
+  
+  export interface Pageable {
+    page_number: number;
+    page_size: number;
+    sort: string[]; 
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  }
+  
+  export interface BankAccountListResponse {
+    content: BankAccount[];
+    pageable: Pageable;
+    total_pages: number;
+    total_elements: number;
+    last: boolean;
+    size: number;
+    number: number;
+    sort: any[]; // tương tự trên
+    number_of_elements: number;
+    first: boolean;
+    empty: boolean;
+  }
+  
+
