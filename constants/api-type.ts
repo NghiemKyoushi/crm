@@ -46,6 +46,11 @@ export const API_TYPE_CONST = {
   LIST_WITHDRAW :`${FEATURE}/admin/withdrawal/requests`,
   ADD_TOPUP_MANUAL:`${FEATURE}/admin/topups/manual`,
   BANK_LIST_DEPOSIT: `${FEATURE}/admin/bank-accounts`,
-  CONFIRM_TOPUP: `${FEATURE}/admin/topups/`
+  CONFIRM_TOPUP: `${FEATURE}/admin/topups/`,
+  CONFIRM_WITHDRAW:`${FEATURE}/admin/withdrawal/approve/`,
+  CANCEL_WITHDRAW: `${FEATURE}/admin/withdrawal/reject/`,
+  HISTORY_WITHDRAW: `${FEATURE}/admin/withdrawal/requests/`,
+  HISTORY_TOPUP: `${FEATURE}/admin/topups/`,
+
 
 } as const;

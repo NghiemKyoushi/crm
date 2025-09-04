@@ -1,3 +1,4 @@
+"use client";
 import { Tabs } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,14 +15,28 @@ import CategoryCustomerPage from "../category-customer/category-page";
 import RoleManagerPage from "../role-manage/role-manage-pages";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "@/components/layout/PermissionContext";
-import NoPermission from "@/components/layout/NoPermission";
+import { Spin } from "antd";
+import { notFound } from "next/navigation";
+import { useMemo } from "react";
 
 export default function CustomerPage() {
   const { t } = useTranslation();
   const { hasPermission, loading } = usePermission();
-console.log('hasPermission', hasPermission('user.categorize_customers'));
+  const canAccess = useMemo(() => {
+    if (loading) return false;
+    return (
+      hasPermission("user.categorize_customers") ||
+      hasPermission("user.manage_staff_roles")
+    );
+  }, [loading, hasPermission]);
 
-  const tabs = [
+  if (loading) {
+    return <Spin />;
+  }
+  if (!canAccess) {
+    notFound();
+  }
+  const allTabs = [
     {
       key: "1",
       label: (
@@ -79,22 +94,24 @@ console.log('hasPermission', hasPermission('user.categorize_customers'));
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <Spin tip="Đang tải quyền..." />
+      </div>
+    );
+  }
+
+  // chỉ giữ lại tab có quyền
+  const allowedTabs = allTabs.filter((tab) => hasPermission(tab.perm));
+
   return (
     <div className="p-4">
-     <Tabs
-        defaultActiveKey="1"
+      <Tabs
+        defaultActiveKey={allowedTabs[0]?.key}
         tabBarGutter={30}
         destroyInactiveTabPane
-        items={tabs.map((tab) => ({
-          ...tab,
-          children: loading ? (
-            <div className="flex justify-center py-10">Đang tải...</div>
-          ) : hasPermission(tab.perm) ? (
-            tab.children
-          ) : (
-            <NoPermission />
-          ),
-        }))}
+        items={allowedTabs}
       />
     </div>
   );

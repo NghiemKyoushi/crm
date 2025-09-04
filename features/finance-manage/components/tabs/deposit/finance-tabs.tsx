@@ -1,62 +1,47 @@
 "use client";
-import React from "react";
-import { Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowDown,
-  faArrowUp,
-  faUniversity,
-  faBalanceScale,
-} from "@fortawesome/free-solid-svg-icons";
+import React, { useState } from "react";
+import { usePermission } from "@/components/layout/PermissionContext";
+import { Spin } from "antd";
+import FinanceTabs from "../withdraw/finance-tabs";
+import DepositTable from "./deposit-table";
+import WithdrawTable from "../withdraw/withdraw-table";
+import BankAccountSetting from "../bank-setting/deposit-bank-setting";
 
-interface FinanceTabsProps {
-  activeKey: string;
-  onChange: (key: string) => void;
-}
+const FinanceDepositApprovalPage = () => {
+  const [activeTab, setActiveTab] = useState("deposit");
+  const { hasPermission, loading } = usePermission();
 
-const FinanceTabs: React.FC<FinanceTabsProps> = ({ activeKey, onChange }) => {
-  const items = [
-    {
-      key: "deposit",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faArrowDown} />
-          Lệnh nạp tiền
-        </span>
-      ),
-    },
-    {
-      key: "withdraw",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faArrowUp} />
-          Yêu cầu rút tiền
-        </span>
-      ),
-    },
-    {
-      key: "bank-settings",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUniversity} />
-          Cài đặt Ngân hàng
-        </span>
-      ),
-    },
-    {
-      key: "reconciliation",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faBalanceScale} />
-          Công nợ & Đối soát
-        </span>
-      ),
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Spin tip="Đang tải quyền..." />
+      </div>
+    );
+  }
+
+  const allowedTabs = [
+    hasPermission("finance.approve_topup") && "deposit",
+    hasPermission("finance.approve_topup") && "withdraw",
+    hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
+    hasPermission("finance.manage_debt") && "reconciliation",
+  ].filter(Boolean) as string[];
 
   return (
-    <Tabs activeKey={activeKey} onChange={onChange} items={items} type="line" />
+    <div className="pt-4">
+        <FinanceTabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          allowedTabs={allowedTabs}
+        />
+
+        {activeTab === "deposit" && <DepositTable />}
+        {activeTab === "withdraw" && <WithdrawTable />}
+        {activeTab === "bank-settings" && <BankAccountSetting />}
+        {activeTab === "reconciliation" && (
+          <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
+        )}
+    </div>
   );
 };
 
-export default FinanceTabs;
+export default FinanceDepositApprovalPage;

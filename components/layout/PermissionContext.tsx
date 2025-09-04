@@ -1,6 +1,6 @@
 "use client";
 import { useUserRole } from "@/features/user-profile/hooks/user-profile";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 interface Permission {
   name: string;
@@ -12,7 +12,7 @@ interface Permission {
 
 interface PermissionContextType {
   permissions: Permission[];
-  hasPermission: (permName: string) => boolean;
+  hasPermission: (permName: string) => boolean | undefined;
   loading: boolean;
 }
 
@@ -30,14 +30,15 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (listRole) {
-      const allPerms = listRole.groups.flatMap((g) => g.permissions);
+      const allPerms = listRole.groups.flatMap((g) => g.permissions);      
       setPermissions(allPerms);
     }
   }, [listRole]);
 
-  const hasPermission = (permName: string) => {
-    return permissions.some((p) => p.name === permName && p.active);
-  };
+  const hasPermission = useCallback(
+    (permName: string) => permissions.some((p) => p.name === permName && p.active),
+    [permissions]
+  );
 
   return (
     <PermissionContext.Provider

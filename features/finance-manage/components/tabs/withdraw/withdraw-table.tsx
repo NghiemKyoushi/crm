@@ -1,26 +1,81 @@
 "use client";
 import React, { useState } from "react";
-import TableComponent, { PaginatedResponse } from "@/components/TableComponent";
-import { DepositRecord, getWithdrawColumns } from "./withdraw-columns";
+import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./withdraw-filter";
 import { Button, Space, Tag } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import ManualDepositModal from "../deposit/modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
-import { withdrawItem } from "@/types/deposit-type";
+import { DepositParams, withdrawItem } from "@/types/deposit-type";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
+import { useListWithdraw } from "@/features/finance-manage/hooks";
+import PopupConfirm from "@/components/PopupConfirm";
+import { toast } from "react-toastify";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { confirmWithdraw, getDetailHistoryTopups, getDetailHistoryWithdraw } from "@/features/finance-manage/apis";
+import TransactionHistoryModal from "../deposit/modal/modal-history";
 
 const WithdrawTable = ({}) => {
-  const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const [page, setPage] = useState(0);
   const handlePageChange = (p: number) => {
     setPage(p);
   };
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [isOpenConfirm, setIsOpenConfirm] = useState(false);
+  const [isOpenHistory, setIsOpenHistory] = useState(false);
+  const [histories, setHistories] = useState<any[]>([]);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
 
-  const handleAction = (type: string, record: DepositRecord) => {
-    console.log("Action:", type, record);
+  const [params, setParams] = useState<DepositParams>({
+    page: 0,
+    size: 10,
+  });
+
+  const { data } = useListWithdraw(params);
+  const handleSearch = (values: DepositParams) => {
+    const newParams: DepositParams = {
+      ...params,
+      depositCode: values.depositCode,
+      status: values.status,
+      fromDate: values.fromDate,
+      toDate: values.toDate,
+      page: 0,
+    };
+    setParams(newParams);
   };
-    const columns: ColumnsType<withdrawItem> = [
+
+  const confirmMutation = useMutation({
+    mutationFn: (id: number) => confirmWithdraw(id),
+    onSuccess: () => {
+      toast.success("Xác nhận thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] }); // refresh list
+      setIsOpenConfirm(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const handleConfirm = () => {
+    if (selectedId) {
+      confirmMutation.mutate(selectedId);
+    }
+  };
+
+  const handleOpenHistory = async (id: number, code: string) => {
+      try {
+        const data = await getDetailHistoryTopups(id); 
+        setHistories(data); 
+        setTransactionId(code); 
+        setIsOpenHistory(true); 
+      } catch (error) {
+        console.error("Lỗi khi lấy lịch sử:", error);
+      }
+    };
+
+  const columns: ColumnsType<withdrawItem> = [
     {
       title: "Mã Lệnh",
       dataIndex: "deposit_code",
@@ -33,8 +88,8 @@ const WithdrawTable = ({}) => {
     },
     {
       title: "Số tiền (VND)",
-      dataIndex: "amount_vnd",
-      key: "amount_vnd",
+      dataIndex: "amount",
+      key: "amount",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
     },
@@ -94,22 +149,22 @@ const WithdrawTable = ({}) => {
           {record.status === "PENDING" && (
             <>
               <Button
-                className="!bg-green-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
+                className="!bg-blue-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 type="primary"
                 size="small"
                 onClick={() => {
-                  // setSelectedId(record.id);
-                  // setIsOpenConfirm(true);
+                  setSelectedId(record.id);
+                  setIsOpenConfirm(true);
                 }}
               >
-                Xác nhận
+                Đã chuyển
               </Button>
               <Button
-                className="!bg-red-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
+                className="!bg-gray-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 size="small"
                 // onClick={() => setIsOpenCancel(true)}
               >
-                Hủy Lệnh
+                Từ chối
               </Button>
             </>
           )}
@@ -118,7 +173,7 @@ const WithdrawTable = ({}) => {
               <Button
                 type="link"
                 size="small"
-                // onClick={() => setIsOpenHistory(true)}
+                onClick={() => handleOpenHistory(record.id, "TEST_CODE")}
               >
                 Xem lịch sử
               </Button>
@@ -129,50 +184,39 @@ const WithdrawTable = ({}) => {
     },
   ];
 
-  const mockResponse: PaginatedResponse<DepositRecord> = {
-    data: [
-      {
-        id: "1",
-        orderCode: "N-0805-1",
-        customer: "Nguyễn Văn A (KH001)",
-        amount: 5000000,
-        createdAt: "05/08/2025 14:15",
-        handler: "-",
-        handledAt: "",
-        status: "pending",
-      },
-      {
-        id: "2",
-        orderCode: "N-0805-2",
-        customer: "Trần Thị B (KH002)",
-        amount: 10000000,
-        createdAt: "05/08/2025 11:30",
-        handler: "Admin",
-        handledAt: "05/08/2025 11:35",
-        status: "confirmed",
-      },
-    ],
-    total_items: 2,
-    page_size: 10,
-    total_pages: 1,
-    current_page: 1,
-  };
-
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex flex-row justify-between mb-3">
         <h2 className="text-lg font-bold mb-4">Xử lý Giao dịch Rút tiền</h2>
       </div>
-      <DepositFilter onFilter={(f: any) => console.log("Filter", f)} />
-      <TableComponent<DepositRecord>
+      <DepositFilter onFilter={handleSearch} />
+
+      <PopupConfirm
+        open={isOpenConfirm}
+        type={"confirm"}
+        title={"Xác nhận rút tiền khách hàng"}
+        content={`Bạn có chắc chắn xác nhận rút tiền khách hàng?`}
+        onConfirm={handleConfirm}
+        onCancel={() => setIsOpenConfirm(false)}
+        confirmText={"Xác nhận"}
+        cancelText="Huỷ"
+      />
+      <TableComponent
         columns={columns}
-        dataSource={mockResponse.data}
-        response={mockResponse}
+        dataSource={data?.data || []}
+        response={data}
         page={page}
         rowHeight={45}
         onPageChange={handlePageChange}
         fontSize={14}
         headerHeight={44}
+      />
+
+      <TransactionHistoryModal
+        open={isOpenHistory}
+        onClose={() => setIsOpenHistory(false)}
+        transactionId={transactionId ?? ""}
+        histories={histories}
       />
     </div>
   );

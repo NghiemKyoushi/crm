@@ -26,3 +26,29 @@ export const confirmTopup = async (id: number) => {
     const res = await api.post(`${API_TYPE_CONST.CONFIRM_TOPUP}${id}/confirm`);
     return res.data.data;
 };
+
+export const cancelTopup = async (id: number, note: string) => {
+  const res = await api.post(`${API_TYPE_CONST.CONFIRM_TOPUP}${id}/cancel`, {note});
+  return res.data.data;
+};
+
+export const confirmWithdraw = async (id: number) => {
+    const res = await api.put(`${API_TYPE_CONST.CONFIRM_WITHDRAW}${id}`);
+    return res.data.data;
+};
+
+export const cancelWithdraw = async (id: number, note: string) => {
+  const res = await api.post(`${API_TYPE_CONST.CANCEL_WITHDRAW}${id}`,{note});
+  return res.data.data;
+};
+
+
+export const getDetailHistoryWithdraw = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.HISTORY_WITHDRAW}${id}`);
+  return res.data.data;
+};
+
+export const getDetailHistoryTopups = async (id: number) => {
+const res = await api.get(`${API_TYPE_CONST.HISTORY_TOPUP}${id}/history`);
+return res.data.data;
+};

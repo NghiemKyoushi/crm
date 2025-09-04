@@ -12,10 +12,15 @@ import {
 interface FinanceTabsProps {
   activeKey: string;
   onChange: (key: string) => void;
+  allowedTabs: string[];
 }
 
-const FinanceTabs: React.FC<FinanceTabsProps> = ({ activeKey, onChange }) => {
-  const items = [
+const FinanceTabs: React.FC<FinanceTabsProps> = ({
+  activeKey,
+  onChange,
+  allowedTabs,
+}) => {
+  const allItems = [
     {
       key: "deposit",
       label: (
@@ -54,8 +59,15 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({ activeKey, onChange }) => {
     },
   ];
 
+  const items = allItems.filter((item) => allowedTabs.includes(item.key));
+
   return (
-    <Tabs activeKey={activeKey} onChange={onChange} items={items} type="line" />
+    <Tabs
+      activeKey={activeKey}
+      onChange={onChange}
+      items={items}
+      type="line"
+    />
   );
 };
 

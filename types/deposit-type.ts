@@ -77,6 +77,7 @@ export interface BankAccount {
     created_at: string;   
     updated_at: string;   
     is_deleted: boolean | null;
+    status: string;
   }
   
   export interface Pageable {

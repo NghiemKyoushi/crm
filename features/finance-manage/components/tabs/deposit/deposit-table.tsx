@@ -23,19 +23,27 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import {
+  cancelTopup,
   confirmTopup,
   createTopupManual,
+  getDetailHistoryTopups,
 } from "@/features/finance-manage/apis";
 import dayjs from "dayjs";
 
 const DepositTable = ({}) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
+
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const { t } = useTranslation();
+  const [histories, setHistories] = useState<any[]>([]);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
+
   const [params, setParams] = useState<DepositParams>({
     page: 0,
     size: 10,
@@ -58,7 +66,7 @@ const DepositTable = ({}) => {
     mutationFn: (id: number) => confirmTopup(id),
     onSuccess: () => {
       toast.success("Xác nhận thành công!");
-      queryClient.invalidateQueries({ queryKey: ["listTopup"] }); // refresh list
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
       setIsOpenConfirm(false);
     },
     onError: (err: any) => {
@@ -72,11 +80,41 @@ const DepositTable = ({}) => {
     }
   };
 
+  const cancelMutation = useMutation({
+    mutationFn: ({ id, note }: { id: number; note: string }) =>
+      cancelTopup(id, note),
+    onSuccess: () => {
+      toast.success("Huỷ bỏ thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+      setIsOpenConfirm(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const handleCancel = (reason: string) => {
+    if (selectedId) {
+      cancelMutation.mutate({ id: selectedId, note: reason });
+    }
+  };
+
   const handlePageChange = (p: number) => {
     setParams((prev) => ({
       ...prev,
       page: p - 1,
     }));
+  };
+
+  const handleOpenHistory = async (id: number, code: string) => {
+    try {
+      const data = await getDetailHistoryTopups(id);
+      setHistories(data);
+      setTransactionId(code);
+      setIsOpenHistory(true);
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử:", error);
+    }
   };
 
   const columns: ColumnsType<DepositItem> = [
@@ -172,7 +210,10 @@ const DepositTable = ({}) => {
               <Button
                 className="!bg-red-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 size="small"
-                onClick={() => setIsOpenCancel(true)}
+                onClick={() => {
+                  setSelectedId(record.id);
+                  setIsOpenCancel(true);
+                }}
               >
                 Hủy Lệnh
               </Button>
@@ -183,7 +224,9 @@ const DepositTable = ({}) => {
               <Button
                 type="link"
                 size="small"
-                onClick={() => setIsOpenHistory(true)}
+                onClick={() =>
+                  handleOpenHistory(record.id, record.deposit_code)
+                }
               >
                 Xem lịch sử
               </Button>
@@ -193,8 +236,6 @@ const DepositTable = ({}) => {
       ),
     },
   ];
-
-  const queryClient = useQueryClient();
 
   const createTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createTopupManual(data),
@@ -246,8 +287,19 @@ const DepositTable = ({}) => {
         transactionCode="N-0805-1"
         onClose={() => setIsOpenCancel(false)}
         open={isOpenCancel}
-        onConfirm={() => console.log("checkkk")}
+        onConfirm={handleCancel}
       />
+      <PopupConfirm
+        open={isOpenConfirm}
+        type={"confirm"}
+        title={"Xác nhận nạp tiền khách hàng"}
+        content={`Bạn có chắc chắn xác nhận nạp tiền khách hàng?`}
+        onConfirm={handleConfirm}
+        onCancel={() => setIsOpenConfirm(false)}
+        confirmText={"Xác nhận"}
+        cancelText="Huỷ"
+      />
+
       <PopupConfirm
         open={isOpenConfirm}
         type={"confirm"}
@@ -261,20 +313,8 @@ const DepositTable = ({}) => {
       <TransactionHistoryModal
         open={isOpenHistory}
         onClose={() => setIsOpenHistory(false)}
-        transactionId="N-0805-2"
-        histories={[
-          {
-            action: "Xác nhận",
-            time: "2025-08-05 11:35:12",
-            user: "Admin",
-            note: "Giao dịch hợp lệ.",
-          },
-          {
-            action: "Tạo lệnh",
-            time: "2025-08-05 11:30:00",
-            user: "Trần Thị B (KH)",
-          },
-        ]}
+        transactionId={transactionId ?? ""}
+        histories={histories}
       />
     </div>
   );
