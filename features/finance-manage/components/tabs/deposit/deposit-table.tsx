@@ -10,7 +10,10 @@ import { Tag, Button, Space } from "antd";
 import CancelReasonModal from "./modal/modal-cancel-statement";
 import PopupConfirm from "@/components/PopupConfirm";
 import TransactionHistoryModal from "./modal/modal-history";
-import { mapDepositResponseToPaginatedResponse, useListTopups } from "@/features/finance-manage/hooks";
+import {
+  mapDepositResponseToPaginatedResponse,
+  useListTopups,
+} from "@/features/finance-manage/hooks";
 import {
   DepositItem,
   DepositParams,
@@ -19,7 +22,10 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { createTopupManual } from "@/features/finance-manage/apis";
+import {
+  confirmTopup,
+  createTopupManual,
+} from "@/features/finance-manage/apis";
 import dayjs from "dayjs";
 
 const DepositTable = ({}) => {
@@ -27,6 +33,8 @@ const DepositTable = ({}) => {
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
   const [isOpenHistory, setIsOpenHistory] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
   const { t } = useTranslation();
   const [params, setParams] = useState<DepositParams>({
     page: 0,
@@ -35,7 +43,6 @@ const DepositTable = ({}) => {
   const { data } = useListTopups(params);
 
   const handleSearch = (values: DepositParams) => {
-    
     const newParams: DepositParams = {
       ...params,
       depositCode: values.depositCode,
@@ -47,10 +54,28 @@ const DepositTable = ({}) => {
     setParams(newParams);
   };
 
+  const confirmMutation = useMutation({
+    mutationFn: (id: number) => confirmTopup(id),
+    onSuccess: () => {
+      toast.success("Xác nhận thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] }); // refresh list
+      setIsOpenConfirm(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const handleConfirm = () => {
+    if (selectedId) {
+      confirmMutation.mutate(selectedId);
+    }
+  };
+
   const handlePageChange = (p: number) => {
     setParams((prev) => ({
       ...prev,
-      page: p - 1,   
+      page: p - 1,
     }));
   };
 
@@ -137,7 +162,10 @@ const DepositTable = ({}) => {
                 className="!bg-green-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 type="primary"
                 size="small"
-                onClick={() => setIsOpenConfirm(true)}
+                onClick={() => {
+                  setSelectedId(record.id);
+                  setIsOpenConfirm(true);
+                }}
               >
                 Xác nhận
               </Button>
@@ -198,8 +226,12 @@ const DepositTable = ({}) => {
       <TableComponent
         columns={columns}
         dataSource={data?.content || []}
-        response={data ? mapDepositResponseToPaginatedResponse<DepositItem>(data) : undefined}
-        page={params.page ?  params.page + 1 :  0}
+        response={
+          data
+            ? mapDepositResponseToPaginatedResponse<DepositItem>(data)
+            : undefined
+        }
+        page={params.page ? params.page + 1 : 0}
         rowHeight={45}
         onPageChange={handlePageChange}
         fontSize={14}
@@ -221,9 +253,9 @@ const DepositTable = ({}) => {
         type={"confirm"}
         title={"Xác nhận nạp tiền khách hàng"}
         content={`Bạn có chắc chắn xác nhận nạp tiền khách hàng?`}
-        onConfirm={() => console.log("check")}
+        onConfirm={handleConfirm}
         onCancel={() => setIsOpenConfirm(false)}
-        confirmText={"Xoá"}
+        confirmText={"Xác nhận"}
         cancelText="Huỷ"
       />
       <TransactionHistoryModal

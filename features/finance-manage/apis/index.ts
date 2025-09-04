@@ -20,4 +20,9 @@ export const createTopupManual = async (body: DepositRequest) => {
 export const getListBankCreateAccount = async (params: BankDepositRequest) => {
     const res = await api.get(API_TYPE_CONST.BANK_LIST_DEPOSIT, { params });
     return res.data.data;
-  };
+};
+
+export const confirmTopup = async (id: number) => {
+    const res = await api.post(`${API_TYPE_CONST.CONFIRM_TOPUP}${id}/confirm`);
+    return res.data.data;
+};

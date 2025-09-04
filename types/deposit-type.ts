@@ -101,5 +101,36 @@ export interface BankAccount {
     first: boolean;
     empty: boolean;
   }
+
+  // Một bản ghi topup
+export interface withdrawItem {
+  id: number;
+  user_id: number;
+  amount: number;
+  user_bank_account_id: number;
+  status: "PENDING" | "COMPLETED" | "REJECTED"; // có thể mở rộng thêm nếu có status khác
+  note: string;
+  processed_by: number | null;
+  processed_at: string | null;
+  transaction_id: string | null;
+  rejection_reason: string | null;
+  admin_note: string | null;
+  fee_amount: number;
+  net_amount: number | null;
+  created_at: string;
+}
+
+export interface PaginatedWithdraw {
+  data: withdrawItem[];
+  total_pages: number;
+  total_items: number;
+  current_page: number;
+  page_size: number;
+}
+
+export interface TopupResponse {
+  data: PaginatedWithdraw;
+}
+
   
 

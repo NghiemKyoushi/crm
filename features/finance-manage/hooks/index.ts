@@ -1,6 +1,6 @@
 import { DepositParams, DepositResponse } from "@/types/deposit-type";
 import { useQuery } from "@tanstack/react-query";
-import { getListTopup } from "../apis";
+import { getListTopup, getListWithdraw } from "../apis";
 import { PaginatedResponse } from "@/components/TableComponent";
 
 export const useListTopups = (params: DepositParams) => {
@@ -10,12 +10,13 @@ export const useListTopups = (params: DepositParams) => {
   });
 };
 
-// export const useListWithdraw = (params: DepositParams) => {
-//     return useQuery<DepositResponse>({
-//       queryKey: ["listTopup", params],
-//       queryFn: () => getListTopup(params),
-//     });
-// };
+export const useListWithdraw = (params: DepositParams) => {
+    return useQuery<DepositResponse>({
+      queryKey: ["listTopup", params],
+      queryFn: () => getListWithdraw(params),
+    });
+};
+
 export function mapDepositResponseToPaginatedResponse<T>(
   res: DepositResponse
 ): PaginatedResponse<T> {
