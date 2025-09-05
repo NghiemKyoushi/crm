@@ -21,14 +21,15 @@ import { useMemo } from "react";
 
 export default function CustomerPage() {
   const { t } = useTranslation();
-  const { hasPermission, loading } = usePermission();
+  const { hasPermission, loading, permissions } = usePermission();
   const canAccess = useMemo(() => {
-    if (loading) return false;
+    if (loading || permissions.length === 0) return undefined;
+
     return (
       hasPermission("user.categorize_customers") ||
       hasPermission("user.manage_staff_roles")
     );
-  }, [loading, hasPermission]);
+  }, [loading, permissions, hasPermission]);
 
   if (loading) {
     return <Spin />;
@@ -102,7 +103,6 @@ export default function CustomerPage() {
     );
   }
 
-  // chỉ giữ lại tab có quyền
   const allowedTabs = allTabs.filter((tab) => hasPermission(tab.perm));
 
   return (

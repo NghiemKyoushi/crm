@@ -51,6 +51,5 @@ export const API_TYPE_CONST = {
   CANCEL_WITHDRAW: `${FEATURE}/admin/withdrawal/reject/`,
   HISTORY_WITHDRAW: `${FEATURE}/admin/withdrawal/requests/`,
   HISTORY_TOPUP: `${FEATURE}/admin/topups/`,
-
-
+  GEN_CODE_TOPUP: `${FEATURE}/admin/topups/create-transaction-code`,
 } as const;

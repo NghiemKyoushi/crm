@@ -11,8 +11,14 @@ import { useListWithdraw } from "@/features/finance-manage/hooks";
 import PopupConfirm from "@/components/PopupConfirm";
 import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { confirmWithdraw, getDetailHistoryTopups, getDetailHistoryWithdraw } from "@/features/finance-manage/apis";
+import {
+  cancelWithdraw,
+  confirmWithdraw,
+  getDetailHistoryTopups,
+  getDetailHistoryWithdraw,
+} from "@/features/finance-manage/apis";
 import TransactionHistoryModal from "../deposit/modal/modal-history";
+import CancelReasonModal from "../deposit/modal/modal-cancel-statement";
 
 const WithdrawTable = ({}) => {
   const queryClient = useQueryClient();
@@ -27,6 +33,7 @@ const WithdrawTable = ({}) => {
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [histories, setHistories] = useState<any[]>([]);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [isOpenCancel, setIsOpenCancel] = useState(false);
 
   const [params, setParams] = useState<DepositParams>({
     page: 0,
@@ -58,6 +65,19 @@ const WithdrawTable = ({}) => {
     },
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: ({ id, note }: { id: number; note: string }) =>
+      cancelWithdraw(id, note),
+    onSuccess: () => {
+      toast.success("Huỷ bỏ thành công!");
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+      setIsOpenConfirm(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
   const handleConfirm = () => {
     if (selectedId) {
       confirmMutation.mutate(selectedId);
@@ -65,15 +85,21 @@ const WithdrawTable = ({}) => {
   };
 
   const handleOpenHistory = async (id: number, code: string) => {
-      try {
-        const data = await getDetailHistoryTopups(id); 
-        setHistories(data); 
-        setTransactionId(code); 
-        setIsOpenHistory(true); 
-      } catch (error) {
-        console.error("Lỗi khi lấy lịch sử:", error);
-      }
-    };
+    try {
+      const data = await getDetailHistoryTopups(id);
+      setHistories(data);
+      setTransactionId(code);
+      setIsOpenHistory(true);
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử:", error);
+    }
+  };
+
+  const handleCancel = (reason: string) => {
+    if (selectedId) {
+      cancelMutation.mutate({ id: selectedId, note: reason });
+    }
+  };
 
   const columns: ColumnsType<withdrawItem> = [
     {
@@ -162,7 +188,10 @@ const WithdrawTable = ({}) => {
               <Button
                 className="!bg-gray-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 size="small"
-                // onClick={() => setIsOpenCancel(true)}
+                onClick={() => {
+                  setSelectedId(record.id);
+                  setIsOpenCancel(true);
+                }}
               >
                 Từ chối
               </Button>
@@ -210,6 +239,13 @@ const WithdrawTable = ({}) => {
         onPageChange={handlePageChange}
         fontSize={14}
         headerHeight={44}
+      />
+
+      <CancelReasonModal
+        transactionCode="N-0805-1"
+        onClose={() => setIsOpenCancel(false)}
+        open={isOpenCancel}
+        onConfirm={handleCancel}
       />
 
       <TransactionHistoryModal

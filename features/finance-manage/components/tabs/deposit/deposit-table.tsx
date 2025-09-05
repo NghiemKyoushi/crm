@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./deposit-filter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { faPlusCircle, faMinusCircle } from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
 import { Tag, Button, Space } from "antd";
@@ -38,6 +38,7 @@ const DepositTable = ({}) => {
 
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
 
   const [histories, setHistories] = useState<any[]>([]);
   const [transactionId, setTransactionId] = useState<string | null>(null);
@@ -63,7 +64,13 @@ const DepositTable = ({}) => {
   };
 
   const confirmMutation = useMutation({
-    mutationFn: (id: number) => confirmTopup(id),
+    mutationFn: ({
+      id,
+      confirmed_amount,
+    }: {
+      id: number;
+      confirmed_amount: number;
+    }) => confirmTopup(id, confirmed_amount),
     onSuccess: () => {
       toast.success("Xác nhận thành công!");
       queryClient.invalidateQueries({ queryKey: ["listTopup"] });
@@ -75,8 +82,13 @@ const DepositTable = ({}) => {
   });
 
   const handleConfirm = () => {
-    if (selectedId) {
-      confirmMutation.mutate(selectedId);
+    if (selectedId && confirmAmount) {
+      console.log("selectedId", selectedId);
+
+      confirmMutation.mutate({
+        id: selectedId,
+        confirmed_amount: confirmAmount,
+      });
     }
   };
 
@@ -201,6 +213,7 @@ const DepositTable = ({}) => {
                 type="primary"
                 size="small"
                 onClick={() => {
+                  setConfirmAmount(record.amount);
                   setSelectedId(record.id);
                   setIsOpenConfirm(true);
                 }}
@@ -255,13 +268,22 @@ const DepositTable = ({}) => {
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex flex-row justify-between mb-3">
         <h2 className="text-lg font-bold mb-4">Duyệt Giao dịch Nạp tiền</h2>
-        <Button
-          onClick={() => setIsOpen(true)}
-          type="primary"
-          className="!h-9 !bg-green-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
-        >
-          <FontAwesomeIcon icon={faPlusCircle} /> Nạp tiền Thủ công
-        </Button>
+        <div className="flex flex-row justify-between gap-2">
+          <Button
+            onClick={() => setIsOpen(true)}
+            type="primary"
+            className="!h-9 !bg-green-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
+          >
+            <FontAwesomeIcon icon={faPlusCircle} /> Nạp tiền Thủ công
+          </Button>
+          <Button
+            onClick={() => setIsOpen(true)}
+            type="primary"
+            className="!h-9 !bg-red-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
+          >
+            <FontAwesomeIcon icon={faMinusCircle} /> Trừ tiền Thủ công
+          </Button>
+        </div>
       </div>
       <DepositFilter onFilter={handleSearch} />
       <TableComponent

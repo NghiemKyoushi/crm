@@ -37,12 +37,12 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const hasPermission = useCallback(
     (permName: string) => permissions.some((p) => p.name === permName && p.active),
-    [permissions]
+    [permissions, listRole]
   );
-
+const stillLoading = isLoading || !listRole || permissions.length === 0;
   return (
     <PermissionContext.Provider
-      value={{ permissions, hasPermission, loading: isLoading }}
+      value={{ permissions, hasPermission, loading: stillLoading }}
     >
       {children}
     </PermissionContext.Provider>

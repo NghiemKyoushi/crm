@@ -10,7 +10,10 @@ import {
   DepositRequest,
 } from "@/types/deposit-type";
 import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
-import { getListBankCreateAccount } from "@/features/finance-manage/apis";
+import {
+  getCodeGeneration,
+  getListBankCreateAccount,
+} from "@/features/finance-manage/apis";
 
 interface User {
   id: string;
@@ -154,9 +157,13 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
               <Button
                 type="dashed"
                 size="small"
-                onClick={() => {
-                  const code = `FT${Date.now()}`;
-                  form.setFieldValue("transactionCode", code);
+                onClick={async () => {
+                  try {
+                    const code = await getCodeGeneration();
+                    form.setFieldValue("transactionCode", code);
+                  } catch (error) {
+                    console.error(error);
+                  }
                 }}
               >
                 Tạo mã
