@@ -155,5 +155,42 @@
     "delete": "Xóa",
     "editPolicy": "Sửa Chính sách",
     "editCategory": "Chỉnh sửa phân loại"
+  },
+  "deposit": {
+    "title": "Duyệt Giao dịch Nạp tiền",
+    "manualTopup": "Nạp tiền Thủ công",
+    "manualDeduct": "Trừ tiền Thủ công",
+    "columns": {
+      "code": "Mã Lệnh",
+      "user": "Khách hàng (UserID)",
+      "amount": "Số tiền (VND)",
+      "createdAt": "Ngày tạo",
+      "handler": "Người xử lý",
+      "handledAt": "Ngày xử lý",
+      "status": "Trạng thái",
+      "action": "Hành động"
+    },
+    "status": {
+      "pending": "Chờ xác nhận",
+      "completed": "Đã xác nhận",
+      "canceled": "Đã hủy",
+      "manual": "Nạp tay"
+    },
+    "actions": {
+      "confirm": "Xác nhận",
+      "cancel": "Hủy Lệnh",
+      "history": "Xem lịch sử"
+    },
+    "modal": {
+      "confirmTitle": "Xác nhận nạp tiền khách hàng",
+      "confirmContent": "Bạn có chắc chắn xác nhận nạp tiền khách hàng?",
+      "confirmText": "Xác nhận",
+      "cancelText": "Huỷ"
+    },
+    "toast": {
+      "confirmSuccess": "Xác nhận thành công!",
+      "cancelSuccess": "Huỷ bỏ thành công!",
+      "manualSuccess": "Tạo lệnh nạp tiền thành công!"
+    }
   }
 }

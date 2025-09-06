@@ -48,3 +48,4 @@ export function mapBankResponseToPaginatedResponse<T>(
     page_size: res.size,
   };
 }
+

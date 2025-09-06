@@ -25,12 +25,14 @@ interface ManualDepositModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (data: DepositRequest) => void;
+  type: 'PLUS' | "MINUS";
 }
 
 const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   open,
   onClose,
   onConfirm,
+  type
 }) => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<SelectProps["options"]>([]);
@@ -67,8 +69,6 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
         const data: BankAccountListResponse = await getListBankCreateAccount(
           params
         );
-        console.log("data");
-
         const opts = data.content.map((acc: BankAccount) => ({
           label: `${acc.bank_name} - ${acc.account_number}`,
           value: acc.id, // value unique
@@ -89,7 +89,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       const values = await form.validateFields();
       setLoading(true);
       onConfirm({
-        amoun_vnd: +values.amount,
+        amount_vnd: +values.amount,
         bank_transaction_id: values.transactionCode,
         company_bank_account_id: values.companyAccount,
         note: values.reason,
@@ -106,12 +106,11 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   return (
     <Modal
       open={open}
-      title="Nạp tiền Thủ công cho User"
+      title={type === 'PLUS'? "Nạp tiền Thủ công cho User" : "Trừ tiền Thủ công cho User"}
       onCancel={onClose}
       footer={null}
     >
       <Form form={form} layout="vertical" className="space-y-1">
-        {/* Tìm kiếm khách hàng */}
         <Form.Item
           className="!mb-1.5"
           label="Tìm kiếm Khách hàng"
@@ -171,13 +170,14 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
             }
           />
         </Form.Item>
-
-        {/* Lý do nạp tiền */}
         <Form.Item
           className="!mb-1.5"
           label="Lý do nạp tiền"
           name="reason"
-          rules={[{ required: true, message: "Nhập lý do!" }]}
+          rules={[
+            { required: true, message: "Nhập lý do hủy!" },
+            { min: 10, message: "Lý do phải có ít nhất 10 ký tự!" },
+          ]}
         >
           <Input.TextArea
             placeholder="VD: Khách chuyển khoản sai cú pháp, đã đối soát và nạp tay."
@@ -188,7 +188,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Hủy bỏ</Button>
           <Button type="primary" loading={loading} onClick={handleSubmit}>
-            Xác nhận Nạp tiền
+           {type === 'PLUS'? "Xác nhận nạp tiền": "Xác nhận trừ tiền" } 
           </Button>
         </div>
       </Form>

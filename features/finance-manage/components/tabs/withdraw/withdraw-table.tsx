@@ -13,32 +13,46 @@ import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   cancelWithdraw,
+  completeWithdraw,
   confirmWithdraw,
   getDetailHistoryTopups,
-  getDetailHistoryWithdraw,
 } from "@/features/finance-manage/apis";
 import TransactionHistoryModal from "../deposit/modal/modal-history";
 import CancelReasonModal from "../deposit/modal/modal-cancel-statement";
+import ConfirmReasonModal from "../deposit/modal/modal-complete-statement";
+import TransactionDetailModal from "./modal/transaction-detail-modal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import TransactionCompleteModal from "./modal/transaction-complete-modal";
 
 const WithdrawTable = ({}) => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const [page, setPage] = useState(0);
-  const handlePageChange = (p: number) => {
-    setPage(p);
-  };
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [histories, setHistories] = useState<any[]>([]);
   const [transactionId, setTransactionId] = useState<string | null>(null);
   const [isOpenCancel, setIsOpenCancel] = useState(false);
+  const [isOpenComplete, setIsOpenComplete] = useState(false);
+  const [isOpenTransaction, setIsOpenTransaction] = useState(false);
+  const [isOpenCompleteTransaction, setIsOpenCompleteTransaction] =
+    useState(false);
+
+  const [isTransacted, setIsTransacted] = useState(false);
 
   const [params, setParams] = useState<DepositParams>({
     page: 0,
     size: 10,
   });
+
+  const handlePageChange = (p: number) => {
+    setParams((prev) => ({
+      ...prev,
+      page: p - 1,
+    }));
+  };
 
   const { data } = useListWithdraw(params);
   const handleSearch = (values: DepositParams) => {
@@ -54,10 +68,24 @@ const WithdrawTable = ({}) => {
   };
 
   const confirmMutation = useMutation({
-    mutationFn: (id: number) => confirmWithdraw(id),
+    mutationFn: ({ id, note }: { id: number; note: string }) =>
+      confirmWithdraw(id, note),
     onSuccess: () => {
       toast.success("Xác nhận thành công!");
-      queryClient.invalidateQueries({ queryKey: ["listTopup"] }); // refresh list
+      queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
+      setIsOpenConfirm(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: { note: string } }) =>
+      completeWithdraw(id, body),
+    onSuccess: () => {
+      toast.success("Hoàn thành giao dịch!");
+      queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
     },
     onError: (err: any) => {
@@ -70,7 +98,7 @@ const WithdrawTable = ({}) => {
       cancelWithdraw(id, note),
     onSuccess: () => {
       toast.success("Huỷ bỏ thành công!");
-      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+      queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
     },
     onError: (err: any) => {
@@ -80,7 +108,8 @@ const WithdrawTable = ({}) => {
 
   const handleConfirm = () => {
     if (selectedId) {
-      confirmMutation.mutate(selectedId);
+      confirmMutation.mutate({ id: selectedId, note: "" });
+      setIsOpenConfirm(false);
     }
   };
 
@@ -98,6 +127,17 @@ const WithdrawTable = ({}) => {
   const handleCancel = (reason: string) => {
     if (selectedId) {
       cancelMutation.mutate({ id: selectedId, note: reason });
+      setIsOpenCancel(false);
+    }
+  };
+
+  const handleComplete = (reason: string) => {
+    if (selectedId) {
+      completeMutation.mutate({
+        id: selectedId,
+        body: { note: reason },
+      });
+      setIsOpenComplete(false);
     }
   };
 
@@ -138,6 +178,7 @@ const WithdrawTable = ({}) => {
       dataIndex: "handledAt",
       key: "handledAt",
     },
+
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -150,64 +191,93 @@ const WithdrawTable = ({}) => {
                 Chờ xử lý
               </Tag>
             );
+          case "APPROVED":
+            return (
+              <Tag className="!rounded-3xl" color="green">
+                Đã xác nhận
+              </Tag>
+            );
           case "COMPLETED":
             return (
               <Tag className="!rounded-3xl" color="green">
                 Thành công
               </Tag>
             );
+          case "CANCELLED":
+            return (
+              <Tag className="!rounded-3xl" color="red">
+                Bị huỷ
+              </Tag>
+            );
           case "REJECTED":
             return (
               <Tag className="!rounded-3xl" color="red">
-                Bị từ chối
+                Bị huỷ
               </Tag>
             );
+
           default:
             return null;
         }
       },
     },
     {
+      title: "Mã QR",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string, record) => (
+        <Space>
+          {["PENDING", "APPROVED"].includes(record.status) && (
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                if (record.status === "APPROVED") {
+                  setIsTransacted(true);
+                } else {
+                  setIsTransacted(false);
+                }
+                setSelectedId(record.id);
+                setIsOpenTransaction(true);
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faQrcode}
+                className="text-blue-500 text-xl"
+              />
+            </button>
+          )}
+
+          {["CANCELLED", "COMPLETED", "REJECTED"].includes(record.status) && (
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                setSelectedId(record.id);
+                setIsOpenCompleteTransaction(true);
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                className="text-blue-500 text-xl"
+              />
+            </button>
+          )}
+        </Space>
+      ),
+    },
+    {
       title: "Hành động",
       key: "action",
       render: (_, record) => (
         <Space>
-          {record.status === "PENDING" && (
-            <>
-              <Button
-                className="!bg-blue-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
-                type="primary"
-                size="small"
-                onClick={() => {
-                  setSelectedId(record.id);
-                  setIsOpenConfirm(true);
-                }}
-              >
-                Đã chuyển
-              </Button>
-              <Button
-                className="!bg-gray-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
-                size="small"
-                onClick={() => {
-                  setSelectedId(record.id);
-                  setIsOpenCancel(true);
-                }}
-              >
-                Từ chối
-              </Button>
-            </>
-          )}
-          {["CANCELED", "COMPLETED", "MANUAL"].includes(record.status) && (
-            <div>
-              <Button
-                type="link"
-                size="small"
-                onClick={() => handleOpenHistory(record.id, "TEST_CODE")}
-              >
-                Xem lịch sử
-              </Button>
-            </div>
-          )}
+          <div>
+            <Button
+              size="small"
+              onClick={() => handleOpenHistory(record.id, "TEST_CODE")}
+              className="!bg-indigo-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
+            >
+              Lịch sử
+            </Button>
+          </div>
         </Space>
       ),
     },
@@ -234,7 +304,7 @@ const WithdrawTable = ({}) => {
         columns={columns}
         dataSource={data?.data || []}
         response={data}
-        page={page}
+        page={params.page ? params.page + 1 : 0}
         rowHeight={45}
         onPageChange={handlePageChange}
         fontSize={14}
@@ -248,11 +318,43 @@ const WithdrawTable = ({}) => {
         onConfirm={handleCancel}
       />
 
+      <ConfirmReasonModal
+        transactionCode="N-0805-1"
+        onClose={() => setIsOpenComplete(false)}
+        open={isOpenComplete}
+        onConfirm={handleComplete}
+      />
+
       <TransactionHistoryModal
         open={isOpenHistory}
         onClose={() => setIsOpenHistory(false)}
         transactionId={transactionId ?? ""}
         histories={histories}
+      />
+      <TransactionDetailModal
+        open={isOpenTransaction}
+        onCancel={() => setIsOpenTransaction(false)}
+        onConfirm={() => {
+          setIsOpenConfirm(true);
+        }}
+        onReject={() => setIsOpenTransaction(false)}
+        onComplete={() => {
+          setIsOpenComplete(true);
+        }}
+        isTransacted={isTransacted}
+      />
+      <TransactionCompleteModal
+        onCancel={() => setIsOpenCompleteTransaction(false)}
+        open={isOpenCompleteTransaction}
+        transaction={{
+          accountHolder: "check",
+          accountNumber: "83838383",
+          amount: 828282,
+          bankName: "VCB",
+          code: "VCB",
+          customer: "NGHIEMDD",
+          status: "COMPLETED",
+        }}
       />
     </div>
   );

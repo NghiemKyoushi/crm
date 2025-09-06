@@ -20,8 +20,6 @@ const FilterSection = (props: FilterSectionProps) => {
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
     };
 
-    console.log("📌 Filter payload:", payload);
-
     try {
       toast.success("Gửi request lọc thành công!");
     } catch (err) {

@@ -8,17 +8,19 @@ import axios from "axios";
 import { bankAccountModel } from "@/types/customer-type";
 import api from "@/api/axiosClient";
 
-interface BankAccountForm {
+export interface BankAccountForm {
   bankId: number;
   accountNumber: string;
   accountHolder: string;
   branch?: string;
 }
 
-interface BankInfo {
+export interface BankInfo {
   id: number;
   name: string;
   logo: string;
+  code: string;
+  short_name?: string;
 }
 
 interface Props {
@@ -55,7 +57,7 @@ const BankAccountModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
       account_holder_name: values.accountHolder,
       account_number: values.accountNumber,
       active: true,
-      bank_id: values.bankId,
+      bank_id: +values.bankId,
     });
     reset();
     onClose();
