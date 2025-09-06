@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Layout, Menu } from "antd";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,8 +17,23 @@ import {
   faCog,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
+import { usePermission } from "./PermissionContext";
 
 const { Sider } = Layout;
+
+export const menuPermissions: Record<string, string[]> = {
+  "/dashboard": [], // luôn hiển thị
+  "/orders": ["order.view_all", "order.update_status"],
+  "/finance-management": [
+    "finance.approve_topup",
+    "finance.manage_debt",
+    "FINANCE_MANAGE_BANK_ACCOUNTS",
+  ],
+  "/user-management": ["user.categorize_customers", "user.manage_staff_roles"],
+  "/auction": [], // tuỳ bạn định nghĩa
+  "/products": [], // tuỳ bạn định nghĩa
+  "/settings": ["system.admin", "system.superAdmin"],
+};
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
@@ -32,6 +47,17 @@ export const menuItems = [
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { t } = useTranslation();
+
+  const { hasPermission } = usePermission();
+
+  // chỉ render menu khi có quyền
+  const filteredMenu = useMemo(() => {
+    return menuItems.filter((item) => {
+      const required = menuPermissions[item.key] || [];
+      if (required.length === 0) return true; // không cần quyền
+      return required.some((perm) => hasPermission(perm));
+    });
+  }, [hasPermission]);
 
   return (
     <Sider
@@ -58,7 +84,7 @@ export const Sidebar: React.FC = () => {
         style={{ border: "none" }}
         theme="light"
         mode="inline"
-        items={menuItems.map((item) => ({
+        items={filteredMenu.map((item) => ({
           key: item.key,
           icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
           label: <Link href={item.key}>{t(`menu.${item.label}`)}</Link>,

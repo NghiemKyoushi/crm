@@ -1,72 +1,109 @@
-import { Table, Tag, Button } from "antd";
+import { Tag, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import AddBankAccountModal from "./modal/add-account-bank";
 import { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import AssignRoleModal from "./modal/modal-assign";
-
-interface BankAccount {
-  id: string;
-  bank: string;
-  accountNumber: string;
-  owner: string;
-  limit: number;
-  status: "active" | "inactive";
-}
-
-const data: BankAccount[] = [
-  {
-    id: "1",
-    bank: "Vietcombank",
-    accountNumber: "0123456789",
-    owner: "CTY TNHH ORDER SYSTEM",
-    limit: 500000000,
-    status: "active",
-  },
-  {
-    id: "2",
-    bank: "Techcombank",
-    accountNumber: "9876543210",
-    owner: "CTY TNHH ORDER SYSTEM",
-    limit: 500000000,
-    status: "inactive",
-  },
-];
-
-const users = [
-  { email: "admin@yourcompany.com", label: "Super Admin" },
-  { email: "ketoan.1@yourcompany.com" },
-  { email: "ketoan.2@yourcompany.com" },
-  { email: "quanly.td@yourcompany.com" },
-  // ... thêm nhiều để test scroll
-];
+import { BankAccount } from "@/types/deposit-type";
+import {
+  mapBankResponseToPaginatedResponse,
+  useBankAccounts,
+} from "@/features/finance-manage/hooks";
+import { ColumnsType } from "antd/es/table";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  addBankCreateAccount,
+  deleteBankCreateAccount,
+  updateBankCreateAccount,
+} from "@/features/finance-manage/apis";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import PopupConfirm from "@/components/PopupConfirm";
 
 export default function BankAccountSetting() {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [openAssign, setOpenAssign] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<BankAccount | null>(null);
+  const [isOpenConfirmDelete, setIsOpenConfirmDelete] = useState(false);
+  const [selectId, setSelectId] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
 
   const [page, setPage] = useState(0);
+  const pageSize = 10;
+  const queryClient = useQueryClient();
 
-  const columns = [
+  const { data } = useBankAccounts({ page, size: pageSize });
+
+  const addMutation = useMutation({
+    mutationFn: addBankCreateAccount,
+    onSuccess: () => {
+      toast.success("Thêm tài khoản thành công!");
+      queryClient.invalidateQueries({
+        queryKey: ["bankAccounts"],
+      });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: any }) =>
+      updateBankCreateAccount(id, body),
+    onSuccess: () => {
+      toast.success("Cập nhật tài khoản thành công!");
+      queryClient.invalidateQueries({
+        queryKey: ["bankAccounts"],
+      });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteBankCreateAccount(id),
+    onSuccess: () => {
+      toast.success("Xóa tài khoản thành công!");
+      queryClient.invalidateQueries({
+        queryKey: ["bankAccounts"],
+      });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.localizedMessage || t("common.error"));
+    },
+  });
+
+  const handleConfirmDelete = () => {
+    if (selectId) {
+      deleteMutation.mutate(+selectId);
+      setIsOpenConfirmDelete(false);
+    }
+  };
+
+  const columns: ColumnsType<BankAccount> = [
     {
       title: "Ngân hàng",
-      dataIndex: "bank",
-      key: "bank",
+      dataIndex: "bank_name",
+      key: "bank_name",
     },
     {
       title: "Số tài khoản",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
+      dataIndex: "account_number",
+      key: "account_number",
     },
     {
       title: "Chủ tài khoản",
-      dataIndex: "owner",
-      key: "owner",
+      dataIndex: "account_holder",
+      key: "account_holder",
     },
     {
       title: "Hạn mức/ngày (VND)",
-      dataIndex: "limit",
-      key: "limit",
+      dataIndex: "daily_limit_vnd",
+      key: "daily_limit_vnd",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { maximumFractionDigits: 0 }),
     },
@@ -74,8 +111,8 @@ export default function BankAccountSetting() {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: BankAccount["status"]) =>
-        status === "active" ? (
+      render: (_, record: BankAccount) =>
+        record.is_active ? (
           <Tag color="green" className="px-3 py-1 !rounded-3xl">
             Hoạt động
           </Tag>
@@ -90,11 +127,35 @@ export default function BankAccountSetting() {
       key: "action",
       render: (_: any, record: BankAccount) => (
         <div className="flex gap-2">
-          <button className="!text-blue-600 hover:underline">Sửa</button>
+          <button
+            onClick={() => {
+              setEditingRecord(record);
+              setOpen(true);
+            }}
+            className="!text-blue-600 hover:underline"
+          >
+            Sửa
+          </button>
           <span>|</span>
-          <button className="!text-green-600 hover:underline" onClick={()=> setOpenAssign(true)}>Gán quyền</button>
+          <button
+            className="!text-green-600 hover:underline"
+            onClick={() => {
+              setSelectId(record.id.toString())
+              setOpenAssign(true)
+            }}
+          >
+            Gán quyền
+          </button>
           <span>|</span>
-          <button className="!text-red-600 hover:underline">Xóa</button>
+          <button
+            onClick={() => {
+              setSelectId(record.id.toString())
+              setIsOpenConfirmDelete(true);
+            }}
+            className="!text-red-600 hover:underline"
+          >
+            Xóa
+          </button>
         </div>
       ),
     },
@@ -111,7 +172,10 @@ export default function BankAccountSetting() {
           Cài đặt Tài khoản Ngân hàng Công ty
         </h2>
         <Button
-        onClick={()=> setOpen(true)}
+          onClick={() => {
+            setEditingRecord(null);
+            setOpen(true);
+          }}
           type="primary"
           icon={<PlusOutlined />}
           className="bg-blue-500 hover:bg-blue-600 rounded-lg"
@@ -121,21 +185,29 @@ export default function BankAccountSetting() {
       </div>
       <TableComponent
         columns={columns}
-        dataSource={data || []}
+        dataSource={data?.content || []}
         rowHeight={45}
         pageSize={10}
-        page={data.length || 0}
+        page={page + 1 || 0}
         onPageChange={handleChangePage}
-        // response={data}
+        response={
+          data
+            ? mapBankResponseToPaginatedResponse<BankAccount>(data)
+            : undefined
+        }
         fontSize={14}
         headerHeight={44}
-        response={undefined}
       />
       <AddBankAccountModal
         open={open}
+        record={editingRecord}
         onCancel={() => setOpen(false)}
         onOk={(values: any) => {
-          console.log("Submit:", values);
+          if (editingRecord) {
+            updateMutation.mutate({ id: editingRecord.id, body: values });
+          } else {
+            addMutation.mutate(values);
+          }
           setOpen(false);
         }}
       />
@@ -143,13 +215,20 @@ export default function BankAccountSetting() {
         open={openAssign}
         onCancel={() => setOpenAssign(false)}
         onSave={(selected) => console.log("Selected users:", selected)}
-        accountName="Vietcombank"
-        accountNumber="0123456789"
-        users={users}
-        defaultSelected={[
-          "ketoan.1@yourcompany.com",
-          "quanly.td@yourcompany.com",
-        ]}
+        accountName={accountName}
+        accountNumber={accountNumber}
+        idBank={selectId}
+       
+      />
+      <PopupConfirm
+        open={isOpenConfirmDelete}
+        type={"delete"}
+        title={"confirm delete"}
+        content={"confirm delete"}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setIsOpenConfirmDelete(false)}
+        confirmText={t("deposit.modal.confirmText")}
+        cancelText={t("deposit.modal.cancelText")}
       />
     </div>
   );

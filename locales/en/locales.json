@@ -51,7 +51,7 @@
   "customerManage": {
     "search": "Search",
     "placeholder": "Find customer",
-    "title":"Customer List",
+    "title": "Customer List",
     "customerOverview": {
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spending",
@@ -155,5 +155,42 @@
     "delete": "Delete",
     "editPolicy": "Edit Policy",
     "editCategory": "Edit Category"
+  },
+  "deposit": {
+    "title": "Approve Deposit Transactions",
+    "manualTopup": "Manual Topup",
+    "manualDeduct": "Manual Deduction",
+    "columns": {
+      "code": "Order Code",
+      "user": "Customer (UserID)",
+      "amount": "Amount (VND)",
+      "createdAt": "Created At",
+      "handler": "Handler",
+      "handledAt": "Handled At",
+      "status": "Status",
+      "action": "Action"
+    },
+    "status": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "canceled": "Canceled",
+      "manual": "Manual"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "history": "View History"
+    },
+    "modal": {
+      "confirmTitle": "Confirm Customer Deposit",
+      "confirmContent": "Are you sure you want to confirm this deposit?",
+      "confirmText": "Confirm",
+      "cancelText": "Cancel"
+    },
+    "toast": {
+      "confirmSuccess": "Confirmed successfully!",
+      "cancelSuccess": "Canceled successfully!",
+      "manualSuccess": "Manual deposit created successfully!"
+    }
   }
 }
