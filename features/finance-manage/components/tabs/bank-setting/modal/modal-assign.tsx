@@ -1,10 +1,6 @@
-import { Modal, Checkbox, Button } from "antd";
-import { useState } from "react";
-
-interface User {
-  email: string;
-  label?: string;
-}
+import { getListBankPermission } from "@/features/finance-manage/apis";
+import { Modal, Checkbox, Button, Spin } from "antd";
+import { useState, useEffect } from "react";
 
 interface AssignRoleModalProps {
   open: boolean;
@@ -12,8 +8,14 @@ interface AssignRoleModalProps {
   onSave: (selected: string[]) => void;
   accountName: string;
   accountNumber: string;
-  users: User[];
   defaultSelected?: string[];
+  idBank: string;
+}
+
+export interface AdminUserCheck {
+  email: string;
+  is_checked: boolean;
+  admin_user_id: number;
 }
 
 export default function AssignRoleModal({
@@ -22,13 +24,47 @@ export default function AssignRoleModal({
   onSave,
   accountName,
   accountNumber,
-  users,
   defaultSelected = [],
+  idBank,
 }: AssignRoleModalProps) {
   const [selectedUsers, setSelectedUsers] = useState<string[]>(defaultSelected);
+  const [staffs, setStaffs] = useState<AdminUserCheck[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch staff list
+  const fetchStaffs = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const response = await getListBankPermission(+idBank);
+      setStaffs(response);
+    } catch (err) {
+      console.error("Fetch staffs error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      setHasMore(true);
+      fetchStaffs();
+    } else {
+      setStaffs([]);
+    }
+  }, [open]);
 
   const handleOk = () => {
     onSave(selectedUsers);
+  };
+
+  const loadMore = () => {
+    if (!hasMore || loading) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchStaffs();
   };
 
   return (
@@ -49,28 +85,46 @@ export default function AssignRoleModal({
       </p>
 
       {/* Scroll container */}
-      <div className="max-h-60 overflow-y-auto rounded-lg p-3 space-y-2 flex flex-col gap-3 border border-zinc-400 bg-gray-100">
-        {users.map((user) => (
-          <Checkbox
-           className="flex items-center py-2"
-            key={user.email}
-            checked={selectedUsers.includes(user.email)}
-            onChange={(e) => {
-              if (e.target.checked) {
-                setSelectedUsers((prev) => [...prev, user.email]);
-              } else {
-                setSelectedUsers((prev) =>
-                  prev.filter((item) => item !== user.email)
-                );
-              }
-            }}
-          >
-            {user.email}{" "}
-            {user.label && (
-              <span className="text-gray-500">({user.label})</span>
-            )}
-          </Checkbox>
-        ))}
+      <div
+        className="max-h-60 overflow-y-auto rounded-lg p-3 space-y-2 flex flex-col gap-3 border border-zinc-400 bg-gray-100"
+        onScroll={(e) => {
+          const target = e.currentTarget;
+          if (
+            target.scrollTop + target.clientHeight >=
+            target.scrollHeight - 20
+          ) {
+            loadMore();
+          }
+        }}
+      >
+        {staffs.map((user) => {
+          if (user.is_checked) {
+            return (
+              <Checkbox
+                className="flex items-center py-2"
+                key={user.email}
+                checked={selectedUsers.includes(user.email)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedUsers((prev) => [...prev, user.email]);
+                  } else {
+                    setSelectedUsers((prev) =>
+                      prev.filter((item) => item !== user.email)
+                    );
+                  }
+                }}
+              >
+                {user.email}
+              </Checkbox>
+            );
+          }
+        })}
+
+        {loading && (
+          <div className="flex justify-center py-2">
+            <Spin />
+          </div>
+        )}
       </div>
 
       {/* Footer */}

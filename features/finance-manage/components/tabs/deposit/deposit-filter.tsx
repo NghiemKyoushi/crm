@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button, Select, DatePicker, Form, SelectProps } from "antd";
+import { Button, Select, DatePicker, Form, SelectProps, Input } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { DepositParams } from "@/types/deposit-type";
@@ -53,22 +53,15 @@ const FilterSection = (props: FilterSectionProps) => {
       <Form form={form} onFinish={onFinish}>
         <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
           <Form.Item name="keyword" className="mb-0">
-            <Select
-              showSearch
-              placeholder="Nhập tên khách hàng"
-              filterOption={false}
-              onSearch={(e) => setSearch(e)}
-              options={options}
-              className="w-full !h-11"
-            />
+          <Input placeholder="Mã lệnh, Mã KH..." className="w-full h-11" />
           </Form.Item>
 
           <Form.Item name="status" className="mb-0">
             <Select placeholder="-- Trạng thái --" className="w-full !h-11">
-              <Option value="PENDDING">Chờ xác nhận</Option>
+              <Option value="WAITING_CONFIRMATION">Chờ xác nhận</Option>
               <Option value="COMPLETED">Đã xác nhận</Option>
               <Option value="CANCELED">Đã hủy</Option>
-              <Option value="MANUAL">Nạp tay</Option>
+              <Option value="FAILED">Thất bại</Option>
             </Select>
           </Form.Item>
 

@@ -16,6 +16,10 @@ export interface DepositItem {
   amount: number;
   user_confirmed: boolean;
   processed: boolean;
+  user_name: string;
+  transaction_id: string;
+  handler:string;
+  handler_time: string;
 }
 
 export interface Pageable {
@@ -54,7 +58,7 @@ export interface DepositParams {
 
 export interface DepositRequest {
   user_id: number;
-  amoun_vnd: number;
+  amount_vnd: number;
   company_bank_account_id: number;
   bank_transaction_id: number;
   reason: string;
@@ -62,44 +66,109 @@ export interface DepositRequest {
 }
 
 export interface BankDepositRequest {
-    page?: number;
-    size?: number;
+  page?: number;
+  size?: number;
 }
 
 export interface BankAccount {
-    id: number;
-    bank_name: string;
-    bank_code: string;
-    account_number: string;
-    account_holder: string;
-    daily_limit_vnd: number;
-    is_active: boolean;
-    created_at: string;   
-    updated_at: string;   
-    is_deleted: boolean | null;
-  }
-  
-  export interface Pageable {
-    page_number: number;
-    page_size: number;
-    sort: string[]; 
-    offset: number;
-    paged: boolean;
-    unpaged: boolean;
-  }
-  
-  export interface BankAccountListResponse {
-    content: BankAccount[];
-    pageable: Pageable;
-    total_pages: number;
-    total_elements: number;
-    last: boolean;
-    size: number;
-    number: number;
-    sort: any[]; // tương tự trên
-    number_of_elements: number;
-    first: boolean;
-    empty: boolean;
-  }
-  
+  id: number;
+  bank_name: string;
+  bank_code: string;
+  account_number: string;
+  account_holder: string;
+  daily_limit_vnd: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean | null;
+  status: string;
+}
 
+export interface Pageable {
+  page_number: number;
+  page_size: number;
+  sort: string[];
+  offset: number;
+  paged: boolean;
+  unpaged: boolean;
+}
+
+export interface BankAccountListResponse {
+  content: BankAccount[];
+  pageable: Pageable;
+  total_pages: number;
+  total_elements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  sort: any[]; // tương tự trên
+  number_of_elements: number;
+  first: boolean;
+  empty: boolean;
+}
+
+export interface BankSettingAccountModel {
+  account_holder: string;
+  account_number: string;
+  bank_code: string;
+  bank_name: string;
+  daily_limit_vnd: number;
+  is_active: boolean;
+  id?:number;
+}
+// Một bản ghi topup
+export interface withdrawItem {
+  id: number;
+  user_id: number;
+  amount: number;
+  user_bank_account_id: number;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED"; // có thể mở rộng thêm nếu có status khác
+  note: string;
+  processed_by: number | null;
+  processed_at: string | null;
+  transaction_id: string | null;
+  rejection_reason: string | null;
+  admin_note: string | null;
+  fee_amount: number;
+  net_amount: number | null;
+  created_at: string;
+}
+
+export interface PaginatedWithdraw {
+  data: withdrawItem[];
+  total_pages: number;
+  total_items: number;
+  current_page: number;
+  page_size: number;
+}
+
+export interface TopupResponse {
+  data: PaginatedWithdraw;
+}
+
+export type TransactionType = "TOPUP" | "WITHDRAW";
+
+export type TransactionStatus =
+  | "WAITING_CONFIRMATION"
+  | "CANCELED"
+  | "COMPLETED"
+  | "PENDING"
+  | "FAILED";
+
+export interface TransactionHistory {
+  id: number;
+  transaction_type: TransactionType;
+  transaction_id: number;
+  old_status: TransactionStatus;
+  new_status: TransactionStatus;
+  action_by: number;
+  action_at: string;
+  reason: string | null;
+  note: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  additional_data: Record<string, any> | null;
+  status_change: boolean;
+  status_change_description: string;
+  username: string;
+}

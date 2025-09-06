@@ -4,12 +4,12 @@ import { Modal, Form, Input, Button, Typography, message } from "antd";
 
 interface CancelReasonModalProps {
   open: boolean;
-  transactionCode: string; // ví dụ: "N-0805-1"
+  transactionCode: string; 
   onClose: () => void;
   onConfirm: (reason: string) => void;
 }
 
-const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
+const ConfirmReasonModal: React.FC<CancelReasonModalProps> = ({
   open,
   transactionCode,
   onClose,
@@ -33,14 +33,14 @@ const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
   return (
     <Modal
       open={open}
-      title="Lý do Hủy/Từ chối"
+      title="Hoàn thành giao dịch"
       onCancel={onClose}
       footer={null}
       width={400}
       centered
     >
       <div className="mb-3 text-sm">
-        Vui lòng nhập lý do hủy cho giao dịch{" "}
+        Vui lòng nhập lý do hoàn thành giao dịch
         <Typography.Text strong className="text-blue-600">
           {transactionCode}
         </Typography.Text>
@@ -66,9 +66,9 @@ const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
           <Button onClick={onClose}>Hủy bỏ</Button>
           <Button
             type="primary"
-            danger
             loading={loading}
             onClick={handleSubmit}
+            className="!bg-green-500"
           >
             Xác nhận
           </Button>
@@ -78,4 +78,4 @@ const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
   );
 };
 
-export default CancelReasonModal;
+export default ConfirmReasonModal;

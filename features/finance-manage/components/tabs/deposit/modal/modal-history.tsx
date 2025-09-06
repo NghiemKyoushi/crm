@@ -1,19 +1,28 @@
+import { TransactionHistory } from "@/types/deposit-type";
 import { Modal } from "antd";
-import { ReactNode } from "react";
-
-interface HistoryItem {
-  action: string;
-  time: string;
-  user: string;
-  note?: string;
-}
+import dayjs from "dayjs";
 
 interface TransactionHistoryModalProps {
   open: boolean;
   onClose: () => void;
   transactionId: string;
-  histories: HistoryItem[];
+  histories: TransactionHistory[];
 }
+
+export const renderTransactionStatus = (status: string): string => {
+    switch (status) {
+      case "WAITING_CONFIRMATION":
+        return "Chờ xử lý";
+      case "COMPLETED":
+        return "Đã hoàn thành";
+      case "CANCELED":
+        return "Đã hủy";
+      case "FAILED":
+        return "Thất bại";
+      default:
+        return status; // fallback nếu có trạng thái khác
+    }
+  };
 
 export default function TransactionHistoryModal({
   open,
@@ -50,20 +59,20 @@ export default function TransactionHistoryModal({
             {/* Content */}
             <div className="flex flex-col gap-2 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                <span className="font-medium">{item.action}</span>
+                <span className="font-medium">{renderTransactionStatus(item.new_status)}</span>
                 <span className="text-gray-500 text-sm">
-                  - {item.time}
+                  - {dayjs(item.action_at).format("DD-MM-YYYY")}
                 </span>
               </div>
               <div className="text-gray-600 text-sm">
-                Người thực hiện: <span className="font-medium">{item.user}</span>
+                Người thực hiện: <span className="font-medium">{item.username}</span>
               </div>
 
-              {item.note && (
+              {/* {item.note && ( */}
                 <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 border border-gray-100">
-                  <span className="font-medium">Ghi chú/Lý do:</span> {item.note}
+                  <span className="font-medium">Ghi chú/Lý do:</span> {item.note ? item.note : "Tạo lệnh nạp thủ công" }
                 </div>
-              )}
+              {/* )} */}
             </div>
           </div>
         ))}

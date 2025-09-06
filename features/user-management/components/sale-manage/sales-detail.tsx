@@ -5,7 +5,6 @@ import { ColumnsType } from "antd/es/table";
 import { CustomerModel } from "@/types/customer-type";
 import { useCustomerForSale, useListCustomer } from "../../hooks/staff-manage";
 import { useState } from "react";
-import CustomerTypeSelect from "../customer-manage/customer-type-select";
 import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeAssignCustomerForSale } from "../../apis/staff-manage";

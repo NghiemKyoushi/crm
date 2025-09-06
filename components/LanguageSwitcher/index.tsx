@@ -50,7 +50,7 @@ const LanguageSwitcher = () => {
         className="flex items-center justify-center cursor-pointer h-10 w-10"
         title={language === 'vi' ? 'Tiếng Việt' : 'English'}
       >
-        <GlobalOutlined className='!text-blue-400' style={{ fontSize: 25 }} />
+        <GlobalOutlined className="!text-gray-500" style={{ fontSize: 25 }} />
       </a>
     </Dropdown>
   );
