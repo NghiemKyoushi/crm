@@ -93,7 +93,7 @@ export default function CustomerTable() {
       key: "debt_amount",
       render: (value) => (
         <Text className={value > 0 ? "text-red-500 font-semibold" : ""}>
-          {value.toLocaleString("vi-VN")}
+          {value && value.toLocaleString("vi-VN")}
         </Text>
       ),
     },

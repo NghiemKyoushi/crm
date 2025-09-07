@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 interface AssignRoleModalProps {
   open: boolean;
   onCancel: () => void;
-  onSave: (selected: string[]) => void;
+  onSave: (selected: number[]) => void;
   accountName: string;
   accountNumber: string;
-  defaultSelected?: string[];
+  defaultSelected?: number[];
   idBank: string;
 }
 
@@ -27,19 +27,23 @@ export default function AssignRoleModal({
   defaultSelected = [],
   idBank,
 }: AssignRoleModalProps) {
-  const [selectedUsers, setSelectedUsers] = useState<string[]>(defaultSelected);
+    console.log('accountName', accountName);
+    
+  const [selectedUsers, setSelectedUsers] = useState<number[]>(defaultSelected);
   const [staffs, setStaffs] = useState<AdminUserCheck[]>([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Fetch staff list
   const fetchStaffs = async () => {
     if (loading) return;
     setLoading(true);
     try {
       const response = await getListBankPermission(+idBank);
       setStaffs(response);
+      const preSelected = response
+        .filter((user: AdminUserCheck) => user.is_checked)
+        .map((user: AdminUserCheck) => user.admin_user_id);
+
+      setSelectedUsers(preSelected);
     } catch (err) {
       console.error("Fetch staffs error:", err);
     } finally {
@@ -49,7 +53,6 @@ export default function AssignRoleModal({
 
   useEffect(() => {
     if (open) {
-      setHasMore(true);
       fetchStaffs();
     } else {
       setStaffs([]);
@@ -58,13 +61,6 @@ export default function AssignRoleModal({
 
   const handleOk = () => {
     onSave(selectedUsers);
-  };
-
-  const loadMore = () => {
-    if (!hasMore || loading) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchStaffs();
   };
 
   return (
@@ -79,45 +75,32 @@ export default function AssignRoleModal({
     >
       <p className="text-gray-600 mb-4">
         Chọn các Admin được phép quản lý tài chính cho tài khoản{" "}
-        <span className="font-semibold text-blue-600">
+        <p className="font-semibold text-blue-600">
           {accountName} – {accountNumber}
-        </span>
+        </p>
       </p>
 
       {/* Scroll container */}
-      <div
-        className="max-h-60 overflow-y-auto rounded-lg p-3 space-y-2 flex flex-col gap-3 border border-zinc-400 bg-gray-100"
-        onScroll={(e) => {
-          const target = e.currentTarget;
-          if (
-            target.scrollTop + target.clientHeight >=
-            target.scrollHeight - 20
-          ) {
-            loadMore();
-          }
-        }}
-      >
+      <div className="max-h-60 overflow-y-auto rounded-lg p-3 space-y-2 flex flex-col gap-3 border border-zinc-400 bg-gray-100">
         {staffs.map((user) => {
-          if (user.is_checked) {
-            return (
-              <Checkbox
-                className="flex items-center py-2"
-                key={user.email}
-                checked={selectedUsers.includes(user.email)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedUsers((prev) => [...prev, user.email]);
-                  } else {
-                    setSelectedUsers((prev) =>
-                      prev.filter((item) => item !== user.email)
-                    );
-                  }
-                }}
-              >
-                {user.email}
-              </Checkbox>
-            );
-          }
+          return (
+            <Checkbox
+              className="flex items-center py-2"
+              key={user.email}
+              checked={selectedUsers.includes(user.admin_user_id)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedUsers((prev) => [...prev, user.admin_user_id]);
+                } else {
+                  setSelectedUsers((prev) =>
+                    prev.filter((id) => id !== user.admin_user_id)
+                  );
+                }   
+              }}
+            >
+              {user.email}
+            </Checkbox>
+          );
         })}
 
         {loading && (

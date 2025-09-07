@@ -168,7 +168,9 @@
       "handler": "Handler",
       "handledAt": "Handled At",
       "status": "Status",
-      "action": "Action"
+      "action": "Action",
+      "userName": "Username",
+      "note": "note"
     },
     "status": {
       "pending": "Pending",
@@ -191,6 +193,55 @@
       "confirmSuccess": "Confirmed successfully!",
       "cancelSuccess": "Canceled successfully!",
       "manualSuccess": "Manual deposit created successfully!"
-    }
+    },
+    "depositTitle": "Deposit Orders",
+    "withdraw": "Withdrawal Requests",
+    "bankSettings": "Bank Settings",
+    "reconciliation": "Debt & Reconciliation",
+    "approveDeposit": "Approve Deposit Transactions",
+    "manualDeposit": "Manual Deposit",
+    "manualWithdraw": "Manual Deduction"
+  },
+  "keywordPlaceholder": "Order ID, Customer ID...",
+  "statusPlaceholder": "-- Status --",
+  "status": {
+    "waiting": "Waiting Confirmation",
+    "completed": "Completed",
+    "canceled": "Canceled",
+    "failed": "Failed"
+  },
+  "fromDate": "From date",
+  "toDate": "To date",
+  "filter": "Filter",
+  "withdraw": {
+    "title": "Process Withdrawal Transaction",
+    "code": "Order Code",
+    "customer": "Customer (UserID)",
+    "amount": "Amount (VND)",
+    "createdAt": "Created At",
+    "handler": "Handler",
+    "handledAt": "Handled At",
+    "status": "Status",
+    "statusType": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected"
+    },
+    "qrCode": "QR Code",
+    "history": "History",
+    "confirmTitle": "Confirm Customer Withdrawal",
+    "confirmContent": "Are you sure you want to confirm this customer withdrawal?",
+    "confirmSuccess": "Withdrawal confirmed successfully!",
+    "completeSuccess": "Transaction completed!",
+    "cancelSuccess": "Cancelled successfully!",
+    "historyError": "Error while fetching history"
+  },
+  "common": {
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "error": "An error occurred"
   }
 }

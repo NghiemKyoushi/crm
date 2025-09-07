@@ -51,7 +51,7 @@
   "customerManage": {
     "search": "Tìm kiếm",
     "placeholder": "Tìm kiếm khách hàng...",
-    "title":"Danh sách Khách hàng",
+    "title": "Danh sách Khách hàng",
     "customerOverview": {
       "totalOrders": "Tổng số Đơn hàng",
       "totalSpent": "Tổng chi tiêu",
@@ -168,7 +168,9 @@
       "handler": "Người xử lý",
       "handledAt": "Ngày xử lý",
       "status": "Trạng thái",
-      "action": "Hành động"
+      "action": "Hành động",
+      "userName": "Tên khách hàng",
+      "note": "Ghi chú"
     },
     "status": {
       "pending": "Chờ xác nhận",
@@ -191,6 +193,56 @@
       "confirmSuccess": "Xác nhận thành công!",
       "cancelSuccess": "Huỷ bỏ thành công!",
       "manualSuccess": "Tạo lệnh nạp tiền thành công!"
-    }
+    },
+    "depositTitle": "Lệnh nạp tiền",
+    "withdraw": "Yêu cầu rút tiền",
+    "bankSettings": "Cài đặt Ngân hàng",
+    "reconciliation": "Công nợ & Đối soát",
+    "approveDeposit": "Duyệt Giao dịch Nạp tiền",
+    "manualDeposit": "Nạp tiền Thủ công",
+    "manualWithdraw": "Trừ tiền Thủ công"
+  },
+  "keywordPlaceholder": "Mã lệnh, Mã KH...",
+  "statusPlaceholder": "-- Trạng thái --",
+  "status": {
+    "waiting": "Chờ xác nhận",
+    "completed": "Đã xác nhận",
+    "canceled": "Đã hủy",
+    "failed": "Thất bại"
+  },
+  "fromDate": "Từ ngày",
+  "toDate": "Đến ngày",
+  "filter": "Lọc",
+
+  "withdraw": {
+    "title": "Xử lý Giao dịch Rút tiền",
+    "code": "Mã Lệnh",
+    "customer": "Khách hàng (UserID)",
+    "amount": "Số tiền (VND)",
+    "createdAt": "Ngày tạo",
+    "handler": "Người xử lý",
+    "handledAt": "Ngày xử lý",
+    "status": "Trạng thái",
+    "statusType": {
+      "pending": "Chờ xử lý",
+      "approved": "Đã xác nhận",
+      "completed": "Thành công",
+      "cancelled": "Đã huỷ",
+      "rejected": "Đã từ chối"
+    },
+    "qrCode": "Mã QR",
+    "history": "Lịch sử",
+    "confirmTitle": "Xác nhận rút tiền khách hàng",
+    "confirmContent": "Bạn có chắc chắn xác nhận rút tiền khách hàng?",
+    "confirmSuccess": "Xác nhận thành công!",
+    "completeSuccess": "Hoàn thành giao dịch!",
+    "cancelSuccess": "Huỷ bỏ thành công!",
+    "historyError": "Lỗi khi lấy lịch sử"
+  },
+  "common": {
+    "actions": "Hành động",
+    "confirm": "Xác nhận",
+    "cancel": "Huỷ",
+    "error": "Có lỗi xảy ra"
   }
 }

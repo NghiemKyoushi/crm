@@ -1,49 +1,76 @@
 "use client";
 
+import { getDetailWithdraw } from "@/features/finance-manage/apis";
+import { withdrawModel } from "@/types/deposit-type";
 import { Modal } from "antd";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface TransactionDetailModalProps {
   open: boolean;
   onCancel: () => void;
-  transaction: {
-    code: string;
-    customer: string;
-    amount: number;
-    status: "PENDING" | "COMPLETED" | "CANCELLED";
-    bankName: string;
-    accountNumber: string;
-    accountHolder: string;
-  };
+  selectId: number | null;
 }
 
 export default function TransactionCompleteModal({
   open,
   onCancel,
-  transaction,
+  selectId,
 }: TransactionDetailModalProps) {
-  const formatCurrency = (amount: number) =>
-    amount.toLocaleString("vi-VN") + " VNĐ";
+  const [withdrawDetail, setWithdrawDetail] = useState<withdrawModel | null>(
+    null
+  );
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const fetchWithdrawDetail = async () => {
+      if (!open || !selectId) return;
+      try {
+        const data = await getDetailWithdraw(Number(selectId));
+        console.log("data", data);
+        setWithdrawDetail(data);
+      } catch (error) {
+        console.error("Error fetching withdraw detail:", error);
+      }
+    };
+
+    fetchWithdrawDetail();
+  }, [open, selectId]);
 
   const getStatusBadge = () => {
-    switch (transaction.status) {
-      case "PENDING":
-        return (
-          <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
-            Chờ xử lý
-          </span>
-        );
-      case "COMPLETED":
-        return (
-          <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
-            Đã hoàn thành
-          </span>
-        );
-      case "CANCELLED":
-        return (
-          <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
-            Đã hủy
-          </span>
-        );
+    if (withdrawDetail) {
+      switch (withdrawDetail.status) {
+        case "PENDING":
+          return (
+            <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.pending")}
+            </span>
+          );
+        case "COMPLETED":
+          return (
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.completed")}
+            </span>
+          );
+        case "APPROVED":
+          return (
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.approved")}
+            </span>
+          );
+        case "CANCELLED":
+          return (
+            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.cancelled")}
+            </span>
+          );
+        case "REJECTED":
+          return (
+            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.rejected")}
+            </span>
+          );
+      }
     }
   };
 
@@ -55,25 +82,26 @@ export default function TransactionCompleteModal({
       centered
       width={600}
       className="rounded-xl"
-      title={<h2 className="text-lg font-semibold">Chi tiết Giao dịch Rút tiền</h2>}
+      title={
+        <h2 className="text-lg font-semibold">Chi tiết Giao dịch Rút tiền</h2>
+      }
     >
       <div className="space-y-4">
-        {/* Thông tin giao dịch */}
         <div className="bg-gray-50 rounded-lg p-3 mr-[50%]">
           <h3 className="font-semibold mb-3">Thông tin Giao dịch</h3>
           <div className="space-y-2 text-sm">
             <p>
               <span className="font-medium">Mã yêu cầu:</span>{" "}
-              {transaction.code}
+              {withdrawDetail?.id}
             </p>
             <p>
               <span className="font-medium">Khách hàng:</span>{" "}
-              {transaction.customer}
+              {withdrawDetail?.userName} ({withdrawDetail?.userId}){" "}
             </p>
             <p>
               <span className="font-medium">Số tiền:</span>{" "}
               <span className="text-red-600 font-semibold">
-                {formatCurrency(transaction.amount)}
+                {withdrawDetail?.amount.toLocaleString()} VNĐ
               </span>
             </p>
             <p>
@@ -89,15 +117,15 @@ export default function TransactionCompleteModal({
           <div className="space-y-2 text-sm">
             <p>
               <span className="font-medium">Ngân hàng:</span>{" "}
-              {transaction.bankName}
+              {withdrawDetail?.bankName}
             </p>
             <p>
               <span className="font-medium">Số tài khoản:</span>{" "}
-              {transaction.accountNumber}
+              {withdrawDetail?.accountNumber}
             </p>
             <p>
               <span className="font-medium">Chủ tài khoản:</span>{" "}
-              {transaction.accountHolder}
+              {withdrawDetail?.userName}
             </p>
           </div>
         </div>

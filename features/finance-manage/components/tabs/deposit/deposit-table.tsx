@@ -113,6 +113,7 @@ const DepositTable = ({}) => {
   const handleCancel = (reason: string) => {
     if (selectedId) {
       cancelMutation.mutate({ id: selectedId, note: reason });
+      setIsOpenCancel(false)
     }
   };
 
@@ -157,12 +158,12 @@ const DepositTable = ({}) => {
     //   key: "user_id",
     // },
     {
-      title: "Tên người dùng",
+      title: t("deposit.columns.userName"),
       dataIndex: "user_name",
       key: "user_name",
     },
     {
-      title: "Ghi chú",
+      title: t("deposit.columns.note"),
       dataIndex: "note",
       key: "note",
     },
@@ -323,21 +324,21 @@ const DepositTable = ({}) => {
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex flex-row justify-between mb-3">
-        <h2 className="text-lg font-bold mb-4">Duyệt Giao dịch Nạp tiền</h2>
+        <h2 className="text-lg font-bold mb-4">{t("deposit.approveDeposit")}</h2>
         <div className="flex flex-row justify-between gap-2">
           <Button
             onClick={() => setIsOpen(true)}
             type="primary"
             className="!h-9 !bg-green-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
           >
-            <FontAwesomeIcon icon={faPlusCircle} /> Nạp tiền Thủ công
+            <FontAwesomeIcon icon={faPlusCircle} /> {t("deposit.manualDeposit")}
           </Button>
           <Button
             onClick={() => setIsOpenMinusManual(true)}
             type="primary"
             className="!h-9 !bg-red-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
           >
-            <FontAwesomeIcon icon={faMinusCircle} /> Trừ tiền Thủ công
+            <FontAwesomeIcon icon={faMinusCircle} /> {t("deposit.manualWithdraw")}
           </Button>
         </div>
       </div>
