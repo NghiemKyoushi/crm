@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle, faMinusCircle } from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
-import { Tag, Button, Space } from "antd";
+import { Tag, Button, Space, Tooltip } from "antd";
 import CancelReasonModal from "./modal/modal-cancel-statement";
 import PopupConfirm from "@/components/PopupConfirm";
 import TransactionHistoryModal from "./modal/modal-history";
@@ -113,7 +113,7 @@ const DepositTable = ({}) => {
   const handleCancel = (reason: string) => {
     if (selectedId) {
       cancelMutation.mutate({ id: selectedId, note: reason });
-      setIsOpenCancel(false)
+      setIsOpenCancel(false);
     }
   };
 
@@ -140,17 +140,31 @@ const DepositTable = ({}) => {
       title: t("deposit.columns.code"),
       dataIndex: "deposit_code",
       key: "deposit_code",
-      render: (code: string, record: DepositItem) => (
-        <Button
-          type="link"
-          onClick={() => {
-            setSelectedRecord(record);
-            setIsOpenDetail(true);
-          }}
-        >
-          {code}
-        </Button>
-      ),
+      render: (code: string) => {
+        if (!code) return "";
+        if (code.length <= 8) {
+          return <span>{code}</span>;
+        }
+        const first = code.slice(0, 4);
+        const last = code.slice(-4);
+        const masked = `${first}...${last}`;
+        return (
+          <Tooltip title={code}>
+            <span>{masked}</span>
+          </Tooltip>
+        );
+      },
+      // render: (code: string, record: DepositItem) => (
+      //   <Button
+      //     type="link"
+      //     onClick={() => {
+      //       setSelectedRecord(record);
+      //       setIsOpenDetail(true);
+      //     }}
+      //   >
+      //     {code}
+      //   </Button>
+      // ),
     },
     // {
     //   title: t("deposit.columns.user"),
@@ -161,11 +175,27 @@ const DepositTable = ({}) => {
       title: t("deposit.columns.userName"),
       dataIndex: "user_name",
       key: "user_name",
+      render: (text: string) => {
+        if (!text) return "";
+        return (
+          <Tooltip title={text}>
+            <span className="truncate max-w-[150px] inline-block">{text}</span>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("deposit.columns.note"),
       dataIndex: "note",
       key: "note",
+      render: (note: string) => {
+        if (!note) return "";
+        return (
+          <Tooltip title={note}>
+            <div className="truncate max-w-[120px]">{note}</div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("deposit.columns.amount"),
@@ -187,6 +217,14 @@ const DepositTable = ({}) => {
       title: t("deposit.columns.handler"),
       dataIndex: "handler",
       key: "handler",
+      render: (handler: string) => {
+        if (!handler) return "-";
+        return (
+          <Tooltip title={handler}>
+            <div className="truncate max-w-[100px]">{handler}</div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("deposit.columns.handledAt"),
@@ -247,7 +285,7 @@ const DepositTable = ({}) => {
       key: "action",
       render: (_, record) => (
         <Space>
-          {record.status === "WAITING_CONFIRMATION"  && (
+          {record.status === "WAITING_CONFIRMATION" && (
             <>
               <Button
                 className="!bg-green-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
@@ -313,18 +351,20 @@ const DepositTable = ({}) => {
 
   const handleCreateTopupManual = (value: DepositRequest) => {
     createTopupManualMutation.mutate(value);
-    setIsOpen(false)
+    setIsOpen(false);
   };
 
   const handleCreateMinusTopupManual = (value: DepositRequest) => {
     createMinusTopupManualMutation.mutate(value);
-    setIsOpenMinusManual(false)
+    setIsOpenMinusManual(false);
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex flex-row justify-between mb-3">
-        <h2 className="text-lg font-bold mb-4">{t("deposit.approveDeposit")}</h2>
+        <h2 className="text-lg font-bold mb-4">
+          {t("deposit.approveDeposit")}
+        </h2>
         <div className="flex flex-row justify-between gap-2">
           <Button
             onClick={() => setIsOpen(true)}
@@ -338,7 +378,8 @@ const DepositTable = ({}) => {
             type="primary"
             className="!h-9 !bg-red-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
           >
-            <FontAwesomeIcon icon={faMinusCircle} /> {t("deposit.manualWithdraw")}
+            <FontAwesomeIcon icon={faMinusCircle} />{" "}
+            {t("deposit.manualWithdraw")}
           </Button>
         </div>
       </div>

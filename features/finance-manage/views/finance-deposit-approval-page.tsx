@@ -11,8 +11,9 @@ const FinanceDepositApprovalPage = () => {
     if (loading || permissions.length === 0) return undefined;
 
     return (
-      hasPermission("user.categorize_customers") ||
-      hasPermission("user.manage_staff_roles")
+      hasPermission("finance.approve_topup") ||
+      hasPermission("finance.manage_debt") ||
+      hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS")
     );
   }, [loading, permissions, hasPermission]);
 

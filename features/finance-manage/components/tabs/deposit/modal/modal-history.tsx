@@ -13,6 +13,8 @@ export const renderTransactionStatus = (status: string): string => {
   switch (status) {
     case "WAITING_CONFIRMATION":
       return "Chờ xử lý";
+    case "APPROVED":
+      return "Đã tiếp nhận";
     case "COMPLETED":
       return "Đã hoàn thành";
     case "CANCELED":
