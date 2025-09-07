@@ -172,7 +172,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
         </Form.Item>
         <Form.Item
           className="!mb-1.5"
-          label="Lý do nạp tiền"
+          label= {type === 'PLUS'? "Lý do nạp tiền" : "Lý do trừ tiền"}
           name="reason"
           rules={[
             { required: true, message: "Nhập lý do hủy!" },

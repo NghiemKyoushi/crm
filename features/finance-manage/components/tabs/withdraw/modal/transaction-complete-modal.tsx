@@ -86,8 +86,8 @@ export default function TransactionCompleteModal({
         <h2 className="text-lg font-semibold">Chi tiết Giao dịch Rút tiền</h2>
       }
     >
-      <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-3 mr-[50%]">
+      <div className="space-y-4 flex flex-row">
+        <div className="bg-gray-50 rounded-lg p-3">
           <h3 className="font-semibold mb-3">Thông tin Giao dịch</h3>
           <div className="space-y-2 text-sm">
             <p>
@@ -112,7 +112,7 @@ export default function TransactionCompleteModal({
         </div>
 
         {/* Thông tin tài khoản nhận */}
-        <div className="bg-blue-50  rounded-lg p-3 mr-[50%]">
+        <div className="bg-blue-50  rounded-lg p-3 ">
           <h3 className="font-semibold mb-3">Thông tin Tài khoản Nhận</h3>
           <div className="space-y-2 text-sm">
             <p>

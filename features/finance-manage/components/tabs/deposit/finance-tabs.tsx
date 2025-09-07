@@ -23,7 +23,7 @@ const FinanceDepositApprovalPage = () => {
     hasPermission("finance.approve_topup") && "deposit",
     hasPermission("finance.approve_topup") && "withdraw",
     hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
-    hasPermission("finance.manage_debt") && "reconciliation",
+    // hasPermission("finance.manage_debt") && "reconciliation",
   ].filter(Boolean) as string[];
 
   return (
@@ -37,9 +37,9 @@ const FinanceDepositApprovalPage = () => {
         {activeTab === "deposit" && <DepositTable />}
         {activeTab === "withdraw" && <WithdrawTable />}
         {activeTab === "bank-settings" && <BankAccountSetting />}
-        {activeTab === "reconciliation" && (
+        {/* {activeTab === "reconciliation" && (
           <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
-        )}
+        )} */}
     </div>
   );
 };

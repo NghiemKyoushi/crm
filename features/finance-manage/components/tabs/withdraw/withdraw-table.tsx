@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./withdraw-filter";
-import { Button, Space, Tag } from "antd";
+import { Button, Space, Tag, Tooltip } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { DepositParams, withdrawItem } from "@/types/deposit-type";
 import dayjs from "dayjs";
@@ -15,7 +15,6 @@ import {
   cancelWithdraw,
   completeWithdraw,
   confirmWithdraw,
-  getDetailHistoryTopups,
   getDetailHistoryWithdraw,
 } from "@/features/finance-manage/apis";
 import TransactionHistoryModal from "../deposit/modal/modal-history";
@@ -75,7 +74,7 @@ const WithdrawTable = ({}) => {
       toast.success(t("withdraw.confirmSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
-      setIsOpenTransaction(false)
+      setIsOpenTransaction(false);
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -89,7 +88,7 @@ const WithdrawTable = ({}) => {
       toast.success(t("withdraw.completeSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
-      setIsOpenTransaction(false)
+      setIsOpenTransaction(false);
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -103,7 +102,7 @@ const WithdrawTable = ({}) => {
       toast.success(t("withdraw.cancelSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
-      setIsOpenTransaction(false)
+      setIsOpenTransaction(false);
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -119,7 +118,7 @@ const WithdrawTable = ({}) => {
 
   const handleOpenHistory = async (id: number, code: string) => {
     try {
-      const data = await getDetailHistoryWithdraw(id);      
+      const data = await getDetailHistoryWithdraw(id);
       setHistories(data);
       setTransactionId(code);
       setIsOpenHistory(true);
@@ -152,6 +151,20 @@ const WithdrawTable = ({}) => {
       title: t("withdraw.code"),
       dataIndex: "deposit_code",
       key: "deposit_code",
+      render: (code: string) => {
+        if (!code) return "";
+        if (code.length <= 8) {
+          return <span>{code}</span>;
+        }
+        const first = code.slice(0, 4);
+        const last = code.slice(-4);
+        const masked = `${first}...${last}`;
+        return (
+          <Tooltip title={code}>
+            <span>{masked}</span>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("withdraw.customer"),
@@ -162,6 +175,14 @@ const WithdrawTable = ({}) => {
       title: "Ghi chú",
       dataIndex: "note",
       key: "note",
+      render: (note: string) => {
+        if (!note) return "-";
+        return (
+          <Tooltip title={note}>
+            <div className="truncate max-w-[200px]">{note}</div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("withdraw.amount"),
@@ -181,13 +202,25 @@ const WithdrawTable = ({}) => {
     },
     {
       title: t("withdraw.handler"),
-      dataIndex: "handler",
-      key: "handler",
+      dataIndex: "processed_name",
+      key: "processed_name",
+      render: (processed_name: string) => {
+        if (!processed_name) return "-";
+        return (
+          <Tooltip title={processed_name}>
+            <div className="truncate max-w-[100px]">{processed_name}</div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: t("withdraw.handledAt"),
-      dataIndex: "handledAt",
-      key: "handledAt",
+      dataIndex: "processed_at",
+      key: "processed_at",
+      render: (value: string) => {
+        if (!value) return "-";
+        return dayjs(value).format("DD-MM-YYYY");
+      },
     },
 
     {
@@ -205,7 +238,7 @@ const WithdrawTable = ({}) => {
           case "APPROVED":
             return (
               <Tag className="!rounded-3xl" color="green">
-               {t("withdraw.statusType.approved")}
+                {t("withdraw.statusType.approved")}
               </Tag>
             );
           case "COMPLETED":
@@ -217,7 +250,7 @@ const WithdrawTable = ({}) => {
           case "CANCELLED":
             return (
               <Tag className="!rounded-3xl" color="red">
-               {t("withdraw.statusType.cancelled")}
+                {t("withdraw.statusType.cancelled")}
               </Tag>
             );
           case "REJECTED":
@@ -282,9 +315,9 @@ const WithdrawTable = ({}) => {
         <Space>
           <div>
             <Button
+              type="link"
               size="small"
               onClick={() => handleOpenHistory(record.id, record.deposit_code)}
-              className="!bg-indigo-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
             >
               {t("withdraw.history")}
             </Button>
@@ -350,7 +383,7 @@ const WithdrawTable = ({}) => {
           setIsOpenConfirm(true);
         }}
         onReject={() => {
-          setIsOpenCancel(true)
+          setIsOpenCancel(true);
         }}
         onComplete={() => {
           setIsOpenComplete(true);

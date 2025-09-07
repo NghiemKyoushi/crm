@@ -66,7 +66,8 @@
       "contactInfo": "Thông tin liên hệ",
       "assignedStaff": "Nhân viên phụ trách",
       "change": "Thay đổi",
-      "addDefaultAddress": "Thêm địa chỉ mặc định"
+      "addDefaultAddress": "Thêm địa chỉ mặc định",
+      "addDefaultBank": "Thêm ngân hàng mặc định"
     },
     "detailTitle": "Chi tiết Khách hàng",
     "tabs": {
@@ -225,7 +226,7 @@
     "status": "Trạng thái",
     "statusType": {
       "pending": "Chờ xử lý",
-      "approved": "Đã xác nhận",
+      "approved": "Đã tiếp nhận",
       "completed": "Thành công",
       "cancelled": "Đã huỷ",
       "rejected": "Đã từ chối"
