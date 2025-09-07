@@ -13,6 +13,7 @@ import { ColumnsType } from "antd/es/table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addBankCreateAccount,
+  addUserBankPermission,
   deleteBankCreateAccount,
   updateBankCreateAccount,
 } from "@/features/finance-manage/apis";
@@ -27,9 +28,9 @@ export default function BankAccountSetting() {
   const [openAssign, setOpenAssign] = useState(false);
   const [editingRecord, setEditingRecord] = useState<BankAccount | null>(null);
   const [isOpenConfirmDelete, setIsOpenConfirmDelete] = useState(false);
-  const [selectId, setSelectId] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
+  const [selectId, setSelectId] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
 
   const [page, setPage] = useState(0);
   const pageSize = 10;
@@ -83,6 +84,24 @@ export default function BankAccountSetting() {
       setIsOpenConfirmDelete(false);
     }
   };
+
+  const useAddBankPermission = (idBank: number, onSuccess?: () => void) => {
+    return useMutation({
+      mutationFn: (admin_user_ids: number[]) =>
+        addUserBankPermission(idBank, { admin_user_ids }),
+      onSuccess: () => {
+        toast.success("Cập nhật phân quyền thành công!");
+        if (onSuccess) onSuccess();
+      },
+      onError: (err: any) => {
+        toast.error(err.response?.data?.localizedMessage || t("common.error"));
+      },
+    });
+  };
+
+  const { mutate: savePermissions } = useAddBankPermission(+selectId, () =>
+    setOpenAssign(false)
+  );
 
   const columns: ColumnsType<BankAccount> = [
     {
@@ -140,8 +159,10 @@ export default function BankAccountSetting() {
           <button
             className="!text-green-600 hover:underline"
             onClick={() => {
-              setSelectId(record.id.toString())
-              setOpenAssign(true)
+              setAccountName(record.account_holder);
+              setAccountNumber(record.account_number);
+              setSelectId(record.id.toString());
+              setOpenAssign(true);
             }}
           >
             Gán quyền
@@ -149,7 +170,7 @@ export default function BankAccountSetting() {
           <span>|</span>
           <button
             onClick={() => {
-              setSelectId(record.id.toString())
+              setSelectId(record.id.toString());
               setIsOpenConfirmDelete(true);
             }}
             className="!text-red-600 hover:underline"
@@ -214,11 +235,12 @@ export default function BankAccountSetting() {
       <AssignRoleModal
         open={openAssign}
         onCancel={() => setOpenAssign(false)}
-        onSave={(selected) => console.log("Selected users:", selected)}
+        onSave={(selectedIds: number[]) => {
+          savePermissions(selectedIds);
+        }}
         accountName={accountName}
         accountNumber={accountNumber}
         idBank={selectId}
-       
       />
       <PopupConfirm
         open={isOpenConfirmDelete}

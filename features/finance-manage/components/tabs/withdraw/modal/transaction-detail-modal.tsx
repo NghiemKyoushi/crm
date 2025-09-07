@@ -1,7 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Modal, Button } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { getDetailWithdraw } from "@/features/finance-manage/apis";
+import { withdrawModel } from "@/types/deposit-type";
+import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 interface TransactionDetailModalProps {
   open: boolean;
@@ -10,6 +16,7 @@ interface TransactionDetailModalProps {
   onReject: () => void;
   isTransacted: boolean;
   onComplete: () => void;
+  selectId: number | null;
 }
 
 export default function TransactionDetailModal({
@@ -19,7 +26,65 @@ export default function TransactionDetailModal({
   onReject,
   isTransacted,
   onComplete,
+  selectId,
 }: TransactionDetailModalProps) {
+  const [withdrawDetail, setWithdrawDetail] = useState<withdrawModel | null>(
+    null
+  );
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const fetchWithdrawDetail = async () => {
+      if (!open || !selectId) return;
+      try {
+        const data = await getDetailWithdraw(Number(selectId));
+        console.log("data", data);
+        setWithdrawDetail(data);
+      } catch (error) {
+        console.error("Error fetching withdraw detail:", error);
+      }
+    };
+
+    fetchWithdrawDetail();
+  }, [open, selectId]);
+
+  const getStatusBadge = () => {
+    if (withdrawDetail) {
+      switch (withdrawDetail.status) {
+        case "PENDING":
+          return (
+            <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.pending")}
+            </span>
+          );
+        case "COMPLETED":
+          return (
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.completed")}
+            </span>
+          );
+        case "APPROVED":
+          return (
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.approved")}
+            </span>
+          );
+        case "CANCELLED":
+          return (
+            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.cancelled")}
+            </span>
+          );
+        case "REJECTED":
+          return (
+            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+              {t("withdraw.statusType.rejected")}
+            </span>
+          );
+      }
+    }
+  };
+
   return (
     <Modal
       open={open}
@@ -40,23 +105,25 @@ export default function TransactionDetailModal({
             <h3 className="font-semibold mb-3">Thông tin Giao dịch</h3>
             <div className="space-y-2 text-sm">
               <p>
-                <span className="font-medium">Mã yêu cầu:</span> R-0805-1
+                <span className="font-medium">Mã yêu cầu:</span>{" "}
+                {withdrawDetail?.id}
               </p>
               <p>
-                <span className="font-medium">Khách hàng:</span> Lê Văn C
-                (KH004)
+                <span className="font-medium">Khách hàng:</span>{" "}
+                {withdrawDetail?.userName} ({withdrawDetail?.userId})
               </p>
               <p>
                 <span className="font-medium">Số tiền:</span>{" "}
                 <span className="text-red-600 font-semibold">
-                  2,500,000 VNĐ
+                  {withdrawDetail?.amount.toLocaleString()} VNĐ
                 </span>
               </p>
               <p>
                 <span className="font-medium">Trạng thái:</span>{" "}
-                <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
+                {getStatusBadge()}
+                {/* <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-medium">
                   Chờ xử lý
-                </span>
+                </span> */}
               </p>
             </div>
           </div>
@@ -66,13 +133,16 @@ export default function TransactionDetailModal({
             <h3 className="font-semibold mb-3">Thông tin Tài khoản Nhận</h3>
             <div className="space-y-2 text-sm">
               <p>
-                <span className="font-medium">Ngân hàng:</span> Vietcombank
+                <span className="font-medium">Ngân hàng:</span>{" "}
+                {withdrawDetail?.bankName}
               </p>
               <p>
-                <span className="font-medium">Số tài khoản:</span> 0123456789012
+                <span className="font-medium">Số tài khoản:</span>{" "}
+                {withdrawDetail?.accountNumber}
               </p>
               <p>
-                <span className="font-medium">Chủ tài khoản:</span> LE VAN C
+                <span className="font-medium">Chủ tài khoản:</span>
+                {withdrawDetail?.userName}
               </p>
             </div>
           </div>
@@ -86,20 +156,21 @@ export default function TransactionDetailModal({
                 ✓ Đã chuyển
               </Button>
             ) : (
-              <Button
-                className="!bg-green-500 !text-white !border-none hover:!bg-green-600"
-                onClick={() => onConfirm()}
-              >
-                ✓ Xác nhận Chuyển tiền
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  className="!bg-green-500 !text-white !border-none hover:!bg-green-600"
+                  onClick={() => onConfirm()}
+                >
+                  ✓ Xác nhận Chuyển tiền
+                </Button>
+                <Button
+                  className="!bg-red-500 !text-white !border-none hover:!bg-red-600"
+                  onClick={() => onReject()}
+                >
+                  ✕ Từ chối
+                </Button>
+              </div>
             )}
-
-            <Button
-              className="!bg-red-500 !text-white !border-none hover:!bg-red-600"
-              onClick={() => onReject()}
-            >
-              ✕ Từ chối
-            </Button>
           </div>
         </div>
 
@@ -107,13 +178,36 @@ export default function TransactionDetailModal({
         <div className="space-y-4">
           {/* QR Code */}
           <div className="border border-dashed rounded-lg flex flex-col items-center justify-center p-6 h-56">
-            <span className="text-gray-400">Mã QR Chuyển khoản</span>
-            <p className="text-sm text-gray-500 mt-2">
-              Quét mã QR để chuyển khoản nhanh
-            </p>
-            <Button type="primary" icon={<DownloadOutlined />} className="mt-3">
-              Tải xuống QR
-            </Button>
+            {withdrawDetail?.qrCode ? (
+              <>
+                <img
+                  src={withdrawDetail.qrCode}
+                  alt="QR Code"
+                  className="w-40 h-40 object-contain cursor-pointer"
+                />
+                <Button
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  className="!mt-3"
+                  size="small"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = withdrawDetail.qrCode;
+                    link.download = "qr-code.png";
+                    link.click();
+                  }}
+                >
+                  Tải xuống QR
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="text-gray-400">Mã QR Chuyển khoản</span>
+                <p className="text-sm text-gray-500 mt-2">
+                  Quét mã QR để chuyển khoản nhanh
+                </p>
+              </>
+            )}
           </div>
 
           {/* Hướng dẫn */}
