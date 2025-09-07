@@ -8,6 +8,7 @@ import {
   faUniversity,
   faBalanceScale,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 interface FinanceTabsProps {
   activeKey: string;
@@ -20,13 +21,14 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
   onChange,
   allowedTabs,
 }) => {
+  const { t } = useTranslation();
   const allItems = [
     {
       key: "deposit",
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon icon={faArrowDown} />
-          Lệnh nạp tiền
+          {t("deposit.depositTitle")}
         </span>
       ),
     },
@@ -35,7 +37,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon icon={faArrowUp} />
-          Yêu cầu rút tiền
+          {t("deposit.withdraw")} 
         </span>
       ),
     },
@@ -44,7 +46,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon icon={faUniversity} />
-          Cài đặt Ngân hàng
+          {t("deposit.bankSettings")}
         </span>
       ),
     },
@@ -53,7 +55,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon icon={faBalanceScale} />
-          Công nợ & Đối soát
+          {t("deposit.reconciliation")}
         </span>
       ),
     },

@@ -86,7 +86,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
             style={{
               fontWeight: 600,
               color: "#ffffff",
-              backgroundColor: opt.color,
+              backgroundColor: opt.color !== null ? opt.color : "blue",
               padding: "2px 8px",
               borderRadius: 6,
               display: "inline-block",
@@ -109,7 +109,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
           width: 150,
           fontWeight: 600,
           color:  "#ffffff",
-          backgroundColor: selected?.color ?? "#f5f5f5",
+          backgroundColor: selected?.color ?? "rgb(22, 119, 255)",
           border: "none",
           borderRadius: 6,
           display: "flex",
@@ -117,7 +117,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
           justifyContent: "space-between",
         }}
       >
-        {selected ? selected.label : "Chọn loại khách hàng"}
+        {selected ? selected.label : "Chọn phân loại "}
         {isLoading ? <Spin size="small" /> : <DownOutlined />}
       </Button>
     </Dropdown>

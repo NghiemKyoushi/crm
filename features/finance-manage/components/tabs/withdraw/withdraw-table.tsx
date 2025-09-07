@@ -16,6 +16,7 @@ import {
   completeWithdraw,
   confirmWithdraw,
   getDetailHistoryTopups,
+  getDetailHistoryWithdraw,
 } from "@/features/finance-manage/apis";
 import TransactionHistoryModal from "../deposit/modal/modal-history";
 import CancelReasonModal from "../deposit/modal/modal-cancel-statement";
@@ -71,9 +72,10 @@ const WithdrawTable = ({}) => {
     mutationFn: ({ id, note }: { id: number; note: string }) =>
       confirmWithdraw(id, note),
     onSuccess: () => {
-      toast.success("Xác nhận thành công!");
+      toast.success(t("withdraw.confirmSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
+      setIsOpenTransaction(false)
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -84,9 +86,10 @@ const WithdrawTable = ({}) => {
     mutationFn: ({ id, body }: { id: number; body: { note: string } }) =>
       completeWithdraw(id, body),
     onSuccess: () => {
-      toast.success("Hoàn thành giao dịch!");
+      toast.success(t("withdraw.completeSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
+      setIsOpenTransaction(false)
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -97,9 +100,10 @@ const WithdrawTable = ({}) => {
     mutationFn: ({ id, note }: { id: number; note: string }) =>
       cancelWithdraw(id, note),
     onSuccess: () => {
-      toast.success("Huỷ bỏ thành công!");
+      toast.success(t("withdraw.cancelSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listwithdraw"] });
       setIsOpenConfirm(false);
+      setIsOpenTransaction(false)
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error"));
@@ -115,7 +119,7 @@ const WithdrawTable = ({}) => {
 
   const handleOpenHistory = async (id: number, code: string) => {
     try {
-      const data = await getDetailHistoryTopups(id);
+      const data = await getDetailHistoryWithdraw(id);      
       setHistories(data);
       setTransactionId(code);
       setIsOpenHistory(true);
@@ -128,6 +132,7 @@ const WithdrawTable = ({}) => {
     if (selectedId) {
       cancelMutation.mutate({ id: selectedId, note: reason });
       setIsOpenCancel(false);
+      setIsOpenTransaction(false);
     }
   };
 
@@ -138,29 +143,35 @@ const WithdrawTable = ({}) => {
         body: { note: reason },
       });
       setIsOpenComplete(false);
+      setIsOpenHistory(false);
     }
   };
 
   const columns: ColumnsType<withdrawItem> = [
     {
-      title: "Mã Lệnh",
+      title: t("withdraw.code"),
       dataIndex: "deposit_code",
       key: "deposit_code",
     },
     {
-      title: "Khách hàng (UserID)",
+      title: t("withdraw.customer"),
       dataIndex: "user_id",
       key: "user_id",
     },
     {
-      title: "Số tiền (VND)",
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+    },
+    {
+      title: t("withdraw.amount"),
       dataIndex: "amount",
       key: "amount",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
     },
     {
-      title: "Ngày tạo",
+      title: t("withdraw.createdAt"),
       dataIndex: "created_at",
       key: "created_at",
       render: (value: string) => {
@@ -169,18 +180,18 @@ const WithdrawTable = ({}) => {
       },
     },
     {
-      title: "Người xử lý",
+      title: t("withdraw.handler"),
       dataIndex: "handler",
       key: "handler",
     },
     {
-      title: "Ngày xử lý",
+      title: t("withdraw.handledAt"),
       dataIndex: "handledAt",
       key: "handledAt",
     },
 
     {
-      title: "Trạng thái",
+      title: t("withdraw.status"),
       dataIndex: "status",
       key: "status",
       render: (status: withdrawItem["status"]) => {
@@ -188,31 +199,31 @@ const WithdrawTable = ({}) => {
           case "PENDING":
             return (
               <Tag className="!rounded-3xl" color="gold">
-                Chờ xử lý
+                {t("withdraw.statusType.pending")}
               </Tag>
             );
           case "APPROVED":
             return (
               <Tag className="!rounded-3xl" color="green">
-                Đã xác nhận
+               {t("withdraw.statusType.approved")}
               </Tag>
             );
           case "COMPLETED":
             return (
               <Tag className="!rounded-3xl" color="green">
-                Thành công
+                {t("withdraw.statusType.completed")}
               </Tag>
             );
           case "CANCELLED":
             return (
               <Tag className="!rounded-3xl" color="red">
-                Bị huỷ
+               {t("withdraw.statusType.cancelled")}
               </Tag>
             );
           case "REJECTED":
             return (
               <Tag className="!rounded-3xl" color="red">
-                Bị huỷ
+                {t("withdraw.statusType.rejected")}
               </Tag>
             );
 
@@ -222,7 +233,7 @@ const WithdrawTable = ({}) => {
       },
     },
     {
-      title: "Mã QR",
+      title: t("withdraw.qrCode"),
       dataIndex: "status",
       key: "status",
       render: (status: string, record) => (
@@ -265,17 +276,17 @@ const WithdrawTable = ({}) => {
       ),
     },
     {
-      title: "Hành động",
+      title: t("common.actions"),
       key: "action",
       render: (_, record) => (
         <Space>
           <div>
             <Button
               size="small"
-              onClick={() => handleOpenHistory(record.id, "TEST_CODE")}
+              onClick={() => handleOpenHistory(record.id, record.deposit_code)}
               className="!bg-indigo-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
             >
-              Lịch sử
+              {t("withdraw.history")}
             </Button>
           </div>
         </Space>
@@ -286,7 +297,7 @@ const WithdrawTable = ({}) => {
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex flex-row justify-between mb-3">
-        <h2 className="text-lg font-bold mb-4">Xử lý Giao dịch Rút tiền</h2>
+        <h2 className="text-lg font-bold mb-4">{t("withdraw.title")}</h2>
       </div>
       <DepositFilter onFilter={handleSearch} />
 
@@ -334,10 +345,13 @@ const WithdrawTable = ({}) => {
       <TransactionDetailModal
         open={isOpenTransaction}
         onCancel={() => setIsOpenTransaction(false)}
+        selectId={selectedId}
         onConfirm={() => {
           setIsOpenConfirm(true);
         }}
-        onReject={() => setIsOpenTransaction(false)}
+        onReject={() => {
+          setIsOpenCancel(true)
+        }}
         onComplete={() => {
           setIsOpenComplete(true);
         }}
@@ -346,15 +360,7 @@ const WithdrawTable = ({}) => {
       <TransactionCompleteModal
         onCancel={() => setIsOpenCompleteTransaction(false)}
         open={isOpenCompleteTransaction}
-        transaction={{
-          accountHolder: "check",
-          accountNumber: "83838383",
-          amount: 828282,
-          bankName: "VCB",
-          code: "VCB",
-          customer: "NGHIEMDD",
-          status: "COMPLETED",
-        }}
+        selectId={selectedId}
       />
     </div>
   );

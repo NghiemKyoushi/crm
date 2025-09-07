@@ -64,8 +64,8 @@ export default function OverviewTab(props: OverviewTabProps) {
     }
   };
 
-  const handleChangeDefaultBank = () => {
-    if (selectedDefaultAddress) {
+  const handleChangeDefaultBank = () => {    
+    if (selectedDefaultBank) {
       handleSetDefaultBank(selectedDefaultBank.toString());
       setIsOpenSetDefaultBank(false);
     }
@@ -100,7 +100,7 @@ export default function OverviewTab(props: OverviewTabProps) {
             {t("customerManage.customerOverview.currentDebt")}
           </div>
           <div className="font-bold text-lg text-red-600">
-            {customer.debt_amount.toLocaleString()}đ
+            {customer.debt_amount && customer.debt_amount.toLocaleString()}đ
           </div>
         </div>
       </div>
@@ -327,7 +327,7 @@ export default function OverviewTab(props: OverviewTabProps) {
       </Modal>
 
       <Modal
-        title={t("customerManage.customerOverview.addDefaultAddress")}
+        title={t("customerManage.customerOverview.addDefaultBank")}
         open={isOpenSetDefaultBank}
         onCancel={() => setIsOpenSetDefaultBank(false)}
         onOk={handleChangeDefaultBank}
@@ -335,7 +335,11 @@ export default function OverviewTab(props: OverviewTabProps) {
       >
         <div className="!max-h-72 !min-h-72 overflow-y-auto">
           <Radio.Group
-            onChange={(e) => setSelectedDefaultBank(e.target.value)}
+            onChange={(e) => {
+              console.log('e', e.target);
+              
+              setSelectedDefaultBank(e.target.value)
+            }}
             value={selectedDefaultBank}
             className="!flex !flex-col !gap-3"
           >

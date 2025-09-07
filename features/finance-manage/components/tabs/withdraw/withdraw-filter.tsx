@@ -1,9 +1,11 @@
 "use client";
 import React from "react";
-import { Button, Input, Select, DatePicker, Form, message } from "antd";
+import { Button, Input, Select, DatePicker, Form } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+const { RangePicker } = DatePicker;
 
 const { Option } = Select;
 
@@ -13,18 +15,16 @@ interface FilterSectionProps {
 const FilterSection = (props: FilterSectionProps) => {
   const { onFilter } = props;
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   const onFinish = async (values: any) => {
     const payload = {
       ...values,
-      date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+      fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
+      toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
+      status: values.status,
     };
-
-    try {
-      toast.success("Gửi request lọc thành công!");
-    } catch (err) {
-      toast.error("Có lỗi khi gọi API");
-    }
+    onFilter(payload);
   };
 
   return (
@@ -32,20 +32,27 @@ const FilterSection = (props: FilterSectionProps) => {
       <Form form={form} onFinish={onFinish}>
         <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
           <Form.Item name="keyword" className="mb-0">
-            <Input placeholder="Mã lệnh, Mã KH..." className="w-full h-11" />
+            <Input
+              placeholder={t("keywordPlaceholder")}
+              className="w-full h-11"
+            />
           </Form.Item>
 
           <Form.Item name="status" className="mb-0">
-            <Select placeholder="-- Trạng thái --" className="w-full !h-11">
-              <Option value="pending">Chờ xác nhận</Option>
-              <Option value="confirmed">Đã xác nhận</Option>
-              <Option value="canceled">Đã hủy</Option>
-              <Option value="manual">Nạp tay</Option>
+            <Select placeholder={t("statusPlaceholder")} className="w-full !h-11">
+              <Option value="PEDDING">{t("status.waiting")}</Option>
+              <Option value="APPROVED">Đã xác nhận</Option>
+              <Option value="CANCELLED">{t("status.canceled")}</Option>
+              <Option value="COMPLETED">{t("status.completed")}</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item name="date" className="mb-0">
-            <DatePicker placeholder="Chọn ngày" className="w-full h-11" />
+          <Form.Item name="dateRange" className="mb-0">
+            <RangePicker
+              placeholder={[t("fromDate"), t("toDate")]}
+              className="w-full h-11"
+              format="YYYY-MM-DD"
+            />
           </Form.Item>
 
           <Form.Item className="mb-0">
@@ -55,7 +62,7 @@ const FilterSection = (props: FilterSectionProps) => {
               icon={<FontAwesomeIcon icon={faFilter} />}
               className="w-full  !bg-gray-700 !text-white !font-medium !h-11 !text-base"
             >
-              Lọc
+              {t("filter")}
             </Button>
           </Form.Item>
         </div>

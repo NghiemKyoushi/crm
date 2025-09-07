@@ -132,6 +132,7 @@ export interface withdrawItem {
   fee_amount: number;
   net_amount: number | null;
   created_at: string;
+  deposit_code: string;
 }
 
 export interface PaginatedWithdraw {
@@ -171,4 +172,26 @@ export interface TransactionHistory {
   status_change: boolean;
   status_change_description: string;
   username: string;
+}
+
+export interface withdrawModel {
+  accountHolderName: string;
+  accountNumber: string;
+  adminNote: null;
+  amount: number;
+  bankName: string;
+  createdAt: string;
+  feeAmount: number;
+  id: number;
+  netAmount: number;
+  note: string;
+  processedAt: string;
+  processedBy: number;
+  qrCode: string;
+  rejectionReason: string;
+  status: string;
+  transactionId: null;
+  userBankAccountId: number;
+  userId: number;
+  userName: string;
 }

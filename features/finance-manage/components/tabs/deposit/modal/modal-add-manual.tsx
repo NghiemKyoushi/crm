@@ -53,7 +53,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       setOptions(
         data.data.map((user: any) => ({
           value: user.user_id,
-          label: `${user.full_name}`,
+          label: `${user.email}`,
         }))
       );
     }

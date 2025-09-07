@@ -89,7 +89,7 @@ export const cancelWithdraw = async (id: number, note: string) => {
 };
 
 export const getDetailHistoryWithdraw = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.HISTORY_WITHDRAW}${id}`);
+  const res = await api.get(`${API_TYPE_CONST.WITHDRAW_HISTORY}${id}/history`);
   return res.data.data;
 };
 
@@ -108,7 +108,12 @@ export const getListBankPermission = async (id: number) => {
   return res.data.data;
 };
 
-export const addUserBankPermission = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.ADD_USER_MANAGE_ACCOUNT_BANK}${id}`);
+export const addUserBankPermission = async (id: number, body: {admin_user_ids: number[]}) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_USER_MANAGE_ACCOUNT_BANK}${id}/permissions`, body);
+  return res.data.data;
+};
+
+export const getDetailWithdraw = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.WITHDRAW_DETAIL}${id}`);
   return res.data.data;
 };
