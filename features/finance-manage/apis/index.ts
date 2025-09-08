@@ -117,3 +117,8 @@ export const getDetailWithdraw = async (id: number) => {
   const res = await api.get(`${API_TYPE_CONST.WITHDRAW_DETAIL}${id}`);
   return res.data.data;
 };
+
+export const getDetailTopup = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.TOPUP_DETAIL}${id}`);
+  return res.data.data;
+};
