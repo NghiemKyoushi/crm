@@ -167,12 +167,25 @@ const WithdrawTable = ({}) => {
       },
     },
     {
-      title: t("withdraw.customer"),
-      dataIndex: "user_id",
-      key: "user_id",
+      title: t("deposit.columns.userName"),
+      dataIndex: "username",
+      key: "username",
+      render: (text: string) => {
+        if (!text) return "";
+        return (
+          <Tooltip title={text}>
+            <span className="truncate max-w-[150px] inline-block">{text}</span>
+          </Tooltip>
+        );
+      },
     },
+    // {
+    //   title: t("withdraw.customer"),
+    //   dataIndex: "user_id",
+    //   key: "user_id",
+    // },
     {
-      title: "Ghi chú",
+      title: t("withdraw.note"),
       dataIndex: "note",
       key: "note",
       render: (note: string) => {
@@ -180,6 +193,19 @@ const WithdrawTable = ({}) => {
         return (
           <Tooltip title={note}>
             <div className="truncate max-w-[200px]">{note}</div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t("withdraw.adminNote"),
+      dataIndex: "admin_note",
+      key: "admin_note",
+      render: (admin_note: string) => {
+        if (!admin_note) return "-";
+        return (
+          <Tooltip title={admin_note}>
+            <div className="truncate max-w-[200px]">{admin_note}</div>
           </Tooltip>
         );
       },

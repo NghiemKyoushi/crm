@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./deposit-filter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faMinusCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlusCircle,
+  faMinusCircle,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
 import { Tag, Button, Space, Tooltip } from "antd";
@@ -32,6 +36,7 @@ import {
 } from "@/features/finance-manage/apis";
 import dayjs from "dayjs";
 import DepositDetailModal from "./modal/modal-detail-deposit";
+import TransactionCompleteModal from "./modal/transaction-topup-complete-modal";
 
 const DepositTable = ({}) => {
   const { t } = useTranslation();
@@ -49,7 +54,8 @@ const DepositTable = ({}) => {
   const [selectedRecord, setSelectedRecord] = useState<DepositItem | null>(
     null
   );
-
+  const [isOpenCompleteTransaction, setIsOpenCompleteTransaction] =
+    useState(false);
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState<DepositParams>({
@@ -236,6 +242,27 @@ const DepositTable = ({}) => {
       },
     },
     {
+      title: "Chi tiết",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string, record) => (
+        <Space>
+          <button
+            className="cursor-pointer"
+            onClick={() => {
+              setSelectedId(record.id);
+              setIsOpenCompleteTransaction(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faInfoCircle}
+              className="text-blue-500 text-xl"
+            />
+          </button>
+        </Space>
+      ),
+    },
+    {
       title: t("deposit.columns.status"),
       dataIndex: "status",
       key: "status",
@@ -273,6 +300,12 @@ const DepositTable = ({}) => {
             return (
               <Tag className="!rounded-3xl" color="orange">
                 Nạp thủ công
+              </Tag>
+            );
+          case "CANCELED_BY_USER":
+            return (
+              <Tag className="!rounded-3xl" color="orange">
+                Người dùng huỷ
               </Tag>
             );
           default:
@@ -440,6 +473,12 @@ const DepositTable = ({}) => {
         open={isOpenDetail}
         onClose={() => setIsOpenDetail(false)}
         record={selectedRecord}
+      />
+
+      <TransactionCompleteModal
+        onCancel={() => setIsOpenCompleteTransaction(false)}
+        open={isOpenCompleteTransaction}
+        selectId={selectedId}
       />
     </div>
   );

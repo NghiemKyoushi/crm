@@ -224,6 +224,8 @@
     "handler": "Người xử lý",
     "handledAt": "Ngày xử lý",
     "status": "Trạng thái",
+    "note":"Ghi chú",
+    "adminNote":"Admin ghi chú",
     "statusType": {
       "pending": "Chờ xử lý",
       "approved": "Đã tiếp nhận",

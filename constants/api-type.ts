@@ -57,6 +57,7 @@ export const API_TYPE_CONST = {
   BANK_LIST_PERMISSION:`${FEATURE}/admin/bank-accounts/`,
   ADD_USER_MANAGE_ACCOUNT_BANK:`${FEATURE}/admin/bank-accounts/`,
   WITHDRAW_DETAIL:`${FEATURE}/admin/withdrawal/requests/detail/`,
-  WITHDRAW_HISTORY:`${FEATURE}/admin/withdrawal/`
+  WITHDRAW_HISTORY:`${FEATURE}/admin/withdrawal/`,
+  TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
 
 } as const;

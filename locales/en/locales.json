@@ -224,6 +224,8 @@
     "handler": "Handler",
     "handledAt": "Handled At",
     "status": "Status",
+    "note":"Note",
+    "adminNote":"Admin Note",
     "statusType": {
       "pending": "Pending",
       "approved": "Approved",

@@ -133,6 +133,7 @@ export interface withdrawItem {
   net_amount: number | null;
   created_at: string;
   deposit_code: string;
+  username: string;
 }
 
 export interface PaginatedWithdraw {

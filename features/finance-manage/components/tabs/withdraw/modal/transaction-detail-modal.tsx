@@ -156,34 +156,32 @@ export default function TransactionDetailModal({
                 ✓ Đã chuyển
               </Button>
             ) : (
-              <div className="flex gap-3">
-                <Button
-                  className="!bg-green-500 !text-white !border-none hover:!bg-green-600"
-                  onClick={() => onConfirm()}
-                >
-                  ✓ Xác nhận Chuyển tiền
-                </Button>
-                <Button
-                  className="!bg-red-500 !text-white !border-none hover:!bg-red-600"
-                  onClick={() => onReject()}
-                >
-                  ✕ Từ chối
-                </Button>
-              </div>
+              <Button
+                className="!bg-green-500 !text-white !border-none hover:!bg-green-600"
+                onClick={() => onConfirm()}
+              >
+                ✓ Xác nhận Chuyển tiền
+              </Button>
             )}
+            <Button
+              className="!bg-red-500 !text-white !border-none hover:!bg-red-600"
+              onClick={() => onReject()}
+            >
+              ✕ Từ chối
+            </Button>
           </div>
         </div>
 
         {/* RIGHT SIDE */}
         <div className="space-y-4">
           {/* QR Code */}
-          <div className="border border-dashed rounded-lg flex flex-col items-center justify-center p-6 h-56">
+          <div className="border border-dashed rounded-lg flex flex-col items-center justify-center p-6 h-60">
             {withdrawDetail?.qrCode ? (
               <>
                 <img
                   src={withdrawDetail.qrCode}
                   alt="QR Code"
-                  className="w-40 h-40 object-contain cursor-pointer"
+                  className="w-48 h-48 object-contain cursor-pointer" // tăng lên từ w-40 h-40
                 />
                 <Button
                   type="primary"
@@ -211,9 +209,11 @@ export default function TransactionDetailModal({
           </div>
 
           {/* Hướng dẫn */}
-          <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Hướng dẫn Chuyển khoản</h3>
-            <ol className="list-decimal list-inside text-sm space-y-1 text-gray-700">
+          <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-2">
+            <h3 className="font-semibold mb-2 text-sm">
+              Hướng dẫn Chuyển khoản
+            </h3>
+            <ol className="list-decimal list-inside text-xs space-y-0.5 text-gray-700">
               <li>Mở ứng dụng ngân hàng</li>
               <li>Chọn Chuyển khoản → Quét mã QR</li>
               <li>Quét mã QR hoặc nhập thông tin thủ công</li>

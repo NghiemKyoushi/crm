@@ -1,6 +1,6 @@
 "use client";
 
-import { getDetailWithdraw } from "@/features/finance-manage/apis";
+import { getDetailTopup, getDetailWithdraw } from "@/features/finance-manage/apis";
 import { withdrawModel } from "@/types/deposit-type";
 import { Modal } from "antd";
 import { useEffect, useState } from "react";
@@ -11,13 +11,22 @@ interface TransactionDetailModalProps {
   onCancel: () => void;
   selectId: number | null;
 }
+export interface DepositDetail {
+  accountHolder: string;        // Tên chủ tài khoản
+  amount: number;               // Số tiền nạp
+  depositCode: string;          // Mã giao dịch nạp
+  fullName: string;             // Họ và tên khách hàng
+  bankAccountNumber: string;    // Số tài khoản ngân hàng
+  bankName: string;             // Tên ngân hàng
+  status: "PENDING" | "COMPLETED" | "CANCELED" | "FAILED" | "APPROVED" | "REJECTED" | "CANCELED_BY_USER"; // Trạng thái
+}
 
 export default function TransactionCompleteModal({
   open,
   onCancel,
   selectId,
 }: TransactionDetailModalProps) {
-  const [withdrawDetail, setWithdrawDetail] = useState<withdrawModel | null>(
+  const [withdrawDetail, setWithdrawDetail] = useState<DepositDetail | null>(
     null
   );
   const { t } = useTranslation();
@@ -26,7 +35,7 @@ export default function TransactionCompleteModal({
     const fetchWithdrawDetail = async () => {
       if (!open || !selectId) return;
       try {
-        const data = await getDetailWithdraw(Number(selectId));
+        const data = await getDetailTopup(Number(selectId));
         console.log("data", data);
         setWithdrawDetail(data);
       } catch (error) {
@@ -58,7 +67,7 @@ export default function TransactionCompleteModal({
               {t("withdraw.statusType.approved")}
             </span>
           );
-        case "CANCELLED":
+        case "CANCELED":
           return (
             <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
               {t("withdraw.statusType.cancelled")}
@@ -70,6 +79,13 @@ export default function TransactionCompleteModal({
               {t("withdraw.statusType.rejected")}
             </span>
           );
+        case "CANCELED_BY_USER":{
+          return (
+            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+              Người dùng huỷ
+            </span>
+          );
+        }
       }
     }
   };
@@ -92,11 +108,11 @@ export default function TransactionCompleteModal({
           <div className="space-y-2 text-sm">
             <p>
               <span className="font-medium">Mã yêu cầu:</span>{" "}
-              {withdrawDetail?.id}
+              {withdrawDetail?.depositCode}
             </p>
             <p>
               <span className="font-medium">Khách hàng:</span>{" "}
-              {withdrawDetail?.userName} ({withdrawDetail?.userId}){" "}
+              {withdrawDetail?.fullName} 
             </p>
             <p>
               <span className="font-medium">Số tiền:</span>{" "}
@@ -121,11 +137,11 @@ export default function TransactionCompleteModal({
             </p>
             <p>
               <span className="font-medium">Số tài khoản:</span>{" "}
-              {withdrawDetail?.accountNumber}
+              {withdrawDetail?.bankAccountNumber}
             </p>
             <p>
               <span className="font-medium">Chủ tài khoản:</span>{" "}
-              {withdrawDetail?.userName}
+              {withdrawDetail?.accountHolder}
             </p>
           </div>
         </div>
