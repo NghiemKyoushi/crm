@@ -9,7 +9,7 @@ export interface CustomerParam {
 export interface CustomerModel {
   color?: string;
   full_name: string;
-  category_name: string;
+  group_name: string;
   user_id: number;
   debt_amount: number;
   sale_name: string;

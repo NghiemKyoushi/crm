@@ -155,6 +155,8 @@ export const RoleManager: React.FC = () => {
               )}
             </div>
             {permissionGroups.map((group) => {
+              console.log("group", group);
+
               const roleGroup = selectedRole?.groups?.find(
                 (g: any) => g.id === group.group_id
               );
@@ -162,42 +164,47 @@ export const RoleManager: React.FC = () => {
                 roleGroup?.permissions
                   .filter((p: any) => p.active)
                   .map((p: any) => p.name) || [];
+              console.log("group44444", group);
 
               return (
                 <div key={group.group_id}>
                   <h4 className="font-medium !mb-3 !mt-3">
                     {renderCategoryName(group.group_name)}
                   </h4>
-                  <Checkbox.Group
-                    options={group.permissions.map((p) => ({
-                      label: p.description,
-                      value: p.permission,
-                    }))}
-                    value={activePermissions}
-                    disabled={isSuperAdmin}
-                    onChange={(checkedValues) => {
-                      if (isSuperAdmin) return;
-                      setSelectedRole((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              groups: prev.groups.map((g: any) => {
-                                if (g.id !== group.group_id) return g;
+                  {group.permissions && (
+                    <Checkbox.Group
+                      options={group.permissions.map((p) => ({
+                        label: p.description,
+                        value: p.permission,
+                      }))}
+                      value={activePermissions}
+                      disabled={isSuperAdmin}
+                      onChange={(checkedValues) => {
+                        if (isSuperAdmin) return;
+                        setSelectedRole((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                groups: prev.groups.map((g: any) => {
+                                  if (g.id !== group.group_id) return g;
 
-                                return {
-                                  ...g,
-                                  permissions: g.permissions.map((p: any) => ({
-                                    ...p,
-                                    active: checkedValues.includes(p.name),
-                                  })),
-                                };
-                              }),
-                            }
-                          : prev
-                      );
-                    }}
-                    className="flex flex-col gap-3"
-                  />
+                                  return {
+                                    ...g,
+                                    permissions: g.permissions.map(
+                                      (p: any) => ({
+                                        ...p,
+                                        active: checkedValues.includes(p.name),
+                                      })
+                                    ),
+                                  };
+                                }),
+                              }
+                            : prev
+                        );
+                      }}
+                      className="flex flex-col gap-3"
+                    />
+                  )}
                 </div>
               );
             })}

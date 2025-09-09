@@ -1,6 +1,6 @@
 export interface Category {
     id: number;
-    category_name: string;
+    group_name: string;
     description: string;
     customer_count: number;
     deposit_percentage: number;
@@ -25,7 +25,7 @@ export interface Category {
   };
   
   export interface CategoryRequest {
-    category_name: string;
+    group_name: string;
     description: string;
     deposit_percentage: number;
     service_fee_percentage?: number;

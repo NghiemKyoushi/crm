@@ -41,12 +41,13 @@ export default function CategoryCustomerTable() {
     queryClient.invalidateQueries({ queryKey: ["listCate"] });
   };
   const handleAdd = (dataForm: CategoryRequest) => {
-    const { category_name, description, deposit_percentage } = dataForm;
+    const { group_name, description, deposit_percentage, color } = dataForm;
     createNewCateMutation.mutate(
       {
-        category_name,
+        group_name,
         description,
         deposit_percentage,
+        color
       },
       {
         onSuccess: () => {
@@ -65,10 +66,10 @@ export default function CategoryCustomerTable() {
   };
 
   const handleUpdate = (dataForm: CategoryRequest) => {
-    const { category_name, description, deposit_percentage, color } = dataForm;
+    const { group_name, description, deposit_percentage, color } = dataForm;
     updateCateMutation.mutate(
       {
-        param: { category_name, description, deposit_percentage, color },
+        param: { group_name, description, deposit_percentage, color },
         id,
       },
       {
@@ -111,8 +112,8 @@ export default function CategoryCustomerTable() {
   const columns: ColumnsType<Category> = [
     {
       title: t("customerCate.name"),
-      dataIndex: "category_name",
-      key: "category_name",
+      dataIndex: "group_name",
+      key: "group_name",
       render: (text: string, record: Category) => (
         <Tag
           style={{
@@ -157,7 +158,7 @@ export default function CategoryCustomerTable() {
               onClick={() => {
                 setId(record.id.toString());
                 setEditingCate({
-                  category_name: record.category_name,
+                  group_name: record.group_name,
                   description: record.description,
                   deposit_percentage: record.deposit_percentage,
                   color: record.color,

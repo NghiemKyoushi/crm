@@ -63,8 +63,8 @@ export default function SalesDetail({
     },
     {
       title: "Phân loại",
-      dataIndex: "category_name",
-      key: "category_name",
+      dataIndex: "group_name",
+      key: "group_name",
       render: (_, record) => (
         <Tag
           style={{
@@ -73,7 +73,7 @@ export default function SalesDetail({
           }}
           className="font-semibold text-[13px] px-3 py-1"
         >
-          {record.category_name}
+          {record.group_name}
         </Tag>
       ),
     },
