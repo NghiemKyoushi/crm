@@ -30,15 +30,25 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (listRole) {
+      console.log('listRole', listRole);
+      
       const allPerms = listRole.groups.flatMap((g) => g.permissions);      
       setPermissions(allPerms);
     }
   }, [listRole]);
 
+  const isAdmin = useMemo(() => {
+    return listRole?.role_name === "ADMIN";
+  }, [listRole]);
+
   const hasPermission = useCallback(
-    (permName: string) => permissions.some((p) => p.name === permName && p.active),
-    [permissions, listRole]
+    (permName: string) => {
+      if (isAdmin) return true; 
+      return permissions.some((p) => p.name === permName && p.active);
+    },
+    [permissions, isAdmin]
   );
+ 
 const stillLoading = isLoading || !listRole || permissions.length === 0;
   return (
     <PermissionContext.Provider

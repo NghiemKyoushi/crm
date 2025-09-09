@@ -69,8 +69,8 @@ export default function CustomerTable() {
     },
     {
       title: t("customerTable.type"),
-      dataIndex: "category_name",
-      key: "category_name",
+      dataIndex: "group_name",
+      key: "group_name",
       render: (_, record) => (
         <>
           <CategorySelect

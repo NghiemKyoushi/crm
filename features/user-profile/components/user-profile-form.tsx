@@ -392,7 +392,7 @@ export default function UserProfileForm() {
                     listRole.groups.map((group) => (
                       <div key={group.id}>
                         <p className="font-medium mb-2">{group.description}</p>
-                        {group.permissions.map((perm) => (
+                        {group?.permissions?.map((perm) => (
                           <div key={perm.id}>
                             <Checkbox checked={perm.active} disabled>
                               {perm.description}

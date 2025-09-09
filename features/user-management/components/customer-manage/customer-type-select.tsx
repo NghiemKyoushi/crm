@@ -24,7 +24,7 @@
 //             borderRadius: 6,
 //           }}
 //         >
-//           {opt.category_name}
+//           {opt.group_name}
 //         </span>
 //       ),
 //     })) ?? [];
@@ -69,7 +69,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
   const categoryOptions =
     data?.data.map((opt: any) => ({
       key: opt.id,
-      label: opt.category_name,
+      label: opt.group_name,
       color: opt.color,
       textColor: opt.text_color ?? "#000",
     })) ?? [];

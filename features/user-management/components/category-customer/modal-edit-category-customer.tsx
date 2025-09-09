@@ -26,7 +26,7 @@ export default function AddCustomerTypeModal({
     watch,
   } = useForm<CategoryRequest>({
     defaultValues: {
-      category_name: "",
+      group_name: "",
       description: "",
       color: "#000000",
     },
@@ -39,7 +39,7 @@ export default function AddCustomerTypeModal({
         color: initialData.color || "#000000", 
       });
     } else {
-      reset({ category_name: "", description: "", color: "#000000" });
+      reset({ group_name: "", description: "", color: "#000000" });
     }
   }, [initialData, reset, open]);
 
@@ -69,14 +69,14 @@ export default function AddCustomerTypeModal({
         <div>
           <label className="block mb-1 font-medium">{t("customerCate.name")}</label>
           <Controller
-            name="category_name"
+            name="group_name"
             control={control}
             rules={{ required: "Vui lòng nhập Tên loại" }}
             render={({ field }) => <Input placeholder="VD: Vàng" {...field} />}
           />
-          {errors.category_name && (
+          {errors.group_name && (
             <p className="text-red-500 text-sm mt-1">
-              {errors.category_name.message}
+              {errors.group_name.message}
             </p>
           )}
         </div>

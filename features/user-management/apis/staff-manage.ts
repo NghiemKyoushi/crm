@@ -60,7 +60,7 @@ export const updateCateCustomer = async (params: CategoryRequest, id: string) =>
 
 export const updateCateforCustomer = async (category_id: number, id: number) => {
   const res = await api.put(
-    `${API_TYPE_CONST.UPDATE_CATE_FOR_CUSTOMER}${id}?category_id=${category_id}`
+    `${API_TYPE_CONST.UPDATE_CATE_FOR_CUSTOMER}${id}?group_id=${category_id}`
   );
   return res.data;
 };
@@ -102,7 +102,7 @@ export const getListRoleGroup = async () => {
 };
 
 export const getListPermiss = async () => {
-  const res = await api.get(API_TYPE_CONST.PERMISSION);
+  const res = await api.get(API_TYPE_CONST.PERMISSION);  
   return res.data.data;
 };
 
