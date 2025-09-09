@@ -41,7 +41,7 @@ export const menuItems = [
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   { key: "/auction", icon: faGavel, label: "action" },
-  { key: "/products", icon: faTags, label: "products" },
+  { key: "/surchange", icon: faTags, label: "products" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
