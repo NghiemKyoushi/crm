@@ -15,6 +15,7 @@ export interface CustomerModel {
   sale_name: string;
   category_id: number;
   email: string;
+  group_id:number;
 }
 
 export interface CustomerResponse {

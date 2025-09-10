@@ -130,16 +130,7 @@ export default function AddBankAccountModal({ open, onCancel, onOk, record }: an
                 <Select.Option
                   key={bank.id}
                   value={bank.id}
-                  label={
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={bank.logo}
-                        alt={bank.name}
-                        className="w-6 h-6 object-contain"
-                      />
-                      <span>{bank.name}</span>
-                    </div>
-                  }
+                 label={bank.name}
                 >
                   <div className="flex items-center gap-2">
                     <img

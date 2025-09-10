@@ -27,7 +27,6 @@ export default function TransactionCompleteModal({
       if (!open || !selectId) return;
       try {
         const data = await getDetailWithdraw(Number(selectId));
-        console.log("data", data);
         setWithdrawDetail(data);
       } catch (error) {
         console.error("Error fetching withdraw detail:", error);
