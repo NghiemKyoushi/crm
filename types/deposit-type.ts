@@ -195,4 +195,5 @@ export interface withdrawModel {
   userBankAccountId: number;
   userId: number;
   userName: string;
+  depositCode: string;
 }

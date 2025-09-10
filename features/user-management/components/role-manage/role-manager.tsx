@@ -155,8 +155,6 @@ export const RoleManager: React.FC = () => {
               )}
             </div>
             {permissionGroups.map((group) => {
-              console.log("group", group);
-
               const roleGroup = selectedRole?.groups?.find(
                 (g: any) => g.id === group.group_id
               );
@@ -164,7 +162,6 @@ export const RoleManager: React.FC = () => {
                 roleGroup?.permissions
                   .filter((p: any) => p.active)
                   .map((p: any) => p.name) || [];
-              console.log("group44444", group);
 
               return (
                 <div key={group.group_id}>

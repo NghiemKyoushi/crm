@@ -7,9 +7,13 @@ interface TransactionHistoryModalProps {
   onClose: () => void;
   transactionId: string;
   histories: TransactionHistory[];
+  isDeposit: boolean;
 }
 
-export const renderTransactionStatus = (status: string): string => {
+export const renderTransactionStatus = (
+  status: string,
+  isDeposit: boolean
+): string => {
   switch (status) {
     case "WAITING_CONFIRMATION":
       return "Chờ xử lý";
@@ -18,7 +22,21 @@ export const renderTransactionStatus = (status: string): string => {
     case "COMPLETED":
       return "Đã hoàn thành";
     case "CANCELED":
+      if (isDeposit) {
+        return "Đã từ chối";
+      }
       return "Đã hủy";
+    case "CANCELED":
+      if (isDeposit) {
+        return "Đã từ chối";
+      }
+      return "Đã hủy";
+    case "CANCELLED":
+      if (isDeposit) {
+        return "Đã từ chối";
+      }
+      return "Đã hủy";
+
     case "FAILED":
       return "Thất bại";
     default:
@@ -31,6 +49,7 @@ export default function TransactionHistoryModal({
   onClose,
   transactionId,
   histories,
+  isDeposit,
 }: TransactionHistoryModalProps) {
   return (
     <Modal
@@ -59,7 +78,7 @@ export default function TransactionHistoryModal({
             <div className="flex flex-col gap-2 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                 <span className="font-medium">
-                  {renderTransactionStatus(item.new_status)}
+                  {renderTransactionStatus(item.new_status, isDeposit)}
                 </span>
                 <span className="text-gray-500 text-sm">
                   - {dayjs(item.action_at).format("DD-MM-YYYY")}

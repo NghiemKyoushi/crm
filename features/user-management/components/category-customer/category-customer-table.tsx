@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faSearch, faTags, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
+import { getContrastColor } from "../customer-manage/customer-type-select";
 
 export default function CategoryCustomerTable() {
   const [open, setOpen] = useState(false);
@@ -118,7 +119,7 @@ export default function CategoryCustomerTable() {
         <Tag
           style={{
             backgroundColor: record.color ? record.color : undefined,
-            color: "#fff",
+            color: record.color ? getContrastColor(record.color): "#ffffff" ,
           }}
           className="font-semibold text-[13px] px-3 py-1"
         >

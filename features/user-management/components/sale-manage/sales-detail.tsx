@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeAssignCustomerForSale } from "../../apis/staff-manage";
 import PopupUnassignConfirm from "./modal-remove-assign";
+import { getContrastColor } from "../customer-manage/customer-type-select";
 
 const { Text } = Typography;
 
@@ -69,7 +70,7 @@ export default function SalesDetail({
         <Tag
           style={{
             backgroundColor: record.color ? record.color : '#000000',
-            color: "#fff",
+            color: record.color ? getContrastColor(record.color): "#ffffff" ,
           }}
           className="font-semibold text-[13px] px-3 py-1"
         >

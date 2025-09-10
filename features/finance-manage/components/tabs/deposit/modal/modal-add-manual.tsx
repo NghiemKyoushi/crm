@@ -25,14 +25,14 @@ interface ManualDepositModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (data: DepositRequest) => void;
-  type: 'PLUS' | "MINUS";
+  type: "PLUS" | "MINUS";
 }
 
 const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   open,
   onClose,
   onConfirm,
-  type
+  type,
 }) => {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<SelectProps["options"]>([]);
@@ -82,6 +82,21 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     fetchBanks();
   }, []);
 
+  useEffect(() => {
+    const fetchCode = async () => {
+      if (open && type === "MINUS") {
+        try {
+          const code = await getCodeGeneration();
+          form.setFieldValue("transactionCode", code);
+        } catch (error) {
+          console.error("Lỗi khi tạo mã:", error);
+        }
+      }
+    };
+
+    fetchCode();
+  }, [open, type]);
+
   const [form] = Form.useForm();
 
   const handleSubmit = async () => {
@@ -106,7 +121,11 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   return (
     <Modal
       open={open}
-      title={type === 'PLUS'? "Nạp tiền Thủ công cho User" : "Trừ tiền Thủ công cho User"}
+      title={
+        type === "PLUS"
+          ? "Nạp tiền Thủ công cho User"
+          : "Trừ tiền Thủ công cho User"
+      }
       onCancel={onClose}
       footer={null}
     >
@@ -141,7 +160,19 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           name="companyAccount"
           rules={[{ required: true, message: "Chọn tài khoản!" }]}
         >
-          <Select options={banks} />
+          <Select
+            options={banks}
+            onChange={async () => {
+              if (type === "PLUS") {
+                try {
+                  const code = await getCodeGeneration();
+                  form.setFieldValue("transactionCode", code);
+                } catch (error) {
+                  console.error("Lỗi khi tạo mã:", error);
+                }
+              }
+            }}
+          />
         </Form.Item>
 
         {/* Mã giao dịch */}
@@ -151,28 +182,29 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           name="transactionCode"
         >
           <Input
-            placeholder="VD: FT240814..."
-            addonAfter={
-              <Button
-                type="dashed"
-                size="small"
-                onClick={async () => {
-                  try {
-                    const code = await getCodeGeneration();
-                    form.setFieldValue("transactionCode", code);
-                  } catch (error) {
-                    console.error(error);
-                  }
-                }}
-              >
-                Tạo mã
-              </Button>
-            }
+            disabled
+            placeholder=""
+            // addonAfter={
+            //   <Button
+            //     type="dashed"
+            //     size="small"
+            //     onClick={async () => {
+            //       try {
+            //         const code = await getCodeGeneration();
+            //         form.setFieldValue("transactionCode", code);
+            //       } catch (error) {
+            //         console.error(error);
+            //       }
+            //     }}
+            //   >
+            //     Tạo mã
+            //   </Button>
+            // }
           />
         </Form.Item>
         <Form.Item
           className="!mb-1.5"
-          label= {type === 'PLUS'? "Lý do nạp tiền" : "Lý do trừ tiền"}
+          label={type === "PLUS" ? "Lý do nạp tiền" : "Lý do trừ tiền"}
           name="reason"
           rules={[
             { required: true, message: "Nhập lý do hủy!" },
@@ -188,7 +220,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Hủy bỏ</Button>
           <Button type="primary" loading={loading} onClick={handleSubmit}>
-           {type === 'PLUS'? "Xác nhận nạp tiền": "Xác nhận trừ tiền" } 
+            {type === "PLUS" ? "Xác nhận nạp tiền" : "Xác nhận trừ tiền"}
           </Button>
         </div>
       </Form>

@@ -38,7 +38,6 @@ export default function TransactionDetailModal({
       if (!open || !selectId) return;
       try {
         const data = await getDetailWithdraw(Number(selectId));
-        console.log("data", data);
         setWithdrawDetail(data);
       } catch (error) {
         console.error("Error fetching withdraw detail:", error);
@@ -106,7 +105,7 @@ export default function TransactionDetailModal({
             <div className="space-y-2 text-sm">
               <p>
                 <span className="font-medium">Mã yêu cầu:</span>{" "}
-                {withdrawDetail?.id}
+                {withdrawDetail?.depositCode}
               </p>
               <p>
                 <span className="font-medium">Khách hàng:</span>{" "}

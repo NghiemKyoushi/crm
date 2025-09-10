@@ -1,62 +1,17 @@
-// import { Select, Spin } from "antd";
-// import { useState } from "react";
-// import { useListCateGoryCus } from "../../hooks/staff-manage";
-
-// export default function CategorySelect({ value, onChange }: any) {
-//   const [page, setPage] = useState(0);
-
-//   const { data, isLoading, isFetching } = useListCateGoryCus({
-//     page,
-//     page_size: 10,
-//     // search: undefined,
-//   });
-
-//   const categoryOptions =
-//     data?.data.map((opt: any) => ({
-//       value: opt.id,
-//       label: (
-//         <span
-//           style={{
-//             fontWeight: 600,
-//             color: "#fff",
-//             backgroundColor: opt.color,
-//             padding: "2px 8px",
-//             borderRadius: 6,
-//           }}
-//         >
-//           {opt.group_name}
-//         </span>
-//       ),
-//     })) ?? [];
-
-//   return (
-//     <Select
-//     className="no-border-select"
-
-//       style={{
-//         width: 150, 
-//         // width: "fit-content", 
-//       }}
-//       allowClear
-//       value={value}
-//       placeholder="Chọn loại khách hàng"
-//       onChange={onChange}
-//       loading={isLoading}
-//       options={categoryOptions}
-//       notFoundContent={isFetching ? <Spin size="small" /> : null}
-//       onPopupScroll={(e) => {
-//         const target = e.target as HTMLElement;
-//         if (target.scrollTop + target.offsetHeight === target.scrollHeight) {
-//           setPage((prev) => prev + 1); // load thêm khi scroll xuống cuối
-//         }
-//       }}
-//     />
-//   );
-// }
 import { Dropdown, Menu, Button, Spin } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useListCateGoryCus } from "../../hooks/staff-manage";
+
+export function getContrastColor(hex: string): string {
+  if (!hex) return "#000";
+  const c = hex.startsWith("#") ? hex.substring(1) : hex;
+  const r = parseInt(c.substr(0, 2), 16);
+  const g = parseInt(c.substr(2, 2), 16);
+  const b = parseInt(c.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "#000" : "#fff"; 
+}
 
 export default function CategoryDropdown({ value, onChange }: any) {
   const [page, setPage] = useState(0);
@@ -85,7 +40,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
           <span
             style={{
               fontWeight: 600,
-              color: "#ffffff",
+              color: getContrastColor(opt.color),
               backgroundColor: opt.color !== null ? opt.color : "blue",
               padding: "2px 8px",
               borderRadius: 6,
@@ -108,7 +63,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
           height: 28,
           width: 150,
           fontWeight: 600,
-          color:  "#ffffff",
+          color:  getContrastColor(selected?.color),
           backgroundColor: selected?.color ?? "rgb(22, 119, 255)",
           border: "none",
           borderRadius: 6,

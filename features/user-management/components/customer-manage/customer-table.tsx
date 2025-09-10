@@ -74,7 +74,7 @@ export default function CustomerTable() {
       render: (_, record) => (
         <>
           <CategorySelect
-            value={record.category_id}
+            value={record.group_id}
             onChange={(e: number) =>
               handleUpdateColor(e, record.user_id)
             }
