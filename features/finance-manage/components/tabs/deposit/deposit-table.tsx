@@ -467,6 +467,7 @@ const DepositTable = ({}) => {
         onClose={() => setIsOpenHistory(false)}
         transactionId={transactionId ?? ""}
         histories={histories}
+        isDeposit={true}
       />
 
       <DepositDetailModal

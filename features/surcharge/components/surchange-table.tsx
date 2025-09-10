@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tabs, Table, Tag, Button, Space } from "antd";
+import { Tabs, Table, Tag, Button, Space, Alert } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import TableComponent from "@/components/TableComponent";
 import AddSurchargeModal from "./modal/add-surcharge-modal";
@@ -129,6 +129,7 @@ const SurchargeTable: React.FC = () => {
         <h2 className="text-lg font-bold">
           Bảng Giá Phụ thu theo Loại sản phẩm
         </h2>
+
         <Space>
           <Button
             type="primary"
@@ -141,7 +142,31 @@ const SurchargeTable: React.FC = () => {
         </Space>
       </div>
 
-      {/* Tabs */}
+      <Alert
+        type="info"
+        showIcon
+        message={
+          <div>
+            <strong className="text-yellow-800">Thông tin về Phụ thu:</strong>
+            <div className="text-yellow-700">
+              Đây là bảng phụ thu mặc định theo giá sản phẩm và loại sản phẩm,
+              được cài đặt riêng cho từng quốc gia (Japan/US).
+            </div>
+            <div className="text-yellow-700">
+              <strong className="text-yellow-800">
+                Phụ thu riêng cho từng khách hàng:
+              </strong>{" "}
+              Có thể được thiết lập trong trang <b>Chi tiết 360</b> của khách
+              hàng, tab <b>Cài đặt Phí riêng</b>.
+            </div>
+          </div>
+        }
+        style={{
+          background: "#fffce8",
+          border: "1px solid #fdecb2",
+          borderLeft: "4px solid #facc15",
+        }}
+      />
       <Tabs
         defaultActiveKey="japan"
         onChange={(key) => setActiveTab(key)}

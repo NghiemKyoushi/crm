@@ -10,10 +10,13 @@ import {
   faCog,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
 const SettingsDetail = () => {
+  const router = useRouter();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <Card
@@ -88,6 +91,7 @@ const SettingsDetail = () => {
             size="large"
             className="!w-full !justify-center !border-0 !bg-blue-50 !text-blue-600 hover:!bg-blue-100 !font-medium"
             type="dashed"
+            onClick={() => router.push("/fee-setting")}
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
           >
             Đi đến trang Quản lý Phí
@@ -104,7 +108,7 @@ const SettingsDetail = () => {
           ]}
           className="!flex !flex-col !gap-1"
           renderItem={(item) => (
-            <List.Item className="!w-full !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
+            <List.Item className="!w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
               <List.Item.Meta
                 avatar={
                   <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />
@@ -128,7 +132,7 @@ const SettingsDetail = () => {
           ]}
           className="!flex !flex-col !gap-1 "
           renderItem={(item) => (
-            <List.Item className="!w-full !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
+            <List.Item className="!w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
               <List.Item.Meta
                 avatar={
                   <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />

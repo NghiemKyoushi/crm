@@ -176,7 +176,7 @@
     "status": {
       "pending": "Chờ xác nhận",
       "completed": "Đã xác nhận",
-      "canceled": "Đã hủy",
+      "canceled": "Đã từ chối",
       "manual": "Nạp tay"
     },
     "actions": {
