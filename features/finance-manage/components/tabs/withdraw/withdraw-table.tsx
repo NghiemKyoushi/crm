@@ -400,6 +400,7 @@ const WithdrawTable = ({}) => {
         onClose={() => setIsOpenHistory(false)}
         transactionId={transactionId ?? ""}
         histories={histories}
+        isDeposit={false}
       />
       <TransactionDetailModal
         open={isOpenTransaction}
