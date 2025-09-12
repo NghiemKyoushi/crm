@@ -41,7 +41,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             maxHeight: "70vh", // Giới hạn chiều cao nội dung
             overflowY: "auto", // Cho phép scroll
             paddingRight: "8px",
-            overflowX: "hidden"
+            overflowX: "hidden",
           },
         }}
         title="Tạo Đơn hàng cho Khách hàng"
@@ -97,57 +97,42 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <Form.Item
-  label="Phương thức"
-  name="method"
-  rules={[{ required: true, message: "Chọn phương thức!" }]}
->
-  <Radio.Group className="flex gap-4 w-full">
-    <Radio value="buy" >
-      Mua thẳng
-    </Radio>
-    <Radio value="auction" >
-      Đấu giá
-    </Radio>
-
-    <div className="grid grid-cols-2 gap-4 w-full">
-      <Form.Item noStyle shouldUpdate={(prev, cur) => prev.method !== cur.method}>
-        {({ getFieldValue }) => {
-          const method = getFieldValue("method");
-          return (
-            <>
-              <div
-                className={`cursor-pointer rounded-xl border p-4 ${
-                  method === "buy" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                }`}
-                onClick={() => form.setFieldsValue({ method: "buy" })}
+                label="Phương thức"
+                name="method"
+                rules={[{ required: true, message: "Chọn phương thức!" }]}
+                className=" !w-full"
               >
-                <div className="font-semibold">Mua thẳng</div>
-                <div className="text-sm text-gray-500">Giá cố định</div>
-              </div>
-              <div
-                className={`cursor-pointer rounded-xl border p-4 ${
-                  method === "auction" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                }`}
-                onClick={() => form.setFieldsValue({ method: "auction" })}
-              >
-                <div className="font-semibold">Đấu giá</div>
-                <div className="text-sm text-gray-500">Giá linh hoạt</div>
-              </div>
-            </>
-          );
-        }}
-      </Form.Item>
-    </div>
-  </Radio.Group>
-</Form.Item>
+                <Radio.Group className="!flex !flex-row !w-full gap-4  ">
+                  <Radio
+                    value="buy"
+                    className="flex-1 border border-gray-300 !p-5 rounded-md hover:border-blue-500"
+                  >
+                    Mua thẳng
+                  </Radio>
+                  <Radio
+                    value="auction"
+                    className="flex-1 border border-gray-300 !p-5 rounded-md hover:border-blue-500"
+                  >
+                    Đấu giá
+                  </Radio>
+                </Radio.Group>
+              </Form.Item>
 
               <div className="flex flex-row gap-1">
                 <Form.Item className="!flex-1" label="Giá (¥)" name="priceY">
-                  <InputNumber className="!w-full" min={0}  />
+                  <InputNumber className="!w-full" min={0} />
                 </Form.Item>
 
-                <Form.Item className="!flex-1" label="Giá (VND)" name="priceVnd">
-                  <Input className="!w-full" disabled placeholder="Tự động tính" />
+                <Form.Item
+                  className="!flex-1"
+                  label="Giá (VND)"
+                  name="priceVnd"
+                >
+                  <Input
+                    className="!w-full"
+                    disabled
+                    placeholder="Tự động tính"
+                  />
                 </Form.Item>
               </div>
             </Col>
@@ -170,8 +155,16 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   <InputNumber className="!w-full" min={0} />
                 </Form.Item>
 
-                <Form.Item className="!flex-1" label="Phí DV (VND)" name="feeVnd">
-                  <Input className="!w-full"  disabled placeholder="Tự động tính" />
+                <Form.Item
+                  className="!flex-1"
+                  label="Phí DV (VND)"
+                  name="feeVnd"
+                >
+                  <Input
+                    className="!w-full"
+                    disabled
+                    placeholder="Tự động tính"
+                  />
                 </Form.Item>
               </div>
 
@@ -187,8 +180,16 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   <InputNumber className="!w-full" min={0} />
                 </Form.Item>
 
-                <Form.Item className="!flex-1" label="% Cọc" name="depositPercent">
-                  <Input className="!w-full" disabled placeholder="Tự động tính" />
+                <Form.Item
+                  className="!flex-1"
+                  label="% Cọc"
+                  name="depositPercent"
+                >
+                  <Input
+                    className="!w-full"
+                    disabled
+                    placeholder="Tự động tính"
+                  />
                 </Form.Item>
               </div>
 
@@ -196,10 +197,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <Input.TextArea placeholder="Ghi chú thêm về đơn hàng..." />
               </Form.Item>
 
-              <div className="p-3 rounded bg-gray-50 border mt-4">
+              <div className="p-3 rounded bg-blue-50  mt-4">
                 <h4 className="font-medium mb-2">Tổng kết Đơn hàng</h4>
                 <p>Giá sản phẩm: 0 đ</p>
                 <p>Phí dịch vụ: 0 đ</p>
+                <hr className="my-2 border-gray-200" />
                 <p className="font-semibold">Tổng cộng: 0 đ</p>
                 <p className="text-green-600">Tiền cọc: 0 đ</p>
                 <p className="text-red-600">Còn lại: 0 đ</p>

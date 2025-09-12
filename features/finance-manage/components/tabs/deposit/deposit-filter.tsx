@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Select, DatePicker, Form, SelectProps, Input } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
@@ -11,9 +11,10 @@ const { Option } = Select;
 
 interface FilterSectionProps {
   onFilter: (value: any) => void;
+  code?: string;
 }
 const FilterSection = (props: FilterSectionProps) => {
-  const { onFilter } = props;
+  const { onFilter, code } = props;
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
@@ -23,9 +24,17 @@ const FilterSection = (props: FilterSectionProps) => {
       fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
       toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
+      depositCode: values.keyword,
     };
     onFilter(payload);
   };
+
+   useEffect(() => {
+    if (code) {
+      form.setFieldsValue({ keyword: code });
+      form.submit(); // sẽ trigger onFinish với giá trị đã có
+    }
+  }, [code, form]);
 
   return (
     <div className="flex flex-col mb-2 gap-4 ">

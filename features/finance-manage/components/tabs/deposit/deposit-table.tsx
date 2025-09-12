@@ -38,7 +38,12 @@ import dayjs from "dayjs";
 import DepositDetailModal from "./modal/modal-detail-deposit";
 import TransactionCompleteModal from "./modal/transaction-topup-complete-modal";
 
-const DepositTable = ({}) => {
+interface DepositTableProps{
+  action?: string;
+  code?: string;
+}
+const DepositTable = (props: DepositTableProps) => {
+  const {action, code} =props;
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenCancel, setIsOpenCancel] = useState(false);
@@ -434,7 +439,7 @@ const DepositTable = ({}) => {
           </Button>
         </div>
       </div>
-      <DepositFilter onFilter={handleSearch} />
+      <DepositFilter onFilter={handleSearch} code={code}/>
       <TableComponent
         columns={columns}
         dataSource={data?.content || []}

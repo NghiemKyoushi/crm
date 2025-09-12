@@ -5,6 +5,7 @@ import { PlusOutlined, FilterOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
+import OrderDetailModal from "./modal/orderhub-detail-modal";
 
 const { Option } = Select;
 
@@ -60,6 +61,18 @@ const data: Order[] = [
   },
 ];
 
+
+
+export default function OrderHub() {
+  const [form] = Form.useForm();
+  const [open, setOpen] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+
+  const handleFinish = (values: any) => {
+    console.log("Filter values:", values);
+  };
+
+  
 const columns: ColumnsType<Order> = [
   {
     title: "Mã Đơn",
@@ -93,18 +106,9 @@ const columns: ColumnsType<Order> = [
     title: "Hành động",
     dataIndex: "hanhDong",
     key: "hanhDong",
-    render: (text) => <a className="text-blue-600">{text}</a>,
+    render: (text) => <button className="!text-blue-600" onClick={ ()=> setOpenDetail(true)}>{text}</button>,
   },
 ];
-
-
-export default function OrderHub() {
-  const [form] = Form.useForm();
-  const [open, setOpen] = useState(false);
-
-  const handleFinish = (values: any) => {
-    console.log("Filter values:", values);
-  };
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
@@ -183,6 +187,7 @@ export default function OrderHub() {
         <Table dataSource={data} columns={columns} pagination={false} />
       </div>
       <CreateOrderModal isOpen={open} onCancel={()=> setOpen(false)}  onConfirm={()=> setOpen(false)}/>
+        <OrderDetailModal open={openDetail} onClose={()=> setOpenDetail(false)}/>
     </div>
   );
 }
