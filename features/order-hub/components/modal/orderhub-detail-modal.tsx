@@ -15,6 +15,15 @@ const OrderDetailModal = (props: OrderDetailModalProps) => {
       footer={null}
       width={800}
       title={<span className="font-bold text-lg">Chi tiết Đơn hàng</span>}
+      centered
+      styles={{
+        body: {
+          maxHeight: "80vh", // Giới hạn chiều cao nội dung
+          overflowY: "auto", // Cho phép scroll
+          paddingRight: "8px",
+          overflowX: "hidden",
+        },
+      }}
     >
       <div className="grid grid-cols-3 gap-4">
         {/* Bảng chiết tính tài chính */}
@@ -161,10 +170,10 @@ const OrderDetailModal = (props: OrderDetailModalProps) => {
           placeholder="Nhập ghi chú..."
           className="w-full border border-blue-200 rounded-md p-2 text-sm"
         />
-        <div className="w-full">
-            <Button type="primary" className="mt-2">
-          Lưu
-        </Button>
+        <div className="w-full flex justify-end">
+          <Button type="primary" className="mt-2">
+            Lưu
+          </Button>
         </div>
       </div>
     </Modal>

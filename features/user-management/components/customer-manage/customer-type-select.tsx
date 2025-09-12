@@ -39,7 +39,6 @@ export default function CategoryDropdown({ value, onChange }: any) {
         label: (
           <span
             style={{
-              fontWeight: 600,
               color: getContrastColor(opt.color),
               backgroundColor: opt.color !== null ? opt.color : "blue",
               padding: "2px 8px",
@@ -47,6 +46,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
               display: "inline-block",
               minWidth: 80,
               textAlign: "center",
+              fontSize: '12px'
             }}
           >
             {opt.label}
@@ -62,7 +62,6 @@ export default function CategoryDropdown({ value, onChange }: any) {
         style={{
           height: 28,
           width: 150,
-          fontWeight: 600,
           color:  getContrastColor(selected?.color),
           backgroundColor: selected?.color ?? "rgb(22, 119, 255)",
           border: "none",
@@ -70,6 +69,8 @@ export default function CategoryDropdown({ value, onChange }: any) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+           textAlign: "center",
+              fontSize: '12px'
         }}
       >
         {selected ? selected.label : "Chọn phân loại "}

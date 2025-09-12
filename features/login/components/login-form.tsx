@@ -33,7 +33,16 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
       loginMutation.mutate(values, {
         onSuccess: () => {
           toast.success(t("login.success"), { position: "top-right" });
-          router.push("user-management");
+          // router.push("user-management");
+          
+          const redirectUrl = window.location.search
+          .split("redirect=")[1] || "/user-management";
+
+          if (decodeURIComponent(redirectUrl) === "/login") {
+            router.replace("/login"); 
+          } else {
+            router.replace(redirectUrl ? decodeURIComponent(redirectUrl) : "/user-management");
+          }
         },
         onError: () => {
           toast.error(t("login.failed"), { position: "top-right" });

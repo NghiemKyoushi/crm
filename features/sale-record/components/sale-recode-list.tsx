@@ -63,17 +63,30 @@ const SalePerformance = () => {
       title: "Tên Sale",
       dataIndex: "name",
       key: "name",
-      render: (_, record) => (
-        <div className="flex items-center gap-2">
-          <Avatar style={{ backgroundColor: "#1890ff" }} icon={null}>
-            <FontAwesomeIcon icon={faUser} className="text-white" />
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium">{record.name}</span>
-            <span className="text-gray-400 text-xs">ID: {record.id}</span>
+      render: (_, record) => {
+        const getInitials = (fullName: string) => {
+          if (!fullName) return "";
+          const parts = fullName.trim().split(" ").filter(Boolean);
+          if (parts.length === 1) {
+            return parts[0][0].toUpperCase();
+          }
+          const first = parts[0][0].toUpperCase();
+          const last = parts[parts.length - 1][0].toUpperCase();
+          return first + last;
+        };
+
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar style={{ backgroundColor: "#1890ff" }}>
+              {getInitials(record.name)}
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-medium">{record.name}</span>
+              <span className="text-gray-400 text-xs">ID: {record.id}</span>
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Doanh số tháng (¥)",
@@ -125,7 +138,12 @@ const SalePerformance = () => {
         <div className="flex flex-col gap-1">
           <button className="!text-blue-600">Chi tiết</button>
           {record.status === "success" && (
-            <button onClick={()=> router.push('sales-management/100')} className="!text-green-600">Tính lương</button>
+            <button
+              onClick={() => router.push("sales-management/100")}
+              className="!text-green-600"
+            >
+              Tính lương
+            </button>
           )}
           {record.status === "error" && (
             <button className="!text-orange-500">Cảnh báo</button>
@@ -139,7 +157,7 @@ const SalePerformance = () => {
     <div className="bg-white p-4 rounded-2xl shadow-sm mt-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-        <FontAwesomeIcon icon={faUsers} /> Theo dõi Hiệu suất Sale
+          <FontAwesomeIcon icon={faUsers} /> Theo dõi Hiệu suất Sale
         </h2>
         <Button type="primary" icon={<PlusOutlined />}>
           Thêm Sale

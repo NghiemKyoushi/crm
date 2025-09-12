@@ -1,6 +1,7 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 
 const apiAuth = axios.create({
@@ -23,9 +24,7 @@ const apiAuth = axios.create({
   },
 });
 export const loginRequest  = async (email: string, password: string) => {    
-  const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });
-  console.log('res', res);
-  
+  const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });  
   const refreshToken = res.data.data.refresh_token;
   if (!refreshToken) {
     throw new Error("Không nhận được refreshToken từ API");
@@ -41,6 +40,7 @@ export const loginRequest  = async (email: string, password: string) => {
       },
     }
   );  
+  Cookies.set("token", accessToken.data.data.token, { expires: 1 });
   localStorage.setItem("accessToken", accessToken.data.data.token);
   return { refreshToken, accessToken };
 };

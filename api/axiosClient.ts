@@ -1,6 +1,7 @@
 import { API_TYPE_CONST } from "@/constants/api-type";
 import i18n from "@/locales/i18n";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
@@ -97,6 +98,7 @@ api.interceptors.response.use(
         );
 
         const token = res.data.data.token;
+        Cookies.set("token", token, { expires: 1 });
         localStorage.setItem("accessToken", token);
         processQueue(null, token);
 

@@ -105,22 +105,21 @@ const columns: ExtendedColumnsType<any> = [
       },
     }),
     render: (val: number) => {
-        const baseClasses =
-          "font-semibold px-2 py-1 rounded-md inline-block";
-        let colorClasses = "text-green-700"; 
-      
-        if (+val === 0) {
-          colorClasses = "text-gray-500"; 
-        } else if (+val < 0) {
-          colorClasses = "text-red-600"; 
-        }
-      
-        return (
-          <div className={`${baseClasses} ${colorClasses}`}>
-            {val.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}đ
-          </div>
-        );
-      },
+      const baseClasses = "font-semibold px-2 py-1 rounded-md inline-block";
+      let colorClasses = "text-green-700";
+
+      if (+val === 0) {
+        colorClasses = "text-gray-500";
+      } else if (+val < 0) {
+        colorClasses = "text-red-600";
+      }
+
+      return (
+        <div className={`${baseClasses} ${colorClasses}`}>
+          {val.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}đ
+        </div>
+      );
+    },
   },
   { title: "Trạng thái", dataIndex: "trangThai", key: "trangThai" },
 ];
@@ -137,7 +136,7 @@ export default function SaleDetail(props: SaleDetailProps) {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6  min-h-screen">
       {/* Header */}
       <div className="bg-white rounded-xl shadow p-4 flex justify-between items-center">
         <div>
@@ -154,13 +153,15 @@ export default function SaleDetail(props: SaleDetailProps) {
         </div>
         <div className="text-right">
           <p className="text-gray-500 !mb-1">Tháng hiện tại</p>
-          <p className="text-blue-600 text-xl font-semibold !mb-1">₫437,185,422</p>
+          <p className="text-blue-600 text-xl font-semibold !mb-1">
+            ₫437,185,422
+          </p>
           <p className="text-gray-500 !mb-1">Hoa hồng 20%: 87,437,084</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-blue-100 rounded-full">
@@ -171,12 +172,12 @@ export default function SaleDetail(props: SaleDetailProps) {
             </div>
             <div className="flex flex-col gap-0">
               <p className="text-gray-600 text-sm !mb-1">Tổng khách hàng</p>
-              <p className="text-lg font-bold ">34</p>
+              <p className="text-lg font-bold">34</p>
             </div>
           </div>
         </Card>
 
-        <Card className="shadow-sm  !h-[100px]">
+        <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-green-100 rounded-full">
               <FontAwesomeIcon

@@ -47,6 +47,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         title="Tạo Đơn hàng cho Khách hàng"
         open={isOpen}
         onCancel={onCancel}
+        centered
         footer={[
           <Button key="cancel" onClick={onCancel}>
             Hủy

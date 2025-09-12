@@ -23,6 +23,7 @@ const FilterSection = (props: FilterSectionProps) => {
       fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
       toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
+      depositCode: values.keyword,
     };
     onFilter(payload);
   };

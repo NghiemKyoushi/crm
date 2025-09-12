@@ -120,6 +120,7 @@ export default function CategoryCustomerTable() {
           style={{
             backgroundColor: record.color ? record.color : undefined,
             color: record.color ? getContrastColor(record.color): "#ffffff" ,
+            fontWeight: 400
           }}
           className="font-semibold text-[13px] px-3 py-1"
         >
@@ -142,7 +143,7 @@ export default function CategoryCustomerTable() {
       key: "actions",
       render: (_: any, record: Category) => (
         <div className="flex space-x-3">
-          <Tooltip title={t("customerCate.editPolicy")}>
+          {/* <Tooltip title={t("customerCate.editPolicy")}>
             <Button
               type="text"
               icon={
@@ -152,7 +153,7 @@ export default function CategoryCustomerTable() {
                 />
               }
             />
-          </Tooltip>
+          </Tooltip> */}
 
           <Tooltip title={t("customerCate.editCategory")}>
             <Button

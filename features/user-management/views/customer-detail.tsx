@@ -163,21 +163,21 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                Nguyễn Văn A
+                {customer?.user_profile.full_name}
               </h2>
               <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                <span>ID: KH001</span>
-                <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                <span>ID: {customer?.user_profile.id}</span>
+                {/* <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium">
                   VIP
-                </span>
-                <span>Sales: Trần Thị Bích</span>
-                <span>Ngày gia nhập: 15/03/2024</span>
+                </span> */}
+                <span>Sales: {customer?.sale_profile?.full_name}</span>
+                {/* <span>Ngày gia nhập: {customer?.user_profile.}</span> */}
               </div>
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
+            <button className="bg-blue-500 hover:bg-blue-600 !text-white px-3 py-1 rounded-lg text-sm font-medium">
               Chỉnh sửa thông tin
             </button>
             <button className="border border-gray-300 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-100">
@@ -239,9 +239,9 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
           <HistoryPaymentTab />
         </TabPane>
 
-        <TabPane tab={t("customerManage.tabs.fees")} key="fees">
+        {/* <TabPane tab={t("customerManage.tabs.fees")} key="fees">
           <ShippingFeeConfig />
-        </TabPane>
+        </TabPane> */}
 
         <TabPane tab={t("customerManage.tabs.notes")} key="notes">
           <Notes selectedId={selectedId} />
