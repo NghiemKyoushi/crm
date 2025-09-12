@@ -26,7 +26,8 @@
     "userManagement": "User Management",
     "action": "Action System",
     "products": "Product Types & Fees",
-    "settings": "System Settings"
+    "settings": "System Settings",
+    "saleRecord":"Sale Records"
   },
   "tabs": {
     "customer": "Customer Management",

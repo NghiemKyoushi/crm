@@ -26,7 +26,8 @@
     "userManagement": "Quản lý Người dùng",
     "action": "Hệ thống Đấu giá",
     "products": "Loại sản phẩm & Phí",
-    "settings": "Cài đặt Hệ thống"
+    "settings": "Cài đặt Hệ thống",
+    "saleRecord":"Quản lý lương sale"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",

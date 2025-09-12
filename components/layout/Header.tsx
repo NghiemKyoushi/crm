@@ -12,6 +12,7 @@ import { logout } from "@/services/auth";
 import { menuItems, menuPermissions } from "./Sidebar";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
+import Cookies from "js-cookie";
 
 const { Header: AntHeader } = Layout;
 
@@ -37,6 +38,7 @@ export const Header: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     storage.clear();
+    Cookies.remove("token", { path: "" }); 
     router.push("/login");
   };
 

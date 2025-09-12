@@ -71,6 +71,7 @@ export default function SalesDetail({
           style={{
             backgroundColor: record.color ? record.color : '#000000',
             color: record.color ? getContrastColor(record.color): "#ffffff" ,
+            fontWeight: 400
           }}
           className="font-semibold text-[13px] px-3 py-1"
         >

@@ -1,6 +1,5 @@
 import { Button, Input, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import CustomerRowActions from "./customer-row-actions";
 import TableComponent from "@/components/TableComponent";
 import CustomerDetailModal from "./modal-customer/modal-view-detail-customer";
 import { useState } from "react";
@@ -15,6 +14,7 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
@@ -25,6 +25,7 @@ export default function CustomerTable() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<string>("");
+  const router = useRouter();
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
   const { data } = useListCustomer({
@@ -33,16 +34,16 @@ export default function CustomerTable() {
     category_id: undefined,
     search: search || undefined,
   });
-  const handleClickPopupdetail = (userId: string) => {
-    setSelectedId(userId);
-    setIsOpenDetail(true);
-  };
+  // const handleClickPopupdetail = (userId: string) => {
+  //   setSelectedId(userId);
+  //   setIsOpenDetail(true);
+  // };
   const handleClosePopupdetail = () => {
     setSelectedId(null);
     setIsOpenDetail(false);
   };
 
-  const handleUpdateColor = (e: number, userId: number) => {    
+  const handleUpdateColor = (e: number, userId: number) => {
     updateCateMutation.mutate(
       {
         category_id: e,
@@ -75,9 +76,7 @@ export default function CustomerTable() {
         <>
           <CategorySelect
             value={record.group_id}
-            onChange={(e: number) =>
-              handleUpdateColor(e, record.user_id)
-            }
+            onChange={(e: number) => handleUpdateColor(e, record.user_id)}
           />
         </>
       ),
@@ -103,9 +102,13 @@ export default function CustomerTable() {
       render: (_: any, record: CustomerModel) => (
         <div
           className="cursor-pointer"
-          onClick={() => handleClickPopupdetail(record.user_id.toString())}
+          onClick={() => {
+            router.push(`user-management/${record.user_id.toString()}`);
+          }}
         >
-          <CustomerRowActions />
+          <div className="text-blue-600 hover:underline">
+            {t("customerTable.view360")}
+          </div>
         </div>
       ),
     },
@@ -116,13 +119,15 @@ export default function CustomerTable() {
   };
 
   const handleSearch = () => {
-    setPage(0); 
+    setPage(0);
     queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-lg font-semibold mb-4">{t("customerManage.title")}</h2>
+      <h2 className="text-lg font-semibold mb-4">
+        {t("customerManage.title")}
+      </h2>
       <div className="flex gap-2 mb-4">
         <Input
           placeholder="Tìm kiếm khách hàng..."

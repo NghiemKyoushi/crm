@@ -15,6 +15,7 @@ import {
   faGavel,
   faTags,
   faCog,
+  faMoneyBill,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -22,27 +23,30 @@ import { usePermission } from "./PermissionContext";
 const { Sider } = Layout;
 
 export const menuPermissions: Record<string, string[]> = {
-  "/dashboard": [], // luôn hiển thị
-  "/orders": ["order.view_all", "order.update_status"],
+  "/dashboard": [], 
+  "/orderhub": ["order.view_all", "order.update_status"],
   "/finance-management": [
     "finance.approve_topup",
     "finance.manage_debt",
     "FINANCE_MANAGE_BANK_ACCOUNTS",
   ],
   "/user-management": ["user.categorize_customers", "user.manage_staff_roles"],
-  "/auction": [], // tuỳ bạn định nghĩa
-  "/products": [], // tuỳ bạn định nghĩa
+  "/auction": [], 
+  "/products": [], 
   "/settings": ["system.admin", "system.superAdmin"],
+  "/sales-management": [],
 };
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
-  { key: "/orders", icon: faShoppingCart, label: "orders" },
+  { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
+  { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   { key: "/auction", icon: faGavel, label: "action" },
   { key: "/surchange", icon: faTags, label: "products" },
   { key: "/settings", icon: faCog, label: "settings" },
+
 ];
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -54,7 +58,7 @@ export const Sidebar: React.FC = () => {
   const filteredMenu = useMemo(() => {
     return menuItems.filter((item) => {
       const required = menuPermissions[item.key] || [];
-      if (required.length === 0) return true; // không cần quyền
+      if (required.length === 0) return true;
       return required.some((perm) => hasPermission(perm));
     });
   }, [hasPermission]);

@@ -6,8 +6,12 @@ import FinanceTabs from "../withdraw/finance-tabs";
 import DepositTable from "./deposit-table";
 import WithdrawTable from "../withdraw/withdraw-table";
 import BankAccountSetting from "../bank-setting/deposit-bank-setting";
+import { useSearchParams } from "next/navigation";
 
 const FinanceDepositApprovalPage = () => {
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const code = searchParams.get("code");
   const [activeTab, setActiveTab] = useState("deposit");
   const { hasPermission, loading } = usePermission();
 
@@ -28,16 +32,16 @@ const FinanceDepositApprovalPage = () => {
 
   return (
     <div className="pt-4">
-        <FinanceTabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          allowedTabs={allowedTabs}
-        />
+      <FinanceTabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        allowedTabs={allowedTabs}
+      />
 
-        {activeTab === "deposit" && <DepositTable />}
-        {activeTab === "withdraw" && <WithdrawTable />}
-        {activeTab === "bank-settings" && <BankAccountSetting />}
-        {/* {activeTab === "reconciliation" && (
+      {activeTab === "deposit" && <DepositTable action={action ?? undefined} code={code ?? undefined} />}
+      {activeTab === "withdraw" && <WithdrawTable />}
+      {activeTab === "bank-settings" && <BankAccountSetting />}
+      {/* {activeTab === "reconciliation" && (
           <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
         )} */}
     </div>
