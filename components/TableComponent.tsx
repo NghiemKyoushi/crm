@@ -5,8 +5,16 @@ import React from "react";
 import { Table, Pagination } from "antd";
 import type { ColumnsType, TableProps } from "antd/es/table";
 
+import type { ReactNode } from "react";
+
+export interface CommonColumn<T> {
+  renderHeader?: (title: ReactNode, column: CommonColumn<T>) => ReactNode;
+  renderCell?: (value: any, record: T, index: number) => ReactNode;
+}
+
+export type ExtendedColumnsType<T> = (ColumnsType<T>[number] & CommonColumn<T>)[];
 interface TableComponentProps<T> extends TableProps<T> {
-  columns: ColumnsType<T>;
+  columns: ExtendedColumnsType<T>;
   dataSource: T[];
   rowHeight?: number;       
   headerHeight?: number;    

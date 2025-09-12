@@ -205,10 +205,22 @@ const DepositTable = ({}) => {
     },
     {
       title: t("deposit.columns.amount"),
-      dataIndex: "amount_vnd",
-      key: "amount_vnd",
-      render: (value: number) =>
-        value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
+      dataIndex: "amount",
+      key: "amount",
+      render: (value: number) => {
+        if (value == null) return null;
+
+        const formatted = value.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        });
+
+        return (
+          <span style={{ color: value >= 0 ? "green" : "red" }}>
+            {formatted}
+          </span>
+        );
+      },
     },
     {
       title: t("deposit.columns.createdAt"),
@@ -267,9 +279,9 @@ const DepositTable = ({}) => {
       dataIndex: "status",
       key: "status",
       render: (status: DepositItem["status"], record: DepositItem) => {
-        if (record.transaction_id !== null) {
-          status = "MANUAL";
-        }
+        // if (record.transaction_id !== null) {
+        //   status = "MANUAL";
+        // }
         switch (status) {
           case "WAITING_CONFIRMATION":
             return (
@@ -296,10 +308,16 @@ const DepositTable = ({}) => {
                 {/* {t("deposit.status.manual")} */}
               </Tag>
             );
-          case "MANUAL":
+          case "MANUAL_TOP_UP_COMPLETED":
             return (
-              <Tag className="!rounded-3xl" color="orange">
-                Nạp thủ công
+              <Tag className="!rounded-3xl" color="green">
+                Nạp tiền
+              </Tag>
+            );
+          case "MANUAL_WITHDRAWAL_COMPLETED":
+            return (
+              <Tag className="!rounded-3xl" color="red">
+                Trừ tiền
               </Tag>
             );
           case "CANCELED_BY_USER":

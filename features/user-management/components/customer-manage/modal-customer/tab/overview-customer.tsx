@@ -80,7 +80,7 @@ export default function OverviewTab(props: OverviewTabProps) {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      {/* <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="bg-white shadow rounded p-4 text-center">
           <div className="text-gray-500 text-sm">
             {t("customerManage.customerOverview.totalOrders")}
@@ -103,7 +103,7 @@ export default function OverviewTab(props: OverviewTabProps) {
             {customer.debt_amount && customer.debt_amount.toLocaleString()}đ
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex flex-row justify-center gap-4">
         {/* Thông tin địa chỉ */}
@@ -244,61 +244,6 @@ export default function OverviewTab(props: OverviewTabProps) {
         onClose={() => setIsOpenSaleAdd(false)}
         onSubmit={handleChangeSaleResponsibiity}
       />
-      {/* <Modal
-        title={t("customerManage.customerOverview.addDefaultAddress")}
-        open={isOpenSetDefault}
-        onCancel={() => setIsOpenSetDefault(false)}
-        onOk={handleChangeDefaultAddress}
-      >
-        <div className="!max-h-72 !min-h-72 overflow-y-auto">
-          <Radio.Group
-            onChange={(e) => setSelectedDefaultAddress(e.target.value)}
-            value={selectedDefaultAddress}
-            className="!flex !flex-col !gap-2"
-          >
-            {customer.shipping_addresses.map((addr) => (
-              <Radio key={addr.id} value={addr.id}>
-                <div>
-                  <div className="font-medium">{addr.address}</div>
-                  <div className="text-xs text-gray-500">
-                    {addr.phone_number}
-                  </div>
-                </div>
-              </Radio>
-            ))}
-          </Radio.Group>
-        </div>
-      </Modal>
-
-      <Modal
-        title={t("customerManage.customerOverview.addDefaultAddress")}
-        open={isOpenSetDefaultBank}
-        onCancel={() => setIsOpenSetDefaultBank(false)}
-        onOk={handleChangeDefaultBank}
-      >
-        <div className="!max-h-72 !min-h-72 overflow-y-auto">
-          <Radio.Group
-            onChange={(e) => {
-              setSelectedDefaultBank(e.target.value);
-            }}
-            value={selectedDefaultBank}
-            className="!flex !flex-col !gap-2"
-          >
-            {customer.bank_accounts.map((addr) => (
-              <Radio key={addr.id} value={addr.id}>
-                <div>
-                  <div className="font-medium">
-                    {addr.account_holder_name}-{addr.bank_name}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {addr.account_number}
-                  </div>
-                </div>
-              </Radio>
-            ))}
-          </Radio.Group>
-        </div>
-      </Modal> */}
       <Modal
         title={t("customerManage.customerOverview.addDefaultAddress")}
         open={isOpenSetDefault}
