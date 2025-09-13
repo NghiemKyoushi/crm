@@ -27,7 +27,6 @@ export default function AssignRoleModal({
   defaultSelected = [],
   idBank,
 }: AssignRoleModalProps) {
-    console.log('accountName', accountName);
     
   const [selectedUsers, setSelectedUsers] = useState<number[]>(defaultSelected);
   const [staffs, setStaffs] = useState<AdminUserCheck[]>([]);

@@ -26,9 +26,7 @@ export default function SalesPage() {
       if (res.data.length === 0) {
         setHasMore(false);
       } else {
-        if(page === 0){
-          console.log('res.data[0]', res.data[0]);
-          
+        if(page === 0){          
           setSelectedSales(res.data[0].user_id)
         }
         setSalesData((prev) => (reset ? res.data : [...prev, ...res.data]));

@@ -29,9 +29,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
   const { data: listRole, isLoading } = useUserRole(); // hook trả về thêm isLoading
 
   useEffect(() => {
-    if (listRole) {
-      console.log('listRole', listRole);
-      
+    if (listRole) {      
       const allPerms = listRole.groups.flatMap((g) => g.permissions);      
       setPermissions(allPerms);
     }
