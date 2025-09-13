@@ -62,6 +62,7 @@ api.interceptors.response.use(
     const logout = () => {
       localStorage.clear();
       window.location.href = "/login";
+      Cookies.remove("token", { path: "" }); 
     };
 
     if (err.response?.status === 401 && !originalRequest._retry) {

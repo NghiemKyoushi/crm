@@ -26,7 +26,6 @@ import {
 import { Employee } from "../components/sale-manage/modal-sales-add";
 import HistoryOrderTab from "../components/customer-manage/modal-customer/tab/history-order";
 import HistoryPaymentTab from "../components/customer-manage/modal-customer/tab/history-payment";
-import ShippingFeeConfig from "../components/customer-manage/modal-customer/tab/fee-privacy-setting";
 import Notes from "../components/customer-manage/modal-customer/tab/internal-note";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
@@ -36,8 +35,6 @@ export interface CustomerDetailProps {
 }
 export default function CustomerDetailPages(props: CustomerDetailProps) {
   const { selectedId } = props;
-  console.log("selectedId", selectedId);
-
   const { t } = useTranslation();
   const { data: customerDetails } = useDetailCustomer(selectedId);
   const addBankMutation = useAddBank();

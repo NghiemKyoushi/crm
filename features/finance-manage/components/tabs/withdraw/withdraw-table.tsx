@@ -24,10 +24,14 @@ import TransactionDetailModal from "./modal/transaction-detail-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faQrcode } from "@fortawesome/free-solid-svg-icons";
 import TransactionCompleteModal from "./modal/transaction-complete-modal";
+import { useSearchParams } from "next/navigation";
 
 const WithdrawTable = ({}) => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const code = searchParams.get("code");
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
@@ -56,9 +60,9 @@ const WithdrawTable = ({}) => {
 
   const { data } = useListWithdraw(params);
   const handleSearch = (values: DepositParams) => {
-    const newParams: DepositParams = {
+    const newParams: any = {
       ...params,
-      depositCode: values.depositCode,
+      code: values.depositCode,
       status: values.status,
       fromDate: values.fromDate,
       toDate: values.toDate,
@@ -358,7 +362,7 @@ const WithdrawTable = ({}) => {
       <div className="flex flex-row justify-between mb-3">
         <h2 className="text-lg font-bold mb-4">{t("withdraw.title")}</h2>
       </div>
-      <DepositFilter onFilter={handleSearch} />
+      <DepositFilter onFilter={handleSearch} action={action ?? undefined} code={code ?? undefined}  />
 
       <PopupConfirm
         open={isOpenConfirm}

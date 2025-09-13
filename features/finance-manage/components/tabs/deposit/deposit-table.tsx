@@ -439,7 +439,7 @@ const DepositTable = (props: DepositTableProps) => {
           </Button>
         </div>
       </div>
-      <DepositFilter onFilter={handleSearch} code={code}/>
+      <DepositFilter onFilter={handleSearch} code={code} action={action}/>
       <TableComponent
         columns={columns}
         dataSource={data?.content || []}

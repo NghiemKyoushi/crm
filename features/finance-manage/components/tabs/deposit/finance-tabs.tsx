@@ -1,12 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { Spin } from "antd";
 import FinanceTabs from "../withdraw/finance-tabs";
 import DepositTable from "./deposit-table";
 import WithdrawTable from "../withdraw/withdraw-table";
 import BankAccountSetting from "../bank-setting/deposit-bank-setting";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const FinanceDepositApprovalPage = () => {
   const searchParams = useSearchParams();
@@ -14,6 +14,25 @@ const FinanceDepositApprovalPage = () => {
   const code = searchParams.get("code");
   const [activeTab, setActiveTab] = useState("deposit");
   const { hasPermission, loading } = usePermission();
+  const router = useRouter();
+  const pathname = usePathname();
+  const allowedTabs = [
+    hasPermission("finance.approve_topup") && "deposit",
+    hasPermission("finance.approve_topup") && "withdraw",
+    hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
+    // hasPermission("finance.manage_debt") && "reconciliation",
+  ].filter(Boolean) as string[];
+
+  useEffect(() => {
+    if (!loading) {
+      if (action && allowedTabs.includes(action)) {
+        setActiveTab(action);
+      } else {
+        // Nếu không có action hoặc action ko hợp lệ → fallback tab đầu tiên được phép
+        setActiveTab(allowedTabs[0] || "deposit");
+      }
+    }
+  }, [loading]);
 
   if (loading) {
     return (
@@ -23,22 +42,20 @@ const FinanceDepositApprovalPage = () => {
     );
   }
 
-  const allowedTabs = [
-    hasPermission("finance.approve_topup") && "deposit",
-    hasPermission("finance.approve_topup") && "withdraw",
-    hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
-    // hasPermission("finance.manage_debt") && "reconciliation",
-  ].filter(Boolean) as string[];
-
   return (
     <div className="pt-4">
       <FinanceTabs
         activeKey={activeTab}
-        onChange={setActiveTab}
+        onChange={(key: string)=>{
+          setActiveTab(key);
+          router.replace(pathname);
+        }}
         allowedTabs={allowedTabs}
       />
 
-      {activeTab === "deposit" && <DepositTable action={action ?? undefined} code={code ?? undefined} />}
+      {activeTab === "deposit" && (
+        <DepositTable action={action ?? undefined} code={code ?? undefined} />
+      )}
       {activeTab === "withdraw" && <WithdrawTable />}
       {activeTab === "bank-settings" && <BankAccountSetting />}
       {/* {activeTab === "reconciliation" && (

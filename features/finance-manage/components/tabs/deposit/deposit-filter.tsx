@@ -12,9 +12,10 @@ const { Option } = Select;
 interface FilterSectionProps {
   onFilter: (value: any) => void;
   code?: string;
+  action?: string;
 }
 const FilterSection = (props: FilterSectionProps) => {
-  const { onFilter, code } = props;
+  const { onFilter, code, action } = props;
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
@@ -30,7 +31,7 @@ const FilterSection = (props: FilterSectionProps) => {
   };
 
    useEffect(() => {
-    if (code) {
+    if (code && action === "deposit") {
       form.setFieldsValue({ keyword: code });
       form.submit(); // sẽ trigger onFinish với giá trị đã có
     }
