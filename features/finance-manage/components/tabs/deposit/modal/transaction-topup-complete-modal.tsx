@@ -1,6 +1,10 @@
 "use client";
 
-import { getDetailTopup, getDetailWithdraw } from "@/features/finance-manage/apis";
+import {
+  getDetailTopup,
+  getDetailWithdraw,
+  TopupType,
+} from "@/features/finance-manage/apis";
 import { withdrawModel } from "@/types/deposit-type";
 import { Modal } from "antd";
 import { useEffect, useState } from "react";
@@ -10,21 +14,30 @@ interface TransactionDetailModalProps {
   open: boolean;
   onCancel: () => void;
   selectId: number | null;
+  typeDetail: string;
 }
 export interface DepositDetail {
-  accountHolder: string;        // Tên chủ tài khoản
-  amount: number;               // Số tiền nạp
-  depositCode: string;          // Mã giao dịch nạp
-  fullName: string;             // Họ và tên khách hàng
-  bankAccountNumber: string;    // Số tài khoản ngân hàng
-  bankName: string;             // Tên ngân hàng
-  status: "PENDING" | "COMPLETED" | "CANCELED" | "FAILED" | "APPROVED" | "REJECTED" | "CANCELED_BY_USER"; // Trạng thái
+  accountHolder: string; // Tên chủ tài khoản
+  amount: number; // Số tiền nạp
+  depositCode: string; // Mã giao dịch nạp
+  fullName: string; // Họ và tên khách hàng
+  bankAccountNumber: string; // Số tài khoản ngân hàng
+  bankName: string; // Tên ngân hàng
+  status:
+    | "PENDING"
+    | "COMPLETED"
+    | "CANCELED"
+    | "FAILED"
+    | "APPROVED"
+    | "REJECTED"
+    | "CANCELED_BY_USER"; // Trạng thái
 }
 
 export default function TransactionCompleteModal({
   open,
   onCancel,
   selectId,
+  typeDetail,
 }: TransactionDetailModalProps) {
   const [withdrawDetail, setWithdrawDetail] = useState<DepositDetail | null>(
     null
@@ -35,8 +48,10 @@ export default function TransactionCompleteModal({
     const fetchWithdrawDetail = async () => {
       if (!open || !selectId) return;
       try {
-        const data = await getDetailTopup(Number(selectId));
-        console.log("data", data);
+        const data = await getDetailTopup(
+          Number(selectId),
+          typeDetail as TopupType
+        );
         setWithdrawDetail(data);
       } catch (error) {
         console.error("Error fetching withdraw detail:", error);
@@ -79,7 +94,7 @@ export default function TransactionCompleteModal({
               {t("withdraw.statusType.rejected")}
             </span>
           );
-        case "CANCELED_BY_USER":{
+        case "CANCELED_BY_USER": {
           return (
             <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
               Người dùng huỷ
@@ -112,7 +127,7 @@ export default function TransactionCompleteModal({
             </p>
             <p>
               <span className="font-medium">Khách hàng:</span>{" "}
-              {withdrawDetail?.fullName} 
+              {withdrawDetail?.fullName}
             </p>
             <p>
               <span className="font-medium">Số tiền:</span>{" "}
