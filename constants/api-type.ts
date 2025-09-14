@@ -59,5 +59,7 @@ export const API_TYPE_CONST = {
   WITHDRAW_DETAIL:`${FEATURE}/admin/withdrawal/requests/detail/`,
   WITHDRAW_HISTORY:`${FEATURE}/admin/withdrawal/`,
   TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
+  WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
+  LIST_REGION: `${FEATURE}/admin/regions`
 
 } as const;
