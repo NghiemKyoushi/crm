@@ -38,12 +38,12 @@ import dayjs from "dayjs";
 import DepositDetailModal from "./modal/modal-detail-deposit";
 import TransactionCompleteModal from "./modal/transaction-topup-complete-modal";
 
-interface DepositTableProps{
+interface DepositTableProps {
   action?: string;
   code?: string;
 }
 const DepositTable = (props: DepositTableProps) => {
-  const {action, code} =props;
+  const { action, code } = props;
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenCancel, setIsOpenCancel] = useState(false);
@@ -61,6 +61,7 @@ const DepositTable = (props: DepositTableProps) => {
   );
   const [isOpenCompleteTransaction, setIsOpenCompleteTransaction] =
     useState(false);
+  const [typeDetail, setTypeDetail] = useState("");
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState<DepositParams>({
@@ -262,13 +263,21 @@ const DepositTable = (props: DepositTableProps) => {
       title: "Chi tiết",
       dataIndex: "status",
       key: "status",
-      render: (status: string, record) => (
+      render: (status: string, record: DepositItem) => (
         <Space>
           <button
             className="cursor-pointer"
             onClick={() => {
               setSelectedId(record.id);
+
               setIsOpenCompleteTransaction(true);
+              if (record.status === "MANUAL_TOP_UP_COMPLETED") {
+                setTypeDetail("MANUAL_TOP_UP");
+              } else if (record.status === "MANUAL_WITHDRAWAL_COMPLETED") {
+                setTypeDetail("MANUAL_WITHDRAWAL");
+              } else {
+                setTypeDetail("TOP_UP");
+              }
             }}
           >
             <FontAwesomeIcon
@@ -367,7 +376,7 @@ const DepositTable = (props: DepositTableProps) => {
               </Button>
             </>
           )}
-          {["CANCELED", "COMPLETED", "MANUAL"].includes(record.status) && (
+          {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED" ].includes(record.status) && (
             <div>
               <Button
                 type="link"
@@ -439,7 +448,7 @@ const DepositTable = (props: DepositTableProps) => {
           </Button>
         </div>
       </div>
-      <DepositFilter onFilter={handleSearch} code={code} action={action}/>
+      <DepositFilter onFilter={handleSearch} code={code} action={action} />
       <TableComponent
         columns={columns}
         dataSource={data?.content || []}
@@ -503,6 +512,7 @@ const DepositTable = (props: DepositTableProps) => {
         onCancel={() => setIsOpenCompleteTransaction(false)}
         open={isOpenCompleteTransaction}
         selectId={selectedId}
+        typeDetail ={typeDetail}
       />
     </div>
   );

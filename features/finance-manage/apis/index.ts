@@ -118,7 +118,14 @@ export const getDetailWithdraw = async (id: number) => {
   return res.data.data;
 };
 
-export const getDetailTopup = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.TOPUP_DETAIL}${id}`);
+export type TopupType = 
+  | "TOP_UP"             // lệnh nạp tiền
+  | "MANUAL_TOP_UP"      // lệnh nạp tiền thủ công
+  | "MANUAL_WITHDRAWAL"; // lệnh trừ tiền thủ công
+
+export const getDetailTopup = async (id: number, type: TopupType) => {
+  const res = await api.get(`${API_TYPE_CONST.TOPUP_DETAIL}${id}`, {
+    params: { type },
+  });
   return res.data.data;
 };
