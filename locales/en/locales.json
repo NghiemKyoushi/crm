@@ -27,7 +27,7 @@
     "action": "Action System",
     "products": "Product Types & Fees",
     "settings": "System Settings",
-    "saleRecord":"Sale Records"
+    "saleRecord": "Sale Records"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -69,7 +69,6 @@
       "change": "Change",
       "addDefaultAddress": "Add default address",
       "addDefaultBank": "Add default bank"
-
     },
     "detailTitle": "Customer Details",
     "tabs": {
@@ -225,8 +224,8 @@
     "handler": "Handler",
     "handledAt": "Handled At",
     "status": "Status",
-    "note":"Note",
-    "adminNote":"Admin Note",
+    "note": "Note",
+    "adminNote": "Admin Note",
     "statusType": {
       "pending": "Pending",
       "approved": "Approved",
@@ -248,5 +247,38 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "error": "An error occurred"
+  },
+  "websiteManage": {
+    "table": {
+      "name": "Website Name",
+      "region": "Region",
+      "action": "Actions"
+    },
+    "action": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "modal": {
+      "editTitle": "Edit Website",
+      "addTitle": "Add Website"
+    },
+    "form": {
+      "name": "Website Name",
+      "requiredName": "Please enter website name",
+      "placeholderName": "Enter website name",
+      "requiredUrl": "Please enter URL",
+      "placeholderUrl": "Enter URL",
+      "region": "Region",
+      "requiredRegion": "Please select a region",
+      "placeholderRegion": "Select region"
+    },
+    "delete": {
+      "title": "Confirm delete website",
+      "content": "Are you sure you want to delete this website?"
+    },
+    "page": {
+      "title": "Supported Website Management",
+      "add": "Add Website"
+    }
   }
 }

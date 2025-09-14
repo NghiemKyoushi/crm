@@ -103,17 +103,17 @@ const SettingsDetail = () => {
         <List
           itemLayout="horizontal"
           dataSource={[
-            { icon: faGlobe, text: "Quản lý Website được hỗ trợ" },
-            { icon: faTags, text: "Quản lý Loại sản phẩm & Phí" },
+            { icon: faGlobe, text: "Quản lý Website được hỗ trợ", url:"/website-manage" },
+            { icon: faTags, text: "Quản lý Loại sản phẩm & Phí", url:"/website-manage" },
           ]}
           className="!flex !flex-col !gap-1"
           renderItem={(item) => (
-            <List.Item className="!w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
+            <List.Item  className="!cursor-pointer  !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
               <List.Item.Meta
                 avatar={
-                  <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />
+                  <FontAwesomeIcon className="w-4 h-4 mt-1 ml-2" icon={item.icon} />
                 }
-                title={<div className="text-[16px]">{item.text}</div>}
+                title={<div onClick={() => router.push(item.url)} className="text-[16px]">{item.text}</div>}
               />
             </List.Item>
           )}
@@ -132,10 +132,10 @@ const SettingsDetail = () => {
           ]}
           className="!flex !flex-col !gap-1 "
           renderItem={(item) => (
-            <List.Item className="!w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
+            <List.Item className="!cursor-pointer !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
               <List.Item.Meta
                 avatar={
-                  <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />
+                  <FontAwesomeIcon className="w-4 h-4  mt-1 ml-2" icon={item.icon} />
                 }
                 title={<div className="text-[16px]">{item.text}</div>}
               />

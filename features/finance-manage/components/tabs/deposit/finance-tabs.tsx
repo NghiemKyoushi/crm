@@ -18,8 +18,9 @@ const FinanceDepositApprovalPage = () => {
   const pathname = usePathname();
   const allowedTabs = [
     hasPermission("finance.approve_topup") && "deposit",
-    hasPermission("finance.approve_topup") && "withdraw",
-    hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
+    hasPermission("finance.process_withdrawal") && "withdraw",
+    "bank-settings",
+    // hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
     // hasPermission("finance.manage_debt") && "reconciliation",
   ].filter(Boolean) as string[];
 

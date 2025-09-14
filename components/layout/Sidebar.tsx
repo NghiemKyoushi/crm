@@ -28,13 +28,15 @@ export const menuPermissions: Record<string, string[]> = {
   "/finance-management": [
     "finance.approve_topup",
     "finance.manage_debt",
-    "FINANCE_MANAGE_BANK_ACCOUNTS",
+    "finance.process_withdrawal",
+    "finance.view_all_transactions",
   ],
-  "/user-management": ["user.categorize_customers", "user.manage_staff_roles"],
+  "/user-management": ["user.view_list", "user.categorize_customers"],
   "/auction": [], 
   "/products": [], 
   "/settings": ["system.admin", "system.superAdmin"],
   "/sales-management": [],
+  "website-manage":[]
 };
 
 export const menuItems = [

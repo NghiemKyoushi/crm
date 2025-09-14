@@ -3,7 +3,7 @@
 import React from "react";
 import SettingsDetail from "../components/setting-detail";
 
-export default function SettingPage() {
+export default function WebsiteManagePage() {
   return (
     <div className="pt-4 pl-[212px]">
       <SettingsDetail/>

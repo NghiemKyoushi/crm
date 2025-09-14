@@ -27,7 +27,7 @@
     "action": "Hệ thống Đấu giá",
     "products": "Loại sản phẩm & Phí",
     "settings": "Cài đặt Hệ thống",
-    "saleRecord":"Quản lý lương sale"
+    "saleRecord": "Quản lý lương sale"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -225,8 +225,8 @@
     "handler": "Người xử lý",
     "handledAt": "Ngày xử lý",
     "status": "Trạng thái",
-    "note":"Ghi chú",
-    "adminNote":"Admin ghi chú",
+    "note": "Ghi chú",
+    "adminNote": "Admin ghi chú",
     "statusType": {
       "pending": "Chờ xử lý",
       "approved": "Đã tiếp nhận",
@@ -248,5 +248,38 @@
     "confirm": "Xác nhận",
     "cancel": "Huỷ",
     "error": "Có lỗi xảy ra"
+  },
+  "websiteManage": {
+    "table": {
+      "name": "Tên Website",
+      "region": "Khu vực",
+      "action": "Hành động"
+    },
+    "action": {
+      "edit": "Sửa",
+      "delete": "Xoá"
+    },
+    "modal": {
+      "editTitle": "Sửa Website",
+      "addTitle": "Thêm Website"
+    },
+    "form": {
+      "name": "Tên Website",
+      "requiredName": "Vui lòng nhập tên website",
+      "placeholderName": "Nhập tên website",
+      "requiredUrl": "Vui lòng nhập URL",
+      "placeholderUrl": "Nhập URL",
+      "region": "Khu vực",
+      "requiredRegion": "Vui lòng chọn khu vực",
+      "placeholderRegion": "Chọn khu vực"
+    },
+    "delete": {
+      "title": "Xác nhận xoá website",
+      "content": "Bạn có chắc chắn muốn xoá website?"
+    },
+    "page": {
+      "title": "Quản lý Website được hỗ trợ",
+      "add": "Thêm Website"
+    }
   }
 }
