@@ -12,7 +12,7 @@ const FinanceDepositApprovalPage = () => {
   const searchParams = useSearchParams();
   const action = searchParams.get("action");
   const code = searchParams.get("code");
-  const [activeTab, setActiveTab] = useState("deposit");
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const { hasPermission, loading } = usePermission();
   const router = useRouter();
   const pathname = usePathname();
@@ -26,14 +26,18 @@ const FinanceDepositApprovalPage = () => {
 
   useEffect(() => {
     if (!loading) {
-      if (action && allowedTabs.includes(action)) {
-        setActiveTab(action);
-      } else {
-        // Nếu không có action hoặc action ko hợp lệ → fallback tab đầu tiên được phép
-        setActiveTab(allowedTabs[0] || "deposit");
+      // Chỉ set lần đầu khi chưa có activeTab
+      if (!activeTab) {
+        let nextTab = "deposit";
+        if (action && allowedTabs.includes(action)) {
+          nextTab = action;
+        } else if (allowedTabs.length > 0) {
+          nextTab = allowedTabs[0];
+        }
+        setActiveTab(nextTab);
       }
     }
-  }, [loading]);
+  }, [loading, action, allowedTabs, activeTab]);
 
   if (loading) {
     return (
@@ -42,14 +46,17 @@ const FinanceDepositApprovalPage = () => {
       </div>
     );
   }
+  console.log("active tab", activeTab);
 
   return (
     <div className="pt-4">
       <FinanceTabs
-        activeKey={activeTab}
-        onChange={(key: string)=>{
-          setActiveTab(key);
+        activeKey={activeTab || ""}
+        onChange={(key: string) => {
+          console.log("key", key);
+
           router.replace(pathname);
+          setActiveTab(key);
         }}
         allowedTabs={allowedTabs}
       />
