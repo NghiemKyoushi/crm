@@ -129,7 +129,17 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
               name="phone_number"
               control={control}
               rules={{ required: t("staffManage.phoneNumberRequired") }}
-              render={({ field }) => <Input {...field} />}
+              render={({ field }) =>  <Input
+              {...field}
+              type="tel" // giữ bàn phím số trên mobile
+              inputMode="numeric" // ưu tiên bàn phím số
+              pattern="[0-9]*" // gợi ý cho browser chỉ nhận số
+              onChange={(e) => {
+                // ép chỉ giữ số, loại bỏ ký tự khác (kể cả autofill text)
+                const onlyNums = e.target.value.replace(/\D/g, "");
+                field.onChange(onlyNums);
+              }}
+            />}
             />
             {errors.phone_number && (
               <p className="text-red-500 text-sm">

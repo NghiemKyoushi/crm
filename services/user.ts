@@ -21,6 +21,8 @@ export const updateUserProfile = async (param: UserProfile) => {
     email: param.email,
     phone_number: param.phone_number,
     birthday: param.birthday,
+    identity_code: "9090909090",
+    gender: "male"
   };
 
   const res = await api.put(API_TYPE_CONST.GET_PROFILE, body);
