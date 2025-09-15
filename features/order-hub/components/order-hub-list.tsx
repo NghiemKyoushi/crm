@@ -7,6 +7,10 @@ import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
+import { useListOrder } from "../hooks/orderhub";
+import { Invoice } from "@/types/orderhub";
+import TableComponent from "@/components/TableComponent";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -67,47 +71,73 @@ export default function OrderHub() {
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const { t } = useTranslation();
+  const [page, setPage] = useState(0);
+
+  const { data: listOrder } = useListOrder({
+    page,
+    size: 10,
+  });
 
   const handleFinish = (values: any) => {
     console.log("Filter values:", values);
   };
 
-  const columns: ColumnsType<Order> = [
+  const handleChangePage = (pageNumber: number) => {
+    setPage(pageNumber - 1);
+  };
+
+  const columns: ColumnsType<Invoice> = [
     {
       title: "Mã Đơn",
-      dataIndex: "maDon",
-      key: "maDon",
+      dataIndex: "invoice_no",
+      key: "invoice_no",
       render: (text) => <a className="text-blue-600 font-medium">{text}</a>,
     },
     {
       title: "Khách hàng",
-      dataIndex: "khachHang",
-      key: "khachHang",
+      dataIndex: "customer_name",
+      key: "customer_name",
+    },
+    {
+      title: "Tổng đơn hàng",
+      dataIndex: "amount",
+      key: "amount",
+       render: (value: number) =>
+        value && value.toLocaleString("vi-VN"),
     },
     {
       title: "Ngày tạo",
-      dataIndex: "ngayTao",
-      key: "ngayTao",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value: string) => {
+        if (!value) return "-";
+        return dayjs(value).format("DD-MM-YYYY");
+      },
     },
+    // {
+    //   title: "Người tạo",
+    //   dataIndex: "created_by",
+    //   key: "created_by",
+    // },
     {
       title: "Trạng thái",
-      dataIndex: "trangThai",
-      key: "trangThai",
+      dataIndex: "status",
+      key: "status",
       render: (status) => {
         let color = "default";
-        if (status === "Chờ xác nhận") color = "orange";
+        if (status === "ORDER_DELIVERED") color = "orange";
         if (status === "Đã đặt cọc") color = "gold";
         if (status === "Đang vận chuyển về Việt Nam") color = "blue";
-        return <Tag color={color}>{status}</Tag>;
+        return <Tag color={color}>{status === "ORDER_DELIVERED" ? "Đã vẫn chuyển": ""}</Tag>;
       },
     },
     {
       title: "Hành động",
       dataIndex: "hanhDong",
       key: "hanhDong",
-      render: (text) => (
+      render: () => (
         <button className="!text-blue-600" onClick={() => setOpenDetail(true)}>
-          {text}
+          {"Xem chi tiết"}
         </button>
       ),
     },
@@ -172,8 +202,17 @@ export default function OrderHub() {
           </Form>
         </div>
 
-        {/* Table */}
-        <Table dataSource={data} columns={columns} pagination={false} />
+        <TableComponent
+          columns={columns}
+          dataSource={listOrder?.data || []}
+          rowHeight={45}
+          pageSize={10}
+          page={(listOrder && listOrder.current_page + 1) || 0}
+          onPageChange={handleChangePage}
+          response={listOrder}
+          fontSize={14}
+          headerHeight={44}
+        />
       </div>
       <CreateOrderModal
         isOpen={open}
