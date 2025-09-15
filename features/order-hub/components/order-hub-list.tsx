@@ -146,9 +146,9 @@ export default function OrderHub() {
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-semibold text-gray-800">
-            Quản lý Đơn hàng (Order Hub)
+            Quản lý Đơn hàng
           </h2>
           <Button
             type="primary"
