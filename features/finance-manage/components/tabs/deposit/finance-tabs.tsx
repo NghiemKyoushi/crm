@@ -55,7 +55,7 @@ const FinanceDepositApprovalPage = () => {
         onChange={(key: string) => {
           console.log("key", key);
 
-          router.replace(pathname);
+          // router.replace(pathname);
           setActiveTab(key);
         }}
         allowedTabs={allowedTabs}
