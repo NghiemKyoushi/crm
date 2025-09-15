@@ -17,6 +17,7 @@ import { faEdit, faSearch, faTags, faTrash } from "@fortawesome/free-solid-svg-i
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 import { getContrastColor } from "../customer-manage/customer-type-select";
+import FeeConfigModal from "./fee-config-modal";
 
 export default function CategoryCustomerTable() {
   const [open, setOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function CategoryCustomerTable() {
   const { t } = useTranslation();
   const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
   const [search, setSearch] = useState<string>(""); // 👈 thêm search state
-
+  const [isOpenFeeSetting, setIsOpenFeeSetting] = useState(false);
   const queryClient = useQueryClient();
   const [editingCate, setEditingCate] = useState<CategoryRequest | null>(null);
   const { data } = useListCateGoryCus({
@@ -143,7 +144,7 @@ export default function CategoryCustomerTable() {
       key: "actions",
       render: (_: any, record: Category) => (
         <div className="flex space-x-3">
-          {/* <Tooltip title={t("customerCate.editPolicy")}>
+          <Tooltip title={t("customerCate.editPolicy")}>
             <Button
               type="text"
               icon={
@@ -152,8 +153,11 @@ export default function CategoryCustomerTable() {
                   className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
                 />
               }
+              onClick={()=>{
+                setIsOpenFeeSetting(true)
+              }}
             />
-          </Tooltip> */}
+          </Tooltip>
 
           <Tooltip title={t("customerCate.editCategory")}>
             <Button
@@ -265,6 +269,8 @@ export default function CategoryCustomerTable() {
         confirmText={"Xoá"}
         cancelText="Huỷ"
       />
+      <FeeConfigModal open={isOpenFeeSetting} onCancel={()=> setIsOpenFeeSetting(false)}/>
+
     </div>
   );
 }
