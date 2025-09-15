@@ -13,8 +13,7 @@ const FinanceDepositApprovalPage = () => {
     return (
       hasPermission("finance.approve_topup") ||
       hasPermission("finance.manage_debt") ||
-      hasPermission("finance.process_withdrawal") ||
-      hasPermission("finance.process_withdrawal")
+      hasPermission("finance.process_withdrawal") 
     );
   }, [loading, permissions, hasPermission]);
 

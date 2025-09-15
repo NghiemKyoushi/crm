@@ -61,7 +61,7 @@ export default function CategoryDropdown({ value, onChange }: any) {
       <Button
         style={{
           height: 28,
-          width: 150,
+          width: 130,
           color:  getContrastColor(selected?.color),
           backgroundColor: selected?.color ?? "rgb(22, 119, 255)",
           border: "none",
