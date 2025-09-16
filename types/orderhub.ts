@@ -6,19 +6,40 @@ export interface InvoiceResponse {
   page_size: number;
 }
 
+export type OrderStatus =
+  | "WAITING_APPROVAL"
+  | "WAITING_DEPOSIT"
+  | "PURCHASED"
+  | "ARRIVED_JP"
+  | "ARRIVED_VN"
+  | "CHECKING"
+  | "WAITING_PAYMENT"
+  | "READY_TO_SHIP" |"ORDER_DELIVERED";
+
+
 export interface Invoice {
   id: number;
   invoice_no: string;
   user_id: number;
   metadata: InvoiceMetadata;
-  amount: number;
-  amount_vnd: number;
+  amount: number;        // Tổng đơn hàng
+  amount_vnd: number;    // Tổng theo VND
+  deposit_amount?: number;  // Số tiền đặt cọc
+  remain_amount?: number;   // Số tiền còn lại
   description: string | null;
-  status: string;
+  status: OrderStatus;
   created_by: number;
   created_at: string;
   customer_name: string;
   created_by_name: string;
+
+  // Fake fields để map UI
+  customer_code?: string;  // SC244
+  product_name?: string;   // iPhone 15 Pro Max
+  source?: string;         // Amazon JP
+  purchase_type?: string;  // Mua thẳng / Đấu giá
+  tracking_code?: string;  // JP1234567890
+  weight?: string;         // 2.1kg
 }
 
 export interface InvoiceMetadata {

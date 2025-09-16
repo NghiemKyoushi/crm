@@ -27,7 +27,8 @@
     "action": "Action System",
     "products": "Product Types & Fees",
     "settings": "System Settings",
-    "saleRecord": "Sale Records"
+    "saleRecord": "Sale Records",
+    "telesaleManagement": "Telesale management"
   },
   "tabs": {
     "customer": "Customer Management",

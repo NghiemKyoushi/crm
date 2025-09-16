@@ -16,6 +16,7 @@ import {
   faTags,
   faCog,
   faMoneyBill,
+  faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -32,11 +33,12 @@ export const menuPermissions: Record<string, string[]> = {
     "finance.view_all_transactions",
   ],
   "/user-management": ["user.view_list", "user.categorize_customers"],
+  "/telesales-manage":[],
   "/auction": [], 
   "/products": [], 
   "/settings": ["system.admin", "system.superAdmin"],
   "/sales-management": [],
-  "website-manage":[]
+  "website-manage":[],
 };
 
 export const menuItems = [
@@ -45,6 +47,7 @@ export const menuItems = [
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
+  { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
   { key: "/auction", icon: faGavel, label: "action" },
   { key: "/surchange", icon: faTags, label: "products" },
   { key: "/settings", icon: faCog, label: "settings" },

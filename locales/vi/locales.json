@@ -27,7 +27,8 @@
     "action": "Hệ thống Đấu giá",
     "products": "Loại sản phẩm & Phí",
     "settings": "Cài đặt Hệ thống",
-    "saleRecord": "Quản lý lương sale"
+    "saleRecord": "Quản lý lương sale",
+    "telesaleManagement": "Quản lý Telesales"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",

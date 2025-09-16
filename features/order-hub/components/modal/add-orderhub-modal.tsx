@@ -72,8 +72,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Link Sản phẩm"
                 name="link"
                 rules={[{ required: true, message: "Vui lòng nhập link!" }]}
+                className="!mb-1"
               >
-                <Input placeholder="https://..." />
+                <Input className="!h-11" placeholder="https://..." />
               </Form.Item>
 
               <Form.Item
@@ -82,16 +83,20 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 rules={[
                   { required: true, message: "Vui lòng nhập tên sản phẩm!" },
                 ]}
+                className="!mb-1"
+
               >
-                <Input placeholder="VD: iPhone 15 Pro Max..." />
+                <Input className="!h-11" placeholder="VD: iPhone 15 Pro Max..." />
               </Form.Item>
 
               <Form.Item
                 label="Loại sản phẩm"
                 name="category"
                 rules={[{ required: true, message: "Chọn loại sản phẩm!" }]}
+                className="!mb-1"
+
               >
-                <Select placeholder="-- Chọn loại sản phẩm --">
+                <Select className="!h-11" placeholder="-- Chọn loại sản phẩm --">
                   <Option value="phone">Điện thoại</Option>
                   <Option value="laptop">Laptop</Option>
                 </Select>
@@ -101,7 +106,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Phương thức"
                 name="method"
                 rules={[{ required: true, message: "Chọn phương thức!" }]}
-                className=" !w-full"
+                className=" !w-full !mb-1"
               >
                 <Radio.Group className="!flex !flex-row !w-full gap-4  ">
                   <Radio
@@ -120,17 +125,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <div className="flex flex-row gap-1">
-                <Form.Item className="!flex-1" label="Giá (¥)" name="priceY">
-                  <InputNumber className="!w-full" min={0} />
+                <Form.Item  className="!flex-1 !mb-1" label="Giá (¥)" name="priceY">
+                  <InputNumber  className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1"
                   label="Giá (VND)"
                   name="priceVnd"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
@@ -144,25 +149,26 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <Form.Item
                 label="Khách hàng"
                 name="customer"
+                className="!mb-1"
                 rules={[
                   { required: true, message: "Vui lòng chọn khách hàng!" },
                 ]}
               >
-                <Input placeholder="Tìm khách hàng theo mã hoặc tên..." />
+                <Input className="!w-full !h-11" placeholder="Tìm khách hàng theo mã hoặc tên..." />
               </Form.Item>
 
               <div className="flex flex-row gap-1">
-                <Form.Item className="!flex-1" label="Phí DV (¥)" name="feeY">
-                  <InputNumber className="!w-full" min={0} />
+                <Form.Item className="!flex-1 !mb-1" label="Phí DV (¥)" name="feeY">
+                  <InputNumber className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1 "
                   label="Phí DV (VND)"
                   name="feeVnd"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
@@ -173,29 +179,30 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   label="Tiền cọc (VND)"
                   name="deposit"
+
                   rules={[
                     { required: true, message: "Vui lòng nhập tiền cọc!" },
                   ]}
-                  className="!flex-1"
+                  className="!flex-1 !mb-1 "
                 >
-                  <InputNumber className="!w-full" min={0} />
+                  <InputNumber className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1"
                   label="% Cọc"
                   name="depositPercent"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
                 </Form.Item>
               </div>
 
-              <Form.Item label="Ghi chú" name="note">
-                <Input.TextArea placeholder="Ghi chú thêm về đơn hàng..." />
+              <Form.Item label="Ghi chú" name="note" className="!mb-1">
+                <Input.TextArea className="!h-25" placeholder="Ghi chú thêm về đơn hàng..." />
               </Form.Item>
 
               <div className="p-3 rounded bg-blue-50  mt-4">
