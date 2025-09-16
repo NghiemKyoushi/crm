@@ -61,5 +61,7 @@ export const API_TYPE_CONST = {
   TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
   LIST_REGION: `${FEATURE}/admin/regions`,
-  LIST_ORDER: `${FEATURE}/admin/orders`
+  LIST_ORDER: `${FEATURE}/admin/orders`,
+  LIST_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/get-data`,
+  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/update-data`
 } as const;

@@ -72,20 +72,20 @@ const FeeSettingsPage: React.FC = () => {
                 >
                   <InputNumber min={0} className="!w-full" />
                 </Form.Item>
-                <Form.Item
+                {/* <Form.Item
                   name="purchaseFeeMin"
                   label="Phí cố định tối thiểu (VND)"
                   rules={[{ required: true, message: "Vui lòng nhập phí" }]}
                 >
                   <InputNumber min={0} className="!w-full" />
-                </Form.Item>
+                </Form.Item> */}
               </div>
               <p className="-mt-6 text-xs">* Phí mua hộ có thể được cài đặt riêng cho từng khách hàng</p>
 
             </div>
 
             {/* Phí Vận chuyển nội địa (COD) */}
-            <div className="mb-1">
+            {/* <div className="mb-1">
               <h3 className="text-lg font-semibold mb-2 border-b border-gray-200 pb-1">
                 Phí vận chuyển Nội địa (COD)
               </h3>
@@ -121,7 +121,7 @@ const FeeSettingsPage: React.FC = () => {
                   <InputNumber min={0} className="!w-full" />
                 </Form.Item>
               </div>
-            </div>
+            </div> */}
 
             {/* Phí Thanh toán */}
             <div className="mb-1">
@@ -143,13 +143,13 @@ const FeeSettingsPage: React.FC = () => {
                 className="!mt-3 !mb-4 !border-l-4 !border-blue-400 !ßbg-blue-50"
               />
               <div className="grid grid-cols-2 gap-4">
-                <Form.Item
+                {/* <Form.Item
                   name="paymentFeePercent"
                   label="Phí thanh toán (%)"
                   rules={[{ required: true, message: "Vui lòng nhập phí" }]}
                 >
                   <InputNumber min={0} className="!w-full" />
-                </Form.Item>
+                </Form.Item> */}
                 <Form.Item
                   name="paymentFeeJP"
                   label="Phí cố định (JPY)"
