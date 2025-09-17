@@ -70,13 +70,13 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 p-3 rounded mb-4">
-        <p>
+        <p className="!mb-1">
           <strong>Mã đơn:</strong> {orderCode}
         </p>
-        <p>
+        <p className="!mb-1">
           <strong>Khách hàng:</strong> {customerName}
         </p>
-        <p>
+        <p className="!mb-1">
           <strong>Sản phẩm:</strong> {productName ?? "N/A"}
         </p>
       </div>

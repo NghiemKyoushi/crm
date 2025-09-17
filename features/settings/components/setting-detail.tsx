@@ -9,6 +9,10 @@ import {
   faLayerGroup,
   faCog,
   faClock,
+  faBan,
+  faPhone,
+  faMapMarked,
+  faTeletype,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { getListExchangRate, updateListExchangRate } from "../apis/setting";
@@ -46,9 +50,9 @@ const SettingsDetail = () => {
 
   const handleSave = async () => {
     try {
-      console.log('rates', rates);
-      
-       await updateListExchangRate({
+      console.log("rates", rates);
+
+      await updateListExchangRate({
         data: rates.map((r) => ({
           id: r.id, // cần id
           rate_to_vnd: r.rate_to_vnd,
@@ -67,10 +71,18 @@ const SettingsDetail = () => {
         className="rounded-2xl shadow-md"
       >
         <Text strong>Tỷ giá ngoại tệ thống nhất</Text>
-        <div className="bg-blue-50 text-blue-600 p-3 rounded-md my-3 text-sm">
-          <strong>Lưu ý quan trọng:</strong> Tỷ giá này sẽ được áp dụng thống
-          nhất cho tất cả khách hàng và mọi giao dịch trong hệ thống. Không có
-          cài đặt tỷ giá riêng cho từng khách hàng.
+        <div className="bg-blue-50  border-l-4 border-blue-400  p-3 rounded-md my-3 text-sm">
+          <strong className=" text-blue-800">Lưu ý quan trọng:</strong> <br />
+          <span className=" text-blue-700">
+            Tỷ giá này sẽ được áp dụng thống nhất cho tất cả khách hàng và mọi
+            giao dịch trong hệ thống. Không có cài đặt tỷ giá riêng cho từng
+            khách hàng.{" "}
+          </span>
+          <br />
+          <span className=" text-blue-700">
+            Tỷ giá áp dụng theo ngày mua hàng và được cập nhật trên trang chủ
+            Dreamcargo.vn
+          </span>
         </div>
 
         <div className="flex gap-4 mb-3 w-full">
@@ -116,7 +128,21 @@ const SettingsDetail = () => {
             </span>
           </Button>
         </div>
-        <div className="w-full flex justify-end mt-8 ">
+        <div className="bg-green-50 border-l-4 border-green-400 rounded-lg p-3">
+          <p className="font-semibold text-green-700 !mb-1">
+          <FontAwesomeIcon icon={faPhone}/> Thông tin Liên hệ
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faMapMarked}/> N02-T3 Khu Ngoại Giao Đoàn, Xuân Tảo, Bắc Từ Liêm, Hà Nội
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faPhone}/> Hotline: <span className="font-bold">096.55.44444</span>
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faTeletype}/> Zalo: <span className="font-bold">097.11.68686</span>
+          </p>
+        </div>
+        <div className="w-full flex justify-end mt-2 ">
           <Button
             type="primary"
             className="!font-medium"
@@ -135,12 +161,20 @@ const SettingsDetail = () => {
             Thiết lập các loại phí mặc định của hệ thống. Các chính sách phí
             riêng cho từng loại khách hàng sẽ ghi đè lên các cài đặt này.
           </div>
-          <ul className="list-disc list-inside text-gray-700 mb-4 text-sm">
-            <li>Phí mua hộ</li>
-            <li>Phí vận chuyển quốc tế</li>
-            <li>Phụ phí theo loại sản phẩm</li>
-            <li>Các loại phí khác…</li>
-          </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ul className="list-disc pl-5 text-gray-700">
+                        <li>Phí mua hộ Mỹ: 4%</li>
+                        <li>Phí mua hộ Nhật: từ 3%</li>
+                        <li>Phí vận chuyển quốc tế</li>
+                        <li>Phụ phí theo loại sản phẩm</li>
+                    </ul>
+                    <ul className="list-disc pl-5 text-gray-700">
+                        <li>Phí gia cố: 5.000 VNĐ/Kg</li>
+                        <li>Phí bảo hiểm: 3%</li>
+                        <li>Phí giao hàng Hà Nội</li>
+                        <li>Phí lưu kho: 1.000 VNĐ/kg/ngày</li>
+                    </ul>
+                </div>
         </div>
 
         <div className="absolute bottom-4 left-4 right-4">
@@ -193,6 +227,16 @@ const SettingsDetail = () => {
             </List.Item>
           )}
         />
+        <div className="bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
+          <p className="font-semibold text-red-700 !mb-1">
+            <FontAwesomeIcon icon={faBan}/> Hàng hóa Không nhận vận chuyển
+          </p>
+          <p className="text-sm text-red-700 leading-relaxed">
+            Hàng dạng xịt, hàng dễ cháy nổ, vũ khí, văn hóa phẩm đồi trụy, thiết
+            bị y tế, ô tô, xe máy, thuốc lá điện tử, vape, ma túy, ngoại tệ,
+            vàng, kim cương.
+          </p>
+        </div>
       </Card>
 
       <Card

@@ -1,12 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Table, Button, Input, Select, Tag } from "antd";
-import {
-  UsergroupAddOutlined,
-  FileExcelOutlined,
-  PlusOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckCircle,
@@ -19,6 +13,9 @@ import {
   faUserTag,
 } from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
+import TelesaleDetailModal from "./telesale-detail-modal";
+import AssignTelesaleModal from "./assign-telesale-modal";
+import ImportCustomerModal from "./import-telesale-modal";
 
 const { Option } = Select;
 
@@ -68,6 +65,9 @@ const data: Customer[] = [
 
 const TelesalesPage: React.FC = () => {
   const [page, setPage] = useState(0);
+  const [isOpenDetail, setIsOpenDetail] = useState(false);
+  const [isOpenAssign, setIsOpenAssign] = useState(false);
+  const [isOpenImport, setIsOpenImport] = useState(false);
 
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
@@ -137,6 +137,7 @@ const TelesalesPage: React.FC = () => {
           {record.status === "Chưa gán" ? (
             <Button
               size="small"
+              onClick={() => setIsOpenAssign(true)}
               className="!bg-orange-500 !text-white !text-xs"
             >
               Gán Sale
@@ -146,6 +147,13 @@ const TelesalesPage: React.FC = () => {
               Ghi chú
             </Button>
           )}
+          <Button
+            onClick={() => setIsOpenDetail(true)}
+            size="small"
+            className="!bg-blue-500 !text-white !text-xs"
+          >
+            Chi tiết
+          </Button>
         </div>
       ),
     },
@@ -154,22 +162,23 @@ const TelesalesPage: React.FC = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       {/* Header */}
-     <div className="flex flex-row justify-between">
-     <h2 className="text-xl font-bold mb-4">Quản Lý Telesales</h2>
-      <div className="flex justify-end mb-4 items-end">
-        <div className="flex gap-2">
-          <Button
-            className="!bg-green-500 !text-white"
-            icon={<FontAwesomeIcon icon={faFileExcel} />}
-          >
-            Import Excel
-          </Button>
-          <Button type="primary" icon={<FontAwesomeIcon icon={faUserPlus} />}>
-            Thêm Telesale
-          </Button>
+      <div className="flex flex-row justify-between">
+        <h2 className="text-xl font-bold mb-4">Quản Lý Telesales</h2>
+        <div className="flex justify-end mb-4 items-end">
+          <div className="flex gap-2">
+            <Button
+              className="!bg-green-500 !text-white"
+              icon={<FontAwesomeIcon icon={faFileExcel} />}
+              onClick={() => setIsOpenImport(true)}
+            >
+              Import Excel
+            </Button>
+            <Button type="primary" icon={<FontAwesomeIcon icon={faUserPlus} />}>
+              Thêm Telesale
+            </Button>
+          </div>
         </div>
       </div>
-     </div>
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {/* Tổng khách hàng */}
@@ -279,6 +288,30 @@ const TelesalesPage: React.FC = () => {
         response={undefined}
         fontSize={14}
         headerHeight={44}
+      />
+
+      <TelesaleDetailModal
+        open={isOpenDetail}
+        onCancel={() => setIsOpenDetail(false)}
+        customer={{
+          address: "111",
+          dob: "23/09/2000",
+          gender: "Male",
+          name: "Name",
+          phone: "PhoneNumber",
+        }}
+        callHistory={[]}
+        onEdit={() => console.log("")}
+      />
+      <AssignTelesaleModal
+        onCancel={() => setIsOpenAssign(false)}
+        onSubmit={() => console.log("")}
+        open={isOpenAssign}
+      />
+      <ImportCustomerModal
+        onClose={() => setIsOpenImport(false)}
+        open={isOpenImport}
+        onImport={() => console.log("")}
       />
     </div>
   );

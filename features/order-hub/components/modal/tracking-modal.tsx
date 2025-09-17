@@ -35,11 +35,11 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 rounded p-3 mb-2">
-        <p className="font-semibold text-blue-700">Thông tin đơn hàng</p>
-        <p>
+        <p className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</p>
+        <p className="!mb-1">
           <span className="font-semibold">Mã đơn:</span> {orderCode}
         </p>
-        <p>
+        <p className="!mb-1">
           <span className="font-semibold">Khách hàng:</span> {customerName}
         </p>
       </div>
@@ -76,7 +76,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
           name="carrier"
           rules={[{ required: true, message: "Vui lòng chọn nhà vận chuyển" }]}
         >
-          <Select placeholder="-- Chọn nhà vận chuyển --">
+          <Select className="!h-11" placeholder="-- Chọn nhà vận chuyển --">
             <Select.Option value="ghn">Giao Hàng Nhanh</Select.Option>
             <Select.Option value="ghtk">Giao Hàng Tiết Kiệm</Select.Option>
             <Select.Option value="vtpost">Viettel Post</Select.Option>

@@ -48,11 +48,11 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 p-3 rounded mb-2">
-        <h4 className="font-semibold text-blue-900 mb-2">Thông tin đơn hàng</h4>
-        <p>
+        <h4 className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</h4>
+        <p className="!mb-1">
           <strong>Mã đơn:</strong> {orderCode}
         </p>
-        <p>
+        <p className="!mb-1">
           <strong>Khách hàng:</strong> {customerName}
         </p>
       </div>
@@ -65,7 +65,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           rules={[{ required: true, message: "Vui lòng chọn loại sản phẩm!" }]}
           className="!mb-3"
         >
-          <Select placeholder="-- Chọn loại sản phẩm --">
+          <Select className="!h-11" placeholder="-- Chọn loại sản phẩm --">
             <Select.Option value="A">Sản phẩm A</Select.Option>
             <Select.Option value="B">Sản phẩm B</Select.Option>
           </Select>
@@ -78,7 +78,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           rules={[{ required: true, message: "Vui lòng chọn phí COD!" }]}
           className="!mb-3"
         >
-          <Radio.Group className="!flex !flex-col !gap-2">
+          <Radio.Group className="!flex !flex-col !gap-2 !h-11">
             <Radio value="FIXED">Điền phí cố định</Radio>
             <Radio value="LATER">Đợi tính phí sau</Radio>
           </Radio.Group>
