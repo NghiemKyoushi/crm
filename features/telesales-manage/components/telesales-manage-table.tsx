@@ -16,6 +16,7 @@ import TableComponent from "@/components/TableComponent";
 import TelesaleDetailModal from "./telesale-detail-modal";
 import AssignTelesaleModal from "./assign-telesale-modal";
 import ImportCustomerModal from "./import-telesale-modal";
+import TagManagerModal from "./tag-modal";
 
 const { Option } = Select;
 
@@ -26,6 +27,7 @@ interface Customer {
   info: string;
   telesale: string;
   status: string;
+  tags?: Array<any>;
 }
 
 const data: Customer[] = [
@@ -68,7 +70,19 @@ const TelesalesPage: React.FC = () => {
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isOpenAssign, setIsOpenAssign] = useState(false);
   const [isOpenImport, setIsOpenImport] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
+  const [isOpenTagModal, setIsOpenTagModal] = useState(false);
 
+  const [tags, setTags] = useState([
+    { id: "1", name: "Khách hàng", color: "red" },
+    { id: "2", name: "Gia đình", color: "green" },
+    { id: "3", name: "Công việc", color: "orange" },
+    { id: "4", name: "Bạn bè", color: "purple" },
+    { id: "5", name: "Trả lời sau", color: "gold" },
+    { id: "6", name: "Đồng nghiệp", color: "blue" },
+  ]);
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
@@ -117,46 +131,72 @@ const TelesalesPage: React.FC = () => {
       },
     },
     {
-      title: "Hành động",
-      key: "action",
+      title: "Tag",
+      dataIndex: "tags",
+      key: "tags",
       render: (_: any, record: Customer) => (
-        <div className="flex gap-2 flex-wrap">
-          <Button size="small" className="!bg-blue-500  !text-white !text-xs">
-            Đã gọi
-          </Button>
+        <div className="flex gap-1 flex-wrap">
+          {record.tags?.map((tagId: string) => {
+            const tag = tags.find((t) => t.id === tagId);
+            return tag ? (
+              <Tag color={tag.color} key={tag.id}>
+                {tag.name}
+              </Tag>
+            ) : null;
+          })}
           <Button
             size="small"
-            type="primary"
-            className="!bg-green-500 !text-xs"
+            onClick={() => {
+              setSelectedCustomer(record);
+              setIsOpenTagModal(true);
+            }}
           >
-            Thành công
-          </Button>
-          <Button size="small" className="!bg-red-500 !text-white !text-xs">
-            Thất bại
-          </Button>
-          {record.status === "Chưa gán" ? (
-            <Button
-              size="small"
-              onClick={() => setIsOpenAssign(true)}
-              className="!bg-orange-500 !text-white !text-xs"
-            >
-              Gán Sale
-            </Button>
-          ) : (
-            <Button size="small" className="!bg-gray-500 !text-white !text-xs">
-              Ghi chú
-            </Button>
-          )}
-          <Button
-            onClick={() => setIsOpenDetail(true)}
-            size="small"
-            className="!bg-blue-500 !text-white !text-xs"
-          >
-            Chi tiết
+            + Tag
           </Button>
         </div>
       ),
     },
+    // {
+    //   title: "Hành động",
+    //   key: "action",
+    //   render: (_: any, record: Customer) => (
+    //     <div className="flex gap-2 flex-wrap">
+    //       <Button size="small" className="!bg-blue-500  !text-white !text-xs">
+    //         Đã gọi
+    //       </Button>
+    //       <Button
+    //         size="small"
+    //         type="primary"
+    //         className="!bg-green-500 !text-xs"
+    //       >
+    //         Thành công
+    //       </Button>
+    //       <Button size="small" className="!bg-red-500 !text-white !text-xs">
+    //         Thất bại
+    //       </Button>
+    //       {record.status === "Chưa gán" ? (
+    //         <Button
+    //           size="small"
+    //           onClick={() => setIsOpenAssign(true)}
+    //           className="!bg-orange-500 !text-white !text-xs"
+    //         >
+    //           Gán Sale
+    //         </Button>
+    //       ) : (
+    //         <Button size="small" className="!bg-gray-500 !text-white !text-xs">
+    //           Ghi chú
+    //         </Button>
+    //       )}
+    //       <Button
+    //         onClick={() => setIsOpenDetail(true)}
+    //         size="small"
+    //         className="!bg-blue-500 !text-white !text-xs"
+    //       >
+    //         Chi tiết
+    //       </Button>
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (
@@ -312,6 +352,22 @@ const TelesalesPage: React.FC = () => {
         onClose={() => setIsOpenImport(false)}
         open={isOpenImport}
         onImport={() => console.log("")}
+      />
+      <TagManagerModal
+        open={isOpenTagModal}
+        onClose={() => setIsOpenTagModal(false)}
+        tags={tags}
+        onChange={setTags}
+        customer={selectedCustomer}
+        onAssignTag={(customerId, tagId) => {
+          const updated = data.map((c) =>
+            c.key === customerId
+              ? { ...c, tags: [...(c.tags || []), tagId] }
+              : c
+          );
+          console.log("Updated data", updated);
+          setIsOpenTagModal(false);
+        }}
       />
     </div>
   );
