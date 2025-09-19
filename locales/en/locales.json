@@ -28,7 +28,8 @@
     "products": "Product Types & Fees",
     "settings": "System Settings",
     "saleRecord": "Sale Records",
-    "telesaleManagement": "Telesale management"
+    "telesaleManagement": "Telesale management",
+    "partnerManagement": "Partner management"
   },
   "tabs": {
     "customer": "Customer Management",
