@@ -249,7 +249,9 @@
     "actions": "Hành động",
     "confirm": "Xác nhận",
     "cancel": "Huỷ",
-    "error": "Có lỗi xảy ra"
+    "error": "Có lỗi xảy ra",
+    "delete": "Xoá",
+    "edit":"Chỉnh sửa"
   },
   "websiteManage": {
     "table": {
@@ -283,5 +285,32 @@
       "title": "Quản lý Website được hỗ trợ",
       "add": "Thêm Website"
     }
+  },
+  "insurance": {
+    "title": "Cài đặt Bảo hiểm",
+    "add": "Thêm gói bảo hiểm",
+    "update": "Cập nhật Gói bảo hiểm",
+    "add_new": "Thêm Gói bảo hiểm mới",
+    "name": "Tên gói bảo hiểm",
+    "name_placeholder": "Ví dụ: Bảo hiểm VIP",
+    "description": "Mô tả",
+    "description_placeholder": "Mô tả chi tiết về phạm vi bảo hiểm",
+    "fee": "Phí bảo hiểm (%)",
+    "fee_placeholder": "Ví dụ: 2 hoặc 3",
+    "max_value": "Bồi thường tối đa (VND)",
+    "max_value_placeholder": "Ví dụ: 1000000",
+    "status": "Trạng thái",
+    "status_active": "Hoạt động",
+    "status_inactive": "Tạm dừng",
+    "status_default": "Mặc định",
+    "cancel": "Hủy",
+    "confirm_add": "Thêm gói bảo hiểm",
+    "confirm_update": "Cập nhật",
+    "delete_title": "Xoá bảo hiểm",
+    "delete_content": "Bạn có muốn xoá bảo hiểm ?",
+    "alert_title": "Lưu ý về Bảo hiểm",
+    "alert_rule_1": "Dream Cargo KHÔNG bảo hiểm: hàng dễ vỡ (gốm, thủy tinh), hàng không chứng minh được nguồn gốc, hàng cấm",
+    "alert_rule_2": "Yêu cầu khách hàng quay video khi mở hàng để làm bằng chứng",
+    "alert_rule_3": "Khiếu nại phải được gửi trong vòng 24h sau khi nhận hàng"
   }
 }

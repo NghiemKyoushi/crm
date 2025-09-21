@@ -63,5 +63,9 @@ export const API_TYPE_CONST = {
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   LIST_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/get-data`,
-  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/update-data`
+  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/update-data`,
+  GET_DATA_FROM_LINK:`${FEATURE}/products/get-data-from-url`,
+  INSURANCE_PACKAGE:`${FEATURE}/insurance-package`,
+  FEE_SETTING:`${FEATURE}/fee-setting`,
+  SHIPPING_METHOD:`${FEATURE}/shipping-method/setting`,
 } as const;

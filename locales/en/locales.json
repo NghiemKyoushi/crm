@@ -248,7 +248,9 @@
     "actions": "Actions",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "delete": "Delete",
+    "edit":"Edit"
   },
   "websiteManage": {
     "table": {
@@ -282,5 +284,32 @@
       "title": "Supported Website Management",
       "add": "Add Website"
     }
+  },
+  "insurance": {
+    "title": "Insurance Settings",
+    "add": "Add Insurance Package",
+    "update": "Update Insurance Package",
+    "add_new": "Add New Insurance Package",
+    "name": "Insurance Package Name",
+    "name_placeholder": "Example: VIP Insurance",
+    "description": "Description",
+    "description_placeholder": "Detailed description of insurance coverage",
+    "fee": "Insurance Fee (%)",
+    "fee_placeholder": "Example: 2 or 3",
+    "max_value": "Maximum Compensation (VND)",
+    "max_value_placeholder": "Example: 1000000",
+    "status": "Status",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "status_default": "Default",
+    "cancel": "Cancel",
+    "confirm_add": "Add Insurance Package",
+    "confirm_update": "Update",
+    "delete_title": "Delete Insurance",
+    "delete_content": "Do you want to delete this insurance?",
+    "alert_title": "Insurance Notice",
+    "alert_rule_1": "Dream Cargo does NOT insure: fragile goods (ceramics, glass), goods without proof of origin, prohibited goods",
+    "alert_rule_2": "Customers are required to record a video when unboxing as evidence",
+    "alert_rule_3": "Complaints must be submitted within 24 hours after receiving goods"
   }
 }

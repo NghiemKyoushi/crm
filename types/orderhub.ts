@@ -65,3 +65,12 @@ export interface ProductMapData {
   description: string;
   productName: string;
 }
+export interface DataFromLink {
+  description: string;
+  discount: null;
+  id: number;
+  images: string[];
+  price: number;
+  product_name: string;
+  quantity: null;
+}

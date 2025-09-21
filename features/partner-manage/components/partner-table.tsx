@@ -1,583 +1,268 @@
-// import React, { useState } from "react";
-// import { Tabs, Card, InputNumber, Input, Button, Select, Table } from "antd";
-// import type { ColumnsType } from "antd/es/table";
-
-// interface Transaction {
-//   id: string;
-//   code: string;
-//   exchangeRate?: number;
-//   debt: number;
-//   createdAt: string;
-//   note?: string;
-// }
-
-// interface Partner {
-//   id: string;
-//   name: string;
-//   description: string;
-//   totalPurchase: number;
-//   exchangeRate: number;
-//   transactions: Transaction[];
-// }
-
-// const App: React.FC = () => {
-//  const [partners, setPartners] = useState<Partner[]>([
-//     {
-//       id: "p1",
-//       name: "Nhà cung cấp Tokyo ABC",
-//       description: "Nguyên liệu điện tử chất lượng cao",
-//       totalPurchase: 250000,
-//       exchangeRate: 175,
-//       transactions: [
-//         {
-//           id: "t1",
-//           code: "#N-0805-2",
-//           exchangeRate: 175,
-//           debt: 16750000,
-//           createdAt: "15/01/2024",
-//         },
-//         {
-//           id: "t2",
-//           code: "#N-0805-2",
-//           debt: -15000000,
-//           createdAt: "16/01/2024 10:20",
-//         },
-//         {
-//           id: "t3",
-//           code: "#N-0805-2",
-//           debt: -12000000,
-//           createdAt: "19/01/2024 09:15",
-//         },
-//       ],
-//     },
-//     {
-//       id: "p2",
-//       name: "Osaka Materials Ltd",
-//       description: "Nhà cung cấp vật liệu xây dựng",
-//       totalPurchase: 180000,
-//       exchangeRate: 178,
-//       transactions: [
-//         {
-//           id: "t4",
-//           code: "#N-0805-2",
-//           exchangeRate: 178,
-//           debt: 24040000,
-//           createdAt: "10/01/2024",
-//         },
-//         {
-//           id: "t5",
-//           code: "#N-0805-2",
-//           debt: -8000000,
-//           createdAt: "12/01/2024 14:35",
-//         },
-//       ],
-//     },
-//   ]);
-
-//   const partnerColumns: ColumnsType<Partner> = [
-//     {
-//       title: "Đối tác",
-//       dataIndex: "name",
-//       key: "name",
-//       render: (text, record) => (
-//         <div>
-//           <div className="font-semibold text-gray-800">{text}</div>
-//           <div className="text-xs text-gray-500">{record.description}</div>
-//         </div>
-//       ),
-//     },
-//     {
-//       title: "Tổng Mua (JPY)",
-//       dataIndex: "totalPurchase",
-//       key: "totalPurchase",
-//       render: (val) => <span>{val.toLocaleString()} ¥</span>,
-//     },
-//     {
-//       title: "Tỷ giá",
-//       dataIndex: "exchangeRate",
-//       key: "exchangeRate",
-//       render: (rate) => (rate ? `1 ¥ = ${rate} đ` : "-"),
-//     },
-//   ];
-
-//   const transactionColumns: ColumnsType<Transaction> = [
-//     {
-//       title: "Mã giao dịch",
-//       dataIndex: "code",
-//       key: "code",
-//       render: (code) => (
-//         <a className="text-blue-600 hover:underline">{code}</a>
-//       ),
-//     },
-//     {
-//       title: "Tỷ giá",
-//       dataIndex: "exchangeRate",
-//       key: "exchangeRate",
-//       render: (rate) => (rate ? `1 ¥ = ${rate} đ` : "-"),
-//     },
-//     {
-//       title: "Công nợ Hiện tại (VND)",
-//       dataIndex: "debt",
-//       key: "debt",
-//       render: (val) => (
-//         <span className={val >= 0 ? "text-red-500" : "text-green-600"}>
-//           {val.toLocaleString()} đ
-//         </span>
-//       ),
-//     },
-//     {
-//       title: "Ngày Tạo",
-//       dataIndex: "createdAt",
-//       key: "createdAt",
-//     },
-//     {
-//       title: "Hành động",
-//       key: "actions",
-//       render: (_, record) => (
-//         <Button danger type="text" onClick={() => handleDelete(record.id)}>
-//           🗑
-//         </Button>
-//       ),
-//     },
-//   ];
-
-//   const handleDelete = (id: string) => {
-//     setPartners((prev) =>
-//       prev.map((p) => ({
-//         ...p,
-//         transactions: p.transactions.filter((t) => t.id !== id),
-//       }))
-//     );
-//   };
-
-
-//   const [newPartnerId, setNewPartnerId] = useState<string>();
-//   const [yen, setYen] = useState<number>(0);
-//   const [rate, setRate] = useState<number>(180);
-//   const [note, setNote] = useState<string>("");
-
-//   // Tính toán summary
-//   const totalPartner = partners.length;
-//   const totalJPY = partners.reduce((sum, p) => sum + p.totalPurchase, 0);
-//   const totalDebt = partners.reduce(
-//     (sum, p) => sum + p.transactions.reduce((s, t) => s + t.debt, 0),
-//     0
-//   );
-//   const totalPaid = partners.reduce(
-//     (sum, p) =>
-//       sum +
-//       p.transactions.reduce((s, t) => (t.debt < 0 ? s + Math.abs(t.debt) : s), 0),
-//     0
-//   );
-
-
-
-
-
-//   const handleDeleteTransaction = (id: string) => {
-//     setPartners((prev) =>
-//       prev.map((p) => ({
-//         ...p,
-//         transactions: p.transactions.filter((t) => t.id !== id),
-//       }))
-//     );
-//   };
-
-//   const handleAddTransaction = () => {
-//     if (!newPartnerId) return;
-
-//     setPartners((prev) =>
-//       prev.map((p) =>
-//         p.id === newPartnerId
-//           ? {
-//               ...p,
-//               transactions: [
-//                 ...p.transactions,
-//                 {
-//                   id: `t-${Date.now()}`,
-//                   code: `#N-${Math.floor(Math.random() * 10000)}`,
-//                   exchangeRate: rate,
-//                   debt: yen * rate,
-//                   createdAt: new Date().toLocaleString(),
-//                   note,
-//                 },
-//               ],
-//             }
-//           : p
-//       )
-//     );
-
-//     setYen(0);
-//     setNote("");
-//   };
-
-//   return (
-//     <div className="p-4 space-y-6">
-//       {/* Tabs */}
-//       <Tabs
-//         defaultActiveKey="1"
-//         items={[
-//           { key: "1", label: "Tổng quan Quản lý Nguyên liệu (JPY)" },
-//           { key: "2", label: "Tài khoản Đối tác" },
-//         ]}
-//       />
-
-//       {/* Summary cards */}
-//       <div className="grid grid-cols-4 gap-4">
-//         <Card className="bg-blue-500 text-white">
-//           <div>Tổng Đối tác</div>
-//           <div className="text-2xl font-bold">{totalPartner}</div>
-//         </Card>
-//         <Card className="bg-green-500 text-white">
-//           <div>Tổng Mua (JPY)</div>
-//           <div className="text-2xl font-bold">{totalJPY} ¥</div>
-//         </Card>
-//         <Card className="bg-red-500 text-white">
-//           <div>Tổng Công nợ (VND)</div>
-//           <div className="text-2xl font-bold">{totalDebt} đ</div>
-//         </Card>
-//         <Card className="bg-purple-500 text-white">
-//           <div>Đã Thanh toán (VND)</div>
-//           <div className="text-2xl font-bold">{totalPaid} đ</div>
-//         </Card>
-//       </div>
-
-//       {/* Form thêm giao dịch */}
-//       <div className="p-4 bg-gray-50 rounded-lg flex gap-4">
-//         <Select
-//           placeholder="-- Chọn đối tác --"
-//           style={{ width: 200 }}
-//           onChange={(v) => setNewPartnerId(v)}
-//         >
-//           {partners.map((p) => (
-//             <Select.Option key={p.id} value={p.id}>
-//               {p.name}
-//             </Select.Option>
-//           ))}
-//         </Select>
-//         <InputNumber
-//           value={yen}
-//           onChange={(val) => setYen(val || 0)}
-//           addonAfter="¥"
-//         />
-//         <InputNumber
-//           value={rate}
-//           onChange={(val) => setRate(val || 180)}
-//           addonAfter="đ"
-//         />
-//         <Input
-//           placeholder="Ghi chú..."
-//           value={note}
-//           onChange={(e) => setNote(e.target.value)}
-//         />
-//         <Button type="primary" onClick={handleAddTransaction}>
-//           + Thêm
-//         </Button>
-//       </div>
-
-//       {/* Table cha – con */}
-//           <Table
-//       columns={partnerColumns}
-//       dataSource={partners}
-//       rowKey="id"
-//       expandable={{
-//         expandedRowRender: (record) => (
-//           <Table
-//             columns={transactionColumns}
-//             dataSource={record.transactions}
-//             rowKey="id"
-//             pagination={false}
-//             size="small"
-//             bordered={false}
-//           />
-//         ),
-//       }}
-//       pagination={false}
-//       bordered
-//     />
-//     </div>
-//   );
-// };
-
-// export default App;
-
+"use client";
 
 import React, { useState } from "react";
-import { Tabs, Card, InputNumber, Input, Button, Select, Table } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import {
+  Tabs,
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  Table,
+  Typography,
+  Popconfirm,
+} from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUsers,
+  faWallet,
+  faYenSign,
+} from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
 
-interface Transaction {
-  id: string;
-  code: string;
-  exchangeRate?: number;
-  debt: number;
-  createdAt: string;
-  note?: string;
-}
+const { Option } = Select;
+const { Title, Text } = Typography;
 
-interface Partner {
-  id: string;
+interface PartnerRecord {
+  key: string;
   name: string;
   description: string;
-  totalPurchase: number;
-  exchangeRate: number;
-  transactions: Transaction[];
+  total: number;
+  rate: number;
+  createdAt: string;
 }
 
-type RowData =
-  | ({ type: "partner" } & Partner)
-  | ({ type: "transaction"; parentId: string } & Transaction);
-
-const App: React.FC = () => {
-  const [partners, setPartners] = useState<Partner[]>([
-    {
-      id: "p1",
-      name: "Nhà cung cấp Tokyo ABC",
-      description: "Nguyên liệu điện tử chất lượng cao",
-      totalPurchase: 250000,
-      exchangeRate: 175,
-      transactions: [
-        {
-          id: "t1",
-          code: "#N-0805-2",
-          exchangeRate: 175,
-          debt: 16750000,
-          createdAt: "15/01/2024",
-        },
-        {
-          id: "t2",
-          code: "#N-0805-2",
-          debt: -15000000,
-          createdAt: "16/01/2024 10:20",
-        },
-        {
-          id: "t3",
-          code: "#N-0805-2",
-          debt: -12000000,
-          createdAt: "19/01/2024 09:15",
-        },
-      ],
-    },
-    {
-      id: "p2",
-      name: "Osaka Materials Ltd",
-      description: "Nhà cung cấp vật liệu xây dựng",
-      totalPurchase: 180000,
-      exchangeRate: 178,
-      transactions: [
-        {
-          id: "t4",
-          code: "#N-0805-2",
-          exchangeRate: 178,
-          debt: 24040000,
-          createdAt: "10/01/2024",
-        },
-        {
-          id: "t5",
-          code: "#N-0805-2",
-          debt: -8000000,
-          createdAt: "12/01/2024 14:35",
-        },
-      ],
-    },
-    {
-      id: "p3",
-      name: "Kyoto Steel Co",
-      description: "Thép và kim loại cao cấp",
-      totalPurchase: 320000,
-      exchangeRate: 172,
-      transactions: [
-        {
-          id: "t6",
-          code: "#N-0805-2",
-          debt: -5040000,
-          createdAt: "08/01/2024",
-        },
-      ],
-    },
-  ]);
-const data: Partner[] = partners.map((p) => ({
-  ...p,
-  key: p.id,
-  children: p.transactions.map((t) => ({
-    ...t,
-    key: `${p.id}-${t.id}`,
-    isTransaction: true,
-  })),
-}));
-  // Flatten Partner + Transaction
-//   const data: RowData[] = partners.flatMap((p) => [
-//     { type: "partner", ...p },
-//     ...p.transactions.map((t) => ({ type: "transaction", parentId: p.id, ...t })),
-//   ]);
-
-  const handleDelete = (id: string) => {
-    setPartners((prev) =>
-      prev.map((p) => ({
-        ...p,
-        transactions: p.transactions.filter((t) => t.id !== id),
-      }))
-    );
-  };
-
-//   const columns: ColumnsType<RowData> = [
-//     {
-//       title: "Đối tác",
-//       key: "partner",
-//       render: (_, record) => {
-//         if (record.type === "partner") {
-//           return (
-//             <div>
-//               <div className="font-semibold text-gray-800">{record.name}</div>
-//               <div className="text-xs text-gray-500">{record.description}</div>
-//             </div>
-//           );
-//         }
-//         return (
-//           <div className="pl-8">
-//             <a className="text-blue-600 hover:underline">{record.code}</a>
-//           </div>
-//         );
-//       },
-//     },
-//     {
-//       title: "Tổng Mua (JPY)",
-//       key: "purchase",
-//       render: (_, record) =>
-//         record.type === "partner"
-//           ? `${record.totalPurchase.toLocaleString()} ¥`
-//           : "-",
-//     },
-//     {
-//       title: "Tỷ giá",
-//       key: "exchangeRate",
-//       render: (_, record) =>
-//         record.exchangeRate ? `1 ¥ = ${record.exchangeRate} đ` : "-",
-//     },
-//     {
-//       title: "Công nợ Hiện tại (VND)",
-//       key: "debt",
-//       render: (_, record) =>
-//         record.type === "transaction" ? (
-//           <span
-//             className={
-//               record.debt >= 0 ? "text-red-500 font-semibold" : "text-green-600"
-//             }
-//           >
-//             {record.debt.toLocaleString()} đ
-//           </span>
-//         ) : null,
-//     },
-//     {
-//       title: "Ngày Tạo",
-//       key: "createdAt",
-//       render: (_, record) =>
-//         record.type === "transaction" ? record.createdAt : "-",
-//     },
-//     {
-//       title: "Hành động",
-//       key: "actions",
-//       render: (_, record) =>
-//         record.type === "transaction" ? (
-//           <Button danger type="text" onClick={() => handleDelete(record.id)}>
-//             🗑
-//           </Button>
-//         ) : null,
-//     },
-//   ];
-    
-const columns: ColumnsType<any> = [
+const dataSource: PartnerRecord[] = [
   {
-    title: "Đối tác / Mã giao dịch",
-    dataIndex: "name",
-    key: "partner",
-    render: (_, record) => {
-      if (record.isTransaction) {
-        return (
-          <div className="pl-8">
-            <a className="text-blue-600 hover:underline">{record.code}</a>
-          </div>
-        );
-      }
-      return (
-        <div>
-          <div className="font-semibold text-gray-800">{record.name}</div>
-          <div className="text-xs text-gray-500">{record.description}</div>
-        </div>
-      );
-    },
+    key: "1",
+    name: "Nhà cung cấp Tokyo ABC",
+    description: "Nguyên liệu đạt chất lượng cao",
+    total: 220000,
+    rate: 175,
+    createdAt: "15/01/2024",
   },
   {
-    title: "Tổng Mua (JPY)",
-    dataIndex: "totalPurchase",
-    key: "purchase",
-    render: (val, record) =>
-      record.isTransaction ? "-" : `${val.toLocaleString()} ¥`,
+    key: "2",
+    name: "Osaka Materials Ltd",
+    description: "Nhà cung cấp vật liệu xây dựng",
+    total: 180000,
+    rate: 178,
+    createdAt: "10/01/2024",
   },
   {
-    title: "Tỷ giá",
-    dataIndex: "exchangeRate",
-    key: "exchangeRate",
-    render: (rate, record) =>
-      rate ? `1 ¥ = ${rate} đ` : record.isTransaction ? "-" : "-",
+    key: "3",
+    name: "Kyoto Steel Co.",
+    description: "Thép và kim loại cao cấp",
+    total: 320000,
+    rate: 172,
+    createdAt: "08/01/2024",
   },
   {
-    title: "Công nợ Hiện tại (VND)",
-    dataIndex: "debt",
-    key: "debt",
-    render: (val, record) =>
-      record.isTransaction ? (
-        <span
-          className={
-            val >= 0 ? "text-red-500 font-semibold" : "text-green-600"
-          }
-        >
-          {val.toLocaleString()} đ
-        </span>
-      ) : null,
-  },
-  {
-    title: "Ngày Tạo",
-    dataIndex: "createdAt",
-    key: "createdAt",
-    render: (val, record) => (record.isTransaction ? val : "-"),
-  },
-  {
-    title: "Hành động",
-    key: "actions",
-    render: (_, record) =>
-      record.isTransaction ? (
-        <Button danger type="text" onClick={() => handleDelete(record.id)}>
-          🗑
-        </Button>
-      ) : null,
+    key: "4",
+    name: "Đơn #AG-88673",
+    description: "Thép và kim loại cao cấp",
+    total: -320000,
+    rate: 180,
+    createdAt: "08/01/2024",
   },
 ];
-const [page, setPage] = useState(0);
 
+export default function JPYManagementPage() {
+  const [form] = Form.useForm();
+  const [activeTab, setActiveTab] = useState("jpy");
+  const [page, setPage] = useState(0);
+
+  const columns = [
+    {
+      title: "Từ",
+      dataIndex: "name",
+      render: (_: string, record: PartnerRecord) => (
+        <div>
+          <Text strong>{record.name}</Text>
+          <br />
+          <Text type="secondary">{record.description}</Text>
+        </div>
+      ),
+    },
+    {
+      title: activeTab === "jpy" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
+      dataIndex: "total",
+      render: (value: number) => (
+        <span className={value >= 0 ? "text-green-600" : "text-red-600"}>
+          {value >= 0 ? "+" : ""}
+          {value.toLocaleString("ja-JP")} {activeTab === "jpy" ? "¥" : "$"}
+        </span>
+      ),
+    },
+    {
+      title: "Tỷ giá",
+      dataIndex: "rate",
+      render: (value: number) => `${value} đ`,
+    },
+    {
+      title: "Ngày Tạo",
+      dataIndex: "createdAt",
+    },
+    {
+      title: "Hành động",
+      render: () => (
+        <Popconfirm title="Xóa bản ghi này?">
+          <DeleteOutlined className="text-red-500 cursor-pointer" />
+        </Popconfirm>
+      ),
+    },
+  ];
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
+
   return (
-    <div className="p-4 space-y-6">
-      <TableComponent
-        columns={columns}
-        dataSource={data}
-        rowKey={(r) =>
-          r.type === "partner" ? r.id : `${r.parentId}-${r.id}`
-        }
-        pagination={false}
-        rowHeight={45}
-        pageSize={10}
-        page={data.length || 0}
-        onPageChange={handleChangePage}
-        response={undefined}
-        fontSize={14}
-        headerHeight={44}
+    <div className="p-6 space-y-6">
+      {/* Tabs thay cho Breadcrumb */}
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={[
+          { key: "jpy", label: "Quản lý (JPY)" },
+          { key: "usd", label: "Quản lý (USD)" },
+        ]}
       />
+
+      {/* Tổng quan */}
+      <div>
+        <Title level={4}>
+          {activeTab === "jpy"
+            ? "Tổng quan Quản lý JPY"
+            : "Tổng quan Quản lý USD"}
+        </Title>
+        <div className="p-3 bg-white rounded-lg shadow grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <Card className=" !p-3 !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white shadow-md rounded-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-80">Tổng Đối tác</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+              <FontAwesomeIcon icon={faUsers} className="text-3xl opacity-90" />
+            </div>
+          </Card>
+
+          <Card className="!p-3 !bg-gradient-to-r !from-green-500 !to-emerald-600 !text-white shadow-md rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-80">
+                  Tổng Mua ({activeTab === "jpy" ? "JPY" : "USD"})
+                </p>
+                <p className="text-2xl font-bold">
+                  0 {activeTab === "jpy" ? "¥" : "$"}
+                </p>
+              </div>
+              <FontAwesomeIcon
+                icon={faYenSign}
+                className="text-3xl opacity-90"
+              />
+            </div>
+          </Card>
+
+          <Card className=" !p-3 !bg-gradient-to-r !from-purple-500 !to-fuchsia-600 !text-white shadow-md rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-80">
+                  Tổng còn lại ({activeTab === "jpy" ? "JPY" : "USD"})
+                </p>
+                <p className="text-2xl font-bold">
+                  0 {activeTab === "jpy" ? "¥" : "$"}
+                </p>
+              </div>
+              <FontAwesomeIcon
+                icon={faWallet}
+                className="text-3xl opacity-90"
+              />
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Form thêm giao dịch */}
+      <div className="p-6 bg-white rounded-lg shadow w-full">
+        <Title level={5} className="!mb-4 !text-gray-800">
+          Thêm Giao dịch Mua Nguyên liệu
+        </Title>
+
+        <Form
+          form={form}
+          layout="vertical" // ✅ label hiển thị trên input
+          className="grid  grid-cols-5 gap-4 !w-full"
+        >
+          {/* Đối tác */}
+          <Form.Item
+            name="partner"
+            label="Đối tác *"
+            rules={[{ required: true, message: "Chọn đối tác" }]}
+            className="mb-0"
+          >
+            <Select
+              placeholder="-- Chọn đối tác --"
+              className="!w-full !h-10"
+            />
+          </Form.Item>
+
+          {/* Số tiền */}
+          <Form.Item
+            name="amount"
+            label="Số tiền Yên *"
+            rules={[{ required: true, message: "Nhập số tiền" }]}
+            className="mb-0"
+          >
+            <Input type="number" suffix="¥" className="!w-full !h-10" />
+          </Form.Item>
+
+          {/* Tỷ giá */}
+          <Form.Item
+            name="rate"
+            label="Tỷ giá *"
+            initialValue={180}
+            rules={[{ required: true }]}
+            className="mb-0"
+          >
+            <Input type="number" suffix="đ" className="!w-full !h-10" />
+          </Form.Item>
+
+          {/* Ghi chú */}
+          <Form.Item name="note" label="Ghi chú" className="mb-0">
+            <Input placeholder="Ghi chú..." className="!w-full !h-10" />
+          </Form.Item>
+
+          {/* Button */}
+          <Form.Item
+            label=" "
+            className="mb-0 col-span-1 md:col-span-1 !w-full"
+          >
+            <Button
+              type="primary"
+              className="bg-blue-600 hover:!bg-blue-700 px-6 !h-10 !rounded-lg w-full"
+            >
+              + Thêm
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+
+      {/* Danh sách */}
+      <div className="p-6 bg-white rounded-lg shadow">
+        <Title level={5}>Danh sách Đối tác và Công nợ</Title>
+        <TableComponent
+          columns={columns}
+          dataSource={dataSource || []}
+          rowHeight={45}
+          pageSize={10}
+          page={dataSource.length || 0}
+          onPageChange={handleChangePage}
+          response={undefined}
+          fontSize={14}
+          headerHeight={44}
+        />
+      </div>
     </div>
   );
-};
-
-export default App;
+}

@@ -11,6 +11,10 @@ import {
   Col,
   Divider,
 } from "antd";
+import { getDataProductFromLink } from "../../apis/orderhub";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { DataFromLink } from "@/types/orderhub";
 
 const { Option } = Select;
 
@@ -22,6 +26,7 @@ interface CreateOrderModalProps {
 export default function CreateOrderModal(props: CreateOrderModalProps) {
   const { isOpen, onCancel, onConfirm } = props;
   const [form] = Form.useForm();
+  const [idProduct, setIdProduct] = React.useState<number | null>(null);
 
   const handleOk = async () => {
     try {
@@ -33,6 +38,30 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   };
 
+  const { mutate, isPending } = useMutation<DataFromLink, Error, string>({
+    mutationFn: (link: string) => getDataProductFromLink(link),
+  });
+
+  const handleGetInfo = () => {
+    const linkValue = form.getFieldValue("link");
+    if (!linkValue) {
+      toast.warning("Vui lòng nhập link trước!");
+      return;
+    }
+
+    mutate(linkValue, {
+      onSuccess: (data: DataFromLink) => {
+        form.setFieldsValue({
+          productName: data?.product_name || "",
+        });
+        setIdProduct(data.id);
+        toast.success("Lấy thông tin sản phẩm thành công!");
+      },
+      onError: () => {
+        toast.error("Không thể lấy thông tin từ link!");
+      },
+    });
+  };
   return (
     <>
       <Modal
@@ -72,9 +101,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Link Sản phẩm"
                 name="link"
                 rules={[{ required: true, message: "Vui lòng nhập link!" }]}
-                className="!mb-1"
+                className="!mb-1 "
               >
-                <Input className="!h-11" placeholder="https://..." />
+                <Input
+                  placeholder="https://..."
+                  className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
+                  addonAfter={
+                    <Button type="dashed" onClick={handleGetInfo}>
+                      Get info
+                    </Button>
+                  }
+                />
               </Form.Item>
 
               <Form.Item

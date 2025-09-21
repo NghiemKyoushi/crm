@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs, Alert, Form, InputNumber, Button, Input } from "antd";
 import InsuranceSettings from "./insurance-settings";
 import ShippingSettings from "./shipping-settings";
@@ -12,117 +12,302 @@ import {
   faInfoCircle,
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
+import { useListFeeSettingDefault } from "../hooks/fee-setting";
+import { on } from "node:stream";
 
-type ShippingFeeFormValues = {
-  // Phí vận chuyển
-  normal: number;
-  highValue: number;
-  apple: number;
-  iphone300: number;
-  iphone500: number;
-  high500_2000: number;
-  high2000: number;
+export interface ShippingRouteData {
+  id: number;
+  name: string;
+  value: number;
+}
 
-  // Phụ thu
-  surchargeNormal: number;
-  surchargeHighValue: number;
-  surchargeApple: number;
-  surchargeIphone300: number;
-  surchargeIphone500: number;
-  surcharge500_2000: number;
-  surcharge2000: number;
+// Các loại phí (SURCHARGE, SERVICE, SHIPPING)
+export interface FeeType {
+  fee_type: "SURCHARGE" | "SERVICE" | "SHIPPING";
+  shipping_route_data: ShippingRouteData[];
+}
 
-  // Phí dịch vụ khác
-  phiMuaHo: number;
-  phiGiaCo: number;
-  phiKiemDem: number;
+// Dữ liệu phí theo tuyến vận chuyển
+export interface FeeCommonData {
+  route_code: string; // VD: "JP_VN", "US_VN"
+  fee_types: FeeType[];
+}
 
-  // Tuyến Mỹ
-  us_normal: number;
-  us_highValue: number;
-  us_apple: number;
-  us_iphone300: number;
-  us_iphone500: number;
-  us_high500_2000: number;
-  us_high2000: number;
-
-  // Tuyến Nhật Bản
-  jp_normal: number;
-  jp_linhKien: number;
-  jp_iphone15: number;
-
-  // Phụ thu
-  surchargeNormals: number;
-  surchargeHighValue5_10: number;
-  surchargeHighValue10_30: number;
-  surchargeApples: number;
-  surchargeIphone12_14: number;
-  surchargeIphone15: number;
-  surchargeLaptop10: number;
-  surchargeLaptop20: number;
-  surchargeLaptop20Percent: number;
-  surchargeAmply20Percent: number;
-  surchargeHighValue50: number;
-
-  // Giao hàng nội thành Hà Nội
-  kv1_fee: number;
-  kv1_free_us: number;
-  kv1_free_jp: number;
-
-  kv2_fee: number;
-  kv2_free_us: number;
-  kv2_free_jp: number;
-
-  kv3_fee: number;
-
-  // Quy định chung
+// Chính sách chung
+export interface GeneralPolicy {
+  id: number;
+  code: string; // "GENERAL_POLICY"
   free_storage_days: number;
-  storage_fee: number;
-  deposit_percent: number;
-};
-const FeeSettingsPage: React.FC = () => {
-  const { handleSubmit, control, getValues, setValue } =
-    useForm<ShippingFeeFormValues>({
-      defaultValues: {
-        normal: 235000,
-        highValue: 230000,
-        apple: 245000,
-        iphone300: 230000,
-        iphone500: 230000,
-        high500_2000: 230000,
-        high2000: 230000,
+  storage_fee_per_kg_per_day: number;
+  min_deposit_percent: number;
+}
 
-        surchargeNormal: 0,
-        surchargeHighValue: 30000,
-        surchargeApple: 100000,
-        surchargeIphone300: 400000,
-        surchargeIphone500: 500000,
-        surcharge500_2000: 3,
-        surcharge2000: 5,
-      },
+// Phí theo khu vực vận chuyển
+export interface ShippingZoneFee {
+  id: number;
+  code: string; // VD: "KV1"
+  name: string;
+  description: string;
+  city: string;
+  fee_amount: number;
+  free_weight_us: number | null;
+  free_weight_japan: number | null;
+}
+
+const FeeSettingsPage: React.FC = () => {
+  const { handleSubmit, control, getValues, setValue, reset } =
+    useForm<ShippingZoneFee>({
+      defaultValues: {} as ShippingZoneFee,
     });
+  const { data: apiData, isLoading } = useListFeeSettingDefault();
+  console.log("apiData", apiData);
 
   const handleFinish = (values: any) => {
     console.log("Form Values:", values);
   };
-  const onSubmit = (data: ShippingFeeFormValues) => {
+  const onSubmit = (data: ShippingZoneFee) => {
+    console.log("data", data);
+
     console.log("🚀 Data form:", data);
   };
 
-  const renderField = (
-    name: keyof ShippingFeeFormValues,
-    label: string,
-    control: any
-  ) => (
-    <div className="grid grid-cols-2 gap-4 items-center">
-      <span>{label}</span>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => <Input {...field} />}
-      />
-    </div>
-  );
+  const DynamicShippingForm = ({
+    data,
+    control,
+  }: {
+    data: {
+      fee_common_data: FeeCommonData[];
+      general_policy: GeneralPolicy[];
+      shipping_zone_fee: ShippingZoneFee[];
+    };
+    control: any;
+    onSubmit: (data: any) => void;
+  }) => {
+    return (
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        {data.fee_common_data &&
+          data.fee_common_data.map((route) => (
+            <div key={route.route_code} className="space-y-4">
+              {/* Header tuyến */}
+              <div className="py-1 border-b font-semibold text-blue-600 flex items-center gap-2">
+                TUYẾN {route.route_code.replace("_", " → ")}
+              </div>
+
+              {route.fee_types.map((feeType) => (
+                <div
+                  key={feeType.fee_type}
+                  className={
+                    route.route_code === "US_VN"
+                      ? ` rounded-lg p-4 ${
+                          feeType.fee_type === "SHIPPING"
+                            ? "bg-red-50 border border-red-200 rounded-lg"
+                            : feeType.fee_type === "SURCHARGE"
+                            ? "bg-orange-50 border border-orange-200 rounded-lg"
+                            : "bg-blue-50 border border-blue-200 rounded-lg"
+                        }`
+                      : `rounded-lg p-4 ${
+                          feeType.fee_type === "SHIPPING"
+                            ? "bg-blue-50 border border-blue-200 rounded-lg"
+                            : feeType.fee_type === "SURCHARGE"
+                            ? "bg-green-50 border border-green-200 rounded-lg"
+                            : "bg-purple-50 border border-blue-200 rounded-lg"
+                        }`
+                  }
+                >
+                  <div
+                    className={
+                      route.route_code === "US_VN"
+                        ? ` font-semibold mb-2  ${
+                            feeType.fee_type === "SHIPPING"
+                              ? "text-red-800 "
+                              : feeType.fee_type === "SURCHARGE"
+                              ? "text-orange-800 "
+                              : "text-blue-800 "
+                          }`
+                        : `font-semibold mb-2 ${
+                            feeType.fee_type === "SHIPPING"
+                              ? "text-blue-800 "
+                              : feeType.fee_type === "SURCHARGE"
+                              ? "text-green-800 "
+                              : "text-purple-800 "
+                          }`
+                    }
+                  >
+                    {feeType.fee_type === "SHIPPING" &&
+                      "Phí Vận chuyển (VNĐ/Kg)"}
+                    {feeType.fee_type === "SURCHARGE" && "Phụ Thu"}
+                    {feeType.fee_type === "SERVICE" && "Phí Dịch Vụ Khác"}
+                  </div>
+
+                  <div
+                    className={`grid grid-cols-2 gap-4 ${
+                      feeType.fee_type === "SHIPPING"
+                        ? "m-3 p-3 space-y-2 bg-white rounded-xl"
+                        : ""
+                    }`}
+                  >
+                    {feeType.shipping_route_data.map((item) => {
+                      const fieldName = `${route.route_code}_${feeType.fee_type}_${item.id}`;
+                      return (
+                        <div key={fieldName}>
+                          <label className="block mb-1">{item.name}</label>
+                          <Controller
+                            name={fieldName}
+                            control={control}
+                            defaultValue={item.value}
+                            render={({ field }) => (
+                              <InputNumber
+                                {...field}
+                                style={{ width: "100%" }}
+                                formatter={(value) =>
+                                  `${value}`.replace(
+                                    /\B(?=(\d{3})+(?!\d))/g,
+                                    "."
+                                  )
+                                }
+                                parser={(value) =>
+                                  value?.replace(/,/g, "") as any
+                                }
+                              />
+                            )}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+
+        {/* Giao hàng nội thành */}
+        <div className="py-1 border-b font-semibold text-green-700 flex items-center gap-2">
+          GIAO HÀNG NỘI THÀNH HÀ NỘI
+        </div>
+        <div className="bg-green-50 rounded-lg p-4 space-y-4">
+          {data.shipping_zone_fee.map((zone) => (
+            <div key={zone.id} className="bg-white p-4 rounded-lg ">
+              {/* <div className="font-medium mb-2">{zone.name}</div> */}
+              <div className="font-medium mb-2">
+                {zone.name} ({zone.description})
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <Controller
+                  name={`zone_${zone.id}_fee`}
+                  control={control}
+                  defaultValue={zone.fee_amount}
+                  render={({ field }) => (
+                    <InputNumber
+                      {...field}
+                      style={{ width: "100%" }}
+                      placeholder="Phí giao hàng (VNĐ)"
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      }
+                      parser={(value) => value?.replace(/,/g, "") as any}
+                    />
+                  )}
+                />
+                <Controller
+                  name={`zone_${zone.id}_free_us`}
+                  control={control}
+                  defaultValue={zone.free_weight_us}
+                  render={({ field }) => (
+                    <InputNumber
+                      {...field}
+                      style={{ width: "100%" }}
+                      placeholder="Miễn phí tuyến Mỹ >kg"
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      }
+                      parser={(value) => value?.replace(/,/g, "") as any}
+                    />
+                  )}
+                />
+                <Controller
+                  name={`zone_${zone.id}_free_jp`}
+                  control={control}
+                  defaultValue={zone.free_weight_japan}
+                  render={({ field }) => (
+                    <InputNumber
+                      {...field}
+                      style={{ width: "100%" }}
+                      placeholder="Miễn phí tuyến Nhật >kg"
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      }
+                      parser={(value) => value?.replace(/,/g, "") as any}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quy định chung */}
+        <div className="py-1 border-b font-semibold text-yellow-700 flex items-center gap-2">
+          QUY ĐỊNH CHUNG
+        </div>
+        <div className="bg-yellow-50 rounded-lg p-4 grid grid-cols-3 gap-4">
+          <Controller
+            name="general_free_storage_days"
+            control={control}
+            defaultValue={data.general_policy[0].free_storage_days}
+            render={({ field }) => (
+              <InputNumber
+                {...field}
+                style={{ width: "100%" }}
+                placeholder="Thời gian lưu kho miễn phí (ngày)"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+              />
+            )}
+          />
+          <Controller
+            name="general_storage_fee"
+            control={control}
+            defaultValue={data.general_policy[0].storage_fee_per_kg_per_day}
+            render={({ field }) => (
+              <InputNumber
+                {...field}
+                style={{ width: "100%" }}
+                placeholder="Phí lưu kho (VNĐ/kg/ngày)"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+              />
+            )}
+          />
+          <Controller
+            name="general_deposit_percent"
+            control={control}
+            defaultValue={data.general_policy[0].min_deposit_percent}
+            render={({ field }) => (
+              <InputNumber
+                {...field}
+                style={{ width: "100%" }}
+                placeholder="Đặt cọc tối thiểu (%)"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+              />
+            )}
+          />
+        </div>
+
+        <div className="text-right">
+          <Button type="primary" htmlType="submit">
+            Lưu thay đổi
+          </Button>
+        </div>
+      </form>
+    );
+  };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
@@ -155,342 +340,13 @@ const FeeSettingsPage: React.FC = () => {
       <Tabs defaultActiveKey="1">
         {/* Tab 1: Phí mặc định */}
         <Tabs.TabPane tab="Phí mặc định" key="1">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Header tuyến */}
-            <div className="py-1 border-b border-red-200 flex items-center gap-2 text-red-700 font-semibold">
-              <FontAwesomeIcon icon={faFlagUsa} />
-              TUYẾN MỸ → VIỆT NAM
-            </div>
-            {/* Phí vận chuyển */}
-            <div className="bg-red-50 border border-red-200 rounded-lg">
-              <div className="px-4 py-2 border-b border-red-200 font-semibold text-red-800">
-                Phí Vận chuyển (VNĐ/Kg)
-              </div>
-              <div className="m-3 p-3 space-y-2 bg-white">
-                <div className="grid grid-cols-2 gap-4 items-center text-center">
-                  <p>Kho Oregon/New Hampshire</p>
-                  <p>Về Hà Nội</p>
-                </div>
-                {[
-                  { label: "Hàng thông thường", name: "normal" },
-                  { label: "Đồ giá trị cao >100$", name: "highValue" },
-                  { label: "Apple Watch, Airpod >100$", name: "apple" },
-                  { label: "Laptop, iPad, iPhone ≤300$", name: "iphone300" },
-                  {
-                    label: "Laptop, iPad, iPhone 300$-500$",
-                    name: "iphone500",
-                  },
-                  {
-                    label: "Hàng giá trị cao 500$-2000$",
-                    name: "high500_2000",
-                  },
-                  { label: "Hàng giá trị cao >2000$", name: "high2000" },
-                ].map((item) => (
-                  <div
-                    key={item.name}
-                    className="grid grid-cols-2 gap-4 items-center"
-                  >
-                    <span>{item.label}</span>
-                    <Controller
-                      name={item.name as keyof ShippingFeeFormValues}
-                      control={control}
-                      render={({ field }) => <Input {...field} />}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Phụ thu */}
-            <div className="bg-orange-50 border border-orange-200 rounded-lg">
-              <div className="px-4 py-2 border-b border-orange-200 font-semibold text-orange-700">
-                Phụ Thu (VNĐ)
-              </div>
-              <div className="p-4 grid grid-cols-2 gap-4">
-                {[
-                  { label: "Hàng thông thường", name: "surchargeNormal" },
-                  { label: "Đồ giá trị cao >100$", name: "surchargeHighValue" },
-                  {
-                    label: "Apple Watch, Airpod >100$",
-                    name: "surchargeApple",
-                  },
-                  {
-                    label: "Laptop, iPad, iPhone ≤300$",
-                    name: "surchargeIphone300",
-                  },
-                  {
-                    label: "Laptop, iPad, iPhone 300$-500$",
-                    name: "surchargeIphone500",
-                  },
-                  {
-                    label: "Hàng giá trị cao 500$-2000$ (%)",
-                    name: "surcharge500_2000",
-                  },
-                  {
-                    label: "Hàng giá trị cao >2000$ (%)",
-                    name: "surcharge2000",
-                  },
-                ].map((item) => (
-                  <div key={item.name}>
-                    <span className="block mb-1">{item.label}</span>
-                    <Controller
-                      name={item.name as keyof ShippingFeeFormValues}
-                      control={control}
-                      render={({ field }) => <Input {...field} />}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* PHÍ DỊCH VỤ KHÁC */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="px-4 py-2 border-b border-blue-200 font-semibold text-blue-600">
-                Phí Dịch vụ Khác
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-4">
-                {[
-                  { label: "Phí mua hộ (%)", name: "phiMuaHo" },
-                  { label: "Phí gia cố (VNĐ/Kg)", name: "phiGiaCo" },
-                  {
-                    label: "Phí kiểm đếm (USD/tracking)",
-                    name: "phiKiemDem",
-                  },
-                ].map((item) => (
-                  <div key={item.name}>
-                    <span className="block mb-1">{item.label}</span>
-                    <Controller
-                      name={item.name as keyof ShippingFeeFormValues}
-                      control={control}
-                      render={({ field }) => <Input {...field} />}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* TUYẾN NHẬT */}
-            <div className=" py-1 border-b border-blue-200 font-semibold text-blue-600 flex items-center gap-2">
-              <FontAwesomeIcon icon={faFlag} />
-              TUYẾN NHẬT BẢN → VIỆT NAM
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="m-3 p-3 space-y-2 bg-white">
-                {renderField("jp_normal", "Hàng thông thường", control)}
-                {renderField(
-                  "jp_linhKien",
-                  "Hàng lô linh kiện điện thoại, máy tính",
-                  control
-                )}
-                {renderField(
-                  "jp_iphone15",
-                  "Điện thoại iPhone 15, 16 pro max, Samsung S24 ultra",
-                  control
-                )}
-              </div>
-            </div>
-
-            {/* PHỤ THU */}
-            <div className="bg-green-50 border border-green-200 rounded-lg">
-              <div className="px-4 py-2 border-b border-green-200 font-semibold text-green-700">
-                Phụ Thu (VNĐ)
-              </div>
-              <div className="p-4 grid grid-cols-2 gap-4">
-                {renderField("surchargeNormal", "Hàng thông thường", control)}
-                {renderField(
-                  "surchargeHighValue5_10",
-                  "Đồ giá trị cao 5-10 triệu VNĐ",
-                  control
-                )}
-                {renderField(
-                  "surchargeHighValue10_30",
-                  "Đồ giá trị cao 10-30 triệu VNĐ",
-                  control
-                )}
-                {renderField("surchargeApple", "Apple Watch, Airpod", control)}
-                {renderField(
-                  "surchargeIphone12_14",
-                  "iPhone 12-14 pro max, Samsung",
-                  control
-                )}
-                {renderField(
-                  "surchargeIphone15",
-                  "iPhone 15, 16 pro max, Samsung S24 ultra",
-                  control
-                )}
-                {renderField(
-                  "surchargeLaptop10",
-                  "Laptop, iPad <10 triệu VNĐ",
-                  control
-                )}
-                {renderField(
-                  "surchargeLaptop20",
-                  "Laptop, iPad <20 triệu VNĐ",
-                  control
-                )}
-                {renderField(
-                  "surchargeLaptop20Percent",
-                  "Laptop, iPad >20 triệu VNĐ (%)",
-                  control
-                )}
-                {renderField(
-                  "surchargeAmply20Percent",
-                  "Loa, đài, ampli >20 triệu VNĐ (%)",
-                  control
-                )}
-                {renderField(
-                  "surchargeHighValue50",
-                  "Hàng giá trị cao >50 triệu VNĐ (%)",
-                  control
-                )}
-              </div>
-            </div>
-            <div className="bg-purple-50 border border-blue-200 rounded-lg">
-              <div className="px-4 py-2 border-b border-purple-200 font-semibold text-purple-600">
-                Phí Dịch vụ Khác
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-4">
-                {[
-                  { label: "Phí mua hộ (%)", name: "phiMuaHo" },
-                  { label: "Phí gia cố (VNĐ/Kg)", name: "phiGiaCo" },
-                  {
-                    label: "Phí kiểm đếm (USD/tracking)",
-                    name: "phiKiemDem",
-                  },
-                ].map((item) => (
-                  <div key={item.name}>
-                    <span className="block mb-1">{item.label}</span>
-                    <Controller
-                      name={item.name as keyof ShippingFeeFormValues}
-                      control={control}
-                      render={({ field }) => <Input {...field} />}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className=" py-1 border-b border-green-200 font-semibold text-green-700 flex items-center gap-2">
-              <FontAwesomeIcon icon={faTruck} /> GIAO HÀNG NỘI THÀNH HÀ NỘI
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg">
-              <div className="p-4 space-y-4">
-                {/* KV1 */}
-                <div className="bg-white p-4 rounded-lg border border-green-200">
-                  <div className="font-medium mb-2">
-                    KV1 (Hoàn Kiếm, Ba Đình, Hai Bà Trưng, Tây Hồ, Đống Đa, Cầu
-                    Giấy, Thanh Xuân, Bắc Từ Liêm, Hoàng Mai, Hà Đông)
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        label: "Phí giao hàng (VNĐ)",
-                        name: "kv2_fee",
-                      },
-                      {
-                        label: "Miễn phí tuyến Mỹ >kg",
-                        name: "kv2_free_us",
-                      },
-                      {
-                        label: "Miễn phí tuyến Nhật >kg",
-                        name: "kv2_free_jp",
-                      },
-                    ].map((item) => (
-                      <div key={item.name}>
-                        <span className="block mb-1">{item.label}</span>
-                        <Controller
-                          name={item.name as keyof ShippingFeeFormValues}
-                          control={control}
-                          render={({ field }) => <Input {...field} />}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* KV2 */}
-                <div className="bg-white p-4 rounded-lg border border-green-200">
-                  <div className="font-medium mb-2">
-                    KV2 (Long Biên, Thanh Trì)
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        label: "Phí giao hàng (VNĐ)",
-                        name: "kv2_fee",
-                      },
-                      {
-                        label: "Miễn phí tuyến Mỹ >kg",
-                        name: "kv2_free_us",
-                      },
-                      {
-                        label: "Miễn phí tuyến Nhật >kg",
-                        name: "kv2_free_jp",
-                      },
-                    ].map((item) => (
-                      <div key={item.name}>
-                        <span className="block mb-1">{item.label}</span>
-                        <Controller
-                          name={item.name as keyof ShippingFeeFormValues}
-                          control={control}
-                          render={({ field }) => <Input {...field} />}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* KV3 */}
-                <div className="bg-white p-4 rounded-lg border border-green-200">
-                  <div className="font-medium mb-2">KV3 (Huyện Gia Lâm)</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {renderField("kv3_fee", "Phí giao hàng (VNĐ)", control)}
-                    <div className="flex items-center text-gray-500">
-                      Không miễn phí
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* QUY ĐỊNH CHUNG */}
-            <div className="py-1 border-b border-yellow-200 font-semibold text-yellow-700 flex items-center gap-2">
-              <FontAwesomeIcon icon={faInfoCircle} /> QUY ĐỊNH CHUNG
-            </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="p-4 grid grid-cols-3 gap-4">
-                {[
-                  {
-                    label: "Thời gian lưu kho miễn phí (ngày)",
-                    name: "free_storage_days",
-                  },
-                  {
-                    label: "Phí lưu kho sau đó (VNĐ/kg/ngày)",
-                    name: "storage_fee",
-                  },
-                  {
-                    label: "Đặt cọc tối thiểu (%)",
-                    name: "deposit_percent",
-                  },
-                ].map((item) => (
-                  <div key={item.name}>
-                    <span className="block mb-1">{item.label}</span>
-                    <Controller
-                      name={item.name as keyof ShippingFeeFormValues}
-                      control={control}
-                      render={({ field }) => <Input {...field} />}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Submit */}
-            <div className="text-right">
-              <Button type="primary" htmlType="submit">
-                Lưu thay đổi
-              </Button>
-            </div>
-          </form>
+          {apiData && (
+            <DynamicShippingForm
+              control={control}
+              data={apiData}
+              onSubmit={onSubmit}
+            />
+          )}
         </Tabs.TabPane>
 
         {/* Tab 2 */}

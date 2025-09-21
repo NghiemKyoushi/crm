@@ -220,7 +220,7 @@ const TelesalesPage: React.FC = () => {
         </div>
       </div>
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         {/* Tổng khách hàng */}
         <div className="border border-blue-200 bg-blue-50 rounded-lg flex items-center justify-start gap-4 ">
           <div className="p-2 bg-blue-500 rounded-lg mb-2 ml-4">
@@ -254,13 +254,13 @@ const TelesalesPage: React.FC = () => {
             />
           </div>
           <div>
-            <p className="text-sm text-green-600 !mb-1">Thành công</p>
+            <p className="text-sm text-green-600 !mb-1">Đã gọi</p>
             <p className="text-2xl font-bold text-green-900 !mb-1">234</p>
           </div>
         </div>
 
         {/* Thất bại */}
-        <div className="bg-red-50 p-2 rounded-lg flex items-center justify-start gap-4">
+        {/* <div className="bg-red-50 p-2 rounded-lg flex items-center justify-start gap-4">
           <div className="p-2 bg-red-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon
               icon={faTimesCircle}
@@ -272,7 +272,7 @@ const TelesalesPage: React.FC = () => {
             <p className="text-sm text-red-600 !mb-1">Thất bại</p>
             <p className="text-2xl font-bold text-red-900 !mb-1">544</p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Actions */}
