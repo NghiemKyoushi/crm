@@ -1,6 +1,6 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { CreateModel } from "@/types/fee-setting";
+import { CreateModel, FormData, ItemShippingList } from "@/types/fee-setting";
 
 export const getListInsurance = async () => {
   const res = await api.get(API_TYPE_CONST.INSURANCE_PACKAGE);
@@ -27,8 +27,17 @@ export const getFeeSettingDefault = async () => {
   return res.data.data;
 };
 
+export const updateFeeSettingDefault = async (body: FormData) => {
+  const res = await api.put(API_TYPE_CONST.FEE_SETTING, body);
+  return res.data.data;
+};
 
 export const getFeeShippingDefault = async () => {
-    const res = await api.get(API_TYPE_CONST.SHIPPING_METHOD);
-    return res.data.data;
-  };
+  const res = await api.get(API_TYPE_CONST.SHIPPING_METHOD);
+  return res.data.data;
+};
+
+export const updateFeeShippingDefault = async (body: ItemShippingList) => {
+  const res = await api.put(API_TYPE_CONST.SHIPPING_METHOD, body);
+  return res.data.data;
+};

@@ -137,17 +137,17 @@ export default function JPYManagementPage() {
             : "Tổng quan Quản lý USD"}
         </Title>
         <div className="p-3 bg-white rounded-lg shadow grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <Card className=" !p-3 !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white shadow-md rounded-xl">
+          <Card className="!h-32 !p-0 !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white shadow-md rounded-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">Tổng Đối tác</p>
                 <p className="text-2xl font-bold">0</p>
               </div>
-              <FontAwesomeIcon icon={faUsers} className="text-3xl opacity-90" />
+              <FontAwesomeIcon icon={faUsers} className="text-3xl opacity-90 w-4 h-4" />
             </div>
           </Card>
 
-          <Card className="!p-3 !bg-gradient-to-r !from-green-500 !to-emerald-600 !text-white shadow-md rounded-2xl">
+          <Card className="!h-32  !p-0 !bg-gradient-to-r !from-green-500 !to-emerald-600 !text-white shadow-md rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
@@ -159,12 +159,12 @@ export default function JPYManagementPage() {
               </div>
               <FontAwesomeIcon
                 icon={faYenSign}
-                className="text-3xl opacity-90"
+                className="text-3xl opacity-90 w-4 h-4"
               />
             </div>
           </Card>
 
-          <Card className=" !p-3 !bg-gradient-to-r !from-purple-500 !to-fuchsia-600 !text-white shadow-md rounded-2xl">
+          <Card className="!h-32  !p-0 !bg-gradient-to-r !from-purple-500 !to-fuchsia-600 !text-white shadow-md rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
@@ -176,7 +176,7 @@ export default function JPYManagementPage() {
               </div>
               <FontAwesomeIcon
                 icon={faWallet}
-                className="text-3xl opacity-90"
+                className="text-3xl opacity-90 w-4 h-4"
               />
             </div>
           </Card>

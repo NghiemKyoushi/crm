@@ -12,8 +12,14 @@ import {
   faInfoCircle,
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
-import { useListFeeSettingDefault } from "../hooks/fee-setting";
+import {
+  useListFeeSettingDefault,
+  useUpdateFeeSettingDefault,
+} from "../hooks/fee-setting";
 import { on } from "node:stream";
+import { mapFormToData } from "@/types/fee-setting";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export interface ShippingRouteData {
   id: number;
@@ -55,20 +61,22 @@ export interface ShippingZoneFee {
 }
 
 const FeeSettingsPage: React.FC = () => {
-  const { handleSubmit, control, getValues, setValue, reset } =
-    useForm<ShippingZoneFee>({
-      defaultValues: {} as ShippingZoneFee,
+  const { t } = useTranslation();
+
+  const { handleSubmit, control, getValues, setValue, reset } = useForm({
+    defaultValues: {},
+  });
+  const { data: apiData } = useListFeeSettingDefault();
+  const updateFeeSettingMutation = useUpdateFeeSettingDefault();
+
+  const onSubmit = (data: any) => {
+    updateFeeSettingMutation.mutate(mapFormToData(data), {
+      onSuccess: () => {
+        toast.success(t("common.success"));
+      },
+      onError: (err: any) =>
+        toast.error(err.response?.data?.localizedMessage || t("common.error")),
     });
-  const { data: apiData, isLoading } = useListFeeSettingDefault();
-  console.log("apiData", apiData);
-
-  const handleFinish = (values: any) => {
-    console.log("Form Values:", values);
-  };
-  const onSubmit = (data: ShippingZoneFee) => {
-    console.log("data", data);
-
-    console.log("🚀 Data form:", data);
   };
 
   const DynamicShippingForm = ({
@@ -89,8 +97,8 @@ const FeeSettingsPage: React.FC = () => {
           data.fee_common_data.map((route) => (
             <div key={route.route_code} className="space-y-4">
               {/* Header tuyến */}
-              <div className="py-1 border-b font-semibold text-blue-600 flex items-center gap-2">
-                TUYẾN {route.route_code.replace("_", " → ")}
+              <div className={`py-1 border-b font-semibold  flex items-center gap-2 ${route.route_code === "US_VN" ? 'text-red-700': 'text-blue-700'}`}>
+               <FontAwesomeIcon icon={route.route_code === "US_VN" ? faFlagUsa: faFlag}/> TUYẾN {route.route_code.replace("_", " → ").toUpperCase()}
               </div>
 
               {route.fee_types.map((feeType) => (
@@ -162,11 +170,11 @@ const FeeSettingsPage: React.FC = () => {
                                 formatter={(value) =>
                                   `${value}`.replace(
                                     /\B(?=(\d{3})+(?!\d))/g,
-                                    "."
+                                    ","
                                   )
                                 }
-                                parser={(value) =>
-                                  value?.replace(/,/g, "") as any
+                                parser={(value: any) =>
+                                  value.replace(/\$\s?|(,*)/g, "")
                                 }
                               />
                             )}
@@ -202,9 +210,9 @@ const FeeSettingsPage: React.FC = () => {
                       style={{ width: "100%" }}
                       placeholder="Phí giao hàng (VNĐ)"
                       formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }
-                      parser={(value) => value?.replace(/,/g, "") as any}
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     />
                   )}
                 />
@@ -218,9 +226,9 @@ const FeeSettingsPage: React.FC = () => {
                       style={{ width: "100%" }}
                       placeholder="Miễn phí tuyến Mỹ >kg"
                       formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }
-                      parser={(value) => value?.replace(/,/g, "") as any}
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     />
                   )}
                 />
@@ -234,9 +242,9 @@ const FeeSettingsPage: React.FC = () => {
                       style={{ width: "100%" }}
                       placeholder="Miễn phí tuyến Nhật >kg"
                       formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }
-                      parser={(value) => value?.replace(/,/g, "") as any}
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     />
                   )}
                 />
@@ -260,9 +268,9 @@ const FeeSettingsPage: React.FC = () => {
                 style={{ width: "100%" }}
                 placeholder="Thời gian lưu kho miễn phí (ngày)"
                 formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
-                parser={(value) => value?.replace(/,/g, "") as any}
+                parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
               />
             )}
           />
@@ -276,9 +284,9 @@ const FeeSettingsPage: React.FC = () => {
                 style={{ width: "100%" }}
                 placeholder="Phí lưu kho (VNĐ/kg/ngày)"
                 formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
-                parser={(value) => value?.replace(/,/g, "") as any}
+                parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
               />
             )}
           />
@@ -292,9 +300,9 @@ const FeeSettingsPage: React.FC = () => {
                 style={{ width: "100%" }}
                 placeholder="Đặt cọc tối thiểu (%)"
                 formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
-                parser={(value) => value?.replace(/,/g, "") as any}
+                parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
               />
             )}
           />

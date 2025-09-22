@@ -9,31 +9,50 @@ import {
   faLocationDot,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
-import { useListFeeShippingDefault } from "../hooks/fee-setting";
-import { ShippingMethod, ShippingMethodResponse } from "@/types/fee-setting";
+import {
+  useListFeeShippingDefault,
+  useUpdateFeeShippingDefault,
+} from "../hooks/fee-setting";
+import { ItemShippingList, ShippingMethod } from "@/types/fee-setting";
+import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const ShippingSettings: React.FC = () => {
+  const { t } = useTranslation();
+
   const [regions, setRegions] = useState<
-    { region_code: string; region_name: string; methods: (ShippingMethod & { checked: boolean })[] }[]
+    {
+      region_code: string;
+      region_name: string;
+      methods: (ShippingMethod & { checked: boolean })[];
+    }[]
   >([]);
 
   const { data: shippingMethods } = useListFeeShippingDefault();
+  const useShippingMutation = useUpdateFeeShippingDefault();
 
   useEffect(() => {
     if (shippingMethods) {
-      const mapped = Object.entries(shippingMethods).map(([regionCode, methods]) => ({
-        region_code: regionCode,
-        region_name: (methods as ShippingMethod[])[0]?.region_name || regionCode,
-        methods: (methods as ShippingMethod[]).map((m) => ({
-          ...m,
-          checked: !m.disable, // mặc định tick nếu ko disable
-        })),
-      }));
+      const mapped = Object.entries(shippingMethods).map(
+        ([regionCode, methods]) => ({
+          region_code: regionCode,
+          region_name:
+            (methods as ShippingMethod[])[0]?.region_name || regionCode,
+          methods: (methods as ShippingMethod[]).map((m) => ({
+            ...m,
+            checked: m.disable,
+          })),
+        })
+      );
       setRegions(mapped);
     }
   }, [shippingMethods]);
 
-  const handleOptionChange = (regionCode: string, id: number, checked: boolean) => {
+  const handleOptionChange = (
+    regionCode: string,
+    id: number,
+    checked: boolean
+  ) => {
     setRegions((prev) =>
       prev.map((region) =>
         region.region_code === regionCode
@@ -48,9 +67,30 @@ const ShippingSettings: React.FC = () => {
     );
   };
 
+  const handleSaveChanges = () => {
+    const getData: ItemShippingList = [];
+    regions.map((item) => {
+      item.methods.map((method) => {
+        getData.push({
+          id: method.id,
+          disable: method.checked,
+        });
+      });
+    });
+    useShippingMutation.mutate(getData, {
+      onSuccess: () => {
+        toast.success(t("common.success"));
+      },
+      onError: (err: any) =>
+        toast.error(err.response?.data?.localizedMessage || t("common.error")),
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Cài đặt Đường vận chuyển Dream Cargo</h3>
+      <h3 className="text-lg font-semibold">
+        Cài đặt Đường vận chuyển Dream Cargo
+      </h3>
 
       {/* Box thông tin liên hệ */}
       <div className="bg-green-50 p-4 rounded-lg border border-l-4 border-green-200">
@@ -84,33 +124,66 @@ const ShippingSettings: React.FC = () => {
           <div
             key={region.region_code}
             className="rounded-lg p-4 flex-1 bg-white shadow"
-            style={{ backgroundColor: region.region_name === "JP -> VN" ? '#eff6ff' : "#fef2f2"}}
-          > 
-            <div className="font-semibold mb-3" style={{color: region.region_name === "JP -> VN" ? '#1d4ed8' : "#dc2626"}}> <FontAwesomeIcon icon={faFlag} />
-            {region.region_name}</div>
+            style={{
+              backgroundColor:
+                region.region_name === "JP -> VN" ? "#eff6ff" : "#fef2f2",
+            }}
+          >
+            <div
+              className="font-semibold mb-3"
+              style={{
+                color:
+                  region.region_name === "JP -> VN" ? "#1d4ed8" : "#dc2626",
+              }}
+            >
+              {" "}
+              <FontAwesomeIcon icon={faFlag} />
+              {region.region_name}
+            </div>
             <div className="space-y-2">
               {region.methods.map((method) => (
                 <div key={method.id}>
                   <Checkbox
-                    checked={method.supported}
-                    disabled={!method.supported}
+                    checked={method.checked}
+                    disabled={!method.disable}
                     onChange={(e) =>
-                      handleOptionChange(region.region_code, method.id, e.target.checked)
+                      handleOptionChange(
+                        region.region_code,
+                        method.id,
+                        e.target.checked
+                      )
                     }
                   >
                     <div className="flex flex-col">
-                      <span className="font-semibold">{method.method_type}</span>
+                      <span className="font-semibold">
+                        {method.method_type}
+                      </span>
                       {method.duration_min !== null && (
                         <span className="text-gray-500 text-xs">
                           Thời gian: {method.duration_min}
-                          {method.duration_max ? ` - ${method.duration_max}` : ""} ngày
+                          {method.duration_max
+                            ? ` - ${method.duration_max}`
+                            : ""}{" "}
+                          ngày
                         </span>
                       )}
                     </div>
                   </Checkbox>
-                  <div className="text-gray-600 text-xs ml-6" style={{color: region.region_name === "JP -> VN" ? '#1d4ed8' : "#dc2626"}}>{method.description}</div>
+                  <div
+                    className="text-gray-600 text-xs ml-6"
+                    style={{
+                      color:
+                        region.region_name === "JP -> VN"
+                          ? "#1d4ed8"
+                          : "#dc2626",
+                    }}
+                  >
+                    {method.description}
+                  </div>
                   {!method.supported && (
-                    <div className="text-gray-500 text-sm ml-6">Không hỗ trợ</div>
+                    <div className="text-gray-500 text-sm ml-6">
+                      Không hỗ trợ
+                    </div>
                   )}
                 </div>
               ))}
@@ -131,25 +204,29 @@ const ShippingSettings: React.FC = () => {
           </h4>
           <ul className="list-disc pl-4 space-y-1 text-sm text-gray-700">
             <li>
-              <strong>Kho Mỹ:</strong> Chỉ sử dụng kho Oregon/New Hampshire. Không sử dụng
-              kho Texas/California
+              <strong>Kho Mỹ:</strong> Chỉ sử dụng kho Oregon/New Hampshire.
+              Không sử dụng kho Texas/California
             </li>
             <li>
-              <strong>Giao hàng:</strong> Chỉ giao hàng trực tiếp tại nội thành Hà Nội.
-              Không giao hàng tại TP.HCM
+              <strong>Giao hàng:</strong> Chỉ giao hàng trực tiếp tại nội thành
+              Hà Nội. Không giao hàng tại TP.HCM
             </li>
             <li>
-              <strong>Trách nhiệm:</strong> Chỉ tính từ khi đối tác về đến kho tại Hà Nội
+              <strong>Trách nhiệm:</strong> Chỉ tính từ khi đối tác về đến kho
+              tại Hà Nội
             </li>
             <li>
-              <strong>Không COD và bảo hiểm:</strong> Đơn hàng qua GHTK, GHN và Hà Nội
+              <strong>Không COD và bảo hiểm:</strong> Đơn hàng qua GHTK, GHN và
+              Hà Nội
             </li>
           </ul>
         </div>
       </div>
 
       <div className="text-right mt-4">
-        <Button type="primary">Lưu tất cả thay đổi</Button>
+        <Button type="primary" onClick={handleSaveChanges}>
+          Lưu tất cả thay đổi
+        </Button>
       </div>
     </div>
   );
