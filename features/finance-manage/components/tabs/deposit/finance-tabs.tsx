@@ -7,6 +7,7 @@ import DepositTable from "./deposit-table";
 import WithdrawTable from "../withdraw/withdraw-table";
 import BankAccountSetting from "../bank-setting/deposit-bank-setting";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import BankPartnerSetting from "../bank-partner/bank-partner";
 
 const FinanceDepositApprovalPage = () => {
   const searchParams = useSearchParams();
@@ -20,6 +21,8 @@ const FinanceDepositApprovalPage = () => {
     hasPermission("finance.approve_topup") && "deposit",
     hasPermission("finance.process_withdrawal") && "withdraw",
     "bank-settings",
+    "bank-partner",
+    "account-partner",
     // hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
     // hasPermission("finance.manage_debt") && "reconciliation",
   ].filter(Boolean) as string[];
@@ -46,16 +49,11 @@ const FinanceDepositApprovalPage = () => {
       </div>
     );
   }
-  console.log("active tab", activeTab);
-
   return (
     <div className="pt-4">
       <FinanceTabs
         activeKey={activeTab || ""}
         onChange={(key: string) => {
-          console.log("key", key);
-
-          // router.replace(pathname);
           setActiveTab(key);
         }}
         allowedTabs={allowedTabs}
@@ -66,6 +64,9 @@ const FinanceDepositApprovalPage = () => {
       )}
       {activeTab === "withdraw" && <WithdrawTable />}
       {activeTab === "bank-settings" && <BankAccountSetting />}
+      {activeTab === "bank-partner" && <BankPartnerSetting/>}
+      {activeTab === "account-partner" && <BankAccountSetting />}
+
       {/* {activeTab === "reconciliation" && (
           <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
         )} */}

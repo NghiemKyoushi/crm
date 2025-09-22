@@ -204,7 +204,8 @@
     "reconciliation": "Debt & Reconciliation",
     "approveDeposit": "Approve Deposit Transactions",
     "manualDeposit": "Manual Deposit",
-    "manualWithdraw": "Manual Deduction"
+    "manualWithdraw": "Manual Deduction",
+    "bankPartner": "Bank Partner"
   },
   "keywordPlaceholder": "Order ID, Customer ID...",
   "statusPlaceholder": "-- Status --",

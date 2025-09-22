@@ -7,6 +7,7 @@ import {
   faArrowUp,
   faUniversity,
   faBalanceScale,
+  faHandshake,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 
@@ -47,6 +48,15 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
         <span className="flex items-center gap-2">
           <FontAwesomeIcon icon={faUniversity} />
           {t("deposit.bankSettings")}
+        </span>
+      ),
+    },
+    {
+      key: "bank-partner",
+      label: (
+        <span className="flex items-center gap-2">
+          <FontAwesomeIcon icon={faHandshake} />
+          {t("deposit.bankPartner")}
         </span>
       ),
     },

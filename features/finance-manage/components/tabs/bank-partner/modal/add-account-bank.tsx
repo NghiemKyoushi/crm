@@ -4,6 +4,7 @@ import { getDetailBankCreateAccount } from "@/features/finance-manage/apis";
 import { BankInfo } from "@/features/user-management/components/customer-manage/modal-customer/tab/modal/modal-overview-add-bank";
 import { BankSettingAccountModel } from "@/types/deposit-type";
 import { Modal, Form, Input, Select, Button, Spin } from "antd";
+import TextArea from "antd/es/input/TextArea";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
@@ -29,6 +30,8 @@ export default function AddBankAccountModal({
         bank_name: bank?.name || "",
         daily_limit_vnd: +values.limit,
         is_active: values.status === "active" ? true : false,
+        description: values.description,
+        partner_name: values.partner_name,
       };
       onOk?.(request);
     } catch (error) {
@@ -64,6 +67,8 @@ export default function AddBankAccountModal({
             account_holder: data.account_holder,
             limit: data.daily_limit_vnd,
             status: data.is_active ? "active" : "inactive",
+            description: data.description,
+            partner_name: data.partner_name,
           });
         })
         .finally(() => setDetailLoading(false));
@@ -100,6 +105,7 @@ export default function AddBankAccountModal({
         initialValues={{
           status: "active",
         }}
+        style={{ marginBottom: 12 }}
       >
         <Form.Item
           label="Tên ngân hàng"
@@ -166,6 +172,24 @@ export default function AddBankAccountModal({
           style={{ marginBottom: 12 }}
         >
           <Input placeholder="VD: CTY TNHH ORDER SYSTEM" />
+        </Form.Item>
+
+        <Form.Item
+          label="Tên gợi nhớ"
+          name="partner_name"
+          rules={[{ required: true, message: "Vui lòng nhập tên gợi nhớ" }]}
+          style={{ marginBottom: 12 }}
+        >
+          <Input placeholder="" />
+        </Form.Item>
+
+        <Form.Item
+          label="Mô tả"
+          name="description"
+          rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+          style={{ marginBottom: 12 }}
+        >
+          <TextArea placeholder="" rows={2} minLength={500}/>
         </Form.Item>
 
         <Form.Item

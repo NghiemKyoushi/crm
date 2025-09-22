@@ -48,4 +48,11 @@ export function mapBankResponseToPaginatedResponse<T>(
     page_size: res.size,
   };
 }
+export function useBankAccountsPartner(params: BankDepositRequest) {
+  return useQuery<BankAccountListResponse>({
+    queryKey: ["bankAccountsPartner", params],
+    queryFn: () => getListBankCreateAccount(params),
+    // keepPreviousData: true, // giữ data cũ khi chuyển trang
+  });
+}
 

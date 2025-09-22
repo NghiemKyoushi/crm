@@ -68,4 +68,7 @@ export const API_TYPE_CONST = {
   INSURANCE_PACKAGE:`${FEATURE}/insurance-package`,
   FEE_SETTING:`${FEATURE}/fee-setting`,
   SHIPPING_METHOD:`${FEATURE}/shipping-method/setting`,
+  BANK_PARTNER: `${FEATURE}/admin/bank-accounts/topup`,
+  SURCHANGE_SETTING: `${FEATURE}/product/fee`
+
 } as const;

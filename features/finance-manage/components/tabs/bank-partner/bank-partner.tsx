@@ -8,20 +8,23 @@ import { BankAccount } from "@/types/deposit-type";
 import {
   mapBankResponseToPaginatedResponse,
   useBankAccounts,
+  useBankAccountsPartner,
 } from "@/features/finance-manage/hooks";
 import { ColumnsType } from "antd/es/table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addBankCreateAccount,
+  addBankCreateAccountPartner,
   addUserBankPermission,
   deleteBankCreateAccount,
   updateBankCreateAccount,
+  updateBankCreateAccountPartner,
 } from "@/features/finance-manage/apis";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 
-export default function BankAccountSetting() {
+export default function BankPartnerSetting() {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -36,14 +39,14 @@ export default function BankAccountSetting() {
   const pageSize = 10;
   const queryClient = useQueryClient();
 
-  const { data } = useBankAccounts({ page, size: pageSize, type: 1 });
+  const { data } = useBankAccountsPartner({ page, size: pageSize, type: 2 });
 
   const addMutation = useMutation({
-    mutationFn: addBankCreateAccount,
+    mutationFn: addBankCreateAccountPartner,
     onSuccess: () => {
       toast.success("Thêm tài khoản thành công!");
       queryClient.invalidateQueries({
-        queryKey: ["bankAccounts"],
+        queryKey: ["bankAccountsPartner"],
       });
     },
     onError: (err: any) => {
@@ -53,11 +56,11 @@ export default function BankAccountSetting() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, body }: { id: number; body: any }) =>
-      updateBankCreateAccount(id, body),
+      updateBankCreateAccountPartner(id, body),
     onSuccess: () => {
       toast.success("Cập nhật tài khoản thành công!");
       queryClient.invalidateQueries({
-        queryKey: ["bankAccounts"],
+        queryKey: ["bankAccountsPartner"],
       });
     },
     onError: (err: any) => {
@@ -70,7 +73,7 @@ export default function BankAccountSetting() {
     onSuccess: () => {
       toast.success("Xóa tài khoản thành công!");
       queryClient.invalidateQueries({
-        queryKey: ["bankAccounts"],
+        queryKey: ["bankAccountsPartner"],
       });
     },
     onError: (err: any) => {
@@ -148,6 +151,8 @@ export default function BankAccountSetting() {
         <div className="flex gap-2">
           <button
             onClick={() => {
+                console.log('record', record);
+                
               setEditingRecord(record);
               setOpen(true);
             }}
@@ -190,7 +195,7 @@ export default function BankAccountSetting() {
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
-          Cài đặt tài khoản ngân hàng Công ty
+          Cài đặt tài khoản ngân hàng đối tác
         </h2>
         <Button
           onClick={() => {

@@ -200,11 +200,14 @@
     },
     "depositTitle": "Lệnh nạp tiền",
     "withdraw": "Yêu cầu rút tiền",
-    "bankSettings": "Cài đặt Ngân hàng",
+    "bankSettings": "Tài khoản công ty",
     "reconciliation": "Công nợ & Đối soát",
     "approveDeposit": "Duyệt Giao dịch Nạp tiền",
     "manualDeposit": "Nạp tiền Thủ công",
-    "manualWithdraw": "Trừ tiền Thủ công"
+    "manualWithdraw": "Trừ tiền Thủ công",
+    "bankPartner": "Tài khoản đối tác",
+    "accountPartner": "Cài đặt Ngân hàng"
+
   },
   "keywordPlaceholder": "Mã lệnh, Mã KH...",
   "statusPlaceholder": "-- Trạng thái --",
