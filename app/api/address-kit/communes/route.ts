@@ -16,9 +16,9 @@ export async function GET(request: Request) {
         }
         const data = await res.json();
         return NextResponse.json(data, { status: 200 });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-        return NextResponse.json({ success: false, message: e?.message || 'Internal error' }, { status: 500 });
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Internal error';
+        return NextResponse.json({ success: false, message }, { status: 500 });
     }
 }
 

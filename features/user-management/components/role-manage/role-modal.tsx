@@ -4,6 +4,8 @@ import { Modal, Checkbox, Form, Input, Spin } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { getListPermiss } from "../../apis/staff-manage";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getPermissionLabel } from "@/utils/permission-mapping";
 
 interface RoleModalProps {
   open: boolean;
@@ -17,33 +19,45 @@ export interface RoleFormValues {
   permissions: string[];
 }
 
-// Map group_name sang tiếng Việt
-const CATEGORY_LABELS: Record<string, string> = {
-  ORDER_MANAGEMENT: "Quản lý Đơn hàng",
-  FINANCIAL_MANAGEMENT: "Quản lý Tài chính",
-  FINANCE: "Quản lý Tài chính",
-  USER_MANAGEMENT: "Quản lý Người dùng",
-  SYSTEM_ADMIN: "Cài đặt Hệ thống",
-  SYSTEM_SETTINGS: "Cài đặt Hệ thống",
+// Map group_name to i18n keys
+const CATEGORY_I18N_KEYS: Record<string, string> = {
+  ORDER_MANAGEMENT: "orders",
+  FINANCIAL_MANAGEMENT: "finance",
+  FINANCE: "finance",
+  USER_MANAGEMENT: "users",
+  SYSTEM_ADMIN: "system",
+  SYSTEM_SETTINGS: "system",
+  TELESALES: "telesales",
+  SALES_MANAGEMENT: "sales",
 };
 
-export function renderCategoryName(code: string) {
-  return CATEGORY_LABELS[code] || code || "Chưa phân loại";
+export function renderCategoryName(code: string, t: (key: string) => string) {
+  const i18nKey = CATEGORY_I18N_KEYS[code];
+  if (i18nKey) {
+    return t(`permissions.groups.${i18nKey}`);
+  }
+  return code || t('common.uncategorized');
 }
+
 
 // Map data từ API sang format cho Checkbox.Group
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapPermissionsFromApi(apiData: any[]) {
+function mapPermissionsFromApi(apiData: any[], t: (key: string) => string) {
   if (!Array.isArray(apiData)) return [];
 
   return apiData.map((group) => ({
     id: group.group_id,
-    category: renderCategoryName(group.group_name),
+    category: renderCategoryName(group.group_name, t),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    permissions: (group.permissions || []).map((p: any) => ({
-      label: p.description || p.permission || "Không rõ",
-      value: p.permission?.toString() || "",
-    })),
+    permissions: (group.permissions || []).map((p: any) => {
+      const permissionName = p.permission || p.name;
+      const label = getPermissionLabel(permissionName, t, p.description);
+
+      return {
+        label,
+        value: permissionName,
+      };
+    }),
   }));
 }
 
@@ -52,6 +66,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   const { control, handleSubmit, reset } = useForm<RoleFormValues>({
     defaultValues: {
       name: "",
@@ -77,7 +92,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
       setLoading(true);
       try {
         const res = await getListPermiss(); // API trả về [{ group_id, group_name, permissions: [] }]
-        setGrouped(mapPermissionsFromApi(res));
+        setGrouped(mapPermissionsFromApi(res, t));
       } catch (error) {
         console.error("Fetch permissions error:", error);
         setGrouped([]);
@@ -108,25 +123,25 @@ export const RoleModal: React.FC<RoleModalProps> = ({
 
   return (
     <Modal
-      title="Thêm Vai trò mới"
+      title={t('roles.modal.addTitle')}
       open={open}
       onCancel={onClose}
       onOk={handleSubmit(handleOk)}
-      okText="Thêm Vai trò"
-      cancelText="Hủy"
+      okText={t('roles.modal.addButton')}
+      cancelText={t('common.cancel')}
       destroyOnClose
       width={500}
     >
       <Form layout="vertical" className="">
         {/* Tên vai trò */}
-        <Form.Item label="Tên Vai trò" required className="!mb-0.5">
+        <Form.Item label={t('roles.form.name')} required className="!mb-0.5">
           <Controller
             name="name"
             control={control}
-            rules={{ required: "Tên vai trò là bắt buộc" }}
+            rules={{ required: t('roles.form.nameRequired') }}
             render={({ field, fieldState }) => (
               <>
-                <Input placeholder="VD: Quản lý Kho" {...field} />
+                <Input placeholder={t('roles.form.namePlaceholder')} {...field} />
                 {fieldState.error && (
                   <span className="text-red-500 text-sm">
                     {fieldState.error.message}
@@ -137,14 +152,14 @@ export const RoleModal: React.FC<RoleModalProps> = ({
           />
         </Form.Item>
 
-        <Form.Item label="Mô tả" required className="!mb-0.5">
+        <Form.Item label={t('roles.form.description')} required className="!mb-0.5">
           <Controller
             name="description"
             control={control}
-            rules={{ required: "Mô tả là bắt buộc" }}
+            rules={{ required: t('roles.form.descriptionRequired') }}
             render={({ field, fieldState }) => (
               <>
-                <Input placeholder="VD: Vai trò cho quản lý kho" {...field} />
+                <Input placeholder={t('roles.form.descriptionPlaceholder')} {...field} />
                 {fieldState.error && (
                   <span className="text-red-500 text-sm">
                     {fieldState.error.message}
@@ -154,7 +169,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             )}
           />
         </Form.Item>
-        <Form.Item label="Quyền hạn">
+        <Form.Item label={t('roles.form.permissions')}>
           <Controller
             name="permissions"
             control={control}
@@ -190,7 +205,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
                   ))
                 ) : (
                   <p className="text-gray-500">
-                    Không có quyền nào để hiển thị
+                    {t('roles.form.noPermissions')}
                   </p>
                 )}
               </div>

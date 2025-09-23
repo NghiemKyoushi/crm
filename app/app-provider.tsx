@@ -5,7 +5,6 @@ import React, { JSX, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundaryWrapper from '@/components/common/error-boundary';
 import { ToastContainer } from 'react-toastify';
-import { PermissionProvider } from '@/components/layout/PermissionContext';
 
 const queryClient = new QueryClient();
 

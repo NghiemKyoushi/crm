@@ -20,11 +20,10 @@ const FinanceDepositApprovalPage = () => {
   const allowedTabs = [
     hasPermission("finance.approve_topup") && "deposit",
     hasPermission("finance.process_withdrawal") && "withdraw",
-    "bank-settings",
-    "bank-partner",
-    "account-partner",
-    // hasPermission("FINANCE_MANAGE_BANK_ACCOUNTS") && "bank-settings",
-    // hasPermission("finance.manage_debt") && "reconciliation",
+    hasPermission("finance.manage_bank_accounts") && "bank-settings",
+    hasPermission("finance.manage_bank_permissions") && "bank-partner",
+    hasPermission("finance.manage_bank_accounts") && "account-partner",
+    hasPermission("finance.manage_debt") && "reconciliation",
   ].filter(Boolean) as string[];
 
   useEffect(() => {

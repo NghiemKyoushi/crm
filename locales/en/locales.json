@@ -26,6 +26,7 @@
     "userManagement": "User Management",
     "action": "Action System",
     "products": "Product Types & Fees",
+    "surcharge": "Surcharge Settings",
     "settings": "System Settings",
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
@@ -312,5 +313,152 @@
     "alert_rule_1": "Dream Cargo does NOT insure: fragile goods (ceramics, glass), goods without proof of origin, prohibited goods",
     "alert_rule_2": "Customers are required to record a video when unboxing as evidence",
     "alert_rule_3": "Complaints must be submitted within 24 hours after receiving goods"
+  },
+  "permissions": {
+    "groups": {
+      "orders": "Order Management",
+      "finance": "Financial Management",
+      "users": "User Management",
+      "system": "System Administration",
+      "telesales": "Telesales",
+      "sales": "Sales Management"
+    },
+    "items": {
+      "viewOrders": "View orders",
+      "viewAllOrders": "View all orders",
+      "createOrder": "Create order",
+      "editOrder": "Edit order",
+      "deleteOrder": "Delete order",
+      "updateOrderStatus": "Update order status",
+      "cancelOrder": "Cancel order",
+      "viewProducts": "View products",
+      "createProduct": "Create product",
+      "editProduct": "Edit product",
+      "deleteProduct": "Delete product",
+      "viewUsers": "View users",
+      "createUser": "Create user",
+      "editUser": "Edit user",
+      "deleteUser": "Delete user",
+      "viewUserList": "View user list",
+      "categorizeCustomers": "Categorize customers",
+      "manageStaffRoles": "Manage staff & roles",
+      "viewRoles": "View roles",
+      "createRole": "Create role",
+      "editRole": "Edit role",
+      "deleteRole": "Delete role",
+      "assignRole": "Assign role",
+      "viewPermissions": "View permissions",
+      "createPermission": "Create permission",
+      "editPermission": "Edit permission",
+      "deletePermission": "Delete permission",
+      "assignPermission": "Assign permission",
+      "approveTopup": "Approve topup",
+      "processWithdrawal": "Process withdrawal",
+      "viewAllTransactions": "View all transactions",
+      "manageDebt": "Manage debt",
+      "viewBankStats": "View bank statistics",
+      "restoreTransactions": "Restore transactions",
+      "processWithdrawRequests": "Process withdrawal requests",
+      "approveTopupRequests": "Approve topup requests",
+      "manualTopup": "Manual topup",
+      "manageBankAccounts": "Manage bank accounts",
+      "viewTransactionHistory": "View transaction history",
+      "manageBankPermissions": "Manage bank permissions",
+      "manageSalesOrders": "Manage sales orders",
+      "viewAssignedOrders": "View assigned orders",
+      "updateSalesOrderStatus": "Update sales order status",
+      "createOrderForCustomers": "Create orders for customers",
+      "manageAuctions": "Manage auctions",
+      "createAuction": "Create auction",
+      "updateAuction": "Update auction",
+      "viewAuctionResults": "View auction results",
+      "manageBids": "Manage bids",
+      "viewOwnSalary": "View own salary",
+      "viewOwnCommission": "View own commission",
+      "viewOwnPerformance": "View own performance",
+      "viewAssignedCustomers": "View assigned customers",
+      "manageAssignedCustomers": "Manage assigned customers",
+      "updateCustomerInfo": "Update customer info",
+      "addCustomerNotes": "Add customer notes",
+      "viewCustomerOrders": "View customer orders",
+      "accessSalesDashboard": "Access sales dashboard",
+      "viewSalesReports": "View sales reports",
+      "exportSalesData": "Export sales data",
+      "telesalesManager": "Telesales manager",
+      "telesalesMember": "Telesales member",
+      "systemAdmin": "System admin",
+      "viewSystemLogs": "View system logs",
+      "manageSystemConfig": "Manage system config",
+      "manageSystemBackup": "Manage system backup",
+      "viewAudit": "View audit",
+      "exportAudit": "Export audit data",
+      "viewReports": "View reports",
+      "createReport": "Create report",
+      "exportReport": "Export report",
+      "viewDashboard": "View dashboard",
+      "editSettings": "Edit settings"
+    }
+  },
+  "roles": {
+    "names": {
+      "admin": "Administrator",
+      "sales": "Sales Staff",
+      "telesalesManager": "Telesales Manager",
+      "telesalesMember": "Telesales Member",
+      "accounting": "Accounting",
+      "warehouse": "Warehouse Staff"
+    },
+    "descriptions": {
+      "admin": "Full system administrator with all permissions",
+      "sales": "Sales staff - Manage assigned orders, auctions and customers",
+      "telesalesManager": "Telesales manager - Full telesales management access",
+      "telesalesMember": "Telesales member - Manage assigned customer list",
+      "accounting": "Accounting staff - Manage finances and transactions",
+      "warehouse": "Warehouse staff - Manage inventory and shipping"
+    }
+  },
+  "roles": {
+    "list": {
+      "title": "Roles",
+      "addButton": "+ Add Role"
+    },
+    "modal": {
+      "addTitle": "Add New Role",
+      "addButton": "Add Role"
+    },
+    "form": {
+      "name": "Role Name",
+      "nameRequired": "Role name is required",
+      "namePlaceholder": "e.g. Warehouse Manager",
+      "description": "Description",
+      "descriptionRequired": "Description is required",
+      "descriptionPlaceholder": "e.g. Role for warehouse management",
+      "permissions": "Permissions",
+      "noPermissions": "No permissions available to display"
+    },
+    "permissions": {
+      "title": "Permissions for role:",
+      "saveButton": "Save Changes",
+      "selectRole": "Select a role to view details"
+    },
+    "tags": {
+      "superAdmin": "Super Admin"
+    },
+    "messages": {
+      "createSuccess": "New role created successfully!",
+      "createError": "Failed to create new role",
+      "updateSuccess": "Role updated successfully",
+      "updateError": "Failed to update role"
+    }
+  },
+  "common": {
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "error": "An error occurred",
+    "delete": "Delete",
+    "edit":"Edit",
+    "unknown": "Unknown",
+    "uncategorized": "Uncategorized"
   }
 }
