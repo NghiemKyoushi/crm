@@ -1,385 +1,134 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Table,
-  Button,
-  Tag,
-  Modal,
-  Form,
-  Input,
-  Select,
-  message,
-  InputNumber,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined } from "@ant-design/icons";
-import TableComponent from "@/components/TableComponent";
+import React from "react";
+import { Form, InputNumber, Button, Card, message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { faInfoCircle, faSave, faShield } from "@fortawesome/free-solid-svg-icons";
 
-import {
-  useListInsurance,
-  useCreateInsurance,
-  useUpdateInsurance,
-  useDeleteInsurance,
-} from "../hooks/fee-setting";
-import { InsuranceModel } from "@/types/fee-setting";
-import PopupConfirm from "@/components/PopupConfirm";
-import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
-
-const { Option } = Select;
+interface InsuranceFormValues {
+  usDefault: number;
+  jpDefault: number;
+  highValue: number;
+  freeDays: number;
+  storageFee: number;
+  depositRate: number;
+}
 
 const InsuranceSettings: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [currentItem, setCurrentItem] = useState<InsuranceModel | null>(null);
+  const [form] = Form.useForm<InsuranceFormValues>();
 
-  const [page, setPage] = useState(0);
-  const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
-  const { t } = useTranslation();
-  const [id, setId] = useState("");
-
-  const [form] = Form.useForm<InsuranceModel>();
-
-  // Query
-  const { data, isLoading } = useListInsurance();
-
-  // Mutations
-  const createMutation = useCreateInsurance();
-  const updateMutation = useUpdateInsurance();
-  const deleteMutation = useDeleteInsurance();
-
-  const handleChangePage = (pageNumber: number) => {
-    setPage(pageNumber - 1);
+  const onFinish = (values: InsuranceFormValues) => {
+    console.log("Form submitted:", values);
+    message.success("Lưu thành công!");
   };
-
-  // Thêm mới hoặc cập nhật
-  const handleSubmit = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        if (editMode && currentItem) {
-          updateMutation.mutate(
-            {
-              id: currentItem.id,
-              body: {
-                name: values.name,
-                description: values.description,
-                fee_percentage: +values.fee_percentage,
-                max_value_vnd: +values.max_value_vnd,
-                status: values.status,
-              },
-            },
-            {
-              onSuccess: () => {
-                message.success(t("insurance.confirm_update") + " " + t("common.success"));
-                setIsModalOpen(false);
-                form.resetFields();
-                setEditMode(false);
-                setCurrentItem(null);
-              },
-              onError: (err: any) =>
-                toast.error(
-                  err.response?.data?.localizedMessage || t("common.error")
-                ),
-            }
-          );
-        } else {
-          createMutation.mutate(
-            {
-              description: values.description,
-              fee_percentage: values.fee_percentage,
-              max_value_vnd: values.max_value_vnd,
-              name: values.name,
-              status: values.status,
-            },
-            {
-              onSuccess: () => {
-                message.success(t("insurance.confirm_add") + " " + t("common.success"));
-                setIsModalOpen(false);
-                form.resetFields();
-              },
-              onError: (err: any) =>
-                toast.error(
-                  err.response?.data?.localizedMessage || t("common.error")
-                ),
-            }
-          );
-        }
-      })
-      .catch(() => {});
-  };
-
-  // Xoá
-  const handleDelete = () => {
-    deleteMutation.mutate(+id, {
-      onSuccess: () => {
-        message.success(t("insurance.delete_title") + " " + t("common.success"));
-      },
-      onError: (err: any) =>
-        toast.error(err.response?.data?.localizedMessage || t("common.error")),
-    });
-  };
-
-  // Map API data -> UI data
-  const tableData: InsuranceModel[] =
-    data?.map((item: InsuranceModel) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      fee_percentage: item.fee_percentage ? item.fee_percentage : "-",
-      max_value_vnd: item.max_value_vnd ? item.max_value_vnd : 0,
-      status: item.status,
-    })) || [];
-
-  const columns: ColumnsType<InsuranceModel> = [
-    {
-      title: t("insurance.name"),
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: t("insurance.description"),
-      dataIndex: "description",
-      key: "description",
-      render: (val: string) => (
-        <div className="text-sm max-w-xs whitespace-pre-line break-words">
-          {val}
-        </div>
-      ),
-    },
-    {
-      title: t("insurance.fee"),
-      dataIndex: "fee_percentage",
-      key: "fee_percentage",
-    },
-    {
-      title: t("insurance.max_value"),
-      dataIndex: "max_value_vnd",
-      key: "max_value_vnd",
-      render: (val: string) => (
-        <span className="text-green-600 whitespace-pre-line">
-          {val && (+val).toLocaleString("vi-VN")} đ
-        </span>
-      ),
-    },
-    {
-      title: t("insurance.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        switch (status) {
-          case "ACTIVE":
-            return <Tag color="green">{t("insurance.status_active")}</Tag>;
-          case "INACTIVE":
-            return <Tag color="red">{t("insurance.status_inactive")}</Tag>;
-          case "DEFAULT":
-            return <Tag color="blue">{t("insurance.status_default")}</Tag>;
-          default:
-            return <Tag>{status}</Tag>;
-        }
-      },
-    },
-    {
-      title: t("common.action"),
-      key: "action",
-      render: (_, record: InsuranceModel) => {
-        return (
-          <div className="flex gap-2">
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => {
-                setEditMode(true);
-                setCurrentItem(record);
-                form.setFieldsValue({
-                  name: record.name,
-                  description: record.description,
-                  fee_percentage: record.fee_percentage,
-                  max_value_vnd: record.max_value_vnd,
-                  status: record.status,
-                });
-                setIsModalOpen(true);
-              }}
-            >
-              {t("common.edit")}
-            </Button>
-            <Button
-              danger
-              size="small"
-              onClick={() => {
-                setId(record.id.toString());
-                setOpenConfirmDeleteCate(true);
-              }}
-            >
-              {t("common.delete")}
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
-    <div className="bg-white rounded-lg ">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">{t("insurance.title")}</h3>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          className="!bg-green-500"
-          onClick={() => {
-            setEditMode(false);
-            form.resetFields();
-            form.setFieldsValue({ status: "ACTIVE" });
-            setIsModalOpen(true);
-          }}
-        >
-          {t("insurance.add")}
-        </Button>
-      </div>
-      {/* Alert */}
-      <div className="flex gap-3 p-4 mb-4 border-l-4 border-red-500 bg-red-50 rounded">
-        <FontAwesomeIcon
-          icon={faExclamationTriangle}
-          className="text-red-500 text-lg mt-1"
-        />
-        <div>
-          <h4 className="font-semibold text-red-600 mb-1">
-            {t("insurance.alert_title")}
-          </h4>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-            <li>{t("insurance.alert_rule_1")}</li>
-            <li>{t("insurance.alert_rule_2")}</li>
-            <li>{t("insurance.alert_rule_3")}</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Table */}
-      <TableComponent
-        columns={columns}
-        dataSource={tableData || []}
-        loading={isLoading}
-        rowHeight={45}
-        pageSize={10}
-        page={page}
-        onPageChange={handleChangePage}
-        response={undefined}
-        fontSize={14}
-        headerHeight={44}
-      />
-
-      {/* Modal */}
-      <Modal
-        title={editMode ? t("insurance.update") : t("insurance.add_new")}
-        open={isModalOpen}
-        onCancel={() => {
-          setIsModalOpen(false);
-          setEditMode(false);
-          setCurrentItem(null);
-        }}
-        footer={null}
-        centered
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label={t("insurance.name")}
-            rules={[
-              { required: true, message: t("insurance.name") + " " + t("common.required") },
-            ]}
-          >
-            <Input placeholder={t("insurance.name_placeholder")} />
-          </Form.Item>
-          <Form.Item name="description" label={t("insurance.description")}>
-            <Input.TextArea
-              rows={3}
-              placeholder={t("insurance.description_placeholder")}
-            />
-          </Form.Item>
-          <Form.Item
-            name="fee_percentage"
-            label={t("insurance.fee")}
-            rules={[{ required: true, message: t("insurance.fee") + " " + t("common.required") }]}
-          >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder={t("insurance.fee_placeholder")}
-              min={0}
-              step={0.1}
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }
-              parser={(value: any) => value.replace(/,/g, "")}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="max_value_vnd"
-            label={t("insurance.max_value")}
-            rules={[
-              { required: true, message: t("insurance.max_value") + " " + t("common.required") },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder={t("insurance.max_value_placeholder")}
-              min={0}
-              step={1000}
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }
-              parser={(value: any) => value.replace(/,/g, "")}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label={t("insurance.status")}
-            rules={[{ required: true, message: t("insurance.status") + " " + t("common.required") }]}
-          >
-            <Select>
-              <Option value="ACTIVE">{t("insurance.status_active")}</Option>
-              <Option value="INACTIVE">{t("insurance.status_inactive")}</Option>
-              <Option value="DEFAULT">{t("insurance.status_default")}</Option>
-            </Select>
-          </Form.Item>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditMode(false);
-                setCurrentItem(null);
-              }}
-            >
-              {t("insurance.cancel")}
-            </Button>
-            <Button
-              type="primary"
-              className="!bg-green-500"
-              loading={createMutation.isPending || updateMutation.isPending}
-              onClick={handleSubmit}
-            >
-              {editMode ? t("insurance.confirm_update") : t("insurance.confirm_add")}
-            </Button>
+    <div className="space-y-6">
+      {/* Cài đặt bảo hiểm */}
+      <Card
+        title={
+          <div className="flex items-center gap-2 font-bold text-lg">
+            <FontAwesomeIcon icon={faShield} className="w-5 h-5 " />
+            Cài Đặt Bảo Hiểm
           </div>
-        </Form>
-      </Modal>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Gói mặc định */}
+          <div className=" bg-blue-50 p-4 rounded-lg space-y-3 border border-blue-200">
+            <h3 className=" mb-4 font-semibold text-blue-800">
+              Gói Mặc Định (Không mua bảo hiểm)
+            </h3>
+            <p className="text-sm text-blue-600 mb-2">
+             Mức bồi thường tối đa khi mất hàng:
+            </p>
+            <Form form={form} layout="vertical" onFinish={onFinish}>
+              <Form.Item
+                label="Tuyến Mỹ (USD/sản phẩm)"
+                name="usDefault"
+                rules={[{ required: true, message: "Vui lòng nhập giá trị" }]}
+                className="!mb-1"
+              >
+                <InputNumber className="!w-full" min={0} />
+              </Form.Item>
 
-      <PopupConfirm
-        open={openConfirmDeleteCate}
-        type={"delete"}
-        title={t("insurance.delete_title")}
-        content={t("insurance.delete_content")}
-        onConfirm={handleDelete}
-        onCancel={() => setOpenConfirmDeleteCate(false)}
-        confirmText={t("common.delete")}
-        cancelText={t("common.cancel")}
-      />
+              <Form.Item
+              className="!mb-1"
+                label="Tuyến Nhật (VNĐ/sản phẩm)"
+                name="jpDefault"
+                rules={[{ required: true, message: "Vui lòng nhập giá trị" }]}
+              >
+                <InputNumber className="!w-full" min={0} />
+              </Form.Item>
+            </Form>
+          </div>
+
+          {/* Gói giá trị cao */}
+          <div className="bg-yellow-50 p-4 rounded-lg space-y-3 border border-yellow-200">
+            <h3 className=" mb-4 font-semibold text-yellow-800">Gói Hàng Giá Trị Cao</h3>
+            <p className="text-sm text-yellow-600 mb-2">
+              Bồi thường 100% giá trị sản phẩm (yêu cầu invoice).
+            </p>
+            <Form form={form} layout="vertical" onFinish={onFinish}>
+              <Form.Item
+                label="Phí bảo hiểm (% giá trị hàng)"
+                name="highValue"
+                rules={[{ required: true, message: "Vui lòng nhập giá trị" }]}
+              >
+                <InputNumber className="!w-full" min={0} max={100} />
+              </Form.Item>
+            </Form>
+          </div>
+        </div>
+      </Card>
+
+      {/* Quy định chung */}
+      <Card
+        title={
+          <div className="flex items-center gap-2 font-bold text-lg">
+            <FontAwesomeIcon icon={faInfoCircle} className="w-5 h-5 " />
+            Quy Định Chung
+          </div>
+        }
+        className="!mt-8"
+      >
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Form.Item
+              label="Thời gian lưu kho miễn phí (ngày)"
+              name="freeDays"
+              rules={[{ required: true, message: "Vui lòng nhập số ngày" }]}
+            >
+              <InputNumber className="!w-full" min={0} />
+            </Form.Item>
+
+            <Form.Item
+              label="Phí lưu kho sau đó (VNĐ/kg/ngày)"
+              name="storageFee"
+              rules={[{ required: true, message: "Vui lòng nhập phí lưu kho" }]}
+            >
+              <InputNumber className="!w-full" min={0} />
+            </Form.Item>
+
+            <Form.Item
+              label="Đặt cọc mua hộ tối thiểu (%)"
+              name="depositRate"
+              rules={[{ required: true, message: "Vui lòng nhập tỉ lệ" }]}
+            >
+              <InputNumber className="!w-full" min={0} max={100} />
+            </Form.Item>
+          </div>
+
+          
+        </Form>
+      </Card>
+      <div className="text-right border-t-gray-100 pt-6 mt-8">
+            <button
+              className="bg-blue-600 hover:bg-blue-700 !text-white !font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105"
+            >
+             <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> Lưu Tất Cả Thay Đổi
+            </button>
+          </div>
     </div>
   );
 };

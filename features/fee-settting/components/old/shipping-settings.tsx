@@ -12,7 +12,7 @@ import {
 import {
   useListFeeShippingDefault,
   useUpdateFeeShippingDefault,
-} from "../hooks/fee-setting";
+} from "../../hooks/fee-setting";
 import { ItemShippingList, ShippingMethod } from "@/types/fee-setting";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";

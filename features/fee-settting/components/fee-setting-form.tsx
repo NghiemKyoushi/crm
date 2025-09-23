@@ -2,14 +2,15 @@
 
 import React, { useEffect } from "react";
 import { Tabs, Alert, Form, InputNumber, Button, Input } from "antd";
-import InsuranceSettings from "./insurance-settings";
-import ShippingSettings from "./shipping-settings";
 import { Controller, useForm } from "react-hook-form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faConciergeBell,
   faFlag,
   faFlagUsa,
   faInfoCircle,
+  faPallet,
+  faShield,
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -20,6 +21,9 @@ import { on } from "node:stream";
 import { mapFormToData } from "@/types/fee-setting";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import ShippingSurchangeTable from "./shipping-surchange";
+import ShippingServiceForm from "./shipping-service-form";
+import InsuranceSettings from "./insurance-settings";
 
 export interface ShippingRouteData {
   id: number;
@@ -97,8 +101,17 @@ const FeeSettingsPage: React.FC = () => {
           data.fee_common_data.map((route) => (
             <div key={route.route_code} className="space-y-4">
               {/* Header tuyến */}
-              <div className={`py-1 border-b font-semibold  flex items-center gap-2 ${route.route_code === "US_VN" ? 'text-red-700': 'text-blue-700'}`}>
-               <FontAwesomeIcon icon={route.route_code === "US_VN" ? faFlagUsa: faFlag}/> TUYẾN {route.route_code.replace("_", " → ").toUpperCase()}
+              <div
+                className={`py-1 border-b font-semibold  flex items-center gap-2 ${
+                  route.route_code === "US_VN"
+                    ? "text-red-700"
+                    : "text-blue-700"
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={route.route_code === "US_VN" ? faFlagUsa : faFlag}
+                />{" "}
+                TUYẾN {route.route_code.replace("_", " → ").toUpperCase()}
               </div>
 
               {route.fee_types.map((feeType) => (
@@ -321,11 +334,11 @@ const FeeSettingsPage: React.FC = () => {
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
       {/* Tiêu đề */}
       <h3 className="text-xl font-semibold mb-4">
-        Quản lý Phí Dịch vụ Mặc định
+        Quản Lý Phí & Cài Đặt Dịch Vụ Toàn Diện
       </h3>
 
       {/* Alert Thông tin quan trọng */}
-      <Alert
+      {/* <Alert
         type="warning"
         showIcon
         message={
@@ -342,31 +355,46 @@ const FeeSettingsPage: React.FC = () => {
           </div>
         }
         className="!mb-6 !border-l-4 !border-yellow-400 !bg-yellow-50"
-      />
+      /> */}
 
-      {/* Tabs */}
-      <Tabs defaultActiveKey="1">
-        {/* Tab 1: Phí mặc định */}
-        <Tabs.TabPane tab="Phí mặc định" key="1">
-          {apiData && (
-            <DynamicShippingForm
-              control={control}
-              data={apiData}
-              onSubmit={onSubmit}
-            />
-          )}
-        </Tabs.TabPane>
+        <Tabs defaultActiveKey="1">
+      <Tabs.TabPane
+        key="1"
+        tab={
+          <span className="flex items-center gap-2">
+            <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+            Vận Chuyển & Phụ Thu
+          </span>
+        }
+      >
+        <ShippingSurchangeTable />
+      </Tabs.TabPane>
 
-        {/* Tab 2 */}
-        <Tabs.TabPane tab="Cài đặt bảo hiểm" key="2">
-          <InsuranceSettings />
-        </Tabs.TabPane>
+      <Tabs.TabPane
+        key="2"
+        tab={
+          <span className="flex items-center gap-2">
+            <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+            Dịch Vụ & Giao Hàng
+          </span>
+        }
+      >
+        <ShippingServiceForm />
+      </Tabs.TabPane>
 
-        {/* Tab 3 */}
-        <Tabs.TabPane tab="Đường vận chuyển" key="3">
-          <ShippingSettings />
-        </Tabs.TabPane>
-      </Tabs>
+      <Tabs.TabPane
+        key="3"
+        tab={
+          <span className="flex items-center gap-2">
+            <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+            Bảo Hiểm & Quy Định Chung
+          </span>
+        }
+      >
+        <InsuranceSettings />
+      </Tabs.TabPane>
+    </Tabs>
+
     </div>
   );
 };
