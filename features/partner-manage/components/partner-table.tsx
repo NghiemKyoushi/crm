@@ -8,108 +8,160 @@ import {
   Input,
   Button,
   Select,
-  Table,
   Typography,
-  Popconfirm,
+  Spin,
 } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faSearch,
+  faTrash,
   faUsers,
   faWallet,
   faYenSign,
 } from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
-
-const { Option } = Select;
+import {
+  useBankAccountsPartnerScreen,
+  useCreateNewMaterial,
+  useDeleteMaterial,
+  useListMaterial,
+  useListMaterialSumary,
+} from "../hooks/partner-manage-hook";
+import { ColumnsType } from "antd/es/table";
+import { FinanceSummary, PartnerTransaction } from "@/types/partner";
+import dayjs from "dayjs";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import PopupConfirm from "@/components/PopupConfirm";
 const { Title, Text } = Typography;
 
-interface PartnerRecord {
-  key: string;
-  name: string;
-  description: string;
-  total: number;
-  rate: number;
-  createdAt: string;
-}
-
-const dataSource: PartnerRecord[] = [
-  {
-    key: "1",
-    name: "Nhà cung cấp Tokyo ABC",
-    description: "Nguyên liệu đạt chất lượng cao",
-    total: 220000,
-    rate: 175,
-    createdAt: "15/01/2024",
-  },
-  {
-    key: "2",
-    name: "Osaka Materials Ltd",
-    description: "Nhà cung cấp vật liệu xây dựng",
-    total: 180000,
-    rate: 178,
-    createdAt: "10/01/2024",
-  },
-  {
-    key: "3",
-    name: "Kyoto Steel Co.",
-    description: "Thép và kim loại cao cấp",
-    total: 320000,
-    rate: 172,
-    createdAt: "08/01/2024",
-  },
-  {
-    key: "4",
-    name: "Đơn #AG-88673",
-    description: "Thép và kim loại cao cấp",
-    total: -320000,
-    rate: 180,
-    createdAt: "08/01/2024",
-  },
-];
-
 export default function JPYManagementPage() {
-  const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState("jpy");
-  const [page, setPage] = useState(0);
+  const { t } = useTranslation();
 
-  const columns = [
+  const [form] = Form.useForm();
+  const [activeTab, setActiveTab] = useState("JPY");
+  const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
+  const [openConfirmDeleteMaterial, setOpenConfirmDeleteMaterial] =
+    useState(false);
+  const [id, setId] = useState("");
+
+  const pageSize = 20;
+  const [search, setSearch] = useState<string>(""); // 👈 thêm search state
+
+  const { data, isLoading, isFetching } = useBankAccountsPartnerScreen({
+    page,
+    size: pageSize,
+    type: 2,
+  });
+  const { data: materialData, isLoading: isLoadingMaterial } = useListMaterial({
+    page,
+    page_size: 10,
+    search: search || undefined,
+    currencyCode: activeTab,
+  });
+
+  const { data: listSummary, isLoading: isLoadingSummary } =
+    useListMaterialSumary();
+  const deleteMaterialMutation = useDeleteMaterial();
+
+  const [options, setOptions] = useState<any[]>([]);
+
+  const createNewMaterialMutation = useCreateNewMaterial();
+
+  const handleAdd = async () => {
+    try {
+      const values = await form.validateFields();
+      createNewMaterialMutation.mutate(
+        {
+          partner_id: values.partner,
+          amount: values.amount,
+          currency_code: activeTab,
+          exchange_rate: values.rate,
+          note: values.note,
+          amount_type: "IN",
+        },
+        {
+          onSuccess: () => {
+            toast.success("Tạo nguyên liệu mới thành công!");
+            queryClient.invalidateQueries({
+              queryKey: ["listMaterial"],
+            });
+            form.resetFields();
+          },
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
+        }
+      );
+      // form.resetFields(); // reset sau khi thêm
+    } catch (err) {
+      console.log("Validation failed:", err);
+    }
+  };
+
+  const handleDelete = () => {
+    deleteMaterialMutation.mutate(
+      {
+        id: +id,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Xóa Website thành công!");
+          queryClient.invalidateQueries({
+            queryKey: ["listwebsite"],
+          });
+          setOpenConfirmDeleteMaterial(false);
+        },
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
+      }
+    );
+    setId("null");
+  };
+  const columns: ColumnsType<PartnerTransaction> = [
     {
       title: "Từ",
       dataIndex: "name",
-      render: (_: string, record: PartnerRecord) => (
+      render: (_: string, record: PartnerTransaction) => (
         <div>
-          <Text strong>{record.name}</Text>
+          <Text strong>{record.partner_name}</Text>
           <br />
           <Text type="secondary">{record.description}</Text>
         </div>
       ),
     },
     {
-      title: activeTab === "jpy" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
-      dataIndex: "total",
-      render: (value: number) => (
-        <span className={value >= 0 ? "text-green-600" : "text-red-600"}>
-          {value >= 0 ? "+" : ""}
-          {value.toLocaleString("ja-JP")} {activeTab === "jpy" ? "¥" : "$"}
-        </span>
-      ),
+      title: activeTab === "JPY" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
+      dataIndex: "amount",
     },
     {
       title: "Tỷ giá",
-      dataIndex: "rate",
-      render: (value: number) => `${value} đ`,
+      dataIndex: "exchange_rate",
+      render: (value: number) => `${value} VNĐ`,
     },
     {
       title: "Ngày Tạo",
-      dataIndex: "createdAt",
+      dataIndex: "created_at",
+      render: (value: string) => {
+        if (!value) return "-";
+        return dayjs(value).format("DD-MM-YYYY");
+      },
     },
     {
       title: "Hành động",
-      render: () => (
-        <Popconfirm title="Xóa bản ghi này?">
-          <DeleteOutlined className="text-red-500 cursor-pointer" />
-        </Popconfirm>
+      render: (_: any, record: PartnerTransaction) => (
+        <div onClick={() => {
+          // setId(record.);
+          setOpenConfirmDeleteMaterial(true);
+        }}>
+          <FontAwesomeIcon icon={faTrash} className="w-4 h-4 text-red-500" />
+          {/* <DeleteOutlined className="text-red-500 cursor-pointer" /> */}
+        </div>
       ),
     },
   ];
@@ -117,19 +169,36 @@ export default function JPYManagementPage() {
     setPage(pageNumber - 1);
   };
 
+  React.useEffect(() => {
+    if (data && data.content) {
+      setOptions((prev) => {
+        const newData = data.content.filter(
+          (item) => !prev.some((o) => o.value === item.id)
+        );
+        return [
+          ...prev,
+          ...newData.map((item) => ({
+            label: item.account_holder,
+            value: item.id,
+          })),
+        ];
+      });
+    }
+  }, [data]);
+
+  const summaryItem: FinanceSummary = listSummary?.find(
+    (item: FinanceSummary) => item.currency_code === activeTab
+  );
   return (
     <div className="p-6 space-y-6">
-      {/* Tabs thay cho Breadcrumb */}
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
         items={[
-          { key: "jpy", label: "Quản lý (JPY)" },
-          { key: "usd", label: "Quản lý (USD)" },
+          { key: "JPY", label: "Quản lý (JPY)" },
+          { key: "USD", label: "Quản lý (USD)" },
         ]}
       />
-
-      {/* Tổng quan */}
       <div>
         <Title level={4}>
           {activeTab === "jpy"
@@ -141,9 +210,14 @@ export default function JPYManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">Tổng Đối tác</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">
+                  {summaryItem && summaryItem.partner_count}
+                </p>
               </div>
-              <FontAwesomeIcon icon={faUsers} className="text-3xl opacity-90 w-4 h-4" />
+              <FontAwesomeIcon
+                icon={faUsers}
+                className="text-3xl opacity-90 w-4 h-4"
+              />
             </div>
           </Card>
 
@@ -154,7 +228,8 @@ export default function JPYManagementPage() {
                   Tổng Mua ({activeTab === "jpy" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
-                  0 {activeTab === "jpy" ? "¥" : "$"}
+                  {summaryItem && summaryItem.total_out}{" "}
+                  {activeTab === "JPY" ? "¥" : "$"}
                 </p>
               </div>
               <FontAwesomeIcon
@@ -171,7 +246,8 @@ export default function JPYManagementPage() {
                   Tổng còn lại ({activeTab === "jpy" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
-                  0 {activeTab === "jpy" ? "¥" : "$"}
+                  {summaryItem && summaryItem.total_in}{" "}
+                  {activeTab === "jpy" ? "¥" : "$"}
                 </p>
               </div>
               <FontAwesomeIcon
@@ -183,7 +259,6 @@ export default function JPYManagementPage() {
         </div>
       </div>
 
-      {/* Form thêm giao dịch */}
       <div className="p-6 bg-white rounded-lg shadow w-full">
         <Title level={5} className="!mb-4 !text-gray-800">
           Thêm Giao dịch Mua Nguyên liệu
@@ -191,10 +266,9 @@ export default function JPYManagementPage() {
 
         <Form
           form={form}
-          layout="vertical" // ✅ label hiển thị trên input
+          layout="vertical"
           className="grid  grid-cols-5 gap-4 !w-full"
         >
-          {/* Đối tác */}
           <Form.Item
             name="partner"
             label="Đối tác *"
@@ -202,26 +276,43 @@ export default function JPYManagementPage() {
             className="mb-0"
           >
             <Select
+              showSearch
               placeholder="-- Chọn đối tác --"
               className="!w-full !h-10"
+              options={options}
+              loading={isLoading}
+              notFoundContent={isLoading ? <Spin size="small" /> : null}
+              onPopupScroll={(e) => {
+                const target = e.target as HTMLElement;
+                if (
+                  target.scrollTop + target.offsetHeight >=
+                  target.scrollHeight - 10
+                ) {
+                  if (!isFetching) {
+                    setPage((p) => p + 1);
+                  }
+                }
+              }}
             />
           </Form.Item>
 
-          {/* Số tiền */}
           <Form.Item
             name="amount"
             label="Số tiền Yên *"
             rules={[{ required: true, message: "Nhập số tiền" }]}
             className="mb-0"
           >
-            <Input type="number" suffix="¥" className="!w-full !h-10" />
+            <Input
+              type="number"
+              suffix={activeTab === "JPY" ? "¥" : "$"}
+              className="!w-full !h-10"
+            />
           </Form.Item>
 
-          {/* Tỷ giá */}
           <Form.Item
             name="rate"
             label="Tỷ giá *"
-            initialValue={180}
+            // initialValue={180}
             rules={[{ required: true }]}
             className="mb-0"
           >
@@ -240,6 +331,7 @@ export default function JPYManagementPage() {
           >
             <Button
               type="primary"
+              onClick={() => handleAdd()}
               className="bg-blue-600 hover:!bg-blue-700 px-6 !h-10 !rounded-lg w-full"
             >
               + Thêm
@@ -250,19 +342,49 @@ export default function JPYManagementPage() {
 
       {/* Danh sách */}
       <div className="p-6 bg-white rounded-lg shadow">
-        <Title level={5}>Danh sách Đối tác và Công nợ</Title>
-        <TableComponent
-          columns={columns}
-          dataSource={dataSource || []}
-          rowHeight={45}
-          pageSize={10}
-          page={dataSource.length || 0}
-          onPageChange={handleChangePage}
-          response={undefined}
-          fontSize={14}
-          headerHeight={44}
-        />
+      <div className="flex items-center justify-between mb-4">
+        <Title level={5} className="!mb-0">
+          Danh sách Đối tác và Công nợ
+        </Title>
+
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Tìm kiếm đối tác..."
+            className="!w-64"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onPressEnter={(e) => setSearch((e.target as HTMLInputElement).value)}
+            suffix={<FontAwesomeIcon icon={faSearch} className="w-4 h-4"/>}
+            allowClear
+          />
+        </div>
       </div>
+        {!isLoadingMaterial && (
+          <TableComponent
+            columns={columns}
+            dataSource={
+              materialData.data !== undefined ? materialData.data : []
+            }
+            rowHeight={45}
+            pageSize={10}
+            page={0}
+            onPageChange={handleChangePage}
+            response={undefined}
+            fontSize={14}
+            headerHeight={44}
+          />
+        )}
+      </div>
+      <PopupConfirm
+        open={openConfirmDeleteMaterial}
+        type={"delete"}
+        title={"Xoá nguyên liệu"}
+        content={"Bạn có chắc muốn xoá nguyên liệu không ?"}
+        onConfirm={handleDelete}
+        onCancel={() => setOpenConfirmDeleteMaterial(false)}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+      />
     </div>
   );
 }
