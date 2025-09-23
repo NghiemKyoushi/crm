@@ -26,6 +26,7 @@
     "userManagement": "Quản lý Người dùng",
     "action": "Hệ thống Đấu giá",
     "products": "Loại sản phẩm & Phí",
+    "surcharge": "Phí phụ thu",
     "settings": "Cài đặt Hệ thống",
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
@@ -315,5 +316,152 @@
     "alert_rule_1": "Dream Cargo KHÔNG bảo hiểm: hàng dễ vỡ (gốm, thủy tinh), hàng không chứng minh được nguồn gốc, hàng cấm",
     "alert_rule_2": "Yêu cầu khách hàng quay video khi mở hàng để làm bằng chứng",
     "alert_rule_3": "Khiếu nại phải được gửi trong vòng 24h sau khi nhận hàng"
+  },
+  "permissions": {
+    "groups": {
+      "orders": "Quản lý Đơn hàng",
+      "finance": "Quản lý Tài chính",
+      "users": "Quản lý Người dùng",
+      "system": "Quản trị Hệ thống",
+      "telesales": "Telesales",
+      "sales": "Quản lý Bán hàng"
+    },
+    "items": {
+      "viewOrders": "Xem đơn hàng",
+      "viewAllOrders": "Xem tất cả đơn hàng",
+      "createOrder": "Tạo đơn hàng",
+      "editOrder": "Sửa đơn hàng",
+      "deleteOrder": "Xóa đơn hàng",
+      "updateOrderStatus": "Cập nhật trạng thái đơn hàng",
+      "cancelOrder": "Hủy đơn hàng",
+      "viewProducts": "Xem sản phẩm",
+      "createProduct": "Tạo sản phẩm",
+      "editProduct": "Sửa sản phẩm",
+      "deleteProduct": "Xóa sản phẩm",
+      "viewUsers": "Xem người dùng",
+      "createUser": "Tạo người dùng",
+      "editUser": "Sửa người dùng",
+      "deleteUser": "Xóa người dùng",
+      "viewUserList": "Xem danh sách người dùng",
+      "categorizeCustomers": "Phân loại khách hàng",
+      "manageStaffRoles": "Quản lý nhân viên & vai trò",
+      "viewRoles": "Xem vai trò",
+      "createRole": "Tạo vai trò",
+      "editRole": "Sửa vai trò",
+      "deleteRole": "Xóa vai trò",
+      "assignRole": "Gán vai trò",
+      "viewPermissions": "Xem quyền hạn",
+      "createPermission": "Tạo quyền hạn",
+      "editPermission": "Sửa quyền hạn",
+      "deletePermission": "Xóa quyền hạn",
+      "assignPermission": "Gán quyền hạn",
+      "approveTopup": "Duyệt nạp tiền",
+      "processWithdrawal": "Xử lý rút tiền",
+      "viewAllTransactions": "Xem tất cả giao dịch",
+      "manageDebt": "Quản lý công nợ",
+      "viewBankStats": "Xem thống kê ngân hàng",
+      "restoreTransactions": "Khôi phục giao dịch",
+      "processWithdrawRequests": "Xử lý yêu cầu rút tiền",
+      "approveTopupRequests": "Duyệt yêu cầu nạp tiền",
+      "manualTopup": "Nạp tiền thủ công",
+      "manageBankAccounts": "Quản lý tài khoản ngân hàng",
+      "viewTransactionHistory": "Xem lịch sử giao dịch",
+      "manageBankPermissions": "Quản lý quyền ngân hàng",
+      "manageSalesOrders": "Quản lý đơn hàng sales",
+      "viewAssignedOrders": "Xem đơn hàng được giao",
+      "updateSalesOrderStatus": "Cập nhật trạng thái đơn sales",
+      "createOrderForCustomers": "Tạo đơn cho khách hàng",
+      "manageAuctions": "Quản lý đấu giá",
+      "createAuction": "Tạo đấu giá",
+      "updateAuction": "Cập nhật đấu giá",
+      "viewAuctionResults": "Xem kết quả đấu giá",
+      "manageBids": "Quản lý đặt giá",
+      "viewOwnSalary": "Xem lương cá nhân",
+      "viewOwnCommission": "Xem hoa hồng cá nhân",
+      "viewOwnPerformance": "Xem hiệu suất cá nhân",
+      "viewAssignedCustomers": "Xem khách hàng được giao",
+      "manageAssignedCustomers": "Quản lý khách hàng được giao",
+      "updateCustomerInfo": "Cập nhật thông tin khách hàng",
+      "addCustomerNotes": "Thêm ghi chú khách hàng",
+      "viewCustomerOrders": "Xem đơn hàng khách hàng",
+      "accessSalesDashboard": "Truy cập dashboard sales",
+      "viewSalesReports": "Xem báo cáo bán hàng",
+      "exportSalesData": "Xuất dữ liệu bán hàng",
+      "telesalesManager": "Quản lý telesales",
+      "telesalesMember": "Nhân viên telesales",
+      "systemAdmin": "Quản trị hệ thống",
+      "viewSystemLogs": "Xem log hệ thống",
+      "manageSystemConfig": "Quản lý cấu hình hệ thống",
+      "manageSystemBackup": "Quản lý sao lưu hệ thống",
+      "viewAudit": "Xem kiểm toán",
+      "exportAudit": "Xuất dữ liệu kiểm toán",
+      "viewReports": "Xem báo cáo",
+      "createReport": "Tạo báo cáo",
+      "exportReport": "Xuất báo cáo",
+      "viewDashboard": "Xem tổng quan",
+      "editSettings": "Sửa cài đặt"
+    }
+  },
+  "roles": {
+    "names": {
+      "admin": "Quản trị viên",
+      "sales": "Nhân viên bán hàng",
+      "telesalesManager": "Quản lý telesales",
+      "telesalesMember": "Nhân viên telesales",
+      "accounting": "Kế toán",
+      "warehouse": "Nhân viên kho"
+    },
+    "descriptions": {
+      "admin": "Quản trị viên toàn quyền hệ thống",
+      "sales": "Nhân viên bán hàng - Quản lý đơn hàng, đấu giá và khách hàng được phân công",
+      "telesalesManager": "Quản lý telesales - Toàn quyền quản lý trang telesales",
+      "telesalesMember": "Nhân viên telesales - Quản lý khách hàng theo danh sách phân công",
+      "accounting": "Nhân viên kế toán - Quản lý tài chính và giao dịch",
+      "warehouse": "Nhân viên kho - Quản lý hàng hóa và vận chuyển"
+    }
+  },
+  "roles": {
+    "list": {
+      "title": "Các Vai trò",
+      "addButton": "+ Thêm vai trò"
+    },
+    "modal": {
+      "addTitle": "Thêm Vai trò mới",
+      "addButton": "Thêm Vai trò"
+    },
+    "form": {
+      "name": "Tên Vai trò",
+      "nameRequired": "Tên vai trò là bắt buộc",
+      "namePlaceholder": "VD: Quản lý Kho",
+      "description": "Mô tả",
+      "descriptionRequired": "Mô tả là bắt buộc",
+      "descriptionPlaceholder": "VD: Vai trò cho quản lý kho",
+      "permissions": "Quyền hạn",
+      "noPermissions": "Không có quyền nào để hiển thị"
+    },
+    "permissions": {
+      "title": "Quyền hạn cho vai trò:",
+      "saveButton": "Lưu thay đổi",
+      "selectRole": "Chọn một vai trò để xem chi tiết"
+    },
+    "tags": {
+      "superAdmin": "Super Admin"
+    },
+    "messages": {
+      "createSuccess": "Tạo vai trò mới thành công!",
+      "createError": "Tạo vai trò mới thất bại",
+      "updateSuccess": "Cập nhật vai trò thành công",
+      "updateError": "Cập nhật vai trò thất bại"
+    }
+  },
+  "common": {
+    "actions": "Hành động",
+    "confirm": "Xác nhận",
+    "cancel": "Huỷ",
+    "error": "Có lỗi xảy ra",
+    "delete": "Xoá",
+    "edit":"Chỉnh sửa",
+    "unknown": "Không rõ",
+    "uncategorized": "Chưa phân loại"
   }
 }
