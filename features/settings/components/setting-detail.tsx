@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Input, Button, List, Typography, InputNumber } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,13 +9,60 @@ import {
   faLayerGroup,
   faCog,
   faClock,
+  faBan,
+  faPhone,
+  faMapMarked,
+  faTeletype,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
+import { getListExchangRate, updateListExchangRate } from "../apis/setting";
+import { CurrencyRate } from "@/types/setting";
+import { toast } from "react-toastify";
 
 const { Text } = Typography;
 
 const SettingsDetail = () => {
   const router = useRouter();
+  const [rateList, setRateList] = useState<CurrencyRate[]>([]);
+  const [rates, setRates] = useState<CurrencyRate[]>(rateList);
+
+  const handleGetListRate = async () => {
+    const listRateExchange = await getListExchangRate();
+    console.log("listRateExchange", listRateExchange);
+    setRateList(listRateExchange);
+    setRates(listRateExchange);
+  };
+
+  useEffect(() => {
+    handleGetListRate();
+  }, []);
+
+  const handleChangeRate = (value: number | null, index: number) => {
+    setRates((prev) => {
+      const newRates = [...prev];
+      newRates[index] = {
+        ...newRates[index],
+        rate_to_vnd: value ?? 0,
+      };
+      return newRates;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      console.log("rates", rates);
+
+      await updateListExchangRate({
+        data: rates.map((r) => ({
+          id: r.id, // cần id
+          rate_to_vnd: r.rate_to_vnd,
+        })),
+      });
+      toast.success("Cập nhật tỉ giá thành công!");
+    } catch (e) {
+      console.error("Update failed", e);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
@@ -24,21 +71,39 @@ const SettingsDetail = () => {
         className="rounded-2xl shadow-md"
       >
         <Text strong>Tỷ giá ngoại tệ thống nhất</Text>
-        <div className="bg-blue-50 text-blue-600 p-3 rounded-md my-3 text-sm">
-          <strong>Lưu ý quan trọng:</strong> Tỷ giá này sẽ được áp dụng thống
-          nhất cho tất cả khách hàng và mọi giao dịch trong hệ thống. Không có
-          cài đặt tỷ giá riêng cho từng khách hàng.
+        <div className="bg-blue-50  border-l-4 border-blue-400  p-3 rounded-md my-3 text-sm">
+          <strong className=" text-blue-800">Lưu ý quan trọng:</strong> <br />
+          <span className=" text-blue-700">
+            Tỷ giá này sẽ được áp dụng thống nhất cho tất cả khách hàng và mọi
+            giao dịch trong hệ thống. Không có cài đặt tỷ giá riêng cho từng
+            khách hàng.{" "}
+          </span>
+          <br />
+          <span className=" text-blue-700">
+            Tỷ giá áp dụng theo ngày mua hàng và được cập nhật trên trang chủ
+            Dreamcargo.vn
+          </span>
         </div>
 
         <div className="flex gap-4 mb-3 w-full">
-          <div className="flex items-start flex-col gap-0 flex-1">
-            <p className="!mb-1">1 USD = (VND)</p>
-            <InputNumber defaultValue="25450" className="!w-full" />
-          </div>
-          <div className="flex items-start flex-col gap-0 flex-1">
-            <p className="!mb-1">1 JPY = (VND)</p>
-            <InputNumber defaultValue="162" className="!w-full" />
-          </div>
+          {rates &&
+            rates.map((item: CurrencyRate, index) => {
+              return (
+                <>
+                  <div
+                    key={item.currency_code}
+                    className="flex items-start flex-col gap-0 flex-1"
+                  >
+                    <p className="!mb-1">1 {item.currency_code} = (VND)</p>
+                    <InputNumber
+                      value={item.rate_to_vnd}
+                      onChange={(value) => handleChangeRate(value, index)}
+                      className="!w-full"
+                    />
+                  </div>
+                </>
+              );
+            })}
         </div>
 
         <div className="text-sm text-gray-500 mb-3">
@@ -63,8 +128,26 @@ const SettingsDetail = () => {
             </span>
           </Button>
         </div>
-        <div className="w-full flex justify-end mt-8 ">
-          <Button type="primary" className="!font-medium">
+        <div className="bg-green-50 border-l-4 border-green-400 rounded-lg p-3">
+          <p className="font-semibold text-green-700 !mb-1">
+          <FontAwesomeIcon icon={faPhone}/> Thông tin Liên hệ
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faMapMarked}/> N02-T3 Khu Ngoại Giao Đoàn, Xuân Tảo, Bắc Từ Liêm, Hà Nội
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faPhone}/> Hotline: <span className="font-bold">096.55.44444</span>
+          </p>
+          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
+          <FontAwesomeIcon icon={faTeletype}/> Zalo: <span className="font-bold">097.11.68686</span>
+          </p>
+        </div>
+        <div className="w-full flex justify-end mt-2 ">
+          <Button
+            type="primary"
+            className="!font-medium"
+            onClick={() => handleSave()}
+          >
             Lưu Tỷ giá
           </Button>
         </div>
@@ -78,12 +161,20 @@ const SettingsDetail = () => {
             Thiết lập các loại phí mặc định của hệ thống. Các chính sách phí
             riêng cho từng loại khách hàng sẽ ghi đè lên các cài đặt này.
           </div>
-          <ul className="list-disc list-inside text-gray-700 mb-4 text-sm">
-            <li>Phí mua hộ</li>
-            <li>Phí vận chuyển quốc tế</li>
-            <li>Phụ phí theo loại sản phẩm</li>
-            <li>Các loại phí khác…</li>
-          </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ul className="list-disc pl-5 text-gray-700">
+                        <li>Phí mua hộ Mỹ: 4%</li>
+                        <li>Phí mua hộ Nhật: từ 3%</li>
+                        <li>Phí vận chuyển quốc tế</li>
+                        <li>Phụ phí theo loại sản phẩm</li>
+                    </ul>
+                    <ul className="list-disc pl-5 text-gray-700">
+                        <li>Phí gia cố: 5.000 VNĐ/Kg</li>
+                        <li>Phí bảo hiểm: 3%</li>
+                        <li>Phí giao hàng Hà Nội</li>
+                        <li>Phí lưu kho: 1.000 VNĐ/kg/ngày</li>
+                    </ul>
+                </div>
         </div>
 
         <div className="absolute bottom-4 left-4 right-4">
@@ -103,21 +194,49 @@ const SettingsDetail = () => {
         <List
           itemLayout="horizontal"
           dataSource={[
-            { icon: faGlobe, text: "Quản lý Website được hỗ trợ", url:"/website-manage" },
-            { icon: faTags, text: "Quản lý Loại sản phẩm & Phí", url:"/website-manage" },
+            {
+              icon: faGlobe,
+              text: "Quản lý Website được hỗ trợ",
+              url: "/website-manage",
+            },
+            {
+              icon: faTags,
+              text: "Quản lý Loại sản phẩm & Phí",
+              url: "/website-manage",
+            },
           ]}
           className="!flex !flex-col !gap-1"
           renderItem={(item) => (
-            <List.Item  className="!cursor-pointer  !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
+            <List.Item className="!cursor-pointer  !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
               <List.Item.Meta
                 avatar={
-                  <FontAwesomeIcon className="w-4 h-4 mt-1 ml-2" icon={item.icon} />
+                  <FontAwesomeIcon
+                    className="w-4 h-4 mt-1 ml-2"
+                    icon={item.icon}
+                  />
                 }
-                title={<div onClick={() => router.push(item.url)} className="text-[16px]">{item.text}</div>}
+                title={
+                  <div
+                    onClick={() => router.push(item.url)}
+                    className="text-[16px]"
+                  >
+                    {item.text}
+                  </div>
+                }
               />
             </List.Item>
           )}
         />
+        <div className="bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
+          <p className="font-semibold text-red-700 !mb-1">
+            <FontAwesomeIcon icon={faBan}/> Hàng hóa Không nhận vận chuyển
+          </p>
+          <p className="text-sm text-red-700 leading-relaxed">
+            Hàng dạng xịt, hàng dễ cháy nổ, vũ khí, văn hóa phẩm đồi trụy, thiết
+            bị y tế, ô tô, xe máy, thuốc lá điện tử, vape, ma túy, ngoại tệ,
+            vàng, kim cương.
+          </p>
+        </div>
       </Card>
 
       <Card
@@ -135,7 +254,10 @@ const SettingsDetail = () => {
             <List.Item className="!cursor-pointer !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
               <List.Item.Meta
                 avatar={
-                  <FontAwesomeIcon className="w-4 h-4  mt-1 ml-2" icon={item.icon} />
+                  <FontAwesomeIcon
+                    className="w-4 h-4  mt-1 ml-2"
+                    icon={item.icon}
+                  />
                 }
                 title={<div className="text-[16px]">{item.text}</div>}
               />

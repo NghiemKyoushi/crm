@@ -69,7 +69,7 @@ export default function CustomerPage() {
         </span>
       ),
       children: <StaffManagePage />,
-      perm: "user.categorize_customers",
+      perm: "user.manage_staff_roles",
     },
     {
       key: "4",

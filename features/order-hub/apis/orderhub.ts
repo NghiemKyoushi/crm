@@ -5,3 +5,8 @@ export const getListOrder = async (params: {page: number, size: number}) => {
   const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
   return res.data.data;
 };
+
+export const getDataProductFromLink = async (link: string) => {
+  const res = await api.post(API_TYPE_CONST.GET_DATA_FROM_LINK, {url: link});
+  return res.data.data;
+};

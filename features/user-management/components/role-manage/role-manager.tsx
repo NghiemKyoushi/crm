@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import { Button, Checkbox, Tag } from "antd";
 import clsx from "clsx";
 import { renderCategoryName, RoleFormValues, RoleModal } from "./role-modal";
+import { getPermissionLabel } from "@/utils/permission-mapping";
+import { useTranslation } from "react-i18next";
 import {
   useCreateNewRole,
   useListRole,
@@ -28,6 +30,7 @@ interface PermissionGroup {
 }
 
 export const RoleManager: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const { data } = useListRole();
@@ -49,11 +52,11 @@ export const RoleManager: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Tạo vai trò mới thành công!");
+          toast.success(t('roles.messages.createSuccess'));
           queryClient.invalidateQueries({ queryKey: ["listRole"] });
         },
         onError: () => {
-          toast.error("Tạo vai trò mới thất bại");
+          toast.error(t('roles.messages.createError'));
         },
       }
     );
@@ -77,11 +80,11 @@ export const RoleManager: React.FC = () => {
         },
         {
           onSuccess: () => {
-            toast.success("Cập nhật vai trò thành công");
+            toast.success(t('roles.messages.updateSuccess'));
             queryClient.invalidateQueries({ queryKey: ["listRole"] });
           },
           onError: () => {
-            toast.error("Cập nhật vai trò thất bại");
+            toast.error(t('roles.messages.updateError'));
           },
         }
       );
@@ -96,7 +99,7 @@ export const RoleManager: React.FC = () => {
 
   const handleCallPer = async () => {
     const groups = await getListPermiss();
-    setPermissionGroups(groups);
+    setPermissionGroups(groups || []);
   };
 
   useEffect(() => {
@@ -109,13 +112,13 @@ export const RoleManager: React.FC = () => {
     <div className="flex gap-6 w-full">
       <div className="w-1/3 bg-white shadow rounded p-3">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold">Các Vai trò</h3>
+          <h3 className="font-semibold">{t('roles.list.title')}</h3>
           <Button
             size="middle"
             type="primary"
             onClick={() => setOpenModal(true)}
           >
-            + Thêm vai trò
+            {t('roles.list.addButton')}
           </Button>
         </div>
         <div className="space-y-1 max-h-[400px] overflow-y-auto">
@@ -133,7 +136,7 @@ export const RoleManager: React.FC = () => {
                 <span>{role.role_name}</span>
                 {role.role_name === "ADMIN" && (
                   <Tag color="red" className="ml-2">
-                    Super Admin
+                    {t('roles.tags.superAdmin')}
                   </Tag>
                 )}
               </div>
@@ -145,12 +148,12 @@ export const RoleManager: React.FC = () => {
           <>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">
-                Quyền hạn cho vai trò:{" "}
+                {t('roles.permissions.title')}{" "}
                 <span className="text-blue-600">{selectedRole.role_name}</span>
               </h3>
               {isSuperAdmin && (
                 <Tag color="red" className="font-semibold">
-                  Super Admin
+                  {t('roles.tags.superAdmin')}
                 </Tag>
               )}
             </div>
@@ -158,22 +161,28 @@ export const RoleManager: React.FC = () => {
               const roleGroup = selectedRole?.groups?.find(
                 (g: any) => g.id === group.group_id
               );
-              const activePermissions =
-                roleGroup?.permissions
-                  .filter((p: any) => p.active)
-                  .map((p: any) => p.name) || [];
+              const activePermissions = isSuperAdmin
+                ? group.permissions.map((p) => p.permission || p.name) // Show all permissions as active for ADMIN
+                : roleGroup?.permissions
+                    .filter((p: any) => p.active)
+                    .map((p: any) => p.name) || [];
 
               return (
                 <div key={group.group_id}>
                   <h4 className="font-medium !mb-3 !mt-3">
-                    {renderCategoryName(group.group_name)}
+                    {renderCategoryName(group.group_name, t)}
                   </h4>
-                  {group.permissions && (
+                  {group.permissions && group.permissions.length > 0 ? (
                     <Checkbox.Group
-                      options={group.permissions.map((p) => ({
-                        label: p.description,
-                        value: p.permission,
-                      }))}
+                      options={group.permissions.map((p) => {
+                        const permissionName = p.permission || p.name;
+                        const label = getPermissionLabel(permissionName, t, p.description);
+
+                        return {
+                          label,
+                          value: permissionName,
+                        };
+                      })}
                       value={activePermissions}
                       disabled={isSuperAdmin}
                       onChange={(checkedValues) => {
@@ -201,6 +210,10 @@ export const RoleManager: React.FC = () => {
                       }}
                       className="flex flex-col gap-3"
                     />
+                  ) : (
+                    <div className="text-gray-500 text-sm italic">
+                      {t('roles.form.noPermissions')}
+                    </div>
                   )}
                 </div>
               );
@@ -214,13 +227,13 @@ export const RoleManager: React.FC = () => {
                     hadnleUpdateRole(selectedRole);
                   }}
                 >
-                  Lưu thay đổi
+                  {t('roles.permissions.saveButton')}
                 </Button>
               </div>
             )}
           </>
         ) : (
-          <p>Chọn một vai trò để xem chi tiết</p>
+          <p>{t('roles.permissions.selectRole')}</p>
         )}
       </div>
 

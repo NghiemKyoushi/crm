@@ -11,6 +11,10 @@ import {
   Col,
   Divider,
 } from "antd";
+import { getDataProductFromLink } from "../../apis/orderhub";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { DataFromLink } from "@/types/orderhub";
 
 const { Option } = Select;
 
@@ -22,6 +26,7 @@ interface CreateOrderModalProps {
 export default function CreateOrderModal(props: CreateOrderModalProps) {
   const { isOpen, onCancel, onConfirm } = props;
   const [form] = Form.useForm();
+  const [idProduct, setIdProduct] = React.useState<number | null>(null);
 
   const handleOk = async () => {
     try {
@@ -33,6 +38,30 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   };
 
+  const { mutate, isPending } = useMutation<DataFromLink, Error, string>({
+    mutationFn: (link: string) => getDataProductFromLink(link),
+  });
+
+  const handleGetInfo = () => {
+    const linkValue = form.getFieldValue("link");
+    if (!linkValue) {
+      toast.warning("Vui lòng nhập link trước!");
+      return;
+    }
+
+    mutate(linkValue, {
+      onSuccess: (data: DataFromLink) => {
+        form.setFieldsValue({
+          productName: data?.product_name || "",
+        });
+        setIdProduct(data.id);
+        toast.success("Lấy thông tin sản phẩm thành công!");
+      },
+      onError: () => {
+        toast.error("Không thể lấy thông tin từ link!");
+      },
+    });
+  };
   return (
     <>
       <Modal
@@ -72,8 +101,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Link Sản phẩm"
                 name="link"
                 rules={[{ required: true, message: "Vui lòng nhập link!" }]}
+                className="!mb-1 "
               >
-                <Input placeholder="https://..." />
+                <Input
+                  placeholder="https://..."
+                  className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
+                  addonAfter={
+                    <Button type="dashed" onClick={handleGetInfo}>
+                      Get info
+                    </Button>
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -82,16 +120,24 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 rules={[
                   { required: true, message: "Vui lòng nhập tên sản phẩm!" },
                 ]}
+                className="!mb-1"
               >
-                <Input placeholder="VD: iPhone 15 Pro Max..." />
+                <Input
+                  className="!h-11"
+                  placeholder="VD: iPhone 15 Pro Max..."
+                />
               </Form.Item>
 
               <Form.Item
                 label="Loại sản phẩm"
                 name="category"
                 rules={[{ required: true, message: "Chọn loại sản phẩm!" }]}
+                className="!mb-1"
               >
-                <Select placeholder="-- Chọn loại sản phẩm --">
+                <Select
+                  className="!h-11"
+                  placeholder="-- Chọn loại sản phẩm --"
+                >
                   <Option value="phone">Điện thoại</Option>
                   <Option value="laptop">Laptop</Option>
                 </Select>
@@ -101,36 +147,38 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Phương thức"
                 name="method"
                 rules={[{ required: true, message: "Chọn phương thức!" }]}
-                className=" !w-full"
+                className=" !w-full !mb-1"
               >
                 <Radio.Group className="!flex !flex-row !w-full gap-4  ">
                   <Radio
+                    disabled
                     value="buy"
-                    className="flex-1 border border-gray-300 !p-5 rounded-md hover:border-blue-500"
+                    className="!text-blue-500 flex-1 !p-5 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
                   >
-                    Mua thẳng
-                  </Radio>
-                  <Radio
-                    value="auction"
-                    className="flex-1 border border-gray-300 !p-5 rounded-md hover:border-blue-500"
-                  >
-                    Đấu giá
+                    <div className="font-medium text-blue-800">Mua thẳng</div>
+                    <div className="text-xs text-blue-600">
+                      Phương thức duy nhất được hỗ trợ
+                    </div>
                   </Radio>
                 </Radio.Group>
               </Form.Item>
 
               <div className="flex flex-row gap-1">
-                <Form.Item className="!flex-1" label="Giá (¥)" name="priceY">
-                  <InputNumber className="!w-full" min={0} />
+                <Form.Item
+                  className="!flex-1 !mb-1"
+                  label="Giá (¥)"
+                  name="priceY"
+                >
+                  <InputNumber className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1"
                   label="Giá (VND)"
                   name="priceVnd"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
@@ -144,25 +192,33 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <Form.Item
                 label="Khách hàng"
                 name="customer"
+                className="!mb-1"
                 rules={[
                   { required: true, message: "Vui lòng chọn khách hàng!" },
                 ]}
               >
-                <Input placeholder="Tìm khách hàng theo mã hoặc tên..." />
+                <Input
+                  className="!w-full !h-11"
+                  placeholder="Tìm khách hàng theo mã hoặc tên..."
+                />
               </Form.Item>
 
               <div className="flex flex-row gap-1">
-                <Form.Item className="!flex-1" label="Phí DV (¥)" name="feeY">
-                  <InputNumber className="!w-full" min={0} />
+                <Form.Item
+                  className="!flex-1 !mb-1"
+                  label="Phí DV (¥)"
+                  name="feeY"
+                >
+                  <InputNumber className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1 "
                   label="Phí DV (VND)"
                   name="feeVnd"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
@@ -176,26 +232,29 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   rules={[
                     { required: true, message: "Vui lòng nhập tiền cọc!" },
                   ]}
-                  className="!flex-1"
+                  className="!flex-1 !mb-1 "
                 >
-                  <InputNumber className="!w-full" min={0} />
+                  <InputNumber className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
-                  className="!flex-1"
+                  className="!flex-1 !mb-1"
                   label="% Cọc"
                   name="depositPercent"
                 >
                   <Input
-                    className="!w-full"
+                    className="!w-full !h-11"
                     disabled
                     placeholder="Tự động tính"
                   />
                 </Form.Item>
               </div>
 
-              <Form.Item label="Ghi chú" name="note">
-                <Input.TextArea placeholder="Ghi chú thêm về đơn hàng..." />
+              <Form.Item label="Ghi chú" name="note" className="!mb-1">
+                <Input.TextArea
+                  className="!h-25"
+                  placeholder="Ghi chú thêm về đơn hàng..."
+                />
               </Form.Item>
 
               <div className="p-3 rounded bg-blue-50  mt-4">

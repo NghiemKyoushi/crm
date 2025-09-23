@@ -68,6 +68,7 @@ export interface DepositRequest {
 export interface BankDepositRequest {
   page?: number;
   size?: number;
+  type?:number;
 }
 
 export interface BankAccount {
@@ -115,6 +116,8 @@ export interface BankSettingAccountModel {
   daily_limit_vnd: number;
   is_active: boolean;
   id?:number;
+  partner_name?: string;
+  description?:string;
 }
 // Một bản ghi topup
 export interface withdrawItem {

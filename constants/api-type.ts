@@ -61,5 +61,14 @@ export const API_TYPE_CONST = {
   TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
   LIST_REGION: `${FEATURE}/admin/regions`,
-  LIST_ORDER: `${FEATURE}/admin/orders`
+  LIST_ORDER: `${FEATURE}/admin/orders`,
+  LIST_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/get-data`,
+  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/update-data`,
+  GET_DATA_FROM_LINK:`${FEATURE}/products/get-data-from-url`,
+  INSURANCE_PACKAGE:`${FEATURE}/insurance-package`,
+  FEE_SETTING:`${FEATURE}/fee-setting`,
+  SHIPPING_METHOD:`${FEATURE}/shipping-method/setting`,
+  BANK_PARTNER: `${FEATURE}/admin/bank-accounts/topup`,
+  SURCHANGE_SETTING: `${FEATURE}/product/fee`
+
 } as const;

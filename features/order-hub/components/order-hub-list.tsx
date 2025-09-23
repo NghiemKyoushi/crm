@@ -1,70 +1,27 @@
 import React, { useState } from "react";
-import { Table, Tag, Button, Input, Select, Form, Row, Col } from "antd";
+import { Tag, Button, Input, Select, Form } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faFilter,
+  faMagnifyingGlass,
+  faPlus,
+  faTruck,
+} from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
 import { useListOrder } from "../hooks/orderhub";
-import { Invoice } from "@/types/orderhub";
+import { Invoice, OrderStatus } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
 import dayjs from "dayjs";
+import ApproveOrderModal from "./modal/approve-order-modal";
+import CheckOrderModal from "./modal/check-order-modal";
+import TrackingModal from "./modal/tracking-modal";
 
 const { Option } = Select;
-
-interface Order {
-  key: string;
-  maDon: string;
-  khachHang: string;
-  ngayTao: string;
-  trangThai: string;
-  hanhDong: string;
-}
-
-const data: Order[] = [
-  {
-    key: "1",
-    maDon: "#DH-0810-1",
-    khachHang: "Nguyễn Văn A (SC244)",
-    ngayTao: "10/08/2025",
-    trangThai: "Chờ xác nhận",
-    hanhDong: "Xem chi tiết",
-  },
-  {
-    key: "2",
-    maDon: "#DH-0809-1",
-    khachHang: "Trần Thị B (SC231)",
-    ngayTao: "09/08/2025",
-    trangThai: "Chờ xác nhận",
-    hanhDong: "Xem chi tiết",
-  },
-  {
-    key: "3",
-    maDon: "#DH-0808-1",
-    khachHang: "Lê Văn C (SC144)",
-    ngayTao: "08/08/2025",
-    trangThai: "Chờ xác nhận",
-    hanhDong: "Xem chi tiết",
-  },
-  {
-    key: "4",
-    maDon: "#DH-0806-1",
-    khachHang: "Nguyễn Văn A (SC244)",
-    ngayTao: "06/08/2025",
-    trangThai: "Đã đặt cọc",
-    hanhDong: "Xem chi tiết",
-  },
-  {
-    key: "5",
-    maDon: "#DH-0805-1",
-    khachHang: "Trần Thị B (SC231)",
-    ngayTao: "05/08/2025",
-    trangThai: "Đang vận chuyển về Việt Nam",
-    hanhDong: "Xem chi tiết",
-  },
-];
 
 export default function OrderHub() {
   const [form] = Form.useForm();
@@ -72,6 +29,10 @@ export default function OrderHub() {
   const [openDetail, setOpenDetail] = useState(false);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
+  //check  function button
+  const [isOpenApproveOrder, setIsOpenApproveOrder] = useState(false);
+  const [isOpenCheckOrder, setIsOpenCheckOrder] = useState(false);
+  const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
 
   const { data: listOrder } = useListOrder({
     page,
@@ -91,55 +52,235 @@ export default function OrderHub() {
       title: "Mã Đơn",
       dataIndex: "invoice_no",
       key: "invoice_no",
-      render: (text) => <a className="text-blue-600 font-medium">{text}</a>,
+      render: (text, record) => (
+        <div>
+          <a className="text-blue-600 font-medium">#{text}</a>
+          <div className="text-xs text-gray-400">
+            {dayjs(record.created_at).format("DD/MM/YYYY")}
+          </div>
+        </div>
+      ),
     },
     {
       title: "Khách hàng",
-      dataIndex: "customer_name",
-      key: "customer_name",
+      key: "customer",
+      render: (_, record) => (
+        <div>
+          <div className="font-medium">{record.customer_name}</div>
+          <div className="text-xs text-gray-400">{record.customer_code}</div>
+        </div>
+      ),
     },
     {
-      title: "Tổng đơn hàng",
-      dataIndex: "amount",
+      title: "Sản phẩm",
+      key: "product",
+      render: (_, record) => (
+        <div>
+          <div>{record.product_name}</div>
+          <div className="text-xs text-gray-400">
+            {record.source} • {record.purchase_type}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Tracking",
+      key: "tracking",
+      render: (_, record) => (
+        <div>
+          {record.tracking_code ? (
+            <>
+              <a href="#" className="text-blue-500 font-medium hover:underline">
+                {record.tracking_code}
+              </a>
+              {record.weight && (
+                <div className="text-xs text-gray-400">
+                  Cân nặng: {record.weight}
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="text-gray-400">Chưa có</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Giá trị",
       key: "amount",
-       render: (value: number) =>
-        value && value.toLocaleString("vi-VN"),
+      render: (_, record) => (
+        <div>
+          <div>{record.amount.toLocaleString("vi-VN")} đ</div>
+          {record.deposit_amount && (
+            <div className="text-xs text-gray-500">
+              Cọc: {record.deposit_amount.toLocaleString("vi-VN")} đ
+            </div>
+          )}
+        </div>
+      ),
     },
-    {
-      title: "Ngày tạo",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
-      },
-    },
-    // {
-    //   title: "Người tạo",
-    //   dataIndex: "created_by",
-    //   key: "created_by",
-    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status) => {
-        let color = "default";
-        if (status === "ORDER_DELIVERED") color = "orange";
-        if (status === "Đã đặt cọc") color = "gold";
-        if (status === "Đang vận chuyển về Việt Nam") color = "blue";
-        return <Tag color={color}>{status === "ORDER_DELIVERED" ? "Đã vẫn chuyển": ""}</Tag>;
+      render: (status: OrderStatus) => {
+        let color = "";
+        let text = "";
+
+        switch (status) {
+          case "WAITING_APPROVAL":
+            color = "orange";
+            text = "Đợi duyệt";
+            break;
+          case "WAITING_DEPOSIT":
+            color = "gold";
+            text = "Đợi đặt cọc";
+            break;
+          case "PURCHASED":
+            color = "blue";
+            text = "Đã mua";
+            break;
+          case "ARRIVED_JP":
+            color = "purple";
+            text = "Đến kho Nhật";
+            break;
+          case "ARRIVED_VN":
+            color = "cyan";
+            text = "Đến kho Việt";
+            break;
+          case "CHECKING":
+            color = "green";
+            text = "Đang kiểm hàng";
+            break;
+          case "WAITING_PAYMENT":
+            color = "red";
+            text = "Đợi thanh toán";
+            break;
+          case "READY_TO_SHIP":
+            color = "geekblue";
+            text = "Sẵn chuyển";
+            break;
+          default:
+            color = "default";
+            text = status;
+        }
+
+        return <Tag color={color}>{text}</Tag>;
       },
     },
+
     {
       title: "Hành động",
-      dataIndex: "hanhDong",
-      key: "hanhDong",
-      render: () => (
-        <button className="!text-blue-600" onClick={() => setOpenDetail(true)}>
-          {"Xem chi tiết"}
-        </button>
-      ),
+      key: "actions",
+      render: (_, record: Invoice) => {
+        const actions: React.ReactNode[] = [];
+
+        // switch (record.status) {
+        //   case "WAITING_APPROVAL":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faCheck} />}
+            className="!bg-green-500 !text-white !border-0 !text-xs"
+            onClick={() => {
+              setIsOpenApproveOrder(true);
+            }}
+          >
+            Duyệt
+          </Button>
+        );
+        //   break;
+
+        // case "WAITING_DEPOSIT":
+        // chỉ có chi tiết + sửa
+        // break;
+
+        // case "PURCHASED":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faPlus} />}
+            className="!bg-purple-500 !text-white !border-0 !text-xs"
+            onClick={() => {
+              setIsOpenTrackingOrder(true);
+            }}
+          >
+            Tracking
+          </Button>
+        );
+        //   break;
+
+        // case "ARRIVED_JP":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faTruck} />}
+            className="!bg-indigo-500 !text-white !border-0 !text-xs"
+          >
+            Chuyển VN
+          </Button>
+        );
+        //   break;
+
+        // case "ARRIVED_VN":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            className="!bg-teal-500 !text-white !border-0 !text-xs"
+            onClick={() => setIsOpenCheckOrder(true)}
+          >
+            Kiểm hàng
+          </Button>
+        );
+        //   break;
+
+        // case "CHECKING":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faCheck} />}
+            className="!bg-green-500 !text-white !border-0 !text-xs"
+          >
+            Xong
+          </Button>
+        );
+        //   break;
+
+        // case "READY_TO_SHIP":
+        actions.push(
+          <Button
+            size="small"
+            icon={<FontAwesomeIcon icon={faTruck} />}
+            className="!bg-emerald-500 !text-white !border-0 !text-xs"
+          >
+            Giao
+          </Button>
+        );
+        // break;
+        // }
+
+        // nút mặc định luôn có
+        actions.push(
+          <Button
+            size="small"
+            className="!bg-blue-500 !text-white !border-0 !text-xs"
+            onClick={()=> setOpenDetail(true)}
+          >
+            Chi tiết
+          </Button>
+        );
+        actions.push(
+          <Button
+            size="small"
+            className="!bg-yellow-500 !text-white !border-0 !text-xs"
+          >
+            Sửa
+          </Button>
+        );
+
+        return <div className="flex gap-2 flex-wrap">{actions}</div>;
+      },
     },
   ];
   return (
@@ -222,6 +363,28 @@ export default function OrderHub() {
       <OrderDetailModal
         open={openDetail}
         onClose={() => setOpenDetail(false)}
+      />
+      <ApproveOrderModal
+        open={isOpenApproveOrder}
+        customerName="Nguyễn Văn A (SC244)"
+        orderCode="#DH-0810-1"
+        onCancel={() => setIsOpenApproveOrder(false)}
+        onSubmit={() => console.log("check")}
+      />
+      <CheckOrderModal
+        open={isOpenCheckOrder}
+        customerName="Nguyễn Văn A (SC244)"
+        feePerKg={10}
+        onCancel={() => setIsOpenCheckOrder(false)}
+        onSubmit={() => console.log("check")}
+        orderCode="#DH-0810-1"
+      />
+      <TrackingModal
+        customerName="Nguyễn Văn A (SC244)"
+        orderCode="#DH-0810-1"
+        onCancel={() => setIsOpenTrackingOrder(false)}
+        onSubmit={() => console.log("check")}
+        open={isOpenTrackingOrder}
       />
     </div>
   );

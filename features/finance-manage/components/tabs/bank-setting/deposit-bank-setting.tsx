@@ -36,7 +36,7 @@ export default function BankAccountSetting() {
   const pageSize = 10;
   const queryClient = useQueryClient();
 
-  const { data } = useBankAccounts({ page, size: pageSize });
+  const { data } = useBankAccounts({ page, size: pageSize, type: 1 });
 
   const addMutation = useMutation({
     mutationFn: addBankCreateAccount,
@@ -190,7 +190,7 @@ export default function BankAccountSetting() {
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
-          Cài đặt Tài khoản Ngân hàng Công ty
+          Cài đặt tài khoản ngân hàng Công ty
         </h2>
         <Button
           onClick={() => {

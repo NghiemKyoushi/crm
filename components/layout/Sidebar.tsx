@@ -16,6 +16,8 @@ import {
   faTags,
   faCog,
   faMoneyBill,
+  faHeadset,
+  faYenSign,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -23,32 +25,82 @@ import { usePermission } from "./PermissionContext";
 const { Sider } = Layout;
 
 export const menuPermissions: Record<string, string[]> = {
-  "/dashboard": [], 
-  "/orderhub": ["order.view_all", "order.update_status"],
+  // Dashboard - accessible to most users
+  "/dashboard": ["dashboard.view"],
+
+  // Order Management - view permissions for most, edit for operations
+  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create"],
+
+  // Finance Management - restricted to finance roles
   "/finance-management": [
     "finance.approve_topup",
-    "finance.manage_debt",
     "finance.process_withdrawal",
     "finance.view_all_transactions",
+    "finance.manage_debt",
+    "finance.approve_topup_requests",
+    "finance.process_withdrawal_requests",
+    "finance.manual_topup",
+    "finance.manage_bank_accounts",
+    "finance.view_transaction_history",
+    "finance.manage_bank_permissions"
   ],
-  "/user-management": ["user.view_list", "user.categorize_customers"],
-  "/auction": [], 
-  "/products": [], 
-  "/settings": ["system.admin", "system.superAdmin"],
-  "/sales-management": [],
-  "website-manage":[]
+
+  // User Management - HR and admin functions
+  "/user-management": [
+    "user.view_list",
+    "user.categorize_customers",
+    "user.manage_staff_roles",
+    "user.view",
+    "role.view",
+    "permission.view"
+  ],
+
+  // Telesales - manager or member access
+  "/telesales-manage": ["telesales.manager", "telesales.member"],
+
+  // Sales Management - sales team access
+  "/sales-management": [
+    "sales.manage_orders",
+    "sales.view_assigned_orders",
+    "sales.view_own_salary",
+    "sales.view_own_commission",
+    "sales.access_dashboard",
+    "sales.view_sales_reports",
+    "sales.manage_assigned_customers"
+  ],
+
+  // Partner Management - finance and admin
+  "/partner-manage": [
+    "finance.manage_bank_accounts",
+    "finance.manage_bank_permissions",
+    "system.admin"
+  ],
+
+  // System Settings - admin only
+  "/settings": ["system.admin", "settings.edit"],
+
+  // Website Management - admin and system config
+  "/website-manage": ["system.admin", "system.config"],
+
+  // Fee Setting - product management permissions
+  "/fee-setting": ["product.view", "product.create", "product.edit", "system.admin"],
+
+  // Surcharge - product and pricing
+  "/surchange": ["product.view", "product.create", "product.edit", "system.admin"]
 };
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
+  { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
-  { key: "/auction", icon: faGavel, label: "action" },
-  { key: "/surchange", icon: faTags, label: "products" },
+  { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
+  { key: "/fee-setting", icon: faTags, label: "products" },
+  { key: "/surchange", icon: faTags, label: "surcharge" },
+  { key: "/website-manage", icon: faGavel, label: "action" },
   { key: "/settings", icon: faCog, label: "settings" },
-
 ];
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();

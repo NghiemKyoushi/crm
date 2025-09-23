@@ -33,7 +33,7 @@ export const getListBankCreateAccount = async (params: BankDepositRequest) => {
 };
 
 export const addBankCreateAccount = async (body: BankSettingAccountModel) => {
-  const res = await api.post(API_TYPE_CONST.BANK_LIST_DEPOSIT, body);
+  const res = await api.post(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/withdrawal`, body);
   return res.data.data;
 };
 
@@ -41,7 +41,7 @@ export const updateBankCreateAccount = async (
   id: number,
   body: BankSettingAccountModel
 ) => {
-  const res = await api.put(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/${id}`, body);
+  const res = await api.put(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/withdrawal/${id}`, body);
   return res.data.data;
 };
 
@@ -127,5 +127,33 @@ export const getDetailTopup = async (id: number, type: TopupType) => {
   const res = await api.get(`${API_TYPE_CONST.TOPUP_DETAIL}${id}`, {
     params: { type },
   });
+  return res.data.data;
+};
+
+export const getListBankCreateAccountPartner = async (params: BankDepositRequest) => {
+  const res = await api.get(API_TYPE_CONST.BANK_LIST_DEPOSIT, { params });
+  return res.data.data;
+};
+
+export const addBankCreateAccountPartner = async (body: BankSettingAccountModel) => {
+  const res = await api.post(API_TYPE_CONST.BANK_PARTNER, body);
+  return res.data.data;
+};
+
+export const updateBankCreateAccountPartner = async (
+  id: number,
+  body: BankSettingAccountModel
+) => {
+  const res = await api.put(`${API_TYPE_CONST.BANK_PARTNER}/${id}`, body);
+  return res.data.data;
+};
+
+export const deleteBankCreateAccountPartner = async (id: number) => {
+  const res = await api.delete(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/${id}`);
+  return res.data.data;
+};
+
+export const getDetailBankCreateAccountPartner = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/${id}`);
   return res.data.data;
 };
