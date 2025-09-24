@@ -6,7 +6,7 @@ import {
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { createNewMaterial, deleteMaterial, getListMaterial, getMaterialSumary } from "../apis/partner-manage";
 import { getListStaffParams } from "@/types/staff-manage-type";
-import { getListMasterialParams, MasterialResponse, MaterialTransactionRequest } from "@/types/partner";
+import { getListMasterialParams, MaterialTransactionRequest } from "@/types/partner";
 
 export function useBankAccountsPartnerScreen(params: BankDepositRequest) {
   return useQuery<BankAccountListResponse>({
@@ -17,7 +17,7 @@ export function useBankAccountsPartnerScreen(params: BankDepositRequest) {
 }
 
 export const useListMaterial = (params: getListMasterialParams) => {
-  return useQuery<MasterialResponse>({
+  return useQuery({
     queryKey: ["listMaterial", params],
     queryFn: ()=>  getListMaterial(params),
     // staleTime: 1000 * 60, // cache 1 phút

@@ -1,16 +1,24 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { CreateModel, FormData, ItemShippingList } from "@/types/fee-setting";
+import {
+  CreateModel,
+  FormData,
+  ItemShippingList,
+  MaterialResponse,
+  ShippingConditionParams,
+} from "@/types/fee-setting";
 import {
   createNewInsurance,
   deleteInsurance,
   getFeeSettingDefault,
   getFeeShippingDefault,
   getListInsurance,
+  getMaterial,
   updateFeeSettingDefault,
   updateFeeShippingDefault,
   updateInsurance,
+  updateShippingFee,
 } from "../apis/fee-setting";
 
 // Query key
@@ -71,8 +79,7 @@ export const useListFeeSettingDefault = () => {
 export const useUpdateFeeSettingDefault = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ( body :FormData) =>
-      updateFeeSettingDefault( body),
+    mutationFn: (body: FormData) => updateFeeSettingDefault(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fee-setting"] });
     },
@@ -89,10 +96,26 @@ export const useListFeeShippingDefault = () => {
 export const useUpdateFeeShippingDefault = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ( body :ItemShippingList) =>
-      updateFeeShippingDefault( body),
+    mutationFn: (body: ItemShippingList) => updateFeeShippingDefault(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fee-shipping"] });
+    },
+  });
+};
+
+export const useListMaterial = () => {
+  return useQuery<MaterialResponse>({
+    queryKey: ["listMaterial"],
+    queryFn: getMaterial,
+  });
+};
+
+export const useUpdateShipping = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ShippingConditionParams) => updateShippingFee(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: INSURANCE_QUERY_KEY });
     },
   });
 };

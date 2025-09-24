@@ -231,7 +231,7 @@ export default function JPYManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
-                  Tổng Mua ({activeTab === "jpy" ? "JPY" : "USD"})
+                  Tổng Mua ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
                   {summaryItem && summaryItem.total_out}{" "}
@@ -249,11 +249,11 @@ export default function JPYManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
-                  Tổng còn lại ({activeTab === "jpy" ? "JPY" : "USD"})
+                  Tổng còn lại ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
                   {summaryItem && summaryItem.total_in}{" "}
-                  {activeTab === "jpy" ? "¥" : "$"}
+                  {activeTab === "JPY" ? "¥" : "$"}
                 </p>
               </div>
               <FontAwesomeIcon
