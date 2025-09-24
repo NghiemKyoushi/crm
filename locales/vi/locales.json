@@ -208,7 +208,6 @@
     "manualWithdraw": "Trừ tiền Thủ công",
     "bankPartner": "Tài khoản đối tác",
     "accountPartner": "Cài đặt Ngân hàng"
-
   },
   "keywordPlaceholder": "Mã lệnh, Mã KH...",
   "statusPlaceholder": "-- Trạng thái --",
@@ -255,7 +254,7 @@
     "cancel": "Huỷ",
     "error": "Có lỗi xảy ra",
     "delete": "Xoá",
-    "edit":"Chỉnh sửa"
+    "edit": "Chỉnh sửa"
   },
   "websiteManage": {
     "table": {
@@ -279,7 +278,9 @@
       "placeholderUrl": "Nhập URL",
       "region": "Khu vực",
       "requiredRegion": "Vui lòng chọn khu vực",
-      "placeholderRegion": "Chọn khu vực"
+      "placeholderRegion": "Chọn khu vực",
+      "currency": "Chọn đơn vị tiền tệ",
+      "requiredCurrency": "Chọn đơn vị tiền tệ"
     },
     "delete": {
       "title": "Xác nhận xoá website",
@@ -460,7 +461,7 @@
     "cancel": "Huỷ",
     "error": "Có lỗi xảy ra",
     "delete": "Xoá",
-    "edit":"Chỉnh sửa",
+    "edit": "Chỉnh sửa",
     "unknown": "Không rõ",
     "uncategorized": "Chưa phân loại"
   }

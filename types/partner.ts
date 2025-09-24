@@ -25,6 +25,14 @@ export type getListMasterialParams = {
   currencyCode: string;
 };
 
+export interface MasterialResponse {
+  data: PartnerTransaction[];
+  total_pages: number;
+  total_items: number;
+  current_page: number;
+  page_size: number;
+}
+
 export interface MaterialTransactionRequest {
   partner_id: number;
   amount: number;

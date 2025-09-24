@@ -23,7 +23,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
   children,
   loading = (
     <div className="flex items-center justify-center min-h-screen">
-      <Spin size="large" tip="Loading...">
+      <Spin size="large" tip="">
         <div />
       </Spin>
     </div>

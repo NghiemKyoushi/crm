@@ -10,7 +10,7 @@ import {
   useUpdateWebsite,
 } from "../hooks/web-manage";
 import { ColumnsType } from "antd/es/table";
-import {Website } from "@/types/website-manage";
+import { Website } from "@/types/website-manage";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -58,6 +58,7 @@ const WebsiteManageTable: React.FC = () => {
               name: values.name,
               domain: values.domain,
               region_id: values.region_id,
+              currency_code: values.currency_code,
             },
           },
           {
@@ -80,6 +81,7 @@ const WebsiteManageTable: React.FC = () => {
             domain: values.domain,
             name: values.name,
             region_id: values.region_id,
+            currency_code: values.currency_code,
           },
           {
             onSuccess: () => {
@@ -132,10 +134,11 @@ const WebsiteManageTable: React.FC = () => {
       title: t("websiteManage.table.region"),
       dataIndex: "region",
       key: "region",
-      render: (region_id: number, record: Website) => {     
-        console.log('regionList?.data', regionList?.data, record.region_id);
-           
-        if (record.region !== null && record.region?.name) return record.region.name;
+      render: (region_id: number, record: Website) => {
+        console.log("regionList?.data", regionList?.data, record.region_id);
+
+        if (record.region !== null && record.region?.name)
+          return record.region.name;
         const regionName = regionList?.data.find(
           (r) => r.id === record.region_id
         )?.name;
@@ -191,7 +194,11 @@ const WebsiteManageTable: React.FC = () => {
       />
 
       <Modal
-        title={editingWebsite ? t("websiteManage.modal.editTitle") : t("websiteManage.modal.addTitle")}
+        title={
+          editingWebsite
+            ? t("websiteManage.modal.editTitle")
+            : t("websiteManage.modal.addTitle")
+        }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         onOk={handleSave}
@@ -203,7 +210,9 @@ const WebsiteManageTable: React.FC = () => {
           <Form.Item
             label={t("websiteManage.form.name")}
             name="name"
-            rules={[{ required: true, message: t("websiteManage.form.requiredName") }]}
+            rules={[
+              { required: true, message: t("websiteManage.form.requiredName") },
+            ]}
           >
             <Input placeholder={t("websiteManage.form.placeholderName")} />
           </Form.Item>
@@ -211,15 +220,22 @@ const WebsiteManageTable: React.FC = () => {
           <Form.Item
             label="URL"
             name="domain"
-            rules={[{ required: true, message: t("websiteManage.form.requiredUrl") }]}
+            rules={[
+              { required: true, message: t("websiteManage.form.requiredUrl") },
+            ]}
           >
-            <Input placeholder={t("websiteManage.form.placeholderUrl")}/>
+            <Input placeholder={t("websiteManage.form.placeholderUrl")} />
           </Form.Item>
 
           <Form.Item
             label={t("websiteManage.form.region")}
             name="region_id"
-            rules={[{ required: true, message: t("websiteManage.form.requiredRegion") }]}
+            rules={[
+              {
+                required: true,
+                message: t("websiteManage.form.requiredRegion"),
+              },
+            ]}
           >
             <Select placeholder={t("websiteManage.form.placeholderRegion")}>
               {regionList?.data?.map((region) => (
@@ -227,6 +243,21 @@ const WebsiteManageTable: React.FC = () => {
                   {region.name}
                 </Select.Option>
               ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label={t("websiteManage.form.currency")}
+            name="currency_code"
+            rules={[
+              {
+                required: true,
+                message: t("websiteManage.form.requiredCurrency"),
+              },
+            ]}
+          >
+            <Select placeholder={t("websiteManage.form.placeholderCurrency")}>
+              <Select.Option value="JPY">JPY</Select.Option>
+              <Select.Option value="USD">USD</Select.Option>
             </Select>
           </Form.Item>
         </Form>

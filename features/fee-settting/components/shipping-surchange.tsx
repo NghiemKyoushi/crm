@@ -139,9 +139,15 @@ export default function ShippingSurchangeTable() {
       dataIndex: "valueUSD",
       width: 140,
       render: (val, record) => (
-        <Input
-          className="!w-full !h-9 !bg-gray-100 !text-center"
+        <InputNumber<string>
+          className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
           value={val}
+          step={0.01}
+          stringMode
+          formatter={(value) =>
+            value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+          }
+          parser={(value) => (value ? value.replace(/,/g, "") : "")}
           onChange={(value) => handleChange(record.key, "valueUSD", value ?? 0)}
         />
       ),
@@ -151,9 +157,15 @@ export default function ShippingSurchangeTable() {
       dataIndex: "priceVND",
       width: 140,
       render: (val, record) => (
-        <Input
-          className="!w-full !h-9 !bg-gray-100 !text-center"
+        <InputNumber<string>
+          className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
           value={val}
+          step={0.01}
+          stringMode
+          formatter={(value) =>
+            value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+          }
+          parser={(value) => (value ? value.replace(/,/g, "") : "")}
           onChange={(value) => handleChange(record.key, "priceVND", value ?? 0)}
         />
       ),
@@ -166,9 +178,27 @@ export default function ShippingSurchangeTable() {
         <Input
           className="w-full !text-red-600 font-bold !h-9 !bg-gray-100 !text-center"
           value={val}
-          onChange={(e) =>
-            handleChange(record.key, "surcharge", e.target.value)
-          }
+          onChange={(e) => {
+            const v = e.target.value.trim();
+            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+            if (!match) return;
+            handleChange(record.key, "surcharge", v);
+          }}
+          onBlur={(e) => {
+            const v = e.target.value.trim();
+            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+            let num = match?.[1] ?? "";
+            const suffix = match?.[2] ?? "";
+
+            if (num) {
+              const [intPart, decimalPart] = num.split(".");
+              num =
+                intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                (decimalPart ? "." + decimalPart : "");
+            }
+
+            handleChange(record.key, "surcharge", num + suffix);
+          }}
         />
       ),
     },

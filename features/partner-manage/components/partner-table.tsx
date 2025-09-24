@@ -10,6 +10,7 @@ import {
   Select,
   Typography,
   Spin,
+  InputNumber,
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -42,21 +43,22 @@ export default function JPYManagementPage() {
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState("JPY");
   const [page, setPage] = useState(0);
+  const [pageMaterial, setPageMaterial] = useState(0);
+
   const queryClient = useQueryClient();
   const [openConfirmDeleteMaterial, setOpenConfirmDeleteMaterial] =
     useState(false);
   const [id, setId] = useState("");
 
-  const pageSize = 20;
   const [search, setSearch] = useState<string>(""); // 👈 thêm search state
 
   const { data, isLoading, isFetching } = useBankAccountsPartnerScreen({
     page,
-    size: pageSize,
+    size: 20,
     type: 2,
   });
   const { data: materialData, isLoading: isLoadingMaterial } = useListMaterial({
-    page,
+    page: pageMaterial,
     page_size: 10,
     search: search || undefined,
     currencyCode: activeTab,
@@ -155,10 +157,12 @@ export default function JPYManagementPage() {
     {
       title: "Hành động",
       render: (_: any, record: PartnerTransaction) => (
-        <div onClick={() => {
-          // setId(record.);
-          setOpenConfirmDeleteMaterial(true);
-        }}>
+        <div
+          onClick={() => {
+            // setId(record.);
+            setOpenConfirmDeleteMaterial(true);
+          }}
+        >
           <FontAwesomeIcon icon={faTrash} className="w-4 h-4 text-red-500" />
           {/* <DeleteOutlined className="text-red-500 cursor-pointer" /> */}
         </div>
@@ -166,7 +170,7 @@ export default function JPYManagementPage() {
     },
   ];
   const handleChangePage = (pageNumber: number) => {
-    setPage(pageNumber - 1);
+    setPageMaterial(pageNumber - 1);
   };
 
   React.useEffect(() => {
@@ -189,6 +193,8 @@ export default function JPYManagementPage() {
   const summaryItem: FinanceSummary = listSummary?.find(
     (item: FinanceSummary) => item.currency_code === activeTab
   );
+  console.log(materialData);
+
   return (
     <div className="p-6 space-y-6">
       <Tabs
@@ -271,7 +277,7 @@ export default function JPYManagementPage() {
         >
           <Form.Item
             name="partner"
-            label="Đối tác *"
+            label="Đối tác"
             rules={[{ required: true, message: "Chọn đối tác" }]}
             className="mb-0"
           >
@@ -298,25 +304,39 @@ export default function JPYManagementPage() {
 
           <Form.Item
             name="amount"
-            label="Số tiền Yên *"
+            label="Số tiền Yên"
             rules={[{ required: true, message: "Nhập số tiền" }]}
-            className="mb-0"
+            className="mb-0 !w-full !h-10"
           >
-            <Input
-              type="number"
-              suffix={activeTab === "JPY" ? "¥" : "$"}
-              className="!w-full !h-10"
+            <InputNumber<string>
+              className="!w-full [&_.ant-input-number-input]:!h-10 [&_.ant-input-number-input]:!py-0"
+              step={0.01}
+              stringMode
+              formatter={(value) =>
+                value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+              }
+              parser={(value) => (value ? value.replace(/,/g, "") : "")}
+              addonAfter={activeTab === "JPY" ? "¥" : "$"}
             />
           </Form.Item>
 
           <Form.Item
             name="rate"
-            label="Tỷ giá *"
+            label="Tỷ giá"
             // initialValue={180}
             rules={[{ required: true }]}
             className="mb-0"
           >
-            <Input type="number" suffix="đ" className="!w-full !h-10" />
+            <InputNumber<string>
+              className="!w-full [&_.ant-input-number-input]:!h-10 [&_.ant-input-number-input]:!py-0"
+              step={0.01}
+              stringMode
+              formatter={(value) =>
+                value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+              }
+              parser={(value) => (value ? value.replace(/,/g, "") : "")}
+              addonAfter="đ"
+            />
           </Form.Item>
 
           {/* Ghi chú */}
@@ -342,34 +362,36 @@ export default function JPYManagementPage() {
 
       {/* Danh sách */}
       <div className="p-6 bg-white rounded-lg shadow">
-      <div className="flex items-center justify-between mb-4">
-        <Title level={5} className="!mb-0">
-          Danh sách Đối tác và Công nợ
-        </Title>
+        <div className="flex items-center justify-between mb-4">
+          <Title level={5} className="!mb-0">
+            Danh sách Đối tác và Công nợ
+          </Title>
 
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Tìm kiếm đối tác..."
-            className="!w-64"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onPressEnter={(e) => setSearch((e.target as HTMLInputElement).value)}
-            suffix={<FontAwesomeIcon icon={faSearch} className="w-4 h-4"/>}
-            allowClear
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Tìm kiếm đối tác..."
+              className="!w-64"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onPressEnter={(e) =>
+                setSearch((e.target as HTMLInputElement).value)
+              }
+              suffix={<FontAwesomeIcon icon={faSearch} className="w-4 h-4" />}
+              allowClear
+            />
+          </div>
         </div>
-      </div>
         {!isLoadingMaterial && (
           <TableComponent
             columns={columns}
             dataSource={
-              materialData.data !== undefined ? materialData.data : []
+              materialData?.data !== undefined ? materialData.data : []
             }
             rowHeight={45}
             pageSize={10}
-            page={0}
+            page={(materialData && materialData?.current_page + 1) || 0}
             onPageChange={handleChangePage}
-            response={undefined}
+            response={materialData}
             fontSize={14}
             headerHeight={44}
           />

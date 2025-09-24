@@ -113,10 +113,10 @@ const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress 
         </p>
 
         <div className="flex justify-end gap-2 pt-3">
-          <button  onClick={onClose}>Hủy</button>
-          <button >
+          <Button  onClick={onClose}>Hủy</Button>
+          <Button type="primary">
             Lưu địa chỉ
-          </button>
+          </Button>
         </div>
       </Form>
     </Modal>

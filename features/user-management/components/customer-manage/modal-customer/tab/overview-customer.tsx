@@ -64,7 +64,7 @@ export default function OverviewTab(props: OverviewTabProps) {
     }
   };
 
-  const handleChangeDefaultBank = () => {    
+  const handleChangeDefaultBank = () => {
     if (selectedDefaultBank) {
       handleSetDefaultBank(selectedDefaultBank.toString());
       setIsOpenSetDefaultBank(false);
@@ -80,31 +80,6 @@ export default function OverviewTab(props: OverviewTabProps) {
 
   return (
     <>
-      {/* <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="bg-white shadow rounded p-4 text-center">
-          <div className="text-gray-500 text-sm">
-            {t("customerManage.customerOverview.totalOrders")}
-          </div>
-          <div className="font-bold text-lg">{customer.total_orders}</div>
-        </div>
-        <div className="bg-white shadow rounded p-4 text-center mr-[1px]">
-          <div className="text-gray-500 text-sm">
-            {t("customerManage.customerOverview.totalSpent")}
-          </div>
-          <div className="font-bold text-lg">
-            {customer.total_expenses.toLocaleString()}đ
-          </div>
-        </div>
-        <div className="bg-white shadow rounded p-4 text-center">
-          <div className="text-gray-500 text-sm">
-            {t("customerManage.customerOverview.currentDebt")}
-          </div>
-          <div className="font-bold text-lg text-red-600">
-            {customer.debt_amount && customer.debt_amount.toLocaleString()}đ
-          </div>
-        </div>
-      </div> */}
-
       <div className="flex flex-row justify-center gap-4">
         {/* Thông tin địa chỉ */}
         <div className="!flex-7/12">
@@ -113,11 +88,11 @@ export default function OverviewTab(props: OverviewTabProps) {
               <span className="font-semibold">
                 {t("customerManage.customerOverview.addressBook")}
               </span>
-              <div>
+              <div className="flex gap-2">
                 <Button
                   onClick={() => setIsOpenAddress(true)}
-                  type="link"
-                  className="text-blue-600 p-0"
+                  type="dashed"
+                  className="!text-blue-600 p-0"
                 >
                   {t("customerManage.customerOverview.addAddress")}
                 </Button>
@@ -125,8 +100,8 @@ export default function OverviewTab(props: OverviewTabProps) {
                 {customer.shipping_addresses.length > 0 && (
                   <Button
                     onClick={() => setIsOpenSetDefault(true)}
-                    type="link"
-                    className="text-blue-600 p-0"
+                    type="dashed"
+                    className="!text-blue-600 p-0"
                   >
                     +{t("customerManage.customerOverview.addDefaultAddress")}
                   </Button>
@@ -158,24 +133,26 @@ export default function OverviewTab(props: OverviewTabProps) {
               <span className="font-semibold">
                 {t("customerManage.customerOverview.bankAccount")}
               </span>
-              <Button
-                type="link"
-                onClick={() => setIsOpenBank(true)}
-                className="text-blue-600 p-0"
-              >
-                {t("customerManage.customerOverview.addBankAccount")}
-              </Button>
-
-              {customer.bank_accounts.length > 0 && (
+              <div className="flex gap-2">
                 <Button
-                  onClick={() => setIsOpenSetDefaultBank(true)}
-                  type="link"
-                  className="text-blue-600 p-0"
+                  type="dashed"
+                  onClick={() => setIsOpenBank(true)}
+                  className="!text-blue-600 p-0"
                 >
-                  {/* +{t("customerManage.customerOverview.addDefaultAddress")} */}
-                  + Thêm tài khoản mặc định
+                  {t("customerManage.customerOverview.addBankAccount")}
                 </Button>
-              )}
+
+                {customer.bank_accounts.length > 0 && (
+                  <Button
+                    onClick={() => setIsOpenSetDefaultBank(true)}
+                    type="dashed"
+                    className="!text-blue-600 p-0"
+                  >
+                    {/* +{t("customerManage.customerOverview.addDefaultAddress")} */}
+                    + Thêm tài khoản mặc định
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="text-sm">
               {customer.bank_accounts.length > 0 &&
@@ -220,8 +197,8 @@ export default function OverviewTab(props: OverviewTabProps) {
               </div>
             </div>
             <Button
-              type="link"
-              className="text-blue-600 p-0"
+              type="dashed"
+              className="!text-blue-600 p-0"
               onClick={() => setIsOpenSaleAdd(true)}
             >
               {t("customerManage.customerOverview.change")}
@@ -250,22 +227,28 @@ export default function OverviewTab(props: OverviewTabProps) {
         onCancel={() => setIsOpenSetDefault(false)}
         onOk={handleChangeDefaultAddress}
         centered
+        okText="Xác nhận"
+        cancelText="Hủy"
       >
-        <div className="!max-h-72 !min-h-72 overflow-y-auto">
+        <div className="!max-h-72 !min-h-72 overflow-y-auto !w-full">
           <Radio.Group
             onChange={(e) => setSelectedDefaultAddress(e.target.value)}
             value={selectedDefaultAddress}
-            className="!flex !flex-col !gap-3"
+            className="!flex !flex-col !gap-3 !w-full"
           >
             {customer.shipping_addresses.map((addr) => (
-              <Radio key={addr.id} value={addr.id} className="!w-full">
-                <div className="border border-gray-400 rounded-lg p-3 hover:shadow-md transition-all duration-200 cursor-pointer">
+              <label
+                key={addr.id}
+                className="flex items-start gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-md transition-all duration-200 cursor-pointer w-full"
+              >
+                <Radio value={addr.id} className="" />
+                <div className="flex flex-col">
                   <div className="font-medium text-sm">{addr.address}</div>
                   <div className="text-xs text-gray-500 mt-1">
                     {addr.phone_number}
                   </div>
                 </div>
-              </Radio>
+              </label>
             ))}
           </Radio.Group>
         </div>
@@ -277,28 +260,33 @@ export default function OverviewTab(props: OverviewTabProps) {
         onCancel={() => setIsOpenSetDefaultBank(false)}
         onOk={handleChangeDefaultBank}
         centered
+        okText="Xác nhận"
+        cancelText="Hủy"
       >
         <div className="!max-h-72 !min-h-72 overflow-y-auto">
           <Radio.Group
             onChange={(e) => {
-              console.log('e', e.target);
-              
-              setSelectedDefaultBank(e.target.value)
+              console.log("e", e.target);
+
+              setSelectedDefaultBank(e.target.value);
             }}
             value={selectedDefaultBank}
             className="!flex !flex-col !gap-3"
           >
             {customer.bank_accounts.map((addr) => (
-              <Radio key={addr.id} value={addr.id} className="!w-full">
-                <div className="border border-gray-400 rounded-lg p-2 hover:shadow-md transition-all duration-200 cursor-pointer">
+              <label
+                key={addr.id}
+                className="flex items-start gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-md transition-all duration-200 cursor-pointer w-full"
+              >
+                <Radio key={addr.id} value={addr.id} className="!w-full">
                   <div className="font-medium text-sm">
                     {addr.account_holder_name} – {addr.bank_name}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
                     {addr.account_number}
                   </div>
-                </div>
-              </Radio>
+                </Radio>
+              </label>
             ))}
           </Radio.Group>
         </div>
