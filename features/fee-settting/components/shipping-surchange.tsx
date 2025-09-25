@@ -76,12 +76,12 @@ export default function ShippingSurchangeTable() {
       id: newKey,
       product_category_name: "",
       condition_type: "GT",
-      value_shipping_data: 0,
       price_from: 0,
       price_to: 0,
       route_id: Number(routeId),
       product_category_id: 0,
       value_data: 0,
+      value_shipping_data: null,
     };
     setData((prev) => ({
       ...prev,
