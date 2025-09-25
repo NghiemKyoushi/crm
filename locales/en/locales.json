@@ -276,7 +276,9 @@
       "placeholderUrl": "Enter URL",
       "region": "Region",
       "requiredRegion": "Please select a region",
-      "placeholderRegion": "Select region"
+      "placeholderRegion": "Select region",
+      "currency":"Currency code",
+      "requiredCurrency":"Select currency"
     },
     "delete": {
       "title": "Confirm delete website",

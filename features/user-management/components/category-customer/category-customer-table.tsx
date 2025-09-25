@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 import { getContrastColor } from "../customer-manage/customer-type-select";
 import FeeConfigModal from "./fee-config-modal";
+import { useRouter } from "next/navigation";
 
 export default function CategoryCustomerTable() {
   const [open, setOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function CategoryCustomerTable() {
   const updateCateMutation = useUpdateCateGoryCus();
   const deleteCateMutation = useDeleteCateGoryCus();
   const createNewCateMutation = useCreateNewCateGoryCus();
-
+  const router = useRouter();
   const handleSearch = () => {
     setPage(0); // reset về trang 1 khi search
     queryClient.invalidateQueries({ queryKey: ["listCate"] });
@@ -154,7 +155,8 @@ export default function CategoryCustomerTable() {
                 />
               }
               onClick={()=>{
-                setIsOpenFeeSetting(true)
+                // setIsOpenFeeSetting(true)
+                router.push(`/category-customer/${record.id}`)
               }}
             />
           </Tooltip>

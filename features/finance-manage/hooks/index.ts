@@ -56,3 +56,5 @@ export function useBankAccountsPartner(params: BankDepositRequest) {
   });
 }
 
+
+

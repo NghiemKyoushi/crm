@@ -96,9 +96,9 @@ export const menuItems = [
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
-  { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
+  // { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
   { key: "/fee-setting", icon: faTags, label: "products" },
-  { key: "/surchange", icon: faTags, label: "surcharge" },
+  // { key: "/surchange", icon: faTags, label: "surcharge" },
   { key: "/website-manage", icon: faGavel, label: "action" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];

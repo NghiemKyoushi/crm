@@ -118,3 +118,70 @@ export function mapFormToData(form: Record<string, any>): FormData {
     shippingZoneFee,
   };
 }
+
+export interface ShippingCondition {
+  id: number;
+  name: string;
+  condition: "GTE" | "LTE" | string; // tùy hệ thống có thêm loại khác thì dùng string
+  condition_value: string;           // có thể parse sang number nếu cần
+  surcharge: string;                 // phí phụ thu
+  shipping: string | null;           // có thể null
+  route_id: number;
+}
+
+export interface ShippingRoute {
+  id: number;
+  code: string;
+  name: string;
+  origin: string;
+  destination: string;
+  created_at: string; // ISO date
+}
+
+export interface ShippingDataItem {
+  data: ShippingCondition[];
+  shipping_route: ShippingRoute;
+}
+
+export interface ShippingResponse {
+  data: ShippingDataItem[];
+}
+
+export interface MaterialItem {
+  id: string;
+  status?: "ACTIVE" | "INACTIVE";
+  created_at?: string;
+  updated_at?: string;
+  created_by?: number;
+  updated_by?: number;
+  route_id: number;
+  value_shipping_data: number| null;
+  product_category_id: number;
+  product_category_name: string;
+  condition_type: "GT" | "LTE" | "GTE" | "RANGE" | string; // thêm union để type-safe
+  price_from: number;
+  price_to: number;
+  value_data: number;
+}
+
+// Response API có dạng object key dynamic ("1", "2"...)
+export type MaterialResponse = {
+  [routeId: string]: MaterialItem[];
+};
+
+export interface ShippingConditionAdd {
+  id: number;
+  route_id: number;
+  product_category_id: number;
+  condition_type: string; 
+  price_from: number;
+  price_to: number;
+  value_data: string;
+  value_shipping_data: string;
+  status?: string; 
+  customer_group_id?: number;
+}
+
+export interface ShippingConditionParams {
+  list: ShippingConditionAdd[];
+}

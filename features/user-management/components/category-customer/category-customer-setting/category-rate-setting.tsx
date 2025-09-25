@@ -1,0 +1,167 @@
+"use client";
+
+import React from "react";
+import { Form, InputNumber, Button, Card, Alert, message } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClock,
+  faDollarSign,
+  faExchangeAlt,
+  faSave,
+  faUser,
+  faYenSign,
+} from "@fortawesome/free-solid-svg-icons";
+
+interface ExchangeRateFormValues {
+  usdToVnd: number;
+  jpyToVnd: number;
+}
+
+const ExchangeRateSettings: React.FC = () => {
+  const [form] = Form.useForm<ExchangeRateFormValues>();
+
+  const onFinish = (values: ExchangeRateFormValues) => {
+    console.log("Exchange Rate Saved:", values);
+    message.success("Cập nhật tỷ giá thành công!");
+  };
+
+  return (
+    <div className="p-6">
+      <Card
+        className="!p-5 !rounded-lg !border !border-gray-200 !bg-blue-50"
+        title={
+          <div className="flex items-center gap-2 font-bold text-lg">
+            <FontAwesomeIcon icon={faExchangeAlt} />
+            Cài Đặt Tỷ Giá Ngoại Tệ Thống Nhất
+          </div>
+        }
+        extra={
+          <Button
+            type="primary"
+            onClick={() => form.submit()}
+            className="!bg-green-600 hover:!bg-green-700"
+          >
+            <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> Lưu Tỷ
+            Giá
+          </Button>
+        }
+      >
+        {/* Alert thông tin */}
+        <div className="bg-blue-100 p-4 rounded-lg mb-6 text-sm border-l-4 border-blue-500">
+          <div>
+            <p className="font-medium text-blue-800 mb-2">
+              Thông tin về Tỷ giá thống nhất:
+            </p>
+            <p className="text-blue-700 mb-2">
+              Tỷ giá này sẽ được áp dụng cho toàn bộ hệ thống Dream Cargo và sẽ
+              tự động cập nhật vào tất cả các giao dịch.
+            </p>
+            <p className="text-blue-700">
+              Tỷ giá sẽ được sử dụng để quy đổi giữa USD, JPY và VNĐ trong các
+              tính toán phí vận chuyển.
+            </p>
+          </div>
+        </div>
+
+        {/* Form */}
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* USD -> VND */}
+            <Card className="!bg-white !rounded-lg !border !shadow-sm">
+              <div className="font-semibold text-gray-800 mb-4 flex items-center text-base">
+                <FontAwesomeIcon
+                  icon={faDollarSign}
+                  className="w-4 h-4 text-green-600"
+                />
+                Tỷ giá USD → VNĐ
+              </div>
+              <p className="block text-gray-600 text-sm font-medium">
+                1 USD = ? VNĐ
+              </p>
+
+              <Form.Item
+                name="usdToVnd"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tỷ giá USD → VNĐ" },
+                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
+                ]}
+              >
+                <InputNumber
+                  className="!w-full !h-[46px]"
+                  min={0}
+                  placeholder="Nhập tỷ giá USD → VNĐ"
+                />
+              </Form.Item>
+
+              <div className="text-xs text-gray-500 mt-2 space-y-1">
+                <p>
+                  <FontAwesomeIcon
+                    icon={faClock}
+                    className="w-4 h-4 text-gray-500"
+                  />
+                  Cập nhật lần cuối: 23/09/2025 14:30
+                </p>
+                <p>
+                  <FontAwesomeIcon
+                    icon={faUser}
+                    className="w-4 h-4 text-gray-500"
+                  />
+                  Được cập nhật bởi:
+                  <span className="font-semibold">Admin</span>
+                </p>
+              </div>
+            </Card>
+
+            {/* JPY -> VND */}
+            <Card>
+              <div className="font-semibold text-gray-800 mb-4 flex items-center  text-base">
+                <FontAwesomeIcon
+                  icon={faYenSign}
+                  className="w-4 h-4 text-red-500"
+                />
+                Tỷ giá JPY → VNĐ
+              </div>
+              <p className="block text-gray-600 text-sm font-medium">
+                1 JPY = ? VNĐ
+              </p>
+
+              <Form.Item
+                name="jpyToVnd"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tỷ giá JPY → VNĐ" },
+                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
+                ]}
+              >
+                <InputNumber
+                  className="!w-full !h-[46px]"
+                  min={0}
+                  placeholder="Nhập tỷ giá JPY → VNĐ"
+                />
+              </Form.Item>
+
+              <div className="text-xs text-gray-500 mt-2 space-y-1">
+                <p>
+                  <FontAwesomeIcon
+                    icon={faClock}
+                    className="w-4 h-4 text-gray-500"
+                  />{" "}
+                  Cập nhật lần cuối: 23/09/2025 14:30
+                </p>
+                <p>
+                  <FontAwesomeIcon
+                    icon={faUser}
+                    className="w-4 h-4 text-gray-500"
+                  />{" "}
+                  Được cập nhật bởi:{" "}
+                  <span className="font-semibold">Admin</span>
+                </p>
+              </div>
+            </Card>
+          </div>
+        </Form>
+      </Card>
+    </div>
+  );
+};
+
+export default ExchangeRateSettings;

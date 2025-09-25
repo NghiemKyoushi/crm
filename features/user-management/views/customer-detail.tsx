@@ -173,14 +173,14 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button className="bg-blue-500 hover:bg-blue-600 !text-white px-3 py-1 rounded-lg text-sm font-medium">
               Chỉnh sửa thông tin
             </button>
             <button className="border border-gray-300 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-100">
               Quay lại
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats */}
@@ -194,18 +194,18 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-green-600">
-                {customer.total_expenses.toLocaleString()}đ
+                {customer.total_expenses.toLocaleString()} đ
               </p>
               <p className="text-gray-600 text-sm">{t("customerManage.customerOverview.totalSpent")}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-red-500">
-                {customer.debt_amount && customer.debt_amount.toLocaleString()}đ
+                {customer.debt_amount ? customer.debt_amount.toLocaleString() : 0} đ
               </p>
               <p className="text-gray-600 text-sm">{t("customerManage.customerOverview.currentDebt")}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-purple-600">4.5M đ</p>
+              <p className="text-2xl font-bold text-purple-600">0M đ</p>
               <p className="text-gray-600 text-sm">Số dư ví</p>
             </div>
           </div>

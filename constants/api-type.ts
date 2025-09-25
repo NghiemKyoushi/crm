@@ -69,6 +69,9 @@ export const API_TYPE_CONST = {
   FEE_SETTING:`${FEATURE}/fee-setting`,
   SHIPPING_METHOD:`${FEATURE}/shipping-method/setting`,
   BANK_PARTNER: `${FEATURE}/admin/bank-accounts/topup`,
-  SURCHANGE_SETTING: `${FEATURE}/product/fee`
-
+  SURCHANGE_SETTING: `${FEATURE}/product/fee`,
+  MATERIAL_TRANSACTIONS_SUMARY:`${FEATURE}/material-transactions/currency-total`,
+  MATERIAL_TRANSACTIONS:`${FEATURE}/material-transactions`,
+  PRODUCT_CATEGORIES:`${FEATURE}/admin/product-categories`,
+  PRODUCT_FEE: `${FEATURE}/product/fee`
 } as const;

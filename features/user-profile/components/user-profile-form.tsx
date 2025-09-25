@@ -7,7 +7,6 @@ import {
   Input,
   Button,
   Upload,
-  Typography,
   Checkbox,
   Avatar,
   message,
@@ -27,8 +26,6 @@ import {
 import { toast } from "react-toastify";
 import { VIEW_IMAGE } from "@/constants/api-type";
 import dayjs from "dayjs";
-
-const { Title, Text } = Typography;
 
 type ProfileFormValues = {
   fullName: string;
@@ -341,44 +338,6 @@ export default function UserProfileForm() {
             key: "2",
             label: "Vai trò & Quyền hạn",
             children: (
-              // <Card className="!border-0 !shadow-none">
-              //   <p className="mb-4">
-              //     Vai trò hiện tại của bạn là:{" "}
-              //     <span className="text-blue-600 font-semibold">Super Administrator</span>
-              //   </p>
-              //   <div className="grid grid-cols-2 gap-4">
-              //     <div>
-              //       <p className="font-medium mb-2">Quản lý Đơn hàng</p>
-              //       <Checkbox defaultChecked disabled>
-              //         Xem tất cả đơn hàng
-              //       </Checkbox>
-              //       <br />
-              //       <Checkbox defaultChecked disabled>
-              //         Tạo/Sửa/Hủy đơn hàng
-              //       </Checkbox>
-              //     </div>
-              //     <div>
-              //       <p className="font-medium mb-2">Quản lý Người dùng</p>
-              //       <Checkbox defaultChecked disabled>
-              //         Quản lý khách hàng
-              //       </Checkbox>
-              //       <br />
-              //       <Checkbox defaultChecked disabled>
-              //         Quản lý nhân viên & vai trò
-              //       </Checkbox>
-              //     </div>
-              //     <div>
-              //       <p className="font-medium mb-2">Quản lý Tài chính</p>
-              //       <Checkbox disabled>Duyệt lệnh nạp/rút tiền</Checkbox>
-              //       <br />
-              //       <Checkbox disabled>Quản lý công nợ & đối soát</Checkbox>
-              //     </div>
-              //     <div>
-              //       <p className="font-medium mb-2">Cài đặt hệ thống</p>
-              //       <Checkbox disabled>Toàn quyền cài đặt</Checkbox>
-              //     </div>
-              //   </div>
-              // </Card>
               <Card className="!border-0 !shadow-none">
                 <p className="mb-4">
                   Vai trò hiện tại của bạn là:{" "}
@@ -387,7 +346,7 @@ export default function UserProfileForm() {
                   </span>
                 </p>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {listRole &&
                     listRole.groups.map((group) => (
                       <div key={group.id}>
