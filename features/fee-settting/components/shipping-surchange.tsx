@@ -26,6 +26,7 @@ import { useListMaterial, useUpdateShipping } from "../hooks/fee-setting";
 import {
   MaterialItem,
   MaterialResponse,
+  MaterialResponseArray,
   ShippingCondition,
   ShippingConditionAdd,
 } from "@/types/fee-setting";
@@ -33,11 +34,12 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 export default function ShippingSurchangeTable() {
-    const { t } = useTranslation();
-  
-  const [data, setData] = useState<Record<string, MaterialItem[]>>({});
+  const { t } = useTranslation();
+
+  const [data, setData] = useState<Record<number, MaterialItem[]>>({});
   const [newKeys, setNewKeys] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
+  const [routeNames, setRouteNames] = useState<Record<number, string>>({});
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["productCategories"],
@@ -53,26 +55,28 @@ export default function ShippingSurchangeTable() {
     })) || [];
 
   const { data: materialData } = useListMaterial();
-  console.log("materialData", materialData);
 
-  if (materialData) {
-    Object.entries(materialData).forEach(([routeId, items]) => {
-      console.log("routeId:", routeId, "items:", items);
-    });
-  }
   useEffect(() => {
     if (materialData) {
-      setData(materialData);
+      const normalized: Record<number, MaterialItem[]> = {};
+      const routeNames: Record<number, string> = {};
+
+      materialData.forEach((item) => {
+        normalized[item.route.id] = item.data ?? [];
+        routeNames[item.route.id] = item.route.name; // lưu tên route
+      });
+      setData(normalized);
+      setRouteNames(routeNames);
     }
   }, [materialData]);
 
-  const handleAddRow = (routeId: string) => {
+  const handleAddRow = (routeId: number) => {
     const newKey = Date.now().toString();
     const newRow: MaterialItem = {
       id: newKey,
       product_category_name: "",
       condition_type: "GT",
-      fee_percentage: 0,
+      value_shipping_data: 0,
       price_from: 0,
       price_to: 0,
       route_id: Number(routeId),
@@ -86,7 +90,7 @@ export default function ShippingSurchangeTable() {
     setNewKeys((prev) => new Set([...prev, newKey]));
   };
 
-  const handleDelete = (routeId: string, key: string) => {
+  const handleDelete = (routeId: number, key: string) => {
     setData((prev) => ({
       ...prev,
       [routeId]: prev[routeId].filter((row) => row.id.toString() !== key),
@@ -99,7 +103,7 @@ export default function ShippingSurchangeTable() {
   };
 
   const handleChange = (
-    routeId: string,
+    routeId: number,
     key: string,
     field: keyof MaterialItem,
     value?: any
@@ -112,28 +116,33 @@ export default function ShippingSurchangeTable() {
     }));
   };
   const handleSaveAll = () => {
-    // gộp tất cả route lại thành 1 mảng
     const allData = Object.values(data).flat();
-    const filteredData = allData.filter((item) => item.route_id === 1);
-     
-    const mappedData = filteredData.map((item) => {      
-      return ({
-        id: Number(item.id),
+    // const filteredData = allData.filter((item) => item.route_id === 1);
+
+    const mappedData = allData.map((item) => {
+      let mappedId: number | null;
+
+      // Nếu id là timestamp (>= 1e12) hoặc null thì gửi null
+      if (!item.id || Number(item.id) >= 1e12) {
+        mappedId = null;
+      } else {
+        mappedId = Number(item.id);
+      }
+      return {
+        id: mappedId,
         route_id: item.route_id,
         product_category_id: item.product_category_id,
         condition_type: item.condition_type,
-        price_from: item.price_from,
-        price_to: item.price_to,
+        price_from: item.price_from || 0,
+        price_to: item.price_to || 0,
         value_data: item.value_data ? item.value_data.toString() : "0", // number -> string
         value_shipping_data: item.value_shipping_data?.toString() ?? "", // hoặc logic khác bạn muốn
         status: item.status,
         customer_group_id: undefined, // nếu có thể map thêm field này
-      })
+      };
     });
+    console.log("mappedData", mappedData);
 
-    console.log('mappedData');
-    
-    
     updateShippingMutation.mutate(
       { list: mappedData as ShippingConditionAdd[] },
       {
@@ -182,7 +191,7 @@ export default function ShippingSurchangeTable() {
             value={val}
             onChange={(e) =>
               handleChange(
-                route,
+                +route,
                 record.id.toString(),
                 "product_category_name",
 
@@ -196,7 +205,7 @@ export default function ShippingSurchangeTable() {
     {
       title: "Loại sản phẩm",
       dataIndex: "product_category_id",
-      width: 180,
+      width: 160,
       render: (val, record) => (
         <Select
           showSearch
@@ -205,7 +214,7 @@ export default function ShippingSurchangeTable() {
           loading={isLoadingCategories}
           onChange={(value) =>
             handleChange(
-              route,
+              +route,
               record.id.toString(),
               "product_category_id",
               value
@@ -225,62 +234,152 @@ export default function ShippingSurchangeTable() {
           className="!w-full !h-9 !bg-gray-100"
           value={val}
           onChange={(value) =>
-            handleChange(route, record.id.toString(), "condition_type", value)
+            handleChange(+route, record.id.toString(), "condition_type", value)
           }
           options={[
             { value: "GTE", label: "Lớn hơn hoặc bằng" },
             { value: "RANGE", label: "Khoảng" },
-            { value: "LT", label: "Lớn hơn" },
+            { value: "LT", label: "Nhỏ hơn" },
             { value: "GT", label: "Lớn hơn" },
             { value: "LTE", label: "Nhỏ hơn hoặc bằng" },
           ]}
         />
       ),
     },
+    // {
+    //   title: "Giá trị",
+    //   dataIndex: "price_to",
+    //   width: 140,
+    //   render: (val, record) => (
+    //     <InputNumber<string>
+    //       className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
+    //       value={val}
+    //       step={0.01}
+    //       stringMode
+    //       formatter={(value) =>
+    //         value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+    //       }
+    //       parser={(value) => (value ? value.replace(/,/g, "") : "")}
+    //       onChange={(value) =>
+    //         handleChange(+route, record.id.toString(), "price_to", value ?? 0)
+    //       }
+    //     />
+    //   ),
+    // },
     {
-      title: "Giá trị (USD)",
+  title: "Giá trị",
+  dataIndex: "price_to",
+  width: 200,
+  render: (val, record: MaterialItem) => {
+    if (record.condition_type === "RANGE") {
+      return (
+        <div className="flex items-center gap-1">
+          <InputNumber<string>
+            className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+            value={record.price_from.toString()}
+            step={0.01}
+            stringMode
+            formatter={(value) =>
+              value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+            }
+            parser={(value) => (value ? value.replace(/,/g, "") : "")}
+            onChange={(value) =>
+              handleChange(+route, record.id.toString(), "price_from", value ?? 0)
+            }
+          />
+          <span className="px-1">~</span>
+          <InputNumber<string>
+            className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+            value={record.price_to.toString()}
+            step={0.01}
+            stringMode
+            formatter={(value) =>
+              value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+            }
+            parser={(value) => (value ? value.replace(/,/g, "") : "")}
+            onChange={(value) =>
+              handleChange(+route, record.id.toString(), "price_to", value ?? 0)
+            }
+          />
+        </div>
+      );
+    }
+
+    // default: chỉ nhập 1 ô cho price_to
+    return (
+      <InputNumber<string>
+        className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+        value={val}
+        step={0.01}
+        stringMode
+        formatter={(value) =>
+          value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+        }
+        parser={(value) => (value ? value.replace(/,/g, "") : "")}
+        onChange={(value) =>
+          handleChange(+route, record.id.toString(), "price_to", value ?? 0)
+        }
+      />
+    );
+  },
+},
+      {
+      title: "Giá Kg - HN (VND) ",
       dataIndex: "value_data",
-      width: 140,
-      render: (val, record) => (
-        <InputNumber<string>
-          className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
-          value={val}
-          step={0.01}
-          stringMode
-          formatter={(value) =>
-            value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-          }
-          parser={(value) => (value ? value.replace(/,/g, "") : "")}
-          onChange={(value) =>
-            handleChange(
-              route,
-              record.id.toString(),
-              "value_data",
-              value ?? 0
-            )
-          }
-        />
-      ),
-    },
-    {
-      title: "Giá Kg - HN (VND)",
-      dataIndex: "price_to",
-      width: 140,
-      render: (val, record) => (
-        <InputNumber<string>
-          className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
-          value={val}
-          step={0.01}
-          stringMode
-          formatter={(value) =>
-            value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-          }
-          parser={(value) => (value ? value.replace(/,/g, "") : "")}
-          onChange={(value) =>
-            handleChange(route, record.id.toString(), "price_to", value ?? 0)
-          }
-        />
-      ),
+      width: 200,
+      render: (val, record) => {
+        const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
+        const numberPart = match
+          ? match[1].replace(/,/g, "")
+          : val?.toString() ?? "";
+        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+
+        return (
+          <div className="flex items-center gap-1">
+            <InputNumber<string>
+              className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+              value={numberPart}
+              step={0.01}
+              stringMode
+              formatter={(value) => {
+                if (!value) return "";
+                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
+              }}
+              parser={(value) => {
+                if (!value) return "";
+                return value.replace(/,/g, "").trim(); // parse ra số
+              }}
+              onChange={(value) =>
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "value_data",
+                  (value ?? "0") + "" + unitPart // lưu kèm đơn vị
+                )
+              }
+            />
+
+            <Select
+              className="!h-9 !w-5/12"
+              value={unitPart}
+              onChange={(cur) => {
+                // đổi đơn vị thì update lại value_data
+                const cleanNumber = numberPart || "0";
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "value_data",
+                  cleanNumber + " " + cur
+                );
+              }}
+              options={[
+                { label: "USD", value: "USD" },
+                { label: "JPY", value: "JPY" },
+              ]}
+            />
+          </div>
+        );
+      },
     },
     {
       title: "Phụ thu",
@@ -294,7 +393,12 @@ export default function ShippingSurchangeTable() {
             const v = e.target.value.trim();
             const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
             if (!match) return;
-            handleChange(route, record.id.toString(), "value_data", v);
+            handleChange(
+              +route,
+              record.id.toString(),
+              "value_shipping_data",
+              v
+            );
           }}
           onBlur={(e) => {
             const v = e.target.value.trim();
@@ -310,7 +414,7 @@ export default function ShippingSurchangeTable() {
             }
 
             handleChange(
-              route,
+              +route,
               record.id.toString(),
               "value_shipping_data",
               num + suffix
@@ -326,18 +430,17 @@ export default function ShippingSurchangeTable() {
       align: "center",
       render: (_, record) => (
         <div className="flex items-center justify-center h-full">
-          <Popconfirm
-            title="Xóa dòng này?"
-            onConfirm={() => handleDelete(route, record.id.toString())}
+          <div
+            onClick={() => handleDelete(+route, record.id.toString())}
+            className="w-8 h-6 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs rounded cursor-pointer flex items-center justify-center"
           >
-            <div className="w-8 h-6 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs rounded cursor-pointer flex items-center justify-center">
-              <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-            </div>
-          </Popconfirm>
+            <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+          </div>
         </div>
       ),
     },
   ];
+  console.log("routeNames", routeNames);
 
   return (
     <div>
@@ -359,40 +462,44 @@ export default function ShippingSurchangeTable() {
             Thêm mới
           </Button>
         </div>
-        <Table
-          bordered
-          dataSource={data}
-          columns={columns}
-          pagination={false}
-          rowKey="key"
-        />
+
       </div> */}
 
       {Object.entries(data).map(([routeId, rows]) => (
         <div key={routeId} className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="font-semibold">Route {routeId}</h2>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => handleAddRow(routeId)}
-              className="!bg-green-600 hover:!bg-green-700"
-            >
-              Thêm mới
-            </Button>
-          </div>
-          <Table<MaterialItem>
+          <div className="p-5 rounded-lg border border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold">
+                <FontAwesomeIcon
+                  icon={routeNames[Number(routeId)] === "US -> VN" ? faFlagUsa : faFlag}
+                  className={`  mr-2 w-4 h-4 ${routeNames[Number(routeId)] === "US -> VN" ? '!text-red-600': '!text-blue-600'}`}
+                />
+                Bảng Giá Tuyến {routeNames[Number(routeId)]}
+              </h2>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => handleAddRow(+routeId)}
+                className="!bg-green-600 hover:!bg-green-700"
+              >
+                Thêm mới
+              </Button>
+            </div>
+            <Table<MaterialItem>
             bordered
             dataSource={rows}
             rowKey="id"
             columns={getColumns(routeId)}
             pagination={false}
           />
+          </div>
+          
         </div>
       ))}
+
       <div className="text-right border-t-gray-100 pt-6 mt-8">
         <button
-          onClick={()=> handleSaveAll()}
+          onClick={() => handleSaveAll()}
           className="bg-blue-600 hover:bg-blue-700 !text-white !font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105"
         >
           <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />

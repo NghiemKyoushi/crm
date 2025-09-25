@@ -14,8 +14,10 @@ import {
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faPlus,
   faSearch,
   faTrash,
+  faUsd,
   faUsers,
   faWallet,
   faYenSign,
@@ -61,7 +63,7 @@ export default function JPYManagementPage() {
     page: pageMaterial,
     page_size: 10,
     search: search || undefined,
-    currencyCode: activeTab,
+    currency_code: activeTab,
   });
 
   const { data: listSummary, isLoading: isLoadingSummary } =
@@ -140,6 +142,26 @@ export default function JPYManagementPage() {
     {
       title: activeTab === "JPY" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
       dataIndex: "amount",
+      render: (val, record: PartnerTransaction) => {
+        const color =
+          record.amount_type === "IN" ? "text-green-600" : "text-red-600";
+        return (
+          <span className={`${color} flex flex-row items-center gap-1 `}>
+            <FontAwesomeIcon
+                icon={faPlus}
+                className="!text-xs !w-2 !h-2 "
+              /> {val} 
+            {activeTab === "JPY" ? (
+              <FontAwesomeIcon
+                icon={faYenSign}
+                className="!text-xs !w-3 !h-3"
+              />
+            ) : (
+              <FontAwesomeIcon icon={faUsd} className="!text-xs !w-3 !h-3" />
+            )}
+          </span>
+        );
+      },
     },
     {
       title: "Tỷ giá",
@@ -159,7 +181,7 @@ export default function JPYManagementPage() {
       render: (_: any, record: PartnerTransaction) => (
         <div
           onClick={() => {
-            // setId(record.);
+            setId(record.id.toString());
             setOpenConfirmDeleteMaterial(true);
           }}
         >
@@ -193,7 +215,6 @@ export default function JPYManagementPage() {
   const summaryItem: FinanceSummary = listSummary?.find(
     (item: FinanceSummary) => item.currency_code === activeTab
   );
-  console.log(materialData);
 
   return (
     <div className="p-6 space-y-6">

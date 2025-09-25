@@ -1,4 +1,5 @@
 export interface PartnerTransaction {
+  id: number;
   description: string;
   amount: number;
   exchange_rate: number;
@@ -22,7 +23,7 @@ export type getListMasterialParams = {
   page: number;
   page_size: number;
   search?: string;
-  currencyCode: string;
+  currency_code: string;
 };
 
 export interface MasterialResponse {

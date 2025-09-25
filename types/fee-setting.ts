@@ -148,7 +148,7 @@ export interface ShippingResponse {
 }
 
 export interface MaterialItem {
-  id: string;
+  id: string ;
   status?: "ACTIVE" | "INACTIVE";
   created_at?: string;
   updated_at?: string;
@@ -164,10 +164,23 @@ export interface MaterialItem {
   value_data: number;
 }
 
+interface Route {
+  id: number;
+  code: string;
+  name: string;
+  origin: string;
+  destination: string;
+  created_at: string;
+}
+
 // Response API có dạng object key dynamic ("1", "2"...)
 export type MaterialResponse = {
-  [routeId: string]: MaterialItem[];
+   route: Route;
+  data: MaterialItem[] | null;
 };
+
+export type MaterialResponseArray = MaterialResponse[];
+
 
 export interface ShippingConditionAdd {
   id: number;

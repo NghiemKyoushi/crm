@@ -6,6 +6,7 @@ import {
   FormData,
   ItemShippingList,
   MaterialResponse,
+  MaterialResponseArray,
   ShippingConditionParams,
 } from "@/types/fee-setting";
 import {
@@ -104,9 +105,9 @@ export const useUpdateFeeShippingDefault = () => {
 };
 
 export const useListMaterial = () => {
-  return useQuery<MaterialResponse>({
+  return useQuery<MaterialResponseArray>({
     queryKey: ["listMaterial"],
-    queryFn: getMaterial,
+    queryFn: ()=>  getMaterial(),
   });
 };
 
