@@ -7,8 +7,6 @@ import {
   Button,
   Select,
   InputNumber,
-  Popconfirm,
-  Tooltip,
   message,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -25,9 +23,6 @@ import { getListProductCategory } from "../apis/fee-setting";
 import { useListMaterial, useUpdateShipping } from "../hooks/fee-setting";
 import {
   MaterialItem,
-  MaterialResponse,
-  MaterialResponseArray,
-  ShippingCondition,
   ShippingConditionAdd,
 } from "@/types/fee-setting";
 import { toast } from "react-toastify";
@@ -267,30 +262,59 @@ export default function ShippingSurchangeTable() {
     //   ),
     // },
     {
-  title: "Giá trị",
-  dataIndex: "price_to",
-  width: 200,
-  render: (val, record: MaterialItem) => {
-    if (record.condition_type === "RANGE") {
-      return (
-        <div className="flex items-center gap-1">
+      title: "Giá trị",
+      dataIndex: "price_to",
+      width: 200,
+      render: (val, record: MaterialItem) => {
+        if (record.condition_type === "RANGE") {
+          return (
+            <div className="flex items-center gap-1">
+              <InputNumber<string>
+                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                value={record.price_from.toString()}
+                step={0.01}
+                stringMode
+                formatter={(value) =>
+                  value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                }
+                parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                onChange={(value) =>
+                  handleChange(
+                    +route,
+                    record.id.toString(),
+                    "price_from",
+                    value ?? 0
+                  )
+                }
+              />
+              <span className="px-1">~</span>
+              <InputNumber<string>
+                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                value={record.price_to.toString()}
+                step={0.01}
+                stringMode
+                formatter={(value) =>
+                  value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                }
+                parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                onChange={(value) =>
+                  handleChange(
+                    +route,
+                    record.id.toString(),
+                    "price_to",
+                    value ?? 0
+                  )
+                }
+              />
+            </div>
+          );
+        }
+
+        // default: chỉ nhập 1 ô cho price_to
+        return (
           <InputNumber<string>
-            className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-            value={record.price_from.toString()}
-            step={0.01}
-            stringMode
-            formatter={(value) =>
-              value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-            }
-            parser={(value) => (value ? value.replace(/,/g, "") : "")}
-            onChange={(value) =>
-              handleChange(+route, record.id.toString(), "price_from", value ?? 0)
-            }
-          />
-          <span className="px-1">~</span>
-          <InputNumber<string>
-            className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-            value={record.price_to.toString()}
+            className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+            value={val}
             step={0.01}
             stringMode
             formatter={(value) =>
@@ -301,42 +325,91 @@ export default function ShippingSurchangeTable() {
               handleChange(+route, record.id.toString(), "price_to", value ?? 0)
             }
           />
-        </div>
-      );
-    }
-
-    // default: chỉ nhập 1 ô cho price_to
-    return (
-      <InputNumber<string>
-        className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-        value={val}
-        step={0.01}
-        stringMode
-        formatter={(value) =>
-          value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-        }
-        parser={(value) => (value ? value.replace(/,/g, "") : "")}
-        onChange={(value) =>
-          handleChange(+route, record.id.toString(), "price_to", value ?? 0)
-        }
-      />
-    );
-  },
-},
-      {
-      title: "Giá Kg - HN (VND) ",
+        );
+      },
+    },
+    {
+      title: "Giá Kg - HN",
       dataIndex: "value_data",
       width: 200,
       render: (val, record) => {
-        const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
-        const numberPart = match
-          ? match[1].replace(/,/g, "")
-          : val?.toString() ?? "";
-        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+        // const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
+        // const numberPart = match
+        //   ? match[1].replace(/,/g, "")
+        //   : val?.toString() ?? "";
+        // const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
 
         return (
           <div className="flex items-center gap-1">
-            <InputNumber<string>
+            <Input
+              className="w-full font-bold !h-9 !bg-gray-100 !text-center"
+              value={val}
+              onChange={(e) => {
+                const v = e.target.value.trim();
+                // Cho phép số + suffix đang gõ dở (JPY, USD, %, $)
+                const match = v.match(
+                  /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
+                );
+                if (!match) return;
+                handleChange(+route, record.id.toString(), "value_data", v);
+              }}
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY|USD)?$/i);
+                let num = match?.[1] ?? "";
+                const suffix = match?.[2]?.toUpperCase() ?? "";
+
+                if (num) {
+                  const [intPart, decimalPart] = num.split(".");
+                  num =
+                    intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                    (decimalPart ? "." + decimalPart : "");
+                }
+
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "value_data",
+                  num + suffix
+                );
+              }}
+            />
+            {/* <Input
+          className="w-full  font-bold !h-9 !bg-gray-100 !text-center"
+          value={val}
+          onChange={(e) => {
+            const v = e.target.value.trim();
+            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+            if (!match) return;
+            handleChange(
+              +route,
+              record.id.toString(),
+              "value_data",
+              v
+            );
+          }}
+          onBlur={(e) => {
+            const v = e.target.value.trim();
+            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+            let num = match?.[1] ?? "";
+            const suffix = match?.[2] ?? "";
+
+            if (num) {
+              const [intPart, decimalPart] = num.split(".");
+              num =
+                intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                (decimalPart ? "." + decimalPart : "");
+            }
+
+            handleChange(
+              +route,
+              record.id.toString(),
+              "value_data",
+              num + suffix
+            );
+          }}
+        /> */}
+            {/* <InputNumber<string>
               className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
               value={numberPart}
               step={0.01}
@@ -376,7 +449,7 @@ export default function ShippingSurchangeTable() {
                 { label: "USD", value: "USD" },
                 { label: "JPY", value: "JPY" },
               ]}
-            />
+            /> */}
           </div>
         );
       },
@@ -391,7 +464,7 @@ export default function ShippingSurchangeTable() {
           value={val}
           onChange={(e) => {
             const v = e.target.value.trim();
-            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i);
             if (!match) return;
             handleChange(
               +route,
@@ -440,39 +513,25 @@ export default function ShippingSurchangeTable() {
       ),
     },
   ];
-  console.log("routeNames", routeNames);
 
   return (
     <div>
-      {/* <div className="p-5 rounded-lg border border-gray-200 bg-gray-50">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">
-            <FontAwesomeIcon
-              icon={faFlagUsa}
-              className="!text-red-600  mr-2 w-4 h-4"
-            />{" "}
-            Bảng Giá Tuyến US → Hà Nội (Kho Oregon / New Hampshire)
-          </h2>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAddRow}
-            className="!bg-green-600 hover:!bg-green-700"
-          >
-            Thêm mới
-          </Button>
-        </div>
-
-      </div> */}
-
       {Object.entries(data).map(([routeId, rows]) => (
         <div key={routeId} className="mb-6">
           <div className="p-5 rounded-lg border border-gray-200 bg-gray-50">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">
                 <FontAwesomeIcon
-                  icon={routeNames[Number(routeId)] === "US -> VN" ? faFlagUsa : faFlag}
-                  className={`  mr-2 w-4 h-4 ${routeNames[Number(routeId)] === "US -> VN" ? '!text-red-600': '!text-blue-600'}`}
+                  icon={
+                    routeNames[Number(routeId)] === "US -> VN"
+                      ? faFlagUsa
+                      : faFlag
+                  }
+                  className={`  mr-2 w-4 h-4 ${
+                    routeNames[Number(routeId)] === "US -> VN"
+                      ? "!text-red-600"
+                      : "!text-blue-600"
+                  }`}
                 />
                 Bảng Giá Tuyến {routeNames[Number(routeId)]}
               </h2>
@@ -486,14 +545,15 @@ export default function ShippingSurchangeTable() {
               </Button>
             </div>
             <Table<MaterialItem>
-            bordered
-            dataSource={rows}
-            rowKey="id"
-            columns={getColumns(routeId)}
-            pagination={false}
-          />
+              bordered
+              dataSource={rows}
+              rowKey="id"
+              columns={getColumns(routeId)}
+              pagination={false}
+              rowClassName={() => "custom-row"}
+              scroll={{ x: "max-content" }}
+            />
           </div>
-          
         </div>
       ))}
 

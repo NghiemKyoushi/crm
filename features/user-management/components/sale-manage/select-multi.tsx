@@ -18,16 +18,12 @@ export default function UserMultiSelect({ onAssign }: UserMultiSelectProps) {
   const [searchValue, setSearchValue] = useState("");
   const [options, setOptions] = useState<UserOption[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-
-  // 👉 gọi hook fetch khách hàng theo searchValue
   const { data } = useListCustomerWithSearch({
     page: 0,
     page_size: 10,
     category_id: undefined,
     search: searchValue,
   });
-
-  // 👉 map data thành options mỗi khi data thay đổi
   useEffect(() => {
     if (data) {
       const mapped = data.data.map((u: CustomerModel) => ({

@@ -14,7 +14,7 @@ import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
 import { useListOrder } from "../hooks/orderhub";
-import { Invoice, OrderStatus } from "@/types/orderhub";
+import { Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
 import dayjs from "dayjs";
 import ApproveOrderModal from "./modal/approve-order-modal";
@@ -123,40 +123,40 @@ export default function OrderHub() {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: OrderStatus) => {
+      render: (status: OrderStatusType) => {
         let color = "";
         let text = "";
 
         switch (status) {
-          case "WAITING_APPROVAL":
+          case OrderStatusType.PENDING:
             color = "orange";
             text = "Đợi duyệt";
             break;
-          case "WAITING_DEPOSIT":
-            color = "gold";
-            text = "Đợi đặt cọc";
-            break;
-          case "PURCHASED":
+          // case OrderStatusType.:
+          //   color = "gold";
+          //   text = "Đợi đặt cọc";
+          //   break;
+          case OrderStatusType.ITEM_PURCHASED:
             color = "blue";
             text = "Đã mua";
             break;
-          case "ARRIVED_JP":
+          case OrderStatusType.ITEM_IN_JAPAN_WAREHOUSE:
             color = "purple";
             text = "Đến kho Nhật";
             break;
-          case "ARRIVED_VN":
+          case OrderStatusType.ITEM_IN_TRANSIT_TO_VIETNAM:
             color = "cyan";
             text = "Đến kho Việt";
             break;
-          case "CHECKING":
-            color = "green";
-            text = "Đang kiểm hàng";
-            break;
-          case "WAITING_PAYMENT":
-            color = "red";
-            text = "Đợi thanh toán";
-            break;
-          case "READY_TO_SHIP":
+          // case "CHECKING":
+          //   color = "green";
+          //   text = "Đang kiểm hàng";
+          //   break;
+          // case OrderStatusType.:
+          //   color = "red";
+          //   text = "Đợi thanh toán";
+          //   break;
+          case OrderStatusType.READY_FOR_DELIVERY:
             color = "geekblue";
             text = "Sẵn chuyển";
             break;
@@ -175,97 +175,107 @@ export default function OrderHub() {
       render: (_, record: Invoice) => {
         const actions: React.ReactNode[] = [];
 
-        // switch (record.status) {
-        //   case "WAITING_APPROVAL":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faCheck} />}
-            className="!bg-green-500 !text-white !border-0 !text-xs"
-            onClick={() => {
-              setIsOpenApproveOrder(true);
-            }}
-          >
-            Duyệt
-          </Button>
-        );
-        //   break;
+        switch (record.status) {
+          case OrderStatusType.PENDING:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faCheck} />}
+                className="!bg-green-500 !text-white !border-0 !text-xs"
+                onClick={() => {
+                  setIsOpenApproveOrder(true);
+                }}
+              >
+                Duyệt
+              </Button>
+            );
+            break;
 
-        // case "WAITING_DEPOSIT":
-        // chỉ có chi tiết + sửa
-        // break;
+          // case "WAITING_DEPOSIT":
+          // break;
 
-        // case "PURCHASED":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faPlus} />}
-            className="!bg-purple-500 !text-white !border-0 !text-xs"
-            onClick={() => {
-              setIsOpenTrackingOrder(true);
-            }}
-          >
-            Tracking
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.ITEM_PURCHASED:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faPlus} />}
+                className="!bg-purple-500 !text-white !border-0 !text-xs"
+                onClick={() => {
+                  setIsOpenTrackingOrder(true);
+                }}
+              >
+                Tracking
+              </Button>
+            );
+            break;
+          case OrderStatusType.ITEM_IN_JAPAN_WAREHOUSE:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+              >
+                Đã đến kho Nhật
+              </Button>
+            );
+            break;
 
-        // case "ARRIVED_JP":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faTruck} />}
-            className="!bg-indigo-500 !text-white !border-0 !text-xs"
-          >
-            Chuyển VN
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.ITEM_IN_TRANSIT_TO_VIETNAM:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+              >
+                Chuyển VN
+              </Button>
+            );
+            break;
 
-        // case "ARRIVED_VN":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
-            className="!bg-teal-500 !text-white !border-0 !text-xs"
-            onClick={() => setIsOpenCheckOrder(true)}
-          >
-            Kiểm hàng
-          </Button>
-        );
-        //   break;
+          case "ARRIVED_VN":
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+                className="!bg-teal-500 !text-white !border-0 !text-xs"
+                onClick={() => setIsOpenCheckOrder(true)}
+              >
+                Kiểm hàng
+              </Button>
+            );
+            break;
 
-        // case "CHECKING":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faCheck} />}
-            className="!bg-green-500 !text-white !border-0 !text-xs"
-          >
-            Xong
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.ORDER_DELIVERED:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faCheck} />}
+                className="!bg-green-500 !text-white !border-0 !text-xs"
+              >
+                Xong
+              </Button>
+            );
+            break;
 
-        // case "READY_TO_SHIP":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faTruck} />}
-            className="!bg-emerald-500 !text-white !border-0 !text-xs"
-          >
-            Giao
-          </Button>
-        );
-        // break;
-        // }
+          case OrderStatusType.READY_FOR_DELIVERY:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-emerald-500 !text-white !border-0 !text-xs"
+              >
+                Giao
+              </Button>
+            );
+            break;
+        }
 
         // nút mặc định luôn có
         actions.push(
           <Button
             size="small"
             className="!bg-blue-500 !text-white !border-0 !text-xs"
-            onClick={()=> setOpenDetail(true)}
+            onClick={() => setOpenDetail(true)}
           >
             Chi tiết
           </Button>
