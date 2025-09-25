@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { usePermission } from '@/components/layout/PermissionContext';
+import { useUserRole } from "@/features/user-profile/hooks/user-profile";
 import {
   canAccessRoute,
   getRoutePermissionConfig,
@@ -31,20 +32,25 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
 }) => {
   const pathname = usePathname();
   const { permissions, loading: permissionLoading } = usePermission();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
+
+  const isAdmin = React.useMemo(() => {
+    return userRole?.role_name === "ADMIN";
+  }, [userRole]);
 
   useEffect(() => {
-    if (!permissionLoading && permissions) {
+    if (!permissionLoading && !roleLoading && permissions && userRole) {
       const userPermissions = permissions.map(p => p.name);
-      const hasAccess = canAccessRoute(userPermissions, pathname);
+      const hasAccess = canAccessRoute(userPermissions, pathname, isAdmin);
 
       if (!hasAccess) {
         const config = getRoutePermissionConfig(pathname);
         handlePermissionViolation(pathname, config ?? undefined);
       }
     }
-  }, [pathname, permissions, permissionLoading]);
+  }, [pathname, permissions, permissionLoading, userRole, roleLoading, isAdmin]);
 
-  if (permissionLoading) {
+  if (permissionLoading || roleLoading) {
     return <>{loading}</>;
   }
 
@@ -71,14 +77,19 @@ export function withRouteGuard<P extends object>(
  */
 export function useRouteAccess() {
   const pathname = usePathname();
-  const { permissions, loading } = usePermission();
+  const { permissions, loading: permissionLoading } = usePermission();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
+
+  const isAdmin = React.useMemo(() => {
+    return userRole?.role_name === "ADMIN";
+  }, [userRole]);
 
   const hasAccess = React.useMemo(() => {
-    if (loading || !permissions) return undefined;
+    if (permissionLoading || roleLoading || !permissions || !userRole) return undefined;
 
     const userPermissions = permissions.map(p => p.name);
-    return canAccessRoute(userPermissions, pathname);
-  }, [pathname, permissions, loading]);
+    return canAccessRoute(userPermissions, pathname, isAdmin);
+  }, [pathname, permissions, permissionLoading, userRole, roleLoading, isAdmin]);
 
   const config = React.useMemo(() => {
     return getRoutePermissionConfig(pathname);
@@ -86,8 +97,9 @@ export function useRouteAccess() {
 
   return {
     hasAccess,
-    loading,
+    loading: permissionLoading || roleLoading,
     config,
-    pathname
+    pathname,
+    isAdmin
   };
 }
