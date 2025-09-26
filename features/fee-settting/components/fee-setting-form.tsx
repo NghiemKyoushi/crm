@@ -11,6 +11,7 @@ import {
   faInfoCircle,
   faPallet,
   faShield,
+  faTag,
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -24,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import ShippingSurchangeTable from "./shipping-surchange";
 import ShippingServiceForm from "./shipping-service-form";
 import InsuranceSettings from "./insurance-settings";
+import ProductTypeTable from "./product-category";
 
 export interface ShippingRouteData {
   id: number;
@@ -75,43 +77,54 @@ const FeeSettingsPage: React.FC = () => {
         Quản Lý Phí & Cài Đặt Dịch Vụ Toàn Diện
       </h3>
 
-        <Tabs defaultActiveKey="1">
-      <Tabs.TabPane
-        key="1"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-            Vận Chuyển & Phụ Thu
-          </span>
-        }
-      >
-        <ShippingSurchangeTable />
-      </Tabs.TabPane>
+      <Tabs defaultActiveKey="1">
+        <Tabs.TabPane
+          key="1"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+              Vận Chuyển & Phụ Thu
+            </span>
+          }
+        >
+          <ShippingSurchangeTable />
+        </Tabs.TabPane>
 
-      <Tabs.TabPane
-        key="2"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-            Dịch Vụ & Giao Hàng
-          </span>
-        }
-      >
-        <ShippingServiceForm />
-      </Tabs.TabPane>
+        <Tabs.TabPane
+          key="2"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+              Dịch Vụ & Giao Hàng
+            </span>
+          }
+        >
+          <ShippingServiceForm />
+        </Tabs.TabPane>
 
-      <Tabs.TabPane
-        key="3"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-            Bảo Hiểm & Quy Định Chung
-          </span>
-        }
-      >
-        <InsuranceSettings />
-      </Tabs.TabPane>
-    </Tabs>
+        <Tabs.TabPane
+          key="3"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+              Bảo Hiểm & Quy Định Chung
+            </span>
+          }
+        >
+          <InsuranceSettings />
+        </Tabs.TabPane>
+        <Tabs.TabPane
+          key="4"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
+              Loai san pham
+            </span>
+          }
+        >
+          <ProductTypeTable />
+        </Tabs.TabPane>
+      </Tabs>
 
     </div>
   );

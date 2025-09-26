@@ -100,7 +100,7 @@ export default function ShippingSurchangeTable() {
   const handleChange = (
     routeId: number,
     key: string,
-    field: keyof MaterialItem,
+    field: string,
     value?: any
   ) => {
     setData((prev) => ({
@@ -136,8 +136,6 @@ export default function ShippingSurchangeTable() {
         customer_group_id: undefined, // nếu có thể map thêm field này
       };
     });
-    console.log("mappedData", mappedData);
-
     updateShippingMutation.mutate(
       { list: mappedData as ShippingConditionAdd[] },
       {
@@ -180,21 +178,21 @@ export default function ShippingSurchangeTable() {
           );
         }
 
-        return (
-          <Input
-            className="!w-full !h-9"
-            value={val}
-            onChange={(e) =>
-              handleChange(
-                +route,
-                record.id.toString(),
-                "product_category_name",
+        // return (
+        //   <Input
+        //     className="!w-full !h-9"
+        //     value={val}
+        //     onChange={(e) =>
+        //       handleChange(
+        //         +route,
+        //         record.id.toString(),
+        //         "product_category_name",
 
-                e.target.value
-              )
-            }
-          />
-        );
+        //         e.target.value
+        //       )
+        //     }
+        //   />
+        // );
       },
     },
     {
@@ -241,26 +239,6 @@ export default function ShippingSurchangeTable() {
         />
       ),
     },
-    // {
-    //   title: "Giá trị",
-    //   dataIndex: "price_to",
-    //   width: 140,
-    //   render: (val, record) => (
-    //     <InputNumber<string>
-    //       className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0  !text-center"
-    //       value={val}
-    //       step={0.01}
-    //       stringMode
-    //       formatter={(value) =>
-    //         value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-    //       }
-    //       parser={(value) => (value ? value.replace(/,/g, "") : "")}
-    //       onChange={(value) =>
-    //         handleChange(+route, record.id.toString(), "price_to", value ?? 0)
-    //       }
-    //     />
-    //   ),
-    // },
     {
       title: "Giá trị",
       dataIndex: "price_to",
@@ -310,19 +288,33 @@ export default function ShippingSurchangeTable() {
           );
         }
 
-        // default: chỉ nhập 1 ô cho price_to
+
         return (
           <InputNumber<string>
             className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-            value={val}
-            step={0.01}
+            value={
+              record.condition_type === "GT" || record.condition_type === "GTE"
+                ? record.price_from?.toString()
+                : record.condition_type === "LT" || record.condition_type === "LTE"
+                  ? record.price_to?.toString()
+                  : ""
+            } step={0.01}
             stringMode
             formatter={(value) =>
               value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
             }
             parser={(value) => (value ? value.replace(/,/g, "") : "")}
-            onChange={(value) =>
-              handleChange(+route, record.id.toString(), "price_to", value ?? 0)
+            onChange={(value) => {
+              let fieldCheck = "";
+              if (record.condition_type === "GT" || record.condition_type === "GTE") {
+                fieldCheck = 'price_from'
+              } else if (record.condition_type === "LT" || record.condition_type === "LTE") {
+                fieldCheck = 'price_to'
+
+              }
+              handleChange(+route, record.id.toString(), fieldCheck, value ?? 0)
+
+            }
             }
           />
         );
@@ -527,11 +519,10 @@ export default function ShippingSurchangeTable() {
                       ? faFlagUsa
                       : faFlag
                   }
-                  className={`  mr-2 w-4 h-4 ${
-                    routeNames[Number(routeId)] === "US -> VN"
-                      ? "!text-red-600"
-                      : "!text-blue-600"
-                  }`}
+                  className={`  mr-2 w-4 h-4 ${routeNames[Number(routeId)] === "US -> VN"
+                    ? "!text-red-600"
+                    : "!text-blue-600"
+                    }`}
                 />
                 Bảng Giá Tuyến {routeNames[Number(routeId)]}
               </h2>

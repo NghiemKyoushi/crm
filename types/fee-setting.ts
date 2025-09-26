@@ -198,3 +198,12 @@ export interface ShippingConditionAdd {
 export interface ShippingConditionParams {
   list: ShippingConditionAdd[];
 }
+
+export interface CategoryItem {
+  id?: number;
+  name: string;
+  icon: string;
+  description: string;
+  created_at?: string;  // ISO datetime string
+  updated_at?: string;  // ISO datetime string
+}

@@ -1,6 +1,7 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { CreateModel, FormData, ItemShippingList, MaterialResponse, MaterialResponseArray, ShippingConditionParams } from "@/types/fee-setting";
+import { CategoryItem, CreateModel, FormData, ItemShippingList, MaterialResponse, MaterialResponseArray, ShippingConditionParams } from "@/types/fee-setting";
+import { WebsiteParams } from "@/types/website-manage";
 
 export const getListInsurance = async () => {
   const res = await api.get(API_TYPE_CONST.INSURANCE_PACKAGE);
@@ -53,6 +54,29 @@ export const getMaterial = async (): Promise<MaterialResponseArray> => {
 };
 
 export const updateShippingFee = async (body: ShippingConditionParams) => {
-    const res = await api.post(API_TYPE_CONST.PRODUCT_FEE, body);
-    return res.data.data;
-  };
+  const res = await api.post(API_TYPE_CONST.PRODUCT_FEE, body);
+  return res.data.data;
+};
+
+
+export const getListProductType = async (params: WebsiteParams) => {
+  const res = await api.get(API_TYPE_CONST.PRODUCT_CATEGORIES, { params });
+  return res.data;
+};
+
+export const createNewProductType = async (body: CategoryItem) => {
+  console.log('api');
+  
+  const res = await api.post(API_TYPE_CONST.PRODUCT_CATEGORIES, body);
+  return res.data;
+};
+
+export const updateProductType = async (id: number, body: CategoryItem) => {
+  const res = await api.put(`${API_TYPE_CONST.PRODUCT_CATEGORIES}/${id}`, body);
+  return res.data;
+};
+
+export const deleteProductType = async (id: number) => {
+  const res = await api.delete(`${API_TYPE_CONST.PRODUCT_CATEGORIES}/${id}`);
+  return res.data;
+};

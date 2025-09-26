@@ -22,6 +22,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   DataFromLink,
+  FeeServiceCheck,
   InsuranceOptionModel,
   OrderFeeRequest,
   RateOrderRequest,
@@ -33,6 +34,8 @@ import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
 import { useCreateNewOrder, useListService } from "../../hooks/orderhub";
 import { useListCustomerWithSearch } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog, faShield, faSquareCaretUp } from "@fortawesome/free-solid-svg-icons";
 const { Option } = Select;
 const { Panel } = Collapse;
 interface CreateOrderModalProps {
@@ -41,8 +44,8 @@ interface CreateOrderModalProps {
   onConfirm: () => void;
 }
 export default function CreateOrderModal(props: CreateOrderModalProps) {
-    const { t } = useTranslation();
-  
+  const { t } = useTranslation();
+
   const { isOpen, onCancel, onConfirm } = props;
   const [form] = Form.useForm();
   const [idProduct, setIdProduct] = React.useState<number | null>(null);
@@ -50,26 +53,28 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const createNewOrderMutation = useCreateNewOrder();
   const { data: listInsurance } = useListInsurance();
   const { data: listService } = useListService();
-  const [services, setServices] = useState<number[]>([]);
+  const [services, setServices] = useState<string[]>([]);
   const [insurance, setInsurance] = useState<InsuranceOptionModel | null>(null);
   const customer = Form.useWatch("customer", form);
+    const [prices, setPrice] = useState<number>(0);
 
+const priceVND = form.getFieldValue("priceVnd");
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      console.log("values", form.getFieldsValue());
       if (idProduct && insurance) {
         const bodyNewOrder: OrderFeeRequest = {
           data: [{ product_id: idProduct, count: 1 }],
           deposit_fee: 0,
           description: form.getFieldValue("note"),
-          fee_codes: [],
+          fee_codes: services,
           insurance_id: insurance?.id,
           user_id: customer,
+          category_product_id: form.getFieldValue("category")
         };
         createNewOrderMutation.mutate(
           {
-           ...bodyNewOrder
+            ...bodyNewOrder
           },
           {
             onSuccess: () => {
@@ -85,9 +90,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           }
         );
       }
-
       // form.resetFields();
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const { mutate } = useMutation<DataFromLink, Error, string>({
@@ -132,7 +136,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     queryFn: getListProductCategory,
   });
 
-  const handleServiceChange = (e: CheckboxChangeEvent, id: number) => {
+  const handleServiceChange = (e: CheckboxChangeEvent, id: string) => {
     const checked = e.target.checked;
     setServices((prev) =>
       checked ? [...prev, id] : prev.filter((k) => k !== id)
@@ -160,6 +164,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             "priceVnd",
             +form.getFieldValue("priceY") * res.rate_to_vnd
           );
+          setPrice(+form.getFieldValue("priceY") * res.rate_to_vnd)
         } catch (err) {
           console.error("Error fetching rate:", err);
         }
@@ -170,22 +175,21 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idProduct, customer]);
 
-  useEffect(() => {
+  useEffect(() => {    
     const fetchFeeService = async () => {
-      if (form.getFieldValue("customer") && idProduct && insurance) {
+      if (customer) {
         const bodyGetFeeService: RateOrderRequest = {
           category_fee_id: 0,
           fee_codes: services,
-          price: form.getFieldValue("priceVnd"),
-          product_ids: [idProduct],
+          price: priceVND ? priceVND: 0,
+          product_ids: idProduct ? [idProduct]: [],
           user_id: form.getFieldValue("customer"),
-          insurance_id: insurance.id,
+          insurance_id: insurance ? insurance.id : 0,
         };
-
         try {
-          const res = await getDataFeeService(bodyGetFeeService);
-          console.log("bodyGetFeeService", bodyGetFeeService);
-          console.log("res", res);
+          const res: FeeServiceCheck = await getDataFeeService(bodyGetFeeService);
+          form.setFieldValue('feeY', res.fee);
+          form.setFieldValue('feeVnd', res.fee);
         } catch (error) {
           console.error("Error fetching fee service:", error);
         }
@@ -193,15 +197,13 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     };
 
     fetchFeeService();
-  }, [form, services, idProduct, insurance]);
+  }, [form, services, customer, priceVND, prices]);
 
   useEffect(() => {
     if (listInsurance) {
       setInsurance(listInsurance[0]);
     }
   }, [listInsurance]);
-
-  console.log("check", form.getFieldsValue());
   return (
     <>
       <Modal
@@ -296,7 +298,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   <Radio
                     disabled
                     value="buy"
-                    className="!text-blue-500 flex-1 !p-5 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
+                    className="!text-blue-500 flex-1 !p-3 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
                   >
                     <div className="font-medium text-blue-800">Mua thẳng</div>
                     <div className="text-xs text-blue-600">
@@ -328,98 +330,99 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 </Form.Item>
               </div>
 
-              <div className="space-y-4">
-                {/* Dịch vụ bổ sung */}
+              <div className="space-y-4 mt-4">
                 <Collapse
                   defaultActiveKey={["1"]}
-                  className="bg-blue-50 rounded-lg border border-blue-200"
+                  className="!bg-blue-50 !rounded-sm !border !border-blue-200 "
                 >
                   <Panel
                     key="1"
                     header={
-                      <span className="font-semibold text-blue-700">
-                        🔧 Dịch vụ bổ sung (tùy chọn)
+                      <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
+                        <FontAwesomeIcon icon={faCog} /> Dịch vụ bổ sung (tùy chọn)
                       </span>
                     }
                   >
-                    <div className="space-y-3">
-                      {listService &&
-                        listService.map((item: ServiceFee) => {
-                          if (!item.optional) {
-                            return (
-                              <div
-                                className="flex items-start justify-between"
-                                key={item.id}
+                    <div className="space-y-1 ">
+                      {listService?.map((item: ServiceFee) => {
+                        if (item.optional) return null;
+
+                        const isChecked = services.includes(item.code);
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex items-start justify-between bg-white rounded-md p-4 border border-blue-200 hover:shadow-sm transition"
+                          >
+                            <div className="flex-1 pr-4">
+                              <Checkbox
+                                checked={isChecked}
+                                onChange={(e) => handleServiceChange(e, item.code)}
+                                className="!text-blue-600"
                               >
-                                <div className="flex-1 pr-4">
-                                  <Checkbox
-                                    checked={services.includes(item.id)}
-                                    onChange={(e) =>
-                                      handleServiceChange(e, item.id)
-                                    }
-                                  >
-                                    <div className="font-medium">
-                                      {item.name}
-                                    </div>
-                                    <div className="text-gray-500 text-sm">
-                                      {item.description}
-                                    </div>
-                                  </Checkbox>
+                                <div>
+                                  <div className="font-medium text-blue-700">{item.name}</div>
+                                  <div className="text-blue-500 text-sm mt-1">
+                                    {item.description}
+                                  </div>
                                 </div>
-                                <div className="text-blue-600 font-medium self-start">
-                                  {item.amount}
-                                  {item.currency_code}
-                                </div>
-                              </div>
-                            );
-                          }
-                        })}
+                              </Checkbox>
+                            </div>
+                            <div className="text-blue-600 font-semibold text-sm min-w-[60px] text-right">
+                              {item.amount}
+                              {item.currency_code}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </Panel>
                 </Collapse>
                 <Collapse
                   defaultActiveKey={["2"]}
-                  className="bg-yellow-50 rounded-lg border border-yellow-200"
+                  className="!bg-yellow-50 !rounded-sm !border !border-yellow-200  !mt-4"
                 >
                   <Panel
                     key="2"
                     header={
-                      <span className="font-semibold text-yellow-700">
-                        🛡️ Bảo hiểm đơn hàng
+                      <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
+                        <FontAwesomeIcon icon={faShield} /> Bảo hiểm đơn hàng
                       </span>
                     }
                   >
-                    <div className="space-y-3">
-                      {listInsurance &&
-                        listInsurance.map((item: InsuranceOptionModel) => {
-                          const isChecked = insurance?.id === item.id;
-                          return (
-                            <div
-                              key={item.id}
-                              className="flex items-start justify-between"
-                            >
-                              <div className="flex-1 pr-4">
-                                <Checkbox
-                                  checked={isChecked}
-                                  onChange={(e) =>
-                                    handleInsuranceChange(e, item)
-                                  }
-                                >
-                                  <div className="font-medium">{item.name}</div>
-                                  <div className="text-gray-500 text-sm">
+                    <div className="space-y-2">
+                      {listInsurance?.map((item: InsuranceOptionModel) => {
+                        const isChecked = insurance?.id === item.id;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex items-start justify-between bg-white rounded-md p-4 border border-yellow-200 hover:shadow-sm transition"
+                          >
+                            <div className="flex-1 pr-4">
+                              <Checkbox
+                                checked={isChecked}
+                                onChange={(e) => handleInsuranceChange(e, item)}
+                                className="!text-yellow-700"
+                              >
+                                <div>
+                                  <div className="font-medium text-yellow-700">{item.name}</div>
+                                  <div className="text-yellow-500 text-xs mt-1">
                                     {item.description}
                                   </div>
-                                </Checkbox>
-                              </div>
-                              <div className="text-red-500 font-semibold self-start">
-                                {item.fee_percentage ? item.fee_percentage : 0}%
-                              </div>
+                                </div>
+                              </Checkbox>
                             </div>
-                          );
-                        })}
+                            <div className="text-yellow-600 font-semibold text-sm min-w-[50px] text-right">
+                              {item.fee_percentage ?? 0}%
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </Panel>
                 </Collapse>
+
               </div>
             </Col>
             <Col span={12}>
@@ -452,7 +455,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   label="Phí DV (¥)"
                   name="feeY"
                 >
-                  <InputNumber className="!w-full !h-11" min={0} />
+                  <Input disabled className="!w-full !h-11" min={0} />
                 </Form.Item>
 
                 <Form.Item
@@ -500,15 +503,63 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 />
               </Form.Item>
 
-              <div className="p-3 rounded bg-blue-50  mt-4">
-                <h4 className="font-medium mb-2">Tổng kết Đơn hàng</h4>
-                <p>Giá sản phẩm: {form.getFieldValue("priceVnd")} đ</p>
-                <p>Phí dịch vụ: 0 đ</p>
+              <div className="p-4 rounded-lg bg-blue-50 mt-4">
+                <h4 className="font-medium mb-3">Tổng kết Đơn hàng</h4>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Giá sản phẩm</span>
+                    <span>
+                      {form.getFieldValue("priceVnd")
+                        ? form.getFieldValue("priceVnd").toLocaleString("vi-VN")
+                        : 0} đ
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span>Phí dịch vụ</span>
+                    <span>
+                      {form.getFieldValue("feeVnd")
+                        ? form.getFieldValue("feeVnd").toLocaleString("vi-VN")
+                        : 0} đ
+                    </span>
+                  </div>
+
+                  {listService &&
+                    listService.map((item: ServiceFee) =>
+                      item.optional ? (
+                        <div key={item.name} className="flex justify-between">
+                          <span>{item.name}</span>
+                          <span>
+                            {item.amount ? item.amount.toLocaleString("vi-VN") : 0} đ
+                          </span>
+                        </div>
+                      ) : null
+                    )}
+                </div>
+
                 <hr className="my-2 border-gray-200" />
-                <p className="font-semibold">Tổng cộng: 0 đ</p>
-                <p className="text-green-600">Tiền cọc: 0 đ</p>
-                <p className="text-red-600">Còn lại: 0 đ</p>
+
+                <div className="flex justify-between font-semibold">
+                  <span>Tổng cộng</span>
+                  <span>
+                    {form.getFieldValue("priceVnd") && form.getFieldValue("feeVnd")
+                      ? (form.getFieldValue("priceVnd") + form.getFieldValue("feeVnd")).toLocaleString("vi-VN")
+                      : 0} đ
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-green-600">
+                  <span>Tiền cọc</span>
+                  <span>0 đ</span>
+                </div>
+
+                <div className="flex justify-between text-red-600">
+                  <span>Còn lại</span>
+                  <span>0 đ</span>
+                </div>
               </div>
+
             </Col>
           </Row>
         </Form>
