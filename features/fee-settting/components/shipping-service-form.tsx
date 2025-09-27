@@ -24,7 +24,6 @@ export default function ShippingServiceForm() {
   const [form] = Form.useForm<FormValues>();
 
   const handleSubmit = (values: FormValues) => {
-    console.log("✅ Submit values:", values);
   };
 
   return (

@@ -30,7 +30,8 @@
     "settings": "Cài đặt Hệ thống",
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
-    "partnerManagement": "Quản lý nhiên liệu"
+    "partnerManagement": "Quản lý nhiên liệu",
+    "operation": "Quản lý vận hành"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -254,7 +255,8 @@
     "cancel": "Huỷ",
     "error": "Có lỗi xảy ra",
     "delete": "Xoá",
-    "edit": "Chỉnh sửa"
+    "edit": "Chỉnh sửa",
+    "save":"Lưu"
   },
   "websiteManage": {
     "table": {

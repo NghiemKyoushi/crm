@@ -34,6 +34,8 @@ const WithdrawTable = ({}) => {
   const code = searchParams.get("code");
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedCode, setSelectedCode] = useState<string>("");
+
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [histories, setHistories] = useState<any[]>([]);
@@ -325,6 +327,7 @@ const WithdrawTable = ({}) => {
             <button
               className="cursor-pointer"
               onClick={() => {
+                setSelectedCode(record.deposit_code)
                 setSelectedId(record.id);
                 setIsOpenCompleteTransaction(true);
               }}
@@ -386,14 +389,14 @@ const WithdrawTable = ({}) => {
       />
 
       <CancelReasonModal
-        transactionCode="N-0805-1"
+        transactionCode={selectedCode}
         onClose={() => setIsOpenCancel(false)}
         open={isOpenCancel}
         onConfirm={handleCancel}
       />
 
       <ConfirmReasonModal
-        transactionCode="N-0805-1"
+        transactionCode={selectedCode}
         onClose={() => setIsOpenComplete(false)}
         open={isOpenComplete}
         onConfirm={handleComplete}

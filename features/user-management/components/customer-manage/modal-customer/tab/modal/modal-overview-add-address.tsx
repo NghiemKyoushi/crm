@@ -64,7 +64,6 @@ const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress 
   const handleSubmit = (values: any) => {
     const provinceObj = provinces.find((p) => p.code === values.province);
     const wardObj = wards.find((w) => w.code === values.ward);
-    console.log("Submitted values:", wardObj);
     handleSubmitDataAddress({
         address: wardObj && provinceObj ? wardObj.name + " "+ provinceObj.name : '',
         phone_number: values.phone,

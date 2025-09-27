@@ -13,13 +13,28 @@ import {
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
-import { useListOrder } from "../hooks/orderhub";
-import { Invoice, OrderStatus } from "@/types/orderhub";
+import {
+  useApproveOrder,
+  useCancelOrder,
+  useCheckOrder,
+  useCompleteOrder,
+  useListOrder,
+  usePurchaseOrder,
+  useTrackingOrder,
+  useTrackingOrderVN,
+} from "../hooks/orderhub";
+import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
 import dayjs from "dayjs";
 import ApproveOrderModal from "./modal/approve-order-modal";
 import CheckOrderModal from "./modal/check-order-modal";
 import TrackingModal from "./modal/tracking-modal";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+import PopupConfirm from "@/components/PopupConfirm";
+import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit/modal/modal-cancel-statement";
+import TrackingModalJP from "./modal/tracking-modal-jp";
+import EditOrderModal from "./modal/edit-order-modal";
 
 const { Option } = Select;
 
@@ -29,15 +44,30 @@ export default function OrderHub() {
   const [openDetail, setOpenDetail] = useState(false);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  //check  function button
   const [isOpenApproveOrder, setIsOpenApproveOrder] = useState(false);
   const [isOpenCheckOrder, setIsOpenCheckOrder] = useState(false);
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
+  const [isOpenTrackingOrderVN, setIsOpenTrackingOrderVN] = useState(false);
+
+  const [orderDetail, setOrderDetail] = useState<Invoice>();
+  const [openConfirmPurchase, setOpenConfirmPurchase] = useState(false);
+  const [openConfirmComplete, setOpenConfirmComplete] = useState(false);
+
+  const [isOpenCancel, setIsOpenCancel] = useState(false);
 
   const { data: listOrder } = useListOrder({
     page,
     size: 10,
   });
+  const approveMutation = useApproveOrder();
+  const useCancelMutation = useCancelOrder();
+  const purchaseMutation = usePurchaseOrder();
+  const trackingJPMutation = useTrackingOrder();
+  const trackingVNMutation = useTrackingOrderVN();
+  const checkOrderVNMutation = useCheckOrder();
+  const useCompleteMutation = useCompleteOrder();
+
+  const queryClient = useQueryClient();
 
   const handleFinish = (values: any) => {
     console.log("Filter values:", values);
@@ -45,6 +75,100 @@ export default function OrderHub() {
 
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
+  };
+
+  const handleConfirmPurchaseOrder = () => {
+    if (orderDetail)
+      purchaseMutation.mutate(
+        {
+          id: orderDetail.id.toString(),
+        },
+        {
+          onSuccess: () => {
+            toast.success("Xác nhận mua đơn hàng thành công!");
+            queryClient.invalidateQueries({
+              queryKey: ["listorder"],
+            });
+            setOpenConfirmPurchase(false);
+          },
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
+        }
+      );
+  };
+
+  const handleCompleteOrder = () => {
+    if (orderDetail)
+      useCompleteMutation.mutate(
+        {
+          id: orderDetail.id.toString(),
+        },
+        {
+          onSuccess: () => {
+            toast.success("Hoàn thành đơn hàng!");
+            queryClient.invalidateQueries({
+              queryKey: ["listorder"],
+            });
+            setOpenConfirmComplete(false);
+          },
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
+        }
+      );
+  };
+
+  const handleCancel = (reason: string) => {
+    if (orderDetail)
+      useCancelMutation.mutate(
+        {
+          reason: reason,
+          id: orderDetail.id.toString(),
+        },
+        {
+          onSuccess: () => {
+            toast.success("Từ chối đơn hàng thành công!");
+            queryClient.invalidateQueries({
+              queryKey: ["listorder"],
+            });
+            setIsOpenCancel(false);
+          },
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
+        }
+      );
+  };
+
+  const handleCheckOrder = (value: any) => {
+    if (orderDetail)
+      checkOrderVNMutation.mutate(
+        {
+          body: {
+            description: value.note,
+            weight: value.actualWeight,
+            weight_fee: value.feePerKg,
+          },
+          id: orderDetail.id.toString(),
+        },
+        {
+          onSuccess: () => {
+            toast.success("Kiểm hàng thành công!");
+            queryClient.invalidateQueries({
+              queryKey: ["listorder"],
+            });
+            setIsOpenCheckOrder(false);
+          },
+          onError: (err: any) =>
+            toast.error(
+              err.response?.data?.localizedMessage || t("common.error")
+            ),
+        }
+      );
   };
 
   const columns: ColumnsType<Invoice> = [
@@ -72,26 +196,29 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Sản phẩm",
-      key: "product",
+      title: "Người tạo",
+      key: "created_by_name",
       render: (_, record) => (
         <div>
-          <div>{record.product_name}</div>
-          <div className="text-xs text-gray-400">
-            {record.source} • {record.purchase_type}
-          </div>
+          <div className="font-medium">{record.created_by_name}</div>
+          <div className="text-xs text-gray-400">{record.customer_code}</div>
         </div>
       ),
     },
     {
       title: "Tracking",
-      key: "tracking",
+      key: "tracking_vn",
       render: (_, record) => (
         <div>
-          {record.tracking_code ? (
+          {record.tracking_other || record.tracking_vn ? (
             <>
               <a href="#" className="text-blue-500 font-medium hover:underline">
-                {record.tracking_code}
+                {record.status === OrderStatusType.ARRIVED_JP_WAREHOUSE &&
+                  record.tracking_other &&
+                  record.tracking_other}
+                {record.status === OrderStatusType.ARRIVED_VN_WAREHOUSE &&
+                  record.tracking_vn &&
+                  record.tracking_vn}
               </a>
               {record.weight && (
                 <div className="text-xs text-gray-400">
@@ -100,7 +227,7 @@ export default function OrderHub() {
               )}
             </>
           ) : (
-            <span className="text-gray-400">Chưa có</span>
+            <span className="text-gray-400"> - </span>
           )}
         </div>
       ),
@@ -123,42 +250,64 @@ export default function OrderHub() {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: OrderStatus) => {
-        let color = "";
-        let text = "";
+      align: "center",
+      onCell: () => ({
+        style: {
+          textAlign: "center",
+        },
+      }),
+      render: (status: OrderStatusType) => {
+        let color: string;
+        let text: string;
 
         switch (status) {
-          case "WAITING_APPROVAL":
+          case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
             text = "Đợi duyệt";
             break;
-          case "WAITING_DEPOSIT":
+          case OrderStatusType.PENDING_DEPOSIT:
             color = "gold";
             text = "Đợi đặt cọc";
             break;
-          case "PURCHASED":
+          case OrderStatusType.DEPOSIT_PAID:
+            color = "green";
+            text = "Đã đặt cọc";
+            break;
+          case OrderStatusType.PURCHASED:
             color = "blue";
             text = "Đã mua";
             break;
-          case "ARRIVED_JP":
+          case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             color = "purple";
             text = "Đến kho Nhật";
             break;
-          case "ARRIVED_VN":
+          case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             color = "cyan";
             text = "Đến kho Việt";
             break;
-          case "CHECKING":
-            color = "green";
+          case OrderStatusType.UNDER_INSPECTION:
+            color = "lime";
             text = "Đang kiểm hàng";
             break;
-          case "WAITING_PAYMENT":
+          case OrderStatusType.PENDING_PAYMENT:
             color = "red";
             text = "Đợi thanh toán";
             break;
-          case "READY_TO_SHIP":
+          case OrderStatusType.READY_TO_SHIP:
             color = "geekblue";
-            text = "Sẵn chuyển";
+            text = "Sẵn sàng giao";
+            break;
+          case OrderStatusType.SHIPPED:
+            color = "volcano";
+            text = "Đã chuyển";
+            break;
+          case OrderStatusType.SHIPPING_REQUEST_CLIENT:
+            color = "magenta";
+            text = "Yêu cầu chuyển hàng";
+            break;
+          case OrderStatusType.CANCELED:
+            color = "red";
+            text = "Đã Huỷ";
             break;
           default:
             color = "default";
@@ -168,118 +317,173 @@ export default function OrderHub() {
         return <Tag color={color}>{text}</Tag>;
       },
     },
-
     {
       title: "Hành động",
       key: "actions",
+      align: "right",
+      onCell: () => ({
+        style: {
+          textAlign: "right",
+        },
+      }),
       render: (_, record: Invoice) => {
         const actions: React.ReactNode[] = [];
 
-        // switch (record.status) {
-        //   case "WAITING_APPROVAL":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faCheck} />}
-            className="!bg-green-500 !text-white !border-0 !text-xs"
-            onClick={() => {
-              setIsOpenApproveOrder(true);
-            }}
-          >
-            Duyệt
-          </Button>
-        );
-        //   break;
+        switch (record.status) {
+          case OrderStatusType.PENDING_APPROVAL:
+            if (record.is_user_created) {
+              actions.push(
+                <Button
+                  size="small"
+                  icon={<FontAwesomeIcon icon={faCheck} />}
+                  className="!bg-green-500 !text-white !border-0 !text-xs"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenApproveOrder(true);
+                  }}
+                >
+                  Duyệt
+                </Button>
+              );
+              actions.push(
+                <Button
+                  size="small"
+                  className="!bg-red-500 !text-white !border-0 !text-xs"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancel(true);
+                  }}
+                >
+                  Từ chối
+                </Button>
+              );
+            }
+            break;
 
-        // case "WAITING_DEPOSIT":
-        // chỉ có chi tiết + sửa
-        // break;
+          // case "WAITING_DEPOSIT":
+          // break;
 
-        // case "PURCHASED":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faPlus} />}
-            className="!bg-purple-500 !text-white !border-0 !text-xs"
-            onClick={() => {
-              setIsOpenTrackingOrder(true);
-            }}
-          >
-            Tracking
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.PURCHASED:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-purple-500 !text-white !border-0 !text-xs"
+                onClick={() => {
+                  setOrderDetail(record);
+                  setIsOpenTrackingOrder(true);
+                }}
+              >
+                Chuyển về kho nhật
+              </Button>
+            );
+            break;
+          //check chụp ảnh
+          case OrderStatusType.ARRIVED_JP_WAREHOUSE:
+            actions.push(
+              <Button
+                size="small"
+                onClick={() => {
+                  setOrderDetail(record);
+                  if (record.take_photo) {
+                    setIsOpenTrackingOrderVN(true);
+                  } else {
+                    trackingVNMutation.mutate(
+                      {
+                        image_ids: [],
+                        id: record.id.toString(),
+                      },
+                      {
+                        onSuccess: () => {
+                          toast.success("Xác nhận về kho Việt thành công!");
+                          queryClient.invalidateQueries({
+                            queryKey: ["listorder"],
+                          });
+                          setIsOpenTrackingOrder(false);
+                        },
+                        onError: (err: any) =>
+                          toast.error(
+                            err.response?.data?.localizedMessage ||
+                              t("common.error")
+                          ),
+                      }
+                    );
+                  }
+                }}
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+              >
+                Chuyển về kho Việt
+              </Button>
+            );
+            break;
 
-        // case "ARRIVED_JP":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faTruck} />}
-            className="!bg-indigo-500 !text-white !border-0 !text-xs"
-          >
-            Chuyển VN
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.ARRIVED_VN_WAREHOUSE:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+                onClick={() => {
+                  setOrderDetail(record);
+                  setIsOpenCheckOrder(true);
+                }}
+              >
+                Kiểm hàng
+              </Button>
+            );
+            break;
 
-        // case "ARRIVED_VN":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
-            className="!bg-teal-500 !text-white !border-0 !text-xs"
-            onClick={() => setIsOpenCheckOrder(true)}
-          >
-            Kiểm hàng
-          </Button>
-        );
-        //   break;
+          case OrderStatusType.DEPOSIT_PAID:
+            actions.push(
+              <Button
+                size="small"
+                onClick={() => {
+                  setOrderDetail(record);
+                  setOpenConfirmPurchase(true);
+                }}
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+              >
+                Đã mua
+              </Button>
+            );
+            break;
 
-        // case "CHECKING":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faCheck} />}
-            className="!bg-green-500 !text-white !border-0 !text-xs"
-          >
-            Xong
-          </Button>
-        );
-        //   break;
-
-        // case "READY_TO_SHIP":
-        actions.push(
-          <Button
-            size="small"
-            icon={<FontAwesomeIcon icon={faTruck} />}
-            className="!bg-emerald-500 !text-white !border-0 !text-xs"
-          >
-            Giao
-          </Button>
-        );
-        // break;
-        // }
+          case OrderStatusType.READY_TO_SHIP:
+            actions.push(
+              <Button
+                size="small"
+                icon={<FontAwesomeIcon icon={faTruck} />}
+                className="!bg-emerald-500 !text-white !border-0 !text-xs"
+                onClick={() => {
+                  setOrderDetail(record);
+                  setOpenConfirmComplete(true);
+                }}
+              >
+                Sẵn sàng giao
+              </Button>
+            );
+            break;
+        }
 
         // nút mặc định luôn có
         actions.push(
           <Button
             size="small"
             className="!bg-blue-500 !text-white !border-0 !text-xs"
-            onClick={()=> setOpenDetail(true)}
+            onClick={() => {
+              setOpenDetail(true);
+              setOrderDetail(record);
+            }}
           >
             Chi tiết
           </Button>
         );
-        actions.push(
-          <Button
-            size="small"
-            className="!bg-yellow-500 !text-white !border-0 !text-xs"
-          >
-            Sửa
-          </Button>
-        );
 
-        return <div className="flex gap-2 flex-wrap">{actions}</div>;
+        return (
+          <div className="flex gap-2 flex-wrap justify-end">{actions}</div>
+        );
       },
     },
   ];
@@ -360,32 +564,153 @@ export default function OrderHub() {
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      <OrderDetailModal
-        open={openDetail}
-        onClose={() => setOpenDetail(false)}
+      {/* {orderDetail?.id && (
+        <OrderDetailModal
+          open={openDetail}
+          onClose={() => setOpenDetail(false)}
+          idOrder={+orderDetail?.id}
+        />
+      )} */}
+
+      {orderDetail?.id && (
+        <EditOrderModal
+          isOpen={openDetail}
+          onCancel={() => setOpenDetail(false)}
+          orderId={+orderDetail?.id}
+          onConfirm={() => console.log()}
+        />
+      )}
+
+      {orderDetail && (
+        <ApproveOrderModal
+          open={isOpenApproveOrder}
+          customerName={orderDetail?.customer_name}
+          orderCode={orderDetail.invoice_no}
+          onCancel={() => setIsOpenApproveOrder(false)}
+          onSubmit={(data: ApproveOrderModel) => {
+            approveMutation.mutate(
+              {
+                body: data,
+                id: orderDetail.id.toString(),
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Xác nhận đơn hàng thành công!");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setIsOpenApproveOrder(false);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+        />
+      )}
+      {orderDetail && (
+        <CheckOrderModal
+          open={isOpenCheckOrder}
+          customerName={orderDetail.customer_name}
+          feePerKg={10}
+          onCancel={() => setIsOpenCheckOrder(false)}
+          onSubmit={handleCheckOrder}
+          orderCode={orderDetail.invoice_no}
+        />
+      )}
+
+      {orderDetail && (
+        <TrackingModalJP
+          customerName={orderDetail.customer_name}
+          orderCode={orderDetail.invoice_no}
+          onCancel={() => setIsOpenTrackingOrder(false)}
+          onSubmit={(value) => {
+            trackingJPMutation.mutate(
+              {
+                tracking: value?.trackingCode,
+                id: orderDetail.id.toString(),
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Xác nhận về kho Nhật thành công!");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setIsOpenTrackingOrder(false);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+          open={isOpenTrackingOrder}
+        />
+      )}
+
+      {orderDetail && (
+        <TrackingModal
+          customerName={orderDetail.customer_name}
+          orderCode={orderDetail.invoice_no}
+          onCancel={() => setIsOpenTrackingOrderVN(false)}
+          onSubmit={(value) => {
+            trackingVNMutation.mutate(
+              {
+                image_ids: value.images,
+                id: orderDetail.id.toString(),
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Xác nhận về kho Việt thành công!");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setIsOpenTrackingOrderVN(false);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+          open={isOpenTrackingOrderVN}
+        />
+      )}
+
+      <PopupConfirm
+        open={openConfirmPurchase}
+        type={"confirm"}
+        title={"Xác nhận đã mua đơn hàng"}
+        content={"Đơn hàng đã được mua !"}
+        onConfirm={handleConfirmPurchaseOrder}
+        onCancel={() => setOpenConfirmPurchase(false)}
+        confirmText={t("common.confirm")}
+        cancelText={t("common.cancel")}
       />
-      <ApproveOrderModal
-        open={isOpenApproveOrder}
-        customerName="Nguyễn Văn A (SC244)"
-        orderCode="#DH-0810-1"
-        onCancel={() => setIsOpenApproveOrder(false)}
-        onSubmit={() => console.log("check")}
+
+      <PopupConfirm
+        open={openConfirmComplete}
+        type={"confirm"}
+        title={"Xác nhận hoàn thành đơn hàng"}
+        content={"Đơn hàng đã được hoàn thành !"}
+        onConfirm={handleCompleteOrder}
+        onCancel={() => setOpenConfirmComplete(false)}
+        confirmText={t("common.confirm")}
+        cancelText={t("common.cancel")}
       />
-      <CheckOrderModal
-        open={isOpenCheckOrder}
-        customerName="Nguyễn Văn A (SC244)"
-        feePerKg={10}
-        onCancel={() => setIsOpenCheckOrder(false)}
-        onSubmit={() => console.log("check")}
-        orderCode="#DH-0810-1"
-      />
-      <TrackingModal
-        customerName="Nguyễn Văn A (SC244)"
-        orderCode="#DH-0810-1"
-        onCancel={() => setIsOpenTrackingOrder(false)}
-        onSubmit={() => console.log("check")}
-        open={isOpenTrackingOrder}
-      />
+
+      {orderDetail && (
+        <CancelReasonModal
+          transactionCode={orderDetail.invoice_no}
+          onClose={() => setIsOpenCancel(false)}
+          open={isOpenCancel}
+          onConfirm={handleCancel}
+        />
+      )}
     </div>
   );
 }

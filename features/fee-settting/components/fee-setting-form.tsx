@@ -1,49 +1,39 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Tabs, Alert, Form, InputNumber, Button, Input } from "antd";
-import { Controller, useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { Tabs } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faConciergeBell,
-  faFlag,
-  faFlagUsa,
-  faInfoCircle,
   faPallet,
   faShield,
-  faTruck,
+  faTag,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  useListFeeSettingDefault,
-  useUpdateFeeSettingDefault,
-} from "../hooks/fee-setting";
-import { on } from "node:stream";
-import { mapFormToData } from "@/types/fee-setting";
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+
+// Import các component con
 import ShippingSurchangeTable from "./shipping-surchange";
 import ShippingServiceForm from "./shipping-service-form";
 import InsuranceSettings from "./insurance-settings";
+import ProductTypeTable from "./product-category";
 
+// --- Types ---
 export interface ShippingRouteData {
   id: number;
   name: string;
   value: number;
 }
 
-// Các loại phí (SURCHARGE, SERVICE, SHIPPING)
 export interface FeeType {
   fee_type: "SURCHARGE" | "SERVICE" | "SHIPPING";
   shipping_route_data: ShippingRouteData[];
 }
 
-// Dữ liệu phí theo tuyến vận chuyển
 export interface FeeCommonData {
   route_code: string; // VD: "JP_VN", "US_VN"
   fee_types: FeeType[];
 }
 
-// Chính sách chung
 export interface GeneralPolicy {
   id: number;
   code: string; // "GENERAL_POLICY"
@@ -52,7 +42,6 @@ export interface GeneralPolicy {
   min_deposit_percent: number;
 }
 
-// Phí theo khu vực vận chuyển
 export interface ShippingZoneFee {
   id: number;
   code: string; // VD: "KV1"
@@ -66,7 +55,7 @@ export interface ShippingZoneFee {
 
 const FeeSettingsPage: React.FC = () => {
   const { t } = useTranslation();
-
+  const [activeKey, setActiveKey] = useState("1");
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
@@ -75,44 +64,55 @@ const FeeSettingsPage: React.FC = () => {
         Quản Lý Phí & Cài Đặt Dịch Vụ Toàn Diện
       </h3>
 
-        <Tabs defaultActiveKey="1">
-      <Tabs.TabPane
-        key="1"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-            Vận Chuyển & Phụ Thu
-          </span>
-        }
-      >
-        <ShippingSurchangeTable />
-      </Tabs.TabPane>
+      <Tabs activeKey={activeKey} onChange={(key) => setActiveKey(key)}>
+        <Tabs.TabPane
+          key="1"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+              Vận Chuyển & Phụ Thu
+            </span>
+          }
+        >
+          {activeKey === "1" && <ShippingSurchangeTable />}
+        </Tabs.TabPane>
 
-      <Tabs.TabPane
-        key="2"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-            Dịch Vụ & Giao Hàng
-          </span>
-        }
-      >
-        <ShippingServiceForm />
-      </Tabs.TabPane>
+        <Tabs.TabPane
+          key="2"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+              Dịch Vụ & Giao Hàng
+            </span>
+          }
+        >
+          {activeKey === "2" && <ShippingServiceForm />}
+        </Tabs.TabPane>
 
-      <Tabs.TabPane
-        key="3"
-        tab={
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-            Bảo Hiểm & Quy Định Chung
-          </span>
-        }
-      >
-        <InsuranceSettings />
-      </Tabs.TabPane>
-    </Tabs>
+        <Tabs.TabPane
+          key="3"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+              Bảo Hiểm & Quy Định Chung
+            </span>
+          }
+        >
+          {activeKey === "3" && <InsuranceSettings />}
+        </Tabs.TabPane>
 
+        <Tabs.TabPane
+          key="4"
+          tab={
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
+              Loại sản phẩm
+            </span>
+          }
+        >
+          {activeKey === "4" && <ProductTypeTable />}
+        </Tabs.TabPane>
+      </Tabs>
     </div>
   );
 };

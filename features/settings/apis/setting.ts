@@ -7,7 +7,19 @@ export const getListExchangRate = async () => {
   return res.data.data;
 };
 
+export const getListExchangRateEachCategory = async (customerGroupId: number) => {
+  const res = await api.get(API_TYPE_CONST.LIST_EXCHANGE_RATE, {
+    params: { customerGroupId }, 
+  });
+  return res.data.data;
+};
+
 export const updateListExchangRate = async (params: UpdateListRateParams) => {
   const res = await api.put(API_TYPE_CONST.UPDATE_EXCHANGE_RATE, params.data);
+  return res.data.data;
+};
+
+export const updateListExchangRateCategory = async (customerGroupId: string, params: UpdateListRateParams) => {
+  const res = await api.put(`${API_TYPE_CONST.UPDATE_EXCHANGE_RATE}/${customerGroupId}`, params.data);
   return res.data.data;
 };

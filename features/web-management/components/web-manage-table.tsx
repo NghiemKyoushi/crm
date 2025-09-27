@@ -135,8 +135,6 @@ const WebsiteManageTable: React.FC = () => {
       dataIndex: "region",
       key: "region",
       render: (region_id: number, record: Website) => {
-        console.log("regionList?.data", regionList?.data, record.region_id);
-
         if (record.region !== null && record.region?.name)
           return record.region.name;
         const regionName = regionList?.data.find(

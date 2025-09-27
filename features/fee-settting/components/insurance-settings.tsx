@@ -18,7 +18,6 @@ const InsuranceSettings: React.FC = () => {
   const [form] = Form.useForm<InsuranceFormValues>();
 
   const onFinish = (values: InsuranceFormValues) => {
-    console.log("Form submitted:", values);
     message.success("Lưu thành công!");
   };
 

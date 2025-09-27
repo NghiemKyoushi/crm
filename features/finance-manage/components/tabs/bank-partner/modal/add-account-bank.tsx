@@ -21,7 +21,6 @@ export default function AddBankAccountModal({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Form values:", values);
       const bank = bankList.find((b) => b.id === values.bank_id);
       const request: BankSettingAccountModel = {
         account_holder: values.account_holder,
@@ -128,8 +127,6 @@ export default function AddBankAccountModal({
               onChange={(value) => {
                 const bank = bankList.find((b) => b.id === value);
                 if (bank) {
-                  console.log("bank", bank);
-
                   form.setFieldsValue({
                     bank_id: bank.id,
                     bank_name: bank.short_name,

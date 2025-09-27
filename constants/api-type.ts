@@ -62,8 +62,9 @@ export const API_TYPE_CONST = {
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
-  LIST_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/get-data`,
-  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/setting/update-data`,
+  DETAIL_ORDER: `${FEATURE}/orders`,
+  LIST_EXCHANGE_RATE: `${FEATURE}/exchange-rate/admin/setting`,
+  UPDATE_EXCHANGE_RATE: `${FEATURE}/exchange-rate/admin/setting`,
   GET_DATA_FROM_LINK:`${FEATURE}/products/get-data-from-url`,
   INSURANCE_PACKAGE:`${FEATURE}/insurance-package`,
   FEE_SETTING:`${FEATURE}/fee-setting`,
@@ -73,5 +74,9 @@ export const API_TYPE_CONST = {
   MATERIAL_TRANSACTIONS_SUMARY:`${FEATURE}/material-transactions/currency-total`,
   MATERIAL_TRANSACTIONS:`${FEATURE}/material-transactions`,
   PRODUCT_CATEGORIES:`${FEATURE}/admin/product-categories`,
-  PRODUCT_FEE: `${FEATURE}/product/fee`
+  PRODUCT_FEE: `${FEATURE}/product/fee`,
+  FEE_GET:`${FEATURE}/fee`,
+  EXCHANGE_RATE:`${FEATURE}/exchange-rate/admin/setting/get-data`,
+  CALCULATE_FEE:`${FEATURE}/fee/calculate-fee`,
+  CREATE_ORDER: `${FEATURE}/admin/orders`,
 } as const;

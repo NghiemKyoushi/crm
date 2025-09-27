@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -31,22 +32,48 @@ import {
 import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
-import { useCreateNewOrder, useListService } from "../../hooks/orderhub";
+import {
+  useCreateNewOrder,
+  useDetailOrder,
+  useListService,
+} from "../../hooks/orderhub";
 import { useListCustomerWithSearch } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TextArea from "antd/es/input/TextArea";
+import TiptapEditor from "../TiptapEditor";
+// import { useEditor, EditorContent } from "@tiptap/react";
+// import StarterKit from "@tiptap/starter-kit";
 
 const { Option } = Select;
 const { Panel } = Collapse;
+
+// const TiptapEditor = ({ value = "", onChange }: { value?: string; onChange?: (html: string) => void }) => {
+//     const editor = useEditor({
+//       extensions: [StarterKit],
+//       immediatelyRender: false,
+//       content: value || "<p></p>",
+//       onUpdate: ({ editor }) => {
+//         onChange?.(editor.getHTML());
+//       },
+//     });
+
+//     return (
+//       <div className="border rounded-md p-2 min-h-[150px]">
+//         <EditorContent editor={editor} />
+//       </div>
+//     );
+//   };
 interface CreateOrderModalProps {
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  orderId: number;
 }
-export default function CreateOrderModal(props: CreateOrderModalProps) {
+export default function EditOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
+  const { data: order } = useDetailOrder(props.orderId);
 
   const { isOpen, onCancel, onConfirm } = props;
   const [form] = Form.useForm();
@@ -63,6 +90,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const deposit = Form.useWatch("deposit", form);
   const feeVnd = Form.useWatch("feeVnd", form);
   const priceVND = Form.useWatch("priceVnd", form);
+  const priceY = Form.useWatch("priceY", form);
+
+  const [rateProduct, setRateProduct] = useState(0);
 
   const totalFee = ((feeVnd + priceVND) * percenDeposit) / 100;
   const handleOk = async () => {
@@ -174,6 +204,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             "priceVnd",
             +form.getFieldValue("priceY") * res.rate_to_vnd
           );
+          setRateProduct(res.rate_to_vnd);
           setPrice(+form.getFieldValue("priceY") * res.rate_to_vnd);
         } catch (err) {
           console.error("Error fetching rate:", err);
@@ -185,11 +216,16 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idProduct, customer]);
 
+  //   useEffect(()=>{
+  //     form.setFieldValue("price",+priceY * rateProduct )
+  //     setPrice(+form.getFieldValue("priceY") * rateProduct)
+  //   },[priceY])
+
   useEffect(() => {
     const fetchFeeService = async () => {
       if (customer) {
         const bodyGetFeeService: RateOrderRequest = {
-          category_fee_id: form.getFieldValue('category'),
+          category_fee_id: form.getFieldValue("category"),
           fee_codes: services,
           price: priceVND ? priceVND : 0,
           product_ids: idProduct ? [idProduct] : [],
@@ -218,11 +254,31 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   }, [listInsurance]);
 
-  useEffect(()=>{
-    if(totalFee)
-    form.setFieldValue("deposit", totalFee);
+  useEffect(() => {
+    if (totalFee) form.setFieldValue("deposit", totalFee);
+  }, [totalFee, percenDeposit]);
 
-  },[totalFee, percenDeposit])
+  useEffect(() => {
+    if (order) {
+      setPrice(order.amount_vnd);
+      setIdProduct(order.metadata.items[0].product.id);
+      form.setFieldsValue({
+        link: order.metadata.items[0]?.product.url,
+        productName: order.metadata.items[0]?.product.map_data.productName,
+        description: order.metadata.items[0]?.product.map_data.description,
+        category: order.metadata.items[0]?.product.id,
+        priceY: order.metadata.items[0]?.product.price,
+        priceVnd: order.amount_vnd,
+        // feeY: order.metadata.infos.fees.find((f) => f.currency_code === "JPY")?.amount ?? 0,
+        // feeVnd: order.metadata.infos.fees.find((f) => f.currency_code === "VND")?.amount ?? 0,
+        customer: order.user_id,
+        deposit: order.deposit_fee,
+        note: order.description,
+        customerName: order.customer_name,
+      });
+    }
+  }, [order, form]);
+
   return (
     <>
       <Modal
@@ -234,7 +290,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             overflowX: "hidden",
           },
         }}
-        title="Tạo Đơn hàng cho Khách hàng"
+        title="Chỉnh sửa Đơn hàng cho Khách hàng"
         open={isOpen}
         onCancel={onCancel}
         centered
@@ -248,7 +304,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             onClick={handleOk}
             className="bg-blue-500"
           >
-            Tạo Đơn hàng
+            Chỉnh sửa đơn hàng
           </Button>,
         ]}
         width={800}
@@ -256,7 +312,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         <Form
           // onValuesChange={(changed, allValues) => {
           //     form.setFieldsValue({
-          //       deposit: totalFee, 
+          //       deposit: totalFee,
           //     });
           // }}
           form={form}
@@ -293,7 +349,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               >
                 <Input className="!h-11" placeholder="" />
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 label="Mô tả Sản phẩm"
                 name="description"
                 rules={[
@@ -301,11 +357,18 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 ]}
                 className="!mb-1"
               >
-                <TextArea
-                  rows={4}
-                  maxLength={500}
-                  placeholder=""
-                />
+
+                <TextArea rows={4} maxLength={500} placeholder="" />
+              </Form.Item> */}
+              <Form.Item
+                label="Mô tả Sản phẩm"
+                name="description"
+                rules={[
+                  { required: true, message: "Vui lòng nhập mô tả sản phẩm!" },
+                ]}
+              >
+                {/* AntD sẽ clone element và pass `value` + `onChange` => TiptapEditor nhận và đồng bộ */}
+                <TiptapEditor />
               </Form.Item>
               <Form.Item
                 label="Loại sản phẩm"
@@ -357,10 +420,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     formatter={(value) =>
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, ",")}
+                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     style={{ display: "flex", alignItems: "center" }}
                     className="!w-full !h-11"
-                    disabled
+                    // disabled
+                    onChange={(e) => {
+                      console.log("rateProduct", rateProduct);
+
+                      form.setFieldValue("priceVnd", +priceY * rateProduct);
+                    }}
                     min={0}
                   />
                 </Form.Item>
@@ -488,21 +556,28 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 label="Khách hàng"
                 name="customer"
                 className="!mb-1"
+                style={{ display: "none" }}
+              >
+                <Input
+                  style={{ display: "flex", alignItems: "center" }}
+                  className="!w-full !h-11"
+                  disabled
+                  min={0}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Khách hàng"
+                name="customerName"
+                className="!mb-1"
                 rules={[
                   { required: true, message: "Vui lòng chọn khách hàng!" },
                 ]}
               >
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Tìm khách hàng theo mã hoặc tên..."
+                <Input
+                  style={{ display: "flex", alignItems: "center" }}
                   className="!w-full !h-11"
-                  filterOption={false} // tắt filter local, dùng API search
-                  onSearch={(value) => setSearchValue(value)} // update searchValue
-                  notFoundContent={
-                    isLoading ? <Spin size="small" /> : "Không có dữ liệu"
-                  }
-                  options={options}
+                  disabled
+                  min={0}
                 />
               </Form.Item>
 
@@ -558,25 +633,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     min={0}
                   />
                 </Form.Item>
-
-                {/* <Form.Item
-                  className="!flex-1 !mb-1"
-                  label="% Cọc"
-                  name="depositPercent"
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, ",")}
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    disabled
-                    placeholder="Tự động tính"
-                  />
-                </Form.Item> */}
               </div>
-
               <Form.Item label="Ghi chú" name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
@@ -638,10 +695,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <div className="flex justify-between text-green-600 font-semibold">
                   <span>Tiền cọc:</span>
                   <span>
-                    {totalFee
-                      ? Number(totalFee).toLocaleString("en-US")
-                      : 0}{" "}
-                    đ
+                    {totalFee ? Number(totalFee).toLocaleString("en-US") : 0} đ
                   </span>
                 </div>
 

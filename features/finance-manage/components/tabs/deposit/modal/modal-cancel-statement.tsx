@@ -40,7 +40,7 @@ const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
       centered
     >
       <div className="mb-3 text-sm">
-        Vui lòng nhập lý do hủy cho giao dịch{" "}
+        Vui lòng nhập lý do hủy{" "}
         <Typography.Text strong className="text-blue-600">
           {transactionCode}
         </Typography.Text>
@@ -57,7 +57,7 @@ const CancelReasonModal: React.FC<CancelReasonModalProps> = ({
           ]}
         >
           <Input.TextArea
-            placeholder="VD: Thông tin chuyển khoản không khớp..."
+            // placeholder="l."
             rows={3}
           />
         </Form.Item>

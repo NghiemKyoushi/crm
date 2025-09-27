@@ -1,22 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Form, Input, Select, Radio, Button } from "antd";
+import { Modal, Form, Input, Select, Radio, Button, InputNumber } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { useQuery } from "@tanstack/react-query";
+import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
+
+const { Option } = Select;
 
 interface ApproveOrderModalProps {
   open: boolean;
   onCancel: () => void;
-  onSubmit: (values: FormValues) => void;
+  onSubmit: (values: FormValuesApprove) => void;
   orderCode: string;
   customerName: string;
 }
 
-interface FormValues {
-  productType: string;
-  codFee: string;
-  adminNote?: string;
+export interface FormValuesApprove {
+  cod_shipping: number;
+  description: string;
+  product_category_id: number;
 }
 
 const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
@@ -38,6 +42,11 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     }
   };
 
+  const { data: categories } = useQuery({
+    queryKey: ["productCategories"],
+    queryFn: getListProductCategory,
+  });
+
   return (
     <Modal
       title="Duyệt đơn hàng"
@@ -48,7 +57,9 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 p-3 rounded mb-2">
-        <h4 className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</h4>
+        <h4 className="font-semibold text-blue-900 !mb-1">
+          Thông tin đơn hàng
+        </h4>
         <p className="!mb-1">
           <strong>Mã đơn:</strong> {orderCode}
         </p>
@@ -60,33 +71,45 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
       <Form layout="vertical" form={form}>
         {/* Loại sản phẩm */}
         <Form.Item
-          name="productType"
+          name="product_category_id"
           label="Loại sản phẩm"
           rules={[{ required: true, message: "Vui lòng chọn loại sản phẩm!" }]}
           className="!mb-3"
         >
           <Select className="!h-11" placeholder="-- Chọn loại sản phẩm --">
-            <Select.Option value="A">Sản phẩm A</Select.Option>
-            <Select.Option value="B">Sản phẩm B</Select.Option>
+            {categories?.map((cat: any) => {
+              return (
+                <>
+                  <Option value={cat.id}>{cat.name}</Option>
+                </>
+              );
+            })}
           </Select>
         </Form.Item>
 
         {/* Phí COD */}
         <Form.Item
-          name="codFee"
+          name="cod_shipping"
           label="Phí COD"
-          rules={[{ required: true, message: "Vui lòng chọn phí COD!" }]}
+          rules={[{ required: true, message: "Vui lòng nhập phí COD!" }]}
           className="!mb-3"
         >
-          <Radio.Group className="!flex !flex-col !gap-2 !h-11">
-            <Radio value="FIXED">Điền phí cố định</Radio>
-            <Radio value="LATER">Đợi tính phí sau</Radio>
-          </Radio.Group>
+          <InputNumber
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            style={{ display: "flex", alignItems: "center" }}
+            className="!w-full !h-11"
+            min={0}
+          />
         </Form.Item>
 
         {/* Ghi chú admin */}
-        <Form.Item name="adminNote" label="Ghi chú admin">
-          <Input.TextArea className="!h-25" placeholder="Ghi chú về việc duyệt đơn..." />
+        <Form.Item  rules={[{ required: true, message: "Vui lòng nhập ghi chú" }]} name="description" label="Ghi chú admin">
+          <Input.TextArea
+            className="!h-25"
+            placeholder="Ghi chú về việc duyệt đơn..."
+          />
         </Form.Item>
 
         {/* Footer */}
