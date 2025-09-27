@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Form, InputNumber, Button, Card, Alert, message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +11,14 @@ import {
   faUser,
   faYenSign,
 } from "@fortawesome/free-solid-svg-icons";
+import { useParams } from "next/navigation";
+import { CurrencyRate } from "@/types/setting";
+import {
+  getListExchangRateEachCategory,
+  updateListExchangRate,
+  updateListExchangRateCategory,
+} from "@/features/settings/apis/setting";
+import { toast } from "react-toastify";
 
 interface ExchangeRateFormValues {
   usdToVnd: number;
@@ -18,11 +26,53 @@ interface ExchangeRateFormValues {
 }
 
 const ExchangeRateSettings: React.FC = () => {
+  const params = useParams();
+  const id = params.id;
   const [form] = Form.useForm<ExchangeRateFormValues>();
+  const [rateList, setRateList] = useState<CurrencyRate[]>([]);
+  const [rates, setRates] = useState<CurrencyRate[]>(rateList);
+
+  const handleGetListRate = async (idCate: number) => {
+    const listRateExchange = await getListExchangRateEachCategory(+idCate);
+    setRateList(listRateExchange);
+    setRates(listRateExchange);
+  };
+  useEffect(() => {
+    if (id) {
+      handleGetListRate(+id);
+    }
+  }, [id]);
 
   const onFinish = (values: ExchangeRateFormValues) => {
     console.log("Exchange Rate Saved:", values);
     message.success("Cập nhật tỷ giá thành công!");
+  };
+
+  const handleChangeRate = (value: number | null, index: number) => {
+    setRates((prev) => {
+      const newRates = [...prev];
+      newRates[index] = {
+        ...newRates[index],
+        rate_to_vnd: value ?? 0,
+      };
+      return newRates;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      if (id)
+        await updateListExchangRateCategory(id.toString(), {
+          data: rates.map((r) => ({
+            id: r.id, // cần id
+            rate_to_vnd: r.rate_to_vnd,
+            currency_code: r.currency_code,
+          })),
+        });
+      toast.success("Cập nhật tỉ giá thành công!");
+    } catch (e) {
+      console.error("Update failed", e);
+    }
   };
 
   return (
@@ -38,7 +88,7 @@ const ExchangeRateSettings: React.FC = () => {
         extra={
           <Button
             type="primary"
-            onClick={() => form.submit()}
+            onClick={() => handleSave()}
             className="!bg-green-600 hover:!bg-green-700"
           >
             <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> Lưu Tỷ
@@ -66,8 +116,67 @@ const ExchangeRateSettings: React.FC = () => {
         {/* Form */}
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* USD -> VND */}
-            <Card className="!bg-white !rounded-lg !border !shadow-sm">
+            {rates &&
+              rates.map((item: CurrencyRate, index) => {
+                return (
+                  <>
+                    <Card className="!bg-white !rounded-lg !border !shadow-sm">
+                      <div className="font-semibold text-gray-800 mb-4 flex items-center text-base">
+                        <FontAwesomeIcon
+                          icon={
+                            item.currency_code === "USD"
+                              ? faDollarSign
+                              : faYenSign
+                          }
+                          className="w-4 h-4 text-green-600"
+                        />
+                        Tỷ giá {item.currency_code} → VNĐ
+                      </div>
+                      <p className="block text-gray-600 text-sm font-medium">
+                        1 {item.currency_code} = ? VNĐ
+                      </p>
+
+                      {/* <Form.Item
+                name="usdToVnd"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tỷ giá USD → VNĐ" },
+                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
+                ]}
+              > */}
+                      <InputNumber
+                        className="!w-full !h-[46px]"
+                        min={0}
+                        formatter={(value) =>
+                          `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                        }
+                        value={item.rate_to_vnd}
+                        placeholder="Nhập tỷ giá USD → VNĐ"
+                        onChange={(value) => handleChangeRate(value, index)}
+                      />
+                      {/* </Form.Item> */}
+
+                      <div className="text-xs text-gray-500 mt-2 space-y-1">
+                        <p>
+                          <FontAwesomeIcon
+                            icon={faClock}
+                            className="w-4 h-4 text-gray-500"
+                          />
+                          Cập nhật lần cuối: 23/09/2025 14:30
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="w-4 h-4 text-gray-500"
+                          />
+                          Được cập nhật bởi:
+                          <span className="font-semibold">Admin</span>
+                        </p>
+                      </div>
+                    </Card>
+                  </>
+                );
+              })}
+            {/* <Card className="!bg-white !rounded-lg !border !shadow-sm">
               <div className="font-semibold text-gray-800 mb-4 flex items-center text-base">
                 <FontAwesomeIcon
                   icon={faDollarSign}
@@ -110,10 +219,10 @@ const ExchangeRateSettings: React.FC = () => {
                   <span className="font-semibold">Admin</span>
                 </p>
               </div>
-            </Card>
+            </Card> */}
 
             {/* JPY -> VND */}
-            <Card>
+            {/* <Card>
               <div className="font-semibold text-gray-800 mb-4 flex items-center  text-base">
                 <FontAwesomeIcon
                   icon={faYenSign}
@@ -156,7 +265,7 @@ const ExchangeRateSettings: React.FC = () => {
                   <span className="font-semibold">Admin</span>
                 </p>
               </div>
-            </Card>
+            </Card> */}
           </div>
         </Form>
       </Card>

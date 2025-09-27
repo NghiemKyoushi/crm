@@ -19,4 +19,5 @@ export interface UpdateListRateParams{
 export interface ListRateParams{
   id: number;
   rate_to_vnd: number;
+  currency_code: string;
 }

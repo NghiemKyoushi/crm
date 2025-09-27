@@ -28,7 +28,7 @@ export const createMinusTopupManual = async (body: DepositRequest) => {
 };
 
 export const getListBankCreateAccount = async (params: BankDepositRequest) => {
-  const res = await api.get(API_TYPE_CONST.BANK_LIST_DEPOSIT, { params });
+  const res = await api.get(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}`, { params });
   return res.data.data;
 };
 

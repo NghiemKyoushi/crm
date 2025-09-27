@@ -18,6 +18,7 @@ import {
   faMoneyBill,
   faHeadset,
   faYenSign,
+  faWarehouse,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -86,20 +87,24 @@ export const menuPermissions: Record<string, string[]> = {
   "/fee-setting": ["product.view", "product.create", "product.edit", "system.admin"],
 
   // Surcharge - product and pricing
-  "/surchange": ["product.view", "product.create", "product.edit", "system.admin"]
+  "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
+  //
+  "/operation-management":["system.admin"]
 };
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
+  { key: "/operation-management", icon: faWarehouse, label: "operation" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   // { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
-  { key: "/fee-setting", icon: faTags, label: "products" },
+  // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
-  { key: "/website-manage", icon: faGavel, label: "action" },
+  // { key: "/website-manage", icon: faGavel, label: "action" },
+
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {

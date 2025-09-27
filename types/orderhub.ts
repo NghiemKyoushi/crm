@@ -14,31 +14,33 @@ export type OrderStatus =
   | "ARRIVED_VN"
   | "CHECKING"
   | "WAITING_PAYMENT"
-  | "READY_TO_SHIP" | "ORDER_DELIVERED";
+  | "READY_TO_SHIP"
+  | "ORDER_DELIVERED";
 
 export enum OrderStatusType {
-  PENDING = "PENDING", // Đợi duyệt
-  DEPOSIT_RECEIVED = "DEPOSIT_RECEIVED", // Đã nhận đặt cọc
-  ORDER_CONFIRMED = "ORDER_CONFIRMED", // Đơn hàng đã được xác nhận
-  ITEM_PURCHASED = "ITEM_PURCHASED", // Đã mua hàng
-  ITEM_PURCHASED_SUCCESSFULLY = "ITEM_PURCHASED_SUCCESSFULLY", // Mua hàng thành công
-  ITEM_IN_JAPAN_WAREHOUSE = "ITEM_IN_JAPAN_WAREHOUSE", // Hàng ở kho Nhật
-  ITEM_IN_TRANSIT_TO_VIETNAM = "ITEM_IN_TRANSIT_TO_VIETNAM", // Hàng đang vận chuyển về Việt Nam
-  ITEM_ARRIVED_VIETNAM_WAREHOUSE = "ITEM_ARRIVED_VIETNAM_WAREHOUSE", // Hàng đã về kho Việt Nam
-  READY_FOR_DELIVERY = "READY_FOR_DELIVERY", // Hàng sẵn sàng giao
-  ORDER_DELIVERED = "ORDER_DELIVERED", // Đơn hàng đã được giao
+  PENDING_APPROVAL = "PENDING", // Đợi duyệt
+  PENDING_DEPOSIT = "PENDING_DEPOSIT", // Đợi đặt cọc
+  DEPOSIT_PAID = "DEPOSIT_PAID", // Đã đặt cọc (Client only)
+  PURCHASED = "PURCHASED", // Đã mua hàng
+  ARRIVED_JP_WAREHOUSE = "ARRIVED_JP_WAREHOUSE", // Về kho Nhật
+  ARRIVED_VN_WAREHOUSE = "ARRIVED_VN_WAREHOUSE", // Hàng về kho Việt
+  UNDER_INSPECTION = "UNDER_INSPECTION", // Đang kiểm hàng (Admin only)
+  PENDING_PAYMENT = "PENDING_PAYMENT", // Đợi thanh toán
+  READY_TO_SHIP = "READY_TO_SHIP", // Sẵn sàng chuyển
+  SHIPPED = "SHIPPED", // Đã chuyển
+  SHIPPING_REQUEST_CLIENT = "SHIPPING_REQUEST_CLIENT", // Tạo yêu cầu chuyển hàng
+  CANCELED="CANCELED" // đã huỷ 
 }
-
 
 export interface Invoice {
   id: number;
   invoice_no: string;
   user_id: number;
   metadata: InvoiceMetadata;
-  amount: number;        // Tổng đơn hàng
-  amount_vnd: number;    // Tổng theo VND
-  deposit_amount?: number;  // Số tiền đặt cọc
-  remain_amount?: number;   // Số tiền còn lại
+  amount: number; // Tổng đơn hàng
+  amount_vnd: number; // Tổng theo VND
+  deposit_amount?: number; // Số tiền đặt cọc
+  remain_amount?: number; // Số tiền còn lại
   description: string | null;
   status: string;
   created_by: number;
@@ -47,12 +49,16 @@ export interface Invoice {
   created_by_name: string;
 
   // Fake fields để map UI
-  customer_code?: string;  // SC244
-  product_name?: string;   // iPhone 15 Pro Max
-  source?: string;         // Amazon JP
-  purchase_type?: string;  // Mua thẳng / Đấu giá
-  tracking_code?: string;  // JP1234567890
-  weight?: string;         // 2.1kg
+  customer_code?: string; // SC244
+  product_name?: string; // iPhone 15 Pro Max
+  source?: string; // Amazon JP
+  purchase_type?: string; // Mua thẳng / Đấu giá
+  tracking_code?: string; // JP1234567890
+  weight?: string; // 2.1kg
+  is_user_created: boolean;
+  tracking_other?: string;
+  tracking_vn?:string;
+  take_photo: boolean;
 }
 
 export interface InvoiceMetadata {
@@ -130,11 +136,29 @@ export interface OrderFeeRequest {
   description: string;
   user_id: number;
   deposit_fee: number;
-  category_product_id: number;
+  product_category_id: number;
 }
 
 export interface FeeServiceCheck {
-  fee: number,
-  fee_vnd: number,
-  min_deposit_percent: number
+  fee: number;
+  fee_vnd: number;
+  min_deposit_percent: number;
+}
+
+export interface ApproveOrderModel {
+  cod_shipping: number;
+  description: string;
+  product_category_id: number;
+}
+
+export interface TrackingWeightInfo {
+  weight: number;        
+  weight_fee: number;    
+  description: string; 
+}
+
+export interface TrackingWeightInfo {
+  weight: number;        
+  weight_fee: number;    
+  description: string; 
 }

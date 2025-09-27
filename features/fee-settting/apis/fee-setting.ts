@@ -64,9 +64,7 @@ export const getListProductType = async (params: WebsiteParams) => {
   return res.data;
 };
 
-export const createNewProductType = async (body: CategoryItem) => {
-  console.log('api');
-  
+export const createNewProductType = async (body: CategoryItem) => {  
   const res = await api.post(API_TYPE_CONST.PRODUCT_CATEGORIES, body);
   return res.data;
 };

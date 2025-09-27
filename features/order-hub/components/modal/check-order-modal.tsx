@@ -5,7 +5,6 @@ import { Modal, Form, InputNumber, Radio, Input, Button, Alert } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
-  faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface CheckOrderModalProps {
@@ -61,9 +60,9 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       width={650}
       styles={{
         body: {
-          maxHeight: "80vh", 
-          overflowY: "auto", 
-          paddingRight: "8px", 
+          maxHeight: "80vh",
+          overflowY: "auto",
+          paddingRight: "8px",
         },
       }}
       centered
@@ -94,15 +93,23 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
               min={0}
               placeholder="0.0"
               step={0.1}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
             />
           </Form.Item>
-          <Form.Item label="Phí cân nặng (VND/kg)">
-            <InputNumber className="!w-full" value={feePerKg} />
+          <Form.Item name="feePerKg" label="Phí cân nặng (VND/kg)">
+            <InputNumber
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              className="!w-full"
+            />
           </Form.Item>
         </div>
 
         {/* Cảnh báo COD */}
-        <Alert
+        {/* <Alert
           message={
             <p className="font-semibold text-yellow-800 text-xs m-0">
               Phí COD chưa được thiết lập
@@ -122,10 +129,10 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
             />
           }
           className="!py-1 !px-2 !pt-3" // thu nhỏ chiều cao
-        />
+        /> */}
 
         {/* Phí COD */}
-        <Form.Item
+        {/* <Form.Item
           className="!mt-2"
           name="codFee"
           label="Phí COD"
@@ -135,10 +142,10 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
             <Radio value="FIXED">Điền phí cố định</Radio>
             <Radio value="LATER">Đợi tính phí sau</Radio>
           </Radio.Group>
-        </Form.Item>
+        </Form.Item> */}
 
         {/* Tính toán phí */}
-        <div className="bg-gray-50 rounded p-3 mb-4">
+        {/* <div className="bg-gray-50 rounded p-3 mb-4">
           <p className="font-semibold text-gray-700 mb-3">Tính toán phí</p>
           <p className="space-y-2 text-sm flex flex-row justify-between">
             Phí cân nặng: <span>{weightFee.toLocaleString()} đ</span> 
@@ -149,11 +156,14 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
           <p className="text-red-600 font-semibold flex flex-row justify-between">
             Tổng phí phát sinh: <span>{weightFee.toLocaleString()} đ</span>  
           </p>
-        </div>
+        </div> */}
 
         {/* Ghi chú */}
         <Form.Item name="note" label="Ghi chú kiểm hàng">
-          <Input.TextArea className="!h-25" placeholder="Ghi chú về tình trạng hàng hóa, phí phát sinh..." />
+          <Input.TextArea
+            className="!h-25"
+            placeholder="Ghi chú về tình trạng hàng hóa, phí phát sinh..."
+          />
         </Form.Item>
 
         {/* Footer */}

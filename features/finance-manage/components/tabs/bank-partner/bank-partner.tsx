@@ -150,9 +150,7 @@ export default function BankPartnerSetting() {
       render: (_: any, record: BankAccount) => (
         <div className="flex gap-2">
           <button
-            onClick={() => {
-                console.log('record', record);
-                
+            onClick={() => {                
               setEditingRecord(record);
               setOpen(true);
             }}

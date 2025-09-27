@@ -54,6 +54,7 @@ const DepositTable = (props: DepositTableProps) => {
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
   const [histories, setHistories] = useState<TransactionHistory[]>([]);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [selectedCode, setSelectedCode] = useState<string>("");
 
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<DepositItem | null>(
@@ -368,6 +369,7 @@ const DepositTable = (props: DepositTableProps) => {
                 className="!bg-red-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
                 size="small"
                 onClick={() => {
+                  setSelectedCode(record.deposit_code)
                   setSelectedId(record.id);
                   setIsOpenCancel(true);
                 }}
@@ -478,7 +480,7 @@ const DepositTable = (props: DepositTableProps) => {
       />
 
       <CancelReasonModal
-        transactionCode="N-0805-1"
+        transactionCode={selectedCode}
         onClose={() => setIsOpenCancel(false)}
         open={isOpenCancel}
         onConfirm={handleCancel}

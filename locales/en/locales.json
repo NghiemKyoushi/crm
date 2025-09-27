@@ -30,7 +30,8 @@
     "settings": "System Settings",
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
-    "partnerManagement": "Partner management"
+    "partnerManagement": "Partner management",
+    "operation": "Operation management"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -252,7 +253,8 @@
     "cancel": "Cancel",
     "error": "An error occurred",
     "delete": "Delete",
-    "edit":"Edit"
+    "edit":"Edit",
+    "save":"Save"
   },
   "websiteManage": {
     "table": {

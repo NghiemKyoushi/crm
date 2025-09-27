@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
-import { Modal, Form, Input, Select, Button } from "antd";
-import { TruckOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Modal, Form, Input, Upload, Button, message } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { uploadAvatar } from "@/features/user-profile/hooks/user-profile";
 
 interface TrackingModalProps {
   open: boolean;
@@ -19,10 +20,52 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   customerName,
 }) => {
   const [form] = Form.useForm();
-
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [uploadedIds, setUploadedIds] = useState<number[]>([]);
   const handleFinish = (values: any) => {
-    onSubmit(values);
+    onSubmit({
+      images: uploadedIds,
+    });
+    form.resetFields();
+    setFileList([]);
   };
+
+  const handleChange = ({ fileList }: { fileList: any[] }) => {
+    setFileList(fileList);
+  };
+
+  const beforeUpload = async (file: File) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("Chỉ được upload file ảnh!");
+      return Upload.LIST_IGNORE;
+    }
+    if (file.size / 1024 / 1024 > 5) {
+      message.error("Ảnh phải nhỏ hơn 5MB!");
+      return Upload.LIST_IGNORE;
+    }
+
+    try {
+      const newId = await uploadAvatar(file);
+      setUploadedIds((prev) => [...prev, newId]);
+
+      setFileList((prev) => [
+        ...prev,
+        {
+          uid: String(Date.now()),
+          name: file.name,
+          status: "done",
+          url: URL.createObjectURL(file), 
+        },
+      ]);
+      return false; 
+    } catch (err) {
+      message.error("Upload thất bại");
+      return Upload.LIST_IGNORE;
+    }
+  };
+
+  console.log('uploadedIds', uploadedIds);
 
   return (
     <Modal
@@ -32,9 +75,10 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
       footer={null}
       width={600}
       centered
+      destroyOnClose
     >
       {/* Thông tin đơn hàng */}
-      <div className="bg-blue-50 rounded p-3 mb-2">
+      <div className="bg-blue-50 rounded p-3 mb-4">
         <p className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</p>
         <p className="!mb-1">
           <span className="font-semibold">Mã đơn:</span> {orderCode}
@@ -44,64 +88,38 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
         </p>
       </div>
 
-      {/* Form */}
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFinish}
-        initialValues={{}}
-        className="!mb-2"
-
-      >
-        {/* Mã tracking */}
-        <Form.Item
-          label="Mã tracking (tùy chọn)"
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
+        {/* <Form.Item
           name="trackingCode"
-          rules={[
-            {
-              pattern: /^[A-Za-z0-9-]*$/,
-              message: "Mã tracking không hợp lệ",
-            },
-          ]}
-          className="!mb-2"
+          label="Mã tracking"
+          rules={[{ required: true, message: "Vui lòng nhập mã tracking!" }]}
         >
-          <Input className="!h-11" placeholder="VD: 1234567890123" />
-        </Form.Item>
+          <Input placeholder="Nhập mã tracking" />
+        </Form.Item> */}
 
-        {/* Nhà vận chuyển */}
-        <Form.Item
-        className="!mb-2"
-
-          label="Nhà vận chuyển"
-          name="carrier"
-          rules={[{ required: true, message: "Vui lòng chọn nhà vận chuyển" }]}
-        >
-          <Select className="!h-11" placeholder="-- Chọn nhà vận chuyển --">
-            <Select.Option value="ghn">Giao Hàng Nhanh</Select.Option>
-            <Select.Option value="ghtk">Giao Hàng Tiết Kiệm</Select.Option>
-            <Select.Option value="vtpost">Viettel Post</Select.Option>
-            <Select.Option value="vnpost">VNPost</Select.Option>
-          </Select>
-        </Form.Item>
-
-        {/* Ghi chú */}
-        <Form.Item label="Ghi chú" name="note">
-          <Input.TextArea
-            placeholder="Ghi chú về việc vận chuyển..."
-            rows={3}
-          />
-        </Form.Item>
-
-        {/* Footer Buttons */}
-        <div className="flex justify-end gap-3">
-          <Button onClick={onCancel}>Hủy</Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="bg-purple-600 hover:bg-purple-700"
-            icon={<TruckOutlined />}
+        <Form.Item label="Ảnh chứng từ / ảnh sản phẩm">
+          <Upload
+            listType="picture-card"
+            fileList={fileList}
+            onChange={handleChange}
+            beforeUpload={beforeUpload}
+            multiple
           >
-            Cập nhật tracking
+            {fileList.length >= 10 ? null : (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Tải lên</div>
+              </div>
+            )}
+          </Upload>
+        </Form.Item>
+
+        <div className="flex justify-end gap-2">
+          <Button onClick={onCancel} className="mr-2">
+            Hủy
+          </Button>
+          <Button type="primary" htmlType="submit">
+            Lưu
           </Button>
         </div>
       </Form>

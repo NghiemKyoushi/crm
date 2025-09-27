@@ -28,7 +28,6 @@ const SettingsDetail = () => {
 
   const handleGetListRate = async () => {
     const listRateExchange = await getListExchangRate();
-    console.log("listRateExchange", listRateExchange);
     setRateList(listRateExchange);
     setRates(listRateExchange);
   };
@@ -50,12 +49,11 @@ const SettingsDetail = () => {
 
   const handleSave = async () => {
     try {
-      console.log("rates", rates);
-
       await updateListExchangRate({
         data: rates.map((r) => ({
           id: r.id, // cần id
           rate_to_vnd: r.rate_to_vnd,
+          currency_code: r.currency_code
         })),
       });
       toast.success("Cập nhật tỉ giá thành công!");
@@ -96,6 +94,9 @@ const SettingsDetail = () => {
                   >
                     <p className="!mb-1">1 {item.currency_code} = (VND)</p>
                     <InputNumber
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       value={item.rate_to_vnd}
                       onChange={(value) => handleChangeRate(value, index)}
                       className="!w-full"
@@ -130,16 +131,19 @@ const SettingsDetail = () => {
         </div>
         <div className="bg-green-50 border-l-4 border-green-400 rounded-lg p-3">
           <p className="font-semibold text-green-700 !mb-1">
-          <FontAwesomeIcon icon={faPhone}/> Thông tin Liên hệ
+            <FontAwesomeIcon icon={faPhone} /> Thông tin Liên hệ
           </p>
           <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-          <FontAwesomeIcon icon={faMapMarked}/> N02-T3 Khu Ngoại Giao Đoàn, Xuân Tảo, Bắc Từ Liêm, Hà Nội
+            <FontAwesomeIcon icon={faMapMarked} /> N02-T3 Khu Ngoại Giao Đoàn,
+            Xuân Tảo, Bắc Từ Liêm, Hà Nội
           </p>
           <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-          <FontAwesomeIcon icon={faPhone}/> Hotline: <span className="font-bold">096.55.44444</span>
+            <FontAwesomeIcon icon={faPhone} /> Hotline:{" "}
+            <span className="font-bold">096.55.44444</span>
           </p>
           <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-          <FontAwesomeIcon icon={faTeletype}/> Zalo: <span className="font-bold">097.11.68686</span>
+            <FontAwesomeIcon icon={faTeletype} /> Zalo:{" "}
+            <span className="font-bold">097.11.68686</span>
           </p>
         </div>
         <div className="w-full flex justify-end mt-2 ">
@@ -162,19 +166,19 @@ const SettingsDetail = () => {
             riêng cho từng loại khách hàng sẽ ghi đè lên các cài đặt này.
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ul className="list-disc pl-5 text-gray-700">
-                        <li>Phí mua hộ Mỹ: 4%</li>
-                        <li>Phí mua hộ Nhật: từ 3%</li>
-                        <li>Phí vận chuyển quốc tế</li>
-                        <li>Phụ phí theo loại sản phẩm</li>
-                    </ul>
-                    <ul className="list-disc pl-5 text-gray-700">
-                        <li>Phí gia cố: 5.000 VNĐ/Kg</li>
-                        <li>Phí bảo hiểm: 3%</li>
-                        <li>Phí giao hàng Hà Nội</li>
-                        <li>Phí lưu kho: 1.000 VNĐ/kg/ngày</li>
-                    </ul>
-                </div>
+            <ul className="list-disc pl-5 text-gray-700">
+              <li>Phí mua hộ Mỹ: 4%</li>
+              <li>Phí mua hộ Nhật: từ 3%</li>
+              <li>Phí vận chuyển quốc tế</li>
+              <li>Phụ phí theo loại sản phẩm</li>
+            </ul>
+            <ul className="list-disc pl-5 text-gray-700">
+              <li>Phí gia cố: 5.000 VNĐ/Kg</li>
+              <li>Phí bảo hiểm: 3%</li>
+              <li>Phí giao hàng Hà Nội</li>
+              <li>Phí lưu kho: 1.000 VNĐ/kg/ngày</li>
+            </ul>
+          </div>
         </div>
 
         <div className="absolute bottom-4 left-4 right-4">
@@ -229,7 +233,7 @@ const SettingsDetail = () => {
         />
         <div className="bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
           <p className="font-semibold text-red-700 !mb-1">
-            <FontAwesomeIcon icon={faBan}/> Hàng hóa Không nhận vận chuyển
+            <FontAwesomeIcon icon={faBan} /> Hàng hóa Không nhận vận chuyển
           </p>
           <p className="text-sm text-red-700 leading-relaxed">
             Hàng dạng xịt, hàng dễ cháy nổ, vũ khí, văn hóa phẩm đồi trụy, thiết

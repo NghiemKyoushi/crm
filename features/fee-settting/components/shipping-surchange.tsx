@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Input,
-  Button,
-  Select,
-  InputNumber,
-  message,
-} from "antd";
+import { Table, Input, Button, Select, InputNumber, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,14 +14,18 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getListProductCategory } from "../apis/fee-setting";
 import { useListMaterial, useUpdateShipping } from "../hooks/fee-setting";
-import {
-  MaterialItem,
-  ShippingConditionAdd,
-} from "@/types/fee-setting";
+import { MaterialItem, ShippingConditionAdd } from "@/types/fee-setting";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
-export default function ShippingSurchangeTable() {
+interface ShippingSurchangeTableProps {
+  isCategory?: boolean;
+  idCategory?: number;
+}
+export default function ShippingSurchangeTable(
+  props: ShippingSurchangeTableProps
+) {
+  const { idCategory, isCategory } = props;
   const { t } = useTranslation();
 
   const [data, setData] = useState<Record<number, MaterialItem[]>>({});
@@ -133,7 +130,7 @@ export default function ShippingSurchangeTable() {
         value_data: item.value_data ? item.value_data.toString() : "0", // number -> string
         value_shipping_data: item.value_shipping_data?.toString() ?? "", // hoặc logic khác bạn muốn
         status: item.status,
-        customer_group_id: undefined, // nếu có thể map thêm field này
+        customer_group_id: isCategory ? idCategory : undefined, // nếu có thể map thêm field này
       };
     });
     updateShippingMutation.mutate(
@@ -288,17 +285,18 @@ export default function ShippingSurchangeTable() {
           );
         }
 
-
         return (
           <InputNumber<string>
             className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
             value={
               record.condition_type === "GT" || record.condition_type === "GTE"
                 ? record.price_from?.toString()
-                : record.condition_type === "LT" || record.condition_type === "LTE"
-                  ? record.price_to?.toString()
-                  : ""
-            } step={0.01}
+                : record.condition_type === "LT" ||
+                  record.condition_type === "LTE"
+                ? record.price_to?.toString()
+                : ""
+            }
+            step={0.01}
             stringMode
             formatter={(value) =>
               value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
@@ -306,16 +304,24 @@ export default function ShippingSurchangeTable() {
             parser={(value) => (value ? value.replace(/,/g, "") : "")}
             onChange={(value) => {
               let fieldCheck = "";
-              if (record.condition_type === "GT" || record.condition_type === "GTE") {
-                fieldCheck = 'price_from'
-              } else if (record.condition_type === "LT" || record.condition_type === "LTE") {
-                fieldCheck = 'price_to'
-
+              if (
+                record.condition_type === "GT" ||
+                record.condition_type === "GTE"
+              ) {
+                fieldCheck = "price_from";
+              } else if (
+                record.condition_type === "LT" ||
+                record.condition_type === "LTE"
+              ) {
+                fieldCheck = "price_to";
               }
-              handleChange(+route, record.id.toString(), fieldCheck, value ?? 0)
-
-            }
-            }
+              handleChange(
+                +route,
+                record.id.toString(),
+                fieldCheck,
+                value ?? 0
+              );
+            }}
           />
         );
       },
@@ -456,7 +462,9 @@ export default function ShippingSurchangeTable() {
           value={val}
           onChange={(e) => {
             const v = e.target.value.trim();
-            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i);
+            const match = v.match(
+              /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
+            );
             if (!match) return;
             handleChange(
               +route,
@@ -519,10 +527,11 @@ export default function ShippingSurchangeTable() {
                       ? faFlagUsa
                       : faFlag
                   }
-                  className={`  mr-2 w-4 h-4 ${routeNames[Number(routeId)] === "US -> VN"
-                    ? "!text-red-600"
-                    : "!text-blue-600"
-                    }`}
+                  className={`  mr-2 w-4 h-4 ${
+                    routeNames[Number(routeId)] === "US -> VN"
+                      ? "!text-red-600"
+                      : "!text-blue-600"
+                  }`}
                 />
                 Bảng Giá Tuyến {routeNames[Number(routeId)]}
               </h2>
