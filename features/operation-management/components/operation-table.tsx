@@ -163,7 +163,11 @@ const ProductManagement: React.FC = () => {
             text = status;
         }
 
-        return <Tag color={color}>{text}</Tag>;
+        return (
+          <Tag key={color} color={color}>
+            {text}
+          </Tag>
+        );
       },
     },
     {
@@ -179,11 +183,12 @@ const ProductManagement: React.FC = () => {
         const actions: React.ReactNode[] = [];
         actions.push(
           <Button
+            key={1}
             size="small"
             className="!bg-blue-500 !text-white !border-0 !text-xs"
             onClick={() => {
-            //   setOpenDetail(true);
-            //   setOrderDetail(record);
+              //   setOpenDetail(true);
+              //   setOrderDetail(record);
             }}
           >
             Đã chuyển

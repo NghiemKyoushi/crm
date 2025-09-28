@@ -78,10 +78,10 @@ export const trackingToJp = async (id: string, tracking: string) => {
   return res.data.data;
 };
 
-export const trackingToVn = async (id: string, image_ids: Array<number>) => {
+export const trackingToVn = async (id: string, body: {image_ids?: Array<number>, is_repacked?: boolean, count_verify?: number}) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/arrived-vn-warehouse/${id}`,
-    { image_ids }
+    body
   );
   return res.data.data;
 };

@@ -100,7 +100,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       await form.validateFields();
       if (idProduct && insurance) {
         const bodyNewOrder: OrderFeeRequest = {
-          data: [{ product_id: idProduct, count: 1 }],
+          data: [
+            {
+              product_id: idProduct,
+              count: 1,
+              description: form.getFieldValue("description"),
+              price: priceY,
+              name: form.getFieldValue("productName"),
+            },
+          ],
           deposit_fee: deposit,
           description: form.getFieldValue("note"),
           fee_codes: services,

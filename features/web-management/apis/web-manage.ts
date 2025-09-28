@@ -26,3 +26,8 @@ export const listRegion = async () => {
   const res = await api.get(`${API_TYPE_CONST.LIST_REGION}`);
   return res.data;
 };
+
+export const listRoute = async () => {
+  const res = await api.get(`${API_TYPE_CONST.SHIP_ROUTE}`);
+  return res.data;
+};

@@ -1,8 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { Modal, Form, Input, Upload, Button, message } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Upload,
+  Button,
+  message,
+  Checkbox,
+  InputNumber,
+} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { uploadAvatar } from "@/features/user-profile/hooks/user-profile";
+import { toast } from "react-toastify";
 
 interface TrackingModalProps {
   open: boolean;
@@ -10,6 +20,9 @@ interface TrackingModalProps {
   onSubmit: (values: any) => void;
   orderCode: string;
   customerName: string;
+  is_verify_count: boolean;
+  is_repacked: boolean;
+  take_photo: boolean;
 }
 
 const TrackingModal: React.FC<TrackingModalProps> = ({
@@ -18,16 +31,25 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   onSubmit,
   orderCode,
   customerName,
+  is_verify_count,
+  is_repacked,
+  take_photo,
 }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<any[]>([]);
   const [uploadedIds, setUploadedIds] = useState<number[]>([]);
   const handleFinish = (values: any) => {
-    onSubmit({
-      images: uploadedIds,
-    });
-    form.resetFields();
-    setFileList([]);
+    console.log("values", values);
+   if(take_photo && uploadedIds.length === 0){
+    toast.warning("Vui lòng upload ảnh lên")
+   } 
+    // onSubmit({
+    //   isRepackage: values.is_repacked,
+    //   images: uploadedIds,
+    //   count: values.count
+    // });
+    // form.resetFields();
+    // setFileList([]);
   };
 
   const handleChange = ({ fileList }: { fileList: any[] }) => {
@@ -55,17 +77,17 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
           uid: String(Date.now()),
           name: file.name,
           status: "done",
-          url: URL.createObjectURL(file), 
+          url: URL.createObjectURL(file),
         },
       ]);
-      return false; 
+      return false;
     } catch (err) {
       message.error("Upload thất bại");
       return Upload.LIST_IGNORE;
     }
   };
 
-  console.log('uploadedIds', uploadedIds);
+  console.log("uploadedIds", uploadedIds);
 
   return (
     <Modal
@@ -89,30 +111,52 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
       </div>
 
       <Form form={form} layout="vertical" onFinish={handleFinish}>
-        {/* <Form.Item
-          name="trackingCode"
-          label="Mã tracking"
-          rules={[{ required: true, message: "Vui lòng nhập mã tracking!" }]}
-        >
-          <Input placeholder="Nhập mã tracking" />
-        </Form.Item> */}
-
-        <Form.Item label="Ảnh chứng từ / ảnh sản phẩm">
-          <Upload
-            listType="picture-card"
-            fileList={fileList}
-            onChange={handleChange}
-            beforeUpload={beforeUpload}
-            multiple
+        {is_verify_count && (
+          <Form.Item
+            name="count"
+            label="Kiểm đếm"
+            rules={[{ required: true, message: "Vui lòng nhập kiểm đếm!" }]}
           >
-            {fileList.length >= 10 ? null : (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Tải lên</div>
-              </div>
-            )}
-          </Upload>
-        </Form.Item>
+            <InputNumber
+              style={{ display: "flex", alignItems: "center" }}
+              className="!w-full !h-11"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value: any) => value.replace(/[^\d.]/g, "")}
+              placeholder="kiểm đếm"
+            />
+          </Form.Item>
+        )}
+
+        {is_repacked && (
+          <Form.Item
+            name="is_repacked"
+            valuePropName="checked"
+            rules={[{ required: true, message: "Vui lòng chọn Repackage!" }]}
+          >
+            <Checkbox><span className="font-semibold">Repackage</span></Checkbox>
+          </Form.Item>
+        )}
+
+        {take_photo && (
+          <Form.Item label="Ảnh chứng từ / ảnh sản phẩm">
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleChange}
+              beforeUpload={beforeUpload}
+              multiple
+            >
+              {fileList.length >= 10 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+        )}
 
         <div className="flex justify-end gap-2">
           <Button onClick={onCancel} className="mr-2">

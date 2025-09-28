@@ -168,7 +168,7 @@ const OrderDetailModal = ({
         text = status;
     }
 
-    return <Tag color={color}>{text}</Tag>;
+    return <Tag key={color} color={color}>{text}</Tag>;
   };
   return (
     // <Modal
