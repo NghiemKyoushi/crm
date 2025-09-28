@@ -24,13 +24,16 @@ const ProductManagement: React.FC = () => {
 
   const { data: listOrder } = useListOrderTracking({
     page,
-    size: 10,
+    size: 20,
     status: [
       OrderStatusType.ARRIVED_VN_WAREHOUSE,
       OrderStatusType.READY_TO_SHIP,
       OrderStatusType.SHIPPING_REQUEST_CLIENT,
     ],
   });
+
+  console.log("listOrder", listOrder);
+
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
 
   const handleChangePage = (pageNumber: number) => {
@@ -41,6 +44,16 @@ const ProductManagement: React.FC = () => {
 
   const columns: ColumnsType<Order> = [
     {
+      title: "Tracking ship",
+      key: "tracking_ship",
+      render: (_, record) => (
+        <div>
+          <div className="font-medium">{record.tracking_ship}</div>
+          {/* <div className="text-xs text-gray-400">{record.}</div> */}
+        </div>
+      ),
+    },
+    {
       title: "Khách hàng",
       key: "customer_name",
       render: (_, record) => (
@@ -50,6 +63,7 @@ const ProductManagement: React.FC = () => {
         </div>
       ),
     },
+
     {
       title: "Người tạo",
       key: "user_name",
@@ -60,14 +74,14 @@ const ProductManagement: React.FC = () => {
       ),
     },
     {
-        title: "Số tiền",
-        key: "amountvnd",
-        render: (_, record) => (
-          <div>
-            <div className="font-medium">{record.amountvnd}</div>
-          </div>
-        ),
-      },
+      title: "Số tiền",
+      key: "amountvnd",
+      render: (_, record) => (
+        <div>
+          <div className="font-medium">{record.amountvnd}</div>
+        </div>
+      ),
+    },
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -180,7 +194,7 @@ const ProductManagement: React.FC = () => {
       </h2>
       <TableComponent
         columns={columns}
-        dataSource={listOrder?.data || []}
+        dataSource={listOrder || []}
         rowHeight={45}
         pageSize={10}
         page={(listOrder && listOrder.current_page + 1) || 0}
@@ -193,16 +207,15 @@ const ProductManagement: React.FC = () => {
       {orderDetail && (
         <TrackingModalShip
           customerName={orderDetail.customer_name}
-          orderCode={""}
+          orderCode={orderDetail.tracking_ship}
           onCancel={() => setIsOpenTrackingOrder(false)}
           onSubmit={(value) => {
             useCompleteShippingMutation.mutate(
               {
                 body: {
                   shipping_code: value.shipping_code,
-                  shipping_fee: value.shipping_fee,
+                  shipping_fee: +value.shipping_fee,
                 },
-                id: orderDetail.tracking_ship,
               },
               {
                 onSuccess: () => {

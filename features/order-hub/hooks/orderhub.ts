@@ -120,7 +120,7 @@ export const useCompleteOrder = () => {
 
 export const useCompleteShippingOrder = () => {
   return useMutation({
-    mutationFn: ({ id, body }: { id: string, body: { shipping_fee: number; shipping_code: string } }) =>
-      completeShippingOrder(id, body),
+    mutationFn: ({ body }: {  body: { shipping_fee: number; shipping_code: string } }) =>
+      completeShippingOrder(body),
   });
 };
