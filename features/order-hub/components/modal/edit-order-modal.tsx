@@ -26,6 +26,7 @@ import {
   FeeServiceCheck,
   InsuranceOptionModel,
   OrderFeeRequest,
+  OrderStatusType,
   RateOrderRequest,
   ServiceFee,
 } from "@/types/orderhub";
@@ -36,6 +37,7 @@ import {
   useCreateNewOrder,
   useDetailOrder,
   useListService,
+  useUpdateOrder,
 } from "../../hooks/orderhub";
 import { useListCustomerWithSearch } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
@@ -73,13 +75,14 @@ interface CreateOrderModalProps {
 }
 export default function EditOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
-  const { data: order } = useDetailOrder(props.orderId);
+  const { data: order, refetch } = useDetailOrder(props.orderId);
 
-  const { isOpen, onCancel, onConfirm } = props;
+  
+  const { isOpen, onCancel, orderId} = props;
   const [form] = Form.useForm();
   const [idProduct, setIdProduct] = React.useState<number | null>(null);
   const queryClient = useQueryClient();
-  const createNewOrderMutation = useCreateNewOrder();
+  const updateOrderMutation = useUpdateOrder();
   const { data: listInsurance } = useListInsurance();
   const { data: listService } = useListService();
   const [services, setServices] = useState<string[]>([]);
@@ -116,13 +119,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           user_id: customer,
           product_category_id: form.getFieldValue("category"),
         };
-        createNewOrderMutation.mutate(
+        updateOrderMutation.mutate(
           {
-            ...bodyNewOrder,
+            param: {...bodyNewOrder},
+            id: orderId
           },
           {
             onSuccess: () => {
-              toast.success("Tạo order mới thành công!");
+              toast.success("Cập nhật order mới thành công!");
               queryClient.invalidateQueries({
                 queryKey: ["listorder"],
               });
@@ -148,6 +152,12 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     page_size: 10,
     search: searchValue,
   });
+
+  useEffect(() => {
+    if (props.isOpen) {
+      refetch(); // gọi lại API mỗi lần modal mở
+    }
+  }, [props.isOpen, refetch]);
 
   const options =
     data?.data.map((c) => ({
@@ -270,15 +280,17 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     if (order) {
       setPrice(order.amount_vnd);
       setIdProduct(order.metadata.items[0].product.id);
+      order.metadata.infos.fees.map(item =>{
+        services.push(item.code)
+      })
+    //   setServices
       form.setFieldsValue({
         link: order.metadata.items[0]?.product.url,
         productName: order.metadata.items[0]?.product.map_data.productName,
         description: order.metadata.items[0]?.product.map_data.description,
         category: order.metadata.items[0]?.product.id,
-        priceY: order.metadata.items[0]?.product.price,
+        priceY: order.metadata.items[0]?.product.map_data.price,
         priceVnd: order.amount_vnd,
-        // feeY: order.metadata.infos.fees.find((f) => f.currency_code === "JPY")?.amount ?? 0,
-        // feeVnd: order.metadata.infos.fees.find((f) => f.currency_code === "VND")?.amount ?? 0,
         customer: order.user_id,
         deposit: order.deposit_fee,
         note: order.description,

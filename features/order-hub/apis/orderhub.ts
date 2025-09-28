@@ -6,6 +6,7 @@ import {
   RateOrderRequest,
   TrackingWeightInfo,
 } from "@/types/orderhub";
+import qs from "qs";
 
 export const getListOrder = async (params: {
   page: number;
@@ -13,6 +14,24 @@ export const getListOrder = async (params: {
   status?: string;
 }) => {
   const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
+  return res.data.data;
+};
+
+export const getListOrderTracking = async (params: {
+  page: number;
+  size: number;
+  status?: string[];
+}) => {
+  const res = await api.get(API_TYPE_CONST.GET_TRACKING_ORDER, {
+    params,
+    paramsSerializer: (params) =>
+      new URLSearchParams(
+        Object.entries(params).flatMap(([key, value]) =>
+          Array.isArray(value) ? value.map((v) => [key, v]) : [[key, value]]
+        )
+      ).toString(),
+  });
+
   return res.data.data;
 };
 
@@ -49,6 +68,11 @@ export const createOrder = async (body: OrderFeeRequest) => {
   return res.data.data;
 };
 
+export const updateOrder = async (id: number, body: OrderFeeRequest) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_ORDER}/edit/${id}`, body);
+  return res.data.data;
+};
+
 export const aproveOrder = async (id: string, body: ApproveOrderModel) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/confirm/${id}`,
@@ -78,7 +102,14 @@ export const trackingToJp = async (id: string, tracking: string) => {
   return res.data.data;
 };
 
-export const trackingToVn = async (id: string, body: {image_ids?: Array<number>, is_repacked?: boolean, count_verify?: number}) => {
+export const trackingToVn = async (
+  id: string,
+  body: {
+    image_ids?: Array<number>;
+    is_repacked?: boolean;
+    count_verify?: number;
+  }
+) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/arrived-vn-warehouse/${id}`,
     body
@@ -98,5 +129,13 @@ export const completeOrder = async (id: string) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/complete-shipping/${id}`
   );
+  return res.data.data;
+};
+
+export const completeShippingOrder = async (
+  id: string,
+  body: { shipping_fee: number; shipping_code: string }
+) => {
+  const res = await api.put(`${API_TYPE_CONST.COMPLETE_SHIPPING}/${id}`, body);
   return res.data.data;
 };

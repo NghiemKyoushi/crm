@@ -230,6 +230,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   useEffect(() => {
     if (totalFee) form.setFieldValue("deposit", totalFee);
   }, [totalFee, percenDeposit]);
+
   return (
     <>
       <Modal

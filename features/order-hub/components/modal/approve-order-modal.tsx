@@ -105,7 +105,11 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
         </Form.Item>
 
         {/* Ghi chú admin */}
-        <Form.Item  rules={[{ required: true, message: "Vui lòng nhập ghi chú" }]} name="description" label="Ghi chú admin">
+        <Form.Item
+          rules={[{ required: true, message: "Vui lòng nhập ghi chú" }]}
+          name="description"
+          label="Ghi chú admin"
+        >
           <Input.TextArea
             className="!h-25"
             placeholder="Ghi chú về việc duyệt đơn..."

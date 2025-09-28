@@ -13,7 +13,12 @@ type Props = {
   className?: string;
 };
 
-export default function TiptapEditor({ value = "", onChange, placeholder, className }: Props) {
+export default function TiptapEditor({
+  value = "",
+  onChange,
+  placeholder,
+  className,
+}: Props) {
   const editor = useEditor({
     extensions: [StarterKit, Link, Image],
     content: value || "",
@@ -49,19 +54,34 @@ export default function TiptapEditor({ value = "", onChange, placeholder, classN
           borderRadius: "6px 6px 0 0",
         }}
       >
-        <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()}>
+        <button
+          type="button"
+          onClick={() => editor?.chain().focus().toggleBold().run()}
+        >
           B
         </button>
-        <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()}>
+        <button
+          type="button"
+          onClick={() => editor?.chain().focus().toggleItalic().run()}
+        >
           I
         </button>
-        <button type="button" onClick={() => editor?.chain().focus().toggleStrike().run()}>
+        <button
+          type="button"
+          onClick={() => editor?.chain().focus().toggleStrike().run()}
+        >
           S
         </button>
-        <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+        <button
+          type="button"
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
+        >
           •
         </button>
-        <button type="button" onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+        <button
+          type="button"
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+        >
           1.
         </button>
       </div>
@@ -74,7 +94,17 @@ export default function TiptapEditor({ value = "", onChange, placeholder, classN
           minHeight: 160,
         }}
       >
-        <EditorContent  editor={editor} style={{ padding: 12, minHeight: 160 }} />
+        <EditorContent
+          rows={5}
+          minLength={10}
+          editor={editor}
+          style={{
+            padding: 12,
+            height: "100%", // fill the parent div
+            boxSizing: "border-box",
+            outline: "none", // remove focus outline
+          }}
+        />
       </div>
     </div>
   );

@@ -4,13 +4,16 @@ import {
   cancelOrder,
   checkOrder,
   completeOrder,
+  completeShippingOrder,
   confirmPurchaeOrder,
   createOrder,
   getDetailOrder,
   getListOrder,
+  getListOrderTracking,
   getListService,
   trackingToJp,
   trackingToVn,
+  updateOrder,
 } from "../apis/orderhub";
 import {
   ApproveOrderModel,
@@ -29,6 +32,15 @@ export const useListOrder = (params: { page: number; size: number , status?: str
   });
 };
 
+export const useListOrderTracking = (params: { page: number; size: number , status?: Array<string>}) => {
+  return useQuery({
+    queryKey: ["listorderTracking", params],
+    queryFn: () => getListOrderTracking(params),
+    // keepPreviousData: true,
+  });
+};
+
+
 export const useListService = () => {
   return useQuery({
     queryKey: ["listService"],
@@ -39,6 +51,13 @@ export const useListService = () => {
 export const useCreateNewOrder = () => {
   return useMutation({
     mutationFn: (param: OrderFeeRequest) => createOrder(param),
+  });
+};
+
+export const useUpdateOrder = () => {
+  return useMutation({
+    mutationFn: ({ id, param }: { id: number; param: OrderFeeRequest }) =>
+      updateOrder(id, param),
   });
 };
 
@@ -96,5 +115,12 @@ export const useCompleteOrder = () => {
   return useMutation({
     mutationFn: ({ id }: { id: string }) =>
       completeOrder(id),
+  });
+};
+
+export const useCompleteShippingOrder = () => {
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string, body: { shipping_fee: number; shipping_code: string } }) =>
+      completeShippingOrder(id, body),
   });
 };

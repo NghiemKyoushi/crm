@@ -19,6 +19,7 @@ import {
   getListInsurance,
   getListProductType,
   getMaterial,
+  getMaterialGroupId,
   updateFeeSettingDefault,
   updateFeeShippingDefault,
   updateInsurance,
@@ -115,6 +116,15 @@ export const useListMaterial = () => {
     queryFn: ()=>  getMaterial(),
   });
 };
+
+// React Query hook
+export const useListMaterialByGroup = (customer_group_id: number) => {
+    return useQuery<MaterialResponseArray>({
+      queryKey: ["listMaterialCate", customer_group_id],
+      queryFn: () => getMaterialGroupId(customer_group_id),
+      enabled: !!customer_group_id,
+    });
+  };
 
 export const useUpdateShipping = () => {
   const queryClient = useQueryClient();

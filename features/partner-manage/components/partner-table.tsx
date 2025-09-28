@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faMinus,
   faPlus,
   faSearch,
   faTrash,
@@ -144,13 +145,20 @@ export default function JPYManagementPage() {
       dataIndex: "amount",
       render: (val, record: PartnerTransaction) => {
         const color =
-          record.amount_type === "IN" ? "text-green-600" : "text-red-600";
+          record.amount > 0
+            ? "text-green-600"
+            : record.amount < 0
+            ? "text-red-600"
+            : "text-gray-600";
         return (
           <span className={`${color} flex flex-row items-center gap-1 `}>
-            <FontAwesomeIcon
-                icon={faPlus}
+            {record.amount > 0 && (
+              <FontAwesomeIcon
+                icon={record.amount > 0 ? faPlus : faMinus}
                 className="!text-xs !w-2 !h-2 "
-              /> {val} 
+              />
+            )}
+            {val}
             {activeTab === "JPY" ? (
               <FontAwesomeIcon
                 icon={faYenSign}
