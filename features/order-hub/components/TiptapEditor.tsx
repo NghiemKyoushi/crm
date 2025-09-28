@@ -74,7 +74,7 @@ export default function TiptapEditor({ value = "", onChange, placeholder, classN
           minHeight: 160,
         }}
       >
-        <EditorContent editor={editor} style={{ padding: 12 }} />
+        <EditorContent  editor={editor} style={{ padding: 12, minHeight: 160 }} />
       </div>
     </div>
   );
