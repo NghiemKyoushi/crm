@@ -64,55 +64,52 @@ const FeeSettingsPage: React.FC = () => {
         Quản Lý Phí & Cài Đặt Dịch Vụ Toàn Diện
       </h3>
 
-      <Tabs activeKey={activeKey} onChange={(key) => setActiveKey(key)}>
-        <Tabs.TabPane
-          key="1"
-          tab={
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-              Vận Chuyển & Phụ Thu
-            </span>
-          }
-        >
-          {activeKey === "1" && <ShippingSurchangeTable />}
-        </Tabs.TabPane>
-
-        <Tabs.TabPane
-          key="2"
-          tab={
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-              Dịch Vụ & Giao Hàng
-            </span>
-          }
-        >
-          {activeKey === "2" && <ShippingServiceForm />}
-        </Tabs.TabPane>
-
-        <Tabs.TabPane
-          key="3"
-          tab={
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-              Bảo Hiểm & Quy Định Chung
-            </span>
-          }
-        >
-          {activeKey === "3" && <InsuranceSettings />}
-        </Tabs.TabPane>
-
-        <Tabs.TabPane
-          key="4"
-          tab={
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
-              Loại sản phẩm
-            </span>
-          }
-        >
-          {activeKey === "4" && <ProductTypeTable />}
-        </Tabs.TabPane>
-      </Tabs>
+      <Tabs
+        activeKey={activeKey}
+        onChange={(key) => setActiveKey(key)}
+        items={[
+          {
+            key: "1",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+                Vận Chuyển & Phụ Thu
+              </span>
+            ),
+            children: <ShippingSurchangeTable />,
+          },
+          {
+            key: "2",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+                Dịch Vụ & Giao Hàng
+              </span>
+            ),
+            children: <ShippingServiceForm />,
+          },
+          {
+            key: "3",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+                Bảo Hiểm & Quy Định Chung
+              </span>
+            ),
+            children: <InsuranceSettings />,
+          },
+          {
+            key: "4",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
+                Loại sản phẩm
+              </span>
+            ),
+            children: <ProductTypeTable />,
+          },
+        ]}
+      />
     </div>
   );
 };

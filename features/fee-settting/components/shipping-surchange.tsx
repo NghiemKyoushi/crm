@@ -13,7 +13,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getListProductCategory } from "../apis/fee-setting";
-import { useListMaterial, useUpdateShipping } from "../hooks/fee-setting";
+import {
+  useListMaterial,
+  useListMaterialByGroup,
+  useUpdateShipping,
+} from "../hooks/fee-setting";
 import { MaterialItem, ShippingConditionAdd } from "@/types/fee-setting";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -47,9 +51,11 @@ export default function ShippingSurchangeTable(
     })) || [];
 
   const { data: materialData } = useListMaterial();
-
+  const { data: listFollowGroup } = useListMaterialByGroup(
+    idCategory as number
+  );
   useEffect(() => {
-    if (materialData) {
+    if (materialData && !isCategory) {
       const normalized: Record<number, MaterialItem[]> = {};
       const routeNames: Record<number, string> = {};
 
@@ -59,8 +65,18 @@ export default function ShippingSurchangeTable(
       });
       setData(normalized);
       setRouteNames(routeNames);
+    } else if (listFollowGroup) {
+      const normalized: Record<number, MaterialItem[]> = {};
+      const routeNames: Record<number, string> = {};
+
+      listFollowGroup.forEach((item) => {
+        normalized[item.route.id] = item.data ?? [];
+        routeNames[item.route.id] = item.route.name; // lưu tên route
+      });
+      setData(normalized);
+      setRouteNames(routeNames);
     }
-  }, [materialData]);
+  }, [materialData, listFollowGroup]);
 
   const handleAddRow = (routeId: number) => {
     const newKey = Date.now().toString();
@@ -138,6 +154,12 @@ export default function ShippingSurchangeTable(
       {
         onSuccess: () => {
           toast.success("Cập nhật phí thành công!");
+          if (isCategory) {
+            queryClient.invalidateQueries({
+              queryKey: ["listMaterialCate"],
+            });
+            return;
+          }
           queryClient.invalidateQueries({
             queryKey: ["listMaterial"],
           });

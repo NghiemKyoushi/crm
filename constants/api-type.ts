@@ -80,4 +80,6 @@ export const API_TYPE_CONST = {
   CALCULATE_FEE:`${FEATURE}/fee/calculate-fee`,
   CREATE_ORDER: `${FEATURE}/admin/orders`,
   SHIP_ROUTE:`${FEATURE}/shipping-route`,
+  GET_TRACKING_ORDER:`${FEATURE}/admin/orders/get-tracking-ship`,
+  COMPLETE_SHIPPING:`${FEATURE}/admin/orders/complete-shipping`
 } as const;

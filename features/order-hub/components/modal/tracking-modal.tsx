@@ -43,13 +43,13 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
    if(take_photo && uploadedIds.length === 0){
     toast.warning("Vui lòng upload ảnh lên")
    } 
-    // onSubmit({
-    //   isRepackage: values.is_repacked,
-    //   images: uploadedIds,
-    //   count: values.count
-    // });
-    // form.resetFields();
-    // setFileList([]);
+    onSubmit({
+      isRepackage: values.is_repacked,
+      images: uploadedIds,
+      count: values.count
+    });
+    form.resetFields();
+    setFileList([]);
   };
 
   const handleChange = ({ fileList }: { fileList: any[] }) => {

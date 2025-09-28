@@ -314,7 +314,11 @@ export default function OrderHub() {
             text = status;
         }
 
-        return <Tag key={color} color={color}>{text}</Tag>;
+        return (
+          <Tag key={color} color={color}>
+            {text}
+          </Tag>
+        );
       },
     },
     {
@@ -334,7 +338,8 @@ export default function OrderHub() {
             if (record.is_user_created) {
               actions.push(
                 <Button
-                  size="small"
+                key={`approve-${record.id}`}
+                size="small"
                   icon={<FontAwesomeIcon icon={faCheck} />}
                   className="!bg-green-500 !text-white !border-0 !text-xs"
                   onClick={() => {
@@ -347,7 +352,8 @@ export default function OrderHub() {
               );
               actions.push(
                 <Button
-                  size="small"
+                key={`reject-${record.id}`}
+                size="small"
                   className="!bg-red-500 !text-white !border-0 !text-xs"
                   onClick={() => {
                     setOrderDetail(record);
@@ -366,6 +372,7 @@ export default function OrderHub() {
           case OrderStatusType.PURCHASED:
             actions.push(
               <Button
+                key={record.status}
                 size="small"
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-purple-500 !text-white !border-0 !text-xs"
@@ -382,10 +389,15 @@ export default function OrderHub() {
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             actions.push(
               <Button
+                key={record.status}
                 size="small"
                 onClick={() => {
                   setOrderDetail(record);
-                  if (record.take_photo || record.is_repacked || record.is_verify_count) {
+                  if (
+                    record.take_photo ||
+                    record.is_repacked ||
+                    record.is_verify_count
+                  ) {
                     setIsOpenTrackingOrderVN(true);
                   } else {
                     trackingVNMutation.mutate(
@@ -421,6 +433,7 @@ export default function OrderHub() {
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             actions.push(
               <Button
+                key={record.status}
                 size="small"
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-indigo-500 !text-white !border-0 !text-xs"
@@ -437,6 +450,7 @@ export default function OrderHub() {
           case OrderStatusType.DEPOSIT_PAID:
             actions.push(
               <Button
+                key={record.status}
                 size="small"
                 onClick={() => {
                   setOrderDetail(record);
@@ -453,6 +467,7 @@ export default function OrderHub() {
           case OrderStatusType.READY_TO_SHIP:
             actions.push(
               <Button
+                key={record.status}
                 size="small"
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-emerald-500 !text-white !border-0 !text-xs"
@@ -470,6 +485,7 @@ export default function OrderHub() {
         // nút mặc định luôn có
         actions.push(
           <Button
+            key={'1'}
             size="small"
             className="!bg-blue-500 !text-white !border-0 !text-xs"
             onClick={() => {
@@ -667,7 +683,7 @@ export default function OrderHub() {
                 body: {
                   count_verify: value.count,
                   image_ids: value.images,
-                  is_repacked: value.is_repacked,
+                  is_repacked: value.isRepackage,
                 },
                 id: orderDetail.id.toString(),
               },

@@ -11,17 +11,18 @@ export interface CommonColumn<T> {
   renderCell?: (value: any, record: T, index: number) => ReactNode;
 }
 
-export type ExtendedColumnsType<T> = (ColumnsType<T>[number] & CommonColumn<T>)[];
+export type ExtendedColumnsType<T> = (ColumnsType<T>[number] &
+  CommonColumn<T>)[];
 interface TableComponentProps<T> extends TableProps<T> {
   columns: ExtendedColumnsType<T>;
   dataSource: T[];
-  rowHeight?: number;       
-  headerHeight?: number;    
-  fontSize?: number;        
-  pageSize?: number;  
-  response: PaginatedResponse<T> | undefined;   
-    page: number;                        // 👈 controlled page
-  onPageChange: (page: number) => void; // 👈 external callback   
+  rowHeight?: number;
+  headerHeight?: number;
+  fontSize?: number;
+  pageSize?: number;
+  response: PaginatedResponse<T> | undefined;
+  page: number; // 👈 controlled page
+  onPageChange: (page: number) => void; // 👈 external callback
 }
 
 export interface PaginatedResponse<T> {
@@ -47,11 +48,16 @@ export default function TableComponent<RecordType extends object>({
       <Table<RecordType>
         columns={columns}
         dataSource={dataSource || []}
-        rowKey={(record: any) => record.id || record.user_id}
+        // rowKey={(record: any, index) =>
+        //   record.id ?? record.user_id ?? `row-${index}`
+        // }
+        rowKey={(record: any, index) =>
+          `${record.id ?? record.user_id ?? "row"}-${index}`
+        }
         pagination={false}
         {...rest}
         rowClassName={() => "custom-row"}
-        scroll={{ x: "max-content" }} 
+        scroll={{ x: "max-content" }}
         components={{
           header: {
             cell: (props: any) => {
@@ -105,7 +111,7 @@ export default function TableComponent<RecordType extends object>({
       {response && response.total_items > response.page_size && (
         <div className="flex justify-end mt-2">
           <Pagination
-            current={page} 
+            current={page}
             pageSize={response.page_size}
             total={response.total_items}
             onChange={onPageChange}
