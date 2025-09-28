@@ -11,6 +11,7 @@ import {
   deleteWebsite,
   getListWebsite,
   listRegion,
+  listRoute,
   updateWebsite,
 } from "../apis/web-manage";
 
@@ -42,8 +43,15 @@ export const useDeleteWebsite = () => {
 };
 
 export const useListRegion = () => {
-    return useQuery<CountryResponse>({
-      queryKey: ["listRegion"],
-      queryFn: listRegion,
-    });
-  };
+  return useQuery<CountryResponse>({
+    queryKey: ["listRegion"],
+    queryFn: listRegion,
+  });
+};
+
+export const useListRoutes = () => {
+  return useQuery({
+    queryKey: ["listRoute"],
+    queryFn: () => listRoute(),
+  });
+};

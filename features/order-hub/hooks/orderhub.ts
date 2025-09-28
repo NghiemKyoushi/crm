@@ -58,8 +58,8 @@ export const useTrackingOrder = () => {
 
 export const useTrackingOrderVN = () => {
   return useMutation({
-    mutationFn: ({ image_ids, id }: { image_ids: Array<number>; id: string }) =>
-      trackingToVn(id, image_ids),
+    mutationFn: ({ body, id }: { body: {image_ids?: Array<number>, is_repacked?: boolean, count_verify?: number}; id: string  }) =>
+      trackingToVn(id, body),
   });
 };
 

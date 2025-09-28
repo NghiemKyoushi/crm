@@ -79,4 +79,5 @@ export const API_TYPE_CONST = {
   EXCHANGE_RATE:`${FEATURE}/exchange-rate/admin/setting/get-data`,
   CALCULATE_FEE:`${FEATURE}/fee/calculate-fee`,
   CREATE_ORDER: `${FEATURE}/admin/orders`,
+  SHIP_ROUTE:`${FEATURE}/shipping-route`,
 } as const;

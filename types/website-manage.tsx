@@ -18,6 +18,7 @@ export interface AddWebsiteModel {
   name: string;
   region_id: number;
   currency_code: string;
+  route_id: string;
 }
 
 export interface Website {

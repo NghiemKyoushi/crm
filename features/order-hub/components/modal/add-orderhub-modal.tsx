@@ -37,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TextArea from "antd/es/input/TextArea";
+import TiptapEditor from "../TiptapEditor";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -70,7 +71,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       await form.validateFields();
       if (idProduct && insurance) {
         const bodyNewOrder: OrderFeeRequest = {
-          data: [{ product_id: idProduct, count: 1 }],
+          data: [
+            {
+              product_id: idProduct,
+              count: 1,
+              description: form.getFieldValue("description"),
+              price: form.getFieldValue("priceY"),
+              name: form.getFieldValue("productName"),
+            },
+          ],
           deposit_fee: deposit,
           description: form.getFieldValue("note"),
           fee_codes: services,
@@ -189,7 +198,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     const fetchFeeService = async () => {
       if (customer) {
         const bodyGetFeeService: RateOrderRequest = {
-          category_fee_id: form.getFieldValue('category'),
+          category_fee_id: form.getFieldValue("category"),
           fee_codes: services,
           price: priceVND ? priceVND : 0,
           product_ids: idProduct ? [idProduct] : [],
@@ -218,11 +227,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   }, [listInsurance]);
 
-  useEffect(()=>{
-    if(totalFee)
-    form.setFieldValue("deposit", totalFee);
-
-  },[totalFee, percenDeposit])
+  useEffect(() => {
+    if (totalFee) form.setFieldValue("deposit", totalFee);
+  }, [totalFee, percenDeposit]);
   return (
     <>
       <Modal
@@ -256,7 +263,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         <Form
           // onValuesChange={(changed, allValues) => {
           //     form.setFieldsValue({
-          //       deposit: totalFee, 
+          //       deposit: totalFee,
           //     });
           // }}
           form={form}
@@ -301,11 +308,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 ]}
                 className="!mb-1"
               >
-                <TextArea
-                  rows={4}
-                  maxLength={500}
-                  placeholder=""
-                />
+                <TiptapEditor />
+
+                {/* <TextArea rows={4} maxLength={500} placeholder="" /> */}
               </Form.Item>
               <Form.Item
                 label="Loại sản phẩm"
@@ -357,7 +362,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     formatter={(value) =>
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, ",")}
+                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     style={{ display: "flex", alignItems: "center" }}
                     className="!w-full !h-11"
                     disabled
@@ -387,99 +392,105 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <Collapse
                   defaultActiveKey={["1"]}
                   className="!bg-blue-50 !rounded-sm !border !border-blue-200 "
-                >
-                  <Panel
-                    key="1"
-                    header={
-                      <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
-                        <FontAwesomeIcon icon={faCog} /> Dịch vụ bổ sung (tùy
-                        chọn)
-                      </span>
-                    }
-                  >
-                    <div className="space-y-1 ">
-                      {listService?.map((item: ServiceFee) => {
-                        if (item.optional) return null;
-                        const isChecked = services.includes(item.code);
-                        return (
-                          <div
-                            key={item.id}
-                            className="flex items-start justify-between bg-white rounded-md p-4 border border-blue-200 hover:shadow-sm transition"
-                          >
-                            <div className="flex-1 pr-4">
-                              <Checkbox
-                                checked={isChecked}
-                                onChange={(e) =>
-                                  handleServiceChange(e, item.code)
-                                }
-                                className="!text-blue-600"
+                  items={[
+                    {
+                      key: "1",
+                      label: (
+                        <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
+                          <FontAwesomeIcon icon={faCog} /> Dịch vụ bổ sung (tùy
+                          chọn)
+                        </span>
+                      ),
+                      children: (
+                        <div className="space-y-1">
+                          {listService?.map((item: ServiceFee) => {
+                            if (item.optional) return null;
+                            const isChecked = services.includes(item.code);
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-start justify-between bg-white rounded-md p-4 border border-blue-200 hover:shadow-sm transition"
                               >
-                                <div>
-                                  <div className="font-medium text-blue-700">
-                                    {item.name}
-                                  </div>
-                                  <div className="text-blue-500 text-sm mt-1">
-                                    {item.description}
-                                  </div>
+                                <div className="flex-1 pr-4">
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onChange={(e) =>
+                                      handleServiceChange(e, item.code)
+                                    }
+                                    className="!text-blue-600"
+                                  >
+                                    <div>
+                                      <div className="font-medium text-blue-700">
+                                        {item.name}
+                                      </div>
+                                      <div className="text-blue-500 text-sm mt-1">
+                                        {item.description}
+                                      </div>
+                                    </div>
+                                  </Checkbox>
                                 </div>
-                              </Checkbox>
-                            </div>
-                            <div className="text-blue-600 font-semibold text-sm min-w-[60px] text-right">
-                              {item.amount}
-                              {item.currency_code}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Panel>
-                </Collapse>
+                                <div className="text-blue-600 font-semibold text-sm min-w-[60px] text-right">
+                                  {item.amount}
+                                  {item.currency_code}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
+
                 <Collapse
                   defaultActiveKey={["2"]}
-                  className="!bg-yellow-50 !rounded-sm !border !border-yellow-200  !mt-4"
-                >
-                  <Panel
-                    key="2"
-                    header={
-                      <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
-                        <FontAwesomeIcon icon={faShield} /> Bảo hiểm đơn hàng
-                      </span>
-                    }
-                  >
-                    <div className="space-y-2">
-                      {listInsurance?.map((item: InsuranceOptionModel) => {
-                        const isChecked = insurance?.id === item.id;
-
-                        return (
-                          <div
-                            key={item.id}
-                            className="flex items-start justify-between bg-white rounded-md p-4 border border-yellow-200 hover:shadow-sm transition"
-                          >
-                            <div className="flex-1 pr-4">
-                              <Checkbox
-                                checked={isChecked}
-                                onChange={(e) => handleInsuranceChange(e, item)}
-                                className="!text-yellow-700"
+                  className="!bg-yellow-50 !rounded-sm !border !border-yellow-200 !mt-4"
+                  items={[
+                    {
+                      key: "2",
+                      label: (
+                        <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
+                          <FontAwesomeIcon icon={faShield} /> Bảo hiểm đơn hàng
+                        </span>
+                      ),
+                      children: (
+                        <div className="space-y-2">
+                          {listInsurance?.map((item: InsuranceOptionModel) => {
+                            const isChecked = insurance?.id === item.id;
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-start justify-between bg-white rounded-md p-4 border border-yellow-200 hover:shadow-sm transition"
                               >
-                                <div>
-                                  <div className="font-medium text-yellow-700">
-                                    {item.name}
-                                  </div>
-                                  <div className="text-yellow-500 text-xs mt-1">
-                                    {item.description}
-                                  </div>
+                                <div className="flex-1 pr-4">
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onChange={(e) =>
+                                      handleInsuranceChange(e, item)
+                                    }
+                                    className="!text-yellow-700"
+                                  >
+                                    <div>
+                                      <div className="font-medium text-yellow-700">
+                                        {item.name}
+                                      </div>
+                                      <div className="text-yellow-500 text-xs mt-1">
+                                        {item.description}
+                                      </div>
+                                    </div>
+                                  </Checkbox>
                                 </div>
-                              </Checkbox>
-                            </div>
-                            <div className="text-yellow-600 font-semibold text-sm min-w-[50px] text-right">
-                              {item.fee_percentage ?? 0}%
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Panel>
-                </Collapse>
+                                <div className="text-yellow-600 font-semibold text-sm min-w-[50px] text-right">
+                                  {item.fee_percentage ?? 0}%
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
               </div>
             </Col>
             <Col span={12}>
@@ -638,21 +649,21 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <div className="flex justify-between text-green-600 font-semibold">
                   <span>Tiền cọc:</span>
                   <span>
-                    {totalFee
-                      ? Number(totalFee).toLocaleString("en-US")
-                      : 0}{" "}
-                    đ
+                    {totalFee ? Number(totalFee).toLocaleString("en-US") : 0} đ
                   </span>
                 </div>
 
                 <div className="flex justify-between text-red-600 font-semibold">
                   <span>Còn lại:</span>
                   <span>
-                    {(
-                      (form.getFieldValue("priceVnd") ?? 0) +
-                      (form.getFieldValue("feeVnd") ?? 0) -
-                      (totalFee ?? 0)
-                    ).toLocaleString("en-US")}{" "}
+                    {(() => {
+                      const value =
+                        (form.getFieldValue("priceVnd") ?? 0) +
+                        (form.getFieldValue("feeVnd") ?? 0) -
+                        (totalFee ?? 0);
+
+                      return isNaN(value) ? 0 : value.toLocaleString("en-US");
+                    })()}{" "}
                     đ
                   </span>
                 </div>

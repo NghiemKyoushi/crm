@@ -62,18 +62,18 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const params: BankDepositRequest = {
-          page: 0,
-          size: 10,
-        };
-        const data: BankAccountListResponse = await getListBankCreateAccount(
-          params
-        );
-        const opts = data.content.map((acc: BankAccount) => ({
-          label: `${acc.bank_name} - ${acc.account_number}`,
-          value: acc.id, // value unique
-        }));
-        setBanks(opts || []);
+        // const params: BankDepositRequest = {
+        //   page: 0,
+        //   size: 10,
+        // };
+        // const data: BankAccountListResponse = await getListBankCreateAccount(
+        //   params
+        // );
+        // const opts = data.content.map((acc: BankAccount) => ({
+        //   label: `${acc.bank_name} - ${acc.account_number}`,
+        //   value: acc.id, // value unique
+        // }));
+        // setBanks(opts || []);
       } catch (err) {
         console.error("Failed to fetch bank list:", err);
       }
@@ -84,7 +84,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
 
   useEffect(() => {
     const fetchCode = async () => {
-      if (open && type === "MINUS") {
+      if (open) {
         try {
           const code = await getCodeGeneration();
           form.setFieldValue("transactionCode", code);
@@ -106,7 +106,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       onConfirm({
         amount_vnd: +values.amount,
         bank_transaction_id: values.transactionCode,
-        company_bank_account_id: values.companyAccount,
+        // company_bank_account_id: values.companyAccount,
         note: values.reason,
         user_id: +values.userId,
         reason: values.reason,
@@ -154,7 +154,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           <Input type="number" placeholder="VD: 5000000" />
         </Form.Item>
 
-        <Form.Item
+        {/* <Form.Item
           className="!mb-1.5"
           label="Tài khoản công ty đã nhận"
           name="companyAccount"
@@ -173,7 +173,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
               }
             }}
           />
-        </Form.Item>
+        </Form.Item> */}
 
         {/* Mã giao dịch */}
         <Form.Item

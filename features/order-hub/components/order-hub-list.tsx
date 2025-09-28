@@ -314,7 +314,7 @@ export default function OrderHub() {
             text = status;
         }
 
-        return <Tag color={color}>{text}</Tag>;
+        return <Tag key={color} color={color}>{text}</Tag>;
       },
     },
     {
@@ -385,12 +385,12 @@ export default function OrderHub() {
                 size="small"
                 onClick={() => {
                   setOrderDetail(record);
-                  if (record.take_photo) {
+                  if (record.take_photo || record.is_repacked || record.is_verify_count) {
                     setIsOpenTrackingOrderVN(true);
                   } else {
                     trackingVNMutation.mutate(
                       {
-                        image_ids: [],
+                        body: {},
                         id: record.id.toString(),
                       },
                       {
@@ -656,10 +656,19 @@ export default function OrderHub() {
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.invoice_no}
           onCancel={() => setIsOpenTrackingOrderVN(false)}
+          is_repacked={orderDetail.is_repacked}
+          is_verify_count={orderDetail.is_verify_count}
+          // is_repacked={true}
+          // is_verify_count={true}
+          take_photo={orderDetail.take_photo}
           onSubmit={(value) => {
             trackingVNMutation.mutate(
               {
-                image_ids: value.images,
+                body: {
+                  count_verify: value.count,
+                  image_ids: value.images,
+                  is_repacked: value.is_repacked,
+                },
                 id: orderDetail.id.toString(),
               },
               {

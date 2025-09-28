@@ -6,6 +6,7 @@ import {
   useCreateNewWebsite,
   useDeleteWebsite,
   useListRegion,
+  useListRoutes,
   useListWebsite,
   useUpdateWebsite,
 } from "../hooks/web-manage";
@@ -59,6 +60,7 @@ const WebsiteManageTable: React.FC = () => {
               domain: values.domain,
               region_id: values.region_id,
               currency_code: values.currency_code,
+              route_id: values.route_id,
             },
           },
           {
@@ -82,6 +84,7 @@ const WebsiteManageTable: React.FC = () => {
             name: values.name,
             region_id: values.region_id,
             currency_code: values.currency_code,
+            route_id: values.route_id,
           },
           {
             onSuccess: () => {
@@ -127,6 +130,8 @@ const WebsiteManageTable: React.FC = () => {
   };
 
   const { data: regionList } = useListRegion();
+  const { data: routeList } = useListRoutes();
+
   const columns: ColumnsType<Website> = [
     { title: t("websiteManage.table.name"), dataIndex: "name", key: "name" },
     { title: "URL", dataIndex: "domain", key: "domain" },
@@ -243,6 +248,25 @@ const WebsiteManageTable: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
+
+          <Form.Item
+            label={"Chọn đường di chuyển"}
+            name="route_id"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng chọn đường di chuyển",
+              },
+            ]}
+          >
+            <Select placeholder={""}>
+              {routeList?.data?.map((item: any) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
           <Form.Item
             label={t("websiteManage.form.currency")}
             name="currency_code"
@@ -253,7 +277,7 @@ const WebsiteManageTable: React.FC = () => {
               },
             ]}
           >
-            <Select placeholder={t("websiteManage.form.placeholderCurrency")}>
+            <Select placeholder={""}>
               <Select.Option value="JPY">JPY</Select.Option>
               <Select.Option value="USD">USD</Select.Option>
             </Select>

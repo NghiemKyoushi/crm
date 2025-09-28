@@ -59,6 +59,8 @@ export interface Invoice {
   tracking_other?: string;
   tracking_vn?:string;
   take_photo: boolean;
+  is_repacked: boolean;
+  is_verify_count: boolean
 }
 
 export interface InvoiceMetadata {
@@ -130,6 +132,9 @@ export interface OrderFeeRequest {
   data: {
     product_id: number;
     count: number;
+    price: number;
+    description: string;
+    name: string;
   }[];
   fee_codes: string[];
   insurance_id: number;
