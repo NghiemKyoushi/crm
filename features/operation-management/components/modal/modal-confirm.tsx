@@ -54,20 +54,20 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
 
       >
         <Form.Item
-          label="Mã tracking (tùy chọn)"
+          label="Mã shipping"
           name="shipping_code"
-          rules={[
-            {
-              pattern: /^[A-Za-z0-9-]*$/,
-              message: "Mã tracking không hợp lệ",
-            },
-          ]}
+          // rules={[
+          //   {
+          //     pattern: /^[A-Za-z0-9-]*$/,
+          //     message: "Mã tracking không hợp lệ",
+          //   },
+          // ]}
           className="!mb-2"
         >
           <Input className="!h-11" placeholder="VD: 1234567890123" />
         </Form.Item>
         <Form.Item
-          label="Mã tracking (tùy chọn)"
+          label="Shipping giá"
           name="shipping_fee"
           rules={[
             {

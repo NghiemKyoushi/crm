@@ -133,9 +133,8 @@ export const completeOrder = async (id: string) => {
 };
 
 export const completeShippingOrder = async (
-  id: string,
   body: { shipping_fee: number; shipping_code: string }
 ) => {
-  const res = await api.put(`${API_TYPE_CONST.COMPLETE_SHIPPING}/${id}`, body);
+  const res = await api.put(`${API_TYPE_CONST.COMPLETE_SHIPPING}`, body);
   return res.data.data;
 };
