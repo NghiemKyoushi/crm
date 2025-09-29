@@ -17,13 +17,15 @@ export function middleware(req: NextRequest) {
     const redirectPath = pathname + search;
 
     loginUrl.searchParams.set("redirect", redirectPath);
-    return NextResponse.redirect(loginUrl);
+    const res = NextResponse.redirect(loginUrl);
+    res.headers.set("x-clear-auth", "true");
+    return res;
   }
 
   // Nếu đã login mà vào /login -> đẩy về dashboard
   if (token && pathname === "/login") {
     return NextResponse.redirect(new URL("/user-management", req.url));
-  } 
+  }
 
   return NextResponse.next();
 }

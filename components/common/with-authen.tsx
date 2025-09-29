@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { storage } from '@/lib/storage';
 import { KEY_STORAGE } from '@/constants/storage';
+import Cookies from "js-cookie";
 
 export function WithAuth<P extends JSX.IntrinsicAttributes>(
   WrappedComponent: React.ComponentType<P>,
@@ -14,12 +15,15 @@ export function WithAuth<P extends JSX.IntrinsicAttributes>(
     const { logout } = useAuth();
 
     useEffect(() => {
-      const token = storage.getItem(KEY_STORAGE.TOKEN);
-      if (!token) {
+      const tokenLocal = storage.getItem(KEY_STORAGE.TOKEN);
+      const tokenCookie = Cookies.get("token");
+
+      // Nếu 1 trong 2 không còn => logout
+      if (!tokenLocal || !tokenCookie) {
         logout();
+        router.push("/login");
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router]);
+    }, [router, logout]);
 
     return <WrappedComponent {...props} />;
   };
