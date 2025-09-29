@@ -44,6 +44,7 @@ export const loginRequest  = async (email: string, password: string) => {
     expires: 1,
     path: "/",
     sameSite: "lax",
+    secure: true,
   });
   // Cookies.set("token", accessToken.data.data.token, { expires: 1 });
   localStorage.setItem("accessToken", accessToken.data.data.token);

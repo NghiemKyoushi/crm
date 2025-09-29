@@ -104,6 +104,7 @@ api.interceptors.response.use(
           expires: 1,
           path: "/",
           sameSite: "lax",
+          secure: true,
         });
         localStorage.setItem("accessToken", token);
         processQueue(null, token);

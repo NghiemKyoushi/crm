@@ -17,9 +17,12 @@ export function WithAuth<P extends JSX.IntrinsicAttributes>(
     useEffect(() => {
       const tokenLocal = storage.getItem(KEY_STORAGE.TOKEN);
       const tokenCookie = Cookies.get("token");
-
+     console.log('tokenCookie', tokenCookie);
+     
       // Nếu 1 trong 2 không còn => logout
       if (!tokenLocal || !tokenCookie) {
+        console.log('checkk333');
+
         logout();
         router.push("/login");
       }
