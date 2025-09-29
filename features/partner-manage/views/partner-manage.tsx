@@ -5,7 +5,7 @@ import PartnerTable from "../components/partner-table";
 
 export default function PartnerManagementPage() {
   return (
-    <div className="pt-4 pl-[212px]">
+    <div className="pt-4 ">
       <PartnerTable />
     </div>
   );

@@ -241,7 +241,7 @@ const ProductTypeTable: React.FC = () => {
               },
             ]}
           >
-            <Input placeholder={t("websiteManage.form.placeholderName")} />
+            <Input placeholder={'Tên loại sản phẩm'} />
           </Form.Item>
 
           <Form.Item
@@ -249,7 +249,7 @@ const ProductTypeTable: React.FC = () => {
             name="description"
             rules={[{ required: true, message: "Mô tả là trường bắt buộc " }]}
           >
-            <Input placeholder={t("websiteManage.form.placeholderUrl")} />
+            <Input placeholder={'Mô tả'} />
           </Form.Item>
           <Form.Item
             label="Icon"

@@ -5,7 +5,7 @@ import SalePerformance from "../components/sale-recode-list";
 
 export default function SaleRecordPage() {
   return (
-    <div className="pt-4 pl-[212px] ">
+    <div className="pt-4   ">
       <SalePerformance />
     </div>
   );

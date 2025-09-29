@@ -5,7 +5,7 @@ import CustomerPage from "../components/customer-manage/customer-page";
 
 export default function UserManagementPage() {
   return (
-    <div className="pt-4 pl-[212px] ">
+    <div className="pt-4   ">
       <CustomerPage />
     </div>
   );

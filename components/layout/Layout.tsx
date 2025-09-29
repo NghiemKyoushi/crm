@@ -3,6 +3,9 @@ import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Layout } from "antd";
 import { PermissionProvider } from "./PermissionContext";
+import { useState } from "react";
+import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
+import ContentWrapper from "./Content";
 
 export const metadata: Metadata = {
   title: "OrderSystem",
@@ -16,21 +19,15 @@ export default function RootLayout({
 }) {
   return (
     <PermissionProvider>
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sidebar />
-        <Layout>
-          <Header />
-          <div
-            style={{
-              flex: 1,
-              margin: "24px",
-              padding: "24px 0px 24px 40px",
-            }}
-          >
-            {children}
-          </div>
+      <SidebarProvider>
+        <Layout style={{ minHeight: "100vh" }}>
+          <Sidebar />
+          <Layout>
+            <Header />
+            <ContentWrapper>{children}</ContentWrapper>
+          </Layout>
         </Layout>
-      </Layout>
+      </SidebarProvider>
     </PermissionProvider>
   );
 }

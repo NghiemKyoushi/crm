@@ -92,7 +92,8 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   return (
     <Modal
       title="Thêm mã tracking"
-      open={open}
+      // open={open}
+      open={true}
       onCancel={onCancel}
       footer={null}
       width={600}

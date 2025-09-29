@@ -5,7 +5,7 @@ import SurchargeTable from "../components/surchange-table";
 
 export default function SurchargePage() {
   return (
-    <div className="pt-4 pl-[212px]">
+    <div className="pt-4  ">
       <SurchargeTable />
     </div>
   );
