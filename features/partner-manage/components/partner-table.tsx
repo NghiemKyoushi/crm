@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faDollarSign,
   faMinus,
   faPlus,
   faSearch,
@@ -139,6 +140,11 @@ export default function JPYManagementPage() {
           <Text type="secondary">{record.description}</Text>
         </div>
       ),
+    },
+    {
+      title: "Ghi chú",
+      dataIndex: "note",
+      width: 120,
     },
     {
       title: activeTab === "JPY" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
@@ -268,7 +274,7 @@ export default function JPYManagementPage() {
                 </p>
               </div>
               <FontAwesomeIcon
-                icon={faYenSign}
+                icon={activeTab === "JPY" ? faYenSign : faDollarSign}
                 className="text-3xl opacity-90 w-4 h-4"
               />
             </div>
@@ -333,7 +339,7 @@ export default function JPYManagementPage() {
 
           <Form.Item
             name="amount"
-            label="Số tiền Yên"
+            label="Số tiền"
             rules={[{ required: true, message: "Nhập số tiền" }]}
             className="mb-0 !w-full !h-10"
           >
