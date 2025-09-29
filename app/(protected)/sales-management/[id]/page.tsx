@@ -8,7 +8,7 @@ export default function CustomerDetailPage() {
   const id = params.id;
 
   return (
-    <div className="pt-4 pl-[212px] ">
+    <div className="pt-4   ">
       <SaleDetail selectId={id} />
     </div>
   );

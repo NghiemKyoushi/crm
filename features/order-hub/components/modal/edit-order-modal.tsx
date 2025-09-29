@@ -352,11 +352,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Input
                   placeholder="https://..."
                   className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
-                  addonAfter={
-                    <Button type="dashed" onClick={handleGetInfo}>
-                      Get info
-                    </Button>
-                  }
+                //   addonAfter={
+                //     <Button type="dashed" onClick={handleGetInfo}>
+                //       Get info
+                //     </Button>
+                //   }
                 />
               </Form.Item>
               <Form.Item

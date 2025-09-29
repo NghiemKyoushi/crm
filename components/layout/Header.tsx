@@ -13,10 +13,13 @@ import { menuItems, menuPermissions } from "./Sidebar";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
 import Cookies from "js-cookie";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 const { Header: AntHeader } = Layout;
 
-export const Header: React.FC = () => {
+export const Header: React.FC= () => {
+    const { collapsed } = useSidebar();
+  
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
@@ -38,7 +41,7 @@ export const Header: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     storage.clear();
-    Cookies.remove("token", { path: "" }); 
+    Cookies.remove("token", { path: "" });
     router.push("/login");
   };
 
@@ -73,9 +76,10 @@ export const Header: React.FC = () => {
 
   return (
     <AntHeader
-      className="!fixed !top-0 !left-[256px] !right-0 !h-16 
+      className="!fixed !top-0  !right-0 !h-16 
              !bg-white !p-6 flex justify-between items-center 
              z-40 gap-4 border-b border-gray-200 shadow-sm"
+      style={{ left: collapsed ? 64 : 256 }}
     >
       <div className="text-lg font-semibold text-left">
         {loading
@@ -94,7 +98,7 @@ export const Header: React.FC = () => {
             icon={<FontAwesomeIcon className="text-gray-500" icon={faUser} />}
             className="cursor-pointer"
             style={{ backgroundColor: "rgb(219 234 254)" }}
-            />
+          />
         </Dropdown>
         <LanguageSwitcher />
       </div>

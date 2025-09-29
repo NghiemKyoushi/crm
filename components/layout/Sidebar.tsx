@@ -19,9 +19,13 @@ import {
   faHeadset,
   faYenSign,
   faWarehouse,
+  faBars,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
+import { useRouter } from "next/navigation";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 const { Sider } = Layout;
 
@@ -108,8 +112,11 @@ export const menuItems = [
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
+  const { collapsed ,toggle } = useSidebar();
+
   const pathname = usePathname();
   const { t } = useTranslation();
+  const router = useRouter();
 
   const { hasPermission } = usePermission();
 
@@ -123,26 +130,65 @@ export const Sidebar: React.FC = () => {
   }, [hasPermission]);
 
   return (
+    // <Sider
+    //   width={256}
+    //   //   collapsedWidth={256}
+    //   className="!fixed !top-0 !left-0 !h-screen shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] z-50"
+    //   theme="light"
+    //   //   breakpoint="lg"
+    //   collapsible={false}
+    // >
+    //   <div className="text-gray-800 font-bold p-4 shadow-md flex justify-starts items-center gap-4">
+    //     <div className=" z-50">
+    //       <Image
+    //         src={logoCRM}
+    //         alt="CRM Logo"
+    //         width={45}
+    //         height={45}
+    //         className="rounded-full shadow-sm"
+    //       />
+    //     </div>
+    //     <span>OrderSystem</span>
+    //   </div>
+    //   <Menu
+    //     style={{ border: "none" }}
+    //     theme="light"
+    //     mode="inline"
+    //     items={filteredMenu.map((item) => ({
+    //       key: item.key,
+    //       icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
+    //       label: <Link href={item.key}>{t(`menu.${item.label}`)}</Link>,
+    //     }))}
+    //     selectedKeys={[pathname]}
+    //   />
+    // </Sider>
     <Sider
       width={256}
-      //   collapsedWidth={256}
-      className="!fixed !top-0 !left-0 !h-screen shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] z-50"
+      collapsedWidth={64}
+      collapsed={collapsed}
+      trigger={null}
+      className="!fixed !top-0 !left-0 !h-screen shadow-md z-50"
       theme="light"
-      //   breakpoint="lg"
-      collapsible={false}
     >
-      <div className="text-gray-800 font-bold p-4 shadow-md flex justify-starts items-center gap-4">
-        <div className=" z-50">
-          <Image
-            src={logoCRM}
-            alt="CRM Logo"
-            width={45}
-            height={45}
-            className="rounded-full shadow-sm"
-          />
-        </div>
-        <span>OrderSystem</span>
+      {/* Logo + toggle */}
+      <div className={`flex items-center  p-4 shadow-md ${collapsed ? "justify-center" : "justify-between"}`}>
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <Image
+              src={logoCRM}
+              alt="CRM Logo"
+              width={40}
+              height={40}
+              className="rounded-full shadow-sm"
+            />
+            <span className="font-bold text-gray-800">OrderSystem</span>
+          </div>
+        )}
+        <button onClick={toggle} className="text-gray-600 hover:text-black">
+          <FontAwesomeIcon icon={collapsed ? faBars : faChevronLeft} />
+        </button>
       </div>
+
       <Menu
         style={{ border: "none" }}
         theme="light"
@@ -150,7 +196,7 @@ export const Sidebar: React.FC = () => {
         items={filteredMenu.map((item) => ({
           key: item.key,
           icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
-          label: <Link href={item.key}>{t(`menu.${item.label}`)}</Link>,
+          label: <Link passHref shallow href={item.key}>{t(`menu.${item.label}`)}</Link>,
         }))}
         selectedKeys={[pathname]}
       />

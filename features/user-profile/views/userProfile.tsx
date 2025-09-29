@@ -5,7 +5,7 @@ import UserProfileForm from "../components/user-profile-form";
 
 export default function UserProfilePage() {
   return (
-    <div className="pt-4 pl-[212px]">
+    <div className="pt-4  ">
       <UserProfileForm/>
     </div>
   );

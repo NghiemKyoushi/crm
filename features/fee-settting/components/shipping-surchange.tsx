@@ -259,7 +259,7 @@ export default function ShippingSurchangeTable(
       ),
     },
     {
-      title: "Giá trị",
+      title: "Giá trị (USD)",
       dataIndex: "price_to",
       width: 200,
       render: (val, record: MaterialItem) => {
@@ -353,170 +353,280 @@ export default function ShippingSurchangeTable(
       dataIndex: "value_data",
       width: 200,
       render: (val, record) => {
-        // const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
-        // const numberPart = match
-        //   ? match[1].replace(/,/g, "")
-        //   : val?.toString() ?? "";
-        // const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-
+        // Bắt cả USD, JPY, VND, %
+        const match = (val ?? "")
+          .toString()
+          .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
+      
+        const numberPart = match
+          ? match[1].replace(/,/g, "")
+          : val?.toString() ?? "";
+      
+        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+      
         return (
           <div className="flex items-center gap-1">
-            <Input
-              className="w-full font-bold !h-9 !bg-gray-100 !text-center"
-              value={val}
-              onChange={(e) => {
-                const v = e.target.value.trim();
-                // Cho phép số + suffix đang gõ dở (JPY, USD, %, $)
-                const match = v.match(
-                  /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
-                );
-                if (!match) return;
-                handleChange(+route, record.id.toString(), "value_data", v);
-              }}
-              onBlur={(e) => {
-                const v = e.target.value.trim();
-                const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY|USD)?$/i);
-                let num = match?.[1] ?? "";
-                const suffix = match?.[2]?.toUpperCase() ?? "";
-
-                if (num) {
-                  const [intPart, decimalPart] = num.split(".");
-                  num =
-                    intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                    (decimalPart ? "." + decimalPart : "");
-                }
-
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "value_data",
-                  num + suffix
-                );
-              }}
-            />
-            {/* <Input
-          className="w-full  font-bold !h-9 !bg-gray-100 !text-center"
-          value={val}
-          onChange={(e) => {
-            const v = e.target.value.trim();
-            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
-            if (!match) return;
-            handleChange(
-              +route,
-              record.id.toString(),
-              "value_data",
-              v
-            );
-          }}
-          onBlur={(e) => {
-            const v = e.target.value.trim();
-            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
-            let num = match?.[1] ?? "";
-            const suffix = match?.[2] ?? "";
-
-            if (num) {
-              const [intPart, decimalPart] = num.split(".");
-              num =
-                intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                (decimalPart ? "." + decimalPart : "");
-            }
-
-            handleChange(
-              +route,
-              record.id.toString(),
-              "value_data",
-              num + suffix
-            );
-          }}
-        /> */}
-            {/* <InputNumber<string>
+            <InputNumber<string>
               className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
               value={numberPart}
               step={0.01}
               stringMode
               formatter={(value) => {
                 if (!value) return "";
-                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
+                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
               }}
               parser={(value) => {
                 if (!value) return "";
-                return value.replace(/,/g, "").trim(); // parse ra số
+                return value.replace(/,/g, "").trim(); // parse số
               }}
               onChange={(value) =>
                 handleChange(
                   +route,
                   record.id.toString(),
                   "value_data",
-                  (value ?? "0") + "" + unitPart // lưu kèm đơn vị
+                  (value ?? "0") + unitPart // nối với đơn vị
                 )
               }
             />
-
+      
             <Select
-              className="!h-9 !w-5/12"
+              className="!h-9 !w-6/12"
               value={unitPart}
               onChange={(cur) => {
-                // đổi đơn vị thì update lại value_data
                 const cleanNumber = numberPart || "0";
                 handleChange(
                   +route,
                   record.id.toString(),
                   "value_data",
-                  cleanNumber + " " + cur
+                  cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
                 );
               }}
               options={[
                 { label: "USD", value: "USD" },
                 { label: "JPY", value: "JPY" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
               ]}
-            /> */}
+            />
           </div>
         );
-      },
+      }
+      // render: (val, record) => {
+      //   const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
+      //   const numberPart = match
+      //     ? match[1].replace(/,/g, "")
+      //     : val?.toString() ?? "";
+      //   const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+
+      //   return (
+      //     <div className="flex items-center gap-1">
+      //       <InputNumber<string>
+      //         className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+      //         value={numberPart}
+      //         step={0.01}
+      //         stringMode
+      //         formatter={(value) => {
+      //           if (!value) return "";
+      //           return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
+      //         }}
+      //         parser={(value) => {
+      //           if (!value) return "";
+      //           return value.replace(/,/g, "").trim(); // parse ra số
+      //         }}
+      //         onChange={(value) =>
+      //           handleChange(
+      //             +route,
+      //             record.id.toString(),
+      //             "value_data",
+      //             (value ?? "0") + "" + unitPart // lưu kèm đơn vị
+      //           )
+      //         }
+      //       />
+
+      //       <Select
+      //         className="!h-9 !w-5/12"
+      //         value={unitPart}
+      //         onChange={(cur) => {
+      //           // đổi đơn vị thì update lại value_data
+      //           const cleanNumber = numberPart || "0";
+      //           handleChange(
+      //             +route,
+      //             record.id.toString(),
+      //             "value_data",
+      //             cleanNumber + "" + cur
+      //           );
+      //         }}
+      //         options={[
+      //           { label: "USD", value: "USD" },
+      //           { label: "JPY", value: "JPY" },
+      //           { label: "VND", value: "VND" },
+      //           { label: "%", value: "%" },
+
+      //         ]}
+      //       />
+      //     </div>
+      //   );
+      // },
     },
     {
       title: "Phụ thu",
       dataIndex: "value_shipping_data",
       width: 140,
-      render: (val, record) => (
-        <Input
-          className="w-full !text-red-600 font-bold !h-9 !bg-gray-100 !text-center"
-          value={val}
-          onChange={(e) => {
-            const v = e.target.value.trim();
-            const match = v.match(
-              /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
-            );
-            if (!match) return;
-            handleChange(
-              +route,
-              record.id.toString(),
-              "value_shipping_data",
-              v
-            );
-          }}
-          onBlur={(e) => {
-            const v = e.target.value.trim();
-            const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
-            let num = match?.[1] ?? "";
-            const suffix = match?.[2] ?? "";
+      render: (val, record) => {
+        // Bắt cả USD, JPY, VND, %
+        const match = (val ?? "")
+          .toString()
+          .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
+      
+        const numberPart = match
+          ? match[1].replace(/,/g, "")
+          : val?.toString() ?? "";
+      
+        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+      
+        return (
+          <div className="flex items-center gap-1">
+            <InputNumber<string>
+              className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+              value={numberPart}
+              step={0.01}
+              stringMode
+              formatter={(value) => {
+                if (!value) return "";
+                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
+              }}
+              parser={(value) => {
+                if (!value) return "";
+                return value.replace(/,/g, "").trim(); // parse số
+              }}
+              onChange={(value) =>
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "value_shipping_data",
+                  (value ?? "0") + unitPart // nối với đơn vị
+                )
+              }
+            />
+      
+            <Select
+              className="!h-9 !w-6/12"
+              value={unitPart}
+              onChange={(cur) => {
+                const cleanNumber = numberPart || "0";
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "value_shipping_data",
+                  cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                );
+              }}
+              options={[
+                { label: "USD", value: "USD" },
+                { label: "JPY", value: "JPY" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ]}
+            />
+          </div>
+        );
+      }
+      
+      // render: (val, record) => {
+      //   const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
+      //   const numberPart = match
+      //     ? match[1].replace(/,/g, "")
+      //     : val?.toString() ?? "";
+      //   const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
 
-            if (num) {
-              const [intPart, decimalPart] = num.split(".");
-              num =
-                intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                (decimalPart ? "." + decimalPart : "");
-            }
+      //   return (
+      //     <div className="flex items-center gap-1">
+      //       <InputNumber<string>
+      //         className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+      //         value={numberPart}
+      //         step={0.01}
+      //         stringMode
+      //         formatter={(value) => {
+      //           if (!value) return "";
+      //           return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
+      //         }}
+      //         parser={(value) => {
+      //           if (!value) return "";
+      //           return value.replace(/,/g, "").trim(); // parse ra số
+      //         }}
+      //         onChange={(value) =>
+      //           handleChange(
+      //             +route,
+      //             record.id.toString(),
+      //             "value_shipping_data",
+      //             (value ?? "0") + "" + unitPart // lưu kèm đơn vị
+      //           )
+      //         }
+      //       />
 
-            handleChange(
-              +route,
-              record.id.toString(),
-              "value_shipping_data",
-              num + suffix
-            );
-          }}
-        />
-      ),
+      //       <Select
+      //         className="!h-9 !w-5/12"
+      //         value={unitPart}
+      //         onChange={(cur) => {
+      //           // đổi đơn vị thì update lại value_data
+      //           const cleanNumber = numberPart || "0";
+      //           handleChange(
+      //             +route,
+      //             record.id.toString(),
+      //             "value_shipping_data",
+      //             cleanNumber + "" + cur
+      //           );
+      //         }}
+      //         options={[
+      //           { label: "USD", value: "USD" },
+      //           { label: "JPY", value: "JPY" },
+      //           { label: "VND", value: "VND" },
+      //           { label: "%", value: "%" },
+
+      //         ]}
+      //       />
+      //     </div>
+      //   );
+      // },
+      // render: (val, record) => (
+      //   <Input
+      //     className="w-full !text-red-600 font-bold !h-9 !bg-gray-100 !text-center"
+      //     value={val}
+      //     onChange={(e) => {
+      //       const v = e.target.value.trim();
+      //       const match = v.match(
+      //         /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
+      //       );
+      //       if (!match) return;
+      //       handleChange(
+      //         +route,
+      //         record.id.toString(),
+      //         "value_shipping_data",
+      //         v
+      //       );
+      //     }}
+      //     // onBlur={(e) => {
+      //     //   const v = e.target.value.trim();
+      //     //   const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
+      //     //   let num = match?.[1] ?? "";
+      //     //   const suffix = match?.[2] ?? "";
+
+      //     //   if (num) {
+      //     //     const [intPart, decimalPart] = num.split(".");
+      //     //     num =
+      //     //       intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+      //     //       (decimalPart ? "." + decimalPart : "");
+      //     //   }
+
+      //     //   handleChange(
+      //     //     +route,
+      //     //     record.id.toString(),
+      //     //     "value_shipping_data",
+      //     //     num + suffix
+      //     //   );
+      //     // }}
+      //   />
+      // ),
     },
     {
       title: "Thao tác",
