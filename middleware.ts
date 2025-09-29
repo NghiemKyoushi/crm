@@ -19,6 +19,7 @@ export function middleware(req: NextRequest) {
     loginUrl.searchParams.set("redirect", redirectPath);
     const res = NextResponse.redirect(loginUrl);
     res.headers.set("x-clear-auth", "true");
+    return res;
   }
 
   // Nếu đã login mà vào /login -> đẩy về dashboard
