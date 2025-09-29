@@ -48,6 +48,7 @@ const FinanceDepositApprovalPage = () => {
       </div>
     );
   }
+  
   return (
     <div className="pt-4">
       <FinanceTabs

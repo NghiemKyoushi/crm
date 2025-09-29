@@ -186,12 +186,16 @@ export const RoleManager: React.FC = () => {
                       value={activePermissions}
                       disabled={isSuperAdmin}
                       onChange={(checkedValues) => {
-                        if (isSuperAdmin) return;
+                        console.log('checkedValues', checkedValues);
+                        
+                        // if (isSuperAdmin) return;
                         setSelectedRole((prev) =>
                           prev
                             ? {
                                 ...prev,
                                 groups: prev.groups.map((g: any) => {
+                                  console.log('g', g);
+                                  
                                   if (g.id !== group.group_id) return g;
 
                                   return {

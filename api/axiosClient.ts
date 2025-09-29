@@ -99,7 +99,12 @@ api.interceptors.response.use(
         );
 
         const token = res.data.data.token;
-        Cookies.set("token", token, { expires: 1 });
+        // Cookies.set("token", token, { expires: 1 });
+        Cookies.set("token", token, {
+          expires: 1,
+          path: "/",
+          sameSite: "lax",
+        });
         localStorage.setItem("accessToken", token);
         processQueue(null, token);
 

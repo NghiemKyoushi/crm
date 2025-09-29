@@ -72,10 +72,11 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
   ];
 
   const items = allItems.filter((item) => allowedTabs.includes(item.key));
-
+  const validActiveKey =
+  items.find((item) => item.key === activeKey)?.key || items[0]?.key;
   return (
     <Tabs
-      activeKey={activeKey}
+      activeKey={validActiveKey}
       onChange={onChange}
       items={items}
       type="line"

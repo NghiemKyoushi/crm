@@ -40,7 +40,12 @@ export const loginRequest  = async (email: string, password: string) => {
       },
     }
   );  
-  Cookies.set("token", accessToken.data.data.token, { expires: 1 });
+  Cookies.set("token", accessToken.data.data.token, {
+    expires: 1,
+    path: "/",
+    sameSite: "lax",
+  });
+  // Cookies.set("token", accessToken.data.data.token, { expires: 1 });
   localStorage.setItem("accessToken", accessToken.data.data.token);
   return { refreshToken, accessToken };
 };
