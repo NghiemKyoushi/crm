@@ -57,7 +57,7 @@ export default function AddCustomerTypeModal({
       title={
         <div className="flex justify-between items-center border-b border-gray-200 pb-2">
           <span className="font-semibold text-lg">
-            {isEdit ? "Chỉnh sửa Loại khách hàng" : "Thêm Loại khách hàng mới"}
+            {isEdit ? t('categoryCustomer.editCategory') : t('categoryCustomer.addNewCategory')}
           </span>
         </div>
       }
@@ -71,8 +71,8 @@ export default function AddCustomerTypeModal({
           <Controller
             name="group_name"
             control={control}
-            rules={{ required: "Vui lòng nhập Tên loại" }}
-            render={({ field }) => <Input placeholder="VD: Vàng" {...field} />}
+            rules={{ required: t('categoryCustomer.nameRequired') }}
+            render={({ field }) => <Input placeholder={t('categoryCustomer.namePlaceholder')} {...field} />}
           />
           {errors.group_name && (
             <p className="text-red-500 text-sm mt-1">
@@ -82,13 +82,13 @@ export default function AddCustomerTypeModal({
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Mô tả</label>
+          <label className="block mb-1 font-medium">{t('categoryCustomer.description')}</label>
           <Controller
             name="description"
             control={control}
-            rules={{ required: "Vui lòng nhập Mô tả" }}
+            rules={{ required: t('categoryCustomer.descriptionRequired') }}
             render={({ field }) => (
-              <Input placeholder="VD: Khách hàng tiềm năng" {...field} />
+              <Input placeholder={t('categoryCustomer.descriptionPlaceholder')} {...field} />
             )}
           />
           {errors.description && (
@@ -100,7 +100,7 @@ export default function AddCustomerTypeModal({
 
         {/* Pick color */}
         <div>
-          <label className="block mb-1 font-medium">Chọn màu</label>
+          <label className="block mb-1 font-medium">{t('categoryCustomer.selectColor')}</label>
           <Controller
             name="color"
             control={control}
@@ -112,14 +112,14 @@ export default function AddCustomerTypeModal({
               />
             )}
           />
-          <p className="mt-2 text-sm">Mã màu: <span className="font-mono">{pickedColor}</span></p>
+          <p className="mt-2 text-sm">{t('categoryCustomer.colorCode')} <span className="font-mono">{pickedColor}</span></p>
         </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button onClick={onClose}>Hủy</Button>
+          <Button onClick={onClose}>{t('categoryCustomer.cancel')}</Button>
           <Button type="primary" htmlType="submit">
-            {isEdit ? "Cập nhật" : "Thêm Loại"}
+            {isEdit ? t('categoryCustomer.update') : t('categoryCustomer.addCategory')}
           </Button>
         </div>
       </form>

@@ -505,12 +505,36 @@
     "note": "Note",
     "totalBuyJPY": "Total Purchase (JPY)",
     "totalBuyUSD": "Total Purchase (USD)",
-    "exchangeRate": "Exchange Rate"
+    "exchangeRate": "Exchange Rate",
+    "currency": "VND",
+    "createdDate": "Created Date",
+    "actions": "Actions",
+    "manageJPY": "Manage (JPY)",
+    "manageUSD": "Manage (USD)",
+    "overviewJPY": "JPY Management Overview",
+    "overviewUSD": "USD Management Overview"
   },
   "categoryCustomer": {
     "createSuccess": "New customer category created successfully!",
     "updateSuccess": "Customer category updated successfully!",
     "deleteSuccess": "Customer category deleted successfully!",
-    "exchangeRateUpdateSuccess": "Exchange rate updated successfully!"
+    "exchangeRateUpdateSuccess": "Exchange rate updated successfully!",
+    "editCategory": "Edit Customer Category",
+    "addNewCategory": "Add New Customer Category",
+    "nameRequired": "Please enter category name",
+    "namePlaceholder": "e.g: Gold",
+    "description": "Description",
+    "descriptionRequired": "Please enter description",
+    "descriptionPlaceholder": "e.g: Potential customers",
+    "selectColor": "Select Color",
+    "colorCode": "Color code:",
+    "cancel": "Cancel",
+    "update": "Update",
+    "addCategory": "Add Category",
+    "exchangeRate": "Exchange Rate",
+    "shippingAndSurcharge": "Shipping & Surcharge",
+    "servicesAndDelivery": "Services & Delivery",
+    "insuranceAndRegulations": "Insurance & General Regulations",
+    "customFeeSettings": "Custom fee settings for customer category"
   }
 }
