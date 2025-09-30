@@ -222,7 +222,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   }, [form, services, customer, priceVND, prices]);
 
   useEffect(() => {
-    if (listInsurance) {
+    if (listInsurance && listInsurance.length > 0) {
       setInsurance(listInsurance[0]);
     }
   }, [listInsurance]);

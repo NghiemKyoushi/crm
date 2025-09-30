@@ -267,7 +267,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   }, [form, services, customer, priceVND, prices]);
 
   useEffect(() => {
-    if (listInsurance) {
+    if (listInsurance && listInsurance.length > 0) {
       setInsurance(listInsurance[0]);
     }
   }, [listInsurance]);
@@ -279,7 +279,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   useEffect(() => {
     if (order) {
       setPrice(order.amount_vnd);
-      setIdProduct(order.metadata.items[0].product.id);
+      setIdProduct(order.metadata.items[0]?.product.id);
       order.metadata.infos.fees.map(item =>{
         services.push(item.code)
       })
