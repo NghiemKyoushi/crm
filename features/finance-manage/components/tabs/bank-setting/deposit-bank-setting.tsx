@@ -41,7 +41,7 @@ export default function BankAccountSetting() {
   const addMutation = useMutation({
     mutationFn: addBankCreateAccount,
     onSuccess: () => {
-      toast.success("Thêm tài khoản thành công!");
+      toast.success(t("bankPartner.addAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccounts"],
       });
@@ -55,7 +55,7 @@ export default function BankAccountSetting() {
     mutationFn: ({ id, body }: { id: number; body: any }) =>
       updateBankCreateAccount(id, body),
     onSuccess: () => {
-      toast.success("Cập nhật tài khoản thành công!");
+      toast.success(t("bankPartner.updateAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccounts"],
       });
@@ -68,7 +68,7 @@ export default function BankAccountSetting() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteBankCreateAccount(id),
     onSuccess: () => {
-      toast.success("Xóa tài khoản thành công!");
+      toast.success(t("bankPartner.deleteAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccounts"],
       });
@@ -90,7 +90,7 @@ export default function BankAccountSetting() {
       mutationFn: (admin_user_ids: number[]) =>
         addUserBankPermission(idBank, { admin_user_ids }),
       onSuccess: () => {
-        toast.success("Cập nhật phân quyền thành công!");
+        toast.success(t("bankPartner.updatePermissionSuccess"));
         if (onSuccess) onSuccess();
       },
       onError: (err: any) => {
@@ -153,7 +153,7 @@ export default function BankAccountSetting() {
             }}
             className="!text-blue-600 hover:underline"
           >
-            Sửa
+            {t('common.edit')}
           </button>
           <span>|</span>
           <button
@@ -165,7 +165,7 @@ export default function BankAccountSetting() {
               setOpenAssign(true);
             }}
           >
-            Gán quyền
+            {t('bankPartner.assignPermission')}
           </button>
           <span>|</span>
           <button
@@ -175,7 +175,7 @@ export default function BankAccountSetting() {
             }}
             className="!text-red-600 hover:underline"
           >
-            Xóa
+            {t('common.delete')}
           </button>
         </div>
       ),
@@ -190,7 +190,7 @@ export default function BankAccountSetting() {
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
-          Cài đặt tài khoản ngân hàng Công ty
+          {t('bankPartner.companyBankAccountSettings')}
         </h2>
         <Button
           onClick={() => {
@@ -201,7 +201,7 @@ export default function BankAccountSetting() {
           icon={<PlusOutlined />}
           className="bg-blue-500 hover:bg-blue-600 rounded-lg"
         >
-          Thêm tài khoản
+          {t('bankPartner.addAccount')}
         </Button>
       </div>
       <TableComponent

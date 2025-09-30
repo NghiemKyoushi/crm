@@ -535,14 +535,14 @@ export default function OrderHub() {
                   placeholder={t("statusPlaceholder")}
                   className="w-full !h-11"
                 >
-                  <Option value="COMPLETED">Đang giao hàng</Option>
-                  <Option value="CANCELED">Đã về kho</Option>
-                  <Option value="FAILED">Đã giao hàng</Option>
+                  <Option value="COMPLETED">{t("status.shipping")}</Option>
+                  <Option value="CANCELED">{t("status.arrivedWarehouse")}</Option>
+                  <Option value="FAILED">{t("status.delivered")}</Option>
                 </Select>
               </Form.Item>
 
               <Form.Item name="dateRange" className="mb-0">
-                <Select placeholder="Nguồn" className="w-full !h-11">
+                <Select placeholder={t("form.source")} className="w-full !h-11">
                   <Option value="WAITING_CONFIRMATION">
                     {t("status.waiting")}
                   </Option>
@@ -720,8 +720,8 @@ export default function OrderHub() {
       <PopupConfirm
         open={openConfirmComplete}
         type={"confirm"}
-        title={"Xác nhận hoàn thành đơn hàng"}
-        content={"Đơn hàng đã được hoàn thành !"}
+        title={t("modal.confirmCompleteOrder")}
+        content={t("modal.orderCompleted")}
         onConfirm={handleCompleteOrder}
         onCancel={() => setOpenConfirmComplete(false)}
         confirmText={t("common.confirm")}

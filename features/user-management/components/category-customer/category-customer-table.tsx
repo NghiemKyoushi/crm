@@ -207,20 +207,20 @@ export default function CategoryCustomerTable() {
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">
-          Phân loại Khách hàng & Chính sách đi kèm
+          {t('categoryCustomer.title')}
         </h2>
         <Button
           type="primary"
           onClick={() => setOpen(true)}
           className="!bg-blue-500 !hover:bg-blue-600 !font-medium"
         >
-          + Thêm Loại mới
+          {t('categoryCustomer.addNewType')}
         </Button>
       </div>
 
       <div className="flex gap-2 mb-4">
         <Input
-          placeholder="Tìm kiếm nhân viên..."
+          placeholder={t('categoryCustomer.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onPressEnter={handleSearch}
@@ -230,7 +230,7 @@ export default function CategoryCustomerTable() {
           icon={<FontAwesomeIcon icon={faSearch} />}
           onClick={handleSearch}
         >
-          Tìm kiếm
+          {t('common.search')}
         </Button>
       </div>
 

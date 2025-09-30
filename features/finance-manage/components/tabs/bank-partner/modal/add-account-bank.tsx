@@ -86,7 +86,7 @@ export default function AddBankAccountModal({
 
   return (
     <Modal
-      title="Thêm tài khoản Ngân hàng mới"
+      title={t('bankPartner.addNewBankAccount')}
       open={open}
       onCancel={handleClose}
       footer={[
@@ -205,8 +205,8 @@ export default function AddBankAccountModal({
           style={{ marginBottom: 12 }}
         >
           <Select>
-            <Option value="active">Hoạt động</Option>
-            <Option value="inactive">Ngừng hoạt động</Option>
+            <Option value="active">{t('status.active')}</Option>
+            <Option value="inactive">{t('status.inactive')}</Option>
           </Select>
         </Form.Item>
       </Form>
