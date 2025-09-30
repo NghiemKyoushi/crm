@@ -93,7 +93,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           },
           {
             onSuccess: () => {
-              toast.success("Tạo order mới thành công!");
+              toast.success(t('toast.createOrderSuccess'));
               queryClient.invalidateQueries({
                 queryKey: ["listorder"],
               });
@@ -129,7 +129,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const handleGetInfo = () => {
     const linkValue = form.getFieldValue("link");
     if (!linkValue) {
-      toast.warning("Vui lòng nhập link trước!");
+      toast.warning(t('toast.pleaseEnterLink'));
       return;
     }
     mutate(linkValue, {
@@ -142,10 +142,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         });
         setIdProduct(data.id);
         form.setFieldValue("priceY", data.price);
-        toast.success("Lấy thông tin sản phẩm thành công!");
+        toast.success(t('toast.getProductInfoSuccess'));
       },
       onError: () => {
-        toast.error("Không thể lấy thông tin từ link!");
+        toast.error(t('toast.cannotGetInfoFromLink'));
       },
     });
   };
@@ -242,13 +242,13 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             overflowX: "hidden",
           },
         }}
-        title="Tạo Đơn hàng cho Khách hàng"
+        title={t('modal.createOrderForCustomer')}
         open={isOpen}
         onCancel={onCancel}
         centered
         footer={[
           <Button key="cancel" onClick={onCancel}>
-            Hủy
+            {t('button.cancel')}
           </Button>,
           <Button
             key="submit"
@@ -256,7 +256,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             onClick={handleOk}
             className="bg-blue-500"
           >
-            Tạo Đơn hàng
+            {t('button.createOrder')}
           </Button>,
         ]}
         width={800}
@@ -274,11 +274,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
             <Col span={12}>
-              <Divider orientation="left">Thông tin Sản phẩm</Divider>
+              <Divider orientation="left">{t('form.productInformation')}</Divider>
               <Form.Item
-                label="Link Sản phẩm"
+                label={t('form.productLink')}
                 name="link"
-                rules={[{ required: true, message: "Vui lòng nhập link!" }]}
+                rules={[{ required: true, message: t('validation.pleaseEnterLink') }]}
                 className="!mb-1 "
               >
                 <Input
@@ -292,20 +292,20 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 />
               </Form.Item>
               <Form.Item
-                label="Tên Sản phẩm"
+                label={t('form.productName')}
                 name="productName"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                  { required: true, message: t('validation.pleaseEnterProductName') },
                 ]}
                 className="!mb-1"
               >
                 <Input className="!h-11" placeholder="" />
               </Form.Item>
               <Form.Item
-                label="Mô tả Sản phẩm"
+                label={t('form.productDescription')}
                 name="description"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                  { required: true, message: t('validation.pleaseEnterProductName') },
                 ]}
                 className="!mb-1"
               >
@@ -314,14 +314,14 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 {/* <TextArea rows={4} maxLength={500} placeholder="" /> */}
               </Form.Item>
               <Form.Item
-                label="Loại sản phẩm"
+                label={t('form.productType')}
                 name="category"
-                rules={[{ required: true, message: "Chọn loại sản phẩm!" }]}
+                rules={[{ required: true, message: t('validation.selectProductType') }]}
                 className="!mb-1"
               >
                 <Select
                   className="!h-11"
-                  placeholder="-- Chọn loại sản phẩm --"
+                  placeholder={t('placeholder.selectProductType')}
                 >
                   {categories?.map((cat: any) => {
                     return (
@@ -334,7 +334,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <Form.Item
-                label="Phương thức"
+                label={t('form.method')}
                 name="method"
                 rules={[{ required: true, message: "Chọn phương thức!" }]}
                 className=" !w-full !mb-1"
@@ -495,24 +495,24 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </div>
             </Col>
             <Col span={12}>
-              <Divider orientation="left">Thông tin Đơn hàng</Divider>
+              <Divider orientation="left">{t('form.orderInformation')}</Divider>
               <Form.Item
-                label="Khách hàng"
+                label={t('form.customer')}
                 name="customer"
                 className="!mb-1"
                 rules={[
-                  { required: true, message: "Vui lòng chọn khách hàng!" },
+                  { required: true, message: t('validation.pleaseSelectCustomer') },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Tìm khách hàng theo mã hoặc tên..."
+                  placeholder={t('placeholder.searchCustomer')}
                   className="!w-full !h-11"
                   filterOption={false} // tắt filter local, dùng API search
                   onSearch={(value) => setSearchValue(value)} // update searchValue
                   notFoundContent={
-                    isLoading ? <Spin size="small" /> : "Không có dữ liệu"
+                    isLoading ? <Spin size="small" /> : t('system.noData')
                   }
                   options={options}
                 />

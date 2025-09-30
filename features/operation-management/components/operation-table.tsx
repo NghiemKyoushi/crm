@@ -54,7 +54,7 @@ const ProductManagement: React.FC = () => {
       ),
     },
     {
-      title: "Khách hàng",
+      title: t('table.customer'),
       key: "customer_name",
       render: (_, record) => (
         <div>
@@ -65,7 +65,7 @@ const ProductManagement: React.FC = () => {
     },
 
     {
-      title: "Người tạo",
+      title: t('table.creator'),
       key: "user_name",
       render: (_, record) => (
         <div>
@@ -74,7 +74,7 @@ const ProductManagement: React.FC = () => {
       ),
     },
     {
-      title: "Số tiền",
+      title: t('table.amount'),
       key: "amountvnd",
       render: (_, record) => (
         <div>
@@ -83,7 +83,7 @@ const ProductManagement: React.FC = () => {
       ),
     },
     {
-      title: "Trạng thái",
+      title: t('table.status'),
       dataIndex: "status",
       key: "status",
       align: "center",
@@ -99,51 +99,51 @@ const ProductManagement: React.FC = () => {
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
-            text = "Đợi duyệt";
+            text = t('status.pendingApproval');
             break;
           case OrderStatusType.PENDING_DEPOSIT:
             color = "gold";
-            text = "Đợi đặt cọc";
+            text = t('status.pendingDeposit');
             break;
           case OrderStatusType.DEPOSIT_PAID:
             color = "green";
-            text = "Đã đặt cọc";
+            text = t('status.depositPaid');
             break;
           case OrderStatusType.PURCHASED:
             color = "blue";
-            text = "Đã mua";
+            text = t('status.purchased');
             break;
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             color = "purple";
-            text = "Đến kho Nhật";
+            text = t('status.arrivedJpWarehouse');
             break;
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             color = "cyan";
-            text = "Đến kho Việt";
+            text = t('status.arrivedVnWarehouse');
             break;
           case OrderStatusType.UNDER_INSPECTION:
             color = "lime";
-            text = "Đang kiểm hàng";
+            text = t('status.underInspection');
             break;
           case OrderStatusType.PENDING_PAYMENT:
             color = "red";
-            text = "Đợi thanh toán";
+            text = t('status.pendingPayment');
             break;
           case OrderStatusType.READY_TO_SHIP:
             color = "geekblue";
-            text = "Sẵn sàng giao";
+            text = t('status.readyToShip');
             break;
           case OrderStatusType.SHIPPED:
             color = "volcano";
-            text = "Đã chuyển";
+            text = t('status.shipped');
             break;
           case OrderStatusType.SHIPPING_REQUEST_CLIENT:
             color = "magenta";
-            text = "Yêu cầu chuyển hàng";
+            text = t('status.shippingRequest');
             break;
           case OrderStatusType.CANCELED:
             color = "red";
-            text = "Đã Huỷ";
+            text = t('status.cancelled');
             break;
           default:
             color = "default";
@@ -158,7 +158,7 @@ const ProductManagement: React.FC = () => {
       },
     },
     {
-      title: "Hành động",
+      title: t('table.actions'),
       key: "actions",
       align: "right",
       onCell: () => ({
@@ -178,7 +178,7 @@ const ProductManagement: React.FC = () => {
               setOrderDetail(record);
             }}
           >
-            Đã chuyển
+            {t('button.shipped')}
           </Button>
         );
         return (
@@ -190,7 +190,7 @@ const ProductManagement: React.FC = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow">
       <h2 className="text-lg font-semibold mt-8 mb-4">
-        Danh sách sản phẩm đã nhập
+        {t('page.importedProductList')}
       </h2>
       <TableComponent
         columns={columns}
@@ -219,7 +219,7 @@ const ProductManagement: React.FC = () => {
               },
               {
                 onSuccess: () => {
-                  toast.success("Xác nhận vận chuyển thành công!");
+                  toast.success(t('toast.confirmShippingSuccess'));
                   queryClient.invalidateQueries({
                     queryKey: ["listorderTracking"],
                   });
