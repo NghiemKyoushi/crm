@@ -180,10 +180,10 @@ export default function JPYManagementPage() {
     {
       title: t('partnerManage.exchangeRate'),
       dataIndex: "exchange_rate",
-      render: (value: number) => `${value} VNĐ`,
+      render: (value: number) => `${value} ${t('partnerManage.currency')}`,
     },
     {
-      title: "Ngày Tạo",
+      title: t('partnerManage.createdDate'),
       dataIndex: "created_at",
       render: (value: string) => {
         if (!value) return "-";
@@ -191,7 +191,7 @@ export default function JPYManagementPage() {
       },
     },
     {
-      title: "Hành động",
+      title: t('partnerManage.actions'),
       render: (_: any, record: PartnerTransaction) => (
         <div
           onClick={() => {
@@ -236,15 +236,15 @@ export default function JPYManagementPage() {
         activeKey={activeTab}
         onChange={setActiveTab}
         items={[
-          { key: "JPY", label: "Quản lý (JPY)" },
-          { key: "USD", label: "Quản lý (USD)" },
+          { key: "JPY", label: t('partnerManage.manageJPY') },
+          { key: "USD", label: t('partnerManage.manageUSD') },
         ]}
       />
       <div>
         <Title level={4}>
           {activeTab === "jpy"
-            ? "Tổng quan Quản lý JPY"
-            : "Tổng quan Quản lý USD"}
+            ? t('partnerManage.overviewJPY')
+            : t('partnerManage.overviewUSD')}
         </Title>
         <div className="p-3 bg-white rounded-lg shadow grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <Card className="!h-32 !p-0 !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white shadow-md rounded-xl">

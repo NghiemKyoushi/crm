@@ -507,12 +507,36 @@
     "note": "Ghi chú",
     "totalBuyJPY": "Tổng Mua (JPY)",
     "totalBuyUSD": "Tổng Mua (USD)",
-    "exchangeRate": "Tỷ giá"
+    "exchangeRate": "Tỷ giá",
+    "currency": "VNĐ",
+    "createdDate": "Ngày Tạo",
+    "actions": "Hành động",
+    "manageJPY": "Quản lý (JPY)",
+    "manageUSD": "Quản lý (USD)",
+    "overviewJPY": "Tổng quan Quản lý JPY",
+    "overviewUSD": "Tổng quan Quản lý USD"
   },
   "categoryCustomer": {
     "createSuccess": "Tạo loại khách hàng mới thành công!",
     "updateSuccess": "Cập nhật loại khách hàng thành công!",
     "deleteSuccess": "Xóa loại khách hàng thành công!",
-    "exchangeRateUpdateSuccess": "Cập nhật tỉ giá thành công!"
+    "exchangeRateUpdateSuccess": "Cập nhật tỉ giá thành công!",
+    "editCategory": "Chỉnh sửa Loại khách hàng",
+    "addNewCategory": "Thêm Loại khách hàng mới",
+    "nameRequired": "Vui lòng nhập Tên loại",
+    "namePlaceholder": "VD: Vàng",
+    "description": "Mô tả",
+    "descriptionRequired": "Vui lòng nhập Mô tả",
+    "descriptionPlaceholder": "VD: Khách hàng tiềm năng",
+    "selectColor": "Chọn màu",
+    "colorCode": "Mã màu:",
+    "cancel": "Hủy",
+    "update": "Cập nhật",
+    "addCategory": "Thêm Loại",
+    "exchangeRate": "Tỷ Giá Ngoại Tệ",
+    "shippingAndSurcharge": "Vận Chuyển & Phụ Thu",
+    "servicesAndDelivery": "Dịch Vụ & Giao Hàng",
+    "insuranceAndRegulations": "Bảo Hiểm & Quy Định Chung",
+    "customFeeSettings": "Cài đặt phí riêng cho loại khách hàng"
   }
 }
