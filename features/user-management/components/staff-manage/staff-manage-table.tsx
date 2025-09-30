@@ -66,7 +66,7 @@ export default function StaffManageTable() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteAcount(id),
     onSuccess: () => {
-      toast.success("Xoá tài khoản thành công!");
+      toast.success(t('staffManage.toast.deleteSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
     onError: (err: any) =>
@@ -76,7 +76,7 @@ export default function StaffManageTable() {
   const lockMutation = useMutation({
     mutationFn: (id: string) => lockAcount(id),
     onSuccess: () => {
-      toast.success("Khoá tài khoản thành công!");
+      toast.success(t('staffManage.toast.lockSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
     onError: (err: any) =>
@@ -86,7 +86,7 @@ export default function StaffManageTable() {
   const unlockMutation = useMutation({
     mutationFn: (id: string) => unlockAcount(id),
     onSuccess: () => {
-      toast.success("Mở khoá tài khoản thành công!");
+      toast.success(t('staffManage.toast.unlockSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
     onError: (err: any) =>
@@ -96,7 +96,7 @@ export default function StaffManageTable() {
   const resetPassMutation = useMutation({
     mutationFn: (id: string) => resetPassAccount(id),
     onSuccess: () => {
-      toast.success("Reset mật khẩu thành công!");
+      toast.success(t('staffManage.toast.resetSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
     onError: (err: any) =>
@@ -132,7 +132,7 @@ export default function StaffManageTable() {
     mutationFn: ({ param, id }: { param: NewUserType; id: string }) =>
       updateStaff(param, id),
     onSuccess: () => {
-      toast.success("Cập nhật tài khoản thành công!");
+      toast.success(t('staffManage.toast.updateSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listStaff"] });
     },
     onError: (err: any) =>
@@ -166,7 +166,7 @@ export default function StaffManageTable() {
         },
         {
           onSuccess: () => {
-            toast.success("Tạo nhân viên mới thành công!");
+            toast.success(t('staffManage.toast.createSuccess'));
             queryClient.invalidateQueries({ queryKey: ["listStaff"] });
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -30,20 +30,21 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import dayjs from "dayjs";
 
-const iconOptions = [
-  { label: "Quần áo", value: "faTshirt", icon: faTshirt },
-  { label: "Giày dép", value: "faShoePrints", icon: faShoePrints },
-  { label: "Túi xách", value: "faShoppingBag", icon: faShoppingBag },
-  { label: "Đồ gia dụng", value: "faCouch", icon: faCouch },
-  { label: "Đồ trẻ em", value: "faBaby", icon: faBaby },
-  { label: "Thực phẩm", value: "faUtensils", icon: faUtensils },
-  { label: "Golf", value: "faGolfBallTee", icon: faGolfBallTee },
-  { label: "Đồ chơi", value: "faGamepad", icon: faGamepad },
-  { label: "Laptop", value: "faLaptop", icon: faLaptop },
-  { label: "Mỹ phẩm", value: "faFlask", icon: faFlask },
-];
 const ProductTypeTable: React.FC = () => {
   const { t } = useTranslation();
+
+  const iconOptions = [
+    { label: t('productType.categories.clothes'), value: "faTshirt", icon: faTshirt },
+    { label: t('productType.categories.shoes'), value: "faShoePrints", icon: faShoePrints },
+    { label: t('productType.categories.bags'), value: "faShoppingBag", icon: faShoppingBag },
+    { label: t('productType.categories.household'), value: "faCouch", icon: faCouch },
+    { label: t('productType.categories.baby'), value: "faBaby", icon: faBaby },
+    { label: t('productType.categories.food'), value: "faUtensils", icon: faUtensils },
+    { label: t('productType.categories.golf'), value: "faGolfBallTee", icon: faGolfBallTee },
+    { label: t('productType.categories.toys'), value: "faGamepad", icon: faGamepad },
+    { label: t('productType.categories.laptop'), value: "faLaptop", icon: faLaptop },
+    { label: t('productType.categories.cosmetics'), value: "faFlask", icon: faFlask },
+  ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<CategoryItem | null>(null);
@@ -88,7 +89,7 @@ const ProductTypeTable: React.FC = () => {
           },
           {
             onSuccess: () => {
-              toast.success("Cập nhật loại sản phẩm thành công!");
+              toast.success(t('productType.updateSuccess'));
               queryClient.invalidateQueries({
                 queryKey: ["listwebsite"],
               });
@@ -109,7 +110,7 @@ const ProductTypeTable: React.FC = () => {
           },
           {
             onSuccess: () => {
-              toast.success("Tạo loại sản mới thành công!");
+              toast.success(t('productType.createSuccess'));
               queryClient.invalidateQueries({
                 queryKey: ["listProductType"],
               });
@@ -152,15 +153,15 @@ const ProductTypeTable: React.FC = () => {
 
   //   const { data: regionList } = useListRegion();
   const columns: ColumnsType<CategoryItem> = [
-    { title: "Tên loại sản phẩm", width: 350, dataIndex: "name", key: "name" },
+    { title: t('productType.name'), width: 350, dataIndex: "name", key: "name" },
     {
-      title: "Mô tả",
+      title: t('productType.description'),
       width: 350,
       dataIndex: "description",
       key: "description",
     },
     {
-      title: "Ngày tạo",
+      title: t('productType.createdDate'),
       width: 150,
       dataIndex: "created_at",
       key: "created_at",
@@ -201,9 +202,9 @@ const ProductTypeTable: React.FC = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow mt-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">{t("websiteManage.page.title")}</h2>
+        <h2 className="text-lg font-bold">{t('productType.title')}</h2>
         <Button type="primary" onClick={() => handleOpenModal()}>
-          + Thêm loại sản phẩm
+          {t('productType.addButton')}
         </Button>
       </div>
 
@@ -221,7 +222,7 @@ const ProductTypeTable: React.FC = () => {
 
       <Modal
         title={
-          editingWebsite ? "Chỉnh sửa loại sản phẩm" : "Thêm loại sản phẩm"
+          editingWebsite ? t('productType.editTitle') : t('productType.addTitle')
         }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -232,33 +233,33 @@ const ProductTypeTable: React.FC = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={"Tên loại sản phẩm"}
+            label={t('productType.name')}
             name="name"
             rules={[
               {
                 required: true,
-                message: "Tên loại sản phẩm là trường bắt buộc ",
+                message: t('productType.nameRequired'),
               },
             ]}
           >
-            <Input placeholder={'Tên loại sản phẩm'} />
+            <Input placeholder={t('productType.namePlaceholder')} />
           </Form.Item>
 
           <Form.Item
-            label="Mô tả"
+            label={t('productType.description')}
             name="description"
-            rules={[{ required: true, message: "Mô tả là trường bắt buộc " }]}
+            rules={[{ required: true, message: t('productType.descriptionRequired') }]}
           >
-            <Input placeholder={'Mô tả'} />
+            <Input placeholder={t('productType.descriptionPlaceholder')} />
           </Form.Item>
           <Form.Item
-            label="Icon"
+            label={t('productType.icon')}
             name="icon"
-            rules={[{ required: true, message: "Vui lòng chọn icon" }]}
+            rules={[{ required: true, message: t('productType.iconRequired') }]}
           >
             <Select
               showSearch
-              placeholder="Chọn icon đại diện"
+              placeholder={t('productType.iconPlaceholder')}
               optionLabelProp="label"
             >
               {iconOptions.map((opt) => (

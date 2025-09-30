@@ -66,7 +66,7 @@
     "settings": "System Settings",
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
-    "partnerManagement": "Partner management",
+    "partnerManagement": "Raw Material Management",
     "operation": "Operation management"
   },
   "tabs": {
@@ -83,6 +83,9 @@
     "debt": "Debt (VND)",
     "actions": "Actions",
     "view360": "view 360°",
+    "searchPlaceholder": "Search customers...",
+    "updateSuccess": "Category updated successfully!",
+    "selectCategory": "Select category",
     "customerType": {
       "vip": "VIP",
       "silver": "Silver",
@@ -291,7 +294,8 @@
     "error": "An error occurred",
     "delete": "Delete",
     "edit":"Edit",
-    "save":"Save"
+    "save":"Save",
+    "currency": "VND"
   },
   "websiteManage": {
     "table": {
@@ -538,6 +542,7 @@
   "partnerManage": {
     "createMaterialSuccess": "New material created successfully!",
     "deleteWebsiteSuccess": "Website deleted successfully!",
+    "deleteMaterialSuccess": "Material deleted successfully!",
     "from": "From",
     "note": "Note",
     "totalBuyJPY": "Total Purchase (JPY)",
@@ -549,7 +554,25 @@
     "manageJPY": "Manage (JPY)",
     "manageUSD": "Manage (USD)",
     "overviewJPY": "JPY Management Overview",
-    "overviewUSD": "USD Management Overview"
+    "overviewUSD": "USD Management Overview",
+    "totalPartners": "Total Partners",
+    "totalPurchase": "Total Purchase",
+    "totalRemaining": "Total Remaining",
+    "addTransactionTitle": "Add Raw Material Purchase Transaction",
+    "partner": "Partner",
+    "selectPartner": "Select Partner",
+    "selectPartnerPlaceholder": "-- Select Partner --",
+    "amount": "Amount",
+    "enterAmount": "Enter amount",
+    "exchangeRateLabel": "Exchange Rate",
+    "noteLabel": "Note",
+    "notePlaceholder": "Note...",
+    "addButton": "+ Add",
+    "partnerListTitle": "Partner List and Debt",
+    "searchPartnerPlaceholder": "Search partners...",
+    "deleteMaterialTitle": "Delete Material",
+    "deleteMaterialConfirm": "Are you sure you want to delete this material?",
+    "currencySymbol": "VND"
   },
   "categoryCustomer": {
     "createSuccess": "New customer category created successfully!",
@@ -668,7 +691,12 @@
     "amount": "Amount",
     "actions": "Actions",
     "orderCode": "Order Code",
-    "details": "Details"
+    "details": "Details",
+    "bankName": "Bank",
+    "accountNumber": "Account Number",
+    "accountHolder": "Account Holder",
+    "dailyLimit": "Daily Limit (VND)",
+    "trackingShip": "Tracking Ship"
   },
   "page": {
     "salesDetailTitle": "Sales Detail - PHƯƠNG LINH",
@@ -869,7 +897,14 @@
     "otherServiceFees": "Other Service Fees (General Application)",
     "purchaseFeeUs": "Purchase Fee (%) - US Route",
     "purchaseFeeJp": "Purchase Fee (%) - Japan Route",
-    "reinforcementFee": "Reinforcement Fee (VND/Kg)"
+    "reinforcementFee": "Reinforcement Fee (VND/Kg)",
+    "checkPhotoFeeUs": "Check/Photo Fee - US (USD/track)",
+    "checkPhotoFeeJp": "Check/Photo Fee - Japan (VND/track)",
+    "comprehensiveFeeManagement": "Comprehensive Fee & Service Management",
+    "shippingAndSurcharge": "Shipping & Surcharge",
+    "serviceAndDelivery": "Service & Delivery",
+    "insuranceAndRegulations": "Insurance & General Regulations",
+    "productTypes": "Product Types"
   },
   "customerManage": {
     "title": "Customer Management",
@@ -877,7 +912,20 @@
       "walletBalance": "Wallet Balance",
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spent",
-      "currentDebt": "Current Debt"
+      "currentDebt": "Current Debt",
+      "addressBook": "Address Book",
+      "addAddress": "Add Address",
+      "addDefaultAddress": "Add Default Address",
+      "addDefaultBank": "Add Default Account",
+      "default": "Default",
+      "home": "Home",
+      "bankAccount": "Bank Account",
+      "addBankAccount": "Add Bank Account",
+      "accountNumber": "Account Number",
+      "accountOwner": "Account Owner",
+      "contactInfo": "Contact Information",
+      "assignedStaff": "Assigned Staff",
+      "change": "Change"
     },
     "tabs": {
       "overview": "Overview",
@@ -885,6 +933,79 @@
       "transactions": "Transactions",
       "fees": "Fees",
       "notes": "Notes"
+    },
+    "orderHistory": {
+      "orderCode": "Order Code",
+      "createdAt": "Created Date",
+      "total": "Total Amount",
+      "status": "Status",
+      "statusPending": "Awaiting Payment",
+      "statusPaid": "Paid",
+      "statusCancel": "Cancelled"
+    },
+    "paymentHistory": {
+      "transactionCode": "Transaction Code",
+      "type": "Type",
+      "amount": "Amount",
+      "note": "Note",
+      "date": "Date",
+      "topUp": "Top Up",
+      "withdraw": "Withdraw",
+      "bankTransfer": "Bank Transfer",
+      "serviceFeePayment": "Service Fee Payment"
+    },
+    "addBankModal": {
+      "title": "Add Bank Account",
+      "bankName": "Bank Name",
+      "selectBank": "Select Bank",
+      "selectBankRequired": "Please select a bank",
+      "accountNumber": "Account Number",
+      "accountNumberRequired": "Please enter account number",
+      "accountNumberPlaceholder": "Enter account number",
+      "accountHolder": "Account Holder",
+      "accountHolderRequired": "Please enter account holder name",
+      "accountHolderPlaceholder": "Account holder name",
+      "branch": "Branch",
+      "branchPlaceholder": "Branch name (optional)",
+      "note": "Bank account information will be kept confidential and used only for withdrawals.",
+      "noteLabel": "Note:",
+      "cancel": "Cancel",
+      "saveAccount": "Save Account"
+    },
+    "internalNote": {
+      "placeholder": "Staff can add notes about the customer here...",
+      "saveNote": "Save Note",
+      "noteHistory": "Note History",
+      "loadMore": "Load More",
+      "createSuccess": "New note created successfully!",
+      "createFailed": "Failed to create new note"
+    }
+  },
+  "shippingFeeConfig": {
+    "title": "Custom Shipping & Fee Settings",
+    "description": "Assign special service fee rates for this customer. These settings will **override** the system's default policies.",
+    "goodsFeePolicyTitle": "Fee Policy by Goods Type",
+    "addButton": "Add",
+    "goodsType": "Goods Type",
+    "goodsTypePlaceholder": "Enter goods type",
+    "feeLevel": "Applicable Fee Level",
+    "selectFeePlaceholder": "Select fee",
+    "actions": "Actions",
+    "airShippingTitle": "AIR Shipping Policy",
+    "seaShippingTitle": "SEA Shipping Policy",
+    "serviceFee": "Service Fee",
+    "shippingPrice": "Shipping Price",
+    "extraFee": "Extra Fee",
+    "depositRate": "Deposit Rate",
+    "saveButton": "Save",
+    "feeOptions": {
+      "fee2": "2% Fee",
+      "default": "Default (3%)",
+      "fee5": "5% Fee"
+    },
+    "defaultData": {
+      "computer": "Computer",
+      "audio": "Audio"
     }
   },
   "status": {
@@ -897,10 +1018,172 @@
     "delivered": "Delivered",
     "pendingPayment": "Pending Payment",
     "paid": "Paid",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "system": {
     "noData": "No data",
     "errorGettingHistory": "Error getting history"
+  },
+  "insuranceSettings": {
+    "title": "Insurance Settings",
+    "defaultPackage": "Default Package (No insurance purchase)",
+    "maxCompensation": "Maximum compensation when goods are lost:",
+    "usRoute": "US Route (USD/product)",
+    "jpRoute": "Japan Route (VND/product)",
+    "highValuePackage": "High Value Goods Package",
+    "fullCompensation": "100% product value compensation (invoice required).",
+    "insuranceFeePercent": "Insurance fee (% of goods value)",
+    "generalRegulations": "General Regulations",
+    "freeStorageDays": "Free storage period (days)",
+    "storageFeeAfter": "Storage fee thereafter (VND/kg/day)",
+    "minDepositRate": "Minimum purchase deposit rate (%)",
+    "saveAllChanges": "Save All Changes",
+    "saveSuccess": "Saved successfully!"
+  },
+  "shippingSettings": {
+    "updateFeeSuccess": "Fee updated successfully!",
+    "saveAllSuccess": "All changes saved!",
+    "routePriceTable": "Route Price Table {{route}}"
+  },
+  "table": {
+    "index": "No.",
+    "product": "Product",
+    "productType": "Product Type",
+    "conditionType": "Condition Type",
+    "valueUSD": "Value (USD)",
+    "priceKgHN": "Price Kg - HN",
+    "surcharge": "Surcharge",
+    "actions": "Actions",
+    "bankName": "Bank",
+    "accountNumber": "Account Number",
+    "accountHolder": "Account Holder",
+    "dailyLimit": "Daily Limit (VND)",
+    "status": "Status",
+    "customer": "Customer",
+    "creator": "Creator",
+    "amount": "Amount",
+    "trackingShip": "Tracking Ship",
+    "orderCode": "Order Code",
+    "details": "Details"
+  },
+  "productType": {
+    "title": "Product Type Management",
+    "addButton": "Add Product Type",
+    "editTitle": "Edit Product Type",
+    "addTitle": "Add Product Type",
+    "name": "Product Type Name",
+    "description": "Description",
+    "createdDate": "Created Date",
+    "icon": "Icon",
+    "nameRequired": "Product type name is required",
+    "descriptionRequired": "Description is required",
+    "iconRequired": "Please select icon",
+    "namePlaceholder": "Product type name",
+    "descriptionPlaceholder": "Description",
+    "iconPlaceholder": "Select representative icon",
+    "updateSuccess": "Product type updated successfully!",
+    "createSuccess": "Product type created successfully!",
+    "categories": {
+      "clothes": "Clothes",
+      "shoes": "Shoes",
+      "bags": "Bags",
+      "household": "Household Items",
+      "baby": "Baby Items",
+      "food": "Food",
+      "golf": "Golf",
+      "toys": "Toys",
+      "laptop": "Laptop",
+      "cosmetics": "Cosmetics"
+    }
+  },
+  "button": {
+    "createNewOrder": "Add Raw Material Purchase Transaction"
+  },
+  "salesManage": {
+    "title": "Sales Staff",
+    "addButton": "+ Add",
+    "addSuccess": "Sales staff added successfully!",
+    "addFailed": "Failed to add sales staff",
+    "managingCustomers": "Managing {count} Customers",
+    "noMoreData": "No more data"
+  },
+  "customerDetail": {
+    "addAddressSuccess": "New address created successfully!",
+    "addBankSuccess": "New account added successfully!",
+    "updateDefaultAddressSuccess": "Default address updated successfully!",
+    "updateDefaultBankSuccess": "Default bank account updated successfully!"
+  },
+  "customerManage": {
+    "title": "Customer Management",
+    "search": "Search customers",
+    "customer": "Customer",
+    "classification": "Classification",
+    "zaloGroup": "Zalo Customer Support Group",
+    "actions": "Actions",
+    "unassign": "Unassign",
+    "assignSuccess": "Customer assigned successfully!",
+    "assignFailed": "Customer assignment failed",
+    "unassignSuccess": "Customer unassigned successfully!",
+    "unassignFailed": "Customer unassignment failed",
+    "detailsTitle": "Details:",
+    "assignedCustomers": "Assigned Customers",
+    "assignNewCustomer": "Assign New Customer",
+    "assignedCustomersList": "List of Assigned Customers"
+  },
+  "userProfile": {
+    "basicInfo": "Basic Information",
+    "rolesPermissions": "Roles & Permissions",
+    "changePassword": "Change Password",
+    "avatar": {
+      "change": "Change Avatar",
+      "fileFormat": "JPG, GIF or PNG. Max 2MB.",
+      "uploadSuccess": "Avatar uploaded successfully",
+      "sizeError": "Image must be smaller than 2MB"
+    },
+    "form": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phoneNumber": "Phone Number",
+      "birthday": "Birthday",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "saveInfo": "Save Information",
+      "currentRole": "Your current role is:"
+    },
+    "validation": {
+      "fullNameRequired": "Full name is required",
+      "emailInvalid": "Invalid email",
+      "emailRequired": "Email is required",
+      "phoneRequired": "Phone number is required",
+      "birthdayRequired": "Please enter birthday",
+      "currentPasswordRequired": "Please enter current password",
+      "newPasswordRequired": "Please enter new password",
+      "newPasswordMinLength": "New password must have at least 8 characters",
+      "newPasswordMaxLength": "New password must not exceed 20 characters",
+      "newPasswordPattern": "Password must contain at least 1 letter and 1 number",
+      "confirmPasswordMatch": "Confirm password does not match",
+      "confirmPasswordRequired": "Please re-enter new password"
+    },
+    "messages": {
+      "updateSuccess": "Profile updated successfully!",
+      "updateFailed": "Update failed",
+      "changePasswordSuccess": "Password changed successfully!",
+      "changePasswordFailed": "Password change failed",
+      "generalError": "An error occurred, please try again."
+    }
+  },
+  "conditions": {
+    "greaterThanOrEqual": "Greater than or equal",
+    "range": "Range",
+    "lessThan": "Less than",
+    "greaterThan": "Greater than",
+    "lessThanOrEqual": "Less than or equal"
+  },
+  "button": {
+    "addNew": "Add New",
+    "saveAllChanges": "Save All Changes"
   }
 }

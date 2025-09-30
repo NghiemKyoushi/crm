@@ -5,6 +5,7 @@ import { BankInfo } from "@/features/user-management/components/customer-manage/
 import { BankSettingAccountModel } from "@/types/deposit-type";
 import { Modal, Form, Input, Select, Button, Spin } from "antd";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const { Option } = Select;
 
@@ -14,6 +15,7 @@ export default function AddBankAccountModal({
   onOk,
   record,
 }: any) {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -166,7 +168,7 @@ export default function AddBankAccountModal({
         </Form.Item>
 
         <Form.Item
-          label="Hạn mức/ngày (VND)"
+          label={t('table.dailyLimit')}
           name="limit"
           style={{ marginBottom: 12 }}
         >
@@ -174,7 +176,7 @@ export default function AddBankAccountModal({
         </Form.Item>
 
         <Form.Item
-          label="Trạng thái"
+          label={t('table.status')}
           name="status"
           style={{ marginBottom: 12 }}
         >

@@ -2,16 +2,19 @@ import OrderFilter from "@/components/FilterComponent";
 import TableComponent from "@/components/TableComponent";
 // import { Select, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { useTranslation } from "react-i18next";
 
 export interface Transaction {
   key: string;
-  code: string; // Mã GD
-  type: string; // Loại
-  amount: number; // Số tiền
-  note: string; // Ghi chú
-  date: string; // Ngày
+  code: string; // Transaction Code
+  type: string; // Type
+  amount: number; // Amount
+  note: string; // Note
+  date: string; // Date
 }
 export default function HistoryPaymentTab() {
+  const { t } = useTranslation();
+
   const onFilter = (values: {
     orderCode?: string;
     status?: string;
@@ -20,35 +23,35 @@ export default function HistoryPaymentTab() {
 
   const columns: ColumnsType<Transaction> = [
     {
-      title: "Mã GD",
+      title: t("customerManage.paymentHistory.transactionCode"),
       dataIndex: "code",
       key: "code",
     },
     {
-      title: "Loại",
+      title: t("customerManage.paymentHistory.type"),
       dataIndex: "type",
       key: "type",
       render: (text) => <span style={{ color: "green" }}>{text}</span>,
     },
     {
-      title: "Số tiền",
+      title: t("customerManage.paymentHistory.amount"),
       dataIndex: "amount",
       key: "amount",
       align: "right",
       render: (value: number) => (
         <span style={{ color: value > 0 ? "green" : "red" }}>
           {value > 0 ? "+" : ""}
-          {value.toLocaleString("vi-VN")} đ
+          {value.toLocaleString("vi-VN")} {t("common.currency")}
         </span>
       ),
     },
     {
-      title: "Ghi chú",
+      title: t("customerManage.paymentHistory.note"),
       dataIndex: "note",
       key: "note",
     },
     {
-      title: "Ngày",
+      title: t("customerManage.paymentHistory.date"),
       dataIndex: "date",
       key: "date",
     },
@@ -58,17 +61,17 @@ export default function HistoryPaymentTab() {
     {
       key: "1",
       code: "N-0805-1",
-      type: "Nạp tiền",
+      type: t("customerManage.paymentHistory.topUp"),
       amount: 5000000,
-      note: "CK thanh toán",
+      note: t("customerManage.paymentHistory.bankTransfer"),
       date: "05/08/2025",
     },
     {
       key: "2",
       code: "R-0806-1",
-      type: "Rút tiền",
+      type: t("customerManage.paymentHistory.withdraw"),
       amount: -2000000,
-      note: "Thanh toán phí dịch vụ",
+      note: t("customerManage.paymentHistory.serviceFeePayment"),
       date: "06/08/2025",
     },
   ];

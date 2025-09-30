@@ -81,16 +81,16 @@ export default function ShippingServiceForm() {
 
           <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
             <Form.Item
-              label="Phí kiểm đếm/chụp ảnh - Tại Mỹ (USD/track)"
+              label={t('feeSettings.checkPhotoFeeUs')}
               name={["serviceFee", "checkUs"]}
-              rules={[{ required: true, message: "Nhập phí tại Mỹ" }]}
+              rules={[{ required: true, message: t('validation.required') }]}
             >
               <InputNumber className="!w-full" min={0} />
             </Form.Item>
             <Form.Item
-              label="Phí kiểm đếm/chụp ảnh - Tại Nhật (VNĐ/track)"
+              label={t('feeSettings.checkPhotoFeeJp')}
               name={["serviceFee", "checkJp"]}
-              rules={[{ required: true, message: "Nhập phí tại Nhật" }]}
+              rules={[{ required: true, message: t('validation.required') }]}
             >
               <InputNumber className="!w-full" min={0} />
             </Form.Item>
@@ -105,7 +105,7 @@ export default function ShippingServiceForm() {
           htmlType="submit"
           className="bg-blue-600 hover:!bg-blue-700 px-6 h-11 font-bold"
         >
-          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> Lưu Tất Cả Thay Đổi
+          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> {t('common.saveAllChanges')}
         </Button>
       </div>
     </Form>

@@ -7,6 +7,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { bankAccountModel } from "@/types/customer-type";
 import api from "@/api/axiosClient";
+import { useTranslation } from "react-i18next";
 
 export interface BankAccountForm {
   bankId: number;
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const BankAccountModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
+  const { t } = useTranslation();
   const [bankList, setBankList] = useState<BankInfo[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +46,7 @@ const BankAccountModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
     if (open) {
       setLoading(true);
       api
-        .get("features/v1/admin/bank-informations") // hoặc URL thực tế của BANK_INFO
+        .get("features/v1/admin/bank-informations") // actual BANK_INFO URL
         .then((res) => {
           setBankList(res.data.data);
         })
@@ -65,27 +67,26 @@ const BankAccountModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
 
   return (
     <Modal
-      title="Thêm tài khoản ngân hàng"
+      title={t("customerManage.addBankModal.title")}
       open={open}
       onCancel={onClose}
       footer={null}
       className="rounded-2xl"
     >
       <form onSubmit={handleSubmit(handleFinish)} className="space-y-3">
-        {/* Chọn ngân hàng */}
         <div className="w-full">
-          <label className="block font-medium mb-1 w-full">Tên ngân hàng</label>
+          <label className="block font-medium mb-1 w-full">{t("customerManage.addBankModal.bankName")}</label>
           <Controller
             name="bankId"
             control={control}
-            rules={{ required: "Vui lòng chọn ngân hàng" }}
+            rules={{ required: t("customerManage.addBankModal.selectBankRequired") }}
             render={({ field }) =>
               loading ? (
                 <Spin />
               ) : (
                 <Select
                   {...field}
-                  placeholder="Chọn ngân hàng"
+                  placeholder={t("customerManage.addBankModal.selectBank")}
                   optionLabelProp="label"
                   showSearch
                   className="w-full"
@@ -119,56 +120,51 @@ const BankAccountModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
           )}
         </div>
 
-        {/* Số tài khoản */}
         <div>
-          <label className="block font-medium mb-1">Số tài khoản</label>
+          <label className="block font-medium mb-1">{t("customerManage.addBankModal.accountNumber")}</label>
           <Controller
             name="accountNumber"
             control={control}
-            rules={{ required: "Vui lòng nhập số tài khoản" }}
-            render={({ field }) => <Input {...field} placeholder="Nhập số tài khoản" />}
+            rules={{ required: t("customerManage.addBankModal.accountNumberRequired") }}
+            render={({ field }) => <Input {...field} placeholder={t("customerManage.addBankModal.accountNumberPlaceholder")} />}
           />
           {errors.accountNumber && (
             <p className="text-red-500 text-sm">{errors.accountNumber.message}</p>
           )}
         </div>
 
-        {/* Chủ tài khoản */}
         <div>
-          <label className="block font-medium mb-1">Chủ tài khoản</label>
+          <label className="block font-medium mb-1">{t("customerManage.addBankModal.accountHolder")}</label>
           <Controller
             name="accountHolder"
             control={control}
-            rules={{ required: "Vui lòng nhập tên chủ tài khoản" }}
-            render={({ field }) => <Input {...field} placeholder="Tên chủ tài khoản" />}
+            rules={{ required: t("customerManage.addBankModal.accountHolderRequired") }}
+            render={({ field }) => <Input {...field} placeholder={t("customerManage.addBankModal.accountHolderPlaceholder")} />}
           />
           {errors.accountHolder && (
             <p className="text-red-500 text-sm">{errors.accountHolder.message}</p>
           )}
         </div>
 
-        {/* Chi nhánh */}
         <div>
-          <label className="block font-medium mb-1">Chi nhánh</label>
+          <label className="block font-medium mb-1">{t("customerManage.addBankModal.branch")}</label>
           <Controller
             name="branch"
             control={control}
             render={({ field }) => (
-              <Input {...field} placeholder="Tên chi nhánh (không bắt buộc)" />
+              <Input {...field} placeholder={t("customerManage.addBankModal.branchPlaceholder")} />
             )}
           />
         </div>
 
-        {/* Ghi chú */}
         <div className="bg-blue-50 text-blue-600 text-sm p-2 rounded-md">
-          <b>Lưu ý:</b> Thông tin tài khoản ngân hàng sẽ được bảo mật và chỉ sử dụng để rút tiền.
+          <b>{t("customerManage.addBankModal.noteLabel")}</b> {t("customerManage.addBankModal.note")}
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-2 pt-3">
-          <Button onClick={onClose}>Hủy</Button>
+          <Button onClick={onClose}>{t("customerManage.addBankModal.cancel")}</Button>
           <Button type="primary" htmlType="submit">
-            Lưu tài khoản
+            {t("customerManage.addBankModal.saveAccount")}
           </Button>
         </div>
       </form>

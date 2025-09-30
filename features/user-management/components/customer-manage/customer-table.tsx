@@ -51,7 +51,7 @@ export default function CustomerTable() {
       },
       {
         onSuccess: () => {
-          toast.success("Cập nhật phân loại thành công!");
+          toast.success(t('customerTable.updateSuccess'));
           queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
         },
         onError: (err: any) =>
@@ -130,7 +130,7 @@ export default function CustomerTable() {
       </h2>
       <div className="flex gap-2 mb-4">
         <Input
-          placeholder="Tìm kiếm khách hàng..."
+          placeholder={t('customerTable.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onPressEnter={handleSearch}

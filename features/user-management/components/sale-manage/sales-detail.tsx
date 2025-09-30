@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeAssignCustomerForSale } from "../../apis/staff-manage";
 import PopupUnassignConfirm from "./modal-remove-assign";
 import { getContrastColor } from "../customer-manage/customer-type-select";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 
@@ -24,6 +25,7 @@ export default function SalesDetail({
   name,
   refetchSales,
 }: SalesDetailProps) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const customerForSaleMutation = useCustomerForSale();
   const queryClient = useQueryClient();
@@ -39,11 +41,11 @@ export default function SalesDetail({
   const removeAssignMutation = useMutation({
     mutationFn: (id: string) => removeAssignCustomerForSale(id),
     onSuccess: () => {
-      toast.success("Huỷ gán khách hàng thành công!");
+      toast.success(t('customerManage.unassignSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
       refetchSales();
     },
-    onError: () => toast.error("Huỷ gán khách hàng thất bại"),
+    onError: () => toast.error(t('customerManage.unassignFailed')),
   });
 
   const { data } = useListCustomer({
@@ -58,12 +60,12 @@ export default function SalesDetail({
   };
   const columns: ColumnsType<CustomerModel> = [
     {
-      title: "Khách hàng",
+      title: t('customerManage.customer'),
       dataIndex: "full_name",
       key: "name",
     },
     {
-      title: "Phân loại",
+      title: t('customerManage.classification'),
       dataIndex: "group_name",
       key: "group_name",
       render: (_, record) => (
@@ -80,7 +82,7 @@ export default function SalesDetail({
       ),
     },
     {
-      title: "Nhóm Zalo CSKH",
+      title: t('customerManage.zaloGroup'),
       dataIndex: "zaloGroup",
       key: "zaloGroup",
       render: (t) => (
@@ -90,7 +92,7 @@ export default function SalesDetail({
       ),
     },
     {
-      title: "Hành động",
+      title: t('customerManage.actions'),
       key: "action",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: CustomerModel) => (
@@ -99,7 +101,7 @@ export default function SalesDetail({
           danger
           onClick={() => handleUnassign(record.user_id.toString())}
         >
-          Hủy gán
+          {t('customerManage.unassign')}
         </Button>
       ),
     },
@@ -120,12 +122,12 @@ export default function SalesDetail({
         { customer_id: getIds[0], sale_id: salesId },
         {
           onSuccess: () => {
-            toast.success("Gán khách hàng thành công!");
+            toast.success(t('customerManage.assignSuccess'));
             queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
             refetchSales();
           },
           onError: () => {
-            toast.error("Gán khách hàng thất bại");
+            toast.error(t('customerManage.assignFailed'));
           },
         }
       );
@@ -134,7 +136,7 @@ export default function SalesDetail({
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <h3 className="font-semibold text-lg mb-4">
-        Chi tiết: <span className="text-blue-600">{name}</span>
+        {t('customerManage.detailsTitle')} <span className="text-blue-600">{name}</span>
       </h3>
 
       <Tabs
@@ -182,18 +184,18 @@ export default function SalesDetail({
           // },
           {
             key: "customers",
-            label: "Khách hàng Phụ trách",
+            label: t('customerManage.assignedCustomers'),
             children: (
               <div className="space-y-4">
                 <Text strong className="mb-2 block">
-                  Gán khách hàng mới
+                  {t('customerManage.assignNewCustomer')}
                 </Text>
                 <div className="flex gap-2 mb-2">
                   <UserMultiSelect onAssign={handleAddCustomerForSale} />
                 </div>
                 <div>
                   <Text strong className="mb-2 block">
-                    Danh sách khách hàng đã gán ({data?.data.length})
+                    {t('customerManage.assignedCustomersList')} ({data?.data.length})
                   </Text>
                   <TableComponent
                     columns={columns}

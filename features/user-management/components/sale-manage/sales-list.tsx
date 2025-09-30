@@ -4,6 +4,7 @@ import AddSalesModal, { Employee } from "./modal-sales-add";
 import { useCreateSaleStaff } from "../../hooks/staff-manage";
 import { toast } from "react-toastify";
 import { UserSaleItem } from "@/types/sale-manage";
+import { useTranslation } from "react-i18next";
 
 interface SalesListProps {
   data: UserSaleItem[];
@@ -16,6 +17,7 @@ interface SalesListProps {
 }
 
 export default function SalesList({ data, loading, hasMore, setPage, selected, onSelect, refetchSales }: SalesListProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
   const createNewSaleMutation = useCreateSaleStaff();
@@ -32,11 +34,11 @@ export default function SalesList({ data, loading, hasMore, setPage, selected, o
     const listId: string[] = data.map((item) => item.id.toString());
     createNewSaleMutation.mutate(listId, {
       onSuccess: () => {
-        toast.success("Thêm nhân viên sale thành công!");
+        toast.success(t('salesManage.addSuccess'));
         refetchSales()
       },
       onError: () => {
-        toast.error("Thêm nhân viên sale thất bại");
+        toast.error(t('salesManage.addFailed'));
       },
     });
     setOpen(false);
@@ -45,9 +47,9 @@ export default function SalesList({ data, loading, hasMore, setPage, selected, o
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg">Nhân viên Sales</h3>
+        <h3 className="font-semibold text-lg">{t('salesManage.title')}</h3>
         <Button type="primary" onClick={() => setOpen(true)}>
-          + Thêm
+          {t('salesManage.addButton')}
         </Button>
       </div>
 
@@ -68,13 +70,13 @@ export default function SalesList({ data, loading, hasMore, setPage, selected, o
                 {item.full_name}
               </div>
               <div className="text-gray-500 text-sm">
-                Đang quản lý {item.total} Khách hàng
+                {t('salesManage.managingCustomers', { count: item.total })}
               </div>
             </List.Item>
           )}
         />
         {loading && <div className="text-center p-2"><Spin /></div>}
-        {!hasMore && <div className="text-center text-gray-400 text-sm p-2">Hết dữ liệu</div>}
+        {!hasMore && <div className="text-center text-gray-400 text-sm p-2">{t('salesManage.noMoreData')}</div>}
       </div>
       <AddSalesModal onClose={() => setOpen(false)} open={open} onSubmit={handleSubmit} />
     </div>

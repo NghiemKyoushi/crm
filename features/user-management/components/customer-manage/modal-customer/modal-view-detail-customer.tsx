@@ -58,7 +58,7 @@ export default function CustomerDetailModal({
       { data, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Tạo địa chỉ mới thành công!");
+          toast.success(t('customerDetail.addAddressSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -78,7 +78,7 @@ export default function CustomerDetailModal({
       { data, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Thêm tài khoản mới thành công!");
+          toast.success(t('customerDetail.addBankSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -98,7 +98,7 @@ export default function CustomerDetailModal({
       { address_id: +addressId, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật địa chỉ mặc định thành công!");
+          toast.success(t('customerDetail.updateDefaultAddressSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -118,7 +118,7 @@ export default function CustomerDetailModal({
       { bank_id: +bankId, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật tài khoản ngân hàng mặc định thành công!");
+          toast.success(t('customerDetail.updateDefaultBankSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -138,7 +138,7 @@ export default function CustomerDetailModal({
       { customer_id: +selectedId, sale_id: +saleinfo.id },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật địa chỉ mặc định thành công!");
+          toast.success(t('customerDetail.updateDefaultAddressSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),

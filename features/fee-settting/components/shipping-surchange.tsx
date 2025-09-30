@@ -153,7 +153,7 @@ export default function ShippingSurchangeTable(
       { list: mappedData as ShippingConditionAdd[] },
       {
         onSuccess: () => {
-          toast.success("Cập nhật phí thành công!");
+          toast.success(t("shippingSettings.updateFeeSuccess"));
           if (isCategory) {
             queryClient.invalidateQueries({
               queryKey: ["listMaterialCate"],
@@ -171,18 +171,18 @@ export default function ShippingSurchangeTable(
       }
     );
     setNewKeys(new Set());
-    message.success("Đã lưu tất cả thay đổi!");
+    message.success(t("shippingSettings.saveAllSuccess"));
   };
 
   const getColumns = (route: string): ColumnsType<MaterialItem> => [
     {
-      title: "STT",
+      title: t("table.index"),
       dataIndex: "id",
       width: 40,
       render: (_val, _record, index) => index + 1,
     },
     {
-      title: "Sản phẩm",
+      title: t("table.product"),
       dataIndex: "product_category_name",
       width: 240,
       render: (val, record: MaterialItem) => {
@@ -215,7 +215,7 @@ export default function ShippingSurchangeTable(
       },
     },
     {
-      title: "Loại sản phẩm",
+      title: t("table.productType"),
       dataIndex: "product_category_id",
       width: 160,
       render: (val, record) => (
@@ -233,12 +233,12 @@ export default function ShippingSurchangeTable(
             )
           }
           options={categoryOptions}
-          placeholder="Chọn loại sản phẩm"
+          placeholder={t("placeholder.selectProductType")}
         />
       ),
     },
     {
-      title: "Loại điều kiện",
+      title: t("table.conditionType"),
       dataIndex: "condition_type",
       width: 140,
       render: (val, record) => (
@@ -249,17 +249,17 @@ export default function ShippingSurchangeTable(
             handleChange(+route, record.id.toString(), "condition_type", value)
           }
           options={[
-            { value: "GTE", label: "Lớn hơn hoặc bằng" },
-            { value: "RANGE", label: "Khoảng" },
-            { value: "LT", label: "Nhỏ hơn" },
-            { value: "GT", label: "Lớn hơn" },
-            { value: "LTE", label: "Nhỏ hơn hoặc bằng" },
+            { value: "GTE", label: t("conditions.greaterThanOrEqual") },
+            { value: "RANGE", label: t("conditions.range") },
+            { value: "LT", label: t("conditions.lessThan") },
+            { value: "GT", label: t("conditions.greaterThan") },
+            { value: "LTE", label: t("conditions.lessThanOrEqual") },
           ]}
         />
       ),
     },
     {
-      title: "Giá trị (USD)",
+      title: t("table.valueUSD"),
       dataIndex: "price_to",
       width: 200,
       render: (val, record: MaterialItem) => {
@@ -349,7 +349,7 @@ export default function ShippingSurchangeTable(
       },
     },
     {
-      title: "Giá Kg - HN",
+      title: t("table.priceKgHN"),
       dataIndex: "value_data",
       width: 200,
       render: (val, record) => {
@@ -469,7 +469,7 @@ export default function ShippingSurchangeTable(
       // },
     },
     {
-      title: "Phụ thu",
+      title: t("table.surcharge"),
       dataIndex: "value_shipping_data",
       width: 140,
       render: (val, record) => {
@@ -629,7 +629,7 @@ export default function ShippingSurchangeTable(
       // ),
     },
     {
-      title: "Thao tác",
+      title: t("table.actions"),
       dataIndex: "action",
       width: 40,
       align: "center",
@@ -665,7 +665,7 @@ export default function ShippingSurchangeTable(
                       : "!text-blue-600"
                   }`}
                 />
-                Bảng Giá Tuyến {routeNames[Number(routeId)]}
+                {t("shippingSettings.routePriceTable", { route: routeNames[Number(routeId)] })}
               </h2>
               <Button
                 type="primary"
@@ -673,7 +673,7 @@ export default function ShippingSurchangeTable(
                 onClick={() => handleAddRow(+routeId)}
                 className="!bg-green-600 hover:!bg-green-700"
               >
-                Thêm mới
+                {t("button.addNew")}
               </Button>
             </div>
             <Table<MaterialItem>
@@ -695,7 +695,7 @@ export default function ShippingSurchangeTable(
           className="bg-blue-600 hover:bg-blue-700 !text-white !font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105"
         >
           <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
-          Lưu Tất Cả Thay Đổi
+          {t("button.saveAllChanges")}
         </button>
       </div>
     </div>

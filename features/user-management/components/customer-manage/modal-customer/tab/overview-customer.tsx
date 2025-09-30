@@ -81,7 +81,7 @@ export default function OverviewTab(props: OverviewTabProps) {
   return (
     <>
       <div className="flex flex-row justify-center gap-4">
-        {/* Thông tin địa chỉ */}
+        {/* Address information */}
         <div className="!flex-7/12">
           <div className="bg-white shadow rounded p-4">
             <div className="flex gap-1 justify-between items-center mb-2">
@@ -109,7 +109,7 @@ export default function OverviewTab(props: OverviewTabProps) {
               </div>
             </div>
             <div className="text-sm">
-              <div className="font-bold">Nhà riêng</div>
+              <div className="font-bold">{t("customerManage.customerOverview.home")}</div>
               {customer.shipping_addresses.length > 0 &&
                 (() => {
                   const defaultAddress = customer.shipping_addresses.find(
@@ -148,8 +148,7 @@ export default function OverviewTab(props: OverviewTabProps) {
                     type="dashed"
                     className="!text-blue-600 p-0"
                   >
-                    {/* +{t("customerManage.customerOverview.addDefaultAddress")} */}
-                    + Thêm tài khoản mặc định
+                    +{t("customerManage.customerOverview.addDefaultBank")}
                   </Button>
                 )}
               </div>
@@ -227,8 +226,8 @@ export default function OverviewTab(props: OverviewTabProps) {
         onCancel={() => setIsOpenSetDefault(false)}
         onOk={handleChangeDefaultAddress}
         centered
-        okText="Xác nhận"
-        cancelText="Hủy"
+        okText={t("common.confirm")}
+        cancelText={t("common.cancel")}
       >
         <div className="!max-h-72 !min-h-72 overflow-y-auto !w-full">
           <Radio.Group
@@ -260,8 +259,8 @@ export default function OverviewTab(props: OverviewTabProps) {
         onCancel={() => setIsOpenSetDefaultBank(false)}
         onOk={handleChangeDefaultBank}
         centered
-        okText="Xác nhận"
-        cancelText="Hủy"
+        okText={t("common.confirm")}
+        cancelText={t("common.cancel")}
       >
         <div className="!max-h-72 !min-h-72 overflow-y-auto">
           <Radio.Group

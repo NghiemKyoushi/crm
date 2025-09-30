@@ -6,6 +6,7 @@ import { Table, Input, Select, Button, Card } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { faPlane, faShip, faTags } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useTranslation } from "react-i18next";
 
 type GoodsFee = {
   name: string;
@@ -25,14 +26,20 @@ type FormValues = {
   sea: ShippingPolicy;
 };
 
-const feeOptions = ["Phí 2%", "Mặc định (3%)", "Phí 5%"];
-
 export default function ShippingFeeConfig() {
+  const { t } = useTranslation();
+
+  const feeOptions = [
+    { value: "fee2", label: t("shippingFeeConfig.feeOptions.fee2") },
+    { value: "default", label: t("shippingFeeConfig.feeOptions.default") },
+    { value: "fee5", label: t("shippingFeeConfig.feeOptions.fee5") }
+  ];
+
   const { control, handleSubmit } = useForm<FormValues>({
     defaultValues: {
       goodsFees: [
-        { name: "Máy tính", fee: "Phí 2%" },
-        { name: "Audio", fee: "Mặc định (3%)" },
+        { name: t("shippingFeeConfig.defaultData.computer"), fee: "fee2" },
+        { name: t("shippingFeeConfig.defaultData.audio"), fee: "default" },
       ],
       air: {
         serviceFee: "3%",
@@ -60,15 +67,16 @@ export default function ShippingFeeConfig() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <h1>Cài đặt Phí & Vận chuyển Riêng</h1>
-      <p>Gán các mức phí dịch vụ đặc biệt cho khách hàng này. Các cài đặt này sẽ **ghi đè** lên chính sách mặc định của hệ thống.</p>
-      {/* --- Chính sách phí theo loại hàng hóa --- */}
+      <h1>{t("shippingFeeConfig.title")}</h1>
+      <p>{t("shippingFeeConfig.description")}</p>
+
+      {/* --- Fee policy by goods type --- */}
       <Card
         className="!mb-3"
         title={
           <span>
             <FontAwesomeIcon icon={faTags} className="mr-2 text-blue-800" />
-              Chính sách Phí theo Loại Hàng Hóa
+            {t("shippingFeeConfig.goodsFeePolicyTitle")}
           </span>
         }
         extra={
@@ -78,7 +86,7 @@ export default function ShippingFeeConfig() {
             onClick={() => append({ name: "", fee: "" })}
             className="!bg-green-500 !font-bold"
           >
-            Thêm
+            {t("shippingFeeConfig.addButton")}
           </Button>
         }
       >
@@ -88,20 +96,20 @@ export default function ShippingFeeConfig() {
           pagination={false}
           columns={[
             {
-              title: "Loại Hàng Hóa",
+              title: t("shippingFeeConfig.goodsType"),
               dataIndex: "name",
               render: (_, __, index) => (
                 <Controller
                   control={control}
                   name={`goodsFees.${index}.name`}
                   render={({ field }) => (
-                    <Input {...field} placeholder="Nhập loại hàng hóa" />
+                    <Input {...field} placeholder={t("shippingFeeConfig.goodsTypePlaceholder")} />
                   )}
                 />
               ),
             },
             {
-              title: "Mức Phí Áp Dụng",
+              title: t("shippingFeeConfig.feeLevel"),
               dataIndex: "fee",
               render: (_, __, index) => (
                 <Controller
@@ -111,11 +119,11 @@ export default function ShippingFeeConfig() {
                     <Select
                       {...field}
                       className="w-full"
-                      placeholder="Chọn phí"
+                      placeholder={t("shippingFeeConfig.selectFeePlaceholder")}
                     >
                       {feeOptions.map((opt) => (
-                        <Select.Option key={opt} value={opt}>
-                          {opt}
+                        <Select.Option key={opt.value} value={opt.value}>
+                          {opt.label}
                         </Select.Option>
                       ))}
                     </Select>
@@ -124,8 +132,8 @@ export default function ShippingFeeConfig() {
               ),
             },
             {
-              title: "Hành động",
-              align: "center",
+              title: t("shippingFeeConfig.actions"),
+              align: "center" as const,
               render: (_, __, index) => (
                 <Button
                   danger
@@ -142,7 +150,7 @@ export default function ShippingFeeConfig() {
         title={
           <span>
             <FontAwesomeIcon icon={faPlane} className="mr-2 text-blue-800" />
-            Chính sách Vận chuyển AIR
+            {t("shippingFeeConfig.airShippingTitle")}
           </span>
         }
         className="!mb-3 [&_.ant-card-head]:!bg-blue-100 [&_.ant-card-head-title]:!text-blue-800"
@@ -150,7 +158,7 @@ export default function ShippingFeeConfig() {
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">
-              Phí dịch vụ
+              {t("shippingFeeConfig.serviceFee")}
             </label>
             <Controller
               control={control}
@@ -160,7 +168,7 @@ export default function ShippingFeeConfig() {
           </div>
           <div>
             <label className="block mb-1 text-sm font-medium">
-              Giá vận chuyển
+              {t("shippingFeeConfig.shippingPrice")}
             </label>
             <Controller
               control={control}
@@ -169,7 +177,7 @@ export default function ShippingFeeConfig() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Phụ phí</label>
+            <label className="block mb-1 text-sm font-medium">{t("shippingFeeConfig.extraFee")}</label>
             <Controller
               control={control}
               name="air.extraFee"
@@ -177,7 +185,7 @@ export default function ShippingFeeConfig() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Tỷ lệ cọc</label>
+            <label className="block mb-1 text-sm font-medium">{t("shippingFeeConfig.depositRate")}</label>
             <Controller
               control={control}
               name="air.depositRate"
@@ -191,7 +199,7 @@ export default function ShippingFeeConfig() {
         title={
           <span>
             <FontAwesomeIcon icon={faShip} className="mr-2 text-blue-800" />
-            Chính sách Vận chuyển SEA
+            {t("shippingFeeConfig.seaShippingTitle")}
           </span>
         }
         className="!mb-3 [&_.ant-card-head]:!bg-green-100 [&_.ant-card-head-title]:!text-green-800"
@@ -199,7 +207,7 @@ export default function ShippingFeeConfig() {
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">
-              Phí dịch vụ
+              {t("shippingFeeConfig.serviceFee")}
             </label>
             <Controller
               control={control}
@@ -209,27 +217,27 @@ export default function ShippingFeeConfig() {
           </div>
           <div>
             <label className="block mb-1 text-sm font-medium">
-              Giá vận chuyển
+              {t("shippingFeeConfig.shippingPrice")}
             </label>
             <Controller
               control={control}
-              name="air.price"
+              name="sea.price"
               render={({ field }) => <Input {...field} />}
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Phụ phí</label>
+            <label className="block mb-1 text-sm font-medium">{t("shippingFeeConfig.extraFee")}</label>
             <Controller
               control={control}
-              name="air.extraFee"
+              name="sea.extraFee"
               render={({ field }) => <Input {...field} />}
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Tỷ lệ cọc</label>
+            <label className="block mb-1 text-sm font-medium">{t("shippingFeeConfig.depositRate")}</label>
             <Controller
               control={control}
-              name="air.depositRate"
+              name="sea.depositRate"
               render={({ field }) => <Input {...field} />}
             />
           </div>
@@ -239,7 +247,7 @@ export default function ShippingFeeConfig() {
       {/* --- Save button --- */}
       <div className="flex justify-end">
         <Button type="primary" htmlType="submit">
-          Lưu
+          {t("shippingFeeConfig.saveButton")}
         </Button>
       </div>
     </form>

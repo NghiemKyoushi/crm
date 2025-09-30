@@ -54,7 +54,7 @@ export default function JPYManagementPage() {
     useState(false);
   const [id, setId] = useState("");
 
-  const [search, setSearch] = useState<string>(""); // 👈 thêm search state
+  const [search, setSearch] = useState<string>(""); // add search state
 
   const { data, isLoading, isFetching } = useBankAccountsPartnerScreen({
     page,
@@ -102,7 +102,7 @@ export default function JPYManagementPage() {
             ),
         }
       );
-      // form.resetFields(); // reset sau khi thêm
+      // form.resetFields(); // reset after adding
     } catch (err) {
       console.log("Validation failed:", err);
     }
@@ -115,7 +115,7 @@ export default function JPYManagementPage() {
       },
       {
         onSuccess: () => {
-          toast.success(t('partnerManage.deleteWebsiteSuccess'));
+          toast.success(t('partnerManage.deleteMaterialSuccess'));
           queryClient.invalidateQueries({
             queryKey: ["listwebsite"],
           });
@@ -200,7 +200,6 @@ export default function JPYManagementPage() {
           }}
         >
           <FontAwesomeIcon icon={faTrash} className="w-4 h-4 text-red-500" />
-          {/* <DeleteOutlined className="text-red-500 cursor-pointer" /> */}
         </div>
       ),
     },
@@ -250,7 +249,7 @@ export default function JPYManagementPage() {
           <Card className="!h-32 !p-0 !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white shadow-md rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-80">Tổng Đối tác</p>
+                <p className="text-sm opacity-80">{t('partnerManage.totalPartners')}</p>
                 <p className="text-2xl font-bold">
                   {summaryItem && summaryItem.partner_count}
                 </p>
@@ -266,7 +265,7 @@ export default function JPYManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
-                  Tổng Mua ({activeTab === "JPY" ? "JPY" : "USD"})
+                  {t('partnerManage.totalPurchase')} ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
                   {summaryItem && summaryItem.total_out}{" "}
@@ -284,7 +283,7 @@ export default function JPYManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-80">
-                  Tổng còn lại ({activeTab === "JPY" ? "JPY" : "USD"})
+                  {t('partnerManage.totalRemaining')} ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
                   {summaryItem && summaryItem.total_in}{" "}
@@ -302,7 +301,7 @@ export default function JPYManagementPage() {
 
       <div className="p-6 bg-white rounded-lg shadow w-full">
         <Title level={5} className="!mb-4 !text-gray-800">
-          Thêm Giao dịch Mua Nguyên liệu
+          {t('partnerManage.addTransactionTitle')}
         </Title>
 
         <Form
@@ -312,13 +311,13 @@ export default function JPYManagementPage() {
         >
           <Form.Item
             name="partner"
-            label="Đối tác"
-            rules={[{ required: true, message: "Chọn đối tác" }]}
+            label={t('partnerManage.partner')}
+            rules={[{ required: true, message: t('partnerManage.selectPartner') }]}
             className="mb-0"
           >
             <Select
               showSearch
-              placeholder="-- Chọn đối tác --"
+              placeholder={t('partnerManage.selectPartnerPlaceholder')}
               className="!w-full !h-10"
               options={options}
               loading={isLoading}
@@ -339,8 +338,8 @@ export default function JPYManagementPage() {
 
           <Form.Item
             name="amount"
-            label="Số tiền"
-            rules={[{ required: true, message: "Nhập số tiền" }]}
+            label={t('partnerManage.amount')}
+            rules={[{ required: true, message: t('partnerManage.enterAmount') }]}
             className="mb-0 !w-full !h-10"
           >
             <InputNumber<string>
@@ -357,8 +356,7 @@ export default function JPYManagementPage() {
 
           <Form.Item
             name="rate"
-            label="Tỷ giá"
-            // initialValue={180}
+            label={t('partnerManage.exchangeRateLabel')}
             rules={[{ required: true }]}
             className="mb-0"
           >
@@ -370,13 +368,13 @@ export default function JPYManagementPage() {
                 value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
               }
               parser={(value) => (value ? value.replace(/,/g, "") : "")}
-              addonAfter="đ"
+              addonAfter={t('partnerManage.currencySymbol')}
             />
           </Form.Item>
 
-          {/* Ghi chú */}
-          <Form.Item name="note" label="Ghi chú" className="mb-0">
-            <Input placeholder="Ghi chú..." className="!w-full !h-10" />
+          {/* Note */}
+          <Form.Item name="note" label={t('partnerManage.noteLabel')} className="mb-0">
+            <Input placeholder={t('partnerManage.notePlaceholder')} className="!w-full !h-10" />
           </Form.Item>
 
           {/* Button */}
@@ -389,22 +387,22 @@ export default function JPYManagementPage() {
               onClick={() => handleAdd()}
               className="bg-blue-600 hover:!bg-blue-700 px-6 !h-10 !rounded-lg w-full"
             >
-              + Thêm
+              {t('partnerManage.addButton')}
             </Button>
           </Form.Item>
         </Form>
       </div>
 
-      {/* Danh sách */}
+      {/* List */}
       <div className="p-6 bg-white rounded-lg shadow">
         <div className="flex items-center justify-between mb-4">
           <Title level={5} className="!mb-0">
-            Danh sách Đối tác và Công nợ
+            {t('partnerManage.partnerListTitle')}
           </Title>
 
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Tìm kiếm đối tác..."
+              placeholder={t('partnerManage.searchPartnerPlaceholder')}
               className="!w-64"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -435,8 +433,8 @@ export default function JPYManagementPage() {
       <PopupConfirm
         open={openConfirmDeleteMaterial}
         type={"delete"}
-        title={"Xoá nguyên liệu"}
-        content={"Bạn có chắc muốn xoá nguyên liệu không ?"}
+        title={t('partnerManage.deleteMaterialTitle')}
+        content={t('partnerManage.deleteMaterialContent')}
         onConfirm={handleDelete}
         onCancel={() => setOpenConfirmDeleteMaterial(false)}
         confirmText={t("common.delete")}

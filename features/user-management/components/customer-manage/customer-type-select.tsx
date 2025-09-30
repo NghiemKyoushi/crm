@@ -2,6 +2,7 @@ import { Dropdown, Button, Spin } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useListCateGoryCus } from "../../hooks/staff-manage";
+import { useTranslation } from "react-i18next";
 
 export function getContrastColor(hex: string): string {
   if (!hex) return "#000";
@@ -19,6 +20,7 @@ interface CategoryDropdownProps {
 }
 
 export default function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
+  const { t } = useTranslation();
   const [page] = useState(0);
 
   const { data, isLoading } = useListCateGoryCus({
@@ -80,7 +82,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
           fontSize: "12px",
         }}
       >
-        {selected ? selected.label : "Chọn phân loại "}
+        {selected ? selected.label : t('customerTable.selectCategory')}
         {isLoading ? <Spin size="small" /> : <DownOutlined />}
       </Button>
     </Dropdown>

@@ -26,6 +26,7 @@ import {
 import { toast } from "react-toastify";
 import { VIEW_IMAGE } from "@/constants/api-type";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 type ProfileFormValues = {
   fullName: string;
@@ -61,35 +62,36 @@ export interface RoleDetail {
   groups: Group[];
 }
 
-// ✅ Validation cho từng form
-const profileSchema = yup.object({
-  fullName: yup.string().required("Họ và tên không được để trống"),
-  email: yup
-    .string()
-    .email("Email không hợp lệ")
-    .required("Email không được để trống"),
-  phoneNumber: yup.string().required("Số điện thoại không được để trống"),
-  birthday: yup.string().required("Nhập ngày sinh"),
-});
-
-const passwordSchema = yup.object({
-  currentPassword: yup.string().required("Vui lòng nhập mật khẩu hiện tại"),
-  newPassword: yup
-    .string()
-    .min(8, "Mật khẩu mới phải có ít nhất 8 ký tự")
-    .max(20, "Mật khẩu mới không được vượt quá 20 ký tự")
-    .matches(
-      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
-      "Mật khẩu phải chứa ít nhất 1 chữ cái và 1 chữ số"
-    )
-    .required("Vui lòng nhập mật khẩu mới"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("newPassword")], "Mật khẩu xác nhận không khớp")
-    .required("Vui lòng nhập lại mật khẩu mới"),
-});
-
 export default function UserProfileForm() {
+  const { t } = useTranslation();
+
+  // ✅ Validation cho từng form
+  const profileSchema = yup.object({
+    fullName: yup.string().required(t('userProfile.validation.fullNameRequired')),
+    email: yup
+      .string()
+      .email(t('userProfile.validation.emailInvalid'))
+      .required(t('userProfile.validation.emailRequired')),
+    phoneNumber: yup.string().required(t('userProfile.validation.phoneRequired')),
+    birthday: yup.string().required(t('userProfile.validation.birthdayRequired')),
+  });
+
+  const passwordSchema = yup.object({
+    currentPassword: yup.string().required(t('userProfile.validation.currentPasswordRequired')),
+    newPassword: yup
+      .string()
+      .min(8, t('userProfile.validation.newPasswordMinLength'))
+      .max(20, t('userProfile.validation.newPasswordMaxLength'))
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
+        t('userProfile.validation.newPasswordPattern')
+      )
+      .required(t('userProfile.validation.newPasswordRequired')),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("newPassword")], t('userProfile.validation.confirmPasswordMatch'))
+      .required(t('userProfile.validation.confirmPasswordRequired')),
+  });
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
@@ -160,14 +162,14 @@ export default function UserProfileForm() {
     if (!isImage) return Upload.LIST_IGNORE;
 
     if (file.size / 1024 / 1024 > 2) {
-      message.error("Ảnh phải nhỏ hơn 2MB");
+      message.error(t('userProfile.avatar.sizeError'));
       return Upload.LIST_IGNORE;
     }
 
     const preview = await getBase64(file);
     setProfileImage(preview);
     await uploadAvatar(file);
-    toast.success("Upload avatar thành công");
+    toast.success(t('userProfile.avatar.uploadSuccess'));
   };
 
   // ✅ Submit Profile
@@ -183,12 +185,12 @@ export default function UserProfileForm() {
         } as any,
         {
           onSuccess: () =>
-            toast.success("Cập nhật thông tin cá nhân thành công!"),
-          onError: () => toast.error("Cập nhật thất bại"),
+            toast.success(t('userProfile.messages.updateSuccess')),
+          onError: () => toast.error(t('userProfile.messages.updateFailed')),
         }
       );
     } catch {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      toast.error(t('userProfile.messages.generalError'));
     }
   };
 
@@ -204,10 +206,10 @@ export default function UserProfileForm() {
       } as any,
       {
         onSuccess: () => {
-          toast.success("Đổi mật khẩu thành công!");
+          toast.success(t('userProfile.messages.changePasswordSuccess'));
           resetPassword();
         },
-        onError: () => toast.error("Đổi mật khẩu thất bại"),
+        onError: () => toast.error(t('userProfile.messages.changePasswordFailed')),
       }
     );
   };
@@ -227,7 +229,7 @@ export default function UserProfileForm() {
         items={[
           {
             key: "1",
-            label: "Thông tin cơ bản",
+            label: t('userProfile.basicInfo'),
             children: (
               <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
                 <Card className="!border-0 !shadow-none">
@@ -245,11 +247,11 @@ export default function UserProfileForm() {
                           beforeUpload={handleBeforeUpload}
                         >
                           <Button icon={<UploadOutlined />}>
-                            Thay đổi ảnh đại diện
+                            {t('userProfile.avatar.change')}
                           </Button>
                         </Upload>
                         <p className="text-[12px] text-gray-500">
-                          JPG, GIF hoặc PNG. Tối đa 2MB.
+                          {t('userProfile.avatar.fileFormat')}
                         </p>
                       </div>
                     </div>
@@ -257,7 +259,7 @@ export default function UserProfileForm() {
                     <div className="grid grid-cols-2 gap-6 w-full">
                       <div>
                         <label className="block mb-1 font-medium">
-                          Họ và Tên
+                          {t('userProfile.form.fullName')}
                         </label>
                         <Controller
                           name="fullName"
@@ -272,7 +274,7 @@ export default function UserProfileForm() {
                       </div>
                       <div>
                         <label className="block mb-1 font-medium">
-                          Địa chỉ email
+                          {t('userProfile.form.email')}
                         </label>
                         <Controller
                           name="email"
@@ -282,7 +284,7 @@ export default function UserProfileForm() {
                       </div>
                       <div>
                         <label className="block mb-1 font-medium">
-                          Số điện thoại
+                          {t('userProfile.form.phoneNumber')}
                         </label>
                         <Controller
                           name="phoneNumber"
@@ -297,7 +299,7 @@ export default function UserProfileForm() {
                       </div>
                       <div>
                         <label className="block mb-1 font-medium">
-                          Ngày sinh
+                          {t('userProfile.form.birthday')}
                         </label>
                         <Controller
                           name="birthday"
@@ -326,7 +328,7 @@ export default function UserProfileForm() {
                     </div>
                     <div className="flex justify-end mt-4 w-full">
                       <Button type="primary" htmlType="submit" className="px-6">
-                        Lưu thông tin
+                        {t('userProfile.form.saveInfo')}
                       </Button>
                     </div>
                   </div>
@@ -336,11 +338,11 @@ export default function UserProfileForm() {
           },
           {
             key: "2",
-            label: "Vai trò & Quyền hạn",
+            label: t('userProfile.rolesPermissions'),
             children: (
               <Card className="!border-0 !shadow-none">
                 <p className="mb-4">
-                  Vai trò hiện tại của bạn là:{" "}
+                  {t('userProfile.form.currentRole')}{" "}
                   <span className="text-blue-600 font-semibold">
                     {listRole && listRole.role_name}
                   </span>
@@ -366,14 +368,14 @@ export default function UserProfileForm() {
           },
           {
             key: "3",
-            label: "Đổi mật khẩu",
+            label: t('userProfile.changePassword'),
             children: (
               <form onSubmit={handlePasswordSubmit(onSubmitPassword)}>
                 <Card className="!border-0 !shadow-none">
                   <div className="flex flex-col gap-3 w-2/4">
                     <div>
                       <label className="block mb-1 font-medium">
-                        Mật khẩu hiện tại
+                        {t('userProfile.form.currentPassword')}
                       </label>
                       <Controller
                         name="currentPassword"
@@ -388,7 +390,7 @@ export default function UserProfileForm() {
                     </div>
                     <div>
                       <label className="block mb-1 font-medium">
-                        Mật khẩu mới
+                        {t('userProfile.form.newPassword')}
                       </label>
                       <Controller
                         name="newPassword"
@@ -403,7 +405,7 @@ export default function UserProfileForm() {
                     </div>
                     <div>
                       <label className="block mb-1 font-medium">
-                        Xác nhận mật khẩu mới
+                        {t('userProfile.form.confirmPassword')}
                       </label>
                       <Controller
                         name="confirmPassword"
@@ -419,7 +421,7 @@ export default function UserProfileForm() {
                   </div>
                   <div className="flex justify-end mt-4">
                     <Button type="primary" htmlType="submit" className="px-6">
-                      Đổi mật khẩu
+                      {t('userProfile.changePassword')}
                     </Button>
                   </div>
                 </Card>
