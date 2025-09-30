@@ -167,7 +167,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             <Form.Item
               name="otp"
               rules={[
-                { required: true, message: t('form.enterOtp') },
+                { required: true, message: t('validation.required') },
                 { len: 6, message: t('form.otpSixDigits') },
               ]}
             >
@@ -182,7 +182,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             <Form.Item
               name="newPassword"
               rules={[
-                { required: true, message: t('form.enterNewPassword') },
+                { required: true, message: t('validation.password.required') },
                 {
                   pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
                   message: t('form.passwordPattern'),

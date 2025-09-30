@@ -336,7 +336,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <Form.Item
                 label={t('form.method')}
                 name="method"
-                rules={[{ required: true, message: "Chọn phương thức!" }]}
+                rules={[{ required: true, message: t('validation.selectMethod') }]}
                 className=" !w-full !mb-1"
               >
                 <Radio.Group className="!flex !flex-row !w-full gap-4  ">
@@ -345,9 +345,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     value="buy"
                     className="!text-blue-500 flex-1 !p-3 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
                   >
-                    <div className="font-medium text-blue-800">Mua thẳng</div>
+                    <div className="font-medium text-blue-800">{t('form.directPurchase')}</div>
                     <div className="text-xs text-blue-600">
-                      Phương thức duy nhất được hỗ trợ
+                      {t('form.onlySupportedMethod')}
                     </div>
                   </Radio>
                 </Radio.Group>
@@ -356,7 +356,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label="Giá (¥)"
+                  label={t('form.priceJpy')}
                   name="priceY"
                 >
                   <InputNumber
@@ -373,7 +373,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label="Giá (VND)"
+                  label={t('form.priceVnd')}
                   name="priceVnd"
                 >
                   <InputNumber
@@ -384,7 +384,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     style={{ display: "flex", alignItems: "center" }}
                     className="!w-full !h-11"
                     disabled
-                    placeholder="Tự động tính"
+                    placeholder={t('form.autoCalculate')}
                   />
                 </Form.Item>
               </div>
@@ -398,8 +398,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       key: "1",
                       label: (
                         <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
-                          <FontAwesomeIcon icon={faCog} /> Dịch vụ bổ sung (tùy
-                          chọn)
+                          <FontAwesomeIcon icon={faCog} /> {t('form.additionalServices')}
                         </span>
                       ),
                       children: (
@@ -451,7 +450,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       key: "2",
                       label: (
                         <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
-                          <FontAwesomeIcon icon={faShield} /> Bảo hiểm đơn hàng
+                          <FontAwesomeIcon icon={faShield} /> {t('form.orderInsurance')}
                         </span>
                       ),
                       children: (
@@ -521,7 +520,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label="Phí DV (¥)"
+                  label={t('form.serviceFeeJpy')}
                   name="feeY"
                 >
                   <InputNumber
@@ -537,7 +536,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
                 <Form.Item
                   className="!flex-1 !mb-1 "
-                  label="Phí DV (VND)"
+                  label={t('form.serviceFeeVnd')}
                   name="feeVnd"
                 >
                   <InputNumber
@@ -547,17 +546,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
                     style={{ display: "flex", alignItems: "center" }}
-                    placeholder="Tự động tính"
+                    placeholder={t('form.autoCalculate')}
                   />
                 </Form.Item>
               </div>
 
               <div className="flex flex-row gap-1">
                 <Form.Item
-                  label="Tiền cọc (VND)"
+                  label={t('form.depositVnd')}
                   name="deposit"
                   rules={[
-                    { required: true, message: "Vui lòng nhập tiền cọc!" },
+                    { required: true, message: t('validation.pleaseEnterDeposit') },
                   ]}
                   className="!flex-1 !mb-1 "
                 >
@@ -589,19 +588,19 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 </Form.Item> */}
               </div>
 
-              <Form.Item label="Ghi chú" name="note" className="!mb-1">
+              <Form.Item label={t('form.note')} name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
-                  placeholder="Ghi chú thêm về đơn hàng..."
+                  placeholder={t('form.orderNote')}
                 />
               </Form.Item>
 
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="font-medium mb-3">Tổng kết Đơn hàng</h4>
+                <h4 className="font-medium mb-3">{t('form.orderSummary')}</h4>
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span>Giá sản phẩm</span>
+                    <span>{t('form.productPrice')}</span>
                     <span>
                       {form.getFieldValue("priceVnd")
                         ? form.getFieldValue("priceVnd").toLocaleString("en-US")
@@ -611,7 +610,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   </div>
 
                   <div className="flex justify-between">
-                    <span>Phí dịch vụ</span>
+                    <span>{t('form.serviceFee')}</span>
                     <span>{feeVnd ? feeVnd.toLocaleString("en-US") : 0} đ</span>
                   </div>
 
@@ -634,7 +633,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <hr className="my-2 border-gray-200" />
 
                 <div className="flex justify-between font-semibold">
-                  <span>Tổng cộng:</span>
+                  <span>{t('form.total')}:</span>
                   <span>
                     {form.getFieldValue("priceVnd") &&
                     form.getFieldValue("feeVnd")
@@ -648,14 +647,14 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 </div>
 
                 <div className="flex justify-between text-green-600 font-semibold">
-                  <span>Tiền cọc:</span>
+                  <span>{t('form.deposit')}:</span>
                   <span>
                     {totalFee ? Number(totalFee).toLocaleString("en-US") : 0} đ
                   </span>
                 </div>
 
                 <div className="flex justify-between text-red-600 font-semibold">
-                  <span>Còn lại:</span>
+                  <span>{t('form.remaining')}:</span>
                   <span>
                     {(() => {
                       const value =

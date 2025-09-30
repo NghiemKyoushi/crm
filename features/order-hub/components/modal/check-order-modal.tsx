@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 interface CheckOrderModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
   productName,
   feePerKg,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
 
   const handleOk = async () => {
@@ -40,20 +42,20 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       onSubmit(values);
       form.resetFields();
     } catch {
-      // lỗi validate sẽ được highlight
+      // Error validation will be highlighted
     }
   };
 
-  // Lấy giá trị form realtime để tính phí
+  // Get form values realtime to calculate fees
   const actualWeight = Form.useWatch("actualWeight", form) || 0;
   const codFee = Form.useWatch("codFee", form);
 
   const weightFee = actualWeight * feePerKg;
-  const codDisplay = codFee === "FIXED" ? "Đã tính" : "Tính sau";
+  const codDisplay = codFee === "FIXED" ? t('status.calculated') : t('status.calculateLater');
 
   return (
     <Modal
-      title="Kiểm hàng và tính phí"
+      title={t('modal.inspectAndCalculateFee')}
       open={open}
       onCancel={onCancel}
       footer={null}
@@ -67,26 +69,26 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       }}
       centered
     >
-      {/* Thông tin đơn hàng */}
+      {/* Order Information */}
       <div className="bg-blue-50 p-3 rounded mb-4">
         <p className="!mb-1">
-          <strong>Mã đơn:</strong> {orderCode}
+          <strong>{t('table.orderCode')}:</strong> {orderCode}
         </p>
         <p className="!mb-1">
-          <strong>Khách hàng:</strong> {customerName}
+          <strong>{t('form.customer')}:</strong> {customerName}
         </p>
         <p className="!mb-1">
-          <strong>Sản phẩm:</strong> {productName ?? "N/A"}
+          <strong>{t('form.productName')}:</strong> {productName ?? "N/A"}
         </p>
       </div>
 
       <Form layout="vertical" form={form}>
-        {/* Cân nặng */}
+        {/* Weight */}
         <div className="grid grid-cols-2 gap-4">
           <Form.Item
             name="actualWeight"
-            label="Cân nặng thực tế (kg)"
-            rules={[{ required: true, message: "Vui lòng nhập cân nặng!" }]}
+            label={t('inspection.actualWeight')}
+            rules={[{ required: true, message: t('validation.weight.required') }]}
           >
             <InputNumber
               className="!w-full"
@@ -98,7 +100,7 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
               }
             />
           </Form.Item>
-          <Form.Item name="feePerKg" label="Phí cân nặng (VND/kg)">
+          <Form.Item name="feePerKg" label={t('inspection.weightFee')}>
             <InputNumber
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -158,24 +160,24 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
           </p>
         </div> */}
 
-        {/* Ghi chú */}
-        <Form.Item name="note" label="Ghi chú kiểm hàng">
+        {/* Notes */}
+        <Form.Item name="note" label={t('inspection.note')}>
           <Input.TextArea
             className="!h-25"
-            placeholder="Ghi chú về tình trạng hàng hóa, phí phát sinh..."
+            placeholder={t('inspection.notePlaceholder')}
           />
         </Form.Item>
 
         {/* Footer */}
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onCancel}>Hủy</Button>
+          <Button onClick={onCancel}>{t('button.cancel')}</Button>
           <Button
             type="primary"
             className="!bg-green-600"
             icon={<FontAwesomeIcon icon={faCheck} />}
             onClick={handleOk}
           >
-            Xác nhận kiểm hàng
+            {t('button.confirmInspection')}
           </Button>
         </div>
       </Form>

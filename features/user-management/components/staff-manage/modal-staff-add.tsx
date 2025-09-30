@@ -157,10 +157,10 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
                 name="password"
                 control={control}
                 rules={{
-                  required: "Nhập mật khẩu mới",
+                  required: t("validation.password.required"),
                   pattern: {
                     value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
-                    message: "Mật khẩu phải 8-20 ký tự, gồm chữ và số",
+                    message: t("form.passwordPattern"),
                   },
                 }}
                 render={({ field }) => (
