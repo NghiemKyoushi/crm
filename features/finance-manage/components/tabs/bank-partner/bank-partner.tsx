@@ -108,29 +108,29 @@ export default function BankPartnerSetting() {
 
   const columns: ColumnsType<BankAccount> = [
     {
-      title: "Ngân hàng",
+      title: t('table.bankName'),
       dataIndex: "bank_name",
       key: "bank_name",
     },
     {
-      title: "Số tài khoản",
+      title: t('table.accountNumber'),
       dataIndex: "account_number",
       key: "account_number",
     },
     {
-      title: "Chủ tài khoản",
+      title: t('table.accountHolder'),
       dataIndex: "account_holder",
       key: "account_holder",
     },
     {
-      title: "Hạn mức/ngày (VND)",
+      title: t('table.dailyLimit'),
       dataIndex: "daily_limit_vnd",
       key: "daily_limit_vnd",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { maximumFractionDigits: 0 }),
     },
     {
-      title: "Trạng thái",
+      title: t('table.status'),
       dataIndex: "status",
       key: "status",
       render: (_, record: BankAccount) =>
@@ -145,7 +145,7 @@ export default function BankPartnerSetting() {
         ),
     },
     {
-      title: "Hành động",
+      title: t('table.actions'),
       key: "action",
       render: (_: any, record: BankAccount) => (
         <div className="flex gap-2">

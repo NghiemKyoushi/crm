@@ -105,44 +105,44 @@ export default function BankAccountSetting() {
 
   const columns: ColumnsType<BankAccount> = [
     {
-      title: "Ngân hàng",
+      title: t('table.bankName'),
       dataIndex: "bank_name",
       key: "bank_name",
     },
     {
-      title: "Số tài khoản",
+      title: t('table.accountNumber'),
       dataIndex: "account_number",
       key: "account_number",
     },
     {
-      title: "Chủ tài khoản",
+      title: t('table.accountHolder'),
       dataIndex: "account_holder",
       key: "account_holder",
     },
     {
-      title: "Hạn mức/ngày (VND)",
+      title: t('table.dailyLimit'),
       dataIndex: "daily_limit_vnd",
       key: "daily_limit_vnd",
       render: (value: number) =>
         value.toLocaleString("vi-VN", { maximumFractionDigits: 0 }),
     },
     {
-      title: "Trạng thái",
+      title: t('table.status'),
       dataIndex: "status",
       key: "status",
       render: (_, record: BankAccount) =>
         record.is_active ? (
           <Tag color="green" className="px-3 py-1 !rounded-3xl">
-            Hoạt động
+            {t('status.active')}
           </Tag>
         ) : (
           <Tag color="default" className="px-3 py-1 !rounded-3xl">
-            Tạm dừng
+            {t('status.inactive')}
           </Tag>
         ),
     },
     {
-      title: "Hành động",
+      title: t('table.actions'),
       key: "action",
       render: (_: any, record: BankAccount) => (
         <div className="flex gap-2">

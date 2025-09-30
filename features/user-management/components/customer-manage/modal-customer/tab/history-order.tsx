@@ -2,6 +2,7 @@ import OrderFilter from "@/components/FilterComponent";
 import TableComponent from "@/components/TableComponent";
 import { Select, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { useTranslation } from "react-i18next";
 
 interface OrderData {
     key: string;
@@ -11,6 +12,8 @@ interface OrderData {
     status: string;
   }
 export default function HistoryOrderTab() {
+  const { t } = useTranslation();
+
   const onFilter = (values: {
     orderCode?: string;
     status?: string;
@@ -19,7 +22,7 @@ export default function HistoryOrderTab() {
 
   const columns: ColumnsType<OrderData> = [
     {
-      title: "Mã Đơn",
+      title: t("customerManage.orderHistory.orderCode"),
       dataIndex: "orderCode",
       key: "orderCode",
       render: (text: string) => (
@@ -27,20 +30,20 @@ export default function HistoryOrderTab() {
       ),
     },
     {
-      title: "Ngày tạo",
+      title: t("customerManage.orderHistory.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       align: "center",
     },
     {
-      title: "Tổng tiền",
+      title: t("customerManage.orderHistory.total"),
       dataIndex: "total",
       key: "total",
       align: "right",
-      render: (value: number) => value.toLocaleString("vi-VN") + " đ",
+      render: (value: number) => value.toLocaleString("vi-VN") + " " + t("common.currency"),
     },
     {
-      title: "Trạng thái",
+      title: t("customerManage.orderHistory.status"),
       dataIndex: "status",
       key: "status",
       align: "center",
@@ -50,15 +53,15 @@ export default function HistoryOrderTab() {
         switch (status) {
           case "pending":
             color = "orange";
-            label = "Chờ thanh toán đủ";
+            label = t("customerManage.orderHistory.statusPending");
             break;
           case "paid":
             color = "green";
-            label = "Đã thanh toán";
+            label = t("customerManage.orderHistory.statusPaid");
             break;
           case "cancel":
             color = "red";
-            label = "Đã hủy";
+            label = t("customerManage.orderHistory.statusCancel");
             break;
         }
         return (

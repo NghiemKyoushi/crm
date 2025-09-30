@@ -11,7 +11,7 @@ interface ModalStaffAddProps {
   open: boolean;
   onClose: () => void;
   handleSubmitDataUser: (data: NewUserType) => void;
-  initialValues?: Partial<NewUserType>; // 👈 thêm để edit
+  initialValues?: Partial<NewUserType>; // for edit mode
 }
 
 export default function ModalStaffAdd(props: ModalStaffAddProps) {
@@ -131,11 +131,11 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
               rules={{ required: t("staffManage.phoneNumberRequired") }}
               render={({ field }) =>  <Input
               {...field}
-              type="tel" // giữ bàn phím số trên mobile
-              inputMode="numeric" // ưu tiên bàn phím số
-              pattern="[0-9]*" // gợi ý cho browser chỉ nhận số
+              type="tel" // numeric keyboard on mobile
+              inputMode="numeric" // prefer numeric keyboard
+              pattern="[0-9]*" // hint for browser to accept only numbers
               onChange={(e) => {
-                // ép chỉ giữ số, loại bỏ ký tự khác (kể cả autofill text)
+                // force numeric only, remove other characters (including autofill text)
                 const onlyNums = e.target.value.replace(/\D/g, "");
                 field.onChange(onlyNums);
               }}
@@ -192,7 +192,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
           />
         </div>
 
-        {/* Vai trò */}
+        {/* Role */}
         <div>
           <label className="block mb-1 font-medium">{t("staffManage.role")}</label>
           <Controller

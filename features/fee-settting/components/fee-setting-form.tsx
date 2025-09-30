@@ -61,7 +61,7 @@ const FeeSettingsPage: React.FC = () => {
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
       {/* Tiêu đề */}
       <h3 className="text-xl font-semibold mb-4">
-        Quản Lý Phí & Cài Đặt Dịch Vụ Toàn Diện
+        {t('feeSettings.comprehensiveFeeManagement')}
       </h3>
 
       <Tabs
@@ -73,7 +73,7 @@ const FeeSettingsPage: React.FC = () => {
             label: (
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-                Vận Chuyển & Phụ Thu
+                {t('feeSettings.shippingAndSurcharge')}
               </span>
             ),
             children: <ShippingSurchangeTable />,
@@ -83,7 +83,7 @@ const FeeSettingsPage: React.FC = () => {
             label: (
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-                Dịch Vụ & Giao Hàng
+                {t('feeSettings.serviceAndDelivery')}
               </span>
             ),
             children: <ShippingServiceForm />,
@@ -93,7 +93,7 @@ const FeeSettingsPage: React.FC = () => {
             label: (
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-                Bảo Hiểm & Quy Định Chung
+                {t('feeSettings.insuranceAndRegulations')}
               </span>
             ),
             children: <InsuranceSettings />,
@@ -103,7 +103,7 @@ const FeeSettingsPage: React.FC = () => {
             label: (
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
-                Loại sản phẩm
+                {t('feeSettings.productTypes')}
               </span>
             ),
             children: <ProductTypeTable />,

@@ -9,6 +9,7 @@ import { getListCustomersNote } from "@/features/user-management/apis/staff-mana
 import dayjs from "dayjs";
 import { CustomerNoteDetail } from "@/types/customer-type";
 import utc from "dayjs/plugin/utc";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(utc);
 
@@ -17,11 +18,12 @@ interface NotesProps {
 }
 
 const Notes = ({ selectedId }: NotesProps) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const createNewNoteMutation = useAddNote();
   const [newNote, setNewNote] = useState("");
 
-  // 🟢 Infinite Query để load more
+  // 🟢 Infinite Query for load more
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["customerNotes", selectedId],
@@ -49,14 +51,14 @@ const Notes = ({ selectedId }: NotesProps) => {
       { content: newNote.trim(), id: selectedId },
       {
         onSuccess: () => {
-          toast.success("Tạo ghi chú mới thành công!");
+          toast.success(t("customerManage.internalNote.createSuccess"));
           queryClient.invalidateQueries({
             queryKey: ["customerNotes", selectedId],
           });
           setNewNote("");
         },
         onError: () => {
-          toast.error("Tạo ghi chú mới thất bại");
+          toast.error(t("customerManage.internalNote.createFailed"));
         },
       }
     );
@@ -64,7 +66,7 @@ const Notes = ({ selectedId }: NotesProps) => {
 
   const notes = data?.pages.flatMap((page) => page.data) || [];
 
-  // 🔹 Tạo items cho Timeline theo chuẩn mới
+  // 🔹 Create items for Timeline according to new standard
   const timelineItems = notes.map((note: CustomerNoteDetail, index) => ({
     key: note.id,
     color: index === 0 ? "blue" : "gray",
@@ -87,24 +89,24 @@ const Notes = ({ selectedId }: NotesProps) => {
 
   return (
     <div className="bg-white rounded-xl p-1">
-      {/* Thêm ghi chú */}
+      {/* Add note */}
       <div className="mb-4">
         <Input.TextArea
           rows={3}
-          placeholder="Nhân viên thêm ghi chú về khách hàng tại đây..."
+          placeholder={t("customerManage.internalNote.placeholder")}
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
         />
         <div className="flex justify-end mt-2">
           <Button type="primary" onClick={handleAddNote}>
-            Lưu ghi chú
+            {t("customerManage.internalNote.saveNote")}
           </Button>
         </div>
       </div>
 
-      {/* Lịch sử ghi chú */}
+      {/* Note history */}
       <div>
-        <h3 className="font-semibold mb-2">Lịch sử Ghi chú</h3>
+        <h3 className="font-semibold mb-2">{t("customerManage.internalNote.noteHistory")}</h3>
         <div className="max-h-64 overflow-y-auto pr-2 !pt-2 !mt-2">
           {isLoading ? (
             <Spin />
@@ -117,7 +119,7 @@ const Notes = ({ selectedId }: NotesProps) => {
         {hasNextPage && (
           <div className="flex justify-center mt-3">
             <Button onClick={() => fetchNextPage()} loading={isFetchingNextPage}>
-              Xem thêm
+              {t("customerManage.internalNote.loadMore")}
             </Button>
           </div>
         )}
