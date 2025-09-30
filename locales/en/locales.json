@@ -474,5 +474,43 @@
     "tryAgain": "Try Again",
     "refreshAndClearCache": "Refresh and Clear Cache",
     "refreshingAppShort": "Refreshing application..."
+  },
+  "settings": {
+    "financialSettings": "Financial Settings",
+    "serviceFeesSettings": "Service Fees Settings",
+    "bankAccountManagement": "Bank Account Management",
+    "saveExchangeRate": "Save Exchange Rate",
+    "exchangeRateUpdateSuccess": "Exchange rate updated successfully!",
+    "serviceFeesDescription": "Set default system fees. Custom fee policies for customer categories will override these settings.",
+    "buyingFeeUS": "US buying fee: 4%",
+    "buyingFeeJP": "Japan buying fee: from 3%",
+    "internationalShipping": "International shipping fee",
+    "productSurcharge": "Product category surcharge",
+    "reinforcementFee": "Reinforcement fee: 5,000 VND/Kg",
+    "insuranceFee": "Insurance fee: 3%",
+    "hanoiDeliveryFee": "Hanoi delivery fee",
+    "storageFee": "Storage fee: 1,000 VND/kg/day",
+    "goToFeeManagement": "Go to Fee Management",
+    "orderOperationsSettings": "Order Operations Settings",
+    "supportedWebsiteManagement": "Supported Website Management",
+    "productTypesAndFees": "Product Types & Fees",
+    "userManagementSettings": "User Management Settings",
+    "customerCategoriesAndPolicies": "Customer Categories & Policies",
+    "staffAndPermissions": "Staff & Permissions"
+  },
+  "partnerManage": {
+    "createMaterialSuccess": "New material created successfully!",
+    "deleteWebsiteSuccess": "Website deleted successfully!",
+    "from": "From",
+    "note": "Note",
+    "totalBuyJPY": "Total Purchase (JPY)",
+    "totalBuyUSD": "Total Purchase (USD)",
+    "exchangeRate": "Exchange Rate"
+  },
+  "categoryCustomer": {
+    "createSuccess": "New customer category created successfully!",
+    "updateSuccess": "Customer category updated successfully!",
+    "deleteSuccess": "Customer category deleted successfully!",
+    "exchangeRateUpdateSuccess": "Exchange rate updated successfully!"
   }
 }
