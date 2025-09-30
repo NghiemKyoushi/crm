@@ -4,6 +4,7 @@ import AppProvider from "@/app/app-provider";
 import "./globals.css";
 import I18nProvider from "@/components/I18nProvider";
 import AntdRegistry from "@/components/AntdRegistry";
+import Script from "next/script";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -30,6 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${notoSansJP.variable}`}>
+        <Script
+          src="/cache-manager-init.js"
+          strategy="beforeInteractive"
+        />
         <I18nProvider>
           <AppProvider><AntdRegistry>{children}</AntdRegistry></AppProvider>
         </I18nProvider>

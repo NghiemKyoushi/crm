@@ -35,8 +35,8 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
           toast.success(t("login.success"), { position: "top-right" });
           // router.push("user-management");
           
-          const redirectUrl = window.location.search
-          .split("redirect=")[1] || "/user-management";
+          const redirectParts = window.location.search.split("redirect=");
+          const redirectUrl = redirectParts.length > 1 ? redirectParts[1] : "/user-management";
 
           if (decodeURIComponent(redirectUrl) === "/login") {
             router.replace("/login"); 

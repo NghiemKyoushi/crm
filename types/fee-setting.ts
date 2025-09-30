@@ -88,7 +88,7 @@ export function mapFormToData(form: Record<string, any>): FormData {
     } else if (key.startsWith("zone_")) {
       // zone_1_fee, zone_1_free_us, zone_1_free_jp
       const zoneMatch = key.match(/^zone_(\d+)_(fee|free_us|free_jp)$/);
-      if (zoneMatch) {
+      if (zoneMatch && zoneMatch.length >= 3) {
         const [, zoneIdStr, field] = zoneMatch;
         const zoneId = parseInt(zoneIdStr, 10);
 

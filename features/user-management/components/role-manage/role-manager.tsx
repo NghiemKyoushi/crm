@@ -92,7 +92,7 @@ export const RoleManager: React.FC = () => {
   };
 
   useEffect(() => {
-    if (data) {
+    if (data && data.length > 0) {
       setSelectedRole(data[0]);
     }
   }, [data]);
