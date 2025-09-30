@@ -17,7 +17,43 @@
     },
     "password": {
       "required": "Please enter your password!"
-    }
+    },
+    "name": {
+      "required": "Please enter name!"
+    },
+    "phoneNumber": {
+      "required": "Please enter phone number!",
+      "invalid": "Invalid phone number!"
+    },
+    "address": {
+      "required": "Please enter address!"
+    },
+    "company": {
+      "required": "Please select company!"
+    },
+    "role": {
+      "required": "Please select role!"
+    },
+    "customerType": {
+      "required": "Please select customer type!"
+    },
+    "sales": {
+      "required": "Please select sales!"
+    },
+    "warehouse": {
+      "required": "Please select warehouse!"
+    },
+    "weight": {
+      "required": "Please enter weight!",
+      "invalid": "Weight must be a positive number!"
+    },
+    "dimensions": {
+      "required": "Please enter dimensions!"
+    },
+    "required": "This field is required!",
+    "selectOption": "Please select an option!",
+    "minLength": "Minimum length is {min} characters!",
+    "maxLength": "Maximum length is {max} characters!"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -207,7 +243,8 @@
     "approveDeposit": "Approve Deposit Transactions",
     "manualDeposit": "Manual Deposit",
     "manualWithdraw": "Manual Deduction",
-    "bankPartner": "Bank Partner"
+    "bankPartner": "Bank Partner",
+    "accountPartner": "Bank Settings"
   },
   "keywordPlaceholder": "Order ID, Customer ID...",
   "statusPlaceholder": "-- Status --",
@@ -614,7 +651,9 @@
     "shipped": "Shipped",
     "shippingRequest": "Shipping Request",
     "cancelled": "Cancelled",
-    "paid": "Paid"
+    "paid": "Paid",
+    "calculated": "Calculated",
+    "calculateLater": "Calculate Later"
   },
   "table": {
     "customerCode": "Customer Code",
@@ -627,7 +666,9 @@
     "customer": "Customer",
     "creator": "Creator",
     "amount": "Amount",
-    "actions": "Actions"
+    "actions": "Actions",
+    "orderCode": "Order Code",
+    "details": "Details"
   },
   "page": {
     "salesDetailTitle": "Sales Detail - PHƯƠNG LINH",
@@ -652,7 +693,13 @@
     "selectProductType": "Please select product type!",
     "selectMethod": "Please select method!",
     "pleaseSelectCustomer": "Please select customer!",
-    "pleaseEnterDeposit": "Please enter deposit!"
+    "pleaseEnterDeposit": "Please enter deposit!",
+    "pleaseUploadImage": "Please upload image",
+    "onlyImageFiles": "Only image files are allowed!",
+    "imageSizeLimit": "Image must be smaller than 5MB!",
+    "uploadFailed": "Upload failed",
+    "pleaseEnterCount": "Please enter count check!",
+    "pleaseSelectRepackage": "Please select Repackage!"
   },
   "modal": {
     "createOrderForCustomer": "Create Order for Customer",
@@ -660,10 +707,6 @@
     "orderPurchased": "Order has been purchased!",
     "confirmCompleteOrder": "Confirm Complete Order",
     "orderCompleted": "Order has been completed!"
-  },
-  "table": {
-    "orderCode": "Order Code",
-    "details": "Details"
   },
   "button": {
     "approve": "Approve",
@@ -677,7 +720,34 @@
     "createNewOrder": "Create New Order",
     "shipped": "Shipped",
     "createOrder": "Create Order",
-    "resendOtp": "Resend OTP"
+    "resendOtp": "Resend OTP",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "update": "Update",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "export": "Export",
+    "import": "Import",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "send": "Send",
+    "resend": "Resend",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "clear": "Clear",
+    "refresh": "Refresh",
+    "reload": "Reload",
+    "select": "Select",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "confirmInspection": "Confirm Inspection"
   },
   "page": {
     "orderManagement": "Order Management",
@@ -685,7 +755,46 @@
   },
   "placeholder": {
     "selectProductType": "-- Select Product Type --",
-    "searchCustomer": "Search customer by code or name..."
+    "searchCustomer": "Search customer by code or name...",
+    "searchByKeyword": "Search by keyword...",
+    "searchByName": "Search by name...",
+    "searchByCode": "Search by code...",
+    "searchByOrderCode": "Search by order code...",
+    "filterStatus": "-- Filter status --",
+    "enterOtp": "Enter OTP code",
+    "enterPassword": "Enter password",
+    "enterConfirmPassword": "Confirm password",
+    "selectDate": "Select date",
+    "selectTime": "Select time",
+    "selectStatus": "-- Select status --",
+    "selectRole": "-- Select role --",
+    "selectWarehouse": "-- Select warehouse --",
+    "selectCompany": "-- Select company --",
+    "selectSales": "-- Select sales --",
+    "selectCustomerType": "-- Select customer type --",
+    "enterNote": "Enter note...",
+    "enterDescription": "Enter description...",
+    "enterName": "Enter name...",
+    "enterAddress": "e.g.: 263 Dang Van Bi"
+  },
+  "address": {
+    "province": "Province/City",
+    "ward": "Ward/Commune",
+    "selectProvince": "Select Province/City",
+    "selectWard": "Select Ward/Commune",
+    "addressNote": "Please enter address according to new administrative units after merging 34 provinces and cities (01/07/2025).",
+    "saveAddress": "Save Address"
+  },
+  "tracking": {
+    "countCheck": "Count Check",
+    "repackage": "Repackage",
+    "documentImages": "Document Images / Product Images"
+  },
+  "inspection": {
+    "actualWeight": "Actual Weight (kg)",
+    "weightFee": "Weight Fee (VND/kg)",
+    "note": "Inspection Note",
+    "notePlaceholder": "Notes about goods condition, additional fees..."
   },
   "form": {
     "productInformation": "Product Information",
@@ -715,11 +824,67 @@
     "confirmOrderSuccess": "Order confirmation successful!",
     "confirmJpWarehouseSuccess": "JP warehouse confirmation successful!",
     "confirmShippingSuccess": "Shipping confirmation successful!",
-    "updateSalesAssignmentSuccess": "Sales assignment updated successfully!"
+    "updateSalesAssignmentSuccess": "Sales assignment updated successfully!",
+    "emailOtpSent": "OTP code has been sent to email!",
+    "waitFiveMinutes": "Please wait 5 minutes before resending!",
+    "emailNotExists": "Email does not exist!",
+    "otpConfirmSuccess": "OTP verification successful!",
+    "newOtpSent": "New OTP code has been sent!",
+    "invalidOtpPassword": "Invalid OTP code or password!"
+  },
+  "component": {
+    "search": "Search",
+    "filterBy": "Filter by",
+    "sortBy": "Sort by",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "error": "An error occurred",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "language": "Language",
+    "vietnamese": "Vietnamese",
+    "english": "English",
+    "currentLanguage": "Current Language",
+    "changeLanguage": "Change Language",
+    "selectLanguage": "Select Language"
+  },
+  "cache": {
+    "clearingCache": "Clearing cache...",
+    "cacheCleared": "Cache has been cleared",
+    "errorClearing": "Error clearing cache",
+    "criticalError": "Critical error",
+    "refreshing": "Refreshing page..."
+  },
+  "errorHandling": {
+    "refreshingApp": "Refreshing application...",
+    "refreshingAppShort": "Refreshing application to fix error...",
+    "pleaseWait": "Please wait a moment...",
+    "somethingWentWrong": "Something went wrong",
+    "appEncounteredError": "The application encountered an error. We are trying to fix it.",
+    "tryAgain": "Try Again",
+    "refreshAndClearCache": "Refresh and Clear Cache"
+  },
+  "feeSettings": {
+    "otherServiceFees": "Other Service Fees (General Application)",
+    "purchaseFeeUs": "Purchase Fee (%) - US Route",
+    "purchaseFeeJp": "Purchase Fee (%) - Japan Route",
+    "reinforcementFee": "Reinforcement Fee (VND/Kg)"
   },
   "customerManage": {
+    "title": "Customer Management",
     "customerOverview": {
-      "walletBalance": "Wallet Balance"
+      "walletBalance": "Wallet Balance",
+      "totalOrders": "Total Orders",
+      "totalSpent": "Total Spent",
+      "currentDebt": "Current Debt"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "orders": "Orders",
+      "transactions": "Transactions",
+      "fees": "Fees",
+      "notes": "Notes"
     }
   },
   "status": {
@@ -729,7 +894,10 @@
     "cancelledByUser": "Cancelled by User",
     "shipping": "Shipping",
     "arrivedWarehouse": "Arrived Warehouse",
-    "delivered": "Delivered"
+    "delivered": "Delivered",
+    "pendingPayment": "Pending Payment",
+    "paid": "Paid",
+    "cancelled": "Cancelled"
   },
   "system": {
     "noData": "No data",

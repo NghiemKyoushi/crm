@@ -27,7 +27,7 @@ export const loginRequest  = async (email: string, password: string) => {
   const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });  
   const refreshToken = res.data.data.refresh_token;
   if (!refreshToken) {
-    throw new Error("Không nhận được refreshToken từ API");
+    throw new Error("No refresh token received from API");
   }
 
   // localStorage.setItem("refreshToken", refreshToken);

@@ -118,12 +118,12 @@ export class CacheManager {
     const criticalPatterns = [
       'Cannot read properties of null',
       'Cannot read property',
-      'TypeError: Cannot read',
+      // 'TypeError: Cannot read',
       'ChunkLoadError',
       'Loading chunk',
       'Loading CSS chunk',
       'Unexpected token',
-      'SyntaxError',
+      // 'SyntaxError',
       'Script error'
     ];
 
@@ -171,9 +171,9 @@ export class CacheManager {
     }
 
     const defaultMessages = {
-      systemError: 'Đã phát hiện lỗi hệ thống',
-      refreshingApp: 'Đang làm mới ứng dụng để khắc phục...',
-      pleaseWait: 'Vui lòng đợi trong giây lát...'
+      systemError: 'Critical error detected',
+      refreshingApp: 'Refreshing application to fix...',
+      pleaseWait: 'Please wait a moment...'
     };
 
     const messages = translations || defaultMessages;

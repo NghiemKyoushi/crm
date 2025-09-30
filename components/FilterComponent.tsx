@@ -3,6 +3,7 @@
 import React from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 type FilterValues = {
   orderCode?: string;
@@ -15,6 +16,7 @@ interface OrderFilterProps {
 }
 
 const OrderFilter: React.FC<OrderFilterProps> = ({ onFilter }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm<FilterValues>();
 
   const handleFinish = (values: FilterValues) => {
@@ -34,18 +36,18 @@ const OrderFilter: React.FC<OrderFilterProps> = ({ onFilter }) => {
       style={{ width: "100%" }}
     >
       <Form.Item name="orderCode" style={{ width: "100%" }} >
-        <Input placeholder="Tìm theo mã đơn..." style={{ width: "100%" }} />
+        <Input placeholder={t('placeholder.searchByOrderCode')} style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item name="status" style={{ width: "100%" }}>
         <Select
-          placeholder="-- Lọc trạng thái --"
+          placeholder={t('placeholder.filterStatus')}
           allowClear
           style={{ width: "100%" }}
         >
-          <Select.Option value="pending">Chờ thanh toán</Select.Option>
-          <Select.Option value="paid">Đã thanh toán</Select.Option>
-          <Select.Option value="cancel">Đã hủy</Select.Option>
+          <Select.Option value="pending">{t('status.pendingPayment')}</Select.Option>
+          <Select.Option value="paid">{t('status.paid')}</Select.Option>
+          <Select.Option value="cancel">{t('status.cancelled')}</Select.Option>
         </Select>
       </Form.Item>
 
@@ -55,7 +57,7 @@ const OrderFilter: React.FC<OrderFilterProps> = ({ onFilter }) => {
 
       <Form.Item style={{ width: "100%" }}>
         <Button type="primary" htmlType="submit" block>
-          Lọc
+          {t('button.filter')}
         </Button>
       </Form.Item>
     </Form>

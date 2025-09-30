@@ -13,6 +13,7 @@ import {
 import { PlusOutlined } from "@ant-design/icons";
 import { uploadAvatar } from "@/features/user-profile/hooks/user-profile";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 interface TrackingModalProps {
   open: boolean;
@@ -35,13 +36,14 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   is_repacked,
   take_photo,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<any[]>([]);
   const [uploadedIds, setUploadedIds] = useState<number[]>([]);
   const handleFinish = (values: any) => {
     console.log("values", values);
    if(take_photo && uploadedIds.length === 0){
-    toast.warning("Vui lòng upload ảnh lên")
+    toast.warning(t('validation.pleaseUploadImage'))
    } 
     onSubmit({
       isRepackage: values.is_repacked,
@@ -59,11 +61,11 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   const beforeUpload = async (file: File) => {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
-      message.error("Chỉ được upload file ảnh!");
+      message.error(t('validation.onlyImageFiles'));
       return Upload.LIST_IGNORE;
     }
     if (file.size / 1024 / 1024 > 5) {
-      message.error("Ảnh phải nhỏ hơn 5MB!");
+      message.error(t('validation.imageSizeLimit'));
       return Upload.LIST_IGNORE;
     }
 
@@ -82,7 +84,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
       ]);
       return false;
     } catch (err) {
-      message.error("Upload thất bại");
+      message.error(t('validation.uploadFailed'));
       return Upload.LIST_IGNORE;
     }
   };
@@ -91,7 +93,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
 
   return (
     <Modal
-      title="Thêm mã tracking"
+      title={t('modal.addTrackingCode')}
       // open={open}
       open={true}
       onCancel={onCancel}
@@ -102,12 +104,12 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 rounded p-3 mb-4">
-        <p className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</p>
+        <p className="font-semibold text-blue-900 !mb-1">{t('form.orderInformation')}</p>
         <p className="!mb-1">
-          <span className="font-semibold">Mã đơn:</span> {orderCode}
+          <span className="font-semibold">{t('table.orderCode')}:</span> {orderCode}
         </p>
         <p className="!mb-1">
-          <span className="font-semibold">Khách hàng:</span> {customerName}
+          <span className="font-semibold">{t('form.customer')}:</span> {customerName}
         </p>
       </div>
 
@@ -115,8 +117,8 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
         {is_verify_count && (
           <Form.Item
             name="count"
-            label="Kiểm đếm"
-            rules={[{ required: true, message: "Vui lòng nhập kiểm đếm!" }]}
+            label={t('tracking.countCheck')}
+            rules={[{ required: true, message: t('validation.pleaseEnterCount') }]}
           >
             <InputNumber
               style={{ display: "flex", alignItems: "center" }}
@@ -125,7 +127,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
               parser={(value: any) => value.replace(/[^\d.]/g, "")}
-              placeholder="kiểm đếm"
+              placeholder={t('tracking.countCheck')}
             />
           </Form.Item>
         )}
@@ -134,14 +136,14 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
           <Form.Item
             name="is_repacked"
             valuePropName="checked"
-            rules={[{ required: true, message: "Vui lòng chọn Repackage!" }]}
+            rules={[{ required: true, message: t('validation.pleaseSelectRepackage') }]}
           >
-            <Checkbox><span className="font-semibold">Repackage</span></Checkbox>
+            <Checkbox><span className="font-semibold">{t('tracking.repackage')}</span></Checkbox>
           </Form.Item>
         )}
 
         {take_photo && (
-          <Form.Item label="Ảnh chứng từ / ảnh sản phẩm">
+          <Form.Item label={t('tracking.documentImages')}>
             <Upload
               listType="picture-card"
               fileList={fileList}
@@ -152,7 +154,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
               {fileList.length >= 10 ? null : (
                 <div>
                   <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Tải lên</div>
+                  <div style={{ marginTop: 8 }}>{t('button.upload')}</div>
                 </div>
               )}
             </Upload>
@@ -161,10 +163,10 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
 
         <div className="flex justify-end gap-2">
           <Button onClick={onCancel} className="mr-2">
-            Hủy
+            {t('button.cancel')}
           </Button>
           <Button type="primary" htmlType="submit">
-            Lưu
+            {t('button.save')}
           </Button>
         </div>
       </Form>

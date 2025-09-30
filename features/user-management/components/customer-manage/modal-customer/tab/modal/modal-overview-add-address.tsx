@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Button } from "antd";
 import { addressModel } from "@/types/customer-type";
+import { useTranslation } from "react-i18next";
 
 interface Province {
   code: string;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [wards, setWards] = useState<Ward[]>([]);
@@ -73,22 +75,22 @@ const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress 
   };
 
   return (
-    <Modal footer={null} title="Thêm địa chỉ mới" open={open} onCancel={onClose} >
+    <Modal footer={null} title={t('customerManage.customerOverview.addAddress')} open={open} onCancel={onClose} >
       <Form form={form} layout="vertical" onFinish={handleSubmit} className="space-y-2">
-        <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}>
-          <Input placeholder="Nguyễn Văn A" />
+        <Form.Item label={t('staffManage.fullName')} name="fullName" rules={[{ required: true, message: t('staffManage.fullNameRequired') }]}>
+          <Input placeholder={t('placeholder.enterName')} />
         </Form.Item>
 
-        <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
+        <Form.Item label={t('staffManage.phoneNumber')} name="phone" rules={[{ required: true, message: t('staffManage.phoneNumberRequired') }]}>
           <Input placeholder="0123456789" />
         </Form.Item>
 
-        <Form.Item label="Số nhà" name="address">
-          <Input placeholder="VD: 263 Đặng Văn Bi" />
+        <Form.Item label={t('validation.address.required')} name="address">
+          <Input placeholder={t('placeholder.enterAddress')} />
         </Form.Item>
 
-        <Form.Item label="Tỉnh/TP" name="province" rules={[{ required: true, message: "Chọn Tỉnh/TP" }]}>
-          <Select placeholder="Chọn Tỉnh/TP" onChange={handleProvinceChange} allowClear>
+        <Form.Item label={t('address.province')} name="province" rules={[{ required: true, message: t('address.selectProvince') }]}>
+          <Select placeholder={t('address.selectProvince')} onChange={handleProvinceChange} allowClear>
             {provinces.map((p) => (
               <Select.Option key={p.code} value={p.code}>
                 {p.name}
@@ -97,8 +99,8 @@ const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress 
           </Select>
         </Form.Item>
 
-        <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Chọn Phường/Xã" }]}>
-          <Select placeholder="Chọn Phường/Xã" disabled={!wards.length} allowClear showSearch>
+        <Form.Item label={t('address.ward')} name="ward" rules={[{ required: true, message: t('address.selectWard') }]}>
+          <Select placeholder={t('address.selectWard')} disabled={!wards.length} allowClear showSearch>
             {wards.map((w) => (
               <Select.Option key={w.code} value={w.code}>
                 {w.name}
@@ -108,13 +110,13 @@ const AddressModal: React.FC<Props> = ({ open, onClose, handleSubmitDataAddress 
         </Form.Item>
 
         <p className="text-red-500 text-sm">
-          Vui lòng nhập địa chỉ theo đơn vị hành chính mới sau khi sáp nhập 34 tỉnh thành (01/07/2025).
+          {t('address.addressNote')}
         </p>
 
         <div className="flex justify-end gap-2 pt-3">
-          <Button  onClick={onClose}>Hủy</Button>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="primary">
-            Lưu địa chỉ
+            {t('address.saveAddress')}
           </Button>
         </div>
       </Form>

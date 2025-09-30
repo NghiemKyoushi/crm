@@ -71,8 +71,8 @@ export default function AddCustomerTypeModal({
           <Controller
             name="group_name"
             control={control}
-            rules={{ required: t('categoryCustomer.nameRequired') }}
-            render={({ field }) => <Input placeholder={t('categoryCustomer.namePlaceholder')} {...field} />}
+            rules={{ required: t('validation.name.required') }}
+            render={({ field }) => <Input placeholder={t('placeholder.enterName')} {...field} />}
           />
           {errors.group_name && (
             <p className="text-red-500 text-sm mt-1">
@@ -86,9 +86,9 @@ export default function AddCustomerTypeModal({
           <Controller
             name="description"
             control={control}
-            rules={{ required: t('categoryCustomer.descriptionRequired') }}
+            rules={{ required: t('validation.required') }}
             render={({ field }) => (
-              <Input placeholder={t('categoryCustomer.descriptionPlaceholder')} {...field} />
+              <Input placeholder={t('placeholder.enterDescription')} {...field} />
             )}
           />
           {errors.description && (

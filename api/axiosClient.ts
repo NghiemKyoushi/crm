@@ -54,14 +54,14 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (res) => {
-    if (res?.data?.message && typeof res.data.message === "string") {
-      res.data.localizedMessage = i18n.t(res.data.message);
+    if (res?.message_key && typeof res.message_key === "string") {
+      res.data.localizedMessage = i18n.t(res.message_key);
     }
     return res;
   },
   async err => {
-    if (err.response?.data?.message) {
-      err.response.data.localizedMessage = i18n.t(err.response.data.message);
+    if (err.response?.message_key) {
+      err.response.data.localizedMessage = i18n.t(err.response.message_key);
     }
     const originalRequest = err.config;
     const logout = () => {
