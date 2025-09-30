@@ -357,11 +357,11 @@ export default function ShippingSurchangeTable(
         const match = (val ?? "")
           .toString()
           .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
-      
-        const numberPart = match
+
+        const numberPart = match && match[1]
           ? match[1].replace(/,/g, "")
           : val?.toString() ?? "";
-      
+
         const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
       
         return (
@@ -477,11 +477,11 @@ export default function ShippingSurchangeTable(
         const match = (val ?? "")
           .toString()
           .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
-      
-        const numberPart = match
+
+        const numberPart = match && match[1]
           ? match[1].replace(/,/g, "")
           : val?.toString() ?? "";
-      
+
         const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
       
         return (
