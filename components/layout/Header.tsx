@@ -41,7 +41,10 @@ export const Header: React.FC= () => {
   const handleLogout = async () => {
     await logout();
     storage.clear();
-    Cookies.remove("token", { path: "" });
+    Cookies.remove("token", { path: "/" });
+    Cookies.remove("accessToken", { path: "/" });
+    Cookies.remove("refreshToken", { path: "/" });
+
     router.push("/login");
   };
 

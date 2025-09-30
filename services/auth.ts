@@ -30,7 +30,14 @@ export const loginRequest  = async (email: string, password: string) => {
     throw new Error("Không nhận được refreshToken từ API");
   }
 
-  localStorage.setItem("refreshToken", refreshToken);
+  // localStorage.setItem("refreshToken", refreshToken);
+  Cookies.set("refreshToken", refreshToken, {
+    expires: 7, 
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+
   const accessToken = await api.post(
     API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
     {}, 
@@ -47,7 +54,13 @@ export const loginRequest  = async (email: string, password: string) => {
     secure: true,
   });
   // Cookies.set("token", accessToken.data.data.token, { expires: 1 });
-  localStorage.setItem("accessToken", accessToken.data.data.token);
+  // localStorage.setItem("accessToken", accessToken.data.data.token);
+  Cookies.set("token", accessToken.data.data.token, {
+    expires: 1, 
+    path: "/",
+    sameSite: "lax",
+    secure: true,
+  });
   return { refreshToken, accessToken };
 };
 
