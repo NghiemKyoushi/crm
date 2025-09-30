@@ -1,32 +1,32 @@
 "use client";
 import LoginForm from "../components/login-form";
 import ForgotPasswordForm from "../components/forgot-password-form";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const [isForgot, setIsForgot] = useState(false);
-
   const router = useRouter();
   const searchParams = useSearchParams();
+  const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
-    // const token = localStorage.getItem("accessToken");
-    const token = Cookies.get("accessToken");
+    if (hasCheckedAuth.current) return;
+    hasCheckedAuth.current = true;
+
+    const token = Cookies.get("token");
 
     if (token) {
-      const redirectUrl = searchParams.get("redirect") || "/user-management";
+      const redirectUrl = searchParams.get("redirect");
+      const decodedUrl = redirectUrl ? decodeURIComponent(redirectUrl) : "/dashboard";
 
-      if (decodeURIComponent(redirectUrl) !== "/login") {
-        router.replace(redirectUrl ? decodeURIComponent(redirectUrl) : "/user-management"); 
+      if (decodedUrl !== "/login") {
+        router.replace(decodedUrl);
       }
-
     }
-    // if (token) {
-    //   router.replace("/user-management");
-    // }
-  }, [router]);
+  }, [router, searchParams]);
+
   return (
     <div className="relative w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
       <div className="pointer-events-none absolute rounded-full blur-3xl opacity-20 bg-sky-200" />
