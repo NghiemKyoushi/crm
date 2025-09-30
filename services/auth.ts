@@ -23,16 +23,16 @@ const apiAuth = axios.create({
     "X-Location": "HN",
   },
 });
-export const loginRequest  = async (email: string, password: string) => {    
-  const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });  
+export const loginRequest = async (email: string, password: string) => {
+  const res = await apiAuth.post(API_TYPE_CONST.LOGIN, { email, password, auth_type: 1 });
   const refreshToken = res.data.data.refresh_token;
+
   if (!refreshToken) {
     throw new Error("No refresh token received from API");
   }
 
-  // localStorage.setItem("refreshToken", refreshToken);
   Cookies.set("refreshToken", refreshToken, {
-    expires: 7, 
+    expires: 7,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -40,28 +40,24 @@ export const loginRequest  = async (email: string, password: string) => {
 
   const accessToken = await api.post(
     API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
-    {}, 
+    {},
     {
       headers: {
         Authorization: `Bearer ${refreshToken}`,
       },
     }
-  );  
-  Cookies.set("token", accessToken.data.data.token, {
+  );
+
+  const token = accessToken.data.data.token;
+
+  Cookies.set("token", token, {
     expires: 1,
     path: "/",
     sameSite: "lax",
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
   });
-  // Cookies.set("token", accessToken.data.data.token, { expires: 1 });
-  // localStorage.setItem("accessToken", accessToken.data.data.token);
-  Cookies.set("token", accessToken.data.data.token, {
-    expires: 1, 
-    path: "/",
-    sameSite: "lax",
-    secure: true,
-  });
-  return { refreshToken, accessToken };
+
+  return { refreshToken, accessToken: token };
 };
 
 export const logout = async () => {

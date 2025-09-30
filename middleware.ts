@@ -24,7 +24,7 @@ export function middleware(req: NextRequest) {
 
   // Nếu đã login mà vào /login -> đẩy về dashboard
   if (token && pathname === "/login") {
-    return NextResponse.redirect(new URL("/user-management", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return NextResponse.next();

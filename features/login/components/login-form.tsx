@@ -33,15 +33,15 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
       loginMutation.mutate(values, {
         onSuccess: () => {
           toast.success(t("login.success"), { position: "top-right" });
-          // router.push("user-management");
-          
-          const redirectParts = window.location.search.split("redirect=");
-          const redirectUrl = redirectParts.length > 1 ? redirectParts[1] : "/user-management";
 
-          if (decodeURIComponent(redirectUrl) === "/login") {
-            router.replace("/login"); 
+          const params = new URLSearchParams(window.location.search);
+          const redirectUrl = params.get("redirect") || "/dashboard";
+          const decodedUrl = decodeURIComponent(redirectUrl);
+
+          if (decodedUrl === "/login") {
+            router.replace("/dashboard");
           } else {
-            router.replace(redirectUrl ? decodeURIComponent(redirectUrl) : "/user-management");
+            router.replace(decodedUrl);
           }
         },
         onError: () => {
@@ -49,7 +49,7 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
         },
       });
     },
-    [loginMutation, router]
+    [loginMutation, router, t]
   );
 
   // callback submit lỗi validate
@@ -61,22 +61,22 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
 
   return (
     <Form
-      form={form}
-      name="login"
-      autoComplete="off"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      layout="vertical"
-      style={{
-        padding: "2rem",
-        background: "white",
-        borderRadius: "30px",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-        border: "3px solid transparent",
-        borderImageSlice: 1,
-        transition: "all 0.3s ease",
-      }}
-    >
+        form={form}
+        name="login"
+        autoComplete="off"
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+        layout="vertical"
+        style={{
+          padding: "2rem",
+          background: "white",
+          borderRadius: "30px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
+          border: "3px solid transparent",
+          borderImageSlice: 1,
+          transition: "all 0.3s ease",
+        }}
+      >
       <div className="flex justify-center z-50">
         <Image
           src={logoCRM}
