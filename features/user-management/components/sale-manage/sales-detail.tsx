@@ -112,7 +112,8 @@ export default function SalesDetail({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAddCustomerForSale = (ids: any[]) => {
     if (ids.length === 0) return;
-    const getIds = ids.map((item) => item?.key);
+    const getIds = ids.map((item) => item?.key).filter(Boolean);
+    if (getIds.length === 0) return;
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     salesId &&
       customerForSaleMutation.mutate(

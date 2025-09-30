@@ -60,7 +60,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
       if (listRole && listRole.length > 0) {
         reset((prev) => ({
           ...prev,
-          role_id: initialValues?.role_id?.toString() || listRole[0].role_id.toString(),
+          role_id: initialValues?.role_id?.toString() || (listRole[0]?.role_id?.toString() ?? ""),
         }));
       }
     }
