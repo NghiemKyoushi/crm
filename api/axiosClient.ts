@@ -2,6 +2,7 @@ import { API_TYPE_CONST } from "@/constants/api-type";
 import i18n from "@/locales/i18n";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { CacheManager } from "@/utils/cache-manager";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
@@ -60,9 +61,10 @@ api.interceptors.response.use(
     }
     const originalRequest = err.config;
     const logout = () => {
+      // Use CacheManager for more thorough cleanup
+      CacheManager.clearAuthData();
       localStorage.clear();
       window.location.href = "/login";
-      Cookies.remove("token", { path: "" }); 
     };
 
     if (err.response?.status === 401 && !originalRequest._retry) {
