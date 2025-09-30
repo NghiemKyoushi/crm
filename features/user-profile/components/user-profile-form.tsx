@@ -27,6 +27,7 @@ import { toast } from "react-toastify";
 import { VIEW_IMAGE } from "@/constants/api-type";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
+import { getPermissionLabel } from "@/utils/permission-mapping";
 
 type ProfileFormValues = {
   fullName: string;
@@ -350,18 +351,41 @@ export default function UserProfileForm() {
 
                 <div className="grid grid-cols-1 gap-4">
                   {listRole &&
-                    listRole.groups.map((group) => (
-                      <div key={group.id}>
-                        <p className="font-medium mb-2">{group.description}</p>
-                        {group?.permissions?.map((perm) => (
-                          <div key={perm.id}>
-                            <Checkbox checked={perm.active} disabled>
-                              {perm.description}
-                            </Checkbox>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                    listRole.groups.map((group) => {
+                      // Map group code to i18n key
+                      const groupI18nKeyMap: Record<string, string> = {
+                        'ORDER_MANAGEMENT': 'orderManagement',
+                        'USER_MANAGEMENT': 'userManagement',
+                        'FINANCE_MANAGEMENT': 'financeManagement',
+                        'TELESALES': 'telesales',
+                        'SALES_MANAGEMENT': 'sales',
+                      };
+
+                      const groupI18nKey = groupI18nKeyMap[group.name];
+                      const groupLabel = groupI18nKey
+                        ? t(`permissions.groups.${groupI18nKey}`)
+                        : group.description || t('common.uncategorized');
+
+                      return (
+                        <div key={group.id}>
+                          <p className="font-medium mb-2">{groupLabel}</p>
+                          {group?.permissions?.map((perm) => {
+                            const permissionLabel = getPermissionLabel(
+                              perm.name,
+                              t,
+                              perm.description
+                            );
+                            return (
+                              <div key={perm.id}>
+                                <Checkbox checked={perm.active} disabled>
+                                  {permissionLabel}
+                                </Checkbox>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
                 </div>
               </Card>
             ),

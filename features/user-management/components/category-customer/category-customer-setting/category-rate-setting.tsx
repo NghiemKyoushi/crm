@@ -84,7 +84,7 @@ const ExchangeRateSettings: React.FC = () => {
         title={
           <div className="flex items-center gap-2 font-bold text-lg">
             <FontAwesomeIcon icon={faExchangeAlt} />
-            Cài Đặt Tỷ Giá Ngoại Tệ Thống Nhất
+            {t('categoryCustomer.exchangeRateSettingsTitle')}
           </div>
         }
         extra={
@@ -93,8 +93,8 @@ const ExchangeRateSettings: React.FC = () => {
             onClick={() => handleSave()}
             className="!bg-green-600 hover:!bg-green-700"
           >
-            <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> Lưu Tỷ
-            Giá
+            <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
+            {t('categoryCustomer.saveExchangeRate')}
           </Button>
         }
       >
@@ -102,15 +102,13 @@ const ExchangeRateSettings: React.FC = () => {
         <div className="bg-blue-100 p-4 rounded-lg mb-6 text-sm border-l-4 border-blue-500">
           <div>
             <p className="font-medium text-blue-800 mb-2">
-              Thông tin về Tỷ giá thống nhất:
+              {t('categoryCustomer.exchangeRateInfo')}
             </p>
             <p className="text-blue-700 mb-2">
-              Tỷ giá này sẽ được áp dụng cho toàn bộ hệ thống Dream Cargo và sẽ
-              tự động cập nhật vào tất cả các giao dịch.
+              {t('categoryCustomer.exchangeRateDescription1')}
             </p>
             <p className="text-blue-700">
-              Tỷ giá sẽ được sử dụng để quy đổi giữa USD, JPY và VNĐ trong các
-              tính toán phí vận chuyển.
+              {t('categoryCustomer.exchangeRateDescription2')}
             </p>
           </div>
         </div>

@@ -81,7 +81,7 @@ export default function AddBankAccountModal({
 
   return (
     <Modal
-      title="Thêm tài khoản Ngân hàng mới"
+      title={t('bankPartner.addNewBankAccount')}
       open={open}
       onCancel={handleClose}
       footer={[

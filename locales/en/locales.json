@@ -11,49 +11,19 @@
     "pleaseCheckInformation": "Please check information!!"
   },
   "validation": {
-    "email": {
-      "required": "Please enter your email!",
-      "invalid": "Invalid email!"
-    },
-    "password": {
-      "required": "Please enter your password!"
-    },
-    "name": {
-      "required": "Please enter name!"
-    },
-    "phoneNumber": {
-      "required": "Please enter phone number!",
-      "invalid": "Invalid phone number!"
-    },
-    "address": {
-      "required": "Please enter address!"
-    },
-    "company": {
-      "required": "Please select company!"
-    },
-    "role": {
-      "required": "Please select role!"
-    },
-    "customerType": {
-      "required": "Please select customer type!"
-    },
-    "sales": {
-      "required": "Please select sales!"
-    },
-    "warehouse": {
-      "required": "Please select warehouse!"
-    },
-    "weight": {
-      "required": "Please enter weight!",
-      "invalid": "Weight must be a positive number!"
-    },
-    "dimensions": {
-      "required": "Please enter dimensions!"
-    },
-    "required": "This field is required!",
-    "selectOption": "Please select an option!",
-    "minLength": "Minimum length is {min} characters!",
-    "maxLength": "Maximum length is {max} characters!"
+    "pleaseEnterLink": "Please enter link!",
+    "pleaseEnterProductName": "Please enter product name!",
+    "pleaseEnterProductDescription": "Please enter product description!",
+    "selectProductType": "Please select product type!",
+    "selectMethod": "Please select method!",
+    "pleaseSelectCustomer": "Please select customer!",
+    "pleaseEnterDeposit": "Please enter deposit!",
+    "pleaseUploadImage": "Please upload image",
+    "onlyImageFiles": "Only image files are allowed!",
+    "imageSizeLimit": "Image must be smaller than 5MB!",
+    "uploadFailed": "Upload failed",
+    "pleaseEnterCount": "Please enter count check!",
+    "pleaseSelectRepackage": "Please select Repackage!"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -93,34 +63,21 @@
     }
   },
   "customerManage": {
-    "search": "Search",
-    "placeholder": "Find customer",
-    "title": "Customer List",
-    "customerOverview": {
-      "totalOrders": "Total Orders",
-      "totalSpent": "Total Spending",
-      "currentDebt": "Current Debt",
-      "addressBook": "Address Book",
-      "addAddress": "+ Add Address",
-      "default": "Default",
-      "bankAccount": "Bank Account",
-      "addBankAccount": "+ Add Account",
-      "accountNumber": "Account No.",
-      "accountOwner": "Account Owner",
-      "contactInfo": "Contact Information",
-      "assignedStaff": "Assigned Staff",
-      "change": "Change",
-      "addDefaultAddress": "Add default address",
-      "addDefaultBank": "Add default bank"
-    },
-    "detailTitle": "Customer Details",
-    "tabs": {
-      "overview": "Overview",
-      "orders": "Order History",
-      "transactions": "Transaction History",
-      "fees": "Custom Fee Settings",
-      "notes": "Internal Notes"
-    }
+    "title": "Customer Management",
+    "search": "Search customers",
+    "customer": "Customer",
+    "classification": "Classification",
+    "zaloGroup": "Zalo Customer Support Group",
+    "actions": "Actions",
+    "unassign": "Unassign",
+    "assignSuccess": "Customer assigned successfully!",
+    "assignFailed": "Customer assignment failed",
+    "unassignSuccess": "Customer unassigned successfully!",
+    "unassignFailed": "Customer unassignment failed",
+    "detailsTitle": "Details:",
+    "assignedCustomers": "Assigned Customers",
+    "assignNewCustomer": "Assign New Customer",
+    "assignedCustomersList": "List of Assigned Customers"
   },
   "staffManage": {
     "addNewStaff": "Add New Staff",
@@ -129,8 +86,8 @@
     "fullNameRequired": "Please enter full name",
     "email": "Email",
     "emailRequired": "Please enter email",
-    "phoneNumberRequired": "Please enter phone number",
     "emailInvalid": "Invalid email address",
+    "phoneNumberRequired": "Please enter phone number",
     "phone": "Phone Number",
     "password": "Password",
     "passwordPlaceholder": "Leave blank if unchanged",
@@ -252,10 +209,30 @@
   "keywordPlaceholder": "Order ID, Customer ID...",
   "statusPlaceholder": "-- Status --",
   "status": {
-    "waiting": "Waiting Confirmation",
-    "completed": "Completed",
-    "canceled": "Canceled",
-    "failed": "Failed"
+    "failed": "Failed",
+    "topUp": "Top Up",
+    "deduction": "Deduction",
+    "cancelledByUser": "Cancelled by User",
+    "shipping": "Shipping",
+    "arrivedWarehouse": "Arrived Warehouse",
+    "delivered": "Delivered",
+    "pendingPayment": "Pending Payment",
+    "paid": "Paid",
+    "cancelled": "Cancelled",
+    "active": "Active",
+    "inactive": "Inactive",
+    "paused": "Paused",
+    "waiting": "Waiting",
+    "pendingApproval": "Pending Approval",
+    "pendingDeposit": "Pending Deposit",
+    "depositPaid": "Deposit Paid",
+    "purchased": "Purchased",
+    "arrivedJpWarehouse": "Arrived JP Warehouse",
+    "arrivedVnWarehouse": "Arrived VN Warehouse",
+    "underInspection": "Under Inspection",
+    "readyToShip": "Ready to Ship",
+    "shipped": "Shipped",
+    "shippingRequest": "Shipping Request"
   },
   "fromDate": "From date",
   "toDate": "To date",
@@ -293,9 +270,12 @@
     "cancel": "Cancel",
     "error": "An error occurred",
     "delete": "Delete",
-    "edit":"Edit",
-    "save":"Save",
-    "currency": "VND"
+    "edit": "Edit",
+    "unknown": "Unknown",
+    "uncategorized": "Uncategorized",
+    "save": "Save",
+    "saveAllChanges": "Save All Changes",
+    "search": "Search"
   },
   "websiteManage": {
     "table": {
@@ -320,8 +300,8 @@
       "region": "Region",
       "requiredRegion": "Please select a region",
       "placeholderRegion": "Select region",
-      "currency":"Currency code",
-      "requiredCurrency":"Select currency"
+      "currency": "Currency code",
+      "requiredCurrency": "Select currency"
     },
     "delete": {
       "title": "Confirm delete website",
@@ -445,24 +425,6 @@
     }
   },
   "roles": {
-    "names": {
-      "admin": "Administrator",
-      "sales": "Sales Staff",
-      "telesalesManager": "Telesales Manager",
-      "telesalesMember": "Telesales Member",
-      "accounting": "Accounting",
-      "warehouse": "Warehouse Staff"
-    },
-    "descriptions": {
-      "admin": "Full system administrator with all permissions",
-      "sales": "Sales staff - Manage assigned orders, auctions and customers",
-      "telesalesManager": "Telesales manager - Full telesales management access",
-      "telesalesMember": "Telesales member - Manage assigned customer list",
-      "accounting": "Accounting staff - Manage finances and transactions",
-      "warehouse": "Warehouse staff - Manage inventory and shipping"
-    }
-  },
-  "roles": {
     "list": {
       "title": "Roles",
       "addButton": "+ Add Role"
@@ -496,25 +458,14 @@
       "updateError": "Failed to update role"
     }
   },
-  "common": {
-    "actions": "Actions",
-    "confirm": "Confirm",
-    "cancel": "Cancel",
-    "error": "An error occurred",
-    "delete": "Delete",
-    "edit":"Edit",
-    "unknown": "Unknown",
-    "uncategorized": "Uncategorized"
-  },
   "errorHandling": {
-    "systemError": "System error detected",
-    "refreshingApp": "Refreshing application to fix the issue...",
+    "refreshingApp": "Refreshing application...",
+    "refreshingAppShort": "Refreshing application to fix error...",
     "pleaseWait": "Please wait a moment...",
     "somethingWentWrong": "Something went wrong",
-    "appEncounteredError": "The application encountered an unexpected error",
+    "appEncounteredError": "The application encountered an error. We are trying to fix it.",
     "tryAgain": "Try Again",
-    "refreshAndClearCache": "Refresh and Clear Cache",
-    "refreshingAppShort": "Refreshing application..."
+    "refreshAndClearCache": "Refresh and Clear Cache"
   },
   "settings": {
     "financialSettings": "Financial Settings",
@@ -575,6 +526,9 @@
     "currencySymbol": "VND"
   },
   "categoryCustomer": {
+    "title": "Customer Classification & Associated Policies",
+    "addNewType": "+ Add New Type",
+    "searchPlaceholder": "Search staff...",
     "createSuccess": "New customer category created successfully!",
     "updateSuccess": "Customer category updated successfully!",
     "deleteSuccess": "Customer category deleted successfully!",
@@ -595,234 +549,29 @@
     "shippingAndSurcharge": "Shipping & Surcharge",
     "servicesAndDelivery": "Services & Delivery",
     "insuranceAndRegulations": "Insurance & General Regulations",
+    "exchangeRateSettingsTitle": "Unified Foreign Exchange Rate Settings",
+    "saveExchangeRate": "Save Exchange Rate",
+    "exchangeRateInfo": "Information about Unified Exchange Rate:",
+    "exchangeRateDescription1": "This exchange rate will be applied throughout the Dream Cargo system and will be automatically updated in all transactions.",
+    "exchangeRateDescription2": "The exchange rate will be used to convert between USD, JPY and VND in shipping fee calculations.",
     "customFeeSettings": "Custom fee settings for customer category"
   },
   "toast": {
-    "emailOtpSent": "OTP code has been sent to your email!",
-    "waitFiveMinutes": "Please wait 5 minutes before trying again!",
+    "confirmVnWarehouseSuccess": "VN warehouse confirmation successful!",
+    "confirmOrderSuccess": "Order confirmation successful!",
+    "confirmJpWarehouseSuccess": "JP warehouse confirmation successful!",
+    "confirmShippingSuccess": "Shipping confirmation successful!",
+    "updateSalesAssignmentSuccess": "Sales assignment updated successfully!",
+    "emailOtpSent": "OTP code has been sent to email!",
+    "waitFiveMinutes": "Please wait 5 minutes before resending!",
     "emailNotExists": "Email does not exist!",
-    "otpConfirmSuccess": "OTP confirmed successfully, new password has been reset!",
-    "invalidOtpPassword": "OTP or password is invalid!",
-    "newOtpSent": "New OTP has been sent!",
-    "createAddressSuccess": "New address created successfully!",
-    "addBankAccountSuccess": "New bank account added successfully!",
-    "updateDefaultAddressSuccess": "Default address updated successfully!",
-    "updateDefaultBankSuccess": "Default bank account updated successfully!",
-    "createOrderSuccess": "New order created successfully!",
-    "pleaseEnterLink": "Please enter link first!",
-    "getProductInfoSuccess": "Product information retrieved successfully!",
-    "cannotGetInfoFromLink": "Cannot get information from link!",
-    "confirmPurchaseSuccess": "Purchase order confirmed successfully!",
-    "completeOrderSuccess": "Order completed!",
+    "otpConfirmSuccess": "OTP verification successful!",
+    "newOtpSent": "New OTP code has been sent!",
+    "invalidOtpPassword": "Invalid OTP code or password!",
+    "confirmPurchaseSuccess": "Purchase confirmation successful!",
+    "completeOrderSuccess": "Order completed successfully!",
     "rejectOrderSuccess": "Order rejected successfully!",
-    "inspectGoodsSuccess": "Goods inspection completed successfully!",
-    "createDepositSuccess": "Deposit order created successfully!"
-  },
-  "form": {
-    "productLink": "Product Link",
-    "productName": "Product Name",
-    "productDescription": "Product Description",
-    "productType": "Product Type",
-    "method": "Method",
-    "priceJpy": "Price (¥)",
-    "priceVnd": "Price (VND)",
-    "customer": "Customer",
-    "serviceFeeJpy": "Service Fee (¥)",
-    "serviceFeeVnd": "Service Fee (VND)",
-    "depositVnd": "Deposit (VND)",
-    "depositPercent": "Deposit %",
-    "note": "Note",
-    "bankName": "Bank Name",
-    "accountNumber": "Account Number",
-    "accountHolderName": "Account Holder Name",
-    "dailyLimitVnd": "Daily Limit (VND)",
-    "status": "Status"
-  },
-  "placeholder": {
-    "searchByOrderCode": "Search by order code...",
-    "filterStatus": "-- Filter Status --",
-    "exampleMedicalEquipment": "e.g: Medical Equipment",
-    "selectIcon": "Select Icon",
-    "productTypeDescription": "Brief description of product type",
-    "searchOrderCustomer": "Order code, Package code, Customer name...",
-    "source": "Source"
-  },
-  "button": {
-    "confirm": "Confirm",
-    "confirmMessage": "Are you sure you want to perform this action?",
-    "agree": "Agree",
-    "cancel": "Cancel",
-    "processing": "Processing...",
-    "close": "Close"
-  },
-  "modal": {
-    "addNewProductType": "Add New Product Type",
-    "addNewSurcharge": "Add New Surcharge",
-    "addTrackingCode": "Add Tracking Code",
-    "inspectAndCalculateFee": "Inspect and Calculate Fee"
-  },
-  "status": {
-    "pendingApproval": "Pending Approval",
-    "pendingDeposit": "Pending Deposit",
-    "depositPaid": "Deposit Paid",
-    "purchased": "Purchased",
-    "arrivedJpWarehouse": "Arrived JP Warehouse",
-    "arrivedVnWarehouse": "Arrived VN Warehouse",
-    "underInspection": "Under Inspection",
-    "pendingPayment": "Pending Payment",
-    "readyToShip": "Ready to Ship",
-    "shipped": "Shipped",
-    "shippingRequest": "Shipping Request",
-    "cancelled": "Cancelled",
-    "paid": "Paid",
-    "calculated": "Calculated",
-    "calculateLater": "Calculate Later"
-  },
-  "table": {
-    "customerCode": "Customer Code",
-    "serviceFeeJpy": "Service Fee (¥)",
-    "totalPaymentJpy": "Total Payment (¥)",
-    "shippingProfit": "Shipping Profit",
-    "paymentFeeProfit": "Payment Fee Profit",
-    "exchangeRateProfit": "Exchange Rate Profit",
-    "status": "Status",
-    "customer": "Customer",
-    "creator": "Creator",
-    "amount": "Amount",
-    "actions": "Actions",
-    "orderCode": "Order Code",
-    "details": "Details",
-    "bankName": "Bank",
-    "accountNumber": "Account Number",
-    "accountHolder": "Account Holder",
-    "dailyLimit": "Daily Limit (VND)",
-    "trackingShip": "Tracking Ship"
-  },
-  "page": {
-    "salesDetailTitle": "Sales Detail - PHƯƠNG LINH",
-    "salesDetailDescription": "Detailed report by customer and profit"
-  },
-  "system": {
-    "loading": "Loading...",
-    "refreshingApp": "Refreshing application to fix the issue...",
-    "pleaseWait": "Please wait a moment..."
-  },
-  "permission": {
-    "noAccess": "You don't have access permission",
-    "contactAdmin": "Please contact your administrator or manager to be granted access to this section."
-  },
-  "language": {
-    "vietnamese": "Vietnamese"
-  },
-  "validation": {
-    "pleaseEnterLink": "Please enter link!",
-    "pleaseEnterProductName": "Please enter product name!",
-    "pleaseEnterProductDescription": "Please enter product description!",
-    "selectProductType": "Please select product type!",
-    "selectMethod": "Please select method!",
-    "pleaseSelectCustomer": "Please select customer!",
-    "pleaseEnterDeposit": "Please enter deposit!",
-    "pleaseUploadImage": "Please upload image",
-    "onlyImageFiles": "Only image files are allowed!",
-    "imageSizeLimit": "Image must be smaller than 5MB!",
-    "uploadFailed": "Upload failed",
-    "pleaseEnterCount": "Please enter count check!",
-    "pleaseSelectRepackage": "Please select Repackage!"
-  },
-  "modal": {
-    "createOrderForCustomer": "Create Order for Customer",
-    "confirmPurchaseOrder": "Confirm Purchase Order",
-    "orderPurchased": "Order has been purchased!",
-    "confirmCompleteOrder": "Confirm Complete Order",
-    "orderCompleted": "Order has been completed!"
-  },
-  "button": {
-    "approve": "Approve",
-    "reject": "Reject",
-    "transferToJpWarehouse": "Transfer to JP Warehouse",
-    "transferToVnWarehouse": "Transfer to VN Warehouse",
-    "inspectGoods": "Inspect Goods",
-    "purchased": "Purchased",
-    "readyToShip": "Ready to Ship",
-    "details": "Details",
-    "createNewOrder": "Create New Order",
-    "shipped": "Shipped",
-    "createOrder": "Create Order",
-    "resendOtp": "Resend OTP",
-    "save": "Save",
-    "edit": "Edit",
-    "delete": "Delete",
-    "add": "Add",
-    "update": "Update",
-    "create": "Create",
-    "search": "Search",
-    "filter": "Filter",
-    "reset": "Reset",
-    "export": "Export",
-    "import": "Import",
-    "view": "View",
-    "download": "Download",
-    "upload": "Upload",
-    "send": "Send",
-    "resend": "Resend",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "submit": "Submit",
-    "clear": "Clear",
-    "refresh": "Refresh",
-    "reload": "Reload",
-    "select": "Select",
-    "selectAll": "Select All",
-    "deselectAll": "Deselect All",
-    "confirmInspection": "Confirm Inspection"
-  },
-  "page": {
-    "orderManagement": "Order Management",
-    "importedProductList": "Imported Product List"
-  },
-  "placeholder": {
-    "selectProductType": "-- Select Product Type --",
-    "searchCustomer": "Search customer by code or name...",
-    "searchByKeyword": "Search by keyword...",
-    "searchByName": "Search by name...",
-    "searchByCode": "Search by code...",
-    "searchByOrderCode": "Search by order code...",
-    "filterStatus": "-- Filter status --",
-    "enterOtp": "Enter OTP code",
-    "enterPassword": "Enter password",
-    "enterConfirmPassword": "Confirm password",
-    "selectDate": "Select date",
-    "selectTime": "Select time",
-    "selectStatus": "-- Select status --",
-    "selectRole": "-- Select role --",
-    "selectWarehouse": "-- Select warehouse --",
-    "selectCompany": "-- Select company --",
-    "selectSales": "-- Select sales --",
-    "selectCustomerType": "-- Select customer type --",
-    "enterNote": "Enter note...",
-    "enterDescription": "Enter description...",
-    "enterName": "Enter name...",
-    "enterAddress": "e.g.: 263 Dang Van Bi"
-  },
-  "address": {
-    "province": "Province/City",
-    "ward": "Ward/Commune",
-    "selectProvince": "Select Province/City",
-    "selectWard": "Select Ward/Commune",
-    "addressNote": "Please enter address according to new administrative units after merging 34 provinces and cities (01/07/2025).",
-    "saveAddress": "Save Address"
-  },
-  "tracking": {
-    "countCheck": "Count Check",
-    "repackage": "Repackage",
-    "documentImages": "Document Images / Product Images"
-  },
-  "inspection": {
-    "actualWeight": "Actual Weight (kg)",
-    "weightFee": "Weight Fee (VND/kg)",
-    "note": "Inspection Note",
-    "notePlaceholder": "Notes about goods condition, additional fees..."
+    "inspectGoodsSuccess": "Goods inspection successful!"
   },
   "form": {
     "productInformation": "Product Information",
@@ -845,20 +594,128 @@
     "otpSixDigits": "OTP must be exactly 6 digits",
     "enterNewPassword": "Enter new password",
     "passwordPattern": "8-20 characters, letters and numbers",
-    "newPassword": "New password"
+    "newPassword": "New password",
+    "productLink": "Product Link",
+    "productName": "Product Name",
+    "productDescription": "Product Description",
+    "productType": "Product Type",
+    "customer": "Customer",
+    "serviceFeeJpy": "Service Fee (¥)",
+    "serviceFeeVnd": "Service Fee (VND)",
+    "depositVnd": "Deposit (VND)",
+    "method": "Method",
+    "priceJpy": "Price (¥)",
+    "priceVnd": "Price (VND)",
+    "note": "Note",
+    "source": "Source"
   },
-  "toast": {
-    "confirmVnWarehouseSuccess": "VN warehouse confirmation successful!",
-    "confirmOrderSuccess": "Order confirmation successful!",
-    "confirmJpWarehouseSuccess": "JP warehouse confirmation successful!",
-    "confirmShippingSuccess": "Shipping confirmation successful!",
-    "updateSalesAssignmentSuccess": "Sales assignment updated successfully!",
-    "emailOtpSent": "OTP code has been sent to email!",
-    "waitFiveMinutes": "Please wait 5 minutes before resending!",
-    "emailNotExists": "Email does not exist!",
-    "otpConfirmSuccess": "OTP verification successful!",
-    "newOtpSent": "New OTP code has been sent!",
-    "invalidOtpPassword": "Invalid OTP code or password!"
+  "placeholder": {
+    "selectProductType": "-- Select Product Type --",
+    "searchCustomer": "Search customer by code or name...",
+    "searchByKeyword": "Search by keyword...",
+    "searchByName": "Search by name...",
+    "searchByCode": "Search by code...",
+    "searchByOrderCode": "Search by order code...",
+    "searchOrderCustomer": "Search order or customer...",
+    "filterStatus": "-- Filter status --",
+    "enterOtp": "Enter OTP code",
+    "enterPassword": "Enter password",
+    "enterConfirmPassword": "Confirm password",
+    "selectDate": "Select date",
+    "selectTime": "Select time",
+    "selectStatus": "-- Select status --",
+    "selectRole": "-- Select role --",
+    "selectWarehouse": "-- Select warehouse --",
+    "selectCompany": "-- Select company --",
+    "selectSales": "-- Select sales --",
+    "selectCustomerType": "-- Select customer type --",
+    "enterNote": "Enter note...",
+    "enterDescription": "Enter description...",
+    "enterName": "Enter name...",
+    "enterAddress": "e.g.: 263 Dang Van Bi"
+  },
+  "button": {
+    "addNew": "Add New",
+    "saveAllChanges": "Save All Changes",
+    "createNewOrder": "Create New Order",
+    "cancel": "Cancel",
+    "createOrder": "Create Order",
+    "readyToShip": "Ready to Ship",
+    "approve": "Approve Order",
+    "reject": "Reject",
+    "transferToJpWarehouse": "Transfer to JP Warehouse",
+    "transferToVnWarehouse": "Transfer to VN Warehouse",
+    "inspectGoods": "Inspect Goods",
+    "purchased": "Purchased",
+    "details": "Details"
+  },
+  "modal": {
+    "createOrderForCustomer": "Create Order for Customer",
+    "confirmPurchaseOrder": "Confirm Purchase Order",
+    "orderPurchased": "Order has been purchased!",
+    "confirmCompleteOrder": "Confirm Complete Order",
+    "orderCompleted": "Order has been completed!"
+  },
+  "table": {
+    "customerCode": "Customer Code",
+    "serviceFeeJpy": "Service Fee (¥)",
+    "totalPaymentJpy": "Total Payment (¥)",
+    "shippingProfit": "Shipping Profit",
+    "paymentFeeProfit": "Payment Fee Profit",
+    "exchangeRateProfit": "Exchange Rate Profit",
+    "status": "Status",
+    "customer": "Customer",
+    "creator": "Creator",
+    "amount": "Amount",
+    "actions": "Actions",
+    "orderCode": "Order Code",
+    "details": "Details",
+    "bankName": "Bank",
+    "accountNumber": "Account Number",
+    "accountHolder": "Account Holder",
+    "dailyLimit": "Daily Limit (VND)",
+    "index": "No.",
+    "product": "Product",
+    "productType": "Product Type",
+    "conditionType": "Condition Type",
+    "valueUSD": "Value (USD)",
+    "priceKgHN": "Price Kg - HN",
+    "surcharge": "Surcharge",
+    "trackingShip": "Tracking Ship"
+  },
+  "page": {
+    "orderManagement": "Order Management",
+    "importedProductList": "Imported Product List"
+  },
+  "system": {
+    "noData": "No data",
+    "errorGettingHistory": "Error getting history"
+  },
+  "permission": {
+    "noAccess": "You don't have access permission",
+    "contactAdmin": "Please contact your administrator or manager to be granted access to this section."
+  },
+  "language": {
+    "vietnamese": "Vietnamese"
+  },
+  "address": {
+    "province": "Province/City",
+    "ward": "Ward/Commune",
+    "selectProvince": "Select Province/City",
+    "selectWard": "Select Ward/Commune",
+    "addressNote": "Please enter address according to new administrative units after merging 34 provinces and cities (01/07/2025).",
+    "saveAddress": "Save Address"
+  },
+  "tracking": {
+    "countCheck": "Count Check",
+    "repackage": "Repackage",
+    "documentImages": "Document Images / Product Images"
+  },
+  "inspection": {
+    "actualWeight": "Actual Weight (kg)",
+    "weightFee": "Weight Fee (VND/kg)",
+    "note": "Inspection Note",
+    "notePlaceholder": "Notes about goods condition, additional fees..."
   },
   "component": {
     "search": "Search",
@@ -884,19 +741,11 @@
     "criticalError": "Critical error",
     "refreshing": "Refreshing page..."
   },
-  "errorHandling": {
-    "refreshingApp": "Refreshing application...",
-    "refreshingAppShort": "Refreshing application to fix error...",
-    "pleaseWait": "Please wait a moment...",
-    "somethingWentWrong": "Something went wrong",
-    "appEncounteredError": "The application encountered an error. We are trying to fix it.",
-    "tryAgain": "Try Again",
-    "refreshAndClearCache": "Refresh and Clear Cache"
-  },
   "feeSettings": {
     "otherServiceFees": "Other Service Fees (General Application)",
     "purchaseFeeUs": "Purchase Fee (%) - US Route",
     "purchaseFeeJp": "Purchase Fee (%) - Japan Route",
+    "purchaseFeeFrom": "Purchase Fee (%) from",
     "reinforcementFee": "Reinforcement Fee (VND/Kg)",
     "checkPhotoFeeUs": "Check/Photo Fee - US (USD/track)",
     "checkPhotoFeeJp": "Check/Photo Fee - Japan (VND/track)",
@@ -905,81 +754,6 @@
     "serviceAndDelivery": "Service & Delivery",
     "insuranceAndRegulations": "Insurance & General Regulations",
     "productTypes": "Product Types"
-  },
-  "customerManage": {
-    "title": "Customer Management",
-    "customerOverview": {
-      "walletBalance": "Wallet Balance",
-      "totalOrders": "Total Orders",
-      "totalSpent": "Total Spent",
-      "currentDebt": "Current Debt",
-      "addressBook": "Address Book",
-      "addAddress": "Add Address",
-      "addDefaultAddress": "Add Default Address",
-      "addDefaultBank": "Add Default Account",
-      "default": "Default",
-      "home": "Home",
-      "bankAccount": "Bank Account",
-      "addBankAccount": "Add Bank Account",
-      "accountNumber": "Account Number",
-      "accountOwner": "Account Owner",
-      "contactInfo": "Contact Information",
-      "assignedStaff": "Assigned Staff",
-      "change": "Change"
-    },
-    "tabs": {
-      "overview": "Overview",
-      "orders": "Orders",
-      "transactions": "Transactions",
-      "fees": "Fees",
-      "notes": "Notes"
-    },
-    "orderHistory": {
-      "orderCode": "Order Code",
-      "createdAt": "Created Date",
-      "total": "Total Amount",
-      "status": "Status",
-      "statusPending": "Awaiting Payment",
-      "statusPaid": "Paid",
-      "statusCancel": "Cancelled"
-    },
-    "paymentHistory": {
-      "transactionCode": "Transaction Code",
-      "type": "Type",
-      "amount": "Amount",
-      "note": "Note",
-      "date": "Date",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "bankTransfer": "Bank Transfer",
-      "serviceFeePayment": "Service Fee Payment"
-    },
-    "addBankModal": {
-      "title": "Add Bank Account",
-      "bankName": "Bank Name",
-      "selectBank": "Select Bank",
-      "selectBankRequired": "Please select a bank",
-      "accountNumber": "Account Number",
-      "accountNumberRequired": "Please enter account number",
-      "accountNumberPlaceholder": "Enter account number",
-      "accountHolder": "Account Holder",
-      "accountHolderRequired": "Please enter account holder name",
-      "accountHolderPlaceholder": "Account holder name",
-      "branch": "Branch",
-      "branchPlaceholder": "Branch name (optional)",
-      "note": "Bank account information will be kept confidential and used only for withdrawals.",
-      "noteLabel": "Note:",
-      "cancel": "Cancel",
-      "saveAccount": "Save Account"
-    },
-    "internalNote": {
-      "placeholder": "Staff can add notes about the customer here...",
-      "saveNote": "Save Note",
-      "noteHistory": "Note History",
-      "loadMore": "Load More",
-      "createSuccess": "New note created successfully!",
-      "createFailed": "Failed to create new note"
-    }
   },
   "shippingFeeConfig": {
     "title": "Custom Shipping & Fee Settings",
@@ -1008,24 +782,6 @@
       "audio": "Audio"
     }
   },
-  "status": {
-    "failed": "Failed",
-    "topUp": "Top Up",
-    "deduction": "Deduction",
-    "cancelledByUser": "Cancelled by User",
-    "shipping": "Shipping",
-    "arrivedWarehouse": "Arrived Warehouse",
-    "delivered": "Delivered",
-    "pendingPayment": "Pending Payment",
-    "paid": "Paid",
-    "cancelled": "Cancelled",
-    "active": "Active",
-    "inactive": "Inactive"
-  },
-  "system": {
-    "noData": "No data",
-    "errorGettingHistory": "Error getting history"
-  },
   "insuranceSettings": {
     "title": "Insurance Settings",
     "defaultPackage": "Default Package (No insurance purchase)",
@@ -1046,27 +802,6 @@
     "updateFeeSuccess": "Fee updated successfully!",
     "saveAllSuccess": "All changes saved!",
     "routePriceTable": "Route Price Table {{route}}"
-  },
-  "table": {
-    "index": "No.",
-    "product": "Product",
-    "productType": "Product Type",
-    "conditionType": "Condition Type",
-    "valueUSD": "Value (USD)",
-    "priceKgHN": "Price Kg - HN",
-    "surcharge": "Surcharge",
-    "actions": "Actions",
-    "bankName": "Bank",
-    "accountNumber": "Account Number",
-    "accountHolder": "Account Holder",
-    "dailyLimit": "Daily Limit (VND)",
-    "status": "Status",
-    "customer": "Customer",
-    "creator": "Creator",
-    "amount": "Amount",
-    "trackingShip": "Tracking Ship",
-    "orderCode": "Order Code",
-    "details": "Details"
   },
   "productType": {
     "title": "Product Type Management",
@@ -1098,9 +833,6 @@
       "cosmetics": "Cosmetics"
     }
   },
-  "button": {
-    "createNewOrder": "Add Raw Material Purchase Transaction"
-  },
   "salesManage": {
     "title": "Sales Staff",
     "addButton": "+ Add",
@@ -1114,23 +846,6 @@
     "addBankSuccess": "New account added successfully!",
     "updateDefaultAddressSuccess": "Default address updated successfully!",
     "updateDefaultBankSuccess": "Default bank account updated successfully!"
-  },
-  "customerManage": {
-    "title": "Customer Management",
-    "search": "Search customers",
-    "customer": "Customer",
-    "classification": "Classification",
-    "zaloGroup": "Zalo Customer Support Group",
-    "actions": "Actions",
-    "unassign": "Unassign",
-    "assignSuccess": "Customer assigned successfully!",
-    "assignFailed": "Customer assignment failed",
-    "unassignSuccess": "Customer unassigned successfully!",
-    "unassignFailed": "Customer unassignment failed",
-    "detailsTitle": "Details:",
-    "assignedCustomers": "Assigned Customers",
-    "assignNewCustomer": "Assign New Customer",
-    "assignedCustomersList": "List of Assigned Customers"
   },
   "userProfile": {
     "basicInfo": "Basic Information",
@@ -1182,8 +897,17 @@
     "greaterThan": "Greater than",
     "lessThanOrEqual": "Less than or equal"
   },
-  "button": {
-    "addNew": "Add New",
-    "saveAllChanges": "Save All Changes"
+  "bankPartner": {
+    "title": "Partner Bank Account Settings",
+    "addAccount": "Add Account",
+    "assignPermission": "Assign Permission",
+    "addAccountSuccess": "Account added successfully!",
+    "updateAccountSuccess": "Account updated successfully!",
+    "deleteAccountSuccess": "Account deleted successfully!",
+    "updatePermissionSuccess": "Permission updated successfully!",
+    "deleteConfirmTitle": "Delete Account",
+    "deleteConfirmContent": "Are you sure you want to delete this account?",
+    "companyBankAccountSettings": "Company Bank Account Settings",
+    "addNewBankAccount": "Add New Bank Account"
   }
 }

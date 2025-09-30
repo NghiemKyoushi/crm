@@ -11,19 +11,49 @@
     "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!"
   },
   "validation": {
-    "pleaseEnterLink": "Vui lòng nhập link!",
-    "pleaseEnterProductName": "Vui lòng nhập tên sản phẩm!",
-    "pleaseEnterProductDescription": "Vui lòng nhập mô tả sản phẩm!",
-    "selectProductType": "Vui lòng chọn loại sản phẩm!",
-    "selectMethod": "Vui lòng chọn phương thức!",
-    "pleaseSelectCustomer": "Vui lòng chọn khách hàng!",
-    "pleaseEnterDeposit": "Vui lòng nhập tiền cọc!",
-    "pleaseUploadImage": "Vui lòng upload ảnh lên",
-    "onlyImageFiles": "Chỉ được upload file ảnh!",
-    "imageSizeLimit": "Ảnh phải nhỏ hơn 5MB!",
-    "uploadFailed": "Upload thất bại",
-    "pleaseEnterCount": "Vui lòng nhập kiểm đếm!",
-    "pleaseSelectRepackage": "Vui lòng chọn Repackage!"
+    "email": {
+      "required": "Vui lòng nhập email!",
+      "invalid": "Email không hợp lệ!"
+    },
+    "password": {
+      "required": "Vui lòng nhập mật khẩu!"
+    },
+    "name": {
+      "required": "Vui lòng nhập tên!"
+    },
+    "phoneNumber": {
+      "required": "Vui lòng nhập số điện thoại!",
+      "invalid": "Số điện thoại không hợp lệ!"
+    },
+    "address": {
+      "required": "Vui lòng nhập địa chỉ!"
+    },
+    "company": {
+      "required": "Vui lòng chọn công ty!"
+    },
+    "role": {
+      "required": "Vui lòng chọn vai trò!"
+    },
+    "customerType": {
+      "required": "Vui lòng chọn loại khách hàng!"
+    },
+    "sales": {
+      "required": "Vui lòng chọn sales!"
+    },
+    "warehouse": {
+      "required": "Vui lòng chọn kho!"
+    },
+    "weight": {
+      "required": "Vui lòng nhập cân nặng!",
+      "invalid": "Cân nặng phải là số dương!"
+    },
+    "dimensions": {
+      "required": "Vui lòng nhập kích thước!"
+    },
+    "required": "Trường này là bắt buộc!",
+    "selectOption": "Vui lòng chọn một tùy chọn!",
+    "minLength": "Độ dài tối thiểu là {min} ký tự!",
+    "maxLength": "Độ dài tối đa là {max} ký tự!"
   },
   "menu": {
     "dashboard": "Bảng điều khiển",
@@ -63,21 +93,34 @@
     }
   },
   "customerManage": {
-    "title": "Quản lý khách hàng",
-    "search": "Tìm kiếm khách hàng",
-    "customer": "Khách hàng",
-    "classification": "Phân loại",
-    "zaloGroup": "Nhóm Zalo CSKH",
-    "actions": "Hành động",
-    "unassign": "Hủy gán",
-    "assignSuccess": "Gán khách hàng thành công!",
-    "assignFailed": "Gán khách hàng thất bại",
-    "unassignSuccess": "Huỷ gán khách hàng thành công!",
-    "unassignFailed": "Huỷ gán khách hàng thất bại",
-    "detailsTitle": "Chi tiết:",
-    "assignedCustomers": "Khách hàng Phụ trách",
-    "assignNewCustomer": "Gán khách hàng mới",
-    "assignedCustomersList": "Danh sách khách hàng đã gán"
+    "search": "Tìm kiếm",
+    "placeholder": "Tìm kiếm khách hàng...",
+    "title": "Danh sách Khách hàng",
+    "customerOverview": {
+      "totalOrders": "Tổng số Đơn hàng",
+      "totalSpent": "Tổng chi tiêu",
+      "currentDebt": "Công nợ hiện tại",
+      "addressBook": "Sổ địa chỉ",
+      "addAddress": "+ Thêm địa chỉ",
+      "default": "Mặc định",
+      "bankAccount": "Tài khoản ngân hàng",
+      "addBankAccount": "+ Thêm tài khoản",
+      "accountNumber": "STK",
+      "accountOwner": "Chủ TK",
+      "contactInfo": "Thông tin liên hệ",
+      "assignedStaff": "Nhân viên phụ trách",
+      "change": "Thay đổi",
+      "addDefaultAddress": "Thêm địa chỉ mặc định",
+      "addDefaultBank": "Thêm ngân hàng mặc định"
+    },
+    "detailTitle": "Chi tiết Khách hàng",
+    "tabs": {
+      "overview": "Tổng quan",
+      "orders": "Lịch sử Đơn hàng",
+      "transactions": "Lịch sử Giao dịch",
+      "fees": "Cài đặt Phí riêng",
+      "notes": "Ghi chú Nội bộ"
+    }
   },
   "staffManage": {
     "addNewStaff": "Thêm Nhân viên mới",
@@ -209,34 +252,15 @@
   "keywordPlaceholder": "Mã lệnh, Mã KH...",
   "statusPlaceholder": "-- Trạng thái --",
   "status": {
-    "failed": "Thất bại",
-    "topUp": "Nạp tiền",
-    "deduction": "Trừ tiền",
-    "cancelledByUser": "Người dùng huỷ",
-    "shipping": "Đang giao hàng",
-    "arrivedWarehouse": "Đã về kho",
-    "delivered": "Đã giao hàng",
-    "pendingPayment": "Chờ thanh toán",
-    "paid": "Đã thanh toán",
-    "cancelled": "Đã hủy",
-    "active": "Hoạt động",
-    "inactive": "Ngừng hoạt động",
-    "paused": "Tạm dừng",
-    "waiting": "Đang chờ",
-    "pendingApproval": "Chờ duyệt",
-    "pendingDeposit": "Chờ đặt cọc",
-    "depositPaid": "Đã đặt cọc",
-    "purchased": "Đã mua hàng",
-    "arrivedJpWarehouse": "Đã về kho Nhật",
-    "arrivedVnWarehouse": "Đã về kho VN",
-    "underInspection": "Đang kiểm hàng",
-    "readyToShip": "Sẵn sàng giao hàng",
-    "shipped": "Đã giao hàng",
-    "shippingRequest": "Yêu cầu giao hàng"
+    "waiting": "Chờ xác nhận",
+    "completed": "Đã xác nhận",
+    "canceled": "Đã hủy",
+    "failed": "Thất bại"
   },
   "fromDate": "Từ ngày",
   "toDate": "Đến ngày",
   "filter": "Lọc",
+
   "withdraw": {
     "title": "Xử lý Giao dịch Rút tiền",
     "code": "Mã Lệnh",
@@ -270,12 +294,9 @@
     "cancel": "Hủy",
     "error": "Có lỗi xảy ra",
     "delete": "Xoá",
-    "edit": "Sửa",
-    "unknown": "Không rõ",
-    "uncategorized": "Chưa phân loại",
-    "save": "Lưu",
-    "saveAllChanges": "Lưu Tất Cả Thay Đổi",
-    "search": "Tìm kiếm"
+    "edit": "Chỉnh sửa",
+    "save":"Lưu",
+    "currency": "đ"
   },
   "websiteManage": {
     "table": {
@@ -425,6 +446,24 @@
     }
   },
   "roles": {
+    "names": {
+      "admin": "Quản trị viên",
+      "sales": "Nhân viên bán hàng",
+      "telesalesManager": "Quản lý telesales",
+      "telesalesMember": "Nhân viên telesales",
+      "accounting": "Kế toán",
+      "warehouse": "Nhân viên kho"
+    },
+    "descriptions": {
+      "admin": "Quản trị viên toàn quyền hệ thống",
+      "sales": "Nhân viên bán hàng - Quản lý đơn hàng, đấu giá và khách hàng được phân công",
+      "telesalesManager": "Quản lý telesales - Toàn quyền quản lý trang telesales",
+      "telesalesMember": "Nhân viên telesales - Quản lý khách hàng theo danh sách phân công",
+      "accounting": "Nhân viên kế toán - Quản lý tài chính và giao dịch",
+      "warehouse": "Nhân viên kho - Quản lý hàng hóa và vận chuyển"
+    }
+  },
+  "roles": {
     "list": {
       "title": "Các Vai trò",
       "addButton": "+ Thêm vai trò"
@@ -458,14 +497,28 @@
       "updateError": "Cập nhật vai trò thất bại"
     }
   },
+  "common": {
+    "actions": "Hành động",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "error": "Có lỗi xảy ra",
+    "delete": "Xoá",
+    "edit": "Sửa",
+    "unknown": "Không rõ",
+    "uncategorized": "Chưa phân loại",
+    "save": "Lưu",
+    "saveAllChanges": "Lưu Tất Cả Thay Đổi",
+    "search": "Tìm kiếm"
+  },
   "errorHandling": {
-    "refreshingApp": "Đang làm mới ứng dụng...",
-    "refreshingAppShort": "Đang làm mới ứng dụng để khắc phục lỗi...",
+    "systemError": "Đã phát hiện lỗi hệ thống",
+    "refreshingApp": "Đang làm mới ứng dụng để khắc phục...",
     "pleaseWait": "Vui lòng đợi trong giây lát...",
-    "somethingWentWrong": "Có lỗi xảy ra",
-    "appEncounteredError": "Ứng dụng gặp lỗi. Chúng tôi đang cố gắng khắc phục.",
+    "somethingWentWrong": "Đã xảy ra lỗi",
+    "appEncounteredError": "Ứng dụng gặp sự cố không mong muốn",
     "tryAgain": "Thử lại",
-    "refreshAndClearCache": "Làm mới và xóa cache"
+    "refreshAndClearCache": "Làm mới và xóa cache",
+    "refreshingAppShort": "Đang làm mới ứng dụng..."
   },
   "settings": {
     "financialSettings": "Cài đặt tài chỉnh",
@@ -557,21 +610,232 @@
     "customFeeSettings": "Cài đặt phí riêng cho loại khách hàng"
   },
   "toast": {
-    "confirmVnWarehouseSuccess": "Xác nhận về kho Việt thành công!",
-    "confirmOrderSuccess": "Xác nhận đơn hàng thành công!",
-    "confirmJpWarehouseSuccess": "Xác nhận về kho Nhật thành công!",
-    "confirmShippingSuccess": "Xác nhận vận chuyển thành công!",
-    "updateSalesAssignmentSuccess": "Cập nhật phân công sales thành công!",
-    "emailOtpSent": "Mã OTP đã được gửi qua email!",
-    "waitFiveMinutes": "Vui lòng chờ 5 phút trước khi gửi lại!",
+    "emailOtpSent": "Mã OTP đã được gửi tới email!",
+    "waitFiveMinutes": "Hãy đợi 5 phút rồi thử lại!",
     "emailNotExists": "Email không tồn tại!",
-    "otpConfirmSuccess": "Xác thực OTP thành công!",
-    "newOtpSent": "Mã OTP mới đã được gửi!",
-    "invalidOtpPassword": "Mã OTP hoặc mật khẩu không hợp lệ!",
-    "confirmPurchaseSuccess": "Xác nhận đã mua đơn hàng thành công!",
-    "completeOrderSuccess": "Hoàn thành đơn hàng thành công!",
+    "otpConfirmSuccess": "Xác nhận OTP thành công, mật khẩu mới đã được reset!",
+    "invalidOtpPassword": "OTP hoặc mật khẩu không hợp lệ!",
+    "newOtpSent": "OTP mới đã được gửi!",
+    "createAddressSuccess": "Tạo địa chỉ mới thành công!",
+    "addBankAccountSuccess": "Thêm tài khoản mới thành công!",
+    "updateDefaultAddressSuccess": "Cập nhật địa chỉ mặc định thành công!",
+    "updateDefaultBankSuccess": "Cập nhật tài khoản ngân hàng mặc định thành công!",
+    "createOrderSuccess": "Tạo order mới thành công!",
+    "pleaseEnterLink": "Vui lòng nhập link trước!",
+    "getProductInfoSuccess": "Lấy thông tin sản phẩm thành công!",
+    "cannotGetInfoFromLink": "Không thể lấy thông tin từ link!",
+    "confirmPurchaseSuccess": "Xác nhận mua đơn hàng thành công!",
+    "completeOrderSuccess": "Hoàn thành đơn hàng!",
     "rejectOrderSuccess": "Từ chối đơn hàng thành công!",
-    "inspectGoodsSuccess": "Kiểm hàng thành công!"
+    "inspectGoodsSuccess": "Kiểm hàng thành công!",
+    "createDepositSuccess": "Tạo lệnh nạp tiền thành công!"
+  },
+  "form": {
+    "productLink": "Link Sản phẩm",
+    "productName": "Tên Sản phẩm",
+    "productDescription": "Mô tả Sản phẩm",
+    "productType": "Loại sản phẩm",
+    "method": "Phương thức",
+    "priceJpy": "Giá (¥)",
+    "priceVnd": "Giá (VND)",
+    "customer": "Khách hàng",
+    "serviceFeeJpy": "Phí DV (¥)",
+    "serviceFeeVnd": "Phí DV (VND)",
+    "depositVnd": "Tiền cọc (VND)",
+    "depositPercent": "% Cọc",
+    "note": "Ghi chú",
+    "bankName": "Tên ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountHolderName": "Tên chủ tài khoản",
+    "dailyLimitVnd": "Hạn mức/ngày (VND)",
+    "status": "Trạng thái"
+  },
+  "placeholder": {
+    "searchByOrderCode": "Tìm theo mã đơn...",
+    "filterStatus": "-- Lọc trạng thái --",
+    "exampleMedicalEquipment": "Ví dụ: Thiết bị y tế",
+    "selectIcon": "Chọn icon",
+    "productTypeDescription": "Mô tả ngắn về loại sản phẩm",
+    "searchOrderCustomer": "Mã đơn, Mã kiện, Tên KH...",
+    "source": "Nguồn"
+  },
+  "button": {
+    "confirm": "Xác nhận",
+    "confirmMessage": "Bạn có chắc chắn muốn thực hiện hành động này?",
+    "agree": "Đồng ý",
+    "cancel": "Hủy",
+    "processing": "Đang xử lý...",
+    "close": "Đóng"
+  },
+  "modal": {
+    "addNewProductType": "Thêm Loại sản phẩm mới",
+    "addNewSurcharge": "Thêm Phụ thu mới",
+    "addTrackingCode": "Thêm mã tracking",
+    "inspectAndCalculateFee": "Kiểm hàng và tính phí"
+  },
+  "status": {
+    "pendingApproval": "Đợi duyệt",
+    "pendingDeposit": "Đợi đặt cọc",
+    "depositPaid": "Đã đặt cọc",
+    "purchased": "Đã mua",
+    "arrivedJpWarehouse": "Đến kho Nhật",
+    "arrivedVnWarehouse": "Đến kho Việt",
+    "underInspection": "Đang kiểm hàng",
+    "pendingPayment": "Đợi thanh toán",
+    "readyToShip": "Sẵn sàng giao",
+    "shipped": "Đã chuyển",
+    "shippingRequest": "Yêu cầu chuyển hàng",
+    "cancelled": "Đã Huỷ",
+    "paid": "Đã thanh toán",
+    "calculated": "Đã tính",
+    "calculateLater": "Tính sau"
+  },
+  "table": {
+    "customerCode": "Mã KH",
+    "serviceFeeJpy": "Phí DV (¥)",
+    "totalPaymentJpy": "Tổng TT (¥)",
+    "shippingProfit": "Lợi nhuận VC",
+    "paymentFeeProfit": "Lợi nhuận Phí TT",
+    "exchangeRateProfit": "Lợi nhuận Tỷ giá",
+    "status": "Trạng thái",
+    "customer": "Khách hàng",
+    "creator": "Người tạo",
+    "amount": "Số tiền",
+    "actions": "Hành động",
+    "orderCode": "Mã Đơn",
+    "details": "Chi tiết",
+    "bankName": "Ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountHolder": "Chủ tài khoản",
+    "dailyLimit": "Hạn mức/ngày (VND)",
+    "trackingShip": "Tracking ship"
+  },
+  "page": {
+    "salesDetailTitle": "Chi tiết Doanh số - PHƯƠNG LINH",
+    "salesDetailDescription": "Báo cáo chi tiết theo từng khách hàng và lợi nhuận"
+  },
+  "system": {
+    "loading": "Đang tải...",
+    "refreshingApp": "Đang làm mới ứng dụng để khắc phục...",
+    "pleaseWait": "Vui lòng đợi trong giây lát..."
+  },
+  "permission": {
+    "noAccess": "Bạn không có quyền truy cập",
+    "contactAdmin": "Vui lòng liên hệ với quản trị viên hoặc quản lý của bạn để được cấp quyền truy cập vào mục này."
+  },
+  "language": {
+    "vietnamese": "Tiếng Việt"
+  },
+  "validation": {
+    "pleaseEnterLink": "Vui lòng nhập link!",
+    "pleaseEnterProductName": "Vui lòng nhập tên sản phẩm!",
+    "pleaseEnterProductDescription": "Vui lòng nhập mô tả sản phẩm!",
+    "selectProductType": "Vui lòng chọn loại sản phẩm!",
+    "selectMethod": "Vui lòng chọn phương thức!",
+    "pleaseSelectCustomer": "Vui lòng chọn khách hàng!",
+    "pleaseEnterDeposit": "Vui lòng nhập tiền cọc!",
+    "pleaseUploadImage": "Vui lòng upload ảnh lên",
+    "onlyImageFiles": "Chỉ được upload file ảnh!",
+    "imageSizeLimit": "Ảnh phải nhỏ hơn 5MB!",
+    "uploadFailed": "Upload thất bại",
+    "pleaseEnterCount": "Vui lòng nhập kiểm đếm!",
+    "pleaseSelectRepackage": "Vui lòng chọn Repackage!"
+  },
+  "modal": {
+    "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
+    "confirmPurchaseOrder": "Xác nhận đã mua đơn hàng",
+    "orderPurchased": "Đơn hàng đã được mua!",
+    "confirmCompleteOrder": "Xác nhận hoàn thành đơn hàng",
+    "orderCompleted": "Đơn hàng đã được hoàn thành!"
+  },
+  "button": {
+    "approve": "Duyệt",
+    "reject": "Từ chối",
+    "transferToJpWarehouse": "Chuyển về kho nhật",
+    "save": "Lưu",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "add": "Thêm",
+    "update": "Cập nhật",
+    "create": "Tạo",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "reset": "Đặt lại",
+    "export": "Xuất",
+    "import": "Nhập",
+    "view": "Xem",
+    "download": "Tải xuống",
+    "upload": "Tải lên",
+    "send": "Gửi",
+    "resend": "Gửi lại",
+    "resendOtp": "Gửi lại OTP",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "submit": "Gửi",
+    "clear": "Xóa",
+    "refresh": "Làm mới",
+    "reload": "Tải lại",
+    "select": "Chọn",
+    "selectAll": "Chọn tất cả",
+    "deselectAll": "Bỏ chọn tất cả",
+    "transferToVnWarehouse": "Chuyển về kho Việt",
+    "inspectGoods": "Kiểm hàng",
+    "purchased": "Đã mua",
+    "readyToShip": "Sẵn sàng giao",
+    "details": "Chi tiết",
+    "createNewOrder": "Tạo Đơn hàng mới",
+    "shipped": "Đã chuyển",
+    "createOrder": "Tạo Đơn hàng",
+    "resendOtp": "Gửi lại OTP",
+    "confirmInspection": "Xác nhận kiểm hàng"
+  },
+  "page": {
+    "orderManagement": "Quản lý Đơn hàng",
+    "importedProductList": "Danh sách sản phẩm đã nhập"
+  },
+  "placeholder": {
+    "selectProductType": "-- Chọn loại sản phẩm --",
+    "searchCustomer": "Tìm khách hàng theo mã hoặc tên...",
+    "searchByKeyword": "Tìm kiếm theo từ khóa...",
+    "searchByName": "Tìm kiếm theo tên...",
+    "searchByCode": "Tìm kiếm theo mã...",
+    "searchByOrderCode": "Tìm theo mã đơn...",
+    "filterStatus": "-- Lọc trạng thái --",
+    "enterOtp": "Nhập mã OTP",
+    "enterPassword": "Nhập mật khẩu",
+    "enterConfirmPassword": "Xác nhận mật khẩu",
+    "selectDate": "Chọn ngày",
+    "selectTime": "Chọn thời gian",
+    "selectStatus": "-- Chọn trạng thái --",
+    "selectRole": "-- Chọn vai trò --",
+    "selectWarehouse": "-- Chọn kho --",
+    "selectCompany": "-- Chọn công ty --",
+    "selectSales": "-- Chọn sales --",
+    "selectCustomerType": "-- Chọn loại khách hàng --",
+    "enterNote": "Nhập ghi chú...",
+    "enterDescription": "Nhập mô tả...",
+    "enterName": "Nhập tên...",
+    "enterAddress": "VD: 263 Đặng Văn Bi"
+  },
+  "address": {
+    "province": "Tỉnh/TP",
+    "ward": "Phường/Xã",
+    "selectProvince": "Chọn Tỉnh/TP",
+    "selectWard": "Chọn Phường/Xã",
+    "addressNote": "Vui lòng nhập địa chỉ theo đơn vị hành chính mới sau khi sáp nhập 34 tỉnh thành (01/07/2025).",
+    "saveAddress": "Lưu địa chỉ"
+  },
+  "tracking": {
+    "countCheck": "Kiểm đếm",
+    "repackage": "Repackage",
+    "documentImages": "Ảnh chứng từ / ảnh sản phẩm"
+  },
+  "inspection": {
+    "actualWeight": "Cân nặng thực tế (kg)",
+    "weightFee": "Phí cân nặng (VND/kg)",
+    "note": "Ghi chú kiểm hàng",
+    "notePlaceholder": "Ghi chú về tình trạng hàng hóa, phí phát sinh..."
   },
   "form": {
     "productInformation": "Thông tin Sản phẩm",
@@ -594,128 +858,20 @@
     "otpSixDigits": "OTP phải có đúng 6 số",
     "enterNewPassword": "Nhập mật khẩu mới",
     "passwordPattern": "8-20 ký tự, gồm chữ và số",
-    "newPassword": "Mật khẩu mới",
-    "productLink": "Link sản phẩm",
-    "productName": "Tên sản phẩm",
-    "productDescription": "Mô tả sản phẩm",
-    "productType": "Loại sản phẩm",
-    "customer": "Khách hàng",
-    "serviceFeeJpy": "Phí dịch vụ (¥)",
-    "serviceFeeVnd": "Phí dịch vụ (VNĐ)",
-    "depositVnd": "Tiền cọc (VNĐ)",
-    "method": "Phương thức",
-    "priceJpy": "Giá (¥)",
-    "priceVnd": "Giá (VNĐ)",
-    "note": "Ghi chú",
-    "source": "Nguồn"
+    "newPassword": "Mật khẩu mới"
   },
-  "placeholder": {
-    "selectProductType": "-- Chọn loại sản phẩm --",
-    "searchCustomer": "Tìm khách hàng theo mã hoặc tên...",
-    "searchByKeyword": "Tìm kiếm theo từ khóa...",
-    "searchByName": "Tìm kiếm theo tên...",
-    "searchByCode": "Tìm kiếm theo mã...",
-    "searchByOrderCode": "Tìm theo mã đơn...",
-    "searchOrderCustomer": "Tìm đơn hàng hoặc khách hàng...",
-    "filterStatus": "-- Lọc trạng thái --",
-    "enterOtp": "Nhập mã OTP",
-    "enterPassword": "Nhập mật khẩu",
-    "enterConfirmPassword": "Xác nhận mật khẩu",
-    "selectDate": "Chọn ngày",
-    "selectTime": "Chọn thời gian",
-    "selectStatus": "-- Chọn trạng thái --",
-    "selectRole": "-- Chọn vai trò --",
-    "selectWarehouse": "-- Chọn kho --",
-    "selectCompany": "-- Chọn công ty --",
-    "selectSales": "-- Chọn sales --",
-    "selectCustomerType": "-- Chọn loại khách hàng --",
-    "enterNote": "Nhập ghi chú...",
-    "enterDescription": "Nhập mô tả...",
-    "enterName": "Nhập tên...",
-    "enterAddress": "VD: 263 Đặng Văn Bi"
-  },
-  "button": {
-    "addNew": "Thêm mới",
-    "saveAllChanges": "Lưu Tất Cả Thay Đổi",
-    "createNewOrder": "Tạo Đơn hàng mới",
-    "cancel": "Huỷ",
-    "createOrder": "Tạo đơn",
-    "readyToShip": "Sẵn sàng giao hàng",
-    "approve": "Duyệt đơn",
-    "reject": "Từ chối",
-    "transferToJpWarehouse": "Chuyển kho Nhật",
-    "transferToVnWarehouse": "Chuyển kho VN",
-    "inspectGoods": "Kiểm hàng",
-    "purchased": "Đã mua",
-    "details": "Chi tiết"
-  },
-  "modal": {
-    "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
-    "confirmPurchaseOrder": "Xác nhận đã mua đơn hàng",
-    "orderPurchased": "Đơn hàng đã được mua!",
-    "confirmCompleteOrder": "Xác nhận hoàn thành đơn hàng",
-    "orderCompleted": "Đơn hàng đã được hoàn thành!"
-  },
-  "table": {
-    "customerCode": "Mã KH",
-    "serviceFeeJpy": "Phí DV (¥)",
-    "totalPaymentJpy": "Tổng TT (¥)",
-    "shippingProfit": "Lợi nhuận VC",
-    "paymentFeeProfit": "Lợi nhuận Phí TT",
-    "exchangeRateProfit": "Lợi nhuận Tỷ giá",
-    "status": "Trạng thái",
-    "customer": "Khách hàng",
-    "creator": "Người tạo",
-    "amount": "Số tiền",
-    "actions": "Hành động",
-    "orderCode": "Mã Đơn",
-    "details": "Chi tiết",
-    "bankName": "Ngân hàng",
-    "accountNumber": "Số tài khoản",
-    "accountHolder": "Chủ tài khoản",
-    "dailyLimit": "Hạn mức/ngày (VND)",
-    "index": "STT",
-    "product": "Sản phẩm",
-    "productType": "Loại sản phẩm",
-    "conditionType": "Loại điều kiện",
-    "valueUSD": "Giá trị (USD)",
-    "priceKgHN": "Giá Kg - HN",
-    "surcharge": "Phụ thu",
-    "trackingShip": "Tracking ship"
-  },
-  "page": {
-    "orderManagement": "Quản lý Đơn hàng",
-    "importedProductList": "Danh sách sản phẩm đã nhập"
-  },
-  "system": {
-    "noData": "Không có dữ liệu",
-    "errorGettingHistory": "Lỗi khi lấy lịch sử"
-  },
-  "permission": {
-    "noAccess": "Bạn không có quyền truy cập",
-    "contactAdmin": "Vui lòng liên hệ với quản trị viên hoặc quản lý của bạn để được cấp quyền truy cập vào mục này."
-  },
-  "language": {
-    "vietnamese": "Tiếng Việt"
-  },
-  "address": {
-    "province": "Tỉnh/TP",
-    "ward": "Phường/Xã",
-    "selectProvince": "Chọn Tỉnh/TP",
-    "selectWard": "Chọn Phường/Xã",
-    "addressNote": "Vui lòng nhập địa chỉ theo đơn vị hành chính mới sau khi sáp nhập 34 tỉnh thành (01/07/2025).",
-    "saveAddress": "Lưu địa chỉ"
-  },
-  "tracking": {
-    "countCheck": "Kiểm đếm",
-    "repackage": "Repackage",
-    "documentImages": "Ảnh chứng từ / ảnh sản phẩm"
-  },
-  "inspection": {
-    "actualWeight": "Cân nặng thực tế (kg)",
-    "weightFee": "Phí cân nặng (VND/kg)",
-    "note": "Ghi chú kiểm hàng",
-    "notePlaceholder": "Ghi chú về tình trạng hàng hóa, phí phát sinh..."
+  "toast": {
+    "confirmVnWarehouseSuccess": "Xác nhận về kho Việt thành công!",
+    "confirmOrderSuccess": "Xác nhận đơn hàng thành công!",
+    "confirmJpWarehouseSuccess": "Xác nhận về kho Nhật thành công!",
+    "confirmShippingSuccess": "Xác nhận vận chuyển thành công!",
+    "updateSalesAssignmentSuccess": "Cập nhật phân công sales thành công!",
+    "emailOtpSent": "Mã OTP đã được gửi qua email!",
+    "waitFiveMinutes": "Vui lòng chờ 5 phút trước khi gửi lại!",
+    "emailNotExists": "Email không tồn tại!",
+    "otpConfirmSuccess": "Xác thực OTP thành công!",
+    "newOtpSent": "Mã OTP mới đã được gửi!",
+    "invalidOtpPassword": "Mã OTP hoặc mật khẩu không hợp lệ!"
   },
   "component": {
     "search": "Tìm kiếm",
@@ -741,11 +897,19 @@
     "criticalError": "Lỗi nghiêm trọng",
     "refreshing": "Đang làm mới trang..."
   },
+  "errorHandling": {
+    "refreshingApp": "Đang làm mới ứng dụng...",
+    "refreshingAppShort": "Đang làm mới ứng dụng để khắc phục lỗi...",
+    "pleaseWait": "Vui lòng đợi trong giây lát...",
+    "somethingWentWrong": "Có lỗi xảy ra",
+    "appEncounteredError": "Ứng dụng gặp lỗi. Chúng tôi đang cố gắng khắc phục.",
+    "tryAgain": "Thử lại",
+    "refreshAndClearCache": "Làm mới và xóa cache"
+  },
   "feeSettings": {
     "otherServiceFees": "Phí Dịch Vụ Khác (Áp dụng chung)",
     "purchaseFeeUs": "Phí mua hộ (%) - Tuyến Mỹ",
     "purchaseFeeJp": "Phí mua hộ (%) - Tuyến Nhật",
-    "purchaseFeeFrom": "Phí mua hộ (%) từ",
     "reinforcementFee": "Phí gia cố (VNĐ/Kg)",
     "checkPhotoFeeUs": "Phí kiểm đếm/chụp ảnh - Tại Mỹ (USD/track)",
     "checkPhotoFeeJp": "Phí kiểm đếm/chụp ảnh - Tại Nhật (VNĐ/track)",
@@ -754,6 +918,81 @@
     "serviceAndDelivery": "Dịch Vụ & Giao Hàng",
     "insuranceAndRegulations": "Bảo Hiểm & Quy Định Chung",
     "productTypes": "Loại sản phẩm"
+  },
+  "customerManage": {
+    "title": "Quản lý Khách hàng",
+    "customerOverview": {
+      "walletBalance": "Số dư ví",
+      "totalOrders": "Tổng đơn hàng",
+      "totalSpent": "Tổng chi tiêu",
+      "currentDebt": "Công nợ hiện tại",
+      "addressBook": "Sổ địa chỉ",
+      "addAddress": "Thêm địa chỉ",
+      "addDefaultAddress": "Thêm địa chỉ mặc định",
+      "addDefaultBank": "Thêm tài khoản mặc định",
+      "default": "Mặc định",
+      "home": "Nhà riêng",
+      "bankAccount": "Tài khoản ngân hàng",
+      "addBankAccount": "Thêm tài khoản ngân hàng",
+      "accountNumber": "Số tài khoản",
+      "accountOwner": "Chủ tài khoản",
+      "contactInfo": "Thông tin liên hệ",
+      "assignedStaff": "Nhân viên phụ trách",
+      "change": "Thay đổi"
+    },
+    "tabs": {
+      "overview": "Tổng quan",
+      "orders": "Đơn hàng",
+      "transactions": "Giao dịch",
+      "fees": "Phí",
+      "notes": "Ghi chú"
+    },
+    "orderHistory": {
+      "orderCode": "Mã Đơn",
+      "createdAt": "Ngày tạo",
+      "total": "Tổng tiền",
+      "status": "Trạng thái",
+      "statusPending": "Chờ thanh toán đủ",
+      "statusPaid": "Đã thanh toán",
+      "statusCancel": "Đã hủy"
+    },
+    "paymentHistory": {
+      "transactionCode": "Mã GD",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "note": "Ghi chú",
+      "date": "Ngày",
+      "topUp": "Nạp tiền",
+      "withdraw": "Rút tiền",
+      "bankTransfer": "CK thanh toán",
+      "serviceFeePayment": "Thanh toán phí dịch vụ"
+    },
+    "addBankModal": {
+      "title": "Thêm tài khoản ngân hàng",
+      "bankName": "Tên ngân hàng",
+      "selectBank": "Chọn ngân hàng",
+      "selectBankRequired": "Vui lòng chọn ngân hàng",
+      "accountNumber": "Số tài khoản",
+      "accountNumberRequired": "Vui lòng nhập số tài khoản",
+      "accountNumberPlaceholder": "Nhập số tài khoản",
+      "accountHolder": "Chủ tài khoản",
+      "accountHolderRequired": "Vui lòng nhập tên chủ tài khoản",
+      "accountHolderPlaceholder": "Tên chủ tài khoản",
+      "branch": "Chi nhánh",
+      "branchPlaceholder": "Tên chi nhánh (không bắt buộc)",
+      "note": "Thông tin tài khoản ngân hàng sẽ được bảo mật và chỉ sử dụng để rút tiền.",
+      "noteLabel": "Lưu ý:",
+      "cancel": "Hủy",
+      "saveAccount": "Lưu tài khoản"
+    },
+    "internalNote": {
+      "placeholder": "Nhân viên thêm ghi chú về khách hàng tại đây...",
+      "saveNote": "Lưu ghi chú",
+      "noteHistory": "Lịch sử Ghi chú",
+      "loadMore": "Xem thêm",
+      "createSuccess": "Tạo ghi chú mới thành công!",
+      "createFailed": "Tạo ghi chú mới thất bại"
+    }
   },
   "shippingFeeConfig": {
     "title": "Cài đặt Phí & Vận chuyển Riêng",
@@ -782,6 +1021,25 @@
       "audio": "Audio"
     }
   },
+  "status": {
+    "failed": "Thất bại",
+    "topUp": "Nạp tiền",
+    "deduction": "Trừ tiền",
+    "cancelledByUser": "Người dùng huỷ",
+    "shipping": "Đang giao hàng",
+    "arrivedWarehouse": "Đã về kho",
+    "delivered": "Đã giao hàng",
+    "pendingPayment": "Chờ thanh toán",
+    "paid": "Đã thanh toán",
+    "cancelled": "Đã hủy",
+    "active": "Hoạt động",
+    "inactive": "Ngừng hoạt động",
+    "paused": "Tạm dừng"
+  },
+  "system": {
+    "noData": "Không có dữ liệu",
+    "errorGettingHistory": "Lỗi khi lấy lịch sử"
+  },
   "insuranceSettings": {
     "title": "Cài Đặt Bảo Hiểm",
     "defaultPackage": "Gói Mặc Định (Không mua bảo hiểm)",
@@ -802,6 +1060,33 @@
     "updateFeeSuccess": "Cập nhật phí thành công!",
     "saveAllSuccess": "Đã lưu tất cả thay đổi!",
     "routePriceTable": "Bảng Giá Tuyến {{route}}"
+  },
+  "table": {
+    "customerCode": "Mã KH",
+    "serviceFeeJpy": "Phí DV (¥)",
+    "totalPaymentJpy": "Tổng TT (¥)",
+    "shippingProfit": "Lợi nhuận VC",
+    "paymentFeeProfit": "Lợi nhuận Phí TT",
+    "exchangeRateProfit": "Lợi nhuận Tỷ giá",
+    "status": "Trạng thái",
+    "customer": "Khách hàng",
+    "creator": "Người tạo",
+    "amount": "Số tiền",
+    "actions": "Hành động",
+    "orderCode": "Mã Đơn",
+    "details": "Chi tiết",
+    "bankName": "Ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountHolder": "Chủ tài khoản",
+    "dailyLimit": "Hạn mức/ngày (VND)",
+    "index": "STT",
+    "product": "Sản phẩm",
+    "productType": "Loại sản phẩm",
+    "conditionType": "Loại điều kiện",
+    "valueUSD": "Giá trị (USD)",
+    "priceKgHN": "Giá Kg - HN",
+    "surcharge": "Phụ thu",
+    "trackingShip": "Tracking ship"
   },
   "productType": {
     "title": "Quản lý loại sản phẩm",
@@ -833,6 +1118,9 @@
       "cosmetics": "Mỹ phẩm"
     }
   },
+  "button": {
+    "createNewOrder": "Thêm Giao dịch Mua Nguyên liệu"
+  },
   "salesManage": {
     "title": "Nhân viên Sales",
     "addButton": "+ Thêm",
@@ -846,6 +1134,23 @@
     "addBankSuccess": "Thêm tài khoản mới thành công!",
     "updateDefaultAddressSuccess": "Cập nhật địa chỉ mặc định thành công!",
     "updateDefaultBankSuccess": "Cập nhật tài khoản ngân hàng mặc định thành công!"
+  },
+  "customerManage": {
+    "title": "Quản lý khách hàng",
+    "search": "Tìm kiếm khách hàng",
+    "customer": "Khách hàng",
+    "classification": "Phân loại",
+    "zaloGroup": "Nhóm Zalo CSKH",
+    "actions": "Hành động",
+    "unassign": "Hủy gán",
+    "assignSuccess": "Gán khách hàng thành công!",
+    "assignFailed": "Gán khách hàng thất bại",
+    "unassignSuccess": "Huỷ gán khách hàng thành công!",
+    "unassignFailed": "Huỷ gán khách hàng thất bại",
+    "detailsTitle": "Chi tiết:",
+    "assignedCustomers": "Khách hàng Phụ trách",
+    "assignNewCustomer": "Gán khách hàng mới",
+    "assignedCustomersList": "Danh sách khách hàng đã gán"
   },
   "userProfile": {
     "basicInfo": "Thông tin cơ bản",
@@ -897,6 +1202,10 @@
     "greaterThan": "Lớn hơn",
     "lessThanOrEqual": "Nhỏ hơn hoặc bằng"
   },
+  "button": {
+    "addNew": "Thêm mới",
+    "saveAllChanges": "Lưu Tất Cả Thay Đổi"
+  },
   "bankPartner": {
     "title": "Cài đặt tài khoản ngân hàng đối tác",
     "addAccount": "Thêm tài khoản",
@@ -906,8 +1215,6 @@
     "deleteAccountSuccess": "Xóa tài khoản thành công!",
     "updatePermissionSuccess": "Cập nhật phân quyền thành công!",
     "deleteConfirmTitle": "Xoá tài khoản",
-    "deleteConfirmContent": "Bạn có chắc chắn muốn xoá tài khoản này?",
-    "companyBankAccountSettings": "Cài đặt tài khoản ngân hàng Công ty",
-    "addNewBankAccount": "Thêm tài khoản Ngân hàng mới"
+    "deleteConfirmContent": "Bạn có chắc chắn muốn xoá tài khoản này?"
   }
 }

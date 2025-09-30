@@ -44,7 +44,7 @@ export default function BankPartnerSetting() {
   const addMutation = useMutation({
     mutationFn: addBankCreateAccountPartner,
     onSuccess: () => {
-      toast.success("Thêm tài khoản thành công!");
+      toast.success(t("bankPartner.addAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccountsPartner"],
       });
@@ -58,7 +58,7 @@ export default function BankPartnerSetting() {
     mutationFn: ({ id, body }: { id: number; body: any }) =>
       updateBankCreateAccountPartner(id, body),
     onSuccess: () => {
-      toast.success("Cập nhật tài khoản thành công!");
+      toast.success(t("bankPartner.updateAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccountsPartner"],
       });
@@ -71,7 +71,7 @@ export default function BankPartnerSetting() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteBankCreateAccount(id),
     onSuccess: () => {
-      toast.success("Xóa tài khoản thành công!");
+      toast.success(t("bankPartner.deleteAccountSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["bankAccountsPartner"],
       });
@@ -93,7 +93,7 @@ export default function BankPartnerSetting() {
       mutationFn: (admin_user_ids: number[]) =>
         addUserBankPermission(idBank, { admin_user_ids }),
       onSuccess: () => {
-        toast.success("Cập nhật phân quyền thành công!");
+        toast.success(t("bankPartner.updatePermissionSuccess"));
         if (onSuccess) onSuccess();
       },
       onError: (err: any) => {
@@ -136,11 +136,11 @@ export default function BankPartnerSetting() {
       render: (_, record: BankAccount) =>
         record.is_active ? (
           <Tag color="green" className="px-3 py-1 !rounded-3xl">
-            Hoạt động
+            {t('status.active')}
           </Tag>
         ) : (
           <Tag color="default" className="px-3 py-1 !rounded-3xl">
-            Tạm dừng
+            {t('status.paused')}
           </Tag>
         ),
     },
@@ -150,13 +150,13 @@ export default function BankPartnerSetting() {
       render: (_: any, record: BankAccount) => (
         <div className="flex gap-2">
           <button
-            onClick={() => {                
+            onClick={() => {
               setEditingRecord(record);
               setOpen(true);
             }}
             className="!text-blue-600 hover:underline"
           >
-            Sửa
+            {t('common.edit')}
           </button>
           <span>|</span>
           <button
@@ -168,7 +168,7 @@ export default function BankPartnerSetting() {
               setOpenAssign(true);
             }}
           >
-            Gán quyền
+            {t('bankPartner.assignPermission')}
           </button>
           <span>|</span>
           <button
@@ -178,7 +178,7 @@ export default function BankPartnerSetting() {
             }}
             className="!text-red-600 hover:underline"
           >
-            Xóa
+            {t('common.delete')}
           </button>
         </div>
       ),
@@ -193,7 +193,7 @@ export default function BankPartnerSetting() {
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
-          Cài đặt tài khoản ngân hàng đối tác
+          {t('bankPartner.title')}
         </h2>
         <Button
           onClick={() => {
@@ -204,7 +204,7 @@ export default function BankPartnerSetting() {
           icon={<PlusOutlined />}
           className="bg-blue-500 hover:bg-blue-600 rounded-lg"
         >
-          Thêm tài khoản
+          {t('bankPartner.addAccount')}
         </Button>
       </div>
       <TableComponent
@@ -248,12 +248,12 @@ export default function BankPartnerSetting() {
       <PopupConfirm
         open={isOpenConfirmDelete}
         type={"delete"}
-        title={"confirm delete"}
-        content={"confirm delete"}
+        title={t("bankPartner.deleteConfirmTitle")}
+        content={t("bankPartner.deleteConfirmContent")}
         onConfirm={handleConfirmDelete}
         onCancel={() => setIsOpenConfirmDelete(false)}
-        confirmText={t("deposit.modal.confirmText")}
-        cancelText={t("deposit.modal.cancelText")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
       />
     </div>
   );
