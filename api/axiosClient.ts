@@ -41,9 +41,13 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 api.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem("accessToken");
-  if (accessToken) {
-    config.headers["Authorization"] = `Bearer ${accessToken}`;
+  // const accessToken = localStorage.getItem("accessToken");
+  // if (accessToken) {
+  //   config.headers["Authorization"] = `Bearer ${accessToken}`;
+  // }
+  const token = Cookies.get("accessToken");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
   }
   return config;
 });
@@ -65,6 +69,9 @@ api.interceptors.response.use(
       CacheManager.clearAuthData();
       localStorage.clear();
       window.location.href = "/login";
+      Cookies.remove("token", { path: "/" }); 
+      Cookies.remove("accessToken", { path: "" }); 
+      Cookies.remove("refreshToken", { path: "" }); 
     };
 
     if (err.response?.status === 401 && !originalRequest._retry) {
@@ -84,7 +91,8 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem("refreshToken");      
+      // const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = Cookies.get("refreshToken");      
       if (!refreshToken) {
         logout();
         return Promise.reject(err);
@@ -108,7 +116,13 @@ api.interceptors.response.use(
           sameSite: "lax",
           secure: true,
         });
-        localStorage.setItem("accessToken", token);
+        // localStorage.setItem("accessToken", token);
+        Cookies.set("accessToken", token, {
+          expires: 1,
+          path: "/",
+          sameSite: "lax",
+          secure: true,
+        });
         processQueue(null, token);
 
         originalRequest.headers.Authorization = `Bearer ${token}`;

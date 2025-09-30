@@ -3,6 +3,7 @@ import LoginForm from "../components/login-form";
 import ForgotPasswordForm from "../components/forgot-password-form";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const [isForgot, setIsForgot] = useState(false);
@@ -11,7 +12,9 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    // const token = localStorage.getItem("accessToken");
+    const token = Cookies.get("accessToken");
+
     if (token) {
       const redirectUrl = searchParams.get("redirect") || "/user-management";
 

@@ -1,9 +1,12 @@
 import { storage } from "@/lib/storage";
 // import { useUserStore } from "@/stores/user-info-store";
+import Cookies from "js-cookie";
 
 export const isAuthenticated = () => {
   if (typeof window === "undefined") return false; // tránh lỗi SSR
-  const accessToken = localStorage.getItem("accessToken");
+  // const accessToken = localStorage.getItem("accessToken");
+  const accessToken = Cookies.get("accessToken");      
+
   return !!accessToken;
 };
 
