@@ -12,6 +12,7 @@ import {
   faYenSign,
 } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { CurrencyRate } from "@/types/setting";
 import {
   getListExchangRateEachCategory,
@@ -28,6 +29,7 @@ interface ExchangeRateFormValues {
 const ExchangeRateSettings: React.FC = () => {
   const params = useParams();
   const id = params.id;
+  const { t } = useTranslation();
   const [form] = Form.useForm<ExchangeRateFormValues>();
   const [rateList, setRateList] = useState<CurrencyRate[]>([]);
   const [rates, setRates] = useState<CurrencyRate[]>(rateList);
@@ -45,7 +47,7 @@ const ExchangeRateSettings: React.FC = () => {
 
   const onFinish = (values: ExchangeRateFormValues) => {
     console.log("Exchange Rate Saved:", values);
-    message.success("Cập nhật tỷ giá thành công!");
+    message.success(t('categoryCustomer.exchangeRateUpdateSuccess'));
   };
 
   const handleChangeRate = (value: number | null, index: number) => {
@@ -69,7 +71,7 @@ const ExchangeRateSettings: React.FC = () => {
             currency_code: r.currency_code,
           })),
         });
-      toast.success("Cập nhật tỉ giá thành công!");
+      toast.success(t('categoryCustomer.exchangeRateUpdateSuccess'));
     } catch (e) {
       console.error("Update failed", e);
     }

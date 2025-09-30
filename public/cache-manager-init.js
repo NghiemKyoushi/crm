@@ -10,12 +10,12 @@
   const CRITICAL_ERROR_PATTERNS = [
     'Cannot read properties of null',
     'Cannot read property',
-    'TypeError: Cannot read',
+    // 'TypeError: Cannot read',
     'ChunkLoadError',
     'Loading chunk',
     'Loading CSS chunk',
     'Unexpected token',
-    'SyntaxError',
+    // 'SyntaxError',
     'Script error'
   ];
 

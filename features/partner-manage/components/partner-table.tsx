@@ -24,6 +24,7 @@ import {
   faWallet,
   faYenSign,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 import TableComponent from "@/components/TableComponent";
 import {
   useBankAccountsPartnerScreen,
@@ -37,7 +38,6 @@ import { FinanceSummary, PartnerTransaction } from "@/types/partner";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 const { Title, Text } = Typography;
 
@@ -90,7 +90,7 @@ export default function JPYManagementPage() {
         },
         {
           onSuccess: () => {
-            toast.success("Tạo nguyên liệu mới thành công!");
+            toast.success(t('partnerManage.createMaterialSuccess'));
             queryClient.invalidateQueries({
               queryKey: ["listMaterial"],
             });
@@ -115,7 +115,7 @@ export default function JPYManagementPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Xóa Website thành công!");
+          toast.success(t('partnerManage.deleteWebsiteSuccess'));
           queryClient.invalidateQueries({
             queryKey: ["listwebsite"],
           });
@@ -131,7 +131,7 @@ export default function JPYManagementPage() {
   };
   const columns: ColumnsType<PartnerTransaction> = [
     {
-      title: "Từ",
+      title: t('partnerManage.from'),
       dataIndex: "name",
       render: (_: string, record: PartnerTransaction) => (
         <div>
@@ -142,12 +142,12 @@ export default function JPYManagementPage() {
       ),
     },
     {
-      title: "Ghi chú",
+      title: t('partnerManage.note'),
       dataIndex: "note",
       width: 120,
     },
     {
-      title: activeTab === "JPY" ? "Tổng Mua (JPY)" : "Tổng Mua (USD)",
+      title: activeTab === "JPY" ? t('partnerManage.totalBuyJPY') : t('partnerManage.totalBuyUSD'),
       dataIndex: "amount",
       render: (val, record: PartnerTransaction) => {
         const color =
@@ -178,7 +178,7 @@ export default function JPYManagementPage() {
       },
     },
     {
-      title: "Tỷ giá",
+      title: t('partnerManage.exchangeRate'),
       dataIndex: "exchange_rate",
       render: (value: number) => `${value} VNĐ`,
     },

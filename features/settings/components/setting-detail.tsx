@@ -18,11 +18,13 @@ import { useRouter } from "next/navigation";
 import { getListExchangRate, updateListExchangRate } from "../apis/setting";
 import { CurrencyRate } from "@/types/setting";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 
 const SettingsDetail = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [rateList, setRateList] = useState<CurrencyRate[]>([]);
   const [rates, setRates] = useState<CurrencyRate[]>(rateList);
 
@@ -56,7 +58,7 @@ const SettingsDetail = () => {
           currency_code: r.currency_code
         })),
       });
-      toast.success("Cập nhật tỉ giá thành công!");
+      toast.success(t('settings.exchangeRateUpdateSuccess'));
     } catch (e) {
       console.error("Update failed", e);
     }
@@ -65,23 +67,9 @@ const SettingsDetail = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <Card
-        title={<div className="text-[18px]">Cài đặt tài chỉnh</div>}
+        title={<div className="text-[18px]">{t('settings.financialSettings')}</div>}
         className="rounded-2xl shadow-md"
       >
-        <Text strong>Tỷ giá ngoại tệ thống nhất</Text>
-        <div className="bg-blue-50  border-l-4 border-blue-400  p-3 rounded-md my-3 text-sm">
-          <strong className=" text-blue-800">Lưu ý quan trọng:</strong> <br />
-          <span className=" text-blue-700">
-            Tỷ giá này sẽ được áp dụng thống nhất cho tất cả khách hàng và mọi
-            giao dịch trong hệ thống. Không có cài đặt tỷ giá riêng cho từng
-            khách hàng.{" "}
-          </span>
-          <br />
-          <span className=" text-blue-700">
-            Tỷ giá áp dụng theo ngày mua hàng và được cập nhật trên trang chủ
-            Dreamcargo.vn
-          </span>
-        </div>
 
         <div className="flex gap-4 mb-3 w-full">
           {rates &&
@@ -107,17 +95,6 @@ const SettingsDetail = () => {
             })}
         </div>
 
-        <div className="text-sm text-gray-500 mb-3">
-          <div className="flex items-center gap-2 text-gray-700">
-            <FontAwesomeIcon className="w-4 h-4" icon={faClock} />
-            <span>Cập nhật lần cuối: 08/08/2025 14:30 bởi Admin</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-700">
-            <FontAwesomeIcon className="w-4 h-4" icon={faUsers} />
-            <span>Áp dụng cho: Tất cả khách hàng</span>
-          </div>
-        </div>
-
         <div className="w-full mt-4 mb-4">
           <Button
             size="large"
@@ -125,26 +102,9 @@ const SettingsDetail = () => {
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faUniversity} />}
           >
             <span className="text-left w-full">
-              Quản lý Tài khoản Ngân hàng
+              {t('settings.bankAccountManagement')}
             </span>
           </Button>
-        </div>
-        <div className="bg-green-50 border-l-4 border-green-400 rounded-lg p-3">
-          <p className="font-semibold text-green-700 !mb-1">
-            <FontAwesomeIcon icon={faPhone} /> Thông tin Liên hệ
-          </p>
-          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-            <FontAwesomeIcon icon={faMapMarked} /> N02-T3 Khu Ngoại Giao Đoàn,
-            Xuân Tảo, Bắc Từ Liêm, Hà Nội
-          </p>
-          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-            <FontAwesomeIcon icon={faPhone} /> Hotline:{" "}
-            <span className="font-bold">096.55.44444</span>
-          </p>
-          <p className="flex items-center gap-2 text-green-700 text-sm !mb-1">
-            <FontAwesomeIcon icon={faTeletype} /> Zalo:{" "}
-            <span className="font-bold">097.11.68686</span>
-          </p>
         </div>
         <div className="w-full flex justify-end mt-2 ">
           <Button
@@ -152,31 +112,30 @@ const SettingsDetail = () => {
             className="!font-medium"
             onClick={() => handleSave()}
           >
-            Lưu Tỷ giá
+            {t('settings.saveExchangeRate')}
           </Button>
         </div>
       </Card>
       <Card
-        title={<div className="text-[18px]">Cài đặt Phí Dịch vụ</div>}
+        title={<div className="text-[18px]">{t('settings.serviceFeesSettings')}</div>}
         className="relative rounded-2xl shadow-md h-full"
       >
         <div className="pb-16">
           <div className="text-gray-600 mb-3">
-            Thiết lập các loại phí mặc định của hệ thống. Các chính sách phí
-            riêng cho từng loại khách hàng sẽ ghi đè lên các cài đặt này.
+            {t('settings.serviceFeesDescription')}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ul className="list-disc pl-5 text-gray-700">
-              <li>Phí mua hộ Mỹ: 4%</li>
-              <li>Phí mua hộ Nhật: từ 3%</li>
-              <li>Phí vận chuyển quốc tế</li>
-              <li>Phụ phí theo loại sản phẩm</li>
+              <li>{t('settings.buyingFeeUS')}</li>
+              <li>{t('settings.buyingFeeJP')}</li>
+              <li>{t('settings.internationalShipping')}</li>
+              <li>{t('settings.productSurcharge')}</li>
             </ul>
             <ul className="list-disc pl-5 text-gray-700">
-              <li>Phí gia cố: 5.000 VNĐ/Kg</li>
-              <li>Phí bảo hiểm: 3%</li>
-              <li>Phí giao hàng Hà Nội</li>
-              <li>Phí lưu kho: 1.000 VNĐ/kg/ngày</li>
+              <li>{t('settings.reinforcementFee')}</li>
+              <li>{t('settings.insuranceFee')}</li>
+              <li>{t('settings.hanoiDeliveryFee')}</li>
+              <li>{t('settings.storageFee')}</li>
             </ul>
           </div>
         </div>
@@ -189,23 +148,23 @@ const SettingsDetail = () => {
             onClick={() => router.push("/fee-setting")}
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
           >
-            Đi đến trang Quản lý Phí
+            {t('settings.goToFeeManagement')}
           </Button>
         </div>
       </Card>
 
-      <Card title="Cài đặt Vận hành Đơn hàng" className="rounded-2xl shadow-md">
+      <Card title={t('settings.orderOperationsSettings')} className="rounded-2xl shadow-md">
         <List
           itemLayout="horizontal"
           dataSource={[
             {
               icon: faGlobe,
-              text: "Quản lý Website được hỗ trợ",
+              text: t('settings.supportedWebsiteManagement'),
               url: "/website-manage",
             },
             {
               icon: faTags,
-              text: "Quản lý Loại sản phẩm & Phí",
+              text: t('settings.productTypesAndFees'),
               url: "/website-manage",
             },
           ]}
@@ -231,27 +190,17 @@ const SettingsDetail = () => {
             </List.Item>
           )}
         />
-        <div className="bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
-          <p className="font-semibold text-red-700 !mb-1">
-            <FontAwesomeIcon icon={faBan} /> Hàng hóa Không nhận vận chuyển
-          </p>
-          <p className="text-sm text-red-700 leading-relaxed">
-            Hàng dạng xịt, hàng dễ cháy nổ, vũ khí, văn hóa phẩm đồi trụy, thiết
-            bị y tế, ô tô, xe máy, thuốc lá điện tử, vape, ma túy, ngoại tệ,
-            vàng, kim cương.
-          </p>
-        </div>
       </Card>
 
       <Card
-        title="Cài đặt Quản trị Người dùng"
+        title={t('settings.userManagementSettings')}
         className="rounded-2xl shadow-md"
       >
         <List
           itemLayout="horizontal"
           dataSource={[
-            { icon: faLayerGroup, text: "Phân loại Khách hàng & Chính sách" },
-            { icon: faUsers, text: "Nhân viên & Phân quyền" },
+            { icon: faLayerGroup, text: t('settings.customerCategoriesAndPolicies') },
+            { icon: faUsers, text: t('settings.staffAndPermissions') },
           ]}
           className="!flex !flex-col !gap-1 "
           renderItem={(item) => (

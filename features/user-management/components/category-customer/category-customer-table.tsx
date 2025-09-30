@@ -54,7 +54,7 @@ export default function CategoryCustomerTable() {
       },
       {
         onSuccess: () => {
-          toast.success("Tạo loại khách hàng mới thành công!");
+          toast.success(t('categoryCustomer.createSuccess'));
           queryClient.invalidateQueries({
             queryKey: ["listCate"],
           });
@@ -77,7 +77,7 @@ export default function CategoryCustomerTable() {
       },
       {
         onSuccess: () => {
-          toast.success("Cập nhật loại khách hàng thành công!");
+          toast.success(t('categoryCustomer.updateSuccess'));
           queryClient.invalidateQueries({ queryKey: ["listCate"] });
           setOpen(false);
         },
@@ -96,7 +96,7 @@ export default function CategoryCustomerTable() {
       },
       {
         onSuccess: () => {
-          toast.success("Xóa loại khách hàng thành công!");
+          toast.success(t('categoryCustomer.deleteSuccess'));
           queryClient.invalidateQueries({ queryKey: ["listCate"] });
           setOpenConfirmDeleteCate(false);
         },

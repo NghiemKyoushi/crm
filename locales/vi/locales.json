@@ -476,5 +476,43 @@
     "tryAgain": "Thử lại",
     "refreshAndClearCache": "Làm mới và xóa cache",
     "refreshingAppShort": "Đang làm mới ứng dụng..."
+  },
+  "settings": {
+    "financialSettings": "Cài đặt tài chỉnh",
+    "serviceFeesSettings": "Cài đặt Phí Dịch vụ",
+    "bankAccountManagement": "Quản lý Tài khoản Ngân hàng",
+    "saveExchangeRate": "Lưu Tỷ giá",
+    "exchangeRateUpdateSuccess": "Cập nhật tỉ giá thành công!",
+    "serviceFeesDescription": "Thiết lập các loại phí mặc định của hệ thống. Các chính sách phí riêng cho từng loại khách hàng sẽ ghi đè lên các cài đặt này.",
+    "buyingFeeUS": "Phí mua hộ Mỹ: 4%",
+    "buyingFeeJP": "Phí mua hộ Nhật: từ 3%",
+    "internationalShipping": "Phí vận chuyển quốc tế",
+    "productSurcharge": "Phụ phí theo loại sản phẩm",
+    "reinforcementFee": "Phí gia cố: 5.000 VNĐ/Kg",
+    "insuranceFee": "Phí bảo hiểm: 3%",
+    "hanoiDeliveryFee": "Phí giao hàng Hà Nội",
+    "storageFee": "Phí lưu kho: 1.000 VNĐ/kg/ngày",
+    "goToFeeManagement": "Đi đến trang Quản lý Phí",
+    "orderOperationsSettings": "Cài đặt Vận hành Đơn hàng",
+    "supportedWebsiteManagement": "Quản lý Website được hỗ trợ",
+    "productTypesAndFees": "Quản lý Loại sản phẩm & Phí",
+    "userManagementSettings": "Cài đặt Quản trị Người dùng",
+    "customerCategoriesAndPolicies": "Phân loại Khách hàng & Chính sách",
+    "staffAndPermissions": "Nhân viên & Phân quyền"
+  },
+  "partnerManage": {
+    "createMaterialSuccess": "Tạo nguyên liệu mới thành công!",
+    "deleteWebsiteSuccess": "Xóa Website thành công!",
+    "from": "Từ",
+    "note": "Ghi chú",
+    "totalBuyJPY": "Tổng Mua (JPY)",
+    "totalBuyUSD": "Tổng Mua (USD)",
+    "exchangeRate": "Tỷ giá"
+  },
+  "categoryCustomer": {
+    "createSuccess": "Tạo loại khách hàng mới thành công!",
+    "updateSuccess": "Cập nhật loại khách hàng thành công!",
+    "deleteSuccess": "Xóa loại khách hàng thành công!",
+    "exchangeRateUpdateSuccess": "Cập nhật tỉ giá thành công!"
   }
 }
