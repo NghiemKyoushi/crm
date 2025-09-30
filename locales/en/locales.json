@@ -464,5 +464,15 @@
     "edit":"Edit",
     "unknown": "Unknown",
     "uncategorized": "Uncategorized"
+  },
+  "errorHandling": {
+    "systemError": "System error detected",
+    "refreshingApp": "Refreshing application to fix the issue...",
+    "pleaseWait": "Please wait a moment...",
+    "somethingWentWrong": "Something went wrong",
+    "appEncounteredError": "The application encountered an unexpected error",
+    "tryAgain": "Try Again",
+    "refreshAndClearCache": "Refresh and Clear Cache",
+    "refreshingAppShort": "Refreshing application..."
   }
 }

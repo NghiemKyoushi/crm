@@ -466,5 +466,15 @@
     "edit": "Chỉnh sửa",
     "unknown": "Không rõ",
     "uncategorized": "Chưa phân loại"
+  },
+  "errorHandling": {
+    "systemError": "Đã phát hiện lỗi hệ thống",
+    "refreshingApp": "Đang làm mới ứng dụng để khắc phục...",
+    "pleaseWait": "Vui lòng đợi trong giây lát...",
+    "somethingWentWrong": "Đã xảy ra lỗi",
+    "appEncounteredError": "Ứng dụng gặp sự cố không mong muốn",
+    "tryAgain": "Thử lại",
+    "refreshAndClearCache": "Làm mới và xóa cache",
+    "refreshingAppShort": "Đang làm mới ứng dụng..."
   }
 }

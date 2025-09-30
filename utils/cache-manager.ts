@@ -165,12 +165,18 @@ export class CacheManager {
   /**
    * Show user-friendly error message before cache clear
    */
-  static showCacheClearMessage() {
+  static showCacheClearMessage(translations?: { systemError: string; refreshingApp: string; pleaseWait: string }) {
     if (!this.isClient() || typeof document === 'undefined') {
       return null;
     }
 
-    const message = 'Đã phát hiện lỗi hệ thống. Đang làm mới ứng dụng để khắc phục...';
+    const defaultMessages = {
+      systemError: 'Đã phát hiện lỗi hệ thống',
+      refreshingApp: 'Đang làm mới ứng dụng để khắc phục...',
+      pleaseWait: 'Vui lòng đợi trong giây lát...'
+    };
+
+    const messages = translations || defaultMessages;
 
     // Create temporary overlay
     const overlay = document.createElement('div');
@@ -195,8 +201,8 @@ export class CacheManager {
     overlay.innerHTML = `
       <div style="background: white; color: #333; padding: 30px; border-radius: 10px; max-width: 400px;">
         <div style="margin-bottom: 20px;">⚠️</div>
-        <div style="margin-bottom: 20px;">${message}</div>
-        <div style="font-size: 14px; opacity: 0.7;">Vui lòng đợi trong giây lát...</div>
+        <div style="margin-bottom: 20px;">${messages.refreshingApp}</div>
+        <div style="font-size: 14px; opacity: 0.7;">${messages.pleaseWait}</div>
       </div>
     `;
 

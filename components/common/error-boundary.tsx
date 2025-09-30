@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import React, { Component, ReactNode } from "react";
 import { CacheManager } from "@/utils/cache-manager";
+import { useTranslation } from 'react-i18next';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -11,6 +12,7 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: ReactNode;
+  t: (key: string) => string;
 }
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -57,8 +59,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
           <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
             <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-700 mb-2">Đang làm mới ứng dụng...</p>
-            <p className="text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
+            <p className="text-gray-700 mb-2">{this.props.t('errorHandling.refreshingAppShort')}</p>
+            <p className="text-sm text-gray-500">{this.props.t('errorHandling.pleaseWait')}</p>
           </div>
         </div>
       );
@@ -69,20 +71,20 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
           <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Đã xảy ra lỗi</h2>
-            <p className="text-gray-600 mb-6">Ứng dụng gặp sự cố không mong muốn</p>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">{this.props.t('errorHandling.somethingWentWrong')}</h2>
+            <p className="text-gray-600 mb-6">{this.props.t('errorHandling.appEncounteredError')}</p>
             <div className="space-y-3">
               <button
                 onClick={this.handleRetry}
                 className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Thử lại
+                {this.props.t('errorHandling.tryAgain')}
               </button>
               <button
                 onClick={this.handleClearCache}
                 className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
               >
-                Làm mới và xóa cache
+                {this.props.t('errorHandling.refreshAndClearCache')}
               </button>
             </div>
           </div>
@@ -96,8 +98,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
 const ErrorBoundaryWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
-  return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>;
+  return <ErrorBoundary key={pathname} t={t}>{children}</ErrorBoundary>;
 };
 
 export default ErrorBoundaryWrapper;
