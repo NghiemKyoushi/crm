@@ -4,10 +4,11 @@ import {
   LockOutlined,
   DeleteOutlined,
   KeyOutlined,
-  UnlockOutlined, 
+  UnlockOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 type ConfirmType = "reset" | "lock" | "delete" | "unlock" | "default" | "confirm"; // 👈 thêm unlock
 
@@ -26,14 +27,20 @@ interface ConfirmModalProps {
 export default function PopupConfirm({
   open,
   type = "default",
-  title = "Xác nhận",
-  content = "Bạn có chắc chắn muốn thực hiện hành động này?",
+  title,
+  content,
   onConfirm,
   onCancel,
-  confirmText = "Đồng ý",
-  cancelText = "Huỷ",
+  confirmText,
+  cancelText,
   loading = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+
+  const defaultTitle = title || t('button.confirm');
+  const defaultContent = content || t('button.confirmMessage');
+  const defaultConfirmText = confirmText || t('button.agree');
+  const defaultCancelText = cancelText || t('button.cancel');
   const config: Record<
     ConfirmType,
     { icon: ReactNode; confirmBtn: string }
@@ -75,15 +82,15 @@ export default function PopupConfirm({
     >
       <div className="flex flex-col items-center gap-3 text-center">
         {config[type]?.icon || config["default"].icon}
-        <h2 className="text-lg font-semibold">{title}</h2>
-        <p className="text-gray-600">{content}</p>
+        <h2 className="text-lg font-semibold">{defaultTitle}</h2>
+        <p className="text-gray-600">{defaultContent}</p>
 
         <div className="flex gap-3 mt-4 w-full justify-center">
           <button
             className="min-w-[100px] px-5 py-2.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium transition text-base"
             onClick={onCancel}
           >
-            {cancelText}
+            {defaultCancelText}
           </button>
           <button
             className={`min-w-[100px] px-5 py-2.5 rounded-md font-medium transition !text-white ${
@@ -92,7 +99,7 @@ export default function PopupConfirm({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "Đang xử lý..." : confirmText}
+            {loading ? t('button.processing') : defaultConfirmText}
           </button>
         </div>
       </div>

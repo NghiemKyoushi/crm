@@ -144,7 +144,7 @@ const DepositTable = (props: DepositTableProps) => {
       setTransactionId(code);
       setIsOpenHistory(true);
     } catch (error) {
-      console.error("Lỗi khi lấy lịch sử:", error);
+      console.error(t('system.errorGettingHistory'), error);
     }
   };
 
@@ -261,7 +261,7 @@ const DepositTable = (props: DepositTableProps) => {
       },
     },
     {
-      title: "Chi tiết",
+      title: t('table.details'),
       dataIndex: "status",
       key: "status",
       render: (status: string, record: DepositItem) => (
@@ -319,26 +319,26 @@ const DepositTable = (props: DepositTableProps) => {
           case "FAILED":
             return (
               <Tag className="!rounded-3xl" color="blue">
-                thất bại
+                {t('status.failed')}
                 {/* {t("deposit.status.manual")} */}
               </Tag>
             );
           case "MANUAL_TOP_UP_COMPLETED":
             return (
               <Tag className="!rounded-3xl" color="green">
-                Nạp tiền
+                {t('status.topUp')}
               </Tag>
             );
           case "MANUAL_WITHDRAWAL_COMPLETED":
             return (
               <Tag className="!rounded-3xl" color="red">
-                Trừ tiền
+                {t('status.deduction')}
               </Tag>
             );
           case "CANCELED_BY_USER":
             return (
               <Tag className="!rounded-3xl" color="orange">
-                Người dùng huỷ
+                {t('status.cancelledByUser')}
               </Tag>
             );
           default:
@@ -399,7 +399,7 @@ const DepositTable = (props: DepositTableProps) => {
   const createTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createTopupManual(data),
     onSuccess: () => {
-      toast.success("Tạo lệnh nạp tiền thành công!");
+      toast.success(t('toast.createDepositSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listTopup"] });
     },
     onError: (err: any) =>
@@ -409,7 +409,7 @@ const DepositTable = (props: DepositTableProps) => {
   const createMinusTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createMinusTopupManual(data),
     onSuccess: () => {
-      toast.success("Tạo lệnh nạp tiền thành công!");
+      toast.success(t('toast.createDepositSuccess'));
       queryClient.invalidateQueries({ queryKey: ["listTopup"] });
     },
     onError: (err: any) =>

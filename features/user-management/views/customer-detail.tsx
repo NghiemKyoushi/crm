@@ -54,7 +54,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
       { data, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Tạo địa chỉ mới thành công!");
+          toast.success(t('toast.createAddressSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -74,7 +74,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
       { data, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Thêm tài khoản mới thành công!");
+          toast.success(t('toast.addBankAccountSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -94,7 +94,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
       { address_id: +addressId, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật địa chỉ mặc định thành công!");
+          toast.success(t('toast.updateDefaultAddressSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -114,7 +114,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
       { bank_id: +bankId, id: selectedId },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật tài khoản ngân hàng mặc định thành công!");
+          toast.success(t('toast.updateDefaultBankSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -134,7 +134,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
       { customer_id: +selectedId, sale_id: +saleinfo.id },
       {
         onSuccess: async () => {
-          toast.success("Cập nhật địa chỉ mặc định thành công!");
+          toast.success(t('toast.updateSalesAssignmentSuccess'));
           const updatedCustomer = await queryClient.fetchQuery({
             queryKey: ["detailCustomer", selectedId],
             queryFn: () => getDetailCustomer(selectedId),
@@ -206,7 +206,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-purple-600">0M đ</p>
-              <p className="text-gray-600 text-sm">Số dư ví</p>
+              <p className="text-gray-600 text-sm">{t('customerManage.customerOverview.walletBalance')}</p>
             </div>
           </div>
         )}

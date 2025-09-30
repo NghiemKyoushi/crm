@@ -85,7 +85,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success("Xác nhận mua đơn hàng thành công!");
+            toast.success(t('toast.confirmPurchaseSuccess'));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -107,7 +107,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success("Hoàn thành đơn hàng!");
+            toast.success(t('toast.completeOrderSuccess'));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -130,7 +130,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success("Từ chối đơn hàng thành công!");
+            toast.success(t('toast.rejectOrderSuccess'));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -157,7 +157,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success("Kiểm hàng thành công!");
+            toast.success(t('toast.inspectGoodsSuccess'));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -173,7 +173,7 @@ export default function OrderHub() {
 
   const columns: ColumnsType<Invoice> = [
     {
-      title: "Mã Đơn",
+      title: t('table.orderCode'),
       dataIndex: "invoice_no",
       key: "invoice_no",
       render: (text, record) => (
@@ -186,7 +186,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Khách hàng",
+      title: t('table.customer'),
       key: "customer",
       render: (_, record) => (
         <div>
@@ -196,7 +196,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Người tạo",
+      title: t('table.creator'),
       key: "created_by_name",
       render: (_, record) => (
         <div>
@@ -233,7 +233,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Giá trị",
+      title: t('table.amount'),
       key: "amount",
       render: (_, record) => (
         <div>
@@ -247,7 +247,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Trạng thái",
+      title: t('table.status'),
       dataIndex: "status",
       key: "status",
       align: "center",
@@ -263,51 +263,51 @@ export default function OrderHub() {
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
-            text = "Đợi duyệt";
+            text = t('status.pendingApproval');
             break;
           case OrderStatusType.PENDING_DEPOSIT:
             color = "gold";
-            text = "Đợi đặt cọc";
+            text = t('status.pendingDeposit');
             break;
           case OrderStatusType.DEPOSIT_PAID:
             color = "green";
-            text = "Đã đặt cọc";
+            text = t('status.depositPaid');
             break;
           case OrderStatusType.PURCHASED:
             color = "blue";
-            text = "Đã mua";
+            text = t('status.purchased');
             break;
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             color = "purple";
-            text = "Đến kho Nhật";
+            text = t('status.arrivedJpWarehouse');
             break;
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             color = "cyan";
-            text = "Đến kho Việt";
+            text = t('status.arrivedVnWarehouse');
             break;
           case OrderStatusType.UNDER_INSPECTION:
             color = "lime";
-            text = "Đang kiểm hàng";
+            text = t('status.underInspection');
             break;
           case OrderStatusType.PENDING_PAYMENT:
             color = "red";
-            text = "Đợi thanh toán";
+            text = t('status.pendingPayment');
             break;
           case OrderStatusType.READY_TO_SHIP:
             color = "geekblue";
-            text = "Sẵn sàng giao";
+            text = t('status.readyToShip');
             break;
           case OrderStatusType.SHIPPED:
             color = "volcano";
-            text = "Đã chuyển";
+            text = t('status.shipped');
             break;
           case OrderStatusType.SHIPPING_REQUEST_CLIENT:
             color = "magenta";
-            text = "Yêu cầu chuyển hàng";
+            text = t('status.shippingRequest');
             break;
           case OrderStatusType.CANCELED:
             color = "red";
-            text = "Đã Huỷ";
+            text = t('status.cancelled');
             break;
           default:
             color = "default";
@@ -322,7 +322,7 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Hành động",
+      title: t('table.actions'),
       key: "actions",
       align: "right",
       onCell: () => ({
@@ -347,7 +347,7 @@ export default function OrderHub() {
                     setIsOpenApproveOrder(true);
                   }}
                 >
-                  Duyệt
+                  {t('button.approve')}
                 </Button>
               );
               actions.push(
@@ -360,7 +360,7 @@ export default function OrderHub() {
                     setIsOpenCancel(true);
                   }}
                 >
-                  Từ chối
+                  {t('button.reject')}
                 </Button>
               );
             }
@@ -381,7 +381,7 @@ export default function OrderHub() {
                   setIsOpenTrackingOrder(true);
                 }}
               >
-                Chuyển về kho nhật
+                {t('button.transferToJpWarehouse')}
               </Button>
             );
             break;
@@ -407,7 +407,7 @@ export default function OrderHub() {
                       },
                       {
                         onSuccess: () => {
-                          toast.success("Xác nhận về kho Việt thành công!");
+                          toast.success(t('toast.confirmVnWarehouseSuccess'));
                           queryClient.invalidateQueries({
                             queryKey: ["listorder"],
                           });
@@ -425,7 +425,7 @@ export default function OrderHub() {
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-indigo-500 !text-white !border-0 !text-xs"
               >
-                Chuyển về kho Việt
+                {t('button.transferToVnWarehouse')}
               </Button>
             );
             break;
@@ -442,7 +442,7 @@ export default function OrderHub() {
                   setIsOpenCheckOrder(true);
                 }}
               >
-                Kiểm hàng
+                {t('button.inspectGoods')}
               </Button>
             );
             break;
@@ -459,7 +459,7 @@ export default function OrderHub() {
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-indigo-500 !text-white !border-0 !text-xs"
               >
-                Đã mua
+                {t('button.purchased')}
               </Button>
             );
             break;
@@ -476,7 +476,7 @@ export default function OrderHub() {
                   setOpenConfirmComplete(true);
                 }}
               >
-                Sẵn sàng giao
+                {t('button.readyToShip')}
               </Button>
             );
             break;
@@ -493,7 +493,7 @@ export default function OrderHub() {
               setOrderDetail(record);
             }}
           >
-            Chi tiết
+            {t('button.details')}
           </Button>
         );
 
@@ -509,7 +509,7 @@ export default function OrderHub() {
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-semibold text-gray-800">
-            Quản lý Đơn hàng
+            {t('page.orderManagement')}
           </h2>
           <Button
             type="primary"
@@ -517,7 +517,7 @@ export default function OrderHub() {
             icon={<PlusOutlined />}
             className="bg-blue-500 hover:bg-blue-600"
           >
-            Tạo Đơn hàng mới
+            {t('button.createNewOrder')}
           </Button>
         </div>
         <div className="flex flex-col mb-2 gap-4 ">
@@ -525,7 +525,7 @@ export default function OrderHub() {
             <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
               <Form.Item name="keyword" className="mb-0">
                 <Input
-                  placeholder="Mã đơn, Mã kiện, Tên KH..."
+                  placeholder={t('placeholder.searchOrderCustomer')}
                   className="w-full h-11"
                 />
               </Form.Item>
@@ -611,7 +611,7 @@ export default function OrderHub() {
               },
               {
                 onSuccess: () => {
-                  toast.success("Xác nhận đơn hàng thành công!");
+                  toast.success(t('toast.confirmOrderSuccess'));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });
@@ -650,7 +650,7 @@ export default function OrderHub() {
               },
               {
                 onSuccess: () => {
-                  toast.success("Xác nhận về kho Nhật thành công!");
+                  toast.success(t('toast.confirmJpWarehouseSuccess'));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });
@@ -689,7 +689,7 @@ export default function OrderHub() {
               },
               {
                 onSuccess: () => {
-                  toast.success("Xác nhận về kho Việt thành công!");
+                  toast.success(t('toast.confirmVnWarehouseSuccess'));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });

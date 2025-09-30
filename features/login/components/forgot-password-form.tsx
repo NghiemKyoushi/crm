@@ -37,15 +37,15 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
     setEmailValue(values.email);
     forgotPassMutation.mutate(values, {
       onSuccess: () => {
-        toast.success("Mã OTP đã được gửi tới email!");
+        toast.success(t('toast.emailOtpSent'));
         setOtpModalVisible(true);
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
         if (err.status === 409) {
-          toast.error("Hãy đợi 5 phút rồi thử lại!");
+          toast.error(t('toast.waitFiveMinutes'));
         } else {
-          toast.error("Email không tồn tại!");
+          toast.error(t('toast.emailNotExists'));
         }
       },
     });
@@ -57,12 +57,12 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         { email: emailValue, otp: values.otp, new_password: values.newPassword },
         {
           onSuccess: () => {
-            toast.success("Xác nhận OTP thành công, mật khẩu mới đã được reset!");
+            toast.success(t('toast.otpConfirmSuccess'));
             setOtpModalVisible(false);
             props.onBack();
           },
           onError: () => {
-            toast.error("OTP hoặc mật khẩu không hợp lệ!");
+            toast.error(t('toast.invalidOtpPassword'));
           },
         }
       );
@@ -74,10 +74,10 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
       { email: emailValue },
       {
         onSuccess: () => {
-          toast.success("OTP mới đã được gửi!");
+          toast.success(t('toast.newOtpSent'));
         },
         onError: () => {
-          toast.error("Hãy đợi 5 phút rồi thử lại!");
+          toast.error(t('toast.waitFiveMinutes'));
         },
       }
     );
@@ -126,8 +126,8 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
           name="email"
           label={<span style={{ fontWeight: 600 }}>Email</span>}
           rules={[
-            { required: true, message: "Vui lòng nhập email!" },
-            { type: "email", message: "Email không hợp lệ!" },
+            { required: true, message: t('validation.email.required') },
+            { type: "email", message: t('validation.email.invalid') },
           ]}
         >
           <Input
@@ -140,7 +140,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
 
         <Form.Item className="!mt-40 flex justify-center">
           <Button type="primary" htmlType="submit" size="large">
-            Gửi mã xác nhận
+            {t('button.confirm')}
           </Button>
         </Form.Item>
       </Form>
@@ -157,18 +157,18 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
         <Form form={otpForm} layout="vertical" onFinish={handleOtpConfirm}>
           <div className="text-center p-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Xác thực OTP và mật khẩu mới
+              {t('form.otpAndNewPassword')}
             </h3>
             <p className="mb-6 text-sm text-gray-500">
-              Nhập mã OTP 6 số và mật khẩu mới
+              {t('form.enterOtpAndPassword')}
             </p>
 
             {/* OTP */}
             <Form.Item
               name="otp"
               rules={[
-                { required: true, message: "Vui lòng nhập OTP" },
-                { len: 6, message: "OTP phải có đúng 6 số" },
+                { required: true, message: t('form.enterOtp') },
+                { len: 6, message: t('form.otpSixDigits') },
               ]}
             >
               <Input.OTP
@@ -182,15 +182,15 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             <Form.Item
               name="newPassword"
               rules={[
-                { required: true, message: "Nhập mật khẩu mới" },
+                { required: true, message: t('form.enterNewPassword') },
                 {
                   pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/,
-                  message: "8-20 ký tự, gồm chữ và số",
+                  message: t('form.passwordPattern'),
                 },
               ]}
             >
               <Input.Password
-                placeholder="Mật khẩu mới"
+                placeholder={t('form.newPassword')}
                 size="large"
                 className="mt-4 mb-2.5"
               />
@@ -205,7 +205,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
                 htmlType="submit"
                 loading={createNewPasswordMutation.isPending}
               >
-                Xác nhận
+                {t('button.confirm')}
               </Button>
               <Button
                 type="default"
@@ -215,7 +215,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
                 loading={resendOTPMutation.isPending}
                 onClick={handleResendOtp}
               >
-                Gửi lại OTP
+                {t('button.resendOtp')}
               </Button>
             </Space>
           </div>

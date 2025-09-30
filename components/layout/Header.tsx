@@ -86,7 +86,7 @@ export const Header: React.FC= () => {
     >
       <div className="text-lg font-semibold text-left">
         {loading
-          ? "Đang tải..."
+          ? t('system.loading')
           : currentMenu
           ? t(`menu.${currentMenu.label}`)
           : "OrderSystem"}

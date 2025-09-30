@@ -536,5 +536,203 @@
     "servicesAndDelivery": "Services & Delivery",
     "insuranceAndRegulations": "Insurance & General Regulations",
     "customFeeSettings": "Custom fee settings for customer category"
+  },
+  "toast": {
+    "emailOtpSent": "OTP code has been sent to your email!",
+    "waitFiveMinutes": "Please wait 5 minutes before trying again!",
+    "emailNotExists": "Email does not exist!",
+    "otpConfirmSuccess": "OTP confirmed successfully, new password has been reset!",
+    "invalidOtpPassword": "OTP or password is invalid!",
+    "newOtpSent": "New OTP has been sent!",
+    "createAddressSuccess": "New address created successfully!",
+    "addBankAccountSuccess": "New bank account added successfully!",
+    "updateDefaultAddressSuccess": "Default address updated successfully!",
+    "updateDefaultBankSuccess": "Default bank account updated successfully!",
+    "createOrderSuccess": "New order created successfully!",
+    "pleaseEnterLink": "Please enter link first!",
+    "getProductInfoSuccess": "Product information retrieved successfully!",
+    "cannotGetInfoFromLink": "Cannot get information from link!",
+    "confirmPurchaseSuccess": "Purchase order confirmed successfully!",
+    "completeOrderSuccess": "Order completed!",
+    "rejectOrderSuccess": "Order rejected successfully!",
+    "inspectGoodsSuccess": "Goods inspection completed successfully!",
+    "createDepositSuccess": "Deposit order created successfully!"
+  },
+  "form": {
+    "productLink": "Product Link",
+    "productName": "Product Name",
+    "productDescription": "Product Description",
+    "productType": "Product Type",
+    "method": "Method",
+    "priceJpy": "Price (¥)",
+    "priceVnd": "Price (VND)",
+    "customer": "Customer",
+    "serviceFeeJpy": "Service Fee (¥)",
+    "serviceFeeVnd": "Service Fee (VND)",
+    "depositVnd": "Deposit (VND)",
+    "depositPercent": "Deposit %",
+    "note": "Note",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "accountHolderName": "Account Holder Name",
+    "dailyLimitVnd": "Daily Limit (VND)",
+    "status": "Status"
+  },
+  "placeholder": {
+    "searchByOrderCode": "Search by order code...",
+    "filterStatus": "-- Filter Status --",
+    "exampleMedicalEquipment": "e.g: Medical Equipment",
+    "selectIcon": "Select Icon",
+    "productTypeDescription": "Brief description of product type",
+    "searchOrderCustomer": "Order code, Package code, Customer name...",
+    "source": "Source"
+  },
+  "button": {
+    "confirm": "Confirm",
+    "confirmMessage": "Are you sure you want to perform this action?",
+    "agree": "Agree",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "close": "Close"
+  },
+  "modal": {
+    "addNewProductType": "Add New Product Type",
+    "addNewSurcharge": "Add New Surcharge",
+    "addTrackingCode": "Add Tracking Code",
+    "inspectAndCalculateFee": "Inspect and Calculate Fee"
+  },
+  "status": {
+    "pendingApproval": "Pending Approval",
+    "pendingDeposit": "Pending Deposit",
+    "depositPaid": "Deposit Paid",
+    "purchased": "Purchased",
+    "arrivedJpWarehouse": "Arrived JP Warehouse",
+    "arrivedVnWarehouse": "Arrived VN Warehouse",
+    "underInspection": "Under Inspection",
+    "pendingPayment": "Pending Payment",
+    "readyToShip": "Ready to Ship",
+    "shipped": "Shipped",
+    "shippingRequest": "Shipping Request",
+    "cancelled": "Cancelled",
+    "paid": "Paid"
+  },
+  "table": {
+    "customerCode": "Customer Code",
+    "serviceFeeJpy": "Service Fee (¥)",
+    "totalPaymentJpy": "Total Payment (¥)",
+    "shippingProfit": "Shipping Profit",
+    "paymentFeeProfit": "Payment Fee Profit",
+    "exchangeRateProfit": "Exchange Rate Profit",
+    "status": "Status",
+    "customer": "Customer",
+    "creator": "Creator",
+    "amount": "Amount",
+    "actions": "Actions"
+  },
+  "page": {
+    "salesDetailTitle": "Sales Detail - PHƯƠNG LINH",
+    "salesDetailDescription": "Detailed report by customer and profit"
+  },
+  "system": {
+    "loading": "Loading...",
+    "refreshingApp": "Refreshing application to fix the issue...",
+    "pleaseWait": "Please wait a moment..."
+  },
+  "permission": {
+    "noAccess": "You don't have access permission",
+    "contactAdmin": "Please contact your administrator or manager to be granted access to this section."
+  },
+  "language": {
+    "vietnamese": "Vietnamese"
+  },
+  "validation": {
+    "pleaseEnterLink": "Please enter link!",
+    "pleaseEnterProductName": "Please enter product name!",
+    "pleaseEnterProductDescription": "Please enter product description!",
+    "selectProductType": "Please select product type!",
+    "selectMethod": "Please select method!",
+    "pleaseSelectCustomer": "Please select customer!",
+    "pleaseEnterDeposit": "Please enter deposit!"
+  },
+  "modal": {
+    "createOrderForCustomer": "Create Order for Customer",
+    "confirmPurchaseOrder": "Confirm Purchase Order",
+    "orderPurchased": "Order has been purchased!",
+    "confirmCompleteOrder": "Confirm Complete Order",
+    "orderCompleted": "Order has been completed!"
+  },
+  "table": {
+    "orderCode": "Order Code",
+    "details": "Details"
+  },
+  "button": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "transferToJpWarehouse": "Transfer to JP Warehouse",
+    "transferToVnWarehouse": "Transfer to VN Warehouse",
+    "inspectGoods": "Inspect Goods",
+    "purchased": "Purchased",
+    "readyToShip": "Ready to Ship",
+    "details": "Details",
+    "createNewOrder": "Create New Order",
+    "shipped": "Shipped",
+    "createOrder": "Create Order",
+    "resendOtp": "Resend OTP"
+  },
+  "page": {
+    "orderManagement": "Order Management",
+    "importedProductList": "Imported Product List"
+  },
+  "placeholder": {
+    "selectProductType": "-- Select Product Type --",
+    "searchCustomer": "Search customer by code or name..."
+  },
+  "form": {
+    "productInformation": "Product Information",
+    "orderInformation": "Order Information",
+    "directPurchase": "Direct Purchase",
+    "onlySupportedMethod": "Only supported method",
+    "autoCalculate": "Auto calculate",
+    "additionalServices": "Additional Services",
+    "orderInsurance": "Order Insurance",
+    "orderNote": "Additional notes about order...",
+    "orderSummary": "Order Summary",
+    "productPrice": "Product Price",
+    "serviceFee": "Service Fee",
+    "total": "Total",
+    "deposit": "Deposit",
+    "remaining": "Remaining",
+    "otpAndNewPassword": "OTP Verification and New Password",
+    "enterOtpAndPassword": "Enter 6-digit OTP and new password",
+    "enterOtp": "Please enter OTP",
+    "otpSixDigits": "OTP must be exactly 6 digits",
+    "enterNewPassword": "Enter new password",
+    "passwordPattern": "8-20 characters, letters and numbers",
+    "newPassword": "New password"
+  },
+  "toast": {
+    "confirmVnWarehouseSuccess": "VN warehouse confirmation successful!",
+    "confirmOrderSuccess": "Order confirmation successful!",
+    "confirmJpWarehouseSuccess": "JP warehouse confirmation successful!",
+    "confirmShippingSuccess": "Shipping confirmation successful!",
+    "updateSalesAssignmentSuccess": "Sales assignment updated successfully!"
+  },
+  "customerManage": {
+    "customerOverview": {
+      "walletBalance": "Wallet Balance"
+    }
+  },
+  "status": {
+    "failed": "Failed",
+    "topUp": "Top Up",
+    "deduction": "Deduction",
+    "cancelledByUser": "Cancelled by User",
+    "shipping": "Shipping",
+    "arrivedWarehouse": "Arrived Warehouse",
+    "delivered": "Delivered"
+  },
+  "system": {
+    "noData": "No data",
+    "errorGettingHistory": "Error getting history"
   }
 }
