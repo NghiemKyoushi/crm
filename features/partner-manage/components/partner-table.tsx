@@ -241,7 +241,7 @@ export default function JPYManagementPage() {
       />
       <div>
         <Title level={4}>
-          {activeTab === "jpy"
+          {activeTab === "JPY"
             ? t('partnerManage.overviewJPY')
             : t('partnerManage.overviewUSD')}
         </Title>
@@ -251,7 +251,7 @@ export default function JPYManagementPage() {
               <div>
                 <p className="text-sm opacity-80">{t('partnerManage.totalPartners')}</p>
                 <p className="text-2xl font-bold">
-                  {summaryItem && summaryItem.partner_count}
+                  {summaryItem ? summaryItem.partner_count : 0}
                 </p>
               </div>
               <FontAwesomeIcon
@@ -268,7 +268,7 @@ export default function JPYManagementPage() {
                   {t('partnerManage.totalPurchase')} ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
-                  {summaryItem && summaryItem.total_out}{" "}
+                  {summaryItem ? summaryItem.total_out : 0}{" "}
                   {activeTab === "JPY" ? "¥" : "$"}
                 </p>
               </div>
@@ -286,7 +286,7 @@ export default function JPYManagementPage() {
                   {t('partnerManage.totalRemaining')} ({activeTab === "JPY" ? "JPY" : "USD"})
                 </p>
                 <p className="text-2xl font-bold">
-                  {summaryItem && summaryItem.total_in}{" "}
+                  {summaryItem ? summaryItem.total_in : 0}{" "}
                   {activeTab === "JPY" ? "¥" : "$"}
                 </p>
               </div>

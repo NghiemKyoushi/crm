@@ -79,9 +79,36 @@
     "detailsTitle": "Details:",
     "assignedCustomers": "Assigned Customers",
     "assignNewCustomer": "Assign New Customer",
-    "assignedCustomersList": "List of Assigned Customers"
+    "assignedCustomersList": "List of Assigned Customers",
+    "customerOverview": {
+      "totalOrders": "Total Orders",
+      "totalSpent": "Total Spent",
+      "currentDebt": "Current Debt",
+      "addressBook": "Address Book",
+      "addAddress": "+ Add Address",
+      "default": "Default",
+      "bankAccount": "Bank Account",
+      "addBankAccount": "+ Add Bank Account",
+      "accountNumber": "Account Number",
+      "accountOwner": "Account Owner",
+      "contactInfo": "Contact Information",
+      "assignedStaff": "Assigned Staff",
+      "change": "Change",
+      "addDefaultAddress": "Add Default Address",
+      "addDefaultBank": "Add Default Bank",
+      "home": "Home"
+     
+    },
+    "tabs": {
+      "overview": "Overview",
+      "orders": "Order History",
+      "transactions": "Transaction History",
+      "fees": "Custom Fee Settings",
+      "notes": "Internal Notes"
+    }
   },
   "staffManage": {
+    "phoneInvalid":"Phone is invalid",
     "addNewStaff": "Add New Staff",
     "editNewStaff": "Edit New Staff",
     "fullName": "Full Name",
@@ -556,7 +583,7 @@
     "shippingAndSurcharge": "Shipping & Surcharge",
     "servicesAndDelivery": "Services & Delivery",
     "insuranceAndRegulations": "Insurance & General Regulations",
-    "exchangeRateSettingsTitle": "Unified Foreign Exchange Rate Settings",
+    "exchangeRateSettingsTitle": "Set Exchange Rates for Customer Type",
     "saveExchangeRate": "Save Exchange Rate",
     "exchangeRateInfo": "Information about Unified Exchange Rate:",
     "exchangeRateDescription1": "This exchange rate will be applied throughout the Dream Cargo system and will be automatically updated in all transactions.",
@@ -579,7 +606,11 @@
     "completeOrderSuccess": "Order completed successfully!",
     "rejectOrderSuccess": "Order rejected successfully!",
     "inspectGoodsSuccess": "Goods inspection successful!",
-    "createOrderSuccess": "Create order successfully"
+    "createOrderSuccess": "Create order successfully",
+    "createDepositSuccess": "Create deposit successfully!",
+    "pleaseEnterLink": "Please enter link",
+    "getProductInfoSuccess": "Get product info success",
+    "cannotGetInfoFromLink": "Can not get info from link"
   },
   "form": {
     "productInformation": "Product Information",

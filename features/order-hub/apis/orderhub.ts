@@ -12,6 +12,8 @@ export const getListOrder = async (params: {
   page: number;
   size: number;
   status?: string;
+  search?: string;
+  date?: string;
 }) => {
   const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
   return res.data.data;
@@ -94,7 +96,7 @@ export const confirmPurchaeOrder = async (id: string) => {
   return res.data.data;
 };
 
-export const trackingToJp = async (id: string, tracking: string) => {
+export const trackingToJp = async (id: string, tracking: Array<string>) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/arrived-jp-warehouse/${id}`,
     { tracking_code: tracking }
@@ -132,9 +134,10 @@ export const completeOrder = async (id: string) => {
   return res.data.data;
 };
 
-export const completeShippingOrder = async (
-  body: { shipping_fee: number; shipping_code: string }
-) => {
+export const completeShippingOrder = async (body: {
+  shipping_fee: number;
+  shipping_code: string;
+}) => {
   const res = await api.put(`${API_TYPE_CONST.COMPLETE_SHIPPING}`, body);
   return res.data.data;
 };

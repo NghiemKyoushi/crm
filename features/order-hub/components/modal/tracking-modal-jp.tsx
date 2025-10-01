@@ -21,9 +21,7 @@ const TrackingModalJP: React.FC<TrackingModalProps> = ({
   const [form] = Form.useForm();
 
   const handleFinish = (values: any) => {
-    // values.trackingCodes = array string
-    console.log('values', values.trackingCodes[0]);
-    
+    // values.trackingCodes = array string    
     onSubmit(values);
   };
 

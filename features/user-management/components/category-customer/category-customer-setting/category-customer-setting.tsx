@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { Tabs } from "antd";
+import { Button, Tabs } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faArrowLeft,
   faConciergeBell,
   faExchangeAlt,
   faPallet,
@@ -13,13 +14,14 @@ import InsuranceSettings from "@/features/fee-settting/components/insurance-sett
 import ShippingServiceForm from "@/features/fee-settting/components/shipping-service-form";
 import ShippingSurchangeTable from "@/features/fee-settting/components/shipping-surchange";
 import ExchangeRateSettings from "./category-rate-setting";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 const CategorySettingsPage: React.FC = () => {
   const params = useParams();
   const id = params.id;
   const { t } = useTranslation();
+  const router = useRouter();
 
   const items = [
     {
@@ -27,7 +29,7 @@ const CategorySettingsPage: React.FC = () => {
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon className="w-4 h-4" icon={faExchangeAlt} />
-          {t('categoryCustomer.exchangeRate')}
+          {t("categoryCustomer.exchangeRate")}
         </span>
       ),
       children: <ExchangeRateSettings />,
@@ -37,7 +39,7 @@ const CategorySettingsPage: React.FC = () => {
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-          {t('categoryCustomer.shippingAndSurcharge')}
+          {t("categoryCustomer.shippingAndSurcharge")}
         </span>
       ),
       children: id ? (
@@ -49,7 +51,7 @@ const CategorySettingsPage: React.FC = () => {
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-          {t('categoryCustomer.servicesAndDelivery')}
+          {t("categoryCustomer.servicesAndDelivery")}
         </span>
       ),
       children: <ShippingServiceForm />,
@@ -59,7 +61,7 @@ const CategorySettingsPage: React.FC = () => {
       label: (
         <span className="flex items-center gap-2">
           <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-          {t('categoryCustomer.insuranceAndRegulations')}
+          {t("categoryCustomer.insuranceAndRegulations")}
         </span>
       ),
       children: <InsuranceSettings />,
@@ -68,9 +70,15 @@ const CategorySettingsPage: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
-      <h3 className="text-xl font-semibold mb-4">
-        {t('categoryCustomer.customFeeSettings')}
-      </h3>
+      <button className="cursor-pointer" onClick={() => router.back()}>
+        <FontAwesomeIcon icon={faArrowLeft} />
+      </button>
+
+      <div className="flex items-center justify-between mb-2 mt-4">
+        <h3 className="text-xl font-semibold">
+          {t("categoryCustomer.customFeeSettings")}
+        </h3>
+      </div>
       <Tabs defaultActiveKey="1" items={items} />
     </div>
   );

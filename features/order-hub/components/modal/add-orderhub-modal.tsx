@@ -64,7 +64,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const deposit = Form.useWatch("deposit", form);
   const feeVnd = Form.useWatch("feeVnd", form);
   const priceVND = Form.useWatch("priceVnd", form);
-
+  const codFee = Form.useWatch("cod", form);
   const totalFee = ((feeVnd + priceVND) * percenDeposit) / 100;
   const handleOk = async () => {
     try {
@@ -93,7 +93,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           },
           {
             onSuccess: () => {
-              toast.success(t('toast.createOrderSuccess'));
+              toast.success(t("toast.createOrderSuccess"));
               queryClient.invalidateQueries({
                 queryKey: ["listorder"],
               });
@@ -129,7 +129,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const handleGetInfo = () => {
     const linkValue = form.getFieldValue("link");
     if (!linkValue) {
-      toast.warning(t('toast.pleaseEnterLink'));
+      toast.warning(t("toast.pleaseEnterLink"));
       return;
     }
     mutate(linkValue, {
@@ -142,10 +142,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         });
         setIdProduct(data.id);
         form.setFieldValue("priceY", data.price);
-        toast.success(t('toast.getProductInfoSuccess'));
+        toast.success(t("toast.getProductInfoSuccess"));
       },
       onError: () => {
-        toast.error(t('toast.cannotGetInfoFromLink'));
+        toast.error(t("toast.cannotGetInfoFromLink"));
       },
     });
   };
@@ -204,6 +204,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           product_ids: idProduct ? [idProduct] : [],
           user_id: form.getFieldValue("customer"),
           insurance_id: insurance ? insurance.id : 0,
+          cod: codFee ? codFee : 0,
         };
         try {
           const res: FeeServiceCheck = await getDataFeeService(
@@ -219,7 +220,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     };
 
     fetchFeeService();
-  }, [form, services, customer, priceVND, prices]);
+  }, [form, services, customer, priceVND, prices, codFee]);
 
   useEffect(() => {
     if (listInsurance && listInsurance.length > 0) {
@@ -231,6 +232,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     if (totalFee) form.setFieldValue("deposit", totalFee);
   }, [totalFee, percenDeposit]);
 
+  const handleCancel = () => {
+    form.resetFields();
+    setServices([]);
+    setInsurance(null);
+    setPrice(0);
+    setPercenDeposit(0);
+    setIdProduct(null);
+    onCancel();
+    console.log('checkkkk');
+    
+  };
   return (
     <>
       <Modal
@@ -242,13 +254,13 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             overflowX: "hidden",
           },
         }}
-        title={t('modal.createOrderForCustomer')}
+        title={t("modal.createOrderForCustomer")}
         open={isOpen}
-        onCancel={onCancel}
+        onCancel={handleCancel}
         centered
         footer={[
-          <Button key="cancel" onClick={onCancel}>
-            {t('button.cancel')}
+          <Button key="cancel" onClick={handleCancel}>
+            {t("button.cancel")}
           </Button>,
           <Button
             key="submit"
@@ -256,7 +268,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             onClick={handleOk}
             className="bg-blue-500"
           >
-            {t('button.createOrder')}
+            {t("button.createOrder")}
           </Button>,
         ]}
         width={800}
@@ -274,11 +286,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
             <Col span={12}>
-              <Divider orientation="left">{t('form.productInformation')}</Divider>
+              <Divider orientation="left">
+                {t("form.productInformation")}
+              </Divider>
               <Form.Item
-                label={t('form.productLink')}
+                label={t("form.productLink")}
                 name="link"
-                rules={[{ required: true, message: t('validation.pleaseEnterLink') }]}
+                rules={[
+                  { required: true, message: t("validation.pleaseEnterLink") },
+                ]}
                 className="!mb-1 "
               >
                 <Input
@@ -292,20 +308,26 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 />
               </Form.Item>
               <Form.Item
-                label={t('form.productName')}
+                label={t("form.productName")}
                 name="productName"
                 rules={[
-                  { required: true, message: t('validation.pleaseEnterProductName') },
+                  {
+                    required: true,
+                    message: t("validation.pleaseEnterProductName"),
+                  },
                 ]}
                 className="!mb-1"
               >
                 <Input className="!h-11" placeholder="" />
               </Form.Item>
               <Form.Item
-                label={t('form.productDescription')}
+                label={t("form.productDescription")}
                 name="description"
                 rules={[
-                  { required: true, message: t('validation.pleaseEnterProductName') },
+                  {
+                    required: true,
+                    message: t("validation.pleaseEnterProductName"),
+                  },
                 ]}
                 className="!mb-1"
               >
@@ -314,14 +336,19 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 {/* <TextArea rows={4} maxLength={500} placeholder="" /> */}
               </Form.Item>
               <Form.Item
-                label={t('form.productType')}
+                label={t("form.productType")}
                 name="category"
-                rules={[{ required: true, message: t('validation.selectProductType') }]}
+                rules={[
+                  {
+                    required: true,
+                    message: t("validation.selectProductType"),
+                  },
+                ]}
                 className="!mb-1"
               >
                 <Select
                   className="!h-11"
-                  placeholder={t('placeholder.selectProductType')}
+                  placeholder={t("placeholder.selectProductType")}
                 >
                   {categories?.map((cat: any) => {
                     return (
@@ -334,9 +361,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <Form.Item
-                label={t('form.method')}
+                label={t("form.method")}
                 name="method"
-                rules={[{ required: true, message: t('validation.selectMethod') }]}
+                rules={[
+                  { required: true, message: t("validation.selectMethod") },
+                ]}
                 className=" !w-full !mb-1"
               >
                 <Radio.Group className="!flex !flex-row !w-full gap-4  ">
@@ -345,9 +374,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     value="buy"
                     className="!text-blue-500 flex-1 !p-3 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
                   >
-                    <div className="font-medium text-blue-800">{t('form.directPurchase')}</div>
+                    <div className="font-medium text-blue-800">
+                      {t("form.directPurchase")}
+                    </div>
                     <div className="text-xs text-blue-600">
-                      {t('form.onlySupportedMethod')}
+                      {t("form.onlySupportedMethod")}
                     </div>
                   </Radio>
                 </Radio.Group>
@@ -356,7 +387,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label={t('form.priceJpy')}
+                  label={t("form.priceJpy")}
                   name="priceY"
                 >
                   <InputNumber
@@ -373,7 +404,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label={t('form.priceVnd')}
+                  label={t("form.priceVnd")}
                   name="priceVnd"
                 >
                   <InputNumber
@@ -384,7 +415,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     style={{ display: "flex", alignItems: "center" }}
                     className="!w-full !h-11"
                     disabled
-                    placeholder={t('form.autoCalculate')}
+                    placeholder={t("form.autoCalculate")}
                   />
                 </Form.Item>
               </div>
@@ -398,7 +429,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       key: "1",
                       label: (
                         <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
-                          <FontAwesomeIcon icon={faCog} /> {t('form.additionalServices')}
+                          <FontAwesomeIcon icon={faCog} />{" "}
+                          {t("form.additionalServices")}
                         </span>
                       ),
                       children: (
@@ -450,7 +482,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       key: "2",
                       label: (
                         <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
-                          <FontAwesomeIcon icon={faShield} /> {t('form.orderInsurance')}
+                          <FontAwesomeIcon icon={faShield} />{" "}
+                          {t("form.orderInsurance")}
                         </span>
                       ),
                       children: (
@@ -494,24 +527,27 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               </div>
             </Col>
             <Col span={12}>
-              <Divider orientation="left">{t('form.orderInformation')}</Divider>
+              <Divider orientation="left">{t("form.orderInformation")}</Divider>
               <Form.Item
-                label={t('form.customer')}
+                label={t("form.customer")}
                 name="customer"
                 className="!mb-1"
                 rules={[
-                  { required: true, message: t('validation.pleaseSelectCustomer') },
+                  {
+                    required: true,
+                    message: t("validation.pleaseSelectCustomer"),
+                  },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder={t('placeholder.searchCustomer')}
+                  placeholder={t("placeholder.searchCustomer")}
                   className="!w-full !h-11"
                   filterOption={false} // tắt filter local, dùng API search
                   onSearch={(value) => setSearchValue(value)} // update searchValue
                   notFoundContent={
-                    isLoading ? <Spin size="small" /> : t('system.noData')
+                    isLoading ? <Spin size="small" /> : t("system.noData")
                   }
                   options={options}
                 />
@@ -520,7 +556,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label={t('form.serviceFeeJpy')}
+                  label={t("form.serviceFeeJpy")}
                   name="feeY"
                 >
                   <InputNumber
@@ -536,7 +572,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
                 <Form.Item
                   className="!flex-1 !mb-1 "
-                  label={t('form.serviceFeeVnd')}
+                  label={t("form.serviceFeeVnd")}
                   name="feeVnd"
                 >
                   <InputNumber
@@ -546,17 +582,22 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
                     style={{ display: "flex", alignItems: "center" }}
-                    placeholder={t('form.autoCalculate')}
+                    placeholder={t("form.autoCalculate")}
                   />
                 </Form.Item>
               </div>
 
               <div className="flex flex-row gap-1">
                 <Form.Item
-                  label={t('form.depositVnd')}
+                  label={t("form.depositVnd")}
                   name="deposit"
+                  style={{display: "none"}}
+
                   rules={[
-                    { required: true, message: t('validation.pleaseEnterDeposit') },
+                    {
+                      required: true,
+                      message: t("validation.pleaseEnterDeposit"),
+                    },
                   ]}
                   className="!flex-1 !mb-1 "
                 >
@@ -569,38 +610,30 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     min={0}
                   />
                 </Form.Item>
-
-                {/* <Form.Item
-                  className="!flex-1 !mb-1"
-                  label="% Cọc"
-                  name="depositPercent"
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, ",")}
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    disabled
-                    placeholder="Tự động tính"
-                  />
-                </Form.Item> */}
               </div>
+              <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  style={{ display: "flex", alignItems: "center" }}
+                  className="!w-full !h-11"
+                />
+              </Form.Item>
 
-              <Form.Item label={t('form.note')} name="note" className="!mb-1">
+              <Form.Item label={t("form.note")} name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
-                  placeholder={t('form.orderNote')}
+                  placeholder={t("form.orderNote")}
                 />
               </Form.Item>
 
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="font-medium mb-3">{t('form.orderSummary')}</h4>
+                <h4 className="font-medium mb-3">{t("form.orderSummary")}</h4>
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span>{t('form.productPrice')}</span>
+                    <span>{t("form.productPrice")}</span>
                     <span>
                       {form.getFieldValue("priceVnd")
                         ? form.getFieldValue("priceVnd").toLocaleString("en-US")
@@ -610,7 +643,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   </div>
 
                   <div className="flex justify-between">
-                    <span>{t('form.serviceFee')}</span>
+                    <span>{t("form.serviceFee")}</span>
                     <span>{feeVnd ? feeVnd.toLocaleString("en-US") : 0} đ</span>
                   </div>
 
@@ -633,7 +666,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <hr className="my-2 border-gray-200" />
 
                 <div className="flex justify-between font-semibold">
-                  <span>{t('form.total')}:</span>
+                  <span>{t("form.total")}:</span>
                   <span>
                     {form.getFieldValue("priceVnd") &&
                     form.getFieldValue("feeVnd")
@@ -647,14 +680,14 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 </div>
 
                 <div className="flex justify-between text-green-600 font-semibold">
-                  <span>{t('form.deposit')}:</span>
+                  <span>{t("form.deposit")}:</span>
                   <span>
                     {totalFee ? Number(totalFee).toLocaleString("en-US") : 0} đ
                   </span>
                 </div>
 
                 <div className="flex justify-between text-red-600 font-semibold">
-                  <span>{t('form.remaining')}:</span>
+                  <span>{t("form.remaining")}:</span>
                   <span>
                     {(() => {
                       const value =

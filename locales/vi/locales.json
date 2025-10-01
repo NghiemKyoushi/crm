@@ -79,9 +79,35 @@
     "detailsTitle": "Chi tiết:",
     "assignedCustomers": "Khách hàng Phụ trách",
     "assignNewCustomer": "Gán khách hàng mới",
-    "assignedCustomersList": "Danh sách khách hàng đã gán"
+    "assignedCustomersList": "Danh sách khách hàng đã gán",
+    "customerOverview": {
+      "totalOrders": "Tổng số Đơn hàng",
+      "totalSpent": "Tổng chi tiêu",
+      "currentDebt": "Công nợ hiện tại",
+      "addressBook": "Sổ địa chỉ",
+      "addAddress": "+ Thêm địa chỉ",
+      "default": "Mặc định",
+      "bankAccount": "Tài khoản ngân hàng",
+      "addBankAccount": "+ Thêm tài khoản",
+      "accountNumber": "STK",
+      "accountOwner": "Chủ TK",
+      "contactInfo": "Thông tin liên hệ",
+      "assignedStaff": "Nhân viên phụ trách",
+      "change": "Thay đổi",
+      "addDefaultAddress": "Thêm địa chỉ mặc định",
+      "addDefaultBank": "Thêm ngân hàng mặc định",
+      "home": "Nhà riêng"
+    },
+    "tabs": {
+      "overview": "Tổng quan",
+      "orders": "Lịch sử Đơn hàng",
+      "transactions": "Lịch sử Giao dịch",
+      "fees": "Cài đặt Phí riêng",
+      "notes": "Ghi chú Nội bộ"
+    }
   },
   "staffManage": {
+    "phoneInvalid":"Số điện thoại không hợp lệ",
     "addNewStaff": "Thêm Nhân viên mới",
     "editNewStaff": "Chỉnh sửa",
     "fullName": "Họ và tên",
@@ -556,7 +582,7 @@
     "shippingAndSurcharge": "Vận Chuyển & Phụ Thu",
     "servicesAndDelivery": "Dịch Vụ & Giao Hàng",
     "insuranceAndRegulations": "Bảo Hiểm & Quy Định Chung",
-    "exchangeRateSettingsTitle": "Cài Đặt Tỷ Giá Ngoại Tệ Thống Nhất",
+    "exchangeRateSettingsTitle": "Tỷ Giá Ngoại Tệ Cho Loại Khách Hàng",
     "saveExchangeRate": "Lưu Tỷ Giá",
     "exchangeRateInfo": "Thông tin về Tỷ giá thống nhất:",
     "exchangeRateDescription1": "Tỷ giá này sẽ được áp dụng cho toàn bộ hệ thống Dream Cargo và sẽ tự động cập nhật vào tất cả các giao dịch.",
@@ -579,7 +605,11 @@
     "completeOrderSuccess": "Hoàn thành đơn hàng thành công!",
     "rejectOrderSuccess": "Từ chối đơn hàng thành công!",
     "inspectGoodsSuccess": "Kiểm hàng thành công!",
-    "createOrderSuccess": "Tạo đơn hàng thành công"
+    "createOrderSuccess": "Tạo đơn hàng thành công",
+    "createDepositSuccess": "Tạo lệnh nạp tiền thành công!",
+    "pleaseEnterLink": "Vui lòng nhập link trước!",
+    "getProductInfoSuccess": "Lấy thông tin sản phẩm thành công!",
+    "cannotGetInfoFromLink": "Không thể lấy thông tin từ link!"
   },
   "form": {
     "productInformation": "Thông tin Sản phẩm",

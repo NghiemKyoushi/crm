@@ -77,8 +77,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
   const { data: order, refetch } = useDetailOrder(props.orderId);
 
-  
-  const { isOpen, onCancel, orderId} = props;
+  const { isOpen, onCancel, orderId } = props;
   const [form] = Form.useForm();
   const [idProduct, setIdProduct] = React.useState<number | null>(null);
   const queryClient = useQueryClient();
@@ -94,6 +93,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const feeVnd = Form.useWatch("feeVnd", form);
   const priceVND = Form.useWatch("priceVnd", form);
   const priceY = Form.useWatch("priceY", form);
+  const codFee = Form.useWatch("cod", form);
 
   const [rateProduct, setRateProduct] = useState(0);
 
@@ -121,8 +121,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         };
         updateOrderMutation.mutate(
           {
-            param: {...bodyNewOrder},
-            id: orderId
+            param: { ...bodyNewOrder },
+            id: orderId,
           },
           {
             onSuccess: () => {
@@ -249,6 +249,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           product_ids: idProduct ? [idProduct] : [],
           user_id: form.getFieldValue("customer"),
           insurance_id: insurance ? insurance.id : 0,
+          cod: codFee ? codFee : 0,
         };
         try {
           const res: FeeServiceCheck = await getDataFeeService(
@@ -280,10 +281,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     if (order) {
       setPrice(order.amount_vnd);
       setIdProduct(order.metadata.items[0]?.product.id);
-      order.metadata.infos.fees.map(item =>{
-        services.push(item.code)
-      })
-    //   setServices
+      order.metadata.infos.fees.map((item) => {
+        services.push(item.code);
+      });
+      //   setServices
       form.setFieldsValue({
         link: order.metadata.items[0]?.product.url,
         productName: order.metadata.items[0]?.product.map_data.productName,
@@ -321,14 +322,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           <Button
             key="submit"
             type="primary"
-            onClick={()=>{
-                if(order?.status !== OrderStatusType.PENDING_DEPOSIT){
-                    return;
-                }
-                handleOk()
+            onClick={() => {
+              if (order?.status !== OrderStatusType.PENDING_DEPOSIT) {
+                return;
+              }
+              handleOk();
             }}
             className="bg-blue-500"
-            disabled ={order?.status !== OrderStatusType.PENDING_DEPOSIT}
+            disabled={order?.status !== OrderStatusType.PENDING_DEPOSIT}
           >
             Chỉnh sửa đơn hàng
           </Button>,
@@ -358,11 +359,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Input
                   placeholder="https://..."
                   className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
-                //   addonAfter={
-                //     <Button type="dashed" onClick={handleGetInfo}>
-                //       Get info
-                //     </Button>
-                //   }
+                  //   addonAfter={
+                  //     <Button type="dashed" onClick={handleGetInfo}>
+                  //       Get info
+                  //     </Button>
+                  //   }
                 />
               </Form.Item>
               <Form.Item
@@ -451,8 +452,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!w-full !h-11"
                     // disabled
                     onChange={(e) => {
-                      console.log("rateProduct", rateProduct);
-
                       form.setFieldValue("priceVnd", +priceY * rateProduct);
                     }}
                     min={0}
@@ -645,6 +644,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   label="Tiền cọc (VND)"
                   name="deposit"
+                  style={{display: "none"}}
                   rules={[
                     { required: true, message: "Vui lòng nhập tiền cọc!" },
                   ]}
@@ -660,6 +660,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
+              <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  style={{ display: "flex", alignItems: "center" }}
+                  className="!w-full !h-11"
+                />
+              </Form.Item>
               <Form.Item label="Ghi chú" name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
