@@ -3,7 +3,7 @@ import api from "@/api/axiosClient";
 import { getDetailBankCreateAccount } from "@/features/finance-manage/apis";
 import { BankInfo } from "@/features/user-management/components/customer-manage/modal-customer/tab/modal/modal-overview-add-bank";
 import { BankSettingAccountModel } from "@/types/deposit-type";
-import { Modal, Form, Input, Select, Button, Spin } from "antd";
+import { Modal, Form, Input, Select, Button, Spin, InputNumber } from "antd";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +30,7 @@ export default function AddBankAccountModal({
         bank_name: bank?.name || "",
         daily_limit_vnd: +values.limit,
         is_active: values.status === "active" ? true : false,
+        telegram_channel_id: values.telegram_channel_id
       };
       onOk?.(request);
     } catch (error) {
@@ -65,6 +66,7 @@ export default function AddBankAccountModal({
             account_holder: data.account_holder,
             limit: data.daily_limit_vnd,
             status: data.is_active ? "active" : "inactive",
+            telegram_channel_id: data.telegram_channel_id
           });
         })
         .finally(() => setDetailLoading(false));
@@ -172,8 +174,24 @@ export default function AddBankAccountModal({
           name="limit"
           style={{ marginBottom: 12 }}
         >
-          <Input placeholder="VD: 500000000" />
+          <InputNumber
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            placeholder="VD: 500000000"
+            className="!w-full"
+          />
         </Form.Item>
+
+        <Form.Item
+          // label={t('table.status')}
+          label="GroupID Telegram"
+          name="telegram_channel_id"
+          style={{ marginBottom: 12 }}
+        >
+          <Input placeholder="" />
+        </Form.Item>
+
 
         <Form.Item
           label={t('table.status')}

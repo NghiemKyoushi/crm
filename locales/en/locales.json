@@ -1,5 +1,6 @@
 {
   "login": {
+    "logout": "Logout",
     "signIn": "Sign In",
     "email": "Email",
     "password": "Password",
@@ -23,7 +24,8 @@
     "imageSizeLimit": "Image must be smaller than 5MB!",
     "uploadFailed": "Upload failed",
     "pleaseEnterCount": "Please enter count check!",
-    "pleaseSelectRepackage": "Please select Repackage!"
+    "pleaseSelectRepackage": "Please select Repackage!",
+    "validationField": "Please enter field"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -310,6 +312,11 @@
     "page": {
       "title": "Supported Website Management",
       "add": "Add Website"
+    },
+    "toast": {
+      "createSuccess": "Website created successfully!",
+      "updateSuccess": "Website updated successfully!",
+      "deleteSuccess": "Website deleted successfully!"
     }
   },
   "insurance": {
@@ -571,7 +578,8 @@
     "confirmPurchaseSuccess": "Purchase confirmation successful!",
     "completeOrderSuccess": "Order completed successfully!",
     "rejectOrderSuccess": "Order rejected successfully!",
-    "inspectGoodsSuccess": "Goods inspection successful!"
+    "inspectGoodsSuccess": "Goods inspection successful!",
+    "createOrderSuccess": "Create order successfully"
   },
   "form": {
     "productInformation": "Product Information",
@@ -647,14 +655,16 @@
     "transferToVnWarehouse": "Transfer to VN Warehouse",
     "inspectGoods": "Inspect Goods",
     "purchased": "Purchased",
-    "details": "Details"
+    "details": "Details",
+    "save": "Save"
   },
   "modal": {
     "createOrderForCustomer": "Create Order for Customer",
     "confirmPurchaseOrder": "Confirm Purchase Order",
     "orderPurchased": "Order has been purchased!",
     "confirmCompleteOrder": "Confirm Complete Order",
-    "orderCompleted": "Order has been completed!"
+    "orderCompleted": "Order has been completed!",
+    "addTrackingCode": "Add tracking code"
   },
   "table": {
     "customerCode": "Customer Code",
@@ -681,7 +691,8 @@
     "valueUSD": "Value (USD)",
     "priceKgHN": "Price Kg - HN",
     "surcharge": "Surcharge",
-    "trackingShip": "Tracking Ship"
+    "trackingShip": "Tracking Ship",
+    "orderType": "Order type"
   },
   "page": {
     "orderManagement": "Order Management",
@@ -689,7 +700,8 @@
   },
   "system": {
     "noData": "No data",
-    "errorGettingHistory": "Error getting history"
+    "errorGettingHistory": "Error getting history",
+    "loading": "Loading..."
   },
   "permission": {
     "noAccess": "You don't have access permission",

@@ -65,7 +65,7 @@ const WebsiteManageTable: React.FC = () => {
           },
           {
             onSuccess: () => {
-              toast.success("Cập nhật Website thành công!");
+              toast.success(t("websiteManage.toast.updateSuccess"));
               queryClient.invalidateQueries({
                 queryKey: ["listwebsite"],
               });
@@ -88,7 +88,7 @@ const WebsiteManageTable: React.FC = () => {
           },
           {
             onSuccess: () => {
-              toast.success("Tạo Website mới thành công!");
+              toast.success(t("websiteManage.toast.createSuccess"));
               queryClient.invalidateQueries({
                 queryKey: ["listwebsite"],
               });
@@ -114,7 +114,7 @@ const WebsiteManageTable: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Xóa Website thành công!");
+          toast.success(t("websiteManage.toast.deleteSuccess"));
           queryClient.invalidateQueries({
             queryKey: ["listwebsite"],
           });

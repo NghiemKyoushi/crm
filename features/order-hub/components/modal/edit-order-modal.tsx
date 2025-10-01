@@ -321,8 +321,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           <Button
             key="submit"
             type="primary"
-            onClick={handleOk}
+            onClick={()=>{
+                if(order?.status !== OrderStatusType.PENDING_DEPOSIT){
+                    return;
+                }
+                handleOk()
+            }}
             className="bg-blue-500"
+            disabled ={order?.status !== OrderStatusType.PENDING_DEPOSIT}
           >
             Chỉnh sửa đơn hàng
           </Button>,

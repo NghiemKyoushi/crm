@@ -43,7 +43,6 @@ interface Item {
 
 export type ItemShippingList = Item[];
 
-
 export type FeeCommon = { id: number; value: number };
 
 export type GeneralPolicy = {
@@ -94,7 +93,12 @@ export function mapFormToData(form: Record<string, any>): FormData {
 
         let zone = shippingZoneFee.find((z) => z.id === zoneId);
         if (!zone) {
-          zone = { id: zoneId, fee_amount: 0, free_weight_us: 0, free_weight_japan: 0 };
+          zone = {
+            id: zoneId,
+            fee_amount: 0,
+            free_weight_us: 0,
+            free_weight_japan: 0,
+          };
           shippingZoneFee.push(zone);
         }
 
@@ -104,11 +108,19 @@ export function mapFormToData(form: Record<string, any>): FormData {
       }
     } else if (key.startsWith("general_")) {
       if (!generalPolicy[0]) {
-        generalPolicy[0] = { id: 0, free_storage_days: 0, storage_fee_per_kg_per_day: 0, min_deposit_percent: 0 };
+        generalPolicy[0] = {
+          id: 0,
+          free_storage_days: 0,
+          storage_fee_per_kg_per_day: 0,
+          min_deposit_percent: 0,
+        };
       }
-      if (key === "general_free_storage_days") generalPolicy[0].free_storage_days = value ?? 0;
-      if (key === "general_storage_fee") generalPolicy[0].storage_fee_per_kg_per_day = value ?? 0;
-      if (key === "general_deposit_percent") generalPolicy[0].min_deposit_percent = value ?? 0;
+      if (key === "general_free_storage_days")
+        generalPolicy[0].free_storage_days = value ?? 0;
+      if (key === "general_storage_fee")
+        generalPolicy[0].storage_fee_per_kg_per_day = value ?? 0;
+      if (key === "general_deposit_percent")
+        generalPolicy[0].min_deposit_percent = value ?? 0;
     }
   });
 
@@ -123,9 +135,9 @@ export interface ShippingCondition {
   id: number;
   name: string;
   condition: "GTE" | "LTE" | string; // tùy hệ thống có thêm loại khác thì dùng string
-  condition_value: string;           // có thể parse sang number nếu cần
-  surcharge: string;                 // phí phụ thu
-  shipping: string | null;           // có thể null
+  condition_value: string; // có thể parse sang number nếu cần
+  surcharge: string; // phí phụ thu
+  shipping: string | null; // có thể null
   route_id: number;
 }
 
@@ -148,20 +160,21 @@ export interface ShippingResponse {
 }
 
 export interface MaterialItem {
-  id: string ;
+  id: string;
   status?: "ACTIVE" | "INACTIVE";
   created_at?: string;
   updated_at?: string;
   created_by?: number;
   updated_by?: number;
   route_id: number;
-  value_shipping_data: number| null;
+  value_shipping_data: number | null;
   product_category_id: number;
   product_category_name: string;
   condition_type: "GT" | "LTE" | "GTE" | "RANGE" | string; // thêm union để type-safe
   price_from: number;
   price_to: number;
   value_data: number;
+  type: number;
 }
 
 interface Route {
@@ -175,23 +188,22 @@ interface Route {
 
 // Response API có dạng object key dynamic ("1", "2"...)
 export type MaterialResponse = {
-   route: Route;
+  route: Route;
   data: MaterialItem[] | null;
 };
 
 export type MaterialResponseArray = MaterialResponse[];
 
-
 export interface ShippingConditionAdd {
   id: number;
   route_id: number;
   product_category_id: number;
-  condition_type: string; 
+  condition_type: string;
   price_from: number;
   price_to: number;
   value_data: string;
   value_shipping_data: string;
-  status?: string; 
+  status?: string;
   customer_group_id?: number;
 }
 
@@ -204,6 +216,27 @@ export interface CategoryItem {
   name: string;
   icon: string;
   description: string;
-  created_at?: string;  // ISO datetime string
-  updated_at?: string;  // ISO datetime string
+  created_at?: string; // ISO datetime string
+  updated_at?: string; // ISO datetime string
+}
+
+export interface InsuranceOption {
+  id: number;
+  name: string;
+  description: string;
+  fee_percentage: number;
+  max_value_vnd: number | null;
+  status: "ACTIVE" | "INACTIVE"; // hoặc string nếu backend có nhiều trạng thái khác
+  is_delete: boolean;
+  created_at: string; // ISO datetime
+  updated_at: string | null; // nullable datetime
+}
+
+export interface InsuranceModelParamSend {
+  description?: string;
+  fee_percentage?: number;
+  id?: number;
+  max_value_vnd?: number;
+  name?: string;
+  status?: string;
 }

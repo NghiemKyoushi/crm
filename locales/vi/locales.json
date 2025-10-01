@@ -1,5 +1,6 @@
 {
   "login": {
+    "logout": "Đăng xuất",
     "signIn": "Đăng nhập",
     "email": "Email",
     "password": "Mật khẩu",
@@ -23,7 +24,8 @@
     "imageSizeLimit": "Ảnh phải nhỏ hơn 5MB!",
     "uploadFailed": "Upload thất bại",
     "pleaseEnterCount": "Vui lòng nhập kiểm đếm!",
-    "pleaseSelectRepackage": "Vui lòng chọn Repackage!"
+    "pleaseSelectRepackage": "Vui lòng chọn Repackage!",
+    "validationField": "Trường bắt buộc"
   },
   "menu": {
     "dashboard": "Bảng điều khiển",
@@ -310,6 +312,11 @@
     "page": {
       "title": "Quản lý Website được hỗ trợ",
       "add": "Thêm Website"
+    },
+    "toast": {
+      "createSuccess": "Tạo Website mới thành công!",
+      "updateSuccess": "Cập nhật Website thành công!",
+      "deleteSuccess": "Xóa Website thành công!"
     }
   },
   "insurance": {
@@ -571,7 +578,8 @@
     "confirmPurchaseSuccess": "Xác nhận đã mua đơn hàng thành công!",
     "completeOrderSuccess": "Hoàn thành đơn hàng thành công!",
     "rejectOrderSuccess": "Từ chối đơn hàng thành công!",
-    "inspectGoodsSuccess": "Kiểm hàng thành công!"
+    "inspectGoodsSuccess": "Kiểm hàng thành công!",
+    "createOrderSuccess": "Tạo đơn hàng thành công"
   },
   "form": {
     "productInformation": "Thông tin Sản phẩm",
@@ -647,14 +655,16 @@
     "transferToVnWarehouse": "Chuyển kho VN",
     "inspectGoods": "Kiểm hàng",
     "purchased": "Đã mua",
-    "details": "Chi tiết"
+    "details": "Chi tiết",
+    "save": "Lưu"
   },
   "modal": {
     "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
     "confirmPurchaseOrder": "Xác nhận đã mua đơn hàng",
     "orderPurchased": "Đơn hàng đã được mua!",
     "confirmCompleteOrder": "Xác nhận hoàn thành đơn hàng",
-    "orderCompleted": "Đơn hàng đã được hoàn thành!"
+    "orderCompleted": "Đơn hàng đã được hoàn thành!",
+    "addTrackingCode": "Thêm mã tracking"
   },
   "table": {
     "customerCode": "Mã KH",
@@ -681,7 +691,8 @@
     "valueUSD": "Giá trị (USD)",
     "priceKgHN": "Giá Kg - HN",
     "surcharge": "Phụ thu",
-    "trackingShip": "Tracking ship"
+    "trackingShip": "Tracking ship",
+    "orderType": "Phân loại hàng"
   },
   "page": {
     "orderManagement": "Quản lý Đơn hàng",
@@ -689,7 +700,8 @@
   },
   "system": {
     "noData": "Không có dữ liệu",
-    "errorGettingHistory": "Lỗi khi lấy lịch sử"
+    "errorGettingHistory": "Lỗi khi lấy lịch sử",
+    "loading": "Đang tải..."
   },
   "permission": {
     "noAccess": "Bạn không có quyền truy cập",

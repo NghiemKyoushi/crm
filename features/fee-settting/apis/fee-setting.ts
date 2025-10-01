@@ -4,6 +4,7 @@ import {
   CategoryItem,
   CreateModel,
   FormData,
+  InsuranceModelParamSend,
   ItemShippingList,
   MaterialResponse,
   MaterialResponseArray,
@@ -21,8 +22,8 @@ export const createNewInsurance = async (body: CreateModel) => {
   return res.data;
 };
 
-export const updateInsurance = async (id: number, body: CreateModel) => {
-  const res = await api.put(`${API_TYPE_CONST.INSURANCE_PACKAGE}/${id}`, body);
+export const updateInsurance = async (body: InsuranceModelParamSend[]) => {
+  const res = await api.put(`${API_TYPE_CONST.INSURANCE_PACKAGE}`, body);
   return res.data;
 };
 

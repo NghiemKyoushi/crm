@@ -1,12 +1,12 @@
 "use client";
-import React from "react";
-import { Modal, Form, Input, Button } from "antd";
-import { TruckOutlined } from "@ant-design/icons";
+import React, { useEffect } from "react";
+import { Modal, Form, Input, Button, Space } from "antd";
+import { TruckOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 interface TrackingModalProps {
   open: boolean;
   onCancel: () => void;
-  onSubmit: (values: any) => void;
+  onSubmit: (values: { trackingCodes: string[] }) => void;
   orderCode: string;
   customerName: string;
 }
@@ -21,8 +21,17 @@ const TrackingModalJP: React.FC<TrackingModalProps> = ({
   const [form] = Form.useForm();
 
   const handleFinish = (values: any) => {
+    // values.trackingCodes = array string
+    console.log('values', values.trackingCodes[0]);
+    
     onSubmit(values);
   };
+
+  useEffect(() => {
+    if (!open) {
+      form.resetFields();
+    }
+  }, [open, form]);
 
   return (
     <Modal
@@ -31,6 +40,12 @@ const TrackingModalJP: React.FC<TrackingModalProps> = ({
       onCancel={onCancel}
       footer={null}
       width={600}
+      styles={{
+        body: {
+          maxHeight: "75vh",
+          overflowY: "auto",
+        },
+      }}
       centered
     >
       {/* Thông tin đơn hàng */}
@@ -49,47 +64,62 @@ const TrackingModalJP: React.FC<TrackingModalProps> = ({
         form={form}
         layout="vertical"
         onFinish={handleFinish}
-        initialValues={{}}
+        initialValues={{ trackingCodes: [""] }}
         className="!mb-2"
-
       >
-        {/* Mã tracking */}
-        <Form.Item
-          label="Mã tracking (tùy chọn)"
-          name="trackingCode"
-          rules={[
-            {
-              pattern: /^[A-Za-z0-9-]*$/,
-              message: "Mã tracking không hợp lệ",
-            },
-          ]}
-          className="!mb-2"
-        >
-          <Input className="!h-11" placeholder="VD: 1234567890123" />
-        </Form.Item>
+        {/* Danh sách mã tracking */}
+        <Form.List name="trackingCodes">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map((field, index) => (
+                <Form.Item
+                  key={field.key}
+                  label={index === 0 ? "Mã tracking" : `Mã kiện ${index + 1}`}
+                  required={false}
+                  className="!mb-2"
+                >
+                  <div  className="!w-full flex gap-2">
+                    <Form.Item
+                      {...field}
+                      validateTrigger={["onChange", "onBlur"]}
+                      rules={[
+                        {
+                          pattern: /^[A-Za-z0-9-]*$/,
+                          message: "Mã tracking không hợp lệ",
+                        },
+                      ]}
+                      noStyle
+                    >
+                      <Input
+                        className="!h-11 !w-full"
+                        placeholder="VD: 1234567890123"
+                      />
+                    </Form.Item>
+                    {fields.length > 1 && (
+                      <Button
+                        danger
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        onClick={() => remove(field.name)}
+                      />
+                    )}
+                  </div>
+                </Form.Item>
+              ))}
 
-        {/* Nhà vận chuyển */}
-        {/* <Form.Item
-        className="!mb-2"
-
-          label="Nhà vận chuyển"
-          name="carrier"
-          rules={[{ required: true, message: "Vui lòng chọn nhà vận chuyển" }]}
-        >
-          <Select className="!h-11" placeholder="-- Chọn nhà vận chuyển --">
-            <Select.Option value="ghn">Giao Hàng Nhanh</Select.Option>
-            <Select.Option value="ghtk">Giao Hàng Tiết Kiệm</Select.Option>
-            <Select.Option value="vtpost">Viettel Post</Select.Option>
-            <Select.Option value="vnpost">VNPost</Select.Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item label="Ghi chú" name="note">
-          <Input.TextArea
-            placeholder="Ghi chú về việc vận chuyển..."
-            rows={3}
-          />
-        </Form.Item> */}
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  block
+                  icon={<PlusOutlined />}
+                >
+                  Thêm mã kiện
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
 
         {/* Footer Buttons */}
         <div className="flex justify-end gap-3">

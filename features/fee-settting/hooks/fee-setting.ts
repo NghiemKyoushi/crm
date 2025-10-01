@@ -5,6 +5,7 @@ import {
   CategoryItem,
   CreateModel,
   FormData,
+  InsuranceModelParamSend,
   ItemShippingList,
   MaterialResponse,
   MaterialResponseArray,
@@ -56,8 +57,8 @@ export const useUpdateInsurance = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: CreateModel }) =>
-      updateInsurance(id, body),
+    mutationFn: ({ body }: { body: InsuranceModelParamSend[] }) =>
+      updateInsurance(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: INSURANCE_QUERY_KEY });
     },
@@ -113,18 +114,18 @@ export const useUpdateFeeShippingDefault = () => {
 export const useListMaterial = () => {
   return useQuery<MaterialResponseArray>({
     queryKey: ["listMaterial"],
-    queryFn: ()=>  getMaterial(),
+    queryFn: () => getMaterial(),
   });
 };
 
 // React Query hook
 export const useListMaterialByGroup = (customer_group_id: number) => {
-    return useQuery<MaterialResponseArray>({
-      queryKey: ["listMaterialCate", customer_group_id],
-      queryFn: () => getMaterialGroupId(customer_group_id),
-      enabled: !!customer_group_id,
-    });
-  };
+  return useQuery<MaterialResponseArray>({
+    queryKey: ["listMaterialCate", customer_group_id],
+    queryFn: () => getMaterialGroupId(customer_group_id),
+    enabled: !!customer_group_id,
+  });
+};
 
 export const useUpdateShipping = () => {
   const queryClient = useQueryClient();
@@ -144,13 +145,13 @@ export const useListProductType = (params: WebsiteParams) => {
   });
 };
 
-export const useCreateNewProductType= () => {
+export const useCreateNewProductType = () => {
   return useMutation({
     mutationFn: (param: CategoryItem) => createNewProductType(param),
   });
 };
 
-export const useUpdateProductType= () => {
+export const useUpdateProductType = () => {
   return useMutation({
     mutationFn: ({ id, param }: { id: number; param: CategoryItem }) =>
       updateProductType(id, param),

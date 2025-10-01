@@ -120,6 +120,12 @@ export default function BankAccountSetting() {
       key: "account_holder",
     },
     {
+      title: "GroupID telegram",
+      dataIndex: "telegram_channel_id",
+      key: "telegram_channel_id",
+      width: 150,
+    },
+    {
       title: t('table.dailyLimit'),
       dataIndex: "daily_limit_vnd",
       key: "daily_limit_vnd",
