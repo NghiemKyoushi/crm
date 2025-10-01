@@ -592,7 +592,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   label={t("form.depositVnd")}
                   name="deposit"
                   style={{display: "none"}}
-
                   rules={[
                     {
                       required: true,
