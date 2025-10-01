@@ -3,7 +3,7 @@ import api from "@/api/axiosClient";
 import { getDetailBankCreateAccount } from "@/features/finance-manage/apis";
 import { BankInfo } from "@/features/user-management/components/customer-manage/modal-customer/tab/modal/modal-overview-add-bank";
 import { BankSettingAccountModel } from "@/types/deposit-type";
-import { Modal, Form, Input, Select, Button, Spin } from "antd";
+import { Modal, Form, Input, Select, Button, Spin, InputNumber } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,6 +33,7 @@ export default function AddBankAccountModal({
         is_active: values.status === "active" ? true : false,
         description: values.description,
         partner_name: values.partner_name,
+        telegram_channel_id: values.telegram_channel_id
       };
       onOk?.(request);
     } catch (error) {
@@ -70,6 +71,7 @@ export default function AddBankAccountModal({
             status: data.is_active ? "active" : "inactive",
             description: data.description,
             partner_name: data.partner_name,
+            telegram_channel_id: data.telegram_channel_id
           });
         })
         .finally(() => setDetailLoading(false));
@@ -188,7 +190,7 @@ export default function AddBankAccountModal({
           rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
           style={{ marginBottom: 12 }}
         >
-          <TextArea placeholder="" rows={2} minLength={500}/>
+          <TextArea placeholder="" rows={2} minLength={500} />
         </Form.Item>
 
         <Form.Item
@@ -196,7 +198,21 @@ export default function AddBankAccountModal({
           name="limit"
           style={{ marginBottom: 12 }}
         >
-          <Input placeholder="VD: 500000000" />
+          <InputNumber
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            placeholder="VD: 500000000"
+            className="!w-full"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="GroupID Telegram"
+          name="telegram_channel_id"
+          style={{ marginBottom: 12 }}
+        >
+          <Input placeholder="" />
         </Form.Item>
 
         <Form.Item

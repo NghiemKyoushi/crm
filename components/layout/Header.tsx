@@ -17,9 +17,9 @@ import { useSidebar } from "@/contexts/SidebarContext";
 
 const { Header: AntHeader } = Layout;
 
-export const Header: React.FC= () => {
-    const { collapsed } = useSidebar();
-  
+export const Header: React.FC = () => {
+  const { collapsed } = useSidebar();
+
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
@@ -58,7 +58,7 @@ export const Header: React.FC= () => {
           onClick={() => router.push("/user-profile")}
           style={{ width: "100%" }}
         >
-          User profile
+          {t("userProfile.basicInfo")}
         </Button>
       ),
     },
@@ -71,7 +71,7 @@ export const Header: React.FC= () => {
           onClick={handleLogout}
           style={{ width: "100%" }}
         >
-          Logout
+          {t('login.logout')}
         </Button>
       ),
     },
@@ -86,7 +86,7 @@ export const Header: React.FC= () => {
     >
       <div className="text-lg font-semibold text-left">
         {loading
-          ? t('system.loading')
+          ? t("system.loading")
           : currentMenu
           ? t(`menu.${currentMenu.label}`)
           : "OrderSystem"}

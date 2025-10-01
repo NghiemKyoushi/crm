@@ -90,6 +90,7 @@ export default function ShippingSurchangeTable(
       product_category_id: 0,
       value_data: 0,
       value_shipping_data: null,
+      type: 1,
     };
     setData((prev) => ({
       ...prev,
@@ -146,7 +147,8 @@ export default function ShippingSurchangeTable(
         value_data: item.value_data ? item.value_data.toString() : "0", // number -> string
         value_shipping_data: item.value_shipping_data?.toString() ?? "", // hoặc logic khác bạn muốn
         status: item.status,
-        customer_group_id: isCategory ? idCategory : undefined, // nếu có thể map thêm field này
+        customer_group_id: isCategory ? idCategory : undefined, 
+        type: item.type ?? 1,
       };
     });
     updateShippingMutation.mutate(
@@ -234,6 +236,24 @@ export default function ShippingSurchangeTable(
           }
           options={categoryOptions}
           placeholder={t("placeholder.selectProductType")}
+        />
+      ),
+    },
+    {
+      title: t("table.orderType"),
+      dataIndex: "order_type",
+      width: 180,
+      render: (val, record) => (
+        <Select
+          className="!w-full !h-9 !bg-gray-100"
+          value={val ?? 1} 
+          onChange={(value) =>
+            handleChange(+route, record.id.toString(), "order_type", value)
+          }
+          options={[
+            { value: 1, label: "Tính trên tổng đơn" },
+            { value: 2, label: "Tính trên chiếc" },
+          ]}
         />
       ),
     },
@@ -358,12 +378,13 @@ export default function ShippingSurchangeTable(
           .toString()
           .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
 
-        const numberPart = match && match[1]
-          ? match[1].replace(/,/g, "")
-          : val?.toString() ?? "";
+        const numberPart =
+          match && match[1]
+            ? match[1].replace(/,/g, "")
+            : val?.toString() ?? "";
 
         const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-      
+
         return (
           <div className="flex items-center gap-1">
             <InputNumber<string>
@@ -388,7 +409,7 @@ export default function ShippingSurchangeTable(
                 )
               }
             />
-      
+
             <Select
               className="!h-9 !w-6/12"
               value={unitPart}
@@ -410,7 +431,7 @@ export default function ShippingSurchangeTable(
             />
           </div>
         );
-      }
+      },
       // render: (val, record) => {
       //   const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
       //   const numberPart = match
@@ -478,12 +499,21 @@ export default function ShippingSurchangeTable(
           .toString()
           .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
 
-        const numberPart = match && match[1]
-          ? match[1].replace(/,/g, "")
-          : val?.toString() ?? "";
+        const numberPart =
+          match && match[1]
+            ? match[1].replace(/,/g, "")
+            : val?.toString() ?? "";
 
         const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-      
+        const optionList =
+          record.route_id === 2
+            ? [{ label: "USD", value: "USD" }]
+            : [
+                { label: "USD", value: "USD" },
+                { label: "JPY", value: "JPY" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ];
         return (
           <div className="flex items-center gap-1">
             <InputNumber<string>
@@ -508,7 +538,7 @@ export default function ShippingSurchangeTable(
                 )
               }
             />
-      
+
             <Select
               className="!h-9 !w-6/12"
               value={unitPart}
@@ -521,112 +551,11 @@ export default function ShippingSurchangeTable(
                   cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
                 );
               }}
-              options={[
-                { label: "USD", value: "USD" },
-                { label: "JPY", value: "JPY" },
-                { label: "VND", value: "VND" },
-                { label: "%", value: "%" },
-              ]}
+              options={optionList}
             />
           </div>
         );
-      }
-      
-      // render: (val, record) => {
-      //   const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
-      //   const numberPart = match
-      //     ? match[1].replace(/,/g, "")
-      //     : val?.toString() ?? "";
-      //   const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-
-      //   return (
-      //     <div className="flex items-center gap-1">
-      //       <InputNumber<string>
-      //         className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-      //         value={numberPart}
-      //         step={0.01}
-      //         stringMode
-      //         formatter={(value) => {
-      //           if (!value) return "";
-      //           return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
-      //         }}
-      //         parser={(value) => {
-      //           if (!value) return "";
-      //           return value.replace(/,/g, "").trim(); // parse ra số
-      //         }}
-      //         onChange={(value) =>
-      //           handleChange(
-      //             +route,
-      //             record.id.toString(),
-      //             "value_shipping_data",
-      //             (value ?? "0") + "" + unitPart // lưu kèm đơn vị
-      //           )
-      //         }
-      //       />
-
-      //       <Select
-      //         className="!h-9 !w-5/12"
-      //         value={unitPart}
-      //         onChange={(cur) => {
-      //           // đổi đơn vị thì update lại value_data
-      //           const cleanNumber = numberPart || "0";
-      //           handleChange(
-      //             +route,
-      //             record.id.toString(),
-      //             "value_shipping_data",
-      //             cleanNumber + "" + cur
-      //           );
-      //         }}
-      //         options={[
-      //           { label: "USD", value: "USD" },
-      //           { label: "JPY", value: "JPY" },
-      //           { label: "VND", value: "VND" },
-      //           { label: "%", value: "%" },
-
-      //         ]}
-      //       />
-      //     </div>
-      //   );
-      // },
-      // render: (val, record) => (
-      //   <Input
-      //     className="w-full !text-red-600 font-bold !h-9 !bg-gray-100 !text-center"
-      //     value={val}
-      //     onChange={(e) => {
-      //       const v = e.target.value.trim();
-      //       const match = v.match(
-      //         /^([\d]*\.?[\d]*)(%|\$|JPY|USD|J|JP|U|US)?$/i
-      //       );
-      //       if (!match) return;
-      //       handleChange(
-      //         +route,
-      //         record.id.toString(),
-      //         "value_shipping_data",
-      //         v
-      //       );
-      //     }}
-      //     // onBlur={(e) => {
-      //     //   const v = e.target.value.trim();
-      //     //   const match = v.match(/^([\d]*\.?[\d]*)(%|\$|JPY)?$/);
-      //     //   let num = match?.[1] ?? "";
-      //     //   const suffix = match?.[2] ?? "";
-
-      //     //   if (num) {
-      //     //     const [intPart, decimalPart] = num.split(".");
-      //     //     num =
-      //     //       intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-      //     //       (decimalPart ? "." + decimalPart : "");
-      //     //   }
-
-      //     //   handleChange(
-      //     //     +route,
-      //     //     record.id.toString(),
-      //     //     "value_shipping_data",
-      //     //     num + suffix
-      //     //   );
-      //     // }}
-      //   />
-      // ),
+      },
     },
     {
       title: t("table.actions"),

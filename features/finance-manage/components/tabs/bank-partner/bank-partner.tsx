@@ -7,17 +7,14 @@ import AssignRoleModal from "./modal/modal-assign";
 import { BankAccount } from "@/types/deposit-type";
 import {
   mapBankResponseToPaginatedResponse,
-  useBankAccounts,
   useBankAccountsPartner,
 } from "@/features/finance-manage/hooks";
 import { ColumnsType } from "antd/es/table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  addBankCreateAccount,
   addBankCreateAccountPartner,
   addUserBankPermission,
   deleteBankCreateAccount,
-  updateBankCreateAccount,
   updateBankCreateAccountPartner,
 } from "@/features/finance-manage/apis";
 import { toast } from "react-toastify";
@@ -121,6 +118,12 @@ export default function BankPartnerSetting() {
       title: t('table.accountHolder'),
       dataIndex: "account_holder",
       key: "account_holder",
+    },
+    {
+      title: "GroupID telegram",
+      dataIndex: "telegram_channel_id",
+      key: "telegram_channel_id",
+      width: 150,
     },
     {
       title: t('table.dailyLimit'),

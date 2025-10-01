@@ -83,6 +83,7 @@ export interface BankAccount {
   updated_at: string;
   is_deleted: boolean | null;
   status: string;
+  telegram_channel_id?: string
 }
 
 export interface Pageable {
@@ -118,6 +119,7 @@ export interface BankSettingAccountModel {
   id?:number;
   partner_name?: string;
   description?:string;
+  telegram_channel_id?: string
 }
 // Một bản ghi topup
 export interface withdrawItem {

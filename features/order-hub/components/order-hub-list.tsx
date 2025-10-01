@@ -234,15 +234,15 @@ export default function OrderHub() {
     },
     {
       title: t('table.amount'),
-      key: "amount",
+      key: "amount_vnd",
       render: (_, record) => (
         <div>
-          <div>{record.amount.toLocaleString("vi-VN")} đ</div>
-          {record.deposit_amount && (
+          <div>{record.amount_vnd.toLocaleString("vi-VN")} đ</div>
+          {/* {record.deposit_amount && (
             <div className="text-xs text-gray-500">
               Cọc: {record.deposit_amount.toLocaleString("vi-VN")} đ
             </div>
-          )}
+          )} */}
         </div>
       ),
     },
@@ -645,7 +645,7 @@ export default function OrderHub() {
           onSubmit={(value) => {
             trackingJPMutation.mutate(
               {
-                tracking: value?.trackingCode,
+                tracking: value.trackingCodes[0],
                 id: orderDetail.id.toString(),
               },
               {
@@ -674,8 +674,6 @@ export default function OrderHub() {
           onCancel={() => setIsOpenTrackingOrderVN(false)}
           is_repacked={orderDetail.is_repacked}
           is_verify_count={orderDetail.is_verify_count}
-          // is_repacked={true}
-          // is_verify_count={true}
           take_photo={orderDetail.take_photo}
           onSubmit={(value) => {
             trackingVNMutation.mutate(
