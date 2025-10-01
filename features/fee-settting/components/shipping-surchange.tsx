@@ -423,10 +423,10 @@ export default function ShippingSurchangeTable(
                 );
               }}
               options={[
-                { label: "USD", value: "USD" },
-                { label: "JPY", value: "JPY" },
+                // { label: "USD", value: "USD" },
+                // { label: "JPY", value: "JPY" },
                 { label: "VND", value: "VND" },
-                { label: "%", value: "%" },
+                // { label: "%", value: "%" },
               ]}
             />
           </div>

@@ -24,7 +24,7 @@ import {
 } from "@/types/orderhub";
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
 
-export const useListOrder = (params: { page: number; size: number , status?: string}) => {
+export const useListOrder = (params: { page: number; size: number , status?: string, search?: string, date?: string}) => {
   return useQuery<InvoiceResponse>({
     queryKey: ["listorder", params],
     queryFn: () => getListOrder(params),
@@ -70,7 +70,7 @@ export const useCancelOrder = () => {
 
 export const useTrackingOrder = () => {
   return useMutation({
-    mutationFn: ({ tracking, id }: { tracking: string; id: string }) =>
+    mutationFn: ({ tracking, id }: { tracking: Array<string>; id: string }) =>
       trackingToJp(id, tracking),
   });
 };

@@ -99,7 +99,7 @@ const ExchangeRateSettings: React.FC = () => {
         }
       >
         {/* Alert thông tin */}
-        <div className="bg-blue-100 p-4 rounded-lg mb-6 text-sm border-l-4 border-blue-500">
+        {/* <div className="bg-blue-100 p-4 rounded-lg mb-6 text-sm border-l-4 border-blue-500">
           <div>
             <p className="font-medium text-blue-800 mb-2">
               {t('categoryCustomer.exchangeRateInfo')}
@@ -111,7 +111,7 @@ const ExchangeRateSettings: React.FC = () => {
               {t('categoryCustomer.exchangeRateDescription2')}
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* Form */}
         <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -154,7 +154,7 @@ const ExchangeRateSettings: React.FC = () => {
                         onChange={(value) => handleChangeRate(value, index)}
                       />
                       {/* </Form.Item> */}
-
+{/* 
                       <div className="text-xs text-gray-500 mt-2 space-y-1">
                         <p>
                           <FontAwesomeIcon
@@ -171,7 +171,7 @@ const ExchangeRateSettings: React.FC = () => {
                           Được cập nhật bởi:
                           <span className="font-semibold">Admin</span>
                         </p>
-                      </div>
+                      </div> */}
                     </Card>
                   </>
                 );

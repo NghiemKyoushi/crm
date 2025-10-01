@@ -126,6 +126,12 @@ export default function BankPartnerSetting() {
       width: 150,
     },
     {
+      title: "Tên gợi nhớ",
+      dataIndex: "partner_name",
+      key: "partner_name",
+      width: 150,
+    },
+    {
       title: t('table.dailyLimit'),
       dataIndex: "daily_limit_vnd",
       key: "daily_limit_vnd",

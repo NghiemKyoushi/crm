@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tag, Button, Input, Select, Form } from "antd";
+import { Tag, Button, Input, Select, Form, DatePicker } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -54,10 +54,18 @@ export default function OrderHub() {
   const [openConfirmComplete, setOpenConfirmComplete] = useState(false);
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
+  const [filters, setFilters] = useState({
+    search: undefined,
+    status: undefined,
+    date: undefined,
+  });
 
   const { data: listOrder } = useListOrder({
     page,
     size: 10,
+    search: filters.search,
+    status: filters.status,
+    date: filters.date,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -70,7 +78,12 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
 
   const handleFinish = (values: any) => {
-    console.log("Filter values:", values);
+    setFilters({
+      search: values.keyword && values.keyword.trim() !== "" ? values.keyword : undefined,
+      status: values.status !== "" ? values.status : undefined,
+      date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+    });
+    setPage(1);
   };
 
   const handleChangePage = (pageNumber: number) => {
@@ -85,7 +98,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success(t('toast.confirmPurchaseSuccess'));
+            toast.success(t("toast.confirmPurchaseSuccess"));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -107,7 +120,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success(t('toast.completeOrderSuccess'));
+            toast.success(t("toast.completeOrderSuccess"));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -130,7 +143,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success(t('toast.rejectOrderSuccess'));
+            toast.success(t("toast.rejectOrderSuccess"));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -157,7 +170,7 @@ export default function OrderHub() {
         },
         {
           onSuccess: () => {
-            toast.success(t('toast.inspectGoodsSuccess'));
+            toast.success(t("toast.inspectGoodsSuccess"));
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
             });
@@ -173,20 +186,20 @@ export default function OrderHub() {
 
   const columns: ColumnsType<Invoice> = [
     {
-      title: t('table.orderCode'),
+      title: t("table.orderCode"),
       dataIndex: "invoice_no",
       key: "invoice_no",
       render: (text, record) => (
         <div>
-          <a className="text-blue-600 font-medium">#{text}</a>
-          <div className="text-xs text-gray-400">
+          <a className="text-blue-600 font-medium">{text}</a>
+          <div className="text-xs text-red-400 ">
             {dayjs(record.created_at).format("DD/MM/YYYY")}
           </div>
         </div>
       ),
     },
     {
-      title: t('table.customer'),
+      title: t("table.customer"),
       key: "customer",
       render: (_, record) => (
         <div>
@@ -196,7 +209,50 @@ export default function OrderHub() {
       ),
     },
     {
-      title: t('table.creator'),
+      title: "Link sản phẩm",
+      key: "product_url",
+      width: 200,
+      render: (_, record) => {
+        const url = record.metadata.items[0].product.url;
+        return (
+          <div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-600 hover:underline break-all"
+            >
+              {url}
+            </a>
+            <div className="text-xs text-gray-400">{record.customer_code}</div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Tên sản phẩm",
+      key: "productName",
+      width: 250,
+      render: (_, record) => (
+        <div>
+          <div className="font-medium">
+            {record.metadata.items[0].product.map_data.productName}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Ghi chú",
+      key: "note",
+      width: 200,
+      render: (_, record) => (
+        <div>
+          <div className="font-medium">{record.note ? record.note : "-"}</div>
+        </div>
+      ),
+    },
+    {
+      title: t("table.creator"),
       key: "created_by_name",
       render: (_, record) => (
         <div>
@@ -233,7 +289,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: t('table.amount'),
+      title: t("table.amount"),
       key: "amount_vnd",
       render: (_, record) => (
         <div>
@@ -247,7 +303,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: t('table.status'),
+      title: t("table.status"),
       dataIndex: "status",
       key: "status",
       align: "center",
@@ -263,51 +319,51 @@ export default function OrderHub() {
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
-            text = t('status.pendingApproval');
+            text = t("status.pendingApproval");
             break;
           case OrderStatusType.PENDING_DEPOSIT:
             color = "gold";
-            text = t('status.pendingDeposit');
+            text = t("status.pendingDeposit");
             break;
           case OrderStatusType.DEPOSIT_PAID:
             color = "green";
-            text = t('status.depositPaid');
+            text = t("status.depositPaid");
             break;
           case OrderStatusType.PURCHASED:
             color = "blue";
-            text = t('status.purchased');
+            text = t("status.purchased");
             break;
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             color = "purple";
-            text = t('status.arrivedJpWarehouse');
+            text = t("status.arrivedJpWarehouse");
             break;
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             color = "cyan";
-            text = t('status.arrivedVnWarehouse');
+            text = t("status.arrivedVnWarehouse");
             break;
           case OrderStatusType.UNDER_INSPECTION:
             color = "lime";
-            text = t('status.underInspection');
+            text = t("status.underInspection");
             break;
           case OrderStatusType.PENDING_PAYMENT:
             color = "red";
-            text = t('status.pendingPayment');
+            text = t("status.pendingPayment");
             break;
           case OrderStatusType.READY_TO_SHIP:
             color = "geekblue";
-            text = t('status.readyToShip');
+            text = t("status.readyToShip");
             break;
           case OrderStatusType.SHIPPED:
             color = "volcano";
-            text = t('status.shipped');
+            text = t("status.shipped");
             break;
           case OrderStatusType.SHIPPING_REQUEST_CLIENT:
             color = "magenta";
-            text = t('status.shippingRequest');
+            text = t("status.shippingRequest");
             break;
           case OrderStatusType.CANCELED:
             color = "red";
-            text = t('status.cancelled');
+            text = t("status.cancelled");
             break;
           default:
             color = "default";
@@ -322,7 +378,7 @@ export default function OrderHub() {
       },
     },
     {
-      title: t('table.actions'),
+      title: t("table.actions"),
       key: "actions",
       align: "right",
       onCell: () => ({
@@ -338,8 +394,8 @@ export default function OrderHub() {
             if (record.is_user_created) {
               actions.push(
                 <Button
-                key={`approve-${record.id}`}
-                size="small"
+                  key={`approve-${record.id}`}
+                  size="small"
                   icon={<FontAwesomeIcon icon={faCheck} />}
                   className="!bg-green-500 !text-white !border-0 !text-xs"
                   onClick={() => {
@@ -347,20 +403,20 @@ export default function OrderHub() {
                     setIsOpenApproveOrder(true);
                   }}
                 >
-                  {t('button.approve')}
+                  {t("button.approve")}
                 </Button>
               );
               actions.push(
                 <Button
-                key={`reject-${record.id}`}
-                size="small"
+                  key={`reject-${record.id}`}
+                  size="small"
                   className="!bg-red-500 !text-white !border-0 !text-xs"
                   onClick={() => {
                     setOrderDetail(record);
                     setIsOpenCancel(true);
                   }}
                 >
-                  {t('button.reject')}
+                  {t("button.reject")}
                 </Button>
               );
             }
@@ -381,7 +437,7 @@ export default function OrderHub() {
                   setIsOpenTrackingOrder(true);
                 }}
               >
-                {t('button.transferToJpWarehouse')}
+                {t("button.transferToJpWarehouse")}
               </Button>
             );
             break;
@@ -407,7 +463,7 @@ export default function OrderHub() {
                       },
                       {
                         onSuccess: () => {
-                          toast.success(t('toast.confirmVnWarehouseSuccess'));
+                          toast.success(t("toast.confirmVnWarehouseSuccess"));
                           queryClient.invalidateQueries({
                             queryKey: ["listorder"],
                           });
@@ -425,7 +481,7 @@ export default function OrderHub() {
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-indigo-500 !text-white !border-0 !text-xs"
               >
-                {t('button.transferToVnWarehouse')}
+                {t("button.transferToVnWarehouse")}
               </Button>
             );
             break;
@@ -442,7 +498,7 @@ export default function OrderHub() {
                   setIsOpenCheckOrder(true);
                 }}
               >
-                {t('button.inspectGoods')}
+                {t("button.inspectGoods")}
               </Button>
             );
             break;
@@ -459,7 +515,7 @@ export default function OrderHub() {
                 icon={<FontAwesomeIcon icon={faTruck} />}
                 className="!bg-indigo-500 !text-white !border-0 !text-xs"
               >
-                {t('button.purchased')}
+                {t("button.purchased")}
               </Button>
             );
             break;
@@ -476,7 +532,7 @@ export default function OrderHub() {
                   setOpenConfirmComplete(true);
                 }}
               >
-                {t('button.readyToShip')}
+                {t("button.readyToShip")}
               </Button>
             );
             break;
@@ -485,7 +541,7 @@ export default function OrderHub() {
         // nút mặc định luôn có
         actions.push(
           <Button
-            key={'1'}
+            key={"1"}
             size="small"
             className="!bg-blue-500 !text-white !border-0 !text-xs"
             onClick={() => {
@@ -493,7 +549,7 @@ export default function OrderHub() {
               setOrderDetail(record);
             }}
           >
-            {t('button.details')}
+            {t("button.details")}
           </Button>
         );
 
@@ -503,13 +559,49 @@ export default function OrderHub() {
       },
     },
   ];
+  const orderStatusOptions = [
+    {
+      value: OrderStatusType.PENDING_APPROVAL,
+      label: t("status.pendingApproval"),
+    },
+    {
+      value: OrderStatusType.PENDING_DEPOSIT,
+      label: t("status.pendingDeposit"),
+    },
+    { value: OrderStatusType.DEPOSIT_PAID, label: t("status.depositPaid") },
+    { value: OrderStatusType.PURCHASED, label: t("status.purchased") },
+    {
+      value: OrderStatusType.ARRIVED_JP_WAREHOUSE,
+      label: t("status.arrivedJpWarehouse"),
+    },
+    {
+      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
+      label: t("status.arrivedVnWarehouse"),
+    },
+    {
+      value: OrderStatusType.UNDER_INSPECTION,
+      label: t("status.underInspection"),
+    },
+    {
+      value: OrderStatusType.PENDING_PAYMENT,
+      label: t("status.pendingPayment"),
+    },
+    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") },
+    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
+    {
+      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
+      label: t("status.shippingRequestClient"),
+    },
+    { value: OrderStatusType.CANCELED, label: t("status.canceled") },
+  ];
+
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-semibold text-gray-800">
-            {t('page.orderManagement')}
+            {t("page.orderManagement")}
           </h2>
           <Button
             type="primary"
@@ -517,7 +609,7 @@ export default function OrderHub() {
             icon={<PlusOutlined />}
             className="bg-blue-500 hover:bg-blue-600"
           >
-            {t('button.createNewOrder')}
+            {t("button.createNewOrder")}
           </Button>
         </div>
         <div className="flex flex-col mb-2 gap-4 ">
@@ -525,7 +617,7 @@ export default function OrderHub() {
             <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
               <Form.Item name="keyword" className="mb-0">
                 <Input
-                  placeholder={t('placeholder.searchOrderCustomer')}
+                  placeholder={t("placeholder.searchOrderCustomer")}
                   className="w-full h-11"
                 />
               </Form.Item>
@@ -534,19 +626,18 @@ export default function OrderHub() {
                 <Select
                   placeholder={t("statusPlaceholder")}
                   className="w-full !h-11"
+                  allowClear
                 >
-                  <Option value="COMPLETED">{t("status.shipping")}</Option>
-                  <Option value="CANCELED">{t("status.arrivedWarehouse")}</Option>
-                  <Option value="FAILED">{t("status.delivered")}</Option>
+                  {orderStatusOptions.map((opt) => (
+                    <Select.Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Select.Option>
+                  ))}
                 </Select>
               </Form.Item>
 
-              <Form.Item name="dateRange" className="mb-0">
-                <Select placeholder={t("form.source")} className="w-full !h-11">
-                  <Option value="WAITING_CONFIRMATION">
-                    {t("status.waiting")}
-                  </Option>
-                </Select>
+              <Form.Item name="date" className="mb-0">
+                <DatePicker className="w-full h-11" />
               </Form.Item>
 
               <Form.Item className="mb-0">
@@ -611,7 +702,7 @@ export default function OrderHub() {
               },
               {
                 onSuccess: () => {
-                  toast.success(t('toast.confirmOrderSuccess'));
+                  toast.success(t("toast.confirmOrderSuccess"));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });
@@ -645,12 +736,12 @@ export default function OrderHub() {
           onSubmit={(value) => {
             trackingJPMutation.mutate(
               {
-                tracking: value.trackingCodes[0],
+                tracking: value.trackingCodes,
                 id: orderDetail.id.toString(),
               },
               {
                 onSuccess: () => {
-                  toast.success(t('toast.confirmJpWarehouseSuccess'));
+                  toast.success(t("toast.confirmJpWarehouseSuccess"));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });
@@ -687,7 +778,7 @@ export default function OrderHub() {
               },
               {
                 onSuccess: () => {
-                  toast.success(t('toast.confirmVnWarehouseSuccess'));
+                  toast.success(t("toast.confirmVnWarehouseSuccess"));
                   queryClient.invalidateQueries({
                     queryKey: ["listorder"],
                   });

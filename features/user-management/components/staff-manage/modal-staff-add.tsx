@@ -4,7 +4,18 @@ import { useForm, Controller } from "react-hook-form";
 import { useListRole } from "../../hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { NewUserType } from "@/types/staff-manage-type";
+import { PhoneNumberUtil } from "google-libphonenumber";
 
+const phoneUtil = PhoneNumberUtil.getInstance();
+
+export function isValidPhoneGoogle(phone: string, region: string = "VN") {
+  try {
+    const number = phoneUtil.parseAndKeepRawInput(phone, region);
+    return phoneUtil.isValidNumberForRegion(number, region);
+  } catch (error) {
+    return false;
+  }
+}
 const { Option } = Select;
 
 interface ModalStaffAddProps {
@@ -27,11 +38,12 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
   } = useForm<NewUserType>({
     defaultValues: {
       full_name: "",
-      active: initialValues && initialValues.active
-      ? "true"
-      : initialValues && !initialValues.active
-      ? "false"
-      : "true",
+      active:
+        initialValues && initialValues.active
+          ? "true"
+          : initialValues && !initialValues.active
+          ? "false"
+          : "true",
       phone_number: "",
       role_id: "",
       password: "",
@@ -43,7 +55,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
 
   const onSubmit = (data: NewUserType) => {
     handleSubmitDataUser(data);
-    reset(); 
+    reset();
     onClose();
   };
   useEffect(() => {
@@ -52,15 +64,17 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
         full_name: "",
         active: initialValues?.active ?? true,
         phone_number: "",
-        role_id: "", 
+        role_id: "",
         password: "",
         ...initialValues,
       });
-  
+
       if (listRole && listRole.length > 0) {
         reset((prev) => ({
           ...prev,
-          role_id: initialValues?.role_id?.toString() || (listRole[0]?.role_id?.toString() ?? ""),
+          role_id:
+            initialValues?.role_id?.toString() ||
+            (listRole[0]?.role_id?.toString() ?? ""),
         }));
       }
     }
@@ -71,7 +85,9 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
       title={
         <div className="flex justify-between items-center border-b border-gray-200 pb-2">
           <span className="font-semibold text-lg">
-            {initialValues ? t("staffManage.editNewStaff") : t("staffManage.addNewStaff")}
+            {initialValues
+              ? t("staffManage.editNewStaff")
+              : t("staffManage.addNewStaff")}
           </span>
         </div>
       }
@@ -93,9 +109,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
               render={({ field }) => <Input {...field} />}
             />
             {errors.full_name && (
-              <p className="text-red-500 text-sm">
-                {errors.full_name.message}
-              </p>
+              <p className="text-red-500 text-sm">{errors.full_name.message}</p>
             )}
           </div>
 
@@ -113,7 +127,9 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
                   message: t("staffManage.emailInvalid"),
                 },
               }}
-              render={({ field }) => <Input {...field} disabled={!!initialValues} />} 
+              render={({ field }) => (
+                <Input {...field} disabled={!!initialValues} />
+              )}
             />
             {errors.email && (
               <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -128,18 +144,23 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
             <Controller
               name="phone_number"
               control={control}
-              rules={{ required: t("staffManage.phoneNumberRequired") }}
-              render={({ field }) =>  <Input
-              {...field}
-              type="tel" // numeric keyboard on mobile
-              inputMode="numeric" // prefer numeric keyboard
-              pattern="[0-9]*" // hint for browser to accept only numbers
-              onChange={(e) => {
-                // force numeric only, remove other characters (including autofill text)
-                const onlyNums = e.target.value.replace(/\D/g, "");
-                field.onChange(onlyNums);
+              rules={{
+                required: t("staffManage.phoneNumberRequired"),
+                validate: (value) =>
+                  isValidPhoneGoogle(value, "VN") ||
+                  t("staffManage.phoneInvalid"),
               }}
-            />}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  onChange={(e) => {
+                    const onlyNums = e.target.value.replace(/\D/g, "");
+                    field.onChange(onlyNums);
+                  }}
+                />
+              )}
             />
             {errors.phone_number && (
               <p className="text-red-500 text-sm">
@@ -148,7 +169,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
             )}
           </div>
 
-          {!initialValues && ( 
+          {!initialValues && (
             <div>
               <label className="block mb-1 font-medium">
                 {t("staffManage.password")}
@@ -179,7 +200,9 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
           )}
         </div>
         <div>
-          <label className="block mb-1 font-medium">{t("staffManage.status")}</label>
+          <label className="block mb-1 font-medium">
+            {t("staffManage.status")}
+          </label>
           <Controller
             name="active"
             control={control}
@@ -194,7 +217,9 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
 
         {/* Role */}
         <div>
-          <label className="block mb-1 font-medium">{t("staffManage.role")}</label>
+          <label className="block mb-1 font-medium">
+            {t("staffManage.role")}
+          </label>
           <Controller
             name="role_id"
             control={control}
@@ -214,7 +239,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
         <div className="flex justify-end gap-3 pt-4">
           <Button onClick={onClose}>{t("staffManage.cancel")}</Button>
           <Button type="primary" htmlType="submit" className="bg-blue-500">
-            {t("staffManage.save")} 
+            {t("staffManage.save")}
           </Button>
         </div>
       </form>

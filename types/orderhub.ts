@@ -60,7 +60,8 @@ export interface Invoice {
   tracking_vn?:string;
   take_photo: boolean;
   is_repacked: boolean;
-  is_verify_count: boolean
+  is_verify_count: boolean;
+  note?: string;
 }
 
 export interface InvoiceMetadata {
@@ -125,7 +126,8 @@ export interface RateOrderRequest {
   insurance_id: number;
   category_fee_id: number;
   price: number; // giá trị đơn hàng
-  product_ids: number[]; // danh sách product id
+  product_ids: number[];
+  cod: number;
 }
 
 export interface OrderFeeRequest {
