@@ -59,6 +59,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const [services, setServices] = useState<string[]>([]);
   const [insurance, setInsurance] = useState<InsuranceOptionModel | null>(null);
   const [prices, setPrice] = useState<number>(0);
+  const [rateValueForPrice, setRateValueForPrice] = useState<number>(0);
   const [percenDeposit, setPercenDeposit] = useState<number>(0);
   const customer = Form.useWatch("customer", form);
   const deposit = Form.useWatch("deposit", form);
@@ -207,6 +208,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             "priceVnd",
             +form.getFieldValue("priceY") * res.rate_to_vnd
           );
+          setRateValueForPrice(res.rate_to_vnd);
           setPrice(+form.getFieldValue("priceY") * res.rate_to_vnd);
         } catch (err) {
           console.error("Error fetching rate:", err);
@@ -299,11 +301,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         width={800}
       >
         <Form
-          // onValuesChange={(changed, allValues) => {
-          //     form.setFieldsValue({
-          //       deposit: totalFee,
-          //     });
-          // }}
           form={form}
           layout="vertical"
           initialValues={{ method: "buy" }}
@@ -422,7 +419,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
                     style={{ display: "flex", alignItems: "center" }}
                     className="!w-full !h-11"
-                    disabled
                     min={0}
                   />
                 </Form.Item>
@@ -444,6 +440,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
+              <p className="text-red-500 font-semibold text-xs">Tỷ giá: {rateValueForPrice ? rateValueForPrice : 0}</p>
 
               <div className="space-y-4 mt-4">
                 <Collapse

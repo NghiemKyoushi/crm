@@ -240,3 +240,14 @@ export interface InsuranceModelParamSend {
   name?: string;
   status?: string;
 }
+
+export interface ServiceFee {
+  id: number;
+  code: string;
+  name: string;
+  optional: boolean;
+  method: number;
+  description: string | null;
+  amount: number;
+  currency_code: string;
+}

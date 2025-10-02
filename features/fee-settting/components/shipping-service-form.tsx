@@ -3,98 +3,71 @@
 import React from "react";
 import { Form, InputNumber, Button, Card } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTruck, faList, faSave, faConciergeBell } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSave,
+  faConciergeBell,
+} from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
-
-type FormValues = {
-  serviceFee: {
-    us: number;
-    jp: number;
-    extraKg: number;
-    checkUs: number;
-    checkJp: number;
-  };
-  delivery: {
-    kv1: { fee: number; freeUs: number; freeJp: number };
-    kv2: { fee: number; freeUs: number; freeJp: number };
-    kv3: { fee: number };
-  };
-};
+import { useListService } from "@/features/order-hub/hooks/orderhub";
+import { ServiceFee } from "@/types/fee-setting";
 
 export default function ShippingServiceForm() {
   const { t } = useTranslation();
-  const [form] = Form.useForm<FormValues>();
+  const [form] = Form.useForm();
 
-  const handleSubmit = (values: FormValues) => {
+  const { data: listService } = useListService();
+
+  const handleSubmit = (values: Record<string, any>) => {
+    if (!listService) return;
+
+    // map lại để trả về object ServiceFee với amount cập nhật
+    const updatedFees: ServiceFee[] = listService.map((service: ServiceFee) => ({
+      ...service,
+      amount: values[service.code] ?? service.amount,
+    }));
+
+    console.log("✅ Updated Fees:", updatedFees);
+
+    // TODO: call API save ở đây
   };
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={handleSubmit}
-      initialValues={{
-        serviceFee: { us: 4, jp: 3, extraKg: 5000, checkUs: 5, checkJp: 10000 },
-        delivery: {
-          kv1: { fee: 50000, freeUs: 10, freeJp: 5 },
-          kv2: { fee: 100000, freeUs: 20, freeJp: 10 },
-          kv3: { fee: 200000 },
-        },
-      }}
-    >
+    <Form form={form} layout="vertical" onFinish={handleSubmit}>
       {/* Phí dịch vụ khác */}
       <Card
         title={
           <div className="flex items-center gap-2 font-bold text-gray-700">
-            <FontAwesomeIcon icon={faConciergeBell} className="w-5 h-5"/> {t('feeSettings.otherServiceFees')}
+            <FontAwesomeIcon icon={faConciergeBell} className="w-5 h-5" />
+            {t("feeSettings.otherServiceFees")}
           </div>
         }
         className="mb-6"
       >
-        <div className="grid grid-cols-3 gap-6">
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
-            <Form.Item
-              label={t('feeSettings.purchaseFeeUs')}
-              name={["serviceFee", "us"]}
-              rules={[{ required: true, message: t('validation.required') }]}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {listService?.map((item: ServiceFee) => (
+            <div
+              key={item.code}
+              className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3"
             >
-              <InputNumber className="!w-full" min={0} />
-            </Form.Item>
-            <Form.Item
-              label={t('feeSettings.purchaseFeeJp')}
-              name={["serviceFee", "jp"]}
-              rules={[{ required: true, message: t('validation.required') }]}
-            >
-              <InputNumber className="!w-full" min={0} />
-            </Form.Item>
-          </div>
-
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
-            <Form.Item
-              label={t('feeSettings.reinforcementFee')}
-              name={["serviceFee", "extraKg"]}
-              rules={[{ required: true, message: t('validation.required') }]}
-            >
-              <InputNumber className="!w-full" min={0} />
-            </Form.Item>
-          </div>
-
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
-            <Form.Item
-              label={t('feeSettings.checkPhotoFeeUs')}
-              name={["serviceFee", "checkUs"]}
-              rules={[{ required: true, message: t('validation.required') }]}
-            >
-              <InputNumber className="!w-full" min={0} />
-            </Form.Item>
-            <Form.Item
-              label={t('feeSettings.checkPhotoFeeJp')}
-              name={["serviceFee", "checkJp"]}
-              rules={[{ required: true, message: t('validation.required') }]}
-            >
-              <InputNumber className="!w-full" min={0} />
-            </Form.Item>
-          </div>
+              <Form.Item
+                label={item.name}
+                name={item.code}
+                initialValue={item.amount ?? 0}
+                rules={[
+                  { required: true, message: t("validation.required") },
+                ]}
+              >
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value: any) => value?.replace(/\D/g, "")}
+                  className="!w-full"
+                  min={0}
+                />
+              </Form.Item>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -105,7 +78,8 @@ export default function ShippingServiceForm() {
           htmlType="submit"
           className="bg-blue-600 hover:!bg-blue-700 px-6 h-11 font-bold"
         >
-          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> {t('common.saveAllChanges')}
+          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
+          {t("common.saveAllChanges")}
         </Button>
       </div>
     </Form>
