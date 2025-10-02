@@ -61,7 +61,7 @@ export default function ShippingSurchangeTable(
 
       materialData.forEach((item) => {
         normalized[item.route.id] = item.data ?? [];
-        routeNames[item.route.id] = item.route.name; // lưu tên route
+        routeNames[item.route.id] = item.route.name;
       });
       setData(normalized);
       setRouteNames(routeNames);
@@ -71,7 +71,7 @@ export default function ShippingSurchangeTable(
 
       listFollowGroup.forEach((item) => {
         normalized[item.route.id] = item.data ?? [];
-        routeNames[item.route.id] = item.route.name; // lưu tên route
+        routeNames[item.route.id] = item.route.name;
       });
       setData(normalized);
       setRouteNames(routeNames);
@@ -144,8 +144,8 @@ export default function ShippingSurchangeTable(
         condition_type: item.condition_type,
         price_from: item.price_from || 0,
         price_to: item.price_to || 0,
-        value_data: item.value_data ? item.value_data.toString() : "0", // number -> string
-        value_shipping_data: item.value_shipping_data?.toString() ?? "", // hoặc logic khác bạn muốn
+        value_data: item.value_data ? item.value_data.toString() : "0",
+        value_shipping_data: item.value_shipping_data?.toString() ?? "",
         status: item.status,
         customer_group_id: isCategory ? idCategory : undefined, 
         type: item.type ?? 1,
@@ -185,39 +185,6 @@ export default function ShippingSurchangeTable(
         dataIndex: "id",
         width: 40,
         render: (_val, _record, index) => index + 1,
-      },
-      {
-        title: t("table.product"),
-        dataIndex: "product_category_name",
-        width: 240,
-        render: (val, record: MaterialItem) => {
-          const isNew =
-            newKeys.has(record.id.toString()) || !val?.toString().trim();
-
-          if (!isNew) {
-            return (
-              <span className="block whitespace-normal break-words w-full">
-                {val}
-              </span>
-            );
-          }
-
-          // return (
-          //   <Input
-          //     className="!w-full !h-9"
-          //     value={val}
-          //     onChange={(e) =>
-          //       handleChange(
-          //         +route,
-          //         record.id.toString(),
-          //         "product_category_name",
-
-          //         e.target.value
-          //       )
-          //     }
-          //   />
-          // );
-        },
       },
       {
         title: t("table.productType"),
@@ -283,11 +250,11 @@ export default function ShippingSurchangeTable(
         ),
       },
       {
-        title: t("table.valueVND"),
+        title: isUSRoute ? "Giá trị (USD)" : "Giá trị (JPY)",
         dataIndex: "price_to",
         width: 200,
         render: (val, record: MaterialItem) => {
-        const placeholder = "₫";
+        const placeholder = isUSRoute ? "$" : "¥";
 
         if (record.condition_type === "RANGE") {
           return (
