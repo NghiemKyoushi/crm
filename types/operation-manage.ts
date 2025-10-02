@@ -1,11 +1,13 @@
 export interface Order {
   tracking_ship: string;
   customer_name: string;
+  customer_code?: string;
   user_name: string;
   status: string;
   order_list: OrderItem[] | null; // nếu có danh sách đơn hàng chi tiết
   amount: number;
   amountvnd: number;
+  created_at?: string;
 }
 
 export interface OrderItem {
