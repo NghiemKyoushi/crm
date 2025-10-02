@@ -84,8 +84,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="p-3 mt-6 ">
-      {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {stats.map((item, i) => (
           <Card key={i} className="shadow rounded-2xl">
             <div className="flex items-center justify-between">
@@ -105,9 +104,7 @@ const DashboardPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Bottom Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        {/* Order Status */}
         <Card
           title="Order Status"
           extra={<a href="#">View All</a>}
@@ -132,8 +129,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         </Card>
-
-        {/* Recent Activities */}
         <Card
           title="Recent Activities"
           extra={<a href="#">View All</a>}
@@ -158,7 +153,7 @@ const DashboardPage: React.FC = () => {
             )}
           />
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 };
