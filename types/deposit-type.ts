@@ -83,7 +83,8 @@ export interface BankAccount {
   updated_at: string;
   is_deleted: boolean | null;
   status: string;
-  telegram_channel_id?: string
+  telegram_channel_id?: string;
+  partner_name?: string;
 }
 
 export interface Pageable {
