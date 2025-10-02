@@ -177,7 +177,7 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
             icon={<FontAwesomeIcon icon={faCheck} />}
             onClick={handleOk}
           >
-            {t('button.confirmInspection')}
+            {t('button.inspectGoods')}
           </Button>
         </div>
       </Form>

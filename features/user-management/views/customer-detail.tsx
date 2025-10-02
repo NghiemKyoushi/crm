@@ -194,19 +194,15 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-green-600">
-                {customer.total_expenses.toLocaleString()} đ
+                {customer.total_expenses.toLocaleString()} VNĐ
               </p>
               <p className="text-gray-600 text-sm">{t("customerManage.customerOverview.totalSpent")}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-red-500">
-                {customer.debt_amount ? customer.debt_amount.toLocaleString() : 0} đ
+                {customer.debt_amount ? customer.debt_amount.toLocaleString() : 0} VNĐ
               </p>
               <p className="text-gray-600 text-sm">{t("customerManage.customerOverview.currentDebt")}</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-purple-600">0M đ</p>
-              <p className="text-gray-600 text-sm">{t('customerManage.customerOverview.walletBalance')}</p>
             </div>
           </div>
         )}
