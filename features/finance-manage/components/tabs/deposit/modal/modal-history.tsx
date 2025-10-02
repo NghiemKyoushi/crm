@@ -1,6 +1,7 @@
 import { TransactionHistory } from "@/types/deposit-type";
 import { Modal } from "antd";
 import dayjs from "dayjs";
+import { t } from "i18next";
 
 interface TransactionHistoryModalProps {
   open: boolean;
@@ -16,26 +17,26 @@ export const renderTransactionStatus = (
 ): string => {
   switch (status) {
     case "WAITING_CONFIRMATION":
-      return "Chờ xử lý";
+      return t("withdraw.statusType.pending");
     case "APPROVED":
-      return "Đã tiếp nhận";
+      return t("withdraw.statusType.approved");
     case "COMPLETED":
-      return "Đã hoàn thành";
+      return t("withdraw.statusType.completed");
+    case "CANCELED":
+      if (isDeposit) {
+        return t("withdraw.statusType.cancelled");
+      }
+      return "Đã hủy";
     case "CANCELED":
       if (isDeposit) {
         return "Đã từ chối";
       }
       return "Đã hủy";
-    case "CANCELED":
+    case "REJECTED":
       if (isDeposit) {
         return "Đã từ chối";
       }
-      return "Đã hủy";
-    case "CANCELLED":
-      if (isDeposit) {
-        return "Đã từ chối";
-      }
-      return "Đã hủy";
+      return t("withdraw.statusType.rejected");
 
     case "FAILED":
       return "Thất bại";
