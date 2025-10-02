@@ -84,6 +84,7 @@
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spent",
       "currentDebt": "Current Debt",
+      "walletBalance": "Wallet Balance",
       "addressBook": "Address Book",
       "addAddress": "+ Add Address",
       "default": "Default",
@@ -105,6 +106,30 @@
       "transactions": "Transaction History",
       "fees": "Custom Fee Settings",
       "notes": "Internal Notes"
+    },
+    "orderHistory": {
+      "orderCode": "Order Code",
+      "createdAt": "Created At",
+      "total": "Total",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusPaid": "Paid",
+      "statusCancel": "Cancelled"
+    },
+    "internalNote": {
+      "noteHistory": "Note History",
+      "saveNote": "Save Note"
+    },
+    "paymentHistory": {
+      "transactionCode": "Transaction Code",
+      "type": "Type",
+      "amount": "Amount",
+      "note": "Note",
+      "date": "Date",
+      "topUp": "Top Up",
+      "withdraw": "Withdraw",
+      "serviceFeePayment": "Service Fee Payment",
+      "bankTransfer": "Bank Transfer"
     }
   },
   "staffManage": {
@@ -304,7 +329,8 @@
     "uncategorized": "Uncategorized",
     "save": "Save",
     "saveAllChanges": "Save All Changes",
-    "search": "Search"
+    "search": "Search",
+    "currency": "¥"
   },
   "websiteManage": {
     "table": {
@@ -687,7 +713,8 @@
     "inspectGoods": "Inspect Goods",
     "purchased": "Purchased",
     "details": "Details",
-    "save": "Save"
+    "save": "Save",
+    "filter": "Filter"
   },
   "modal": {
     "createOrderForCustomer": "Create Order for Customer",

@@ -84,6 +84,7 @@
       "totalOrders": "Tổng số Đơn hàng",
       "totalSpent": "Tổng chi tiêu",
       "currentDebt": "Công nợ hiện tại",
+      "walletBalance": "Số dư ví",
       "addressBook": "Sổ địa chỉ",
       "addAddress": "+ Thêm địa chỉ",
       "default": "Mặc định",
@@ -104,6 +105,30 @@
       "transactions": "Lịch sử Giao dịch",
       "fees": "Cài đặt Phí riêng",
       "notes": "Ghi chú Nội bộ"
+    },
+    "orderHistory": {
+      "orderCode": "Mã đơn hàng",
+      "createdAt": "Ngày tạo",
+      "total": "Tổng tiền",
+      "status": "Trạng thái",
+      "statusPending": "Chờ xử lý",
+      "statusPaid": "Đã thanh toán",
+      "statusCancel": "Đã hủy"
+    },
+    "internalNote": {
+      "noteHistory": "Lịch sử ghi chú",
+      "saveNote": "Lưu ghi chú"
+    },
+    "paymentHistory": {
+      "transactionCode": "Mã giao dịch",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "note": "Ghi chú",
+      "date": "Ngày",
+      "topUp": "Nạp tiền",
+      "withdraw": "Rút tiền",
+      "serviceFeePayment": "Thanh toán phí dịch vụ",
+      "bankTransfer": "Chuyển khoản"
     }
   },
   "staffManage": {
@@ -303,7 +328,8 @@
     "uncategorized": "Chưa phân loại",
     "save": "Lưu",
     "saveAllChanges": "Lưu Tất Cả Thay Đổi",
-    "search": "Tìm kiếm"
+    "search": "Tìm kiếm",
+    "currency": "¥"
   },
   "websiteManage": {
     "table": {
@@ -686,7 +712,8 @@
     "inspectGoods": "Kiểm hàng",
     "purchased": "Đã mua",
     "details": "Chi tiết",
-    "save": "Lưu"
+    "save": "Lưu",
+    "filter": "Lọc"
   },
   "modal": {
     "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
