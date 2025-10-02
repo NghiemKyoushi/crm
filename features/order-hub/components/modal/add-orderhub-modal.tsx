@@ -32,7 +32,7 @@ import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
 import { useCreateNewOrder, useListService } from "../../hooks/orderhub";
-import { useListCustomerWithSearch } from "@/features/user-management/hooks/staff-manage";
+import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
@@ -114,17 +114,41 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     mutationFn: (link: string) => getDataProductFromLink(link),
   });
   const [searchValue, setSearchValue] = useState("");
-  const { data, isLoading } = useListCustomerWithSearch({
-    page: 0,
+  const [customerPage, setCustomerPage] = useState(0);
+  const [allCustomers, setAllCustomers] = useState<any[]>([]);
+  const { data, isLoading } = useListCustomer({
+    page: customerPage,
     page_size: 10,
-    search: searchValue,
+    ...(searchValue && { search: searchValue }),
   });
 
+  useEffect(() => {
+    if (data?.data) {
+      setAllCustomers((prev) => {
+        // Nếu là trang đầu tiên, thay thế toàn bộ
+        if (customerPage === 0) {
+          return data.data;
+        }
+        // Nếu không, thêm vào danh sách hiện có (loại bỏ trùng lặp)
+        const newCustomers = data.data.filter(
+          (newCust) => !prev.some((oldCust) => oldCust.user_id === newCust.user_id)
+        );
+        return [...prev, ...newCustomers];
+      });
+    }
+  }, [data, customerPage]);
+
   const options =
-    data?.data.map((c) => ({
+    allCustomers.map((c) => ({
       value: c.user_id,
       label: `${c.full_name} - ${c.email}`,
     })) ?? [];
+
+  const handleLoadMoreCustomers = () => {
+    if (data && customerPage < data.total_pages - 1) {
+      setCustomerPage((prev) => prev + 1);
+    }
+  };
 
   const handleGetInfo = () => {
     const linkValue = form.getFieldValue("link");
@@ -239,9 +263,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setPrice(0);
     setPercenDeposit(0);
     setIdProduct(null);
+    setSearchValue("");
+    setCustomerPage(0);
+    setAllCustomers([]);
     onCancel();
-    console.log('checkkkk');
-    
   };
   return (
     <>
@@ -544,11 +569,33 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   allowClear
                   placeholder={t("placeholder.searchCustomer")}
                   className="!w-full !h-11"
-                  filterOption={false} // tắt filter local, dùng API search
-                  onSearch={(value) => setSearchValue(value)} // update searchValue
+                  filterOption={false}
+                  onSearch={(value) => {
+                    setSearchValue(value);
+                    setCustomerPage(0);
+                  }}
+                  onPopupScroll={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (
+                      target.scrollTop + target.offsetHeight >=
+                      target.scrollHeight - 10
+                    ) {
+                      handleLoadMoreCustomers();
+                    }
+                  }}
                   notFoundContent={
                     isLoading ? <Spin size="small" /> : t("system.noData")
                   }
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      {isLoading && customerPage > 0 && (
+                        <div style={{ textAlign: "center", padding: "8px" }}>
+                          <Spin size="small" />
+                        </div>
+                      )}
+                    </>
+                  )}
                   options={options}
                 />
               </Form.Item>
