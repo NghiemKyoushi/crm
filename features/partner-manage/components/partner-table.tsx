@@ -487,7 +487,7 @@ export default function JPYManagementPage() {
           ) : materialData?.data && materialData.data.length > 0 ? (
             <>
               <div className="space-y-2">
-                {materialData.data.map((record) => renderTransactionCard(record))}
+                {materialData.data.map((record: PartnerTransaction) => renderTransactionCard(record))}
               </div>
 
               {/* Pagination */}

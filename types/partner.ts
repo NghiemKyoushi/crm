@@ -7,6 +7,7 @@ export interface PartnerTransaction {
   bank_name: string;
   partner_name: string;
   created_at: string;
+  note?: string;
 }
 export type PartnerTransactionList = PartnerTransaction[];
 
