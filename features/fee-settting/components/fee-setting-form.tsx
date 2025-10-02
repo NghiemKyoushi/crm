@@ -44,7 +44,7 @@ export interface GeneralPolicy {
 
 export interface ShippingZoneFee {
   id: number;
-  code: string; // VD: "KV1"
+  code: string;
   name: string;
   description: string;
   city: string;
