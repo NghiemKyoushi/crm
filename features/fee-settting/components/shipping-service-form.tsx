@@ -45,67 +45,69 @@ export default function ShippingServiceForm() {
       {/* Phí dịch vụ khác */}
       <Card
         title={
-          <div className="flex items-center gap-2 font-bold text-gray-700">
-            <FontAwesomeIcon icon={faConciergeBell} className="w-5 h-5"/> {t('feeSettings.otherServiceFees')}
+          <div className="flex items-center gap-2 text-base font-medium text-gray-800">
+            <FontAwesomeIcon icon={faConciergeBell} className="w-4 h-4"/> {t('feeSettings.otherServiceFees')}
           </div>
         }
-        className="mb-6"
+        className="mb-6 rounded-lg shadow-sm"
       >
-        <div className="grid grid-cols-3 gap-6">
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
             <Form.Item
-              label={t('feeSettings.purchaseFeeUs')}
+              label={<span className="text-sm text-gray-700">{t('feeSettings.purchaseFeeUs')}</span>}
               name={["serviceFee", "us"]}
               rules={[{ required: true, message: t('validation.required') }]}
             >
-              <InputNumber className="!w-full" min={0} />
+              <InputNumber className="!w-full" size="large" min={0} />
             </Form.Item>
             <Form.Item
-              label={t('feeSettings.purchaseFeeJp')}
+              label={<span className="text-sm text-gray-700">{t('feeSettings.purchaseFeeJp')}</span>}
               name={["serviceFee", "jp"]}
               rules={[{ required: true, message: t('validation.required') }]}
             >
-              <InputNumber className="!w-full" min={0} />
+              <InputNumber className="!w-full" size="large" min={0} />
             </Form.Item>
           </div>
 
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
             <Form.Item
-              label={t('feeSettings.reinforcementFee')}
+              label={<span className="text-sm text-gray-700">{t('feeSettings.reinforcementFee')}</span>}
               name={["serviceFee", "extraKg"]}
               rules={[{ required: true, message: t('validation.required') }]}
             >
-              <InputNumber className="!w-full" min={0} />
+              <InputNumber className="!w-full" size="large" min={0} />
             </Form.Item>
           </div>
 
-          <div className="!bg-gray-50 p-4 !rounded-lg !border !border-gray-200 !space-y-3">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
             <Form.Item
-              label={t('feeSettings.checkPhotoFeeUs')}
+              label={<span className="text-sm text-gray-700">{t('feeSettings.checkPhotoFeeUs')}</span>}
               name={["serviceFee", "checkUs"]}
               rules={[{ required: true, message: t('validation.required') }]}
             >
-              <InputNumber className="!w-full" min={0} />
+              <InputNumber className="!w-full" size="large" min={0} />
             </Form.Item>
             <Form.Item
-              label={t('feeSettings.checkPhotoFeeJp')}
+              label={<span className="text-sm text-gray-700">{t('feeSettings.checkPhotoFeeJp')}</span>}
               name={["serviceFee", "checkJp"]}
               rules={[{ required: true, message: t('validation.required') }]}
             >
-              <InputNumber className="!w-full" min={0} />
+              <InputNumber className="!w-full" size="large" min={0} />
             </Form.Item>
           </div>
         </div>
       </Card>
 
       {/* Save button */}
-      <div className="text-right border-t-gray-100 pt-6 mt-8">
+      <div className="text-right border-t border-gray-200 pt-6 mt-8">
         <Button
           type="primary"
+          size="large"
           htmlType="submit"
-          className="bg-blue-600 hover:!bg-blue-700 px-6 h-11 font-bold"
+          icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+          className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
-          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" /> {t('common.saveAllChanges')}
+          {t('common.saveAllChanges')}
         </Button>
       </div>
     </Form>

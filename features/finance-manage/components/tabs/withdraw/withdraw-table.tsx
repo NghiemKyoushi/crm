@@ -157,18 +157,19 @@ const WithdrawTable = ({}) => {
       title: t("withdraw.code"),
       dataIndex: "deposit_code",
       key: "deposit_code",
-      render: (code: string) => {
+      width: 130,
+      render: (code: string, record: withdrawItem) => {
         if (!code) return "";
-        if (code.length <= 8) {
-          return <span>{code}</span>;
-        }
-        const first = code.slice(0, 4);
-        const last = code.slice(-4);
-        const masked = `${first}...${last}`;
+        const displayCode = code.length > 12 ? `${code.slice(0, 8)}...${code.slice(-4)}` : code;
         return (
-          <Tooltip title={code}>
-            <span>{masked}</span>
-          </Tooltip>
+          <div>
+            <Tooltip title={code}>
+              <span className="text-blue-600 text-sm">{displayCode}</span>
+            </Tooltip>
+            <div className="text-xs text-gray-500">
+              {dayjs(record.created_at).format("DD/MM HH:mm")}
+            </div>
+          </div>
         );
       },
     },
@@ -176,29 +177,39 @@ const WithdrawTable = ({}) => {
       title: t("deposit.columns.userName"),
       dataIndex: "username",
       key: "username",
-      render: (text: string) => {
+      width: 150,
+      render: (text: string, record: withdrawItem) => {
         if (!text) return "";
         return (
-          <Tooltip title={text}>
-            <span className="truncate max-w-[150px] inline-block">{text}</span>
-          </Tooltip>
+          <div>
+            <Tooltip title={text}>
+              <div className="text-sm text-gray-800 truncate max-w-[140px]">{text}</div>
+            </Tooltip>
+            <div className="text-xs text-gray-500">ID: {record.user_id}</div>
+          </div>
         );
       },
     },
-    // {
-    //   title: t("withdraw.customer"),
-    //   dataIndex: "user_id",
-    //   key: "user_id",
-    // },
+    {
+      title: t("withdraw.amount"),
+      dataIndex: "amount",
+      key: "amount",
+      width: 130,
+      render: (value: number) => {
+        const formatted = value.toLocaleString("vi-VN");
+        return <div className="text-sm text-red-600">-{formatted}đ</div>;
+      },
+    },
     {
       title: t("withdraw.note"),
       dataIndex: "note",
       key: "note",
+      width: 180,
       render: (note: string) => {
-        if (!note) return "-";
+        if (!note) return <span className="text-gray-400 text-sm">-</span>;
         return (
           <Tooltip title={note}>
-            <div className="truncate max-w-[200px]">{note}</div>
+            <div className="text-sm text-gray-700 line-clamp-2">{note}</div>
           </Tooltip>
         );
       },
@@ -207,51 +218,35 @@ const WithdrawTable = ({}) => {
       title: t("withdraw.adminNote"),
       dataIndex: "admin_note",
       key: "admin_note",
+      width: 180,
       render: (admin_note: string) => {
-        if (!admin_note) return "-";
+        if (!admin_note) return <span className="text-gray-400 text-sm">-</span>;
         return (
           <Tooltip title={admin_note}>
-            <div className="truncate max-w-[200px]">{admin_note}</div>
+            <div className="text-sm text-gray-700 line-clamp-2">{admin_note}</div>
           </Tooltip>
         );
-      },
-    },
-    {
-      title: t("withdraw.amount"),
-      dataIndex: "amount",
-      key: "amount",
-      render: (value: number) =>
-        value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }),
-    },
-    {
-      title: t("withdraw.createdAt"),
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
       },
     },
     {
       title: t("withdraw.handler"),
       dataIndex: "processed_name",
       key: "processed_name",
-      render: (processed_name: string) => {
-        if (!processed_name) return "-";
+      width: 130,
+      render: (processed_name: string, record: withdrawItem) => {
+        if (!processed_name) return <span className="text-gray-400 text-sm">-</span>;
         return (
-          <Tooltip title={processed_name}>
-            <div className="truncate max-w-[100px]">{processed_name}</div>
-          </Tooltip>
+          <div>
+            <Tooltip title={processed_name}>
+              <div className="text-sm text-gray-700 truncate max-w-[120px]">{processed_name}</div>
+            </Tooltip>
+            {record.processed_at && (
+              <div className="text-xs text-gray-500">
+                {dayjs(record.processed_at).format("DD/MM HH:mm")}
+              </div>
+            )}
+          </div>
         );
-      },
-    },
-    {
-      title: t("withdraw.handledAt"),
-      dataIndex: "processed_at",
-      key: "processed_at",
-      render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
       },
     },
 
@@ -259,53 +254,34 @@ const WithdrawTable = ({}) => {
       title: t("withdraw.status"),
       dataIndex: "status",
       key: "status",
+      width: 120,
+      align: "center",
       render: (status: withdrawItem["status"]) => {
-        switch (status) {
-          case "PENDING":
-            return (
-              <Tag className="!rounded-3xl" color="gold">
-                {t("withdraw.statusType.pending")}
-              </Tag>
-            );
-          case "APPROVED":
-            return (
-              <Tag className="!rounded-3xl" color="green">
-                {t("withdraw.statusType.approved")}
-              </Tag>
-            );
-          case "COMPLETED":
-            return (
-              <Tag className="!rounded-3xl" color="green">
-                {t("withdraw.statusType.completed")}
-              </Tag>
-            );
-          case "CANCELLED":
-            return (
-              <Tag className="!rounded-3xl" color="red">
-                {t("withdraw.statusType.cancelled")}
-              </Tag>
-            );
-          case "REJECTED":
-            return (
-              <Tag className="!rounded-3xl" color="red">
-                {t("withdraw.statusType.rejected")}
-              </Tag>
-            );
-
-          default:
-            return null;
-        }
+        const statusConfig = {
+          PENDING: { color: "gold", text: t("withdraw.statusType.pending") },
+          APPROVED: { color: "green", text: t("withdraw.statusType.approved") },
+          COMPLETED: { color: "green", text: t("withdraw.statusType.completed") },
+          CANCELLED: { color: "red", text: t("withdraw.statusType.cancelled") },
+          REJECTED: { color: "red", text: t("withdraw.statusType.rejected") },
+        };
+        const config = statusConfig[status as keyof typeof statusConfig];
+        return config ? (
+          <Tag className="!rounded-3xl text-xs" color={config.color}>
+            {config.text}
+          </Tag>
+        ) : null;
       },
     },
     {
-      title: t("withdraw.qrCode"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: string, record) => (
-        <Space>
+      title: t("common.actions"),
+      key: "action",
+      width: 160,
+      fixed: "right",
+      render: (_, record) => (
+        <Space size="small">
           {["PENDING", "APPROVED"].includes(record.status) && (
             <button
-              className="cursor-pointer"
+              className="cursor-pointer hover:opacity-70"
               onClick={() => {
                 if (record.status === "APPROVED") {
                   setIsTransacted(true);
@@ -318,14 +294,14 @@ const WithdrawTable = ({}) => {
             >
               <FontAwesomeIcon
                 icon={faQrcode}
-                className="text-blue-500 text-xl"
+                className="text-blue-500 text-lg"
               />
             </button>
           )}
 
           {["CANCELLED", "COMPLETED", "REJECTED"].includes(record.status) && (
             <button
-              className="cursor-pointer"
+              className="cursor-pointer hover:opacity-70"
               onClick={() => {
                 setSelectedCode(record.deposit_code)
                 setSelectedId(record.id);
@@ -334,27 +310,19 @@ const WithdrawTable = ({}) => {
             >
               <FontAwesomeIcon
                 icon={faInfoCircle}
-                className="text-blue-500 text-xl"
+                className="text-blue-500 text-lg"
               />
             </button>
           )}
-        </Space>
-      ),
-    },
-    {
-      title: t("common.actions"),
-      key: "action",
-      render: (_, record) => (
-        <Space>
-          <div>
-            <Button
-              type="link"
-              size="small"
-              onClick={() => handleOpenHistory(record.id, record.deposit_code)}
-            >
-              {t("withdraw.history")}
-            </Button>
-          </div>
+
+          <Button
+            type="link"
+            size="small"
+            className="!text-xs !p-0"
+            onClick={() => handleOpenHistory(record.id, record.deposit_code)}
+          >
+            Lịch sử
+          </Button>
         </Space>
       ),
     },
@@ -377,16 +345,18 @@ const WithdrawTable = ({}) => {
         confirmText={"Xác nhận"}
         cancelText="Huỷ"
       />
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        response={data}
-        page={params.page ? params.page + 1 : 0}
-        rowHeight={45}
-        onPageChange={handlePageChange}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          response={data}
+          page={params.page ? params.page + 1 : 0}
+          rowHeight={60}
+          onPageChange={handlePageChange}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
 
       <CancelReasonModal
         transactionCode={selectedCode}

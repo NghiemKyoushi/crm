@@ -188,28 +188,34 @@ export default function StaffManageTable() {
       title: t("staffManage.fullName"),
       dataIndex: "full_name",
       key: "full_name",
-      render: (text: string) => <span className="font-medium">{text}</span>,
-    },
-    {
-      title: t("staffManage.email"),
-      dataIndex: "email",
-      key: "email",
+      width: 180,
+      render: (text: string, record: UserData) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+          <div className="text-xs text-gray-500">{record.email}</div>
+        </div>
+      ),
     },
     {
       title: t("staffManage.phoneNumber"),
       dataIndex: "phone_number",
       key: "phone_number",
+      width: 130,
+      render: (text: string) => (
+        <div className="text-sm text-gray-700">{text || "-"}</div>
+      ),
     },
     {
       title: t("staffManage.role"),
       dataIndex: "role_name",
       key: "role_name",
+      width: 180,
       render: (role: string, record: UserData) => {
         if (listRole) {
           return (
             <Select
-              size="middle"
-              value={role} // 👈 giá trị đang hiển thị
+              size="small"
+              value={role}
               style={{ width: 160 }}
               onChange={(value, option) => {
                 if (value) {
@@ -239,25 +245,26 @@ export default function StaffManageTable() {
       title: t("staffManage.status"),
       dataIndex: "active",
       key: "active",
+      width: 100,
+      align: "center",
       render: (active: boolean) => (
-        <>
-          {active ? (
-            <Tag color="green">{t("staffManage.active")}</Tag>
-          ) : (
-            <Tag color="red">{t("staffManage.locked")}</Tag>
-          )}
-        </>
+        <Tag color={active ? "green" : "red"} className="text-xs">
+          {active ? t("staffManage.active") : t("staffManage.locked")}
+        </Tag>
       ),
     },
     {
       title: t("staffManage.actions"),
       key: "actions",
+      width: 140,
+      fixed: "right",
       render: (_: any, record: UserData) => (
-        <div className="flex gap-3 text-[16px]">
+        <div className="flex gap-3 text-sm justify-center">
           <FontAwesomeIcon
             icon={faEdit}
             onClick={() => handleOpenEdit(record.user_id)}
             className="cursor-pointer text-blue-500 hover:text-blue-700"
+            title="Sửa"
           />
           <FontAwesomeIcon
             icon={faKey}
@@ -265,6 +272,7 @@ export default function StaffManageTable() {
             onClick={() =>
               handleOpenConfirm("reset", record.user_id.toString())
             }
+            title="Reset mật khẩu"
           />
           {record.active ? (
             <FontAwesomeIcon
@@ -273,6 +281,7 @@ export default function StaffManageTable() {
               onClick={() =>
                 handleOpenConfirm("lock", record.user_id.toString())
               }
+              title="Khóa"
             />
           ) : (
             <FontAwesomeIcon
@@ -281,6 +290,7 @@ export default function StaffManageTable() {
               onClick={() => {
                 handleOpenConfirm("unlock", record.user_id.toString());
               }}
+              title="Mở khóa"
             />
           )}
           <FontAwesomeIcon
@@ -289,6 +299,7 @@ export default function StaffManageTable() {
             onClick={() =>
               handleOpenConfirm("delete", record.user_id.toString())
             }
+            title="Xóa"
           />
         </div>
       ),
@@ -326,17 +337,19 @@ export default function StaffManageTable() {
           {t("staffManage.search")}
         </Button>
       </div>
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        rowHeight={45}
-        pageSize={10}
-        page={(data && data?.current_page + 1) || 0}
-        onPageChange={handleChangePage}
-        response={data}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          rowHeight={55}
+          pageSize={10}
+          page={(data && data?.current_page + 1) || 0}
+          onPageChange={handleChangePage}
+          response={data}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
 
       <ModalStaffAdd
         initialValues={detailStaff}
