@@ -118,7 +118,8 @@
     },
     "internalNote": {
       "noteHistory": "Note History",
-      "saveNote": "Save Note"
+      "saveNote": "Save Note",
+      "placeholder": "Enter note..."
     },
     "paymentHistory": {
       "transactionCode": "Transaction Code",
@@ -130,6 +131,21 @@
       "withdraw": "Withdraw",
       "serviceFeePayment": "Service Fee Payment",
       "bankTransfer": "Bank Transfer"
+    },
+    "addBankModal": {
+      "title": "Add Bank Account",
+      "bankName": "Bank Name",
+      "selectBank": "Select Bank",
+      "accountNumber": "Account Number",
+      "accountHolder": "Account Holder",
+      "branch": "Branch",
+      "noteLabel": "Note",
+      "note": "Enter note...",
+      "accountNumberPlaceholder": "Enter account number",
+      "accountHolderPlaceholder": "Enter account holder name",
+      "branchPlaceholder": "Enter branch",
+      "saveAccount": "Save Account",
+      "cancel": "Cancel"
     }
   },
   "staffManage": {

@@ -117,7 +117,8 @@
     },
     "internalNote": {
       "noteHistory": "Lịch sử ghi chú",
-      "saveNote": "Lưu ghi chú"
+      "saveNote": "Lưu ghi chú",
+      "placeholder": "Nhập ghi chú..."
     },
     "paymentHistory": {
       "transactionCode": "Mã giao dịch",
@@ -129,6 +130,21 @@
       "withdraw": "Rút tiền",
       "serviceFeePayment": "Thanh toán phí dịch vụ",
       "bankTransfer": "Chuyển khoản"
+    },
+    "addBankModal": {
+      "title": "Thêm tài khoản ngân hàng",
+      "bankName": "Tên ngân hàng",
+      "selectBank": "Chọn ngân hàng",
+      "accountNumber": "Số tài khoản",
+      "accountHolder": "Chủ tài khoản",
+      "branch": "Chi nhánh",
+      "noteLabel": "Ghi chú",
+      "note": "Nhập ghi chú...",
+      "accountNumberPlaceholder": "Nhập số tài khoản",
+      "accountHolderPlaceholder": "Nhập tên chủ tài khoản",
+      "branchPlaceholder": "Nhập chi nhánh",
+      "saveAccount": "Lưu tài khoản",
+      "cancel": "Hủy"
     }
   },
   "staffManage": {
