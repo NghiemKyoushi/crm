@@ -117,14 +117,14 @@ export default function CategoryCustomerTable() {
       title: t("customerCate.name"),
       dataIndex: "group_name",
       key: "group_name",
+      width: 180,
       render: (text: string, record: Category) => (
         <Tag
           style={{
             backgroundColor: record.color ? record.color : undefined,
-            color: record.color ? getContrastColor(record.color): "#ffffff" ,
-            fontWeight: 400
+            color: record.color ? getContrastColor(record.color): "#ffffff",
           }}
-          className="font-semibold text-[13px] px-3 py-1"
+          className="text-xs px-3 py-1"
         >
           {text}
         </Tag>
@@ -134,28 +134,39 @@ export default function CategoryCustomerTable() {
       title: t("customerCate.description"),
       dataIndex: "description",
       key: "description",
+      width: 250,
+      render: (text: string) => (
+        <div className="text-sm text-gray-700">{text || "-"}</div>
+      ),
     },
     {
       title: t("customerCate.customerCount"),
       dataIndex: "customer_count",
       key: "customer_count",
+      width: 130,
+      align: "center",
+      render: (count: number) => (
+        <div className="text-sm text-gray-700">{count || 0}</div>
+      ),
     },
     {
       title: t("customerCate.actions"),
       key: "actions",
+      width: 140,
+      fixed: "right",
       render: (_: any, record: Category) => (
-        <div className="flex space-x-3">
+        <div className="flex space-x-2 justify-center">
           <Tooltip title={t("customerCate.editPolicy")}>
             <Button
               type="text"
+              size="small"
               icon={
                 <FontAwesomeIcon
                   icon={faEdit}
-                  className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+                  className="text-indigo-600 hover:text-indigo-800 text-sm"
                 />
               }
               onClick={()=>{
-                // setIsOpenFeeSetting(true)
                 router.push(`/category-customer/${record.id}`)
               }}
             />
@@ -174,10 +185,11 @@ export default function CategoryCustomerTable() {
                 setOpen(true);
               }}
               type="text"
+              size="small"
               icon={
                 <FontAwesomeIcon
                   icon={faTags}
-                  className="text-green-600 hover:text-green-800 transition-colors duration-200"
+                  className="text-green-600 hover:text-green-800 text-sm"
                 />
               }
             />
@@ -185,6 +197,7 @@ export default function CategoryCustomerTable() {
           <Tooltip title={t("customerCate.delete")}>
             <Button
               type="text"
+              size="small"
               danger
               icon={
                 <FontAwesomeIcon
@@ -234,17 +247,19 @@ export default function CategoryCustomerTable() {
         </Button>
       </div>
 
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        rowHeight={45}
-        pageSize={10}
-        page={(data && data?.current_page + 1) || 0}
-        onPageChange={handleChangePage}
-        response={data}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          rowHeight={55}
+          pageSize={10}
+          page={(data && data?.current_page + 1) || 0}
+          onPageChange={handleChangePage}
+          response={data}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
       <AddCustomerTypeModal
         open={open}
         onClose={() => {

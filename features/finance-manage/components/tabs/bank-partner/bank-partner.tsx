@@ -108,47 +108,63 @@ export default function BankPartnerSetting() {
       title: t('table.bankName'),
       dataIndex: "bank_name",
       key: "bank_name",
-    },
-    {
-      title: t('table.accountNumber'),
-      dataIndex: "account_number",
-      key: "account_number",
+      width: 150,
+      render: (text: string, record: BankAccount) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+          <div className="text-xs text-gray-500">{record.account_number}</div>
+        </div>
+      ),
     },
     {
       title: t('table.accountHolder'),
       dataIndex: "account_holder",
       key: "account_holder",
+      width: 180,
+      render: (text: string, record: BankAccount) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+          {record.partner_name && (
+            <div className="text-xs text-gray-500">
+              Tên nhớ: {record.partner_name}
+            </div>
+          )}
+        </div>
+      ),
     },
     {
-      title: "GroupID telegram",
+      title: "Telegram",
       dataIndex: "telegram_channel_id",
       key: "telegram_channel_id",
-      width: 150,
-    },
-    {
-      title: "Tên gợi nhớ",
-      dataIndex: "partner_name",
-      key: "partner_name",
-      width: 150,
+      width: 130,
+      render: (text: string) => (
+        <div className="text-sm text-gray-700">{text || "-"}</div>
+      ),
     },
     {
       title: t('table.dailyLimit'),
       dataIndex: "daily_limit_vnd",
       key: "daily_limit_vnd",
-      render: (value: number) =>
-        value.toLocaleString("vi-VN", { maximumFractionDigits: 0 }),
+      width: 140,
+      render: (value: number) => (
+        <div className="text-sm text-gray-700">
+          {value.toLocaleString("vi-VN")}đ
+        </div>
+      ),
     },
     {
       title: t('table.status'),
       dataIndex: "status",
       key: "status",
+      width: 100,
+      align: "center",
       render: (_, record: BankAccount) =>
         record.is_active ? (
-          <Tag color="green" className="px-3 py-1 !rounded-3xl">
+          <Tag color="green" className="!rounded-3xl text-xs">
             {t('status.active')}
           </Tag>
         ) : (
-          <Tag color="default" className="px-3 py-1 !rounded-3xl">
+          <Tag color="default" className="!rounded-3xl text-xs">
             {t('status.paused')}
           </Tag>
         ),
@@ -156,20 +172,26 @@ export default function BankPartnerSetting() {
     {
       title: t('table.actions'),
       key: "action",
+      width: 200,
+      fixed: "right",
       render: (_: any, record: BankAccount) => (
-        <div className="flex gap-2">
-          <button
+        <div className="flex gap-2 items-center text-sm">
+          <Button
+            type="link"
+            size="small"
+            className="!p-0 !h-auto !text-xs"
             onClick={() => {
               setEditingRecord(record);
               setOpen(true);
             }}
-            className="!text-blue-600 hover:underline"
           >
-            {t('common.edit')}
-          </button>
-          <span>|</span>
-          <button
-            className="!text-green-600 hover:underline"
+            Sửa
+          </Button>
+          <span className="text-gray-300">|</span>
+          <Button
+            type="link"
+            size="small"
+            className="!p-0 !h-auto !text-xs !text-green-600"
             onClick={() => {
               setAccountName(record.account_holder);
               setAccountNumber(record.account_number);
@@ -177,18 +199,21 @@ export default function BankPartnerSetting() {
               setOpenAssign(true);
             }}
           >
-            {t('bankPartner.assignPermission')}
-          </button>
-          <span>|</span>
-          <button
+            Phân quyền
+          </Button>
+          <span className="text-gray-300">|</span>
+          <Button
+            type="link"
+            size="small"
+            danger
+            className="!p-0 !h-auto !text-xs"
             onClick={() => {
               setSelectId(record.id.toString());
               setIsOpenConfirmDelete(true);
             }}
-            className="!text-red-600 hover:underline"
           >
-            {t('common.delete')}
-          </button>
+            Xóa
+          </Button>
         </div>
       ),
     },
@@ -216,21 +241,23 @@ export default function BankPartnerSetting() {
           {t('bankPartner.addAccount')}
         </Button>
       </div>
-      <TableComponent
-        columns={columns}
-        dataSource={data?.content || []}
-        rowHeight={45}
-        pageSize={10}
-        page={page + 1 || 0}
-        onPageChange={handleChangePage}
-        response={
-          data
-            ? mapBankResponseToPaginatedResponse<BankAccount>(data)
-            : undefined
-        }
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.content || []}
+          rowHeight={55}
+          pageSize={10}
+          page={page + 1 || 0}
+          onPageChange={handleChangePage}
+          response={
+            data
+              ? mapBankResponseToPaginatedResponse<BankAccount>(data)
+              : undefined
+          }
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
       <AddBankAccountModal
         open={open}
         record={editingRecord}

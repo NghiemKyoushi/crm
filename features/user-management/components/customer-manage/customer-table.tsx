@@ -67,49 +67,63 @@ export default function CustomerTable() {
       title: t("customerTable.name"),
       dataIndex: "full_name",
       key: "full_name",
+      width: 200,
+      render: (text: string, record: CustomerModel) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+          <div className="text-xs text-gray-500">{record.email}</div>
+        </div>
+      ),
     },
     {
       title: t("customerTable.type"),
       dataIndex: "group_name",
       key: "group_name",
+      width: 180,
       render: (_, record) => (
-        <>
-          <CategorySelect
-            value={record.group_id}
-            onChange={(e: number) => handleUpdateColor(e, record.user_id)}
-          />
-        </>
+        <CategorySelect
+          value={record.group_id}
+          onChange={(e: number) => handleUpdateColor(e, record.user_id)}
+        />
       ),
     },
     {
       title: t("customerTable.sales"),
       dataIndex: "sale_name",
       key: "sale_name",
+      width: 150,
+      render: (text: string) => (
+        <div className="text-sm text-gray-700">{text || "-"}</div>
+      ),
     },
     {
       title: t("customerTable.debt"),
       dataIndex: "debt_amount",
       key: "debt_amount",
-      render: (value) => (
-        <Text className={value > 0 ? "text-red-500 font-semibold" : ""}>
-          {value && value.toLocaleString("vi-VN")}
-        </Text>
+      width: 140,
+      align: "right",
+      render: (value: number) => (
+        <div className={`text-sm ${value > 0 ? "text-red-600" : "text-gray-700"}`}>
+          {value ? `${value.toLocaleString("vi-VN")}đ` : "0đ"}
+        </div>
       ),
     },
     {
       title: t("customerTable.actions"),
       key: "actions",
+      width: 120,
+      fixed: "right",
       render: (_: any, record: CustomerModel) => (
-        <div
-          className="cursor-pointer"
+        <Button
+          type="link"
+          size="small"
+          className="!p-0 !h-auto !text-xs"
           onClick={() => {
             router.push(`user-management/${record.user_id.toString()}`);
           }}
         >
-          <div className="text-blue-600 hover:underline">
-            {t("customerTable.view360")}
-          </div>
-        </div>
+          Xem chi tiết
+        </Button>
       ),
     },
   ];
@@ -143,17 +157,19 @@ export default function CustomerTable() {
           {t("customerManage.search")}
         </Button>
       </div>
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        rowHeight={48}
-        pageSize={5}
-        page={data?.current_page || 0}
-        onPageChange={handleChangePage}
-        response={data}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          rowHeight={55}
+          pageSize={10}
+          page={data?.current_page || 0}
+          onPageChange={handleChangePage}
+          response={data}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
       {selectedId && (
         <CustomerDetailModal
           selectedId={selectedId}

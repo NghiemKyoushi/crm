@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Table, Input, Button, Select, InputNumber, message } from "antd";
+import { Table, Button, Select, InputNumber, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -176,113 +176,119 @@ export default function ShippingSurchangeTable(
     message.success(t("shippingSettings.saveAllSuccess"));
   };
 
-  const getColumns = (route: string): ColumnsType<MaterialItem> => [
-    {
-      title: t("table.index"),
-      dataIndex: "id",
-      width: 40,
-      render: (_val, _record, index) => index + 1,
-    },
-    {
-      title: t("table.product"),
-      dataIndex: "product_category_name",
-      width: 240,
-      render: (val, record: MaterialItem) => {
-        const isNew =
-          newKeys.has(record.id.toString()) || !val?.toString().trim();
+  const getColumns = (route: string, routeName: string): ColumnsType<MaterialItem> => {
+    const isUSRoute = routeName === "US -> VN";
 
-        if (!isNew) {
-          return (
-            <span className="block whitespace-normal break-words w-full">
-              {val}
-            </span>
-          );
-        }
-
-        // return (
-        //   <Input
-        //     className="!w-full !h-9"
-        //     value={val}
-        //     onChange={(e) =>
-        //       handleChange(
-        //         +route,
-        //         record.id.toString(),
-        //         "product_category_name",
-
-        //         e.target.value
-        //       )
-        //     }
-        //   />
-        // );
+    return [
+      {
+        title: t("table.index"),
+        dataIndex: "id",
+        width: 40,
+        render: (_val, _record, index) => index + 1,
       },
-    },
-    {
-      title: t("table.productType"),
-      dataIndex: "product_category_id",
-      width: 160,
-      render: (val, record) => (
-        <Select
-          showSearch
-          className="!w-[180px] !h-9 !bg-gray-100"
-          value={val}
-          loading={isLoadingCategories}
-          onChange={(value) =>
-            handleChange(
-              +route,
-              record.id.toString(),
-              "product_category_id",
-              value
-            )
+      {
+        title: t("table.product"),
+        dataIndex: "product_category_name",
+        width: 240,
+        render: (val, record: MaterialItem) => {
+          const isNew =
+            newKeys.has(record.id.toString()) || !val?.toString().trim();
+
+          if (!isNew) {
+            return (
+              <span className="block whitespace-normal break-words w-full">
+                {val}
+              </span>
+            );
           }
-          options={categoryOptions}
-          placeholder={t("placeholder.selectProductType")}
-        />
-      ),
-    },
-    {
-      title: t("table.orderType"),
-      dataIndex: "order_type",
-      width: 180,
-      render: (val, record) => (
-        <Select
-          className="!w-full !h-9 !bg-gray-100"
-          value={val ?? 1} 
-          onChange={(value) =>
-            handleChange(+route, record.id.toString(), "order_type", value)
-          }
-          options={[
-            { value: 1, label: "Tính trên tổng đơn" },
-            { value: 2, label: "Tính trên chiếc" },
-          ]}
-        />
-      ),
-    },
-    {
-      title: t("table.conditionType"),
-      dataIndex: "condition_type",
-      width: 140,
-      render: (val, record) => (
-        <Select
-          className="!w-full !h-9 !bg-gray-100"
-          value={val}
-          onChange={(value) =>
-            handleChange(+route, record.id.toString(), "condition_type", value)
-          }
-          options={[
-            { value: "GTE", label: t("conditions.greaterThanOrEqual") },
-            { value: "RANGE", label: t("conditions.range") },
-            { value: "LT", label: t("conditions.lessThan") },
-            { value: "GT", label: t("conditions.greaterThan") },
-            { value: "LTE", label: t("conditions.lessThanOrEqual") },
-          ]}
-        />
-      ),
-    },
-    {
-      title: t("table.valueUSD"),
-      dataIndex: "price_to",
-      width: 200,
-      render: (val, record: MaterialItem) => {
+
+          // return (
+          //   <Input
+          //     className="!w-full !h-9"
+          //     value={val}
+          //     onChange={(e) =>
+          //       handleChange(
+          //         +route,
+          //         record.id.toString(),
+          //         "product_category_name",
+
+          //         e.target.value
+          //       )
+          //     }
+          //   />
+          // );
+        },
+      },
+      {
+        title: t("table.productType"),
+        dataIndex: "product_category_id",
+        width: 160,
+        render: (val, record) => (
+          <Select
+            showSearch
+            className="!w-[180px] !h-9 !bg-gray-100"
+            value={val}
+            loading={isLoadingCategories}
+            onChange={(value) =>
+              handleChange(
+                +route,
+                record.id.toString(),
+                "product_category_id",
+                value
+              )
+            }
+            options={categoryOptions}
+            placeholder={t("placeholder.selectProductType")}
+          />
+        ),
+      },
+      {
+        title: t("table.orderType"),
+        dataIndex: "order_type",
+        width: 180,
+        render: (val, record) => (
+          <Select
+            className="!w-full !h-9 !bg-gray-100"
+            value={val ?? 1}
+            onChange={(value) =>
+              handleChange(+route, record.id.toString(), "order_type", value)
+            }
+            options={[
+              { value: 1, label: "Tính trên tổng đơn" },
+              { value: 2, label: "Tính trên chiếc" },
+            ]}
+          />
+        ),
+      },
+      {
+        title: t("table.conditionType"),
+        dataIndex: "condition_type",
+        width: 100,
+        render: (val, record) => (
+          <Select
+            className="!w-full !h-9 !bg-gray-100"
+            value={val}
+            onChange={(value) =>
+              handleChange(+route, record.id.toString(), "condition_type", value)
+            }
+            options={[
+              { value: "GTE", label: ">=" },
+              { value: "LTE", label: "<=" },
+              { value: "EQ", label: "==" },
+              { value: "GT", label: ">" },
+              { value: "LT", label: "<" },
+              { value: "RANGE", label: "Range" },
+            ]}
+          />
+        ),
+      },
+      {
+        title: t("table.valueVND"),
+        dataIndex: "price_to",
+        width: 200,
+        render: (val, record: MaterialItem) => {
+        const placeholder = "₫";
+
         if (record.condition_type === "RANGE") {
           return (
             <div className="flex items-center gap-1">
@@ -291,6 +297,7 @@ export default function ShippingSurchangeTable(
                 value={record.price_from.toString()}
                 step={0.01}
                 stringMode
+                placeholder={placeholder}
                 formatter={(value) =>
                   value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
                 }
@@ -310,6 +317,7 @@ export default function ShippingSurchangeTable(
                 value={record.price_to.toString()}
                 step={0.01}
                 stringMode
+                placeholder={placeholder}
                 formatter={(value) =>
                   value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
                 }
@@ -340,6 +348,7 @@ export default function ShippingSurchangeTable(
             }
             step={0.01}
             stringMode
+            placeholder={placeholder}
             formatter={(value) =>
               value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
             }
@@ -383,7 +392,20 @@ export default function ShippingSurchangeTable(
             ? match[1].replace(/,/g, "")
             : val?.toString() ?? "";
 
-        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
+        // US route: USD, VND, %
+        // JP route: JPY, VND
+        const defaultUnit = isUSRoute ? "USD": "JPY";
+        const unitPart = match && match[2] ? match[2].toUpperCase() : defaultUnit;
+
+        const currencyOptions = isUSRoute
+          ? [
+              { label: "USD", value: "USD" },
+              { label: "VND", value: "VND" },
+              { label: "%", value: "%" },
+            ]: [
+              { label: "JPY", value: "JPY" },
+              { label: "VND", value: "VND" },
+            ];
 
         return (
           <div className="flex items-center gap-1">
@@ -422,72 +444,11 @@ export default function ShippingSurchangeTable(
                   cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
                 );
               }}
-              options={[
-                // { label: "USD", value: "USD" },
-                // { label: "JPY", value: "JPY" },
-                { label: "VND", value: "VND" },
-                // { label: "%", value: "%" },
-              ]}
+              options={currencyOptions}
             />
           </div>
         );
       },
-      // render: (val, record) => {
-      //   const match = (val ?? "").toString().match(/^([\d.,]+)\s*(USD|JPY)?$/i);
-      //   const numberPart = match
-      //     ? match[1].replace(/,/g, "")
-      //     : val?.toString() ?? "";
-      //   const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-
-      //   return (
-      //     <div className="flex items-center gap-1">
-      //       <InputNumber<string>
-      //         className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-      //         value={numberPart}
-      //         step={0.01}
-      //         stringMode
-      //         formatter={(value) => {
-      //           if (!value) return "";
-      //           return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // chỉ format số
-      //         }}
-      //         parser={(value) => {
-      //           if (!value) return "";
-      //           return value.replace(/,/g, "").trim(); // parse ra số
-      //         }}
-      //         onChange={(value) =>
-      //           handleChange(
-      //             +route,
-      //             record.id.toString(),
-      //             "value_data",
-      //             (value ?? "0") + "" + unitPart // lưu kèm đơn vị
-      //           )
-      //         }
-      //       />
-
-      //       <Select
-      //         className="!h-9 !w-5/12"
-      //         value={unitPart}
-      //         onChange={(cur) => {
-      //           // đổi đơn vị thì update lại value_data
-      //           const cleanNumber = numberPart || "0";
-      //           handleChange(
-      //             +route,
-      //             record.id.toString(),
-      //             "value_data",
-      //             cleanNumber + "" + cur
-      //           );
-      //         }}
-      //         options={[
-      //           { label: "USD", value: "USD" },
-      //           { label: "JPY", value: "JPY" },
-      //           { label: "VND", value: "VND" },
-      //           { label: "%", value: "%" },
-
-      //         ]}
-      //       />
-      //     </div>
-      //   );
-      // },
     },
     {
       title: t("table.surcharge"),
@@ -504,16 +465,21 @@ export default function ShippingSurchangeTable(
             ? match[1].replace(/,/g, "")
             : val?.toString() ?? "";
 
-        const unitPart = match && match[2] ? match[2].toUpperCase() : "USD";
-        const optionList =
-          record.route_id === 2
-            ? [{ label: "USD", value: "USD" }]
-            : [
-                { label: "USD", value: "USD" },
-                { label: "JPY", value: "JPY" },
-                { label: "VND", value: "VND" },
-                { label: "%", value: "%" },
-              ];
+        // US route: USD, VND, %
+        // JP route: JPY, VND
+        const defaultUnit = isUSRoute ? "USD" : "JPY" ;
+        const unitPart = match && match[2] ? match[2].toUpperCase() : defaultUnit;
+
+        const optionList = isUSRoute
+          ? [
+              { label: "USD", value: "USD" },
+              { label: "VND", value: "VND" },
+              { label: "%", value: "%" },
+            ] : [
+              { label: "JPY", value: "JPY" },
+              { label: "VND", value: "VND" },
+            ];
+
         return (
           <div className="flex items-center gap-1">
             <InputNumber<string>
@@ -574,21 +540,22 @@ export default function ShippingSurchangeTable(
       ),
     },
   ];
+};
 
   return (
     <div>
       {Object.entries(data).map(([routeId, rows]) => (
         <div key={routeId} className="mb-6">
-          <div className="p-5 rounded-lg border border-gray-200 bg-gray-50">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-semibold">
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-base font-medium text-gray-800">
                 <FontAwesomeIcon
                   icon={
                     routeNames[Number(routeId)] === "US -> VN"
                       ? faFlagUsa
                       : faFlag
                   }
-                  className={`  mr-2 w-4 h-4 ${
+                  className={`mr-2 w-4 h-4 ${
                     routeNames[Number(routeId)] === "US -> VN"
                       ? "!text-red-600"
                       : "!text-blue-600"
@@ -598,6 +565,7 @@ export default function ShippingSurchangeTable(
               </h2>
               <Button
                 type="primary"
+                size="large"
                 icon={<PlusOutlined />}
                 onClick={() => handleAddRow(+routeId)}
                 className="!bg-green-600 hover:!bg-green-700"
@@ -605,27 +573,32 @@ export default function ShippingSurchangeTable(
                 {t("button.addNew")}
               </Button>
             </div>
-            <Table<MaterialItem>
-              bordered
-              dataSource={rows}
-              rowKey="id"
-              columns={getColumns(routeId)}
-              pagination={false}
-              rowClassName={() => "custom-row"}
-              scroll={{ x: "max-content" }}
-            />
+            <div className="overflow-x-auto">
+              <Table<MaterialItem>
+                bordered
+                dataSource={rows}
+                rowKey="id"
+                columns={getColumns(routeId, routeNames[Number(routeId)])}
+                pagination={false}
+                rowClassName={() => "custom-row"}
+                scroll={{ x: "max-content" }}
+                size="small"
+              />
+            </div>
           </div>
         </div>
       ))}
 
-      <div className="text-right border-t-gray-100 pt-6 mt-8">
-        <button
+      <div className="text-right border-t border-gray-200 pt-6 mt-8">
+        <Button
+          type="primary"
+          size="large"
           onClick={() => handleSaveAll()}
-          className="bg-blue-600 hover:bg-blue-700 !text-white !font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105"
+          icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+          className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
-          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
           {t("button.saveAllChanges")}
-        </button>
+        </Button>
       </div>
     </div>
   );

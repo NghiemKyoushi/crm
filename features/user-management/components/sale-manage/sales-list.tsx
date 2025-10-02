@@ -60,23 +60,23 @@ export default function SalesList({ data, loading, hasMore, setPage, selected, o
           renderItem={(item) => (
             <List.Item
               onClick={() => onSelect(item.user_id, item.full_name)}
-              className={`cursor-pointer rounded !p-4 border-l-4 ${
+              className={`cursor-pointer rounded !p-3 border-l-4 transition-colors ${
                 selected === item.user_id
-                  ? "bg-blue-100 border-blue-500"
-                  : "border-transparent"
+                  ? "bg-blue-50 border-blue-500"
+                  : "border-transparent hover:bg-gray-50"
               }`}
             >
-              <div className={`${selected === item.user_id ? "text-blue-700" : ""} font-bold`}>
+              <div className={`text-sm ${selected === item.user_id ? "text-blue-700" : "text-gray-800"}`}>
                 {item.full_name}
               </div>
-              <div className="text-gray-500 text-sm">
+              <div className="text-gray-500 text-xs mt-1">
                 {t('salesManage.managingCustomers', { count: item.total })}
               </div>
             </List.Item>
           )}
         />
-        {loading && <div className="text-center p-2"><Spin /></div>}
-        {!hasMore && <div className="text-center text-gray-400 text-sm p-2">{t('salesManage.noMoreData')}</div>}
+        {loading && <div className="text-center p-2"><Spin size="small" /></div>}
+        {!hasMore && <div className="text-center text-gray-400 text-xs p-2">{t('salesManage.noMoreData')}</div>}
       </div>
       <AddSalesModal onClose={() => setOpen(false)} open={open} onSubmit={handleSubmit} />
     </div>
