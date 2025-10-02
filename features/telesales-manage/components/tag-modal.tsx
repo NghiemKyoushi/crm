@@ -91,7 +91,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
             onClick={() => setIsEditOpen(true)}
             className="text-blue-500 text-sm hover:underline mt-2"
           >
-            + Thêm phân loại
+            Thêm phân loại
           </Button>
           </div>
         </div>

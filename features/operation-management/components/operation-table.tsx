@@ -32,8 +32,6 @@ const ProductManagement: React.FC = () => {
     ],
   });
 
-  console.log("listOrder", listOrder);
-
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
 
   const handleChangePage = (pageNumber: number) => {
@@ -46,20 +44,24 @@ const ProductManagement: React.FC = () => {
     {
       title: "Tracking ship",
       key: "tracking_ship",
+      width: 140,
       render: (_, record) => (
         <div>
-          <div className="font-medium">{record.tracking_ship}</div>
-          {/* <div className="text-xs text-gray-400">{record.}</div> */}
+          <a className="text-sm text-blue-600 hover:underline">{record.tracking_ship}</a>
+          <div className="text-xs text-gray-500">
+            {record.created_at ? dayjs(record.created_at).format("DD/MM/YYYY HH:mm") : "-"}
+          </div>
         </div>
       ),
     },
     {
       title: t('table.customer'),
       key: "customer_name",
+      width: 150,
       render: (_, record) => (
         <div>
-          <div className="font-medium">{record.customer_name}</div>
-          {/* <div className="text-xs text-gray-400">{record.}</div> */}
+          <div className="text-sm text-gray-800">{record.customer_name}</div>
+          <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
         </div>
       ),
     },
@@ -67,18 +69,22 @@ const ProductManagement: React.FC = () => {
     {
       title: t('table.creator'),
       key: "user_name",
+      width: 120,
       render: (_, record) => (
         <div>
-          <div className="font-medium">{record.user_name}</div>
+          <div className="text-sm text-gray-800">{record.user_name}</div>
         </div>
       ),
     },
     {
       title: t('table.amount'),
       key: "amountvnd",
+      width: 140,
       render: (_, record) => (
-        <div>
-          <div className="font-medium">{record.amountvnd}</div>
+        <div className="space-y-1">
+          <div className="text-sm text-gray-800">
+            {record.amountvnd ? record.amountvnd.toLocaleString("vi-VN") : "0"}đ
+          </div>
         </div>
       ),
     },
@@ -86,12 +92,8 @@ const ProductManagement: React.FC = () => {
       title: t('table.status'),
       dataIndex: "status",
       key: "status",
+      width: 140,
       align: "center",
-      onCell: () => ({
-        style: {
-          textAlign: "center",
-        },
-      }),
       render: (status: OrderStatusType) => {
         let color: string;
         let text: string;
@@ -151,7 +153,7 @@ const ProductManagement: React.FC = () => {
         }
 
         return (
-          <Tag key={color} color={color}>
+          <Tag key={color} color={color} className="text-xs">
             {text}
           </Tag>
         );
@@ -160,19 +162,15 @@ const ProductManagement: React.FC = () => {
     {
       title: t('table.actions'),
       key: "actions",
+      width: 100,
       align: "right",
-      onCell: () => ({
-        style: {
-          textAlign: "right",
-        },
-      }),
       render: (_, record: Order) => {
         const actions: React.ReactNode[] = [];
         actions.push(
           <Button
             key={1}
             size="small"
-            className="!bg-blue-500 !text-white !border-0 !text-xs"
+            className="!bg-blue-500 !text-white !border-0 !text-xs hover:!bg-blue-600"
             onClick={() => {
               setIsOpenTrackingOrder(true);
               setOrderDetail(record);
@@ -195,13 +193,13 @@ const ProductManagement: React.FC = () => {
       <TableComponent
         columns={columns}
         dataSource={listOrder || []}
-        rowHeight={45}
+        rowHeight={55}
         pageSize={10}
         page={(listOrder && listOrder.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={undefined}
-        fontSize={14}
-        headerHeight={44}
+        fontSize={13}
+        headerHeight={46}
       />
 
       {orderDetail && (
