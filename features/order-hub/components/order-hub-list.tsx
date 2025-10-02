@@ -189,11 +189,12 @@ export default function OrderHub() {
       title: t("table.orderCode"),
       dataIndex: "invoice_no",
       key: "invoice_no",
+      width: 140,
       render: (text, record) => (
         <div>
-          <a className="text-blue-600 font-medium">{text}</a>
-          <div className="text-xs text-red-400 ">
-            {dayjs(record.created_at).format("DD/MM/YYYY")}
+          <a className="text-blue-600">{text}</a>
+          <div className="text-xs text-gray-500">
+            {dayjs(record.created_at).format("DD/MM/YYYY HH:mm")}
           </div>
         </div>
       ),
@@ -201,111 +202,131 @@ export default function OrderHub() {
     {
       title: t("table.customer"),
       key: "customer",
+      width: 150,
       render: (_, record) => (
         <div>
-          <div className="font-medium">{record.customer_name}</div>
-          <div className="text-xs text-gray-400">{record.customer_code}</div>
+          <div className="text-gray-800">{record.customer_name}</div>
+          <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
         </div>
       ),
     },
     {
-      title: "Link sản phẩm",
-      key: "product_url",
-      width: 200,
+      title: "Sản phẩm",
+      key: "product",
+      width: 350,
       render: (_, record) => {
-        const url = record.metadata.items[0].product.url;
+        const product = record.metadata.items[0].product;
+        const url = product.url;
+        const name = product.map_data.productName;
+        const price = product.map_data.price;
+        const images = product.map_data.images || [];
+        const thumbnail = images.length > 0 ? images[0] : null;
+
         return (
-          <div>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-blue-600 hover:underline break-all"
-            >
-              {url}
-            </a>
-            <div className="text-xs text-gray-400">{record.customer_code}</div>
+          <div className="flex gap-3">
+            {thumbnail && (
+              <img
+                src={thumbnail}
+                alt={name}
+                className="w-16 h-16 object-cover rounded border border-gray-200"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64?text=No+Image';
+                }}
+              />
+            )}
+            <div className="flex-1 space-y-1 min-w-0">
+              <div className="text-gray-800 line-clamp-2 text-sm">{name}</div>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-500 hover:underline block truncate"
+              >
+                {url}
+              </a>
+              <div className="text-xs text-gray-500">
+                Giá: {price ? `¥${parseFloat(price).toLocaleString()}` : "-"}
+              </div>
+            </div>
           </div>
         );
       },
     },
     {
-      title: "Tên sản phẩm",
-      key: "productName",
-      width: 250,
+      title: "Thông tin đơn hàng",
+      key: "order_info",
+      width: 180,
       render: (_, record) => (
-        <div>
-          <div className="font-medium">
-            {record.metadata.items[0].product.map_data.productName}
+        <div className="space-y-1">
+          <div className="text-sm">
+            <span className="text-gray-500">Tổng: </span>
+            <span className="text-gray-800">{record.amount_vnd.toLocaleString("vi-VN")}đ</span>
           </div>
+          {record.deposit_amount && (
+            <div className="text-xs">
+              <span className="text-gray-500">Cọc: </span>
+              <span className="text-green-600">{record.deposit_amount.toLocaleString("vi-VN")}đ</span>
+            </div>
+          )}
+          {record.remain_amount && (
+            <div className="text-xs">
+              <span className="text-gray-500">Còn lại: </span>
+              <span className="text-orange-600">{record.remain_amount.toLocaleString("vi-VN")}đ</span>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Tracking & Cân nặng",
+      key: "tracking",
+      width: 150,
+      render: (_, record) => (
+        <div className="space-y-1">
+          {record.tracking_other || record.tracking_vn ? (
+            <>
+              <a href="#" className="text-blue-500 text-sm hover:underline">
+                {record.status === OrderStatusType.ARRIVED_JP_WAREHOUSE &&
+                  record.tracking_other}
+                {record.status === OrderStatusType.ARRIVED_VN_WAREHOUSE &&
+                  record.tracking_vn}
+              </a>
+              {record.weight && (
+                <div className="text-xs text-gray-600">
+                  <span className="text-gray-500">KL: </span>
+                  {record.weight}
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="text-gray-400 text-sm">Chưa có</span>
+          )}
         </div>
       ),
     },
     {
       title: "Ghi chú",
       key: "note",
-      width: 200,
+      width: 150,
       render: (_, record) => (
-        <div>
-          <div className="font-medium">{record.note ? record.note : "-"}</div>
+        <div className="text-sm text-gray-600 line-clamp-2">
+          {record.note || record.description || "-"}
         </div>
       ),
     },
     {
       title: t("table.creator"),
       key: "created_by_name",
+      width: 120,
       render: (_, record) => (
-        <div>
-          <div className="font-medium">{record.created_by_name}</div>
-          <div className="text-xs text-gray-400">{record.customer_code}</div>
-        </div>
-      ),
-    },
-    {
-      title: "Tracking",
-      key: "tracking_vn",
-      render: (_, record) => (
-        <div>
-          {record.tracking_other || record.tracking_vn ? (
-            <>
-              <a href="#" className="text-blue-500 font-medium hover:underline">
-                {record.status === OrderStatusType.ARRIVED_JP_WAREHOUSE &&
-                  record.tracking_other &&
-                  record.tracking_other}
-                {record.status === OrderStatusType.ARRIVED_VN_WAREHOUSE &&
-                  record.tracking_vn &&
-                  record.tracking_vn}
-              </a>
-              {record.weight && (
-                <div className="text-xs text-gray-400">
-                  Cân nặng: {record.weight}
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="text-gray-400"> - </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: t("table.amount"),
-      key: "amount_vnd",
-      render: (_, record) => (
-        <div>
-          <div>{record.amount_vnd.toLocaleString("vi-VN")} đ</div>
-          {/* {record.deposit_amount && (
-            <div className="text-xs text-gray-500">
-              Cọc: {record.deposit_amount.toLocaleString("vi-VN")} đ
-            </div>
-          )} */}
-        </div>
+        <div className="text-sm text-gray-700">{record.created_by_name}</div>
       ),
     },
     {
       title: t("table.status"),
       dataIndex: "status",
       key: "status",
+      width: 140,
       align: "center",
       onCell: () => ({
         style: {
@@ -371,7 +392,7 @@ export default function OrderHub() {
         }
 
         return (
-          <Tag key={color} color={color}>
+          <Tag key={color} color={color} className="text-xs">
             {text}
           </Tag>
         );
@@ -380,7 +401,9 @@ export default function OrderHub() {
     {
       title: t("table.actions"),
       key: "actions",
+      width: 200,
       align: "right",
+      fixed: "right",
       onCell: () => ({
         style: {
           textAlign: "right",
@@ -396,52 +419,49 @@ export default function OrderHub() {
                 <Button
                   key={`approve-${record.id}`}
                   size="small"
-                  icon={<FontAwesomeIcon icon={faCheck} />}
-                  className="!bg-green-500 !text-white !border-0 !text-xs"
+                  icon={<FontAwesomeIcon icon={faCheck} className="text-xs" />}
+                  className="!bg-green-500 !text-white !border-0 !text-xs !px-2"
                   onClick={() => {
                     setOrderDetail(record);
                     setIsOpenApproveOrder(true);
                   }}
                 >
-                  {t("button.approve")}
+                  Duyệt
                 </Button>
               );
               actions.push(
                 <Button
                   key={`reject-${record.id}`}
                   size="small"
-                  className="!bg-red-500 !text-white !border-0 !text-xs"
+                  className="!bg-red-500 !text-white !border-0 !text-xs !px-2"
                   onClick={() => {
                     setOrderDetail(record);
                     setIsOpenCancel(true);
                   }}
                 >
-                  {t("button.reject")}
+                  Từ chối
                 </Button>
               );
             }
             break;
-
-          // case "WAITING_DEPOSIT":
-          // break;
 
           case OrderStatusType.PURCHASED:
             actions.push(
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} />}
-                className="!bg-purple-500 !text-white !border-0 !text-xs"
+                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                className="!bg-purple-500 !text-white !border-0 !text-xs !px-2"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenTrackingOrder(true);
                 }}
               >
-                {t("button.transferToJpWarehouse")}
+                Kho JP
               </Button>
             );
             break;
-          //check chụp ảnh
+
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             actions.push(
               <Button
@@ -478,10 +498,10 @@ export default function OrderHub() {
                     );
                   }
                 }}
-                icon={<FontAwesomeIcon icon={faTruck} />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
               >
-                {t("button.transferToVnWarehouse")}
+                Kho VN
               </Button>
             );
             break;
@@ -491,14 +511,14 @@ export default function OrderHub() {
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenCheckOrder(true);
                 }}
               >
-                {t("button.inspectGoods")}
+                Kiểm
               </Button>
             );
             break;
@@ -512,10 +532,10 @@ export default function OrderHub() {
                   setOrderDetail(record);
                   setOpenConfirmPurchase(true);
                 }}
-                icon={<FontAwesomeIcon icon={faTruck} />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs"
+                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
               >
-                {t("button.purchased")}
+                Mua
               </Button>
             );
             break;
@@ -525,14 +545,14 @@ export default function OrderHub() {
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} />}
-                className="!bg-emerald-500 !text-white !border-0 !text-xs"
+                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                className="!bg-emerald-500 !text-white !border-0 !text-xs !px-2"
                 onClick={() => {
                   setOrderDetail(record);
                   setOpenConfirmComplete(true);
                 }}
               >
-                {t("button.readyToShip")}
+                Giao
               </Button>
             );
             break;
@@ -543,18 +563,18 @@ export default function OrderHub() {
           <Button
             key={"1"}
             size="small"
-            className="!bg-blue-500 !text-white !border-0 !text-xs"
+            className="!bg-blue-500 !text-white !border-0 !text-xs !px-2"
             onClick={() => {
               setOpenDetail(true);
               setOrderDetail(record);
             }}
           >
-            {t("button.details")}
+            Chi tiết
           </Button>
         );
 
         return (
-          <div className="flex gap-2 flex-wrap justify-end">{actions}</div>
+          <div className="flex gap-1 flex-wrap justify-end">{actions}</div>
         );
       },
     },
@@ -654,17 +674,19 @@ export default function OrderHub() {
           </Form>
         </div>
 
-        <TableComponent
-          columns={columns}
-          dataSource={listOrder?.data || []}
-          rowHeight={45}
-          pageSize={10}
-          page={(listOrder && listOrder.current_page + 1) || 0}
-          onPageChange={handleChangePage}
-          response={listOrder}
-          fontSize={14}
-          headerHeight={44}
-        />
+        <div className="overflow-x-auto">
+          <TableComponent
+            columns={columns}
+            dataSource={listOrder?.data || []}
+            rowHeight={70}
+            pageSize={10}
+            page={(listOrder && listOrder.current_page + 1) || 0}
+            onPageChange={handleChangePage}
+            response={listOrder}
+            fontSize={13}
+            headerHeight={48}
+          />
+        </div>
       </div>
       <CreateOrderModal
         isOpen={open}
