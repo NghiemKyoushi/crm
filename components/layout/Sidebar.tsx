@@ -102,7 +102,7 @@ export const menuItems = [
   { key: "/operation-management", icon: faWarehouse, label: "operation" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
-  { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
+  // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   // { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
   // { key: "/fee-setting", icon: faTags, label: "products" },
