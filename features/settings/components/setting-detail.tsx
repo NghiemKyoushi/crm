@@ -67,49 +67,51 @@ const SettingsDetail = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <Card
-        title={<div className="text-[18px]">{t('settings.financialSettings')}</div>}
-        className="rounded-2xl shadow-md"
+        title={<div className="text-base font-medium text-gray-800">{t('settings.financialSettings')}</div>}
+        className="rounded-lg shadow-sm"
       >
-
-        <div className="flex gap-4 mb-3 w-full">
+        <div className="flex gap-3 mb-6 w-full">
           {rates &&
             rates.map((item: CurrencyRate, index) => {
               return (
-                <>
-                  <div
-                    key={item.currency_code}
-                    className="flex items-start flex-col gap-0 flex-1"
-                  >
-                    <p className="!mb-1">1 {item.currency_code} = (VND)</p>
-                    <InputNumber
-                      formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      value={item.rate_to_vnd}
-                      onChange={(value) => handleChangeRate(value, index)}
-                      className="!w-full"
-                    />
-                  </div>
-                </>
+                <div
+                  key={item.currency_code}
+                  className="flex items-start flex-col gap-1 flex-1"
+                >
+                  <label className="text-xs text-gray-600 mb-1">
+                    1 {item.currency_code} = (VND)
+                  </label>
+                  <InputNumber
+                    size="large"
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value?.replace(/,/g, "") as any}
+                    value={item.rate_to_vnd}
+                    onChange={(value) => handleChangeRate(value, index)}
+                    className="!w-full"
+                  />
+                </div>
               );
             })}
         </div>
 
-        <div className="w-full mt-4 mb-4">
+        <div className="w-full mb-4">
           <Button
             size="large"
-            className="!w-full !border-0 !bg-gray-50 !hover:bg-gray-100 !font-medium !p-3 !flex items-center gap-2"
+            onClick={() => router.push("/finance-management")}
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faUniversity} />}
           >
-            <span className="text-left w-full">
+            <span className="text-sm">
               {t('settings.bankAccountManagement')}
             </span>
           </Button>
         </div>
-        <div className="w-full flex justify-end mt-2 ">
+        <div className="w-full flex justify-end">
           <Button
             type="primary"
-            className="!font-medium"
+            size="large"
             onClick={() => handleSave()}
           >
             {t('settings.saveExchangeRate')}
@@ -117,21 +119,21 @@ const SettingsDetail = () => {
         </div>
       </Card>
       <Card
-        title={<div className="text-[18px]">{t('settings.serviceFeesSettings')}</div>}
-        className="relative rounded-2xl shadow-md h-full"
+        title={<div className="text-base font-medium text-gray-800">{t('settings.serviceFeesSettings')}</div>}
+        className="relative rounded-lg shadow-sm h-full"
       >
         <div className="pb-16">
-          <div className="text-gray-600 mb-3">
+          <div className="text-sm text-gray-600 mb-4">
             {t('settings.serviceFeesDescription')}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ul className="list-disc pl-5 text-gray-700">
+            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
               <li>{t('settings.buyingFeeUS')}</li>
               <li>{t('settings.buyingFeeJP')}</li>
               <li>{t('settings.internationalShipping')}</li>
               <li>{t('settings.productSurcharge')}</li>
             </ul>
-            <ul className="list-disc pl-5 text-gray-700">
+            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
               <li>{t('settings.reinforcementFee')}</li>
               <li>{t('settings.insuranceFee')}</li>
               <li>{t('settings.hanoiDeliveryFee')}</li>
@@ -143,80 +145,61 @@ const SettingsDetail = () => {
         <div className="absolute bottom-4 left-4 right-4">
           <Button
             size="large"
-            className="!w-full !justify-center !border-0 !bg-blue-50 !text-blue-600 hover:!bg-blue-100 !font-medium"
-            type="dashed"
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
             onClick={() => router.push("/fee-setting")}
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
           >
-            {t('settings.goToFeeManagement')}
+            <span className="text-sm">{t('settings.goToFeeManagement')}</span>
           </Button>
         </div>
       </Card>
 
-      <Card title={t('settings.orderOperationsSettings')} className="rounded-2xl shadow-md">
-        <List
-          itemLayout="horizontal"
-          dataSource={[
-            {
-              icon: faGlobe,
-              text: t('settings.supportedWebsiteManagement'),
-              url: "/website-manage",
-            },
-            {
-              icon: faTags,
-              text: t('settings.productTypesAndFees'),
-              url: "/website-manage",
-            },
-          ]}
-          className="!flex !flex-col !gap-1"
-          renderItem={(item) => (
-            <List.Item className="!cursor-pointer  !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 ">
-              <List.Item.Meta
-                avatar={
-                  <FontAwesomeIcon
-                    className="w-4 h-4 mt-1 ml-2"
-                    icon={item.icon}
-                  />
-                }
-                title={
-                  <div
-                    onClick={() => router.push(item.url)}
-                    className="text-[16px]"
-                  >
-                    {item.text}
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-        />
+      <Card
+        title={<div className="text-base font-medium text-gray-800">{t('settings.orderOperationsSettings')}</div>}
+        className="rounded-lg shadow-sm"
+      >
+        <div className="flex flex-col gap-3">
+          <Button
+            size="large"
+            onClick={() => router.push("/website-manage")}
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+            icon={<FontAwesomeIcon className="w-4 h-4" icon={faGlobe} />}
+          >
+            <span className="text-sm">{t('settings.supportedWebsiteManagement')}</span>
+          </Button>
+          <Button
+            size="large"
+            onClick={() => router.push("/category-product")}
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+            icon={<FontAwesomeIcon className="w-4 h-4" icon={faTags} />}
+          >
+            <span className="text-sm">{t('settings.productTypesAndFees')}</span>
+          </Button>
+        </div>
       </Card>
 
       <Card
-        title={t('settings.userManagementSettings')}
-        className="rounded-2xl shadow-md"
+        title={<div className="text-base font-medium text-gray-800">{t('settings.userManagementSettings')}</div>}
+        className="rounded-lg shadow-sm"
       >
-        <List
-          itemLayout="horizontal"
-          dataSource={[
-            { icon: faLayerGroup, text: t('settings.customerCategoriesAndPolicies') },
-            { icon: faUsers, text: t('settings.staffAndPermissions') },
-          ]}
-          className="!flex !flex-col !gap-1 "
-          renderItem={(item) => (
-            <List.Item className="!cursor-pointer !w-full !rounded-md !border-0  !bg-gray-50 !hover:bg-gray-100 !font-medium !mb-2 !h-12 !pl-2 !text-base">
-              <List.Item.Meta
-                avatar={
-                  <FontAwesomeIcon
-                    className="w-4 h-4  mt-1 ml-2"
-                    icon={item.icon}
-                  />
-                }
-                title={<div className="text-[16px]">{item.text}</div>}
-              />
-            </List.Item>
-          )}
-        />
+        <div className="flex flex-col gap-3">
+          <Button
+            size="large"
+            onClick={() => router.push("/category-customer")}
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+            icon={<FontAwesomeIcon className="w-4 h-4" icon={faLayerGroup} />}
+          >
+            <span className="text-sm">{t('settings.customerCategoriesAndPolicies')}</span>
+          </Button>
+          <Button
+            size="large"
+            onClick={() => router.push("/user-management")}
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+            icon={<FontAwesomeIcon className="w-4 h-4" icon={faUsers} />}
+          >
+            <span className="text-sm">{t('settings.staffAndPermissions')}</span>
+          </Button>
+        </div>
       </Card>
     </div>
   );

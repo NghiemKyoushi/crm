@@ -62,7 +62,7 @@ const DepositTable = (props: DepositTableProps) => {
   );
   const [isOpenCompleteTransaction, setIsOpenCompleteTransaction] =
     useState(false);
-  const [typeDetail, setTypeDetail] = useState("");
+  const [typeDetail, setTypeDetail] = useState<string>("TOP_UP");
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState<DepositParams>({
@@ -153,60 +153,36 @@ const DepositTable = (props: DepositTableProps) => {
       title: t("deposit.columns.code"),
       dataIndex: "deposit_code",
       key: "deposit_code",
-      render: (code: string) => {
+      width: 130,
+      render: (code: string, record: DepositItem) => {
         if (!code) return "";
-        if (code.length <= 8) {
-          return <span>{code}</span>;
-        }
-        const first = code.slice(0, 4);
-        const last = code.slice(-4);
-        const masked = `${first}...${last}`;
+        const displayCode = code.length > 12 ? `${code.slice(0, 8)}...${code.slice(-4)}` : code;
         return (
-          <Tooltip title={code}>
-            <span>{masked}</span>
-          </Tooltip>
+          <div>
+            <Tooltip title={code}>
+              <span className="text-blue-600 text-sm">{displayCode}</span>
+            </Tooltip>
+            <div className="text-xs text-gray-500">
+              {dayjs(record.created_at).format("DD/MM HH:mm")}
+            </div>
+          </div>
         );
       },
-      // render: (code: string, record: DepositItem) => (
-      //   <Button
-      //     type="link"
-      //     onClick={() => {
-      //       setSelectedRecord(record);
-      //       setIsOpenDetail(true);
-      //     }}
-      //   >
-      //     {code}
-      //   </Button>
-      // ),
     },
-    // {
-    //   title: t("deposit.columns.user"),
-    //   dataIndex: "user_id",
-    //   key: "user_id",
-    // },
     {
       title: t("deposit.columns.userName"),
       dataIndex: "user_name",
       key: "user_name",
-      render: (text: string) => {
+      width: 150,
+      render: (text: string, record: DepositItem) => {
         if (!text) return "";
         return (
-          <Tooltip title={text}>
-            <span className="truncate max-w-[150px] inline-block">{text}</span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      title: t("deposit.columns.note"),
-      dataIndex: "note",
-      key: "note",
-      render: (note: string) => {
-        if (!note) return "";
-        return (
-          <Tooltip title={note}>
-            <div className="truncate max-w-[120px]">{note}</div>
-          </Tooltip>
+          <div>
+            <Tooltip title={text}>
+              <div className="text-sm text-gray-800 truncate max-w-[140px]">{text}</div>
+            </Tooltip>
+            <div className="text-xs text-gray-500">ID: {record.user_id}</div>
+          </div>
         );
       },
     },
@@ -214,148 +190,112 @@ const DepositTable = (props: DepositTableProps) => {
       title: t("deposit.columns.amount"),
       dataIndex: "amount",
       key: "amount",
+      width: 130,
       render: (value: number) => {
         if (value == null) return null;
-
-        const formatted = value.toLocaleString("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        });
-
+        const formatted = value.toLocaleString("vi-VN");
         return (
-          <span style={{ color: value >= 0 ? "green" : "red" }}>
-            {formatted}
-          </span>
+          <div className={`text-sm ${value >= 0 ? "text-green-600" : "text-red-600"}`}>
+            {value >= 0 ? "+" : ""}{formatted}đ
+          </div>
         );
       },
     },
     {
-      title: t("deposit.columns.createdAt"),
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
+      title: t("deposit.columns.note"),
+      dataIndex: "note",
+      key: "note",
+      width: 200,
+      render: (note: string) => {
+        if (!note) return <span className="text-gray-400 text-sm">-</span>;
+        return (
+          <Tooltip title={note}>
+            <div className="text-sm text-gray-700 line-clamp-2">{note}</div>
+          </Tooltip>
+        );
       },
     },
     {
       title: t("deposit.columns.handler"),
       dataIndex: "handler",
       key: "handler",
-      render: (handler: string) => {
-        if (!handler) return "-";
+      width: 130,
+      render: (handler: string, record: DepositItem) => {
+        if (!handler) return <span className="text-gray-400 text-sm">-</span>;
         return (
-          <Tooltip title={handler}>
-            <div className="truncate max-w-[100px]">{handler}</div>
-          </Tooltip>
+          <div>
+            <Tooltip title={handler}>
+              <div className="text-sm text-gray-700 truncate max-w-[120px]">{handler}</div>
+            </Tooltip>
+            {record.handler_time && (
+              <div className="text-xs text-gray-500">
+                {dayjs(record.handler_time).format("DD/MM HH:mm")}
+              </div>
+            )}
+          </div>
         );
       },
-    },
-    {
-      title: t("deposit.columns.handledAt"),
-      dataIndex: "handler_time",
-      key: "handler_time",
-      render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
-      },
-    },
-    {
-      title: t('table.details'),
-      dataIndex: "status",
-      key: "status",
-      render: (status: string, record: DepositItem) => (
-        <Space>
-          <button
-            className="cursor-pointer"
-            onClick={() => {
-              setSelectedId(record.id);
-
-              setIsOpenCompleteTransaction(true);
-              if (record.status === "MANUAL_TOP_UP_COMPLETED") {
-                setTypeDetail("MANUAL_TOP_UP");
-              } else if (record.status === "MANUAL_WITHDRAWAL_COMPLETED") {
-                setTypeDetail("MANUAL_WITHDRAWAL");
-              } else {
-                setTypeDetail("TOP_UP");
-              }
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faInfoCircle}
-              className="text-blue-500 text-xl"
-            />
-          </button>
-        </Space>
-      ),
     },
     {
       title: t("deposit.columns.status"),
       dataIndex: "status",
       key: "status",
-      render: (status: DepositItem["status"], record: DepositItem) => {
-        // if (record.transaction_id !== null) {
-        //   status = "MANUAL";
-        // }
-        switch (status) {
-          case "WAITING_CONFIRMATION":
-            return (
-              <Tag className="!rounded-3xl" color="gold">
-                {t("deposit.status.pending")}
-              </Tag>
-            );
-          case "COMPLETED":
-            return (
-              <Tag className="!rounded-3xl" color="green">
-                {t("deposit.status.completed")}
-              </Tag>
-            );
-          case "CANCELED":
-            return (
-              <Tag className="!rounded-3xl" color="red">
-                {t("deposit.status.canceled")}
-              </Tag>
-            );
-          case "FAILED":
-            return (
-              <Tag className="!rounded-3xl" color="blue">
-                {t('status.failed')}
-                {/* {t("deposit.status.manual")} */}
-              </Tag>
-            );
-          case "MANUAL_TOP_UP_COMPLETED":
-            return (
-              <Tag className="!rounded-3xl" color="green">
-                {t('status.topUp')}
-              </Tag>
-            );
-          case "MANUAL_WITHDRAWAL_COMPLETED":
-            return (
-              <Tag className="!rounded-3xl" color="red">
-                {t('status.deduction')}
-              </Tag>
-            );
-          case "CANCELED_BY_USER":
-            return (
-              <Tag className="!rounded-3xl" color="orange">
-                {t('status.cancelledByUser')}
-              </Tag>
-            );
-          default:
-            return null;
-        }
+      width: 130,
+      align: "center",
+      render: (status: DepositItem["status"]) => {
+        const statusConfig = {
+          WAITING_CONFIRMATION: { color: "gold", text: t("deposit.status.pending") },
+          COMPLETED: { color: "green", text: t("deposit.status.completed") },
+          CANCELED: { color: "red", text: t("deposit.status.canceled") },
+          FAILED: { color: "blue", text: t('status.failed') },
+          MANUAL_TOP_UP_COMPLETED: { color: "green", text: t('status.topUp') },
+          MANUAL_WITHDRAWAL_COMPLETED: { color: "red", text: t('status.deduction') },
+          CANCELED_BY_USER: { color: "orange", text: t('status.cancelledByUser') },
+        };
+        const config = statusConfig[status as keyof typeof statusConfig];
+        return config ? (
+          <Tag className="!rounded-3xl text-xs" color={config.color}>
+            {config.text}
+          </Tag>
+        ) : null;
       },
     },
     {
       title: t("deposit.columns.action"),
       key: "action",
+      width: 160,
+      fixed: "right",
       render: (_, record) => (
-        <Space>
+        <Space size="small">
+          <button
+            className="cursor-pointer hover:opacity-70"
+            onClick={() => {
+              console.log("Opening detail modal - Record:", record.id, "Status:", record.status);
+              setSelectedId(record.id);
+
+              // Set typeDetail trước khi mở modal
+              let type = "TOP_UP";
+              if (record.status === "MANUAL_TOP_UP_COMPLETED") {
+                type = "MANUAL_TOP_UP";
+              } else if (record.status === "MANUAL_WITHDRAWAL_COMPLETED") {
+                type = "MANUAL_WITHDRAWAL";
+              }
+              console.log("Setting typeDetail to:", type);
+              setTypeDetail(type);
+
+              // Mở modal sau
+              setIsOpenCompleteTransaction(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faInfoCircle}
+              className="text-blue-500 text-lg"
+            />
+          </button>
           {record.status === "WAITING_CONFIRMATION" && (
             <>
               <Button
-                className="!bg-green-500 !hover:bg-green-600 !text-white !px-2 !py-1 !font-medium !rounded"
-                type="primary"
+                className="!bg-green-500 !text-white !border-0 !text-xs !px-2"
                 size="small"
                 onClick={() => {
                   setConfirmAmount(record.amount);
@@ -363,10 +303,10 @@ const DepositTable = (props: DepositTableProps) => {
                   setIsOpenConfirm(true);
                 }}
               >
-                {t("deposit.actions.confirm")}
+                Duyệt
               </Button>
               <Button
-                className="!bg-red-500 !hover:bg-red-600 !text-white !px-2 !py-1 !font-medium !rounded"
+                className="!bg-red-500 !text-white !border-0 !text-xs !px-2"
                 size="small"
                 onClick={() => {
                   setSelectedCode(record.deposit_code)
@@ -374,22 +314,21 @@ const DepositTable = (props: DepositTableProps) => {
                   setIsOpenCancel(true);
                 }}
               >
-                {t("deposit.actions.cancel")}
+                Hủy
               </Button>
             </>
           )}
-          {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED" ].includes(record.status) && (
-            <div>
-              <Button
-                type="link"
-                size="small"
-                onClick={() =>
-                  handleOpenHistory(record.id, record.deposit_code)
-                }
-              >
-                {t("deposit.actions.history")}
-              </Button>
-            </div>
+          {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED"].includes(record.status) && (
+            <Button
+              type="link"
+              size="small"
+              className="!text-xs !p-0"
+              onClick={() =>
+                handleOpenHistory(record.id, record.deposit_code)
+              }
+            >
+              Lịch sử
+            </Button>
           )}
         </Space>
       ),
@@ -451,20 +390,22 @@ const DepositTable = (props: DepositTableProps) => {
         </div>
       </div>
       <DepositFilter onFilter={handleSearch} code={code} action={action} />
-      <TableComponent
-        columns={columns}
-        dataSource={data?.content || []}
-        response={
-          data
-            ? mapDepositResponseToPaginatedResponse<DepositItem>(data)
-            : undefined
-        }
-        page={params.page ? params.page + 1 : 0}
-        rowHeight={45}
-        onPageChange={handlePageChange}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.content || []}
+          response={
+            data
+              ? mapDepositResponseToPaginatedResponse<DepositItem>(data)
+              : undefined
+          }
+          page={params.page ? params.page + 1 : 0}
+          rowHeight={60}
+          onPageChange={handlePageChange}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
       <ManualDepositModal
         onClose={() => setIsOpen(false)}
         open={isOpen}
