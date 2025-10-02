@@ -41,7 +41,7 @@ export default function ShippingServiceForm() {
             {t("feeSettings.otherServiceFees")}
           </div>
         }
-        className="mb-6"
+        className="mb-6 rounded-lg shadow-sm"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {listService?.map((item: ServiceFee) => (
@@ -72,11 +72,13 @@ export default function ShippingServiceForm() {
       </Card>
 
       {/* Save button */}
-      <div className="text-right border-t-gray-100 pt-6 mt-8">
+      <div className="text-right border-t border-gray-200 pt-6 mt-8">
         <Button
           type="primary"
+          size="large"
           htmlType="submit"
-          className="bg-blue-600 hover:!bg-blue-700 px-6 h-11 font-bold"
+          icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+          className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
           <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
           {t("common.saveAllChanges")}

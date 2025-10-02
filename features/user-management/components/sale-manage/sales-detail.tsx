@@ -63,19 +63,26 @@ export default function SalesDetail({
       title: t('customerManage.customer'),
       dataIndex: "full_name",
       key: "name",
+      width: 200,
+      render: (text: string, record: CustomerModel) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+          <div className="text-xs text-gray-500">{record.email}</div>
+        </div>
+      ),
     },
     {
       title: t('customerManage.classification'),
       dataIndex: "group_name",
       key: "group_name",
+      width: 150,
       render: (_, record) => (
         <Tag
           style={{
             backgroundColor: record.color ? record.color : '#000000',
-            color: record.color ? getContrastColor(record.color): "#ffffff" ,
-            fontWeight: 400
+            color: record.color ? getContrastColor(record.color): "#ffffff",
           }}
-          className="font-semibold text-[13px] px-3 py-1"
+          className="text-xs"
         >
           {record.group_name}
         </Tag>
@@ -85,23 +92,27 @@ export default function SalesDetail({
       title: t('customerManage.zaloGroup'),
       dataIndex: "zaloGroup",
       key: "zaloGroup",
-      render: (t) => (
-        <a href="#" className="text-blue-600">
-          link to ZALO{" "}
+      width: 120,
+      render: () => (
+        <a href="#" className="text-blue-600 text-xs hover:underline">
+          Link Zalo
         </a>
       ),
     },
     {
       title: t('customerManage.actions'),
       key: "action",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      width: 120,
+      fixed: "right",
       render: (_: any, record: CustomerModel) => (
         <Button
-          type="primary"
+          type="link"
           danger
+          size="small"
+          className="!p-0 !h-auto !text-xs"
           onClick={() => handleUnassign(record.user_id.toString())}
         >
-          {t('customerManage.unassign')}
+          Bỏ phân công
         </Button>
       ),
     },
@@ -197,17 +208,19 @@ export default function SalesDetail({
                   <Text strong className="mb-2 block">
                     {t('customerManage.assignedCustomersList')} ({data?.data.length})
                   </Text>
-                  <TableComponent
-                    columns={columns}
-                    dataSource={data?.data || []}
-                    rowHeight={48}
-                    pageSize={5}
-                    page={data?.current_page || 0}
-                    onPageChange={handleChangePage}
-                    response={data}
-                    fontSize={14}
-                    headerHeight={44}
-                  />
+                  <div className="overflow-x-auto">
+                    <TableComponent
+                      columns={columns}
+                      dataSource={data?.data || []}
+                      rowHeight={55}
+                      pageSize={10}
+                      page={data?.current_page || 0}
+                      onPageChange={handleChangePage}
+                      response={data}
+                      fontSize={13}
+                      headerHeight={46}
+                    />
+                  </div>
                 </div>
                 <PopupUnassignConfirm
                   open={openConfirm}

@@ -42,20 +42,22 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
   const menuItems = categoryOptions.map((opt: any) => ({
     key: opt.key,
     label: (
-      <span
+      <div
         style={{
           color: getContrastColor(opt.color),
-          backgroundColor: opt.color ?? "blue",
-          padding: "2px 8px",
+          backgroundColor: opt.color ?? "#1677ff",
+          padding: "4px 12px",
           borderRadius: 6,
           display: "inline-block",
-          minWidth: 80,
+          width: "100%",
           textAlign: "center",
           fontSize: "12px",
+          transition: "all 0.2s",
         }}
+        className="hover:opacity-80"
       >
         {opt.label}
-      </span>
+      </div>
     ),
   }));
 
@@ -66,24 +68,33 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
         items: menuItems,
         onClick: ({ key }) => onChange?.(Number(key)),
       }}
+      overlayStyle={{ minWidth: 150 }}
     >
       <Button
+        size="small"
         style={{
-          height: 28,
-          width: 130,
+          height: 30,
+          minWidth: 120,
+          maxWidth: 160,
           color: getContrastColor(selected?.color),
-          backgroundColor: selected?.color ?? "rgb(22, 119, 255)",
+          backgroundColor: selected?.color ?? "#1677ff",
           border: "none",
           borderRadius: 6,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          textAlign: "center",
+          padding: "4px 10px",
           fontSize: "12px",
+          fontWeight: 400,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+          transition: "all 0.2s",
         }}
+        className="hover:opacity-90"
       >
-        {selected ? selected.label : t('customerTable.selectCategory')}
-        {isLoading ? <Spin size="small" /> : <DownOutlined />}
+        <span className="truncate flex-1 text-left">
+          {selected ? selected.label : t('customerTable.selectCategory')}
+        </span>
+        {isLoading ? <Spin size="small" className="ml-2" /> : <DownOutlined className="ml-2" style={{ fontSize: 10 }} />}
       </Button>
     </Dropdown>
   );

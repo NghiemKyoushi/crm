@@ -44,7 +44,7 @@ export interface GeneralPolicy {
 
 export interface ShippingZoneFee {
   id: number;
-  code: string; // VD: "KV1"
+  code: string;
   name: string;
   description: string;
   city: string;
@@ -60,7 +60,7 @@ const FeeSettingsPage: React.FC = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
       {/* Tiêu đề */}
-      <h3 className="text-xl font-semibold mb-4">
+      <h3 className="text-lg font-medium text-gray-800 mb-6">
         {t('feeSettings.comprehensiveFeeManagement')}
       </h3>
 
@@ -71,7 +71,7 @@ const FeeSettingsPage: React.FC = () => {
           {
             key: "1",
             label: (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-sm">
                 <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
                 {t('feeSettings.shippingAndSurcharge')}
               </span>
@@ -81,7 +81,7 @@ const FeeSettingsPage: React.FC = () => {
           {
             key: "2",
             label: (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-sm">
                 <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
                 {t('feeSettings.serviceAndDelivery')}
               </span>
@@ -91,7 +91,7 @@ const FeeSettingsPage: React.FC = () => {
           {
             key: "3",
             label: (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-sm">
                 <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
                 {t('feeSettings.insuranceAndRegulations')}
               </span>
@@ -101,7 +101,7 @@ const FeeSettingsPage: React.FC = () => {
           {
             key: "4",
             label: (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-sm">
                 <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
                 {t('feeSettings.productTypes')}
               </span>

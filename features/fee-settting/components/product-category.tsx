@@ -153,12 +153,23 @@ const ProductTypeTable: React.FC = () => {
 
   //   const { data: regionList } = useListRegion();
   const columns: ColumnsType<CategoryItem> = [
-    { title: t('productType.name'), width: 350, dataIndex: "name", key: "name" },
+    {
+      title: t('productType.name'),
+      width: 350,
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => (
+        <div className="text-sm text-gray-800">{text}</div>
+      )
+    },
     {
       title: t('productType.description'),
       width: 350,
       dataIndex: "description",
       key: "description",
+      render: (text: string) => (
+        <div className="text-sm text-gray-700">{text || "-"}</div>
+      )
     },
     {
       title: t('productType.createdDate'),
@@ -166,8 +177,8 @@ const ProductTypeTable: React.FC = () => {
       dataIndex: "created_at",
       key: "created_at",
       render: (value: string) => {
-        if (!value) return "-";
-        return dayjs(value).format("DD-MM-YYYY");
+        if (!value) return <div className="text-sm text-gray-700">-</div>;
+        return <div className="text-sm text-gray-700">{dayjs(value).format("DD-MM-YYYY")}</div>;
       },
     },
 
@@ -175,11 +186,12 @@ const ProductTypeTable: React.FC = () => {
       title: t("websiteManage.table.region"),
       key: "action",
       width: 100,
+      fixed: "right",
       render: (_: any, record: CategoryItem) => (
-        <div className="space-x-2">
+        <div className="flex justify-center">
           <Button
             type="primary"
-            // className="!text-blue-500"
+            size="small"
             onClick={() => handleOpenModal(record)}
           >
             {t("websiteManage.action.edit")}
@@ -200,25 +212,27 @@ const ProductTypeTable: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow mt-4">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">{t('productType.title')}</h2>
-        <Button type="primary" onClick={() => handleOpenModal()}>
+        <h2 className="text-base font-medium text-gray-800">{t('productType.title')}</h2>
+        <Button type="primary" size="large" onClick={() => handleOpenModal()}>
           {t('productType.addButton')}
         </Button>
       </div>
 
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        rowHeight={45}
-        pageSize={10}
-        page={(data && data?.current_page + 1) || 0}
-        onPageChange={handleChangePage}
-        response={data}
-        fontSize={14}
-        headerHeight={44}
-      />
+      <div className="overflow-x-auto">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          rowHeight={55}
+          pageSize={10}
+          page={(data && data?.current_page + 1) || 0}
+          onPageChange={handleChangePage}
+          response={data}
+          fontSize={13}
+          headerHeight={46}
+        />
+      </div>
 
       <Modal
         title={

@@ -101,10 +101,10 @@
       "totalSpent": "Tổng chi tiêu",
       "currentDebt": "Công nợ hiện tại",
       "addressBook": "Sổ địa chỉ",
-      "addAddress": "+ Thêm địa chỉ",
+      "addAddress": "Thêm địa chỉ",
       "default": "Mặc định",
       "bankAccount": "Tài khoản ngân hàng",
-      "addBankAccount": "+ Thêm tài khoản",
+      "addBankAccount": "Thêm tài khoản",
       "accountNumber": "STK",
       "accountOwner": "Chủ TK",
       "contactInfo": "Thông tin liên hệ",
@@ -466,7 +466,7 @@
   "roles": {
     "list": {
       "title": "Các Vai trò",
-      "addButton": "+ Thêm vai trò"
+      "addButton": "Thêm vai trò"
     },
     "modal": {
       "addTitle": "Thêm Vai trò mới",
@@ -571,7 +571,7 @@
     "exchangeRateLabel": "Tỷ giá",
     "noteLabel": "Ghi chú",
     "notePlaceholder": "Ghi chú...",
-    "addButton": "+ Thêm",
+    "addButton": "Thêm",
     "partnerListTitle": "Danh sách Đối tác và Công nợ",
     "searchPartnerPlaceholder": "Tìm kiếm đối tác...",
     "deleteMaterialTitle": "Xoá nguyên liệu",
@@ -580,7 +580,7 @@
   },
   "categoryCustomer": {
     "title": "Phân loại Khách hàng & Chính sách đi kèm",
-    "addNewType": "+ Thêm Loại mới",
+    "addNewType": "Thêm Loại mới",
     "searchPlaceholder": "Tìm kiếm nhân viên...",
     "createSuccess": "Tạo loại khách hàng mới thành công!",
     "updateSuccess": "Cập nhật loại khách hàng thành công!",
@@ -1123,7 +1123,7 @@
   },
   "salesManage": {
     "title": "Nhân viên Sales",
-    "addButton": "+ Thêm",
+    "addButton": "Thêm",
     "addSuccess": "Thêm nhân viên sale thành công!",
     "addFailed": "Thêm nhân viên sale thất bại",
     "managingCustomers": "Đang quản lý {count} Khách hàng",

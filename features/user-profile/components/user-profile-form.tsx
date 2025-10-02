@@ -66,7 +66,6 @@ export interface RoleDetail {
 export default function UserProfileForm() {
   const { t } = useTranslation();
 
-  // ✅ Validation cho từng form
   const profileSchema = yup.object({
     fullName: yup.string().required(t('userProfile.validation.fullNameRequired')),
     email: yup
@@ -101,7 +100,6 @@ export default function UserProfileForm() {
   const { mutate: updateProfile } = useUpdateUserProfile();
   const { mutate: changePassword } = useUpdatePassword();
 
-  // ✅ Form 1: Profile
   const {
     control: profileControl,
     handleSubmit: handleProfileSubmit,
@@ -117,7 +115,6 @@ export default function UserProfileForm() {
     },
   });
 
-  // ✅ Form 2: Password
   const {
     control: passwordControl,
     handleSubmit: handlePasswordSubmit,
@@ -149,7 +146,6 @@ export default function UserProfileForm() {
     }
   }, [data, resetProfile]);
 
-  // ✅ Upload Avatar
   const getBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -173,7 +169,6 @@ export default function UserProfileForm() {
     toast.success(t('userProfile.avatar.uploadSuccess'));
   };
 
-  // ✅ Submit Profile
   const onSubmitProfile: SubmitHandler<ProfileFormValues> = async (values) => {
     try {
       updateProfile(
@@ -195,7 +190,6 @@ export default function UserProfileForm() {
     }
   };
 
-  // ✅ Submit Password
   const onSubmitPassword: SubmitHandler<PasswordFormValues> = async (
     values
   ) => {
@@ -215,245 +209,310 @@ export default function UserProfileForm() {
     );
   };
 
-  return (
-    <div className="p-6 mx-10 space-y-6">
-      {/* <Card>
-        <Title level={3}>Thông tin Cá nhân</Title>
-        <Text className="text-gray-600">
-          Quản lý thông tin, mật khẩu và quyền hạn tài khoản của bạn.
-        </Text>
-      </Card> */}
-
-      <Tabs
-        className="bg-white !p-5"
-        defaultActiveKey="1"
-        items={[
-          {
-            key: "1",
-            label: t('userProfile.basicInfo'),
-            children: (
-              <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
-                <Card className="!border-0 !shadow-none">
-                  <div className="flex items-start flex-col gap-6">
-                    <div className="flex flex-row items-center gap-2">
-                      <Avatar
-                        size={80}
-                        src={profileImage}
-                        icon={!profileImage ? <UserOutlined /> : undefined}
-                        className="bg-gray-200"
-                      />
-                      <div className="flex flex-col justify-center items-center">
-                        <Upload
-                          showUploadList={false}
-                          beforeUpload={handleBeforeUpload}
-                        >
-                          <Button icon={<UploadOutlined />}>
-                            {t('userProfile.avatar.change')}
-                          </Button>
-                        </Upload>
-                        <p className="text-[12px] text-gray-500">
-                          {t('userProfile.avatar.fileFormat')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6 w-full">
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          {t('userProfile.form.fullName')}
-                        </label>
-                        <Controller
-                          name="fullName"
-                          control={profileControl}
-                          render={({ field }) => <Input {...field} />}
-                        />
-                        {profileErrors.fullName && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {profileErrors.fullName.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          {t('userProfile.form.email')}
-                        </label>
-                        <Controller
-                          name="email"
-                          control={profileControl}
-                          render={({ field }) => <Input {...field} disabled />}
-                        />
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          {t('userProfile.form.phoneNumber')}
-                        </label>
-                        <Controller
-                          name="phoneNumber"
-                          control={profileControl}
-                          render={({ field }) => <Input {...field} />}
-                        />
-                        {profileErrors.phoneNumber && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {profileErrors.phoneNumber.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block mb-1 font-medium">
-                          {t('userProfile.form.birthday')}
-                        </label>
-                        <Controller
-                          name="birthday"
-                          control={profileControl}
-                          render={({ field }) => (
-                            <DatePicker
-                              {...field}
-                              format="YYYY-MM-DD"
-                              placeholder="YYYY-MM-DD"
-                              value={field.value ? dayjs(field.value) : null}
-                              onChange={(date) =>
-                                field.onChange(
-                                  date ? date.format("YYYY-MM-DD") : ""
-                                )
-                              }
-                              className="w-full"
-                            />
-                          )}
-                        />
-                        {profileErrors.birthday && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {profileErrors.birthday.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex justify-end mt-4 w-full">
-                      <Button type="primary" htmlType="submit" className="px-6">
-                        {t('userProfile.form.saveInfo')}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </form>
-            ),
-          },
-          {
-            key: "2",
-            label: t('userProfile.rolesPermissions'),
-            children: (
-              <Card className="!border-0 !shadow-none">
-                <p className="mb-4">
-                  {t('userProfile.form.currentRole')}{" "}
-                  <span className="text-blue-600 font-semibold">
-                    {listRole && listRole.role_name}
-                  </span>
+  const tabItems = [
+    {
+      key: "1",
+      label: t('userProfile.basicInfo'),
+      children: (
+        <form onSubmit={handleProfileSubmit(onSubmitProfile)}>
+          <div className="space-y-6">
+            {/* Avatar Section */}
+            <div className="flex items-center gap-6 p-5 bg-gray-50 rounded-lg">
+              <Avatar
+                size={90}
+                src={profileImage}
+                icon={!profileImage ? <UserOutlined /> : undefined}
+                className="bg-gray-200"
+              />
+              <div className="flex-1">
+                <h3 className="text-base font-medium text-gray-800 mb-1">{data?.full_name || t('userProfile.form.fullName')}</h3>
+                <p className="text-sm text-gray-500 mb-3">{data?.email}</p>
+                <Upload
+                  showUploadList={false}
+                  beforeUpload={handleBeforeUpload}
+                >
+                  <Button icon={<UploadOutlined />} size="small">
+                    {t('userProfile.avatar.change')}
+                  </Button>
+                </Upload>
+                <p className="text-xs text-gray-500 mt-2">
+                  {t('userProfile.avatar.fileFormat')}
                 </p>
+              </div>
+            </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  {listRole &&
-                    listRole.groups.map((group) => {
-                      // Map group code to i18n key
-                      const groupI18nKeyMap: Record<string, string> = {
-                        'ORDER_MANAGEMENT': 'orderManagement',
-                        'USER_MANAGEMENT': 'userManagement',
-                        'FINANCE_MANAGEMENT': 'financeManagement',
-                        'TELESALES': 'telesales',
-                        'SALES_MANAGEMENT': 'sales',
-                      };
+            {/* Form Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.fullName')}
+                </label>
+                <Controller
+                  name="fullName"
+                  control={profileControl}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      placeholder={t('userProfile.form.fullName')}
+                    />
+                  )}
+                />
+                {profileErrors.fullName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {profileErrors.fullName.message}
+                  </p>
+                )}
+              </div>
 
-                      const groupI18nKey = groupI18nKeyMap[group.name];
-                      const groupLabel = groupI18nKey
-                        ? t(`permissions.groups.${groupI18nKey}`)
-                        : group.description || t('common.uncategorized');
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.email')}
+                </label>
+                <Controller
+                  name="email"
+                  control={profileControl}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      disabled
+                    />
+                  )}
+                />
+              </div>
 
-                      return (
-                        <div key={group.id}>
-                          <p className="font-medium mb-2">{groupLabel}</p>
-                          {group?.permissions?.map((perm) => {
-                            const permissionLabel = getPermissionLabel(
-                              perm.name,
-                              t,
-                              perm.description
-                            );
-                            return (
-                              <div key={perm.id}>
-                                <Checkbox checked={perm.active} disabled>
-                                  {permissionLabel}
-                                </Checkbox>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })}
-                </div>
-              </Card>
-            ),
-          },
-          {
-            key: "3",
-            label: t('userProfile.changePassword'),
-            children: (
-              <form onSubmit={handlePasswordSubmit(onSubmitPassword)}>
-                <Card className="!border-0 !shadow-none">
-                  <div className="flex flex-col gap-3 w-2/4">
-                    <div>
-                      <label className="block mb-1 font-medium">
-                        {t('userProfile.form.currentPassword')}
-                      </label>
-                      <Controller
-                        name="currentPassword"
-                        control={passwordControl}
-                        render={({ field }) => <Input.Password {...field} />}
-                      />
-                      {passwordErrors.currentPassword && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {passwordErrors.currentPassword.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-medium">
-                        {t('userProfile.form.newPassword')}
-                      </label>
-                      <Controller
-                        name="newPassword"
-                        control={passwordControl}
-                        render={({ field }) => <Input.Password {...field} />}
-                      />
-                      {passwordErrors.newPassword && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {passwordErrors.newPassword.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-medium">
-                        {t('userProfile.form.confirmPassword')}
-                      </label>
-                      <Controller
-                        name="confirmPassword"
-                        control={passwordControl}
-                        render={({ field }) => <Input.Password {...field} />}
-                      />
-                      {passwordErrors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {passwordErrors.confirmPassword.message}
-                        </p>
-                      )}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.phoneNumber')}
+                </label>
+                <Controller
+                  name="phoneNumber"
+                  control={profileControl}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      placeholder={t('userProfile.form.phoneNumber')}
+                    />
+                  )}
+                />
+                {profileErrors.phoneNumber && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {profileErrors.phoneNumber.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.birthday')}
+                </label>
+                <Controller
+                  name="birthday"
+                  control={profileControl}
+                  render={({ field }) => (
+                    <DatePicker
+                      {...field}
+                      format="YYYY-MM-DD"
+                      placeholder="YYYY-MM-DD"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(date) =>
+                        field.onChange(
+                          date ? date.format("YYYY-MM-DD") : ""
+                        )
+                      }
+                      className="w-full"
+                    />
+                  )}
+                />
+                {profileErrors.birthday && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {profileErrors.birthday.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="px-6"
+              >
+                {t('userProfile.form.saveInfo')}
+              </Button>
+            </div>
+          </div>
+        </form>
+      ),
+    },
+    {
+      key: "2",
+      label: t('userProfile.rolesPermissions'),
+      children: (
+        <div className="space-y-6">
+          {/* Role Badge */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">{t('userProfile.form.currentRole')}</p>
+            <p className="text-lg font-semibold text-gray-800">
+              {listRole && listRole.role_name}
+            </p>
+          </div>
+
+          {/* Permissions Grid */}
+          <div className="grid grid-cols-1 gap-4">
+            {listRole &&
+              listRole.groups.map((group) => {
+                const groupI18nKeyMap: Record<string, string> = {
+                  'ORDER_MANAGEMENT': 'orderManagement',
+                  'USER_MANAGEMENT': 'userManagement',
+                  'FINANCE_MANAGEMENT': 'financeManagement',
+                  'TELESALES': 'telesales',
+                  'SALES_MANAGEMENT': 'sales',
+                };
+
+                const groupI18nKey = groupI18nKeyMap[group.name];
+                const groupLabel = groupI18nKey
+                  ? t(`permissions.groups.${groupI18nKey}`)
+                  : group.description || t('common.uncategorized');
+
+                return (
+                  <div key={group.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-medium text-gray-800 mb-3 pb-2 border-b border-gray-100">
+                      {groupLabel}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {group?.permissions?.map((perm) => {
+                        const permissionLabel = getPermissionLabel(
+                          perm.name,
+                          t,
+                          perm.description
+                        );
+                        return (
+                          <div key={perm.id}>
+                            <Checkbox checked={perm.active} disabled className="text-sm">
+                              {permissionLabel}
+                            </Checkbox>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className="flex justify-end mt-4">
-                    <Button type="primary" htmlType="submit" className="px-6">
-                      {t('userProfile.changePassword')}
-                    </Button>
-                  </div>
-                </Card>
-              </form>
-            ),
-          },
-        ]}
-      />
+                );
+              })}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: t('userProfile.changePassword'),
+      children: (
+        <form onSubmit={handlePasswordSubmit(onSubmitPassword)}>
+          <div className="space-y-6 max-w-2xl">
+            {/* Security Info */}
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <p className="text-sm text-gray-700">
+                Mật khẩu phải từ 8-20 ký tự, bao gồm chữ và số
+              </p>
+            </div>
+
+            {/* Password Fields */}
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.currentPassword')}
+                </label>
+                <Controller
+                  name="currentPassword"
+                  control={passwordControl}
+                  render={({ field }) => (
+                    <Input.Password
+                      {...field}
+                      placeholder="••••••••"
+                    />
+                  )}
+                />
+                {passwordErrors.currentPassword && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {passwordErrors.currentPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.newPassword')}
+                </label>
+                <Controller
+                  name="newPassword"
+                  control={passwordControl}
+                  render={({ field }) => (
+                    <Input.Password
+                      {...field}
+                      placeholder="••••••••"
+                    />
+                  )}
+                />
+                {passwordErrors.newPassword && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {passwordErrors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t('userProfile.form.confirmPassword')}
+                </label>
+                <Controller
+                  name="confirmPassword"
+                  control={passwordControl}
+                  render={({ field }) => (
+                    <Input.Password
+                      {...field}
+                      placeholder="••••••••"
+                    />
+                  )}
+                />
+                {passwordErrors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {passwordErrors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="px-6"
+              >
+                {t('userProfile.changePassword')}
+              </Button>
+            </div>
+          </div>
+        </form>
+      ),
+    },
+  ];
+
+  return (
+    <div className="p-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h1 className="text-xl font-semibold text-gray-800">Thông tin cá nhân</h1>
+          <p className="text-sm text-gray-500 mt-1">Quản lý thông tin, mật khẩu và quyền hạn tài khoản của bạn</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <Tabs
+            defaultActiveKey="1"
+            items={tabItems}
+          />
+        </div>
+      </div>
     </div>
   );
 }
