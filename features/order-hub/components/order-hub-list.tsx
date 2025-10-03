@@ -691,7 +691,7 @@ export default function OrderHub() {
                 }}
                 className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               >
-                🛒 XN mua
+                🛒 Đã mua
               </Button>
             );
             break;
