@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import React, { Component, ReactNode } from "react";
 import { CacheManager } from "@/utils/cache-manager";
 import { useTranslation } from 'react-i18next';
+import { Button } from "antd";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -107,18 +108,19 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
             {/* Actions */}
             <div className="space-y-3">
-              <button
+                <Button
                 onClick={this.handleRetry}
-                className="w-full px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow"
-              >
+                className="w-full px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow mb-2"
+                >
                 {this.props.t('errorHandling.tryAgain')}
-              </button>
-              <button
+                </Button>
+
+                <Button
                 onClick={this.handleClearCache}
                 className="w-full px-5 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200"
-              >
+                >
                 {this.props.t('errorHandling.refreshAndClearCache')}
-              </button>
+                </Button>
             </div>
           </div>
         </div>

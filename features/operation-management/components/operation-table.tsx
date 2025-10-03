@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, Tag, DatePicker, Select, Modal } from "antd";
+import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip } from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -18,7 +18,7 @@ import { Order } from "@/types/operation-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
@@ -59,12 +59,11 @@ const ProductManagement: React.FC = () => {
     {
       title: "No",
       key: "invoice_no",
-      width: 50,
+      width: 40,
       align: "center",
-      fixed: "left",
       render: (_, record) => {
         const invoice_no = record.order_list?.[0]?.invoice_no;
-        return <div className="text-xs font-medium">{invoice_no || "-"}</div>;
+        return <div className="text-xs font-medium text-blue-600">{invoice_no || "-"}</div>;
       },
     },
     {
@@ -244,7 +243,7 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => (
-        <div className="text-xs text-gray-800 text-right">-</div>
+        <div className="text-xs text-gray-800 text-left">-</div>
       ),
     },
     {
@@ -300,7 +299,7 @@ const ProductManagement: React.FC = () => {
       },
     },
     {
-      title: "Tiền V.Chuyển",
+      title: "COD (Việt)",
       key: "transfer_fee",
       width: 180,
       onCell: () => ({
@@ -312,6 +311,8 @@ const ProductManagement: React.FC = () => {
         const orderData = record.order_list?.[0];
         const codPrice = orderData?.cod_shipping_price || 0;
         const shippingPrice = codPrice || orderData?.shipping_fee || 0;
+        const shippingCode = orderData?.tracking_vn || "";
+        const isShippingRequest = record.status === OrderStatusType.SHIPPING_REQUEST_CLIENT;
 
         let shippingTypeText = "-";
         let shippingTypeColor = "text-gray-600";
@@ -321,23 +322,56 @@ const ProductManagement: React.FC = () => {
           shippingTypeColor = "text-blue-600";
         }
 
+        const showWarningCode = isShippingRequest && !shippingCode;
+        const showWarningPrice = isShippingRequest && !shippingPrice;
+        const showWarningType = isShippingRequest && shippingTypeText === "-";
+
         return (
           <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Mã: </span>
-              <span className="text-gray-800">-</span>
+            <div className="text-xs flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500">Mã: </span>
+                {showWarningCode ? (
+                  <Tooltip title="Chưa có mã vận chuyển">
+                    <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+                  </Tooltip>
+                ) : (
+                  <span className="text-gray-800">{shippingCode || "-"}</span>
+                )}
+              </div>
+              {isShippingRequest && (
+                <EditOutlined
+                  className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenTrackingOrder(true);
+                  }}
+                />
+              )}
             </div>
-            <div className="text-xs">
+            <div className="text-xs flex items-center gap-1">
               <span className="text-gray-500">Giá: </span>
-              <span className="text-gray-800 font-medium">
-                {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
+              {showWarningPrice ? (
+                <Tooltip title="Chưa có giá vận chuyển">
+                  <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+                </Tooltip>
+              ) : (
+                <span className="text-gray-800 font-medium">
+                  {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
+                </span>
+              )}
             </div>
-            <div className="text-xs">
+            <div className="text-xs flex items-center gap-1">
               <span className="text-gray-500">HT: </span>
-              <span className={`font-medium ${shippingTypeColor}`}>
-                {shippingTypeText}
-              </span>
+              {showWarningType ? (
+                <Tooltip title="Chưa có hình thức">
+                  <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+                </Tooltip>
+              ) : (
+                <span className={`font-medium ${shippingTypeColor}`}>
+                  {shippingTypeText}
+                </span>
+              )}
             </div>
           </div>
         );
@@ -398,7 +432,7 @@ const ProductManagement: React.FC = () => {
         const totalCost = weightFee + shippingFee;
 
         return (
-          <div className="text-xs text-gray-800 text-right font-medium">
+          <div className="text-xs text-gray-800 text-left font-medium">
             {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
           </div>
         );
@@ -439,9 +473,9 @@ const ProductManagement: React.FC = () => {
       },
     },
     {
-      title: "Trạng Thái & Hành Động",
+      title: "Hành Động",
       key: "status_actions",
-      width: 140,
+      width: 160,
       align: "center",
       fixed: "right",
       onCell: () => ({
@@ -509,17 +543,25 @@ const ProductManagement: React.FC = () => {
         }
 
         return (
-          <div className="flex flex-col items-center justify-center gap-1 py-1">
+          <div className="flex flex-col items-center justify-center gap-2 py-2">
             <Tag
               color={color}
-              className="!text-[10px] m-0 !py-0 !px-1 !leading-4"
-              style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '90px', height: '18px' }}
+              className="!text-[11px] m-0 !py-1 !px-2 !leading-4 !font-medium"
+              style={{
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minWidth: '100px',
+                height: '22px',
+                borderRadius: '4px'
+              }}
             >
               {text}
             </Tag>
             <Button
               size="small"
-              className="!bg-blue-500 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+              className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               onClick={() => {
                 setIsOpenTrackingOrder(true);
                 setOrderDetail(record);
