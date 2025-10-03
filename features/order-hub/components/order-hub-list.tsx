@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Tag, Button, Input, Select, Form, DatePicker, Modal } from "antd";
+import { Tag, Button, Input, Select, Form, DatePicker, Modal, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, EditOutlined, ReloadOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, ReloadOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -61,31 +61,12 @@ export default function OrderHub() {
   } | null>(null);
 
   // Edit modal states
-  const [editingExtraFee, setEditingExtraFee] = useState<{orderId: number, value: string} | null>(null);
   const [editingNote, setEditingNote] = useState<{orderId: number, value: string} | null>(null);
   const [editingFeesRates, setEditingFeesRates] = useState<{
     orderId: number,
-    ship: string,
-    serviceFee: string,
-    exchangeRateJpy: string,
-    exchangeRateConverted: string,
-    pricePerKg: string
+    codOption: string,
+    codAmount: string
   } | null>(null);
-  const [editingTransferFee, setEditingTransferFee] = useState<{
-    orderId: number,
-    shippingCode: string,
-    shippingPrice: string,
-    shippingType: string
-  } | null>(null);
-  const [editingPaymentInfo, setEditingPaymentInfo] = useState<{
-    orderId: number,
-    deposit: string,
-    remaining: string,
-    paymentDate: string,
-    paid: string,
-    debt: string
-  } | null>(null);
-  const [editingTotalCost, setEditingTotalCost] = useState<{orderId: number, value: string} | null>(null);
   const [editingNoteExtra, setEditingNoteExtra] = useState<{orderId: number, value: string} | null>(null);
 
   const [filters, setFilters] = useState({
@@ -223,11 +204,10 @@ export default function OrderHub() {
       title: "No",
       dataIndex: "invoice_no",
       key: "invoice_no",
-      width: 50,
+      width: 40,
       align: "center",
-      fixed: "left",
       render: (invoice_no: string) => (
-        <div className="text-xs font-medium">{invoice_no || "-"}</div>
+        <div className="text-xs font-medium text-blue-600">{invoice_no || "-"}</div>
       ),
     },
     {
@@ -377,13 +357,7 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => (
-        <div className="flex items-center justify-between gap-2 h-full">
-          <div className="text-xs text-gray-800 flex-1 text-right">-</div>
-          <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-            onClick={() => setEditingExtraFee({ orderId: record.id, value: "" })}
-          />
-        </div>
+        <div className="text-xs text-gray-800 text-left">-</div>
       ),
     },
     {
@@ -420,89 +394,43 @@ export default function OrderHub() {
         const shippingFee = record.shipping_fee;
         const weightFee = record.weight_fee;
         const rate = record.rate;
+        const isPendingApproval = record.status === OrderStatusType.PENDING_APPROVAL;
+        const shouldShowWarning = isPendingApproval && !shippingFee;
 
         return (
-          <div className="flex items-center justify-between gap-2 h-full">
-            <div className="space-y-1 flex-1">
-              <div className="text-xs">
-                <span className="text-gray-500">Ship: </span>
-                <span className="text-gray-800">
-                  {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
+          <div className="space-y-1">
+            <div className="text-xs flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500">COD: </span>
+                {shouldShowWarning ? (
+                  <Tooltip title="Chưa có phí COD">
+                    <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+                  </Tooltip>
+                ) : (
+                  <span className="text-gray-800">
+                    {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}¥` : "-"}
+                  </span>
+                )}
               </div>
-              <div className="text-xs">
-                <span className="text-gray-500">CN: </span>
-                <span className="text-gray-800">
-                  {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">TG Yên: </span>
-                <span className="text-gray-800">{rate || "-"}</span>
-              </div>
+              <EditOutlined
+                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                onClick={() => setEditingFeesRates({
+                  orderId: record.id,
+                  codOption: "",
+                  codAmount: ""
+                })}
+              />
             </div>
-            <EditOutlined
-              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-              onClick={() => setEditingFeesRates({
-                orderId: record.id,
-                ship: shippingFee?.toString() || "",
-                serviceFee: weightFee?.toString() || "",
-                exchangeRateJpy: rate?.toString() || "",
-                exchangeRateConverted: "",
-                pricePerKg: ""
-              })}
-            />
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tiền V.Chuyển",
-      key: "transfer_fee",
-      width: 180,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const shippingCode = record.tracking_vn || "-";
-        const codShippingPrice = record.cod_shipping_price || 0;
-        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
-
-        const isCOD = codShippingPrice > 0;
-        const shippingTypeText = isCOD ? "COD" : "-";
-        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
-
-        return (
-          <div className="flex items-center justify-between gap-2 h-full">
-            <div className="space-y-1 flex-1">
-              <div className="text-xs">
-                <span className="text-gray-500">Mã: </span>
-                <span className="text-gray-800">{shippingCode}</span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">Giá: </span>
-                <span className="text-gray-800 font-medium">
-                  {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">HT: </span>
-                <span className={`font-medium ${shippingTypeColor}`}>
-                  {shippingTypeText}
-                </span>
-              </div>
+            <div className="text-xs">
+              <span className="text-gray-500">CN: </span>
+              <span className="text-gray-800">
+                {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
             </div>
-            <EditOutlined
-              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-              onClick={() => setEditingTransferFee({
-                orderId: record.id,
-                shippingCode: "",
-                shippingPrice: "",
-                shippingType: ""
-              })}
-            />
+            <div className="text-xs">
+              <span className="text-gray-500">TG Yên: </span>
+              <span className="text-gray-800">{rate || "-"}</span>
+            </div>
           </div>
         );
       },
@@ -522,44 +450,71 @@ export default function OrderHub() {
         const remaining = totalAmount - depositFee;
 
         return (
-          <div className="flex items-center justify-between gap-2 h-full">
-            <div className="space-y-1 flex-1">
-              <div className="text-xs">
-                <span className="text-gray-500">Cọc: </span>
-                <span className="text-green-600 font-medium">
-                  {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">Sau cọc: </span>
-                <span className="text-orange-600 font-medium">
-                  {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">Ngày TT: </span>
-                <span className="text-gray-800">-</span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">Đã TT: </span>
-                <span className="text-gray-800">-</span>
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">Công nợ: </span>
-                <span className="text-gray-800">-</span>
-              </div>
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-gray-500">Cọc: </span>
+              <span className="text-green-600 font-medium">
+                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
             </div>
-            <EditOutlined
-              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-              onClick={() => setEditingPaymentInfo({
-                orderId: record.id,
-                deposit: depositFee.toString(),
-                remaining: remaining.toString(),
-                paymentDate: "",
-                paid: "",
-                debt: ""
-              })}
-            />
+            <div className="text-xs">
+              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-orange-600 font-medium">
+                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Ngày TT: </span>
+              <span className="text-gray-800">-</span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Đã TT: </span>
+              <span className="text-gray-800">-</span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Công nợ: </span>
+              <span className="text-gray-800">-</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "COD (Việt)",
+      key: "transfer_fee",
+      width: 180,
+      onCell: () => ({
+        style: {
+          borderRight: '1px solid #f0f0f0',
+        },
+      }),
+      render: (_, record) => {
+        const shippingCode = record.tracking_vn || "-";
+        const codShippingPrice = record.cod_shipping_price || 0;
+        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
+
+        const isCOD = codShippingPrice > 0;
+        const shippingTypeText = isCOD ? "COD" : "-";
+        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
+
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-gray-500">Mã: </span>
+              <span className="text-gray-800">{shippingCode}</span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Giá: </span>
+              <span className="text-gray-800 font-medium">
+                {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">HT: </span>
+              <span className={`font-medium ${shippingTypeColor}`}>
+                {shippingTypeText}
+              </span>
+            </div>
           </div>
         );
       },
@@ -579,14 +534,8 @@ export default function OrderHub() {
         const totalCost = shippingFee + weightFee;
 
         return (
-          <div className="flex items-center justify-between gap-2 h-full">
-            <div className="text-xs text-gray-800 flex-1 text-right font-medium">
-              {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
-            </div>
-            <EditOutlined
-              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-              onClick={() => setEditingTotalCost({ orderId: record.id, value: totalCost.toString() })}
-            />
+          <div className="text-xs text-gray-800 text-left font-medium">
+            {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
           </div>
         );
       },
@@ -607,7 +556,7 @@ export default function OrderHub() {
       ),
     },
     {
-      title: "Ghi Chú",
+      title: "Ghi Chú (Admin)",
       key: "note_extra",
       width: 140,
       onCell: () => ({
@@ -628,7 +577,7 @@ export default function OrderHub() {
     {
       title: "Hành Động",
       key: "status_actions",
-      width: 140,
+      width: 160,
       align: "center",
       fixed: "right",
       onCell: () => ({
@@ -703,28 +652,28 @@ export default function OrderHub() {
           case OrderStatusType.PENDING_APPROVAL:
             if (record.is_user_created) {
               actionButton = (
-                <div className="flex gap-1 justify-center">
+                <div className="flex gap-1.5 justify-center w-full">
                   <Button
                     key={`approve-${record.id}`}
                     size="small"
-                    className="!bg-green-500 !text-white !border-0 !text-[10px] !px-1 !h-6"
+                    className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
                     onClick={() => {
                       setOrderDetail(record);
                       setIsOpenApproveOrder(true);
                     }}
                   >
-                    Duyệt
+                    ✓ Duyệt
                   </Button>
                   <Button
                     key={`reject-${record.id}`}
                     size="small"
-                    className="!bg-red-500 !text-white !border-0 !text-[10px] !px-1 !h-6"
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
                     onClick={() => {
                       setOrderDetail(record);
                       setIsOpenCancel(true);
                     }}
                   >
-                    Từ chối
+                    ✕ Từ chối
                   </Button>
                 </div>
               );
@@ -740,9 +689,9 @@ export default function OrderHub() {
                   setOrderDetail(record);
                   setOpenConfirmPurchase(true);
                 }}
-                className="!bg-blue-500 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+                className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               >
-                XN mua
+                🛒 Đã mua
               </Button>
             );
             break;
@@ -752,13 +701,13 @@ export default function OrderHub() {
               <Button
                 key={record.status}
                 size="small"
-                className="!bg-purple-500 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+                className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenTrackingOrder(true);
                 }}
               >
-                Kho JP
+                🏢 Kho JP
               </Button>
             );
             break;
@@ -799,9 +748,9 @@ export default function OrderHub() {
                     );
                   }
                 }}
-                className="!bg-indigo-500 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+                className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               >
-                Kho VN
+                🏭 Kho VN
               </Button>
             );
             break;
@@ -811,13 +760,13 @@ export default function OrderHub() {
               <Button
                 key={record.status}
                 size="small"
-                className="!bg-cyan-600 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+                className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenCheckOrder(true);
                 }}
               >
-                Kiểm hàng
+                📦 Kiểm hàng
               </Button>
             );
             break;
@@ -827,25 +776,33 @@ export default function OrderHub() {
               <Button
                 key={record.status}
                 size="small"
-                className="!bg-emerald-500 !text-white !border-0 !text-[10px] !px-1 !h-6 w-full"
+                className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setOpenConfirmComplete(true);
                 }}
               >
-                Giao hàng
+                🚚 Giao hàng
               </Button>
             );
             break;
         }
 
         return (
-          <div className="flex flex-col items-center justify-center gap-1 py-1">
+          <div className="flex flex-col items-center justify-center gap-2 py-2">
             {/* Tag trạng thái */}
             <Tag
               color={color}
-              className="!text-[10px] m-0 !py-0 !px-1 !leading-4"
-              style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '90px', height: '18px' }}
+              className="!text-[11px] m-0 !py-1 !px-2 !leading-4 !font-medium"
+              style={{
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minWidth: '100px',
+                height: '22px',
+                borderRadius: '4px'
+              }}
             >
               {text}
             </Tag>
@@ -853,16 +810,18 @@ export default function OrderHub() {
             {/* Nút hành động chính (nếu có) */}
             {actionButton}
 
-            {/* Link chi tiết luôn hiển thị */}
-            <a
-              className="text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer underline text-center"
+            {/* Button chi tiết luôn hiển thị */}
+            <Button
+              size="small"
+              type="link"
+              className="!text-[11px] !p-0 !h-auto !font-medium hover:!text-blue-700"
               onClick={() => {
                 setOpenDetail(true);
                 setOrderDetail(record);
               }}
             >
               Chi tiết
-            </a>
+            </Button>
           </div>
         );
       },
@@ -1159,34 +1118,6 @@ export default function OrderHub() {
         />
       )}
 
-      {/* Modal Edit Extra Fee */}
-      {editingExtraFee && (
-        <Modal
-          open={!!editingExtraFee}
-          onCancel={() => setEditingExtraFee(null)}
-          title="Cập nhật Phụ Phí"
-          width={400}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingExtraFee(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save extra fee:", editingExtraFee);
-              toast.success("Đã lưu phụ phí");
-              setEditingExtraFee(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Phụ Phí">
-              <Input
-                value={editingExtraFee.value}
-                onChange={(e) => setEditingExtraFee({...editingExtraFee, value: e.target.value})}
-                placeholder="Nhập phụ phí"
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-      )}
-
       {/* Modal Edit Note */}
       {editingNote && (
         <Modal
@@ -1221,184 +1152,40 @@ export default function OrderHub() {
         <Modal
           open={!!editingFeesRates}
           onCancel={() => setEditingFeesRates(null)}
-          title="Cập nhật Phí & Tỷ Giá"
+          title="Cập nhật Phí COD"
           width={500}
           footer={[
             <Button key="cancel" onClick={() => setEditingFeesRates(null)}>Hủy</Button>,
             <Button key="submit" type="primary" onClick={() => {
               console.log("Save fees & rates:", editingFeesRates);
-              toast.success("Đã lưu phí & tỷ giá");
+              toast.success("Đã lưu phí COD");
               setEditingFeesRates(null);
             }}>Lưu</Button>,
           ]}
         >
           <Form layout="vertical" className="py-4">
-            <Form.Item label="Ship">
-              <Input
-                value={editingFeesRates.ship}
-                onChange={(e) => setEditingFeesRates({...editingFeesRates, ship: e.target.value})}
-                placeholder="Nhập phí ship"
-              />
-            </Form.Item>
-            <Form.Item label="Phí Dịch Vụ">
-              <Input
-                value={editingFeesRates.serviceFee}
-                onChange={(e) => setEditingFeesRates({...editingFeesRates, serviceFee: e.target.value})}
-                placeholder="Nhập phí dịch vụ"
-              />
-            </Form.Item>
-            <Form.Item label="Tỷ Giá Yên">
-              <Input
-                value={editingFeesRates.exchangeRateJpy}
-                onChange={(e) => setEditingFeesRates({...editingFeesRates, exchangeRateJpy: e.target.value})}
-                placeholder="Nhập tỷ giá yên"
-              />
-            </Form.Item>
-            <Form.Item label="Tỷ Giá Quy Đổi">
-              <Input
-                value={editingFeesRates.exchangeRateConverted}
-                onChange={(e) => setEditingFeesRates({...editingFeesRates, exchangeRateConverted: e.target.value})}
-                placeholder="Nhập tỷ giá quy đổi"
-              />
-            </Form.Item>
-            <Form.Item label="Đơn Giá KG">
-              <Input
-                value={editingFeesRates.pricePerKg}
-                onChange={(e) => setEditingFeesRates({...editingFeesRates, pricePerKg: e.target.value})}
-                placeholder="Nhập đơn giá kg"
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-      )}
-
-      {/* Modal Edit Transfer Fee */}
-      {editingTransferFee && (
-        <Modal
-          open={!!editingTransferFee}
-          onCancel={() => setEditingTransferFee(null)}
-          title="Cập nhật Tiền Vận Chuyển"
-          width={500}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingTransferFee(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save transfer fee:", editingTransferFee);
-              toast.success("Đã lưu tiền vận chuyển");
-              setEditingTransferFee(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Mã Shipping">
-              <Input
-                value={editingTransferFee.shippingCode}
-                onChange={(e) => setEditingTransferFee({...editingTransferFee, shippingCode: e.target.value})}
-                placeholder="Nhập mã shipping"
-              />
-            </Form.Item>
-            <Form.Item label="Giá Vận Chuyển">
-              <Input
-                type="number"
-                value={editingTransferFee.shippingPrice}
-                onChange={(e) => setEditingTransferFee({...editingTransferFee, shippingPrice: e.target.value})}
-                placeholder="Nhập giá vận chuyển"
-                suffix="đ"
-              />
-            </Form.Item>
-            <Form.Item label="Hình Thức Phí Vận Chuyển">
+            <Form.Item label="COD (Nhật)">
               <Select
-                value={editingTransferFee.shippingType}
-                onChange={(value) => setEditingTransferFee({...editingTransferFee, shippingType: value})}
-                placeholder="Chọn hình thức"
+                value={editingFeesRates.codOption}
+                onChange={(value) => setEditingFeesRates({...editingFeesRates, codOption: value})}
+                placeholder="Chọn loại COD"
               >
-                <Select.Option value="customer_pay">Khách hàng tự trả phí vận chuyển</Select.Option>
-                <Select.Option value="cod">Admin điền phí COD</Select.Option>
                 <Select.Option value="free">Miễn phí vận chuyển</Select.Option>
+                <Select.Option value="admin_cod">Admin điền phí COD</Select.Option>
               </Select>
             </Form.Item>
-          </Form>
-        </Modal>
-      )}
 
-      {/* Modal Edit Payment Info */}
-      {editingPaymentInfo && (
-        <Modal
-          open={!!editingPaymentInfo}
-          onCancel={() => setEditingPaymentInfo(null)}
-          title="Cập nhật Thanh Toán & Công Nợ"
-          width={500}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingPaymentInfo(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save payment info:", editingPaymentInfo);
-              toast.success("Đã lưu thông tin thanh toán");
-              setEditingPaymentInfo(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Cọc 100%">
-              <Input
-                value={editingPaymentInfo.deposit}
-                onChange={(e) => setEditingPaymentInfo({...editingPaymentInfo, deposit: e.target.value})}
-                placeholder="Nhập tiền cọc"
-              />
-            </Form.Item>
-            <Form.Item label="TT Sau Cọc">
-              <Input
-                value={editingPaymentInfo.remaining}
-                onChange={(e) => setEditingPaymentInfo({...editingPaymentInfo, remaining: e.target.value})}
-                placeholder="Nhập tiền còn lại"
-              />
-            </Form.Item>
-            <Form.Item label="Ngày TT">
-              <DatePicker
-                className="w-full"
-                placeholder="Chọn ngày thanh toán"
-              />
-            </Form.Item>
-            <Form.Item label="Đã TT">
-              <Input
-                value={editingPaymentInfo.paid}
-                onChange={(e) => setEditingPaymentInfo({...editingPaymentInfo, paid: e.target.value})}
-                placeholder="Nhập số tiền đã thanh toán"
-              />
-            </Form.Item>
-            <Form.Item label="Công Nợ">
-              <Input
-                value={editingPaymentInfo.debt}
-                onChange={(e) => setEditingPaymentInfo({...editingPaymentInfo, debt: e.target.value})}
-                placeholder="Nhập công nợ"
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-      )}
-
-      {/* Modal Edit Total Cost */}
-      {editingTotalCost && (
-        <Modal
-          open={!!editingTotalCost}
-          onCancel={() => setEditingTotalCost(null)}
-          title="Cập nhật Tổng Chi Phí"
-          width={400}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingTotalCost(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save total cost:", editingTotalCost);
-              toast.success("Đã lưu tổng chi phí");
-              setEditingTotalCost(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Tổng Chi Phí">
-              <Input
-                value={editingTotalCost.value}
-                onChange={(e) => setEditingTotalCost({...editingTotalCost, value: e.target.value})}
-                placeholder="Nhập tổng chi phí"
-              />
-            </Form.Item>
+            {editingFeesRates.codOption === "admin_cod" && (
+              <Form.Item label="Phí COD">
+                <Input
+                  type="number"
+                  value={editingFeesRates.codAmount}
+                  onChange={(e) => setEditingFeesRates({...editingFeesRates, codAmount: e.target.value})}
+                  placeholder="Nhập phí COD"
+                  suffix="¥"
+                />
+              </Form.Item>
+            )}
           </Form>
         </Modal>
       )}
