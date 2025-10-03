@@ -50,28 +50,29 @@ const FinanceDepositApprovalPage = () => {
   }
   
   return (
-    <div className="pt-4">
+    <div className="p-6">
       {
         activeTab !== null  ?
-        <>
-        <FinanceTabs
-        activeKey={activeTab || ""}
-        onChange={(key: string) => {
-          setActiveTab(key);
-        }}
-        allowedTabs={allowedTabs}
-      />
-
-      {activeTab === "deposit" && (
-        <DepositTable action={action ?? undefined} code={code ?? undefined} />
-      )}
-      {activeTab === "withdraw" && <WithdrawTable />}
-      {activeTab === "bank-settings" && <BankAccountSetting />}
-      {activeTab === "bank-partner" && <BankPartnerSetting/>}
-      {activeTab === "account-partner" && <BankAccountSetting />}
-      </> : <Spin />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <FinanceTabs
+            activeKey={activeTab || ""}
+            onChange={(key: string) => {
+              setActiveTab(key);
+            }}
+            allowedTabs={allowedTabs}
+          />
+          <div className="px-6 pb-6 pt-4">
+            {activeTab === "deposit" && (
+              <DepositTable action={action ?? undefined} code={code ?? undefined} />
+            )}
+            {activeTab === "withdraw" && <WithdrawTable />}
+            {activeTab === "bank-settings" && <BankAccountSetting />}
+            {activeTab === "bank-partner" && <BankPartnerSetting/>}
+            {activeTab === "account-partner" && <BankAccountSetting />}
+          </div>
+        </div> : <Spin />
       }
-      
+
       {/* {activeTab === "reconciliation" && (
           <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
         )} */}
