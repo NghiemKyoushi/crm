@@ -279,9 +279,9 @@ const ProductManagement: React.FC = () => {
         return (
           <div className="space-y-1">
             <div className="text-xs">
-              <span className="text-gray-500">Ship: </span>
+              <span className="text-gray-500">COD: </span>
               <span className="text-gray-800">
-                {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}đ` : "-"}
+                {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}¥` : "-"}
               </span>
             </div>
             <div className="text-xs">

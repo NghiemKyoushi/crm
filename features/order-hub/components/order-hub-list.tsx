@@ -408,7 +408,7 @@ export default function OrderHub() {
                   </Tooltip>
                 ) : (
                   <span className="text-gray-800">
-                    {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}đ` : "-"}
+                    {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}¥` : "-"}
                   </span>
                 )}
               </div>
@@ -1152,13 +1152,13 @@ export default function OrderHub() {
         <Modal
           open={!!editingFeesRates}
           onCancel={() => setEditingFeesRates(null)}
-          title="Cập nhật Phí & Tỷ Giá"
+          title="Cập nhật Phí COD"
           width={500}
           footer={[
             <Button key="cancel" onClick={() => setEditingFeesRates(null)}>Hủy</Button>,
             <Button key="submit" type="primary" onClick={() => {
               console.log("Save fees & rates:", editingFeesRates);
-              toast.success("Đã lưu phí & tỷ giá");
+              toast.success("Đã lưu phí COD");
               setEditingFeesRates(null);
             }}>Lưu</Button>,
           ]}
@@ -1182,7 +1182,7 @@ export default function OrderHub() {
                   value={editingFeesRates.codAmount}
                   onChange={(e) => setEditingFeesRates({...editingFeesRates, codAmount: e.target.value})}
                   placeholder="Nhập phí COD"
-                  suffix="đ"
+                  suffix="¥"
                 />
               </Form.Item>
             )}

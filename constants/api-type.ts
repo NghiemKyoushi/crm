@@ -81,5 +81,6 @@ export const API_TYPE_CONST = {
   CREATE_ORDER: `${FEATURE}/admin/orders`,
   SHIP_ROUTE:`${FEATURE}/shipping-route`,
   GET_TRACKING_ORDER:`${FEATURE}/admin/orders/get-tracking-ship`,
-  COMPLETE_SHIPPING:`${FEATURE}/admin/orders/complete-shipping`
+  COMPLETE_SHIPPING:`${FEATURE}/admin/orders/complete-shipping`,
+  DASHBOARD_STATS:`${FEATURE}/admin/dashboard/stats`
 } as const;
