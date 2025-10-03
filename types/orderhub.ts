@@ -54,14 +54,20 @@ export interface Invoice {
   source?: string; // Amazon JP
   purchase_type?: string; // Mua thẳng / Đấu giá
   tracking_code?: string; // JP1234567890
-  weight?: string; // 2.1kg
+  weight?: number; // Cân nặng (gram)
   is_user_created: boolean;
   tracking_other?: string;
-  tracking_vn?:string;
+  tracking_vn?: string;
+  tracking_ship?: string;
   take_photo: boolean;
   is_repacked: boolean;
   is_verify_count: boolean;
   note?: string;
+  shipping_fee?: number;
+  weight_fee?: number;
+  rate?: number;
+  cod_shipping_price?: number;
+  deposit_fee?: number;
 }
 
 export interface InvoiceMetadata {

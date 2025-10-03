@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlusCircle,
   faMinusCircle,
-  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
@@ -238,11 +237,11 @@ const DepositTable = (props: DepositTableProps) => {
     },
     {
       title: t("deposit.columns.status"),
-      dataIndex: "status",
-      key: "status",
-      width: 130,
+      key: "status_action",
+      width: 160,
       align: "center",
-      render: (status: DepositItem["status"]) => {
+      fixed: "right",
+      render: (_, record) => {
         const statusConfig = {
           WAITING_CONFIRMATION: { color: "gold", text: t("deposit.status.pending") },
           COMPLETED: { color: "green", text: t("deposit.status.completed") },
@@ -252,86 +251,76 @@ const DepositTable = (props: DepositTableProps) => {
           MANUAL_WITHDRAWAL_COMPLETED: { color: "red", text: t('status.deduction') },
           CANCELED_BY_USER: { color: "orange", text: t('status.cancelledByUser') },
         };
-        const config = statusConfig[status as keyof typeof statusConfig];
-        return config ? (
-          <Tag className="!rounded-3xl text-xs" color={config.color}>
-            {config.text}
-          </Tag>
-        ) : null;
+        const config = statusConfig[record.status as keyof typeof statusConfig];
+
+        return (
+          <div className="flex flex-col items-center gap-2 py-1">
+            {config && (
+              <Tag className="!rounded-3xl !text-xs !m-0" color={config.color}>
+                {config.text}
+              </Tag>
+            )}
+            <Space size="small" className="flex justify-center">
+              <Button
+                type="link"
+                size="small"
+                className="!text-xs !p-0 !h-auto"
+                onClick={() => {
+                  setSelectedId(record.id);
+                  let type = "TOP_UP";
+                  if (record.status === "MANUAL_TOP_UP_COMPLETED") {
+                    type = "MANUAL_TOP_UP";
+                  } else if (record.status === "MANUAL_WITHDRAWAL_COMPLETED") {
+                    type = "MANUAL_WITHDRAWAL";
+                  }
+                  setTypeDetail(type);
+                  setIsOpenCompleteTransaction(true);
+                }}
+              >
+                Chi tiết
+              </Button>
+              {record.status === "WAITING_CONFIRMATION" && (
+                <>
+                  <Button
+                    className="!bg-green-500 !text-white !border-0 !text-xs !px-2 !h-6"
+                    size="small"
+                    onClick={() => {
+                      setConfirmAmount(record.amount);
+                      setSelectedId(record.id);
+                      setIsOpenConfirm(true);
+                    }}
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    className="!bg-red-500 !text-white !border-0 !text-xs !px-2 !h-6"
+                    size="small"
+                    onClick={() => {
+                      setSelectedCode(record.deposit_code)
+                      setSelectedId(record.id);
+                      setIsOpenCancel(true);
+                    }}
+                  >
+                    Hủy
+                  </Button>
+                </>
+              )}
+              {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED"].includes(record.status) && (
+                <Button
+                  type="link"
+                  size="small"
+                  className="!text-xs !p-0 !h-auto"
+                  onClick={() =>
+                    handleOpenHistory(record.id, record.deposit_code)
+                  }
+                >
+                  Lịch sử
+                </Button>
+              )}
+            </Space>
+          </div>
+        );
       },
-    },
-    {
-      title: t("deposit.columns.action"),
-      key: "action",
-      width: 160,
-      fixed: "right",
-      render: (_, record) => (
-        <Space size="small">
-          <button
-            className="cursor-pointer hover:opacity-70"
-            onClick={() => {
-              console.log("Opening detail modal - Record:", record.id, "Status:", record.status);
-              setSelectedId(record.id);
-
-              // Set typeDetail trước khi mở modal
-              let type = "TOP_UP";
-              if (record.status === "MANUAL_TOP_UP_COMPLETED") {
-                type = "MANUAL_TOP_UP";
-              } else if (record.status === "MANUAL_WITHDRAWAL_COMPLETED") {
-                type = "MANUAL_WITHDRAWAL";
-              }
-              console.log("Setting typeDetail to:", type);
-              setTypeDetail(type);
-
-              // Mở modal sau
-              setIsOpenCompleteTransaction(true);
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faInfoCircle}
-              className="text-blue-500 text-lg"
-            />
-          </button>
-          {record.status === "WAITING_CONFIRMATION" && (
-            <>
-              <Button
-                className="!bg-green-500 !text-white !border-0 !text-xs !px-2"
-                size="small"
-                onClick={() => {
-                  setConfirmAmount(record.amount);
-                  setSelectedId(record.id);
-                  setIsOpenConfirm(true);
-                }}
-              >
-                Duyệt
-              </Button>
-              <Button
-                className="!bg-red-500 !text-white !border-0 !text-xs !px-2"
-                size="small"
-                onClick={() => {
-                  setSelectedCode(record.deposit_code)
-                  setSelectedId(record.id);
-                  setIsOpenCancel(true);
-                }}
-              >
-                Hủy
-              </Button>
-            </>
-          )}
-          {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED"].includes(record.status) && (
-            <Button
-              type="link"
-              size="small"
-              className="!text-xs !p-0"
-              onClick={() =>
-                handleOpenHistory(record.id, record.deposit_code)
-              }
-            >
-              Lịch sử
-            </Button>
-          )}
-        </Space>
-      ),
     },
   ];
 
@@ -367,25 +356,26 @@ const DepositTable = (props: DepositTableProps) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex flex-row justify-between mb-3">
-        <h2 className="text-lg font-bold mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-semibold text-gray-800">
           {t("deposit.approveDeposit")}
         </h2>
-        <div className="flex flex-row justify-between gap-2">
+        <div className="flex items-center gap-3">
           <Button
             onClick={() => setIsOpen(true)}
             type="primary"
-            className="!h-9 !bg-green-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
+            className="!h-9 !bg-green-500 hover:!bg-green-600 !border-green-500 hover:!border-green-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
           >
-            <FontAwesomeIcon icon={faPlusCircle} /> {t("deposit.manualDeposit")}
+            <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
+            <span>{t("deposit.manualDeposit")}</span>
           </Button>
           <Button
             onClick={() => setIsOpenMinusManual(true)}
             type="primary"
-            className="!h-9 !bg-red-500 !hover:bg-green-600 !text-white !font-bold !py-2 !px-4 !rounded-lg !flex !items-center !shadow-sm"
+            className="!h-9 !bg-red-500 hover:!bg-red-600 !border-red-500 hover:!border-red-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
           >
-            <FontAwesomeIcon icon={faMinusCircle} />{" "}
-            {t("deposit.manualWithdraw")}
+            <FontAwesomeIcon icon={faMinusCircle} className="text-sm" />
+            <span>{t("deposit.manualWithdraw")}</span>
           </Button>
         </div>
       </div>

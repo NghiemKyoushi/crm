@@ -11,9 +11,25 @@ export interface Order {
 }
 
 export interface OrderItem {
-  // định nghĩa theo dữ liệu chi tiết của từng item, ví dụ:
   id: number;
-  product_name: string;
-  quantity: number;
-  price: number;
+  invoice_no?: string;
+  created_at?: string;
+  tracking_vn?: string;
+  tracking_other?: string;
+  weight?: number;
+  metadata?: any;
+  description?: string;
+  note?: string;
+  shipping_fee?: number;
+  weight_fee?: number;
+  rate?: number;
+  cod_shipping_price?: number;
+  deposit_fee?: number;
+  amount_vnd?: number;
+  address?: string;
+  created_by_name?: string;
+  approved_by_name?: string;
+  product_name?: string;
+  quantity?: number;
+  price?: number;
 }

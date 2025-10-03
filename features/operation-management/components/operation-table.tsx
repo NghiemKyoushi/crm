@@ -57,24 +57,28 @@ const ProductManagement: React.FC = () => {
 
   const columns: ColumnsType<Order> = [
     {
-      title: "STT",
-      key: "stt",
+      title: "No",
+      key: "invoice_no",
       width: 50,
       align: "center",
       fixed: "left",
-      render: (_, __, index) => (
-        <div className="text-xs font-medium">{(page * 20) + index + 1}</div>
-      ),
+      render: (_, record) => {
+        const invoice_no = record.order_list?.[0]?.invoice_no;
+        return <div className="text-xs font-medium">{invoice_no || "-"}</div>;
+      },
     },
     {
       title: "Ngày TT",
       key: "payment_created_date",
       width: 80,
-      render: (_, record) => (
-        <div className="text-xs text-gray-800">
-          {record.created_at ? dayjs(record.created_at).format("DD/MM/YY") : "-"}
-        </div>
-      ),
+      render: (_, record) => {
+        const createdAt = record.order_list?.[0]?.created_at;
+        return (
+          <div className="text-xs text-gray-800">
+            {createdAt ? dayjs(createdAt).format("DD/MM/YY") : "-"}
+          </div>
+        );
+      },
     },
     {
       title: "Ngày Về",
@@ -89,13 +93,13 @@ const ProductManagement: React.FC = () => {
       key: "tracking_package",
       width: 200,
       render: (_, record) => {
-        // Giả sử có tracking data từ API
+        const orderData = record.order_list?.[0];
         const trackingRecords = [
           {
             tracking: record.tracking_ship || "",
-            packageCode: "",
-            quantity: 0,
-            weight: ""
+            packageCode: orderData?.tracking_vn || "",
+            quantity: 0, // Số lượng đơn - chưa có trong response, để sau
+            weight: orderData?.weight ? `${orderData.weight}g` : ""
           }
         ].filter(r => r.tracking || r.packageCode);
 
@@ -118,7 +122,7 @@ const ProductManagement: React.FC = () => {
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">SL: </span>
-                      <span className="text-gray-800">{firstRecord.quantity || "-"}</span>
+                      <span className="text-gray-800">{firstRecord.quantity > 0 ? firstRecord.quantity : "-"}</span>
                       <span className="text-gray-500"> | CN: </span>
                       <span className="text-gray-800">{firstRecord.weight || "-"}</span>
                     </div>
@@ -161,16 +165,19 @@ const ProductManagement: React.FC = () => {
       title: "Khách Hàng / NTạo",
       key: "customer_info",
       width: 200,
-      render: (_, record) => (
-        <div className="space-y-1">
-          <div className="text-xs text-gray-800 font-medium">{record.customer_name}</div>
-          <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
-          <div className="text-xs text-blue-600">
-            <span className="text-gray-500">NTạo: </span>
-            {record.user_name}
+      render: (_, record) => {
+        const createdByName = record.order_list?.[0]?.created_by_name;
+        return (
+          <div className="space-y-1">
+            <div className="text-xs text-gray-800 font-medium">{record.customer_name || "-"}</div>
+            <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
+            <div className="text-xs text-blue-600">
+              <span className="text-gray-500">NTạo: </span>
+              {createdByName || "-"}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Sản Phẩm",
@@ -180,21 +187,47 @@ const ProductManagement: React.FC = () => {
         const orderList = record.order_list || [];
         const firstItem = orderList.length > 0 ? orderList[0] : null;
 
+        let productName = "Không có sản phẩm";
+        let quantity = 0;
+        let productImage = null;
+
+        if (firstItem?.metadata) {
+          try {
+            const metadata = typeof firstItem.metadata === 'string'
+              ? JSON.parse(firstItem.metadata)
+              : firstItem.metadata;
+
+            const items = metadata?.items || [];
+            if (items.length > 0) {
+              const product = items[0].product;
+              productName = product?.map_data?.productName || productName;
+              quantity = items[0].count || 0;
+              const images = product?.map_data?.images || [];
+              productImage = images.length > 0 ? images[0] : null;
+            }
+          } catch (e) {
+            console.error("Error parsing metadata:", e);
+          }
+        }
+
         return (
           <div className="flex gap-2">
-            <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 flex items-center justify-center">
-              <span className="text-xs text-gray-400">No img</span>
+            <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
+              {productImage ? (
+                <img src={productImage} alt="Product" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-xs text-gray-400">No img</span>
+                </div>
+              )}
             </div>
             <div className="flex-1 min-w-0 space-y-1">
               <div className="text-xs text-gray-800 line-clamp-2">
-                {firstItem?.product_name || "Không có sản phẩm"}
+                {productName}
               </div>
               <div className="text-xs">
                 <span className="text-gray-500">SL: </span>
-                <span className="text-gray-800">{firstItem?.quantity || 0}</span>
-                {orderList.length > 1 && (
-                  <span className="text-gray-500 ml-2">+{orderList.length - 1} sản phẩm</span>
-                )}
+                <span className="text-gray-800">{quantity}</span>
               </div>
             </div>
           </div>
@@ -223,9 +256,12 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-600">-</div>
-      ),
+      render: (_, record) => {
+        const description = record.order_list?.[0]?.description;
+        return (
+          <div className="text-xs text-gray-600 line-clamp-2">{description || "-"}</div>
+        );
+      },
     },
     {
       title: "Phí & Tỷ Giá",
@@ -236,22 +272,32 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="space-y-1">
-          <div className="text-xs">
-            <span className="text-gray-500">Ship: </span>
-            <span className="text-gray-800">-</span>
+      render: (_, record) => {
+        const orderData = record.order_list?.[0];
+        const shippingFee = orderData?.shipping_fee;
+        const weightFee = orderData?.weight_fee;
+        const rate = orderData?.rate;
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-gray-500">Ship: </span>
+              <span className="text-gray-800">
+                {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">CN: </span>
+              <span className="text-gray-800">
+                {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">TG Yên: </span>
+              <span className="text-gray-800">{rate || "-"}</span>
+            </div>
           </div>
-          <div className="text-xs">
-            <span className="text-gray-500">DV: </span>
-            <span className="text-gray-800">-</span>
-          </div>
-          <div className="text-xs">
-            <span className="text-gray-500">TG Yên: </span>
-            <span className="text-gray-800">-</span>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Tiền V.Chuyển",
@@ -262,33 +308,24 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_) => {
-        // TODO: Get shipping data from API
-        const shippingCode = "-";
-        const shippingPrice = 0;
-        const shippingType = "" as "customer_pay" | "cod" | "free" | "";
+      render: (_, record) => {
+        const orderData = record.order_list?.[0];
+        const codPrice = orderData?.cod_shipping_price || 0;
+        const shippingPrice = codPrice || orderData?.shipping_fee || 0;
 
-        let shippingTypeText = "";
+        let shippingTypeText = "-";
         let shippingTypeColor = "text-gray-600";
 
-        if (shippingType === "customer_pay") {
-          shippingTypeText = "KH tự trả";
-          shippingTypeColor = "text-orange-600";
-        } else if (shippingType === "cod") {
+        if (codPrice > 0) {
           shippingTypeText = "COD";
           shippingTypeColor = "text-blue-600";
-        } else if (shippingType === "free") {
-          shippingTypeText = "Miễn phí";
-          shippingTypeColor = "text-green-600";
-        } else {
-          shippingTypeText = "-";
         }
 
         return (
           <div className="space-y-1">
             <div className="text-xs">
               <span className="text-gray-500">Mã: </span>
-              <span className="text-gray-800">{shippingCode}</span>
+              <span className="text-gray-800">-</span>
             </div>
             <div className="text-xs">
               <span className="text-gray-500">Giá: </span>
@@ -297,7 +334,7 @@ const ProductManagement: React.FC = () => {
               </span>
             </div>
             <div className="text-xs">
-              <span className="text-gray-500">Hình thức: </span>
+              <span className="text-gray-500">HT: </span>
               <span className={`font-medium ${shippingTypeColor}`}>
                 {shippingTypeText}
               </span>
@@ -315,22 +352,35 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="space-y-1">
-          <div className="text-xs">
-            <span className="text-gray-500">Cọc: </span>
-            <span className="text-green-600 font-medium">-</span>
+      render: (_, record) => {
+        const orderData = record.order_list?.[0];
+        const depositFee = orderData?.deposit_fee || 0;
+        const totalAmount = orderData?.amount_vnd || 0;
+        const remaining = totalAmount - depositFee;
+
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-gray-500">Cọc: </span>
+              <span className="text-green-600 font-medium">
+                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-orange-600 font-medium">
+                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Đã TT: </span>
+              <span className="text-gray-800">
+                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
+            </div>
           </div>
-          <div className="text-xs">
-            <span className="text-gray-500">Sau cọc: </span>
-            <span className="text-orange-600 font-medium">-</span>
-          </div>
-          <div className="text-xs">
-            <span className="text-gray-500">Đã TT: </span>
-            <span className="text-gray-800">-</span>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Tổng Chi Phí",
@@ -341,9 +391,18 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-800 text-right">-</div>
-      ),
+      render: (_, record) => {
+        const orderData = record.order_list?.[0];
+        const weightFee = orderData?.weight_fee || 0;
+        const shippingFee = orderData?.shipping_fee || 0;
+        const totalCost = weightFee + shippingFee;
+
+        return (
+          <div className="text-xs text-gray-800 text-right font-medium">
+            {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
+          </div>
+        );
+      },
     },
     {
       title: "Tổng",
@@ -354,24 +413,30 @@ const ProductManagement: React.FC = () => {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="text-xs font-medium text-blue-600">
-          {record.amountvnd ? record.amountvnd.toLocaleString("vi-VN") : "0"}đ
-        </div>
-      ),
+      render: (_, record) => {
+        const amountVnd = record.order_list?.[0]?.amount_vnd || record.amountvnd || 0;
+        return (
+          <div className="text-xs font-medium text-blue-600">
+            {amountVnd > 0 ? `${amountVnd.toLocaleString("vi-VN")}đ` : "-"}
+          </div>
+        );
+      },
     },
     {
-      title: "Ghi Chú",
-      key: "note_extra",
-      width: 140,
+      title: "Địa Chỉ",
+      key: "address",
+      width: 160,
       onCell: () => ({
         style: {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-600">-</div>
-      ),
+      render: (_, record) => {
+        const address = record.order_list?.[0]?.address;
+        return (
+          <div className="text-xs text-gray-600 line-clamp-3">{address || "-"}</div>
+        );
+      },
     },
     {
       title: "Trạng Thái & Hành Động",
