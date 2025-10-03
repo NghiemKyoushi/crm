@@ -21,8 +21,6 @@ import TransactionHistoryModal from "../deposit/modal/modal-history";
 import CancelReasonModal from "../deposit/modal/modal-cancel-statement";
 import ConfirmReasonModal from "../deposit/modal/modal-complete-statement";
 import TransactionDetailModal from "./modal/transaction-detail-modal";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle, faQrcode } from "@fortawesome/free-solid-svg-icons";
 import TransactionCompleteModal from "./modal/transaction-complete-modal";
 import { useSearchParams } from "next/navigation";
 
@@ -252,11 +250,11 @@ const WithdrawTable = ({}) => {
 
     {
       title: t("withdraw.status"),
-      dataIndex: "status",
-      key: "status",
-      width: 120,
+      key: "status_action",
+      width: 160,
       align: "center",
-      render: (status: withdrawItem["status"]) => {
+      fixed: "right",
+      render: (_, record) => {
         const statusConfig = {
           PENDING: { color: "gold", text: t("withdraw.statusType.pending") },
           APPROVED: { color: "green", text: t("withdraw.statusType.approved") },
@@ -264,74 +262,69 @@ const WithdrawTable = ({}) => {
           CANCELLED: { color: "red", text: t("withdraw.statusType.cancelled") },
           REJECTED: { color: "red", text: t("withdraw.statusType.rejected") },
         };
-        const config = statusConfig[status as keyof typeof statusConfig];
-        return config ? (
-          <Tag className="!rounded-3xl text-xs" color={config.color}>
-            {config.text}
-          </Tag>
-        ) : null;
+        const config = statusConfig[record.status as keyof typeof statusConfig];
+
+        return (
+          <div className="flex flex-col items-center gap-2 py-1">
+            {config && (
+              <Tag className="!rounded-3xl !text-xs !m-0" color={config.color}>
+                {config.text}
+              </Tag>
+            )}
+            <Space size="small" className="flex justify-center">
+              {["PENDING", "APPROVED"].includes(record.status) && (
+                <Button
+                  type="link"
+                  size="small"
+                  className="!text-xs !p-0 !h-auto"
+                  onClick={() => {
+                    if (record.status === "APPROVED") {
+                      setIsTransacted(true);
+                    } else {
+                      setIsTransacted(false);
+                    }
+                    setSelectedId(record.id);
+                    setIsOpenTransaction(true);
+                  }}
+                >
+                  Xử lý
+                </Button>
+              )}
+
+              {["CANCELLED", "COMPLETED", "REJECTED"].includes(record.status) && (
+                <Button
+                  type="link"
+                  size="small"
+                  className="!text-xs !p-0 !h-auto"
+                  onClick={() => {
+                    setSelectedCode(record.deposit_code)
+                    setSelectedId(record.id);
+                    setIsOpenCompleteTransaction(true);
+                  }}
+                >
+                  Chi tiết
+                </Button>
+              )}
+
+              <Button
+                type="link"
+                size="small"
+                className="!text-xs !p-0 !h-auto"
+                onClick={() => handleOpenHistory(record.id, record.deposit_code)}
+              >
+                Lịch sử
+              </Button>
+            </Space>
+          </div>
+        );
       },
-    },
-    {
-      title: t("common.actions"),
-      key: "action",
-      width: 160,
-      fixed: "right",
-      render: (_, record) => (
-        <Space size="small">
-          {["PENDING", "APPROVED"].includes(record.status) && (
-            <button
-              className="cursor-pointer hover:opacity-70"
-              onClick={() => {
-                if (record.status === "APPROVED") {
-                  setIsTransacted(true);
-                } else {
-                  setIsTransacted(false);
-                }
-                setSelectedId(record.id);
-                setIsOpenTransaction(true);
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faQrcode}
-                className="text-blue-500 text-lg"
-              />
-            </button>
-          )}
-
-          {["CANCELLED", "COMPLETED", "REJECTED"].includes(record.status) && (
-            <button
-              className="cursor-pointer hover:opacity-70"
-              onClick={() => {
-                setSelectedCode(record.deposit_code)
-                setSelectedId(record.id);
-                setIsOpenCompleteTransaction(true);
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                className="text-blue-500 text-lg"
-              />
-            </button>
-          )}
-
-          <Button
-            type="link"
-            size="small"
-            className="!text-xs !p-0"
-            onClick={() => handleOpenHistory(record.id, record.deposit_code)}
-          >
-            Lịch sử
-          </Button>
-        </Space>
-      ),
     },
   ];
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex flex-row justify-between mb-3">
-        <h2 className="text-lg font-bold mb-4">{t("withdraw.title")}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-semibold text-gray-800">{t("withdraw.title")}</h2>
       </div>
       <DepositFilter onFilter={handleSearch} action={action ?? undefined} code={code ?? undefined}  />
 

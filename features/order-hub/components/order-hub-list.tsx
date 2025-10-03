@@ -220,13 +220,14 @@ export default function OrderHub() {
 
   const columns: ColumnsType<Invoice> = [
     {
-      title: "STT",
-      key: "stt",
+      title: "No",
+      dataIndex: "invoice_no",
+      key: "invoice_no",
       width: 50,
       align: "center",
       fixed: "left",
-      render: (_, __, index) => (
-        <div className="text-xs font-medium">{(page * 10) + index + 1}</div>
+      render: (invoice_no: string) => (
+        <div className="text-xs font-medium">{invoice_no || "-"}</div>
       ),
     },
     {
@@ -252,15 +253,14 @@ export default function OrderHub() {
       key: "tracking_package",
       width: 200,
       render: (_, record) => {
-        // Giả sử có nhiều records từ API, hiện tại dùng data có sẵn
         const trackingRecords = [
           {
-            tracking: record.tracking_other || record.tracking_vn || "",
-            packageCode: "", // Sẽ lấy từ API sau
-            quantity: record.metadata.items[0]?.count || 0,
-            weight: record.weight || ""
+            tracking: record.tracking_ship || "",
+            packageCode: record.tracking_vn || "",
+            quantity: 0, // Số lượng đơn - chưa có trong response, để sau
+            weight: record.weight ? `${record.weight}g` : ""
           }
-        ].filter(r => r.tracking || r.packageCode); // Lọc bỏ records rỗng
+        ].filter(r => r.tracking || r.packageCode);
 
         const hasData = trackingRecords.length > 0;
         const firstRecord = trackingRecords[0];
@@ -281,7 +281,7 @@ export default function OrderHub() {
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">SL: </span>
-                      <span className="text-gray-800">{firstRecord.quantity || "-"}</span>
+                      <span className="text-gray-800">{firstRecord.quantity > 0 ? firstRecord.quantity : "-"}</span>
                       <span className="text-gray-500"> | CN: </span>
                       <span className="text-gray-800">{firstRecord.weight || "-"}</span>
                     </div>
@@ -416,43 +416,45 @@ export default function OrderHub() {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="flex items-center justify-between gap-2 h-full">
-          <div className="space-y-1 flex-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Ship: </span>
-              <span className="text-gray-800">-</span>
+      render: (_, record) => {
+        const shippingFee = record.shipping_fee;
+        const weightFee = record.weight_fee;
+        const rate = record.rate;
+
+        return (
+          <div className="flex items-center justify-between gap-2 h-full">
+            <div className="space-y-1 flex-1">
+              <div className="text-xs">
+                <span className="text-gray-500">Ship: </span>
+                <span className="text-gray-800">
+                  {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}đ` : "-"}
+                </span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">CN: </span>
+                <span className="text-gray-800">
+                  {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
+                </span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">TG Yên: </span>
+                <span className="text-gray-800">{rate || "-"}</span>
+              </div>
             </div>
-            <div className="text-xs">
-              <span className="text-gray-500">DV: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">TG Yên: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">TG QĐ: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">ĐG/KG: </span>
-              <span className="text-gray-800">-</span>
-            </div>
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
+              onClick={() => setEditingFeesRates({
+                orderId: record.id,
+                ship: shippingFee?.toString() || "",
+                serviceFee: weightFee?.toString() || "",
+                exchangeRateJpy: rate?.toString() || "",
+                exchangeRateConverted: "",
+                pricePerKg: ""
+              })}
+            />
           </div>
-          <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-            onClick={() => setEditingFeesRates({
-              orderId: record.id,
-              ship: "",
-              serviceFee: "",
-              exchangeRateJpy: "",
-              exchangeRateConverted: "",
-              pricePerKg: ""
-            })}
-          />
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Tiền V.Chuyển",
@@ -464,26 +466,13 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => {
-        // TODO: Get shipping data from API
-        const shippingCode = "-";
-        const shippingPrice = 0;
-        const shippingType = "" as "customer_pay" | "cod" | "free" | "";
+        const shippingCode = record.tracking_vn || "-";
+        const codShippingPrice = record.cod_shipping_price || 0;
+        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
 
-        let shippingTypeText = "";
-        let shippingTypeColor = "text-gray-600";
-
-        if (shippingType === "customer_pay") {
-          shippingTypeText = "KH tự trả";
-          shippingTypeColor = "text-orange-600";
-        } else if (shippingType === "cod") {
-          shippingTypeText = "COD";
-          shippingTypeColor = "text-blue-600";
-        } else if (shippingType === "free") {
-          shippingTypeText = "Miễn phí";
-          shippingTypeColor = "text-green-600";
-        } else {
-          shippingTypeText = "-";
-        }
+        const isCOD = codShippingPrice > 0;
+        const shippingTypeText = isCOD ? "COD" : "-";
+        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
 
         return (
           <div className="flex items-center justify-between gap-2 h-full">
@@ -527,47 +516,53 @@ export default function OrderHub() {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="flex items-center justify-between gap-2 h-full">
-          <div className="space-y-1 flex-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Cọc: </span>
-              <span className="text-green-600 font-medium">
-                {record.deposit_amount ? `${record.deposit_amount.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
+      render: (_, record) => {
+        const depositFee = record.deposit_fee || 0;
+        const totalAmount = record.amount_vnd || 0;
+        const remaining = totalAmount - depositFee;
+
+        return (
+          <div className="flex items-center justify-between gap-2 h-full">
+            <div className="space-y-1 flex-1">
+              <div className="text-xs">
+                <span className="text-gray-500">Cọc: </span>
+                <span className="text-green-600 font-medium">
+                  {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+                </span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">Sau cọc: </span>
+                <span className="text-orange-600 font-medium">
+                  {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+                </span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">Ngày TT: </span>
+                <span className="text-gray-800">-</span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">Đã TT: </span>
+                <span className="text-gray-800">-</span>
+              </div>
+              <div className="text-xs">
+                <span className="text-gray-500">Công nợ: </span>
+                <span className="text-gray-800">-</span>
+              </div>
             </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Sau cọc: </span>
-              <span className="text-orange-600 font-medium">
-                {record.remain_amount ? `${record.remain_amount.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Ngày TT: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Đã TT: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Công nợ: </span>
-              <span className="text-gray-800">-</span>
-            </div>
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
+              onClick={() => setEditingPaymentInfo({
+                orderId: record.id,
+                deposit: depositFee.toString(),
+                remaining: remaining.toString(),
+                paymentDate: "",
+                paid: "",
+                debt: ""
+              })}
+            />
           </div>
-          <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-            onClick={() => setEditingPaymentInfo({
-              orderId: record.id,
-              deposit: record.deposit_amount?.toString() || "",
-              remaining: record.remain_amount?.toString() || "",
-              paymentDate: "",
-              paid: "",
-              debt: ""
-            })}
-          />
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Tổng Chi Phí",
@@ -578,15 +573,23 @@ export default function OrderHub() {
           borderRight: '1px solid #f0f0f0',
         },
       }),
-      render: (_, record) => (
-        <div className="flex items-center justify-between gap-2 h-full">
-          <div className="text-xs text-gray-800 flex-1 text-right">-</div>
-          <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-            onClick={() => setEditingTotalCost({ orderId: record.id, value: "" })}
-          />
-        </div>
-      ),
+      render: (_, record) => {
+        const shippingFee = record.shipping_fee || 0;
+        const weightFee = record.weight_fee || 0;
+        const totalCost = shippingFee + weightFee;
+
+        return (
+          <div className="flex items-center justify-between gap-2 h-full">
+            <div className="text-xs text-gray-800 flex-1 text-right font-medium">
+              {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
+            </div>
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+              onClick={() => setEditingTotalCost({ orderId: record.id, value: totalCost.toString() })}
+            />
+          </div>
+        );
+      },
     },
     {
       title: "Tổng",
