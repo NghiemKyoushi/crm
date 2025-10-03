@@ -221,7 +221,7 @@ export default function ShippingSurchangeTable(
               handleChange(+route, record.id.toString(), "order_type", value)
             }
             options={[
-              { value: 1, label: "Tính trên tổng đơn" },
+              { value: 1, label: "Tính trên giá sản phẩm" },
               { value: 2, label: "Tính trên chiếc" },
             ]}
           />
