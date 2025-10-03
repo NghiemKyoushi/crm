@@ -18,7 +18,7 @@ import { Order } from "@/types/operation-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { EditOutlined, ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
@@ -27,7 +27,7 @@ const ProductManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const [isEditingTracking, setIsEditingTracking] = useState<{
+  const [isViewingTracking, setIsViewingTracking] = useState<{
     orderId: number,
     records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
   } | null>(null);
@@ -134,9 +134,9 @@ const ProductManagement: React.FC = () => {
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined className="text-xs" />}
+                icon={<EyeOutlined className="text-xs" />}
                 className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => setIsEditingTracking({
+                onClick={() => setIsViewingTracking({
                   orderId: record.tracking_ship ? parseInt(record.tracking_ship) : 0,
                   records: trackingRecords.length > 0 ? trackingRecords : [
                     { tracking: "", packageCode: "", quantity: 0, weight: "" }
@@ -149,7 +149,7 @@ const ProductManagement: React.FC = () => {
                 type="link"
                 size="small"
                 className="!p-0 !h-auto !text-xs"
-                onClick={() => setIsEditingTracking({
+                onClick={() => setIsViewingTracking({
                   orderId: record.tracking_ship ? parseInt(record.tracking_ship) : 0,
                   records: trackingRecords
                 })}
@@ -650,180 +650,91 @@ const ProductManagement: React.FC = () => {
         />
       )}
 
-      {/* Modal Edit Tracking/Kiện/SL/CN */}
-      {isEditingTracking && (
-        <EditTrackingModal
-          open={!!isEditingTracking}
-          onClose={() => setIsEditingTracking(null)}
-          initialData={isEditingTracking}
-          onSave={(records) => {
-            // TODO: Call API to save tracking records
-            console.log("Save tracking records:", records);
-            toast.success("Đã lưu thông tin tracking");
-            setIsEditingTracking(null);
-            queryClient.invalidateQueries({
-              queryKey: ["listorderTracking"],
-            });
-          }}
+      {/* Modal View Tracking/Kiện/SL/CN */}
+      {isViewingTracking && (
+        <ViewTrackingModal
+          open={!!isViewingTracking}
+          onClose={() => setIsViewingTracking(null)}
+          data={isViewingTracking}
         />
       )}
     </div>
   );
 };
 
-// Modal Edit Tracking Component
-function EditTrackingModal({
+// Modal View Tracking Component (Read-only)
+function ViewTrackingModal({
   open,
   onClose,
-  initialData,
-  onSave,
+  data,
 }: {
   open: boolean;
   onClose: () => void;
-  initialData: {
+  data: {
     orderId: number;
     records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
   };
-  onSave: (data: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>) => void;
 }) {
-  const [records, setRecords] = React.useState(initialData.records);
-
-  const handleAddRecord = () => {
-    setRecords([...records, { tracking: "", packageCode: "", quantity: 0, weight: "" }]);
-  };
-
-  const handleRemoveRecord = (index: number) => {
-    const newRecords = [...records];
-    newRecords.splice(index, 1);
-    setRecords(newRecords);
-  };
-
-  const handleRecordChange = (index: number, field: string, value: any) => {
-    const newRecords = [...records];
-    newRecords[index] = { ...newRecords[index], [field]: value };
-    setRecords(newRecords);
-  };
-
-  const handleGeneratePackageCode = (index: number) => {
-    const today = new Date();
-    const month = today.getMonth() + 1;
-    const code = `T${month}nt${Math.floor(Math.random() * 1000)}`;
-    handleRecordChange(index, "packageCode", code);
-  };
-
-  const handleSubmit = () => {
-    onSave(records);
-  };
-
   return (
     <Modal
       open={open}
       onCancel={onClose}
-      title="Cập nhật Tracking / Kiện / Số lượng / Cân nặng"
-      width={800}
+      title="Thông tin Tracking / Kiện / Số lượng / Cân nặng"
+      width="auto"
       centered
       footer={[
-        <Button key="cancel" onClick={onClose}>
-          Hủy
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Lưu
+        <Button key="close" type="primary" onClick={onClose}>
+          Đóng
         </Button>,
       ]}
+      styles={{
+        body: { width: 'fit-content', minWidth: '600px', maxWidth: '90vw' }
+      }}
     >
       <div className="space-y-3 py-4">
-        {/* Header như Excel */}
-        <div className="grid grid-cols-[40px_200px_180px_100px_100px_50px] gap-2 bg-gray-100 p-2 rounded font-medium text-xs text-gray-700">
+        {/* Header */}
+        <div className="grid grid-cols-[50px_1fr_1fr_120px_120px] gap-3 bg-gray-100 p-3 rounded font-medium text-sm text-gray-700 min-w-[600px]">
           <div className="text-center">#</div>
           <div>Mã Tracking</div>
           <div>Mã Kiện</div>
           <div className="text-center">Số Kiện</div>
           <div className="text-center">Cân Nặng</div>
-          <div></div>
         </div>
 
-        {/* Rows như Excel */}
-        <div className="max-h-[50vh] overflow-y-auto space-y-2">
-          {records.map((record, index) => (
+        {/* Read-only Rows */}
+        <div className="max-h-[60vh] overflow-y-auto space-y-2">
+          {data.records.map((record, index) => (
             <div
               key={index}
-              className="grid grid-cols-[40px_200px_180px_100px_100px_50px] gap-2 items-center p-2 bg-white border rounded hover:bg-gray-50"
+              className="grid grid-cols-[50px_1fr_1fr_120px_120px] gap-3 items-center p-3 bg-gray-50 border rounded min-w-[600px]"
             >
               {/* STT */}
-              <div className="text-center text-xs text-gray-600 font-medium">
+              <div className="text-center text-sm text-gray-600 font-medium">
                 {index + 1}
               </div>
 
               {/* Mã Tracking */}
-              <Input
-                value={record.tracking}
-                onChange={(e) => handleRecordChange(index, "tracking", e.target.value)}
-                placeholder="Mã tracking"
-                size="small"
-                className="text-xs"
-              />
+              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border break-all">
+                {record.tracking || "-"}
+              </div>
 
-              {/* Mã Kiện với icon Gen bên trong */}
-              <Input
-                value={record.packageCode}
-                onChange={(e) => handleRecordChange(index, "packageCode", e.target.value)}
-                placeholder="Mã kiện"
-                size="small"
-                className="text-xs"
-                suffix={
-                  <ReloadOutlined
-                    className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                    onClick={() => handleGeneratePackageCode(index)}
-                    title="Generate mã kiện"
-                  />
-                }
-              />
+              {/* Mã Kiện */}
+              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border break-all">
+                {record.packageCode || "-"}
+              </div>
 
               {/* Số Kiện */}
-              <Input
-                type="number"
-                value={record.quantity}
-                onChange={(e) => handleRecordChange(index, "quantity", Number(e.target.value))}
-                placeholder="0"
-                size="small"
-                className="text-xs text-center"
-              />
+              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border text-center">
+                {record.quantity > 0 ? record.quantity : "-"}
+              </div>
 
               {/* Cân Nặng */}
-              <Input
-                value={record.weight}
-                onChange={(e) => handleRecordChange(index, "weight", e.target.value)}
-                placeholder="3.5kg"
-                size="small"
-                className="text-xs"
-              />
-
-              {/* Delete Button */}
-              {records.length > 1 && (
-                <Button
-                  danger
-                  size="small"
-                  onClick={() => handleRemoveRecord(index)}
-                  className="!px-2"
-                  title="Xóa"
-                >
-                  ×
-                </Button>
-              )}
+              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border text-center">
+                {record.weight || "-"}
+              </div>
             </div>
           ))}
         </div>
-
-        {/* Add Record Button */}
-        <Button
-          type="dashed"
-          onClick={handleAddRecord}
-          icon={<PlusOutlined />}
-          className="w-full"
-          size="small"
-        >
-          Thêm dòng mới
-        </Button>
       </div>
     </Modal>
   );
