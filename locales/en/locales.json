@@ -730,7 +730,8 @@
     "purchased": "Purchased",
     "details": "Details",
     "save": "Save",
-    "filter": "Filter"
+    "filter": "Filter",
+    "shipped": "Ship"
   },
   "modal": {
     "createOrderForCustomer": "Create Order for Customer",

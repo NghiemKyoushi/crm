@@ -729,7 +729,8 @@
     "purchased": "Đã mua",
     "details": "Chi tiết",
     "save": "Lưu",
-    "filter": "Lọc"
+    "filter": "Lọc",
+    "shipped": "Giao hàng"
   },
   "modal": {
     "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
