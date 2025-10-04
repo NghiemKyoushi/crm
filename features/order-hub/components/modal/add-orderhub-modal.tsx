@@ -46,6 +46,10 @@ interface CreateOrderModalProps {
   onCancel: () => void;
   onConfirm: () => void;
 }
+export const CURRENCY_CODE = {
+  JPY: "JPY",
+  USD: "USD"
+}
 export default function CreateOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
 
@@ -65,8 +69,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const deposit = Form.useWatch("deposit", form);
   const feeVnd = Form.useWatch("feeVnd", form);
   const priceVND = Form.useWatch("priceVnd", form);
+  const priceY = Form.useWatch("priceY", form);
   const codFee = Form.useWatch("cod", form);
   const totalFee = ((feeVnd + priceVND) * percenDeposit) / 100;
+  const [paymentType, setPaymentType] = useState<string>();
+  const [currencyCode, setCurrencyCode] = useState("");
   const handleOk = async () => {
     try {
       await form.validateFields();
@@ -132,7 +139,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         }
         // Nếu không, thêm vào danh sách hiện có (loại bỏ trùng lặp)
         const newCustomers = data.data.filter(
-          (newCust) => !prev.some((oldCust) => oldCust.user_id === newCust.user_id)
+          (newCust) =>
+            !prev.some((oldCust) => oldCust.user_id === newCust.user_id)
         );
         return [...prev, ...newCustomers];
       });
@@ -165,6 +173,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         form.setFieldsValue({
           description: data.description || "",
         });
+        setCurrencyCode(data.currency_code)
         setIdProduct(data.id);
         form.setFieldValue("priceY", data.price);
         toast.success(t("toast.getProductInfoSuccess"));
@@ -226,7 +235,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         const bodyGetFeeService: RateOrderRequest = {
           category_fee_id: form.getFieldValue("category"),
           fee_codes: services,
-          price: priceVND ? priceVND : 0,
+          price: priceY ? priceVND * rateValueForPrice : 0,
           product_ids: idProduct ? [idProduct] : [],
           user_id: form.getFieldValue("customer"),
           insurance_id: insurance ? insurance.id : 0,
@@ -235,6 +244,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         try {
           const res: FeeServiceCheck = await getDataFeeService(
             bodyGetFeeService
+          );
+          form.setFieldValue(
+            "priceVnd",
+            +form.getFieldValue("priceY") * rateValueForPrice
           );
           form.setFieldValue("feeY", res.fee);
           form.setFieldValue("feeVnd", res.fee_vnd);
@@ -246,7 +259,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     };
 
     fetchFeeService();
-  }, [form, services, customer, priceVND, prices, codFee]);
+  }, [form, services, customer, priceVND, prices, codFee, priceY]);
 
   useEffect(() => {
     if (listInsurance && listInsurance.length > 0) {
@@ -300,11 +313,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         ]}
         width={800}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ method: "buy" }}
-        >
+        <Form form={form} layout="vertical" initialValues={{ method: "buy" }}>
           <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
             <Col span={12}>
@@ -409,7 +418,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label={t("form.priceJpy")}
+                  label={currencyCode ? (currencyCode === CURRENCY_CODE.JPY ? t("form.priceJpy") : "Giá ($)") : "Giá"}
                   name="priceY"
                 >
                   <InputNumber
@@ -427,6 +436,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   className="!flex-1 !mb-1"
                   label={t("form.priceVnd")}
                   name="priceVnd"
+                  style={{ display: "none" }}
                 >
                   <InputNumber
                     formatter={(value) =>
@@ -440,8 +450,45 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
-              <p className="text-red-500 font-semibold text-xs">Tỷ giá: {rateValueForPrice ? rateValueForPrice : 0}</p>
-
+              <Form.Item
+                label="Phí vc nội địa"
+                name="paymentType"
+                className="!mb-1 "
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn hình thức thanh toán",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Chọn hình thức"
+                  onChange={(value) => setPaymentType(value)}
+                  options={[
+                    { label: "Free ship", value: "free_ship" },
+                    { label: "Chưa xác định", value: "tra_sau" },
+                    { label: "COD", value: "pay_now" },
+                  ]}
+                  className="!w-full !h-11"
+                />
+              </Form.Item>
+              {paymentType === "pay_now" && (
+                <Form.Item
+                  label="Số tiền thanh toán"
+                  name="paymentAmount"
+                  className="!mb-1"
+                  rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
+                >
+                  <InputNumber
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value?.replace(/,/g, "") as any}
+                    className="!w-full !h-11"
+                    min={0}
+                  />
+                </Form.Item>
+              )}
               <div className="space-y-4 mt-4">
                 <Collapse
                   defaultActiveKey={["1"]}
@@ -600,7 +647,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
-                  label={t("form.serviceFeeJpy")}
+                  // label={t("form.serviceFeeJpy")}
+                  label={currencyCode ? (currencyCode === CURRENCY_CODE.JPY ? t("form.serviceFeeJpy") : "Phí dịch vụ ($)") : "Phí dịch vụ"}
+
                   name="feeY"
                 >
                   <InputNumber
@@ -618,6 +667,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   className="!flex-1 !mb-1 "
                   label={t("form.serviceFeeVnd")}
                   name="feeVnd"
+                  style={{ display: "none" }}
                 >
                   <InputNumber
                     className="!w-full !h-11"
@@ -635,7 +685,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   label={t("form.depositVnd")}
                   name="deposit"
-                  style={{display: "none"}}
+                  style={{ display: "none" }}
                   rules={[
                     {
                       required: true,
@@ -654,60 +704,80 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
-              <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
-                <InputNumber
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  style={{ display: "flex", alignItems: "center" }}
-                  className="!w-full !h-11"
-                />
-              </Form.Item>
-
+              <div className="flex flex-row gap-1">
+                <Form.Item
+                  className="!flex-1 !mb-1"
+                  label="Số lượng"
+                  name="cod"
+                >
+                  <InputNumber
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    style={{ display: "flex", alignItems: "center" }}
+                    className="!w-full !h-11"
+                  />
+                </Form.Item>
+                {/* <Form.Item
+                  className="!flex-1 !mb-1"
+                  label="Cân nặng"
+                  name="cod"
+                >
+                  <InputNumber
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    style={{ display: "flex", alignItems: "center" }}
+                    className="!w-full !h-11"
+                  />
+                </Form.Item> */}
+              </div>
               <Form.Item label={t("form.note")} name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
                   placeholder={t("form.orderNote")}
                 />
               </Form.Item>
-
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
                 <h4 className="font-medium mb-3">{t("form.orderSummary")}</h4>
-
                 <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Tỷ giá quy đổi</span>
+                    <span>{rateValueForPrice ? rateValueForPrice : 0} đ</span>
+                  </div>
                   <div className="flex justify-between">
                     <span>{t("form.productPrice")}</span>
                     <span>
                       {form.getFieldValue("priceVnd")
                         ? form.getFieldValue("priceVnd").toLocaleString("en-US")
-                        : 0}
-                      đ
+                        : 0} đ
                     </span>
                   </div>
-
+                 
+                  <div className="flex justify-between">
+                    <span>Cước VC nội địa</span>
+                    <span>0 đ</span>
+                  </div>
                   <div className="flex justify-between">
                     <span>{t("form.serviceFee")}</span>
                     <span>{feeVnd ? feeVnd.toLocaleString("en-US") : 0} đ</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Phí thanh toán</span>
+                    <span>0 đ</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Cước vc quốc tế</span>
+                    <span>0 đ</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Phụ thu VC</span>
+                    <span>0 đ</span>
+                  </div>
 
-                  {listService &&
-                    listService.map((item: ServiceFee) =>
-                      item.optional ? (
-                        <div key={item.name} className="flex justify-between">
-                          <span>{item.name}</span>
-                          <span>
-                            {item.amount
-                              ? item.amount.toLocaleString("en-US")
-                              : 0}{" "}
-                            đ
-                          </span>
-                        </div>
-                      ) : null
-                    )}
+                 
                 </div>
-
                 <hr className="my-2 border-gray-200" />
-
                 <div className="flex justify-between font-semibold">
                   <span>{t("form.total")}:</span>
                   <span>
@@ -734,7 +804,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   <span>
                     {(() => {
                       const value =
-                        (form.getFieldValue("priceVnd") ?? 0) +
+                        (form.getFieldValue("priceY") ?? 0) +
                         (form.getFieldValue("feeVnd") ?? 0) -
                         (totalFee ?? 0);
 

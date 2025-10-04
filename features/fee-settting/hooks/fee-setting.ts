@@ -17,6 +17,7 @@ import {
   deleteInsurance,
   getFeeSettingDefault,
   getFeeShippingDefault,
+  getListGeneralPolicy,
   getListInsurance,
   getListProductType,
   getMaterial,
@@ -37,6 +38,13 @@ export const useListInsurance = () => {
   return useQuery({
     queryKey: [...INSURANCE_QUERY_KEY],
     queryFn: () => getListInsurance(),
+  });
+};
+
+export const useListGeneralPolicy = () => {
+  return useQuery({
+    queryKey: [""],
+    queryFn: () => getListGeneralPolicy(),
   });
 };
 

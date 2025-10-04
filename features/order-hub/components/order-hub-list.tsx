@@ -22,6 +22,7 @@ import {
   usePurchaseOrder,
   useTrackingOrder,
   useTrackingOrderVN,
+  useUpdateNoteOrder,
 } from "../hooks/orderhub";
 import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
@@ -36,6 +37,7 @@ import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit
 import TrackingModalJP from "./modal/tracking-modal-jp";
 import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
+import NoteModal from "./modal/update-note-modal";
 
 const { Option } = Select;
 
@@ -56,13 +58,20 @@ export default function OrderHub() {
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isEditingTracking, setIsEditingTracking] = useState<{
-    orderId: number,
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
+    orderId: number;
+    records: Array<{
+      tracking: string;
+      packageCode: string;
+      quantity: number;
+      weight: string;
+    }>;
   } | null>(null);
 
   // Edit modal states
-  const [editingNote, setEditingNote] = useState<{orderId: number, value: string} | null>(null);
-  const [editingFeesRates, setEditingFeesRates] = useState<{
+const [editingNote, setEditingNote] = useState<{
+  id: number;
+  note: string;
+} | null>(null);  const [editingFeesRates, setEditingFeesRates] = useState<{
     orderId: number,
     codOption: string,
     codAmount: string
@@ -89,12 +98,15 @@ export default function OrderHub() {
   const trackingVNMutation = useTrackingOrderVN();
   const checkOrderVNMutation = useCheckOrder();
   const useCompleteMutation = useCompleteOrder();
-
+  const useAddNote = useUpdateNoteOrder();
   const queryClient = useQueryClient();
 
   const handleFinish = (values: any) => {
     setFilters({
-      search: values.keyword && values.keyword.trim() !== "" ? values.keyword : undefined,
+      search:
+        values.keyword && values.keyword.trim() !== ""
+          ? values.keyword
+          : undefined,
       status: values.status !== "" ? values.status : undefined,
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
     });
@@ -224,9 +236,7 @@ export default function OrderHub() {
       title: "Ngày Về",
       key: "arrival_date",
       width: 80,
-      render: (_, record) => (
-        <div className="text-xs text-gray-800">-</div>
-      ),
+      render: (_, record) => <div className="text-xs text-gray-800">-</div>,
     },
     {
       title: "Tracking / Kiện / SL / CN",
@@ -236,11 +246,11 @@ export default function OrderHub() {
         const trackingRecords = [
           {
             tracking: record.tracking_ship || "",
-            packageCode: record.tracking_vn || "",
+            packageCode: record.package_code || "",
             quantity: 0, // Số lượng đơn - chưa có trong response, để sau
-            weight: record.weight ? `${record.weight}g` : ""
-          }
-        ].filter(r => r.tracking || r.packageCode);
+            weight: record.weight ? `${record.weight}g` : "",
+          },
+        ].filter((r) => r.tracking || r.packageCode);
 
         const hasData = trackingRecords.length > 0;
         const firstRecord = trackingRecords[0];
@@ -253,17 +263,25 @@ export default function OrderHub() {
                   <>
                     <div className="text-xs truncate">
                       <span className="text-gray-500">Track: </span>
-                      <span className="text-gray-800">{firstRecord.tracking || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.tracking || "-"}
+                      </span>
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">Kiện: </span>
-                      <span className="text-gray-800">{firstRecord.packageCode || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.packageCode || "-"}
+                      </span>
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">SL: </span>
-                      <span className="text-gray-800">{firstRecord.quantity > 0 ? firstRecord.quantity : "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.quantity > 0 ? firstRecord.quantity : "-"}
+                      </span>
                       <span className="text-gray-500"> | CN: </span>
-                      <span className="text-gray-800">{firstRecord.weight || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.weight || "-"}
+                      </span>
                     </div>
                   </>
                 ) : (
@@ -275,12 +293,22 @@ export default function OrderHub() {
                 size="small"
                 icon={<EditOutlined className="text-xs" />}
                 className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => setIsEditingTracking({
-                  orderId: record.id,
-                  records: trackingRecords.length > 0 ? trackingRecords : [
-                    { tracking: "", packageCode: "", quantity: 0, weight: "" }
-                  ]
-                })}
+                onClick={() =>
+                  setIsEditingTracking({
+                    orderId: record.id,
+                    records:
+                      trackingRecords.length > 0
+                        ? trackingRecords
+                        : [
+                            {
+                              tracking: "",
+                              packageCode: "",
+                              quantity: 0,
+                              weight: "",
+                            },
+                          ],
+                  })
+                }
               />
             </div>
             {trackingRecords.length > 1 && (
@@ -288,10 +316,12 @@ export default function OrderHub() {
                 type="link"
                 size="small"
                 className="!p-0 !h-auto !text-xs"
-                onClick={() => setIsEditingTracking({
-                  orderId: record.id,
-                  records: trackingRecords
-                })}
+                onClick={() =>
+                  setIsEditingTracking({
+                    orderId: record.id,
+                    records: trackingRecords,
+                  })
+                }
               >
                 +{trackingRecords.length - 1} mục khác
               </Button>
@@ -320,7 +350,8 @@ export default function OrderHub() {
                 alt={name}
                 className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/48?text=No+Image';
+                  (e.target as HTMLImageElement).src =
+                    "https://via.placeholder.com/48?text=No+Image";
                 }}
               />
             )}
@@ -353,7 +384,7 @@ export default function OrderHub() {
       width: 110,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => (
@@ -366,7 +397,7 @@ export default function OrderHub() {
       width: 140,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => (
@@ -376,7 +407,12 @@ export default function OrderHub() {
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-            onClick={() => setEditingNote({ orderId: record.id, value: record.note || record.description || "" })}
+            onClick={() =>
+              setEditingNote({
+                id: record.id,
+                note: record.note || record.description || "",
+              })
+            }
           />
         </div>
       ),
@@ -387,7 +423,7 @@ export default function OrderHub() {
       width: 160,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => {
@@ -441,7 +477,7 @@ export default function OrderHub() {
       width: 170,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => {
@@ -520,33 +556,12 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Tổng Chi Phí",
-      key: "total_cost",
-      width: 130,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const shippingFee = record.shipping_fee || 0;
-        const weightFee = record.weight_fee || 0;
-        const totalCost = shippingFee + weightFee;
-
-        return (
-          <div className="text-xs text-gray-800 text-left font-medium">
-            {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tổng",
+      title: "tổng chi phí",
       key: "total",
       width: 110,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => (
@@ -866,15 +881,13 @@ export default function OrderHub() {
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
-        {/* Header */}
-
         <div className="flex flex-col mb-2 gap-4 ">
           <Form form={form} onFinish={handleFinish}>
             <div className="w-full grid grid-cols-5 gap-3 items-center bg-white rounded-lg">
               <Form.Item name="keyword" className="mb-0">
                 <Input
                   placeholder={t("placeholder.searchOrderCustomer")}
-                  className="w-full !h-8 !text-xs"
+                  className="!w-full !h-11 !text-xs"
                   size="small"
                 />
               </Form.Item>
@@ -882,7 +895,7 @@ export default function OrderHub() {
               <Form.Item name="status" className="mb-0">
                 <Select
                   placeholder={t("statusPlaceholder")}
-                  className="w-full"
+                  className="!w-full !h-11"
                   size="small"
                   allowClear
                 >
@@ -895,7 +908,7 @@ export default function OrderHub() {
               </Form.Item>
 
               <Form.Item name="date" className="mb-0">
-                <DatePicker className="w-full !h-8" size="small" />
+                <DatePicker className="!w-full !h-11" size="small" />
               </Form.Item>
 
               <Form.Item className="mb-0">
@@ -938,21 +951,12 @@ export default function OrderHub() {
             headerHeight={48}
           />
         </EnhancedTableWrapper>
-      
       </div>
       <CreateOrderModal
         isOpen={open}
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {/* {orderDetail?.id && (
-        <OrderDetailModal
-          open={openDetail}
-          onClose={() => setOpenDetail(false)}
-          idOrder={+orderDetail?.id}
-        />
-      )} */}
-
       {orderDetail?.id && (
         <EditOrderModal
           isOpen={openDetail}
@@ -965,8 +969,8 @@ export default function OrderHub() {
       {orderDetail && (
         <ApproveOrderModal
           open={isOpenApproveOrder}
-          customerName={orderDetail?.customer_name}
-          orderCode={orderDetail.invoice_no}
+          customerName={orderDetail?.customer_name ? orderDetail?.customer_name : "" } 
+          orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
           onCancel={() => setIsOpenApproveOrder(false)}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
@@ -999,6 +1003,7 @@ export default function OrderHub() {
           onCancel={() => setIsOpenCheckOrder(false)}
           onSubmit={handleCheckOrder}
           orderCode={orderDetail.invoice_no}
+          customerId={orderDetail.user_id}
         />
       )}
 
@@ -1120,31 +1125,34 @@ export default function OrderHub() {
 
       {/* Modal Edit Note */}
       {editingNote && (
-        <Modal
+        <NoteModal
           open={!!editingNote}
+          note={editingNote?.note}
           onCancel={() => setEditingNote(null)}
-          title="Cập nhật Ghi Chú"
-          width={500}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingNote(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save note:", editingNote);
-              toast.success("Đã lưu ghi chú");
-              setEditingNote(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Ghi Chú">
-              <Input.TextArea
-                rows={4}
-                value={editingNote.value}
-                onChange={(e) => setEditingNote({...editingNote, value: e.target.value})}
-                placeholder="Nhập ghi chú"
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
+          onSave={(note) => {
+            useAddNote.mutate(
+              {
+                param: {
+                  id: editingNote.id,
+                  note: note
+                }
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Update ghi chú thành công");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setEditingNote(null)
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+        />
       )}
 
       {/* Modal Edit Fees & Rates */}
@@ -1164,7 +1172,7 @@ export default function OrderHub() {
           ]}
         >
           <Form layout="vertical" className="py-4">
-            <Form.Item label="COD (Nhật)">
+            <Form.Item label="VC (Nhật)">
               <Select
                 value={editingFeesRates.codOption}
                 onChange={(value) => setEditingFeesRates({...editingFeesRates, codOption: value})}
@@ -1198,12 +1206,20 @@ export default function OrderHub() {
           title="Cập nhật Ghi Chú"
           width={500}
           footer={[
-            <Button key="cancel" onClick={() => setEditingNoteExtra(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save note extra:", editingNoteExtra);
-              toast.success("Đã lưu ghi chú");
-              setEditingNoteExtra(null);
-            }}>Lưu</Button>,
+            <Button key="cancel" onClick={() => setEditingNoteExtra(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                console.log("Save note extra:", editingNoteExtra);
+                toast.success("Đã lưu ghi chú");
+                setEditingNoteExtra(null);
+              }}
+            >
+              Lưu
+            </Button>,
           ]}
         >
           <Form layout="vertical" className="py-4">
@@ -1211,7 +1227,12 @@ export default function OrderHub() {
               <Input.TextArea
                 rows={4}
                 value={editingNoteExtra.value}
-                onChange={(e) => setEditingNoteExtra({...editingNoteExtra, value: e.target.value})}
+                onChange={(e) =>
+                  setEditingNoteExtra({
+                    ...editingNoteExtra,
+                    value: e.target.value,
+                  })
+                }
                 placeholder="Nhập ghi chú"
               />
             </Form.Item>
@@ -1233,14 +1254,29 @@ function EditTrackingModal({
   onClose: () => void;
   initialData: {
     orderId: number;
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
+    records: Array<{
+      tracking: string;
+      packageCode: string;
+      quantity: number;
+      weight: string;
+    }>;
   };
-  onSave: (data: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>) => void;
+  onSave: (
+    data: Array<{
+      tracking: string;
+      packageCode: string;
+      quantity: number;
+      weight: string;
+    }>
+  ) => void;
 }) {
   const [records, setRecords] = React.useState(initialData.records);
 
   const handleAddRecord = () => {
-    setRecords([...records, { tracking: "", packageCode: "", quantity: 0, weight: "" }]);
+    setRecords([
+      ...records,
+      { tracking: "", packageCode: "", quantity: 0, weight: "" },
+    ]);
   };
 
   const handleRemoveRecord = (index: number) => {
@@ -1308,7 +1344,9 @@ function EditTrackingModal({
               {/* Mã Tracking */}
               <Input
                 value={record.tracking}
-                onChange={(e) => handleRecordChange(index, "tracking", e.target.value)}
+                onChange={(e) =>
+                  handleRecordChange(index, "tracking", e.target.value)
+                }
                 placeholder="Mã tracking"
                 size="small"
                 className="text-xs"
@@ -1317,7 +1355,9 @@ function EditTrackingModal({
               {/* Mã Kiện với icon Gen bên trong */}
               <Input
                 value={record.packageCode}
-                onChange={(e) => handleRecordChange(index, "packageCode", e.target.value)}
+                onChange={(e) =>
+                  handleRecordChange(index, "packageCode", e.target.value)
+                }
                 placeholder="Mã kiện"
                 size="small"
                 className="text-xs"
@@ -1334,7 +1374,9 @@ function EditTrackingModal({
               <Input
                 type="number"
                 value={record.quantity}
-                onChange={(e) => handleRecordChange(index, "quantity", Number(e.target.value))}
+                onChange={(e) =>
+                  handleRecordChange(index, "quantity", Number(e.target.value))
+                }
                 placeholder="0"
                 size="small"
                 className="text-xs text-center"
@@ -1343,7 +1385,9 @@ function EditTrackingModal({
               {/* Cân Nặng */}
               <Input
                 value={record.weight}
-                onChange={(e) => handleRecordChange(index, "weight", e.target.value)}
+                onChange={(e) =>
+                  handleRecordChange(index, "weight", e.target.value)
+                }
                 placeholder="3.5kg"
                 size="small"
                 className="text-xs"

@@ -372,6 +372,7 @@ export default function ShippingSurchangeTable(
             ]: [
               { label: "JPY", value: "JPY" },
               { label: "VND", value: "VND" },
+              { label: "%", value: "%" },
             ];
 
         return (
@@ -445,6 +446,7 @@ export default function ShippingSurchangeTable(
             ] : [
               { label: "JPY", value: "JPY" },
               { label: "VND", value: "VND" },
+              { label: "%", value: "%" },
             ];
 
         return (

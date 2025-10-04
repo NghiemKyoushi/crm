@@ -739,7 +739,8 @@
     "orderPurchased": "Order has been purchased!",
     "confirmCompleteOrder": "Confirm Complete Order",
     "orderCompleted": "Order has been completed!",
-    "addTrackingCode": "Add tracking code"
+    "addTrackingCode": "Add tracking code",
+    "inspectAndCalculateFee": "Calculate fee for weight"
   },
   "table": {
     "customerCode": "Customer Code",
@@ -767,7 +768,9 @@
     "priceKgHN": "Price Kg - HN",
     "surcharge": "Surcharge",
     "trackingShip": "Tracking Ship",
-    "orderType": "Order type"
+    "orderType": "Order type",
+    "codePackage":"Code package"
+
   },
   "page": {
     "orderManagement": "Order Management",

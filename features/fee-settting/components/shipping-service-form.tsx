@@ -8,27 +8,41 @@ import {
   faConciergeBell,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
-import { useListService } from "@/features/order-hub/hooks/orderhub";
+import { useListService, useUpdateListService } from "@/features/order-hub/hooks/orderhub";
 import { ServiceFee } from "@/types/fee-setting";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ShippingServiceForm() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-
+  const queryClient = useQueryClient();
   const { data: listService } = useListService();
 
+  const useUpdateServiceMutation = useUpdateListService();
   const handleSubmit = (values: Record<string, any>) => {
     if (!listService) return;
-
-    // map lại để trả về object ServiceFee với amount cập nhật
     const updatedFees: ServiceFee[] = listService.map((service: ServiceFee) => ({
       ...service,
       amount: values[service.code] ?? service.amount,
     }));
-
+    useUpdateServiceMutation.mutate(
+          { param:  updatedFees},
+          {
+            onSuccess: () => {
+              toast.success(t("shippingSettings.updateFeeSuccess"));
+                queryClient.invalidateQueries({
+                  queryKey: ["listService"],
+                });
+                return;
+            },
+            onError: (err: any) =>
+              toast.error(
+                err.response?.data?.localizedMessage || t("common.error")
+              ),
+          }
+        );
     console.log("✅ Updated Fees:", updatedFees);
-
-    // TODO: call API save ở đây
   };
 
   return (
@@ -80,7 +94,6 @@ export default function ShippingServiceForm() {
           icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
           className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
-          <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
           {t("common.saveAllChanges")}
         </Button>
       </div>

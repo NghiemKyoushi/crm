@@ -68,6 +68,7 @@ export interface Invoice {
   rate?: number;
   cod_shipping_price?: number;
   deposit_fee?: number;
+  package_code: string;
 }
 
 export interface InvoiceMetadata {
@@ -101,6 +102,7 @@ export interface DataFromLink {
   price: number;
   product_name: string;
   quantity: null;
+  currency_code: string;
 }
 
 export interface InsuranceOptionModel {

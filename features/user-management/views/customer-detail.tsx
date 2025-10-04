@@ -223,14 +223,14 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
             />
           )}
         </TabPane>
-
+{/* 
         <TabPane tab={t("customerManage.tabs.orders")} key="orders">
           <HistoryOrderTab />
         </TabPane>
 
         <TabPane tab={t("customerManage.tabs.transactions")} key="transactions">
           <HistoryPaymentTab />
-        </TabPane>
+        </TabPane> */}
 
         {/* <TabPane tab={t("customerManage.tabs.fees")} key="fees">
           <ShippingFeeConfig />

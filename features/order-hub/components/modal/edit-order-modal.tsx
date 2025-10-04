@@ -45,28 +45,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TextArea from "antd/es/input/TextArea";
 import TiptapEditor from "../TiptapEditor";
-// import { useEditor, EditorContent } from "@tiptap/react";
-// import StarterKit from "@tiptap/starter-kit";
 
 const { Option } = Select;
 const { Panel } = Collapse;
-
-// const TiptapEditor = ({ value = "", onChange }: { value?: string; onChange?: (html: string) => void }) => {
-//     const editor = useEditor({
-//       extensions: [StarterKit],
-//       immediatelyRender: false,
-//       content: value || "<p></p>",
-//       onUpdate: ({ editor }) => {
-//         onChange?.(editor.getHTML());
-//       },
-//     });
-
-//     return (
-//       <div className="border rounded-md p-2 min-h-[150px]">
-//         <EditorContent editor={editor} />
-//       </div>
-//     );
-//   };
 interface CreateOrderModalProps {
   isOpen: boolean;
   onCancel: () => void;
@@ -94,6 +75,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const priceVND = Form.useWatch("priceVnd", form);
   const priceY = Form.useWatch("priceY", form);
   const codFee = Form.useWatch("cod", form);
+  const [paymentType, setPaymentType] = useState<string>();
 
   const [rateProduct, setRateProduct] = useState(0);
 
@@ -296,6 +278,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         deposit: order.deposit_fee,
         note: order.description,
         customerName: order.customer_name,
+        count: order.metadata.items[0].count
       });
     }
   }, [order, form]);
@@ -359,11 +342,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Input
                   placeholder="https://..."
                   className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
-                  //   addonAfter={
-                  //     <Button type="dashed" onClick={handleGetInfo}>
-                  //       Get info
-                  //     </Button>
-                  //   }
                 />
               </Form.Item>
               <Form.Item
@@ -462,6 +440,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   className="!flex-1 !mb-1"
                   label="Giá (VND)"
                   name="priceVnd"
+                  style={{display: "none"}}
                 >
                   <InputNumber
                     formatter={(value) =>
@@ -475,6 +454,46 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
+
+              <Form.Item
+                label="Phí vc nội địa"
+                name="paymentType"
+                className="!mb-1 "
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn hình thức thanh toán",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Chọn hình thức"
+                  onChange={(value) => setPaymentType(value)}
+                  options={[
+                    { label: "Free ship", value: "free_ship" },
+                    { label: "Chưa xác định", value: "tra_sau" },
+                    { label: "COD", value: "pay_now" },
+                  ]}
+                  className="!w-full !h-11"
+                />
+              </Form.Item>
+              {paymentType === "pay_now" && (
+                <Form.Item
+                  label="Số tiền thanh toán"
+                  name="paymentAmount"
+                  className="!mb-1"
+                  rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
+                >
+                  <InputNumber
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value?.replace(/,/g, "") as any}
+                    className="!w-full !h-11"
+                    min={0}
+                  />
+                </Form.Item>
+              )}
 
               <div className="space-y-4 mt-4">
                 <Collapse
@@ -626,6 +645,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   className="!flex-1 !mb-1 "
                   label="Phí DV (VND)"
+                  style={{ display: "none" }}
                   name="feeVnd"
                 >
                   <InputNumber
@@ -644,7 +664,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   label="Tiền cọc (VND)"
                   name="deposit"
-                  style={{display: "none"}}
+                  style={{ display: "none" }}
                   rules={[
                     { required: true, message: "Vui lòng nhập tiền cọc!" },
                   ]}
@@ -660,7 +680,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
-              <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+              <Form.Item className="!flex-1 !mb-1" label="Số lượng" name="count">
                 <InputNumber
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -669,6 +689,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   className="!w-full !h-11"
                 />
               </Form.Item>
+              {/* <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  style={{ display: "flex", alignItems: "center" }}
+                  className="!w-full !h-11"
+                />
+              </Form.Item> */}
               <Form.Item label="Ghi chú" name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
@@ -677,11 +706,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="font-medium mb-3">Tổng kết Đơn hàng</h4>
+                <h4 className="font-medium mb-3">{t("form.orderSummary")}</h4>
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span>Giá sản phẩm</span>
+                    <span>Tỉ giá</span>
+                    <span>{rateProduct ? rateProduct : 0} đ</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t("form.productPrice")}</span>
                     <span>
                       {form.getFieldValue("priceVnd")
                         ? form.getFieldValue("priceVnd").toLocaleString("en-US")
@@ -691,24 +724,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   </div>
 
                   <div className="flex justify-between">
-                    <span>Phí dịch vụ</span>
+                    <span>{t("form.serviceFee")}</span>
                     <span>{feeVnd ? feeVnd.toLocaleString("en-US") : 0} đ</span>
                   </div>
-
-                  {listService &&
-                    listService.map((item: ServiceFee) =>
-                      item.optional ? (
-                        <div key={item.name} className="flex justify-between">
-                          <span>{item.name}</span>
-                          <span>
-                            {item.amount
-                              ? item.amount.toLocaleString("en-US")
-                              : 0}{" "}
-                            đ
-                          </span>
-                        </div>
-                      ) : null
-                    )}
+                  <div className="flex justify-between">
+                    <span>Phí vc quốc tế</span>
+                    <span>0 đ</span>
+                  </div>
                 </div>
 
                 <hr className="my-2 border-gray-200" />

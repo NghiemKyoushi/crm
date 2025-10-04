@@ -13,6 +13,8 @@ import {
   getListService,
   trackingToJp,
   trackingToVn,
+  updateListService,
+  updateNoteOrder,
   updateOrder,
 } from "../apis/orderhub";
 import {
@@ -23,6 +25,7 @@ import {
   TrackingWeightInfo,
 } from "@/types/orderhub";
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
+import { ServiceFee } from "@/types/fee-setting";
 
 export const useListOrder = (params: { page: number; size: number , status?: string, search?: string, date?: string}) => {
   return useQuery<InvoiceResponse>({
@@ -48,6 +51,22 @@ export const useListService = () => {
     // keepPreviousData: true,
   });
 };
+
+export const useUpdateListService  = () => {
+  return useMutation({
+    mutationFn: ({ param }: {  param: ServiceFee[] }) =>
+      updateListService( param),
+  });
+};
+
+export const useUpdateNoteOrder  = () => {
+  return useMutation({
+    mutationFn: ({ param }: {  param: {id: number, note: string}}) =>
+      updateNoteOrder( param),
+  });
+};
+
+
 export const useCreateNewOrder = () => {
   return useMutation({
     mutationFn: (param: OrderFeeRequest) => createOrder(param),

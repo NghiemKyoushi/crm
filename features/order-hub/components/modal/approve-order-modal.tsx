@@ -61,10 +61,10 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           Thông tin đơn hàng
         </h4>
         <p className="!mb-1">
-          <strong>Mã đơn:</strong> {orderCode}
+          <strong>Mã đơn:</strong> {orderCode ? orderCode : ''}
         </p>
         <p className="!mb-1">
-          <strong>Khách hàng:</strong> {customerName}
+          <strong>Khách hàng:</strong> {customerName ? customerName : ""}
         </p>
       </div>
 

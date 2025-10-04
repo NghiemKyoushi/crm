@@ -9,7 +9,7 @@ import {
   faShield,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
-import { useListInsurance, useUpdateInsurance } from "../hooks/fee-setting";
+import { useListGeneralPolicy, useListInsurance, useUpdateInsurance } from "../hooks/fee-setting";
 import { InsuranceOption } from "@/types/fee-setting";
 import { toast } from "react-toastify";
 
@@ -27,6 +27,7 @@ const InsuranceSettings: React.FC = () => {
   const [form] = Form.useForm<InsuranceFormValues>();
 
   const { data: listInsurance, isPending } = useListInsurance();
+  const { data: listGereralPolicy, isPending: generalPolicy } = useListGeneralPolicy();
   const updateInsuranceMutation = useUpdateInsurance();
   const onFinish = (values: any) => {
     // values.insurance = { id: { fee_percentage: number }, ... }
@@ -93,7 +94,7 @@ const InsuranceSettings: React.FC = () => {
         </Card>
 
         {/* Quy định chung */}
-        {/* <Card
+        <Card
           title={
             <div className="flex items-center gap-2 font-bold text-lg">
               <FontAwesomeIcon icon={faInfoCircle} className="w-5 h-5 " />
@@ -129,7 +130,7 @@ const InsuranceSettings: React.FC = () => {
               </Form.Item>
             </div>
           </Form>
-        </Card> */}
+        </Card>
         <div className="text-right border-t border-gray-200 pt-6 mt-8">
           <Button
             type="primary"
