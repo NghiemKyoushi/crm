@@ -168,13 +168,14 @@ export interface MaterialItem {
   updated_by?: number;
   route_id: number;
   value_shipping_data: number | null;
-  product_category_id: number;
+  product_category_id: number | null;
   product_category_name: string;
   condition_type: "GT" | "LTE" | "GTE" | "RANGE" | string; // thêm union để type-safe
   price_from: number;
   price_to: number;
   value_data: number;
   type: number;
+  order_type?:number; 
 }
 
 interface Route {
@@ -239,4 +240,15 @@ export interface InsuranceModelParamSend {
   max_value_vnd?: number;
   name?: string;
   status?: string;
+}
+
+export interface ServiceFee {
+  id: number;
+  code: string;
+  name: string;
+  optional: boolean;
+  method: number;
+  description: string | null;
+  amount: number;
+  currency_code: string;
 }

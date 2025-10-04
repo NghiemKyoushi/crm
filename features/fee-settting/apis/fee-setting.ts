@@ -95,3 +95,8 @@ export const deleteProductType = async (id: number) => {
   const res = await api.delete(`${API_TYPE_CONST.PRODUCT_CATEGORIES}/${id}`);
   return res.data;
 };
+
+export const getListGeneralPolicy = async () => {
+  const res = await api.get(API_TYPE_CONST.GENERAL_POLICY);
+  return res.data.data;
+}; 

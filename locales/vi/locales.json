@@ -738,7 +738,8 @@
     "orderPurchased": "Đơn hàng đã được mua!",
     "confirmCompleteOrder": "Xác nhận hoàn thành đơn hàng",
     "orderCompleted": "Đơn hàng đã được hoàn thành!",
-    "addTrackingCode": "Thêm mã tracking"
+    "addTrackingCode": "Thêm mã tracking",
+    "inspectAndCalculateFee": "Kiểm hàng và tính phí"
   },
   "table": {
     "customerCode": "Mã KH",
@@ -766,7 +767,9 @@
     "priceKgHN": "Giá Kg - HN",
     "surcharge": "Phụ thu",
     "trackingShip": "Tracking ship",
-    "orderType": "Phân loại hàng"
+    "orderType": "Phân loại hàng",
+    "codePackage":"Mã kiện"
+
   },
   "page": {
     "orderManagement": "Quản lý Đơn hàng",

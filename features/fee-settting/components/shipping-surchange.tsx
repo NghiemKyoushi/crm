@@ -87,7 +87,7 @@ export default function ShippingSurchangeTable(
       price_from: 0,
       price_to: 0,
       route_id: Number(routeId),
-      product_category_id: 0,
+      product_category_id: null,
       value_data: 0,
       value_shipping_data: null,
       type: 1,
@@ -147,7 +147,7 @@ export default function ShippingSurchangeTable(
         value_data: item.value_data ? item.value_data.toString() : "0",
         value_shipping_data: item.value_shipping_data?.toString() ?? "",
         status: item.status,
-        customer_group_id: isCategory ? idCategory : undefined, 
+        customer_group_id: isCategory ? idCategory : undefined,
         type: item.type ?? 1,
       };
     });
@@ -176,7 +176,10 @@ export default function ShippingSurchangeTable(
     message.success(t("shippingSettings.saveAllSuccess"));
   };
 
-  const getColumns = (route: string, routeName: string): ColumnsType<MaterialItem> => {
+  const getColumns = (
+    route: string,
+    routeName: string
+  ): ColumnsType<MaterialItem> => {
     const isUSRoute = routeName === "US -> VN";
 
     return [
@@ -190,24 +193,34 @@ export default function ShippingSurchangeTable(
         title: t("table.productType"),
         dataIndex: "product_category_id",
         width: 160,
-        render: (val, record) => (
-          <Select
-            showSearch
-            className="!w-[180px] !h-9 !bg-gray-100"
-            value={val}
-            loading={isLoadingCategories}
-            onChange={(value) =>
-              handleChange(
-                +route,
-                record.id.toString(),
-                "product_category_id",
-                value
-              )
-            }
-            options={categoryOptions}
-            placeholder={t("placeholder.selectProductType")}
-          />
-        ),
+        render: (val, record) => {
+          // Lấy tất cả category_id đã chọn trong route này
+          const usedIds = data[+route]?.map((r) => r.product_category_id) || [];
+      
+          // Nếu đang edit row này thì cho phép giữ nguyên value hiện tại
+          const filteredOptions = categoryOptions.filter(
+            (opt:any) => opt.value === val || !usedIds.includes(opt.value)
+          );
+      
+          return (
+            <Select
+              showSearch
+              className="!w-[180px] !h-9 !bg-gray-100"
+              value={val}
+              loading={isLoadingCategories}
+              onChange={(value) =>
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "product_category_id",
+                  value
+                )
+              }
+              options={filteredOptions}
+              placeholder={t("placeholder.selectProductType")}
+            />
+          );
+        },
       },
       {
         title: t("table.orderType"),
@@ -231,283 +244,301 @@ export default function ShippingSurchangeTable(
         title: t("table.conditionType"),
         dataIndex: "condition_type",
         width: 100,
-        render: (val, record) => (
-          <Select
-            className="!w-full !h-9 !bg-gray-100"
-            value={val}
-            onChange={(value) =>
-              handleChange(+route, record.id.toString(), "condition_type", value)
-            }
-            options={[
-              { value: "GTE", label: ">=" },
-              { value: "LTE", label: "<=" },
-              { value: "EQ", label: "==" },
-              { value: "GT", label: ">" },
-              { value: "LT", label: "<" },
-              { value: "RANGE", label: "Range" },
-            ]}
-          />
-        ),
+        render: (val, record) => {
+          console.log('record.condition_type', record.condition_type);
+          
+          if (record.order_type === 2) return null;
+          return (
+            <Select
+              className="!w-full !h-9 !bg-gray-100"
+              value={val}
+              onChange={(value) =>
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  "condition_type",
+                  value
+                )
+              }
+              options={[
+                { value: "GTE", label: ">=" },
+                { value: "LTE", label: "<=" },
+                { value: "EQ", label: "==" },
+                { value: "GT", label: ">" },
+                { value: "LT", label: "<" },
+                { value: "RANGE", label: "Range" },
+              ]}
+            />
+          );
+        },
       },
       {
         title: isUSRoute ? "Giá trị (USD)" : "Giá trị (JPY)",
         dataIndex: "price_to",
         width: 200,
         render: (val, record: MaterialItem) => {
-        const placeholder = isUSRoute ? "$" : "¥";
+          if (record.order_type === 2) return null;
+          const placeholder = isUSRoute ? "$" : "¥";
 
-        if (record.condition_type === "RANGE") {
+          if (record.condition_type === "RANGE") {
+            return (
+              <div className="flex items-center gap-1">
+                <InputNumber<string>
+                  className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                  value={record.price_from.toString()}
+                  step={0.01}
+                  stringMode
+                  placeholder={placeholder}
+                  formatter={(value) =>
+                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                  }
+                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                  onChange={(value) =>
+                    handleChange(
+                      +route,
+                      record.id.toString(),
+                      "price_from",
+                      value ?? 0
+                    )
+                  }
+                />
+                <span className="px-1">~</span>
+                <InputNumber<string>
+                  className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                  value={record.price_to.toString()}
+                  step={0.01}
+                  stringMode
+                  placeholder={placeholder}
+                  formatter={(value) =>
+                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                  }
+                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                  onChange={(value) =>
+                    handleChange(
+                      +route,
+                      record.id.toString(),
+                      "price_to",
+                      value ?? 0
+                    )
+                  }
+                />
+              </div>
+            );
+          }
+
+          return (
+            <InputNumber<string>
+              className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+              value={
+                record.condition_type === "GT" ||
+                record.condition_type === "GTE"
+                  ? record.price_from?.toString()
+                  : record.condition_type === "LT" ||
+                    record.condition_type === "LTE"
+                  ? record.price_to?.toString()
+                  : ""
+              }
+              step={0.01}
+              stringMode
+              placeholder={placeholder}
+              formatter={(value) =>
+                value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+              }
+              parser={(value) => (value ? value.replace(/,/g, "") : "")}
+              onChange={(value) => {
+                let fieldCheck = "";
+                if (
+                  record.condition_type === "GT" ||
+                  record.condition_type === "GTE"
+                ) {
+                  fieldCheck = "price_from";
+                } else if (
+                  record.condition_type === "LT" ||
+                  record.condition_type === "LTE"
+                ) {
+                  fieldCheck = "price_to";
+                }
+                handleChange(
+                  +route,
+                  record.id.toString(),
+                  fieldCheck,
+                  value ?? 0
+                );
+              }}
+            />
+          );
+        },
+      },
+      {
+        title: t("table.priceKgHN"),
+        dataIndex: "value_data",
+        width: 200,
+        render: (val, record) => {
+          // Bắt cả USD, JPY, VND, %
+          const match = (val ?? "")
+            .toString()
+            .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
+
+          const numberPart =
+            match && match[1]
+              ? match[1].replace(/,/g, "")
+              : val?.toString() ?? "";
+
+          // US route: USD, VND, %
+          // JP route: JPY, VND
+          const defaultUnit = isUSRoute ? "USD" : "JPY";
+          const unitPart =
+            match && match[2] ? match[2].toUpperCase() : defaultUnit;
+
+          const currencyOptions = isUSRoute
+            ? [
+                { label: "USD", value: "USD" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ]
+            : [
+                { label: "JPY", value: "JPY" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ];
+
           return (
             <div className="flex items-center gap-1">
               <InputNumber<string>
                 className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-                value={record.price_from.toString()}
+                value={numberPart}
                 step={0.01}
                 stringMode
-                placeholder={placeholder}
-                formatter={(value) =>
-                  value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-                }
-                parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                formatter={(value) => {
+                  if (!value) return "";
+                  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
+                }}
+                parser={(value) => {
+                  if (!value) return "";
+                  return value.replace(/,/g, "").trim(); // parse số
+                }}
                 onChange={(value) =>
                   handleChange(
                     +route,
                     record.id.toString(),
-                    "price_from",
-                    value ?? 0
+                    "value_data",
+                    (value ?? "0") + unitPart // nối với đơn vị
                   )
                 }
               />
-              <span className="px-1">~</span>
-              <InputNumber<string>
-                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-                value={record.price_to.toString()}
-                step={0.01}
-                stringMode
-                placeholder={placeholder}
-                formatter={(value) =>
-                  value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-                }
-                parser={(value) => (value ? value.replace(/,/g, "") : "")}
-                onChange={(value) =>
+
+              <Select
+                className="!h-9 !w-6/12"
+                value={unitPart}
+                onChange={(cur) => {
+                  const cleanNumber = numberPart || "0";
                   handleChange(
                     +route,
                     record.id.toString(),
-                    "price_to",
-                    value ?? 0
-                  )
-                }
+                    "value_data",
+                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                  );
+                }}
+                options={currencyOptions}
               />
             </div>
           );
-        }
-
-        return (
-          <InputNumber<string>
-            className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-            value={
-              record.condition_type === "GT" || record.condition_type === "GTE"
-                ? record.price_from?.toString()
-                : record.condition_type === "LT" ||
-                  record.condition_type === "LTE"
-                ? record.price_to?.toString()
-                : ""
-            }
-            step={0.01}
-            stringMode
-            placeholder={placeholder}
-            formatter={(value) =>
-              value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-            }
-            parser={(value) => (value ? value.replace(/,/g, "") : "")}
-            onChange={(value) => {
-              let fieldCheck = "";
-              if (
-                record.condition_type === "GT" ||
-                record.condition_type === "GTE"
-              ) {
-                fieldCheck = "price_from";
-              } else if (
-                record.condition_type === "LT" ||
-                record.condition_type === "LTE"
-              ) {
-                fieldCheck = "price_to";
-              }
-              handleChange(
-                +route,
-                record.id.toString(),
-                fieldCheck,
-                value ?? 0
-              );
-            }}
-          />
-        );
+        },
       },
-    },
-    {
-      title: t("table.priceKgHN"),
-      dataIndex: "value_data",
-      width: 200,
-      render: (val, record) => {
-        // Bắt cả USD, JPY, VND, %
-        const match = (val ?? "")
-          .toString()
-          .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
+      {
+        title: t("table.surcharge"),
+        dataIndex: "value_shipping_data",
+        width: 140,
+        render: (val, record) => {
+          // Bắt cả USD, JPY, VND, %
+          const match = (val ?? "")
+            .toString()
+            .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
 
-        const numberPart =
-          match && match[1]
-            ? match[1].replace(/,/g, "")
-            : val?.toString() ?? "";
+          const numberPart =
+            match && match[1]
+              ? match[1].replace(/,/g, "")
+              : val?.toString() ?? "";
 
-        // US route: USD, VND, %
-        // JP route: JPY, VND
-        const defaultUnit = isUSRoute ? "USD": "JPY";
-        const unitPart = match && match[2] ? match[2].toUpperCase() : defaultUnit;
+          // US route: USD, VND, %
+          // JP route: JPY, VND
+          const defaultUnit = isUSRoute ? "USD" : "JPY";
+          const unitPart =
+            match && match[2] ? match[2].toUpperCase() : defaultUnit;
 
-        const currencyOptions = isUSRoute
-          ? [
-              { label: "USD", value: "USD" },
-              { label: "VND", value: "VND" },
-              { label: "%", value: "%" },
-            ]: [
-              { label: "JPY", value: "JPY" },
-              { label: "VND", value: "VND" },
-            ];
+          const optionList = isUSRoute
+            ? [
+                { label: "USD", value: "USD" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ]
+            : [
+                { label: "JPY", value: "JPY" },
+                { label: "VND", value: "VND" },
+                { label: "%", value: "%" },
+              ];
 
-        return (
-          <div className="flex items-center gap-1">
-            <InputNumber<string>
-              className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-              value={numberPart}
-              step={0.01}
-              stringMode
-              formatter={(value) => {
-                if (!value) return "";
-                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
-              }}
-              parser={(value) => {
-                if (!value) return "";
-                return value.replace(/,/g, "").trim(); // parse số
-              }}
-              onChange={(value) =>
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "value_data",
-                  (value ?? "0") + unitPart // nối với đơn vị
-                )
-              }
-            />
+          return (
+            <div className="flex items-center gap-1">
+              <InputNumber<string>
+                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                value={numberPart}
+                step={0.01}
+                stringMode
+                formatter={(value) => {
+                  if (!value) return "";
+                  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
+                }}
+                parser={(value) => {
+                  if (!value) return "";
+                  return value.replace(/,/g, "").trim(); // parse số
+                }}
+                onChange={(value) =>
+                  handleChange(
+                    +route,
+                    record.id.toString(),
+                    "value_shipping_data",
+                    (value ?? "0") + unitPart // nối với đơn vị
+                  )
+                }
+              />
 
-            <Select
-              className="!h-9 !w-6/12"
-              value={unitPart}
-              onChange={(cur) => {
-                const cleanNumber = numberPart || "0";
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "value_data",
-                  cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                );
-              }}
-              options={currencyOptions}
-            />
-          </div>
-        );
+              <Select
+                className="!h-9 !w-6/12"
+                value={unitPart}
+                onChange={(cur) => {
+                  const cleanNumber = numberPart || "0";
+                  handleChange(
+                    +route,
+                    record.id.toString(),
+                    "value_shipping_data",
+                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                  );
+                }}
+                options={optionList}
+              />
+            </div>
+          );
+        },
       },
-    },
-    {
-      title: t("table.surcharge"),
-      dataIndex: "value_shipping_data",
-      width: 140,
-      render: (val, record) => {
-        // Bắt cả USD, JPY, VND, %
-        const match = (val ?? "")
-          .toString()
-          .match(/^([\d.,]+)\s*(USD|JPY|VND|%)?$/i);
-
-        const numberPart =
-          match && match[1]
-            ? match[1].replace(/,/g, "")
-            : val?.toString() ?? "";
-
-        // US route: USD, VND, %
-        // JP route: JPY, VND
-        const defaultUnit = isUSRoute ? "USD" : "JPY" ;
-        const unitPart = match && match[2] ? match[2].toUpperCase() : defaultUnit;
-
-        const optionList = isUSRoute
-          ? [
-              { label: "USD", value: "USD" },
-              { label: "VND", value: "VND" },
-              { label: "%", value: "%" },
-            ] : [
-              { label: "JPY", value: "JPY" },
-              { label: "VND", value: "VND" },
-            ];
-
-        return (
-          <div className="flex items-center gap-1">
-            <InputNumber<string>
-              className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
-              value={numberPart}
-              step={0.01}
-              stringMode
-              formatter={(value) => {
-                if (!value) return "";
-                return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
-              }}
-              parser={(value) => {
-                if (!value) return "";
-                return value.replace(/,/g, "").trim(); // parse số
-              }}
-              onChange={(value) =>
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "value_shipping_data",
-                  (value ?? "0") + unitPart // nối với đơn vị
-                )
-              }
-            />
-
-            <Select
-              className="!h-9 !w-6/12"
-              value={unitPart}
-              onChange={(cur) => {
-                const cleanNumber = numberPart || "0";
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "value_shipping_data",
-                  cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                );
-              }}
-              options={optionList}
-            />
+      {
+        title: t("table.actions"),
+        dataIndex: "action",
+        width: 40,
+        align: "center",
+        render: (_, record) => (
+          <div className="flex items-center justify-center h-full">
+            <div
+              onClick={() => handleDelete(+route, record.id.toString())}
+              className="w-8 h-6 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs rounded cursor-pointer flex items-center justify-center"
+            >
+              <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+            </div>
           </div>
-        );
+        ),
       },
-    },
-    {
-      title: t("table.actions"),
-      dataIndex: "action",
-      width: 40,
-      align: "center",
-      render: (_, record) => (
-        <div className="flex items-center justify-center h-full">
-          <div
-            onClick={() => handleDelete(+route, record.id.toString())}
-            className="w-8 h-6 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs rounded cursor-pointer flex items-center justify-center"
-          >
-            <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-          </div>
-        </div>
-      ),
-    },
-  ];
-};
+    ];
+  };
 
   return (
     <div>
@@ -528,7 +559,9 @@ export default function ShippingSurchangeTable(
                       : "!text-blue-600"
                   }`}
                 />
-                {t("shippingSettings.routePriceTable", { route: routeNames[Number(routeId)] })}
+                {t("shippingSettings.routePriceTable", {
+                  route: routeNames[Number(routeId)],
+                })}
               </h2>
               <Button
                 type="primary"

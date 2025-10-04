@@ -20,6 +20,7 @@ import {
   updateListExchangRateCategory,
 } from "@/features/settings/apis/setting";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 interface ExchangeRateFormValues {
   usdToVnd: number;
@@ -47,7 +48,7 @@ const ExchangeRateSettings: React.FC = () => {
 
   const onFinish = (values: ExchangeRateFormValues) => {
     console.log("Exchange Rate Saved:", values);
-    message.success(t('categoryCustomer.exchangeRateUpdateSuccess'));
+    message.success(t("categoryCustomer.exchangeRateUpdateSuccess"));
   };
 
   const handleChangeRate = (value: number | null, index: number) => {
@@ -71,7 +72,7 @@ const ExchangeRateSettings: React.FC = () => {
             currency_code: r.currency_code,
           })),
         });
-      toast.success(t('categoryCustomer.exchangeRateUpdateSuccess'));
+      toast.success(t("categoryCustomer.exchangeRateUpdateSuccess"));
     } catch (e) {
       console.error("Update failed", e);
     }
@@ -84,7 +85,7 @@ const ExchangeRateSettings: React.FC = () => {
         title={
           <div className="flex items-center gap-2 font-bold text-lg">
             <FontAwesomeIcon icon={faExchangeAlt} />
-            {t('categoryCustomer.exchangeRateSettingsTitle')}
+            {t("categoryCustomer.exchangeRateSettingsTitle")}
           </div>
         }
         extra={
@@ -94,7 +95,7 @@ const ExchangeRateSettings: React.FC = () => {
             className="!bg-green-600 hover:!bg-green-700"
           >
             <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
-            {t('categoryCustomer.saveExchangeRate')}
+            {t("categoryCustomer.saveExchangeRate")}
           </Button>
         }
       >
@@ -154,14 +155,17 @@ const ExchangeRateSettings: React.FC = () => {
                         onChange={(value) => handleChangeRate(value, index)}
                       />
                       {/* </Form.Item> */}
-{/* 
+
                       <div className="text-xs text-gray-500 mt-2 space-y-1">
                         <p>
                           <FontAwesomeIcon
                             icon={faClock}
                             className="w-4 h-4 text-gray-500"
                           />
-                          Cập nhật lần cuối: 23/09/2025 14:30
+                          Cập nhật lần cuối:{" "}
+                          {item.updated_at
+                            ? dayjs(item.updated_at).format("DD/MM/YY")
+                            : "-"}
                         </p>
                         <p>
                           <FontAwesomeIcon
@@ -169,9 +173,11 @@ const ExchangeRateSettings: React.FC = () => {
                             className="w-4 h-4 text-gray-500"
                           />
                           Được cập nhật bởi:
-                          <span className="font-semibold">Admin</span>
+                          <span className="font-semibold">
+                            {item.full_name}
+                          </span>
                         </p>
-                      </div> */}
+                      </div>
                     </Card>
                   </>
                 );

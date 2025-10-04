@@ -6,6 +6,7 @@ export interface CurrencyRate {
   created_by: number;
   updated_at: string;      
   updated_by: number;
+  full_name: string
 }
 
 export interface CurrencyRateResponse {

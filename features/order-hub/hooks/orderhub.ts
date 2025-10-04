@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import {
   aproveOrder,
   cancelOrder,
@@ -13,16 +13,24 @@ import {
   getListService,
   trackingToJp,
   trackingToVn,
+  updateCodForEarchOrder,
+  updateListService,
+  updateNoteOrder,
+  updateNoteOrderClient,
   updateOrder,
+  updateTrackingOrder,
 } from "../apis/orderhub";
 import {
   ApproveOrderModel,
+  CreateTrackingModel,
   FeeServiceCheck,
   InvoiceResponse,
   OrderFeeRequest,
   TrackingWeightInfo,
+  updateCodEachRowModel,
 } from "@/types/orderhub";
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
+import { ServiceFee } from "@/types/fee-setting";
 
 export const useListOrder = (params: { page: number; size: number , status?: string, search?: string, date?: string}) => {
   return useQuery<InvoiceResponse>({
@@ -41,13 +49,45 @@ export const useListOrderTracking = (params: { page: number; size: number , stat
 };
 
 
-export const useListService = () => {
+export const useListService = (
+  params: { routeId: number },
+  options?: UseQueryOptions<any, Error> // <-- thêm options ở đây
+) => {
   return useQuery({
-    queryKey: ["listService"],
-    queryFn: () => getListService(),
-    // keepPreviousData: true,
+    queryKey: ["listService", params],
+    queryFn: () => getListService(params),
+    ...options, 
   });
 };
+export const useUpdateListService  = () => {
+  return useMutation({
+    mutationFn: ({ param }: {  param: ServiceFee[] }) =>
+      updateListService( param),
+  });
+};
+export const useUpdateCodForEarchOrder  = () => {
+  return useMutation({
+    mutationFn: ({ param, id }: {  param: updateCodEachRowModel, id: number }) =>
+      updateCodForEarchOrder( id, param),
+  });
+};
+
+export const useUpdateNoteOrder  = () => {
+  return useMutation({
+    mutationFn: ({ param }: {  param: {order_id: number, note: string}}) =>
+      updateNoteOrder( param),
+  });
+};
+
+export const useUpdateNoteOrderClient  = () => {
+  return useMutation({
+    mutationFn: ({ id, param }: { id: number, param: { note: string}}) =>
+      updateNoteOrderClient( id, param),
+  });
+};
+
+
+
 export const useCreateNewOrder = () => {
   return useMutation({
     mutationFn: (param: OrderFeeRequest) => createOrder(param),
@@ -81,6 +121,14 @@ export const useTrackingOrderVN = () => {
       trackingToVn(id, body),
   });
 };
+
+export const useUpdateTrackingOrder = () => {
+  return useMutation({
+    mutationFn: ({ body, id }: { body: CreateTrackingModel[]; id: number  }) =>
+      updateTrackingOrder(id, body),
+  });
+};
+
 
 export const useApproveOrder = () => {
   return useMutation({
@@ -120,7 +168,18 @@ export const useCompleteOrder = () => {
 
 export const useCompleteShippingOrder = () => {
   return useMutation({
-    mutationFn: ({ body }: {  body: { shipping_code: number,  cod_fee?: number, shipping_option?: string } }) =>
+    mutationFn: ({ body }: {  body: { shipping_code: number,  shipping_type?: number, shipping_fee?: number } }) =>
       completeShippingOrder(body),
   });
 };
+
+export function extractPathId(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const path = new URL(url).pathname; // /item/z495005608
+    const segments = path.split("/").filter(Boolean);
+    return segments[segments.length - 1] || null;
+  } catch (e) {
+    return null;
+  }
+}

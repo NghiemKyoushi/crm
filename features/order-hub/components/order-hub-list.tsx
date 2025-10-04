@@ -1,7 +1,21 @@
 import React, { useState } from "react";
-import { Tag, Button, Input, Select, Form, DatePicker, Modal, Tooltip } from "antd";
+import {
+  Tag,
+  Button,
+  Input,
+  Select,
+  Form,
+  DatePicker,
+  Modal,
+  Tooltip,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, EditOutlined, ReloadOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  ReloadOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -11,9 +25,9 @@ import {
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
-import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
 import {
+  extractPathId,
   useApproveOrder,
   useCancelOrder,
   useCheckOrder,
@@ -22,6 +36,10 @@ import {
   usePurchaseOrder,
   useTrackingOrder,
   useTrackingOrderVN,
+  useUpdateCodForEarchOrder,
+  useUpdateNoteOrder,
+  useUpdateNoteOrderClient,
+  useUpdateTrackingOrder,
 } from "../hooks/orderhub";
 import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
@@ -36,6 +54,8 @@ import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit
 import TrackingModalJP from "./modal/tracking-modal-jp";
 import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
+import NoteModal from "./modal/update-note-modal";
+import { EditTrackingModal } from "./modal/edit-tracking-modal";
 
 const { Option } = Select;
 
@@ -55,19 +75,31 @@ export default function OrderHub() {
   const [openConfirmComplete, setOpenConfirmComplete] = useState(false);
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
+  const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
   const [isEditingTracking, setIsEditingTracking] = useState<{
-    orderId: number,
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
+    orderId: number;
+    records: Array<{
+      tracking: string;
+      packageCode: string;
+      quantity: number;
+      weight: string;
+    }>;
   } | null>(null);
 
   // Edit modal states
-  const [editingNote, setEditingNote] = useState<{orderId: number, value: string} | null>(null);
-  const [editingFeesRates, setEditingFeesRates] = useState<{
-    orderId: number,
-    codOption: string,
-    codAmount: string
+  const [editingNote, setEditingNote] = useState<{
+    id: number;
+    note: string;
   } | null>(null);
-  const [editingNoteExtra, setEditingNoteExtra] = useState<{orderId: number, value: string} | null>(null);
+  const [editingFeesRates, setEditingFeesRates] = useState<{
+    orderId: number;
+    codOption: number;
+    codAmount: string;
+  } | null>(null);
+  const [editingNoteExtra, setEditingNoteExtra] = useState<{
+    orderId: number;
+    value: string;
+  } | null>(null);
 
   const [filters, setFilters] = useState({
     search: undefined,
@@ -89,12 +121,18 @@ export default function OrderHub() {
   const trackingVNMutation = useTrackingOrderVN();
   const checkOrderVNMutation = useCheckOrder();
   const useCompleteMutation = useCompleteOrder();
-
+  const useAddNote = useUpdateNoteOrder();
+  const useAddNoteClient = useUpdateNoteOrderClient();
+  const useUpdateOrderTracking = useUpdateTrackingOrder();
   const queryClient = useQueryClient();
+  const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
   const handleFinish = (values: any) => {
     setFilters({
-      search: values.keyword && values.keyword.trim() !== "" ? values.keyword : undefined,
+      search:
+        values.keyword && values.keyword.trim() !== ""
+          ? values.keyword
+          : undefined,
       status: values.status !== "" ? values.status : undefined,
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
     });
@@ -179,7 +217,7 @@ export default function OrderHub() {
           body: {
             description: value.note,
             weight: value.actualWeight,
-            weight_fee: value.feePerKg,
+            weight_fee: value.feePerKg ? value.feePerKg : 0,
           },
           id: orderDetail.id.toString(),
         },
@@ -207,63 +245,65 @@ export default function OrderHub() {
       width: 40,
       align: "center",
       render: (invoice_no: string) => (
-        <div className="text-xs font-medium text-blue-600">{invoice_no || "-"}</div>
+        <div className="text-xs font-medium text-blue-600">
+          {invoice_no || "-"}
+        </div>
       ),
     },
     {
       title: "Ngày TT",
       key: "payment_created_date",
-      width: 80,
-      render: (_, record) => (
-        <div className="text-xs text-gray-800">
-          {dayjs(record.created_at).format("DD/MM/YY")}
-        </div>
-      ),
+      // render: (_, record) => (
+      //   <div className="text-xs text-gray-800">
+      //     {record.created_at
+      //       ? dayjs(record.created_at).format("DD/MM/YY")
+      //       : "-"}
+      //   </div>
+      // ),
     },
     {
       title: "Ngày Về",
       key: "arrival_date",
       width: 80,
-      render: (_, record) => (
-        <div className="text-xs text-gray-800">-</div>
-      ),
+      render: (_, record) => <div className="text-xs text-gray-800">-</div>,
     },
     {
       title: "Tracking / Kiện / SL / CN",
       key: "tracking_package",
       width: 200,
       render: (_, record) => {
-        const trackingRecords = [
-          {
-            tracking: record.tracking_ship || "",
-            packageCode: record.tracking_vn || "",
-            quantity: 0, // Số lượng đơn - chưa có trong response, để sau
-            weight: record.weight ? `${record.weight}g` : ""
-          }
-        ].filter(r => r.tracking || r.packageCode);
-
-        const hasData = trackingRecords.length > 0;
+        const trackingRecords = record.tracking_ship_list || [];
         const firstRecord = trackingRecords[0];
 
         return (
           <div className="space-y-1">
             <div className="flex items-center justify-between gap-1">
               <div className="flex-1 min-w-0">
-                {hasData ? (
+                {firstRecord ? (
                   <>
                     <div className="text-xs truncate">
                       <span className="text-gray-500">Track: </span>
-                      <span className="text-gray-800">{firstRecord.tracking || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.tracking_code || "-"}
+                      </span>
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">Kiện: </span>
-                      <span className="text-gray-800">{firstRecord.packageCode || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.package_code || "-"}
+                      </span>
                     </div>
                     <div className="text-xs">
                       <span className="text-gray-500">SL: </span>
-                      <span className="text-gray-800">{firstRecord.quantity > 0 ? firstRecord.quantity : "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.package_number > 0
+                          ? firstRecord.package_number
+                          : "-"}
+                      </span>
                       <span className="text-gray-500"> | CN: </span>
-                      <span className="text-gray-800">{firstRecord.weight || "-"}</span>
+                      <span className="text-gray-800">
+                        {firstRecord.weight || "-"}
+                      </span>
                     </div>
                   </>
                 ) : (
@@ -275,12 +315,10 @@ export default function OrderHub() {
                 size="small"
                 icon={<EditOutlined className="text-xs" />}
                 className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => setIsEditingTracking({
-                  orderId: record.id,
-                  records: trackingRecords.length > 0 ? trackingRecords : [
-                    { tracking: "", packageCode: "", quantity: 0, weight: "" }
-                  ]
-                })}
+                onClick={() => {
+                  setIsEditingTrackingModal(true);
+                  setOrderDetail(record);
+                }}
               />
             </div>
             {trackingRecords.length > 1 && (
@@ -288,10 +326,10 @@ export default function OrderHub() {
                 type="link"
                 size="small"
                 className="!p-0 !h-auto !text-xs"
-                onClick={() => setIsEditingTracking({
-                  orderId: record.id,
-                  records: trackingRecords
-                })}
+                onClick={() => {
+                  setIsEditingTrackingModal(true);
+                  setOrderDetail(record);
+                }}
               >
                 +{trackingRecords.length - 1} mục khác
               </Button>
@@ -301,17 +339,24 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Sản Phẩm",
+      title: "Giá SP",
       key: "product",
       width: 280,
       render: (_, record) => {
-        const product = record.metadata.items[0]?.product;
+        const product = record.metadata?.items?.[0]?.product;
         const name = product?.map_data?.productName || "-";
         const price = product?.map_data?.price;
-        const url = product?.url;
+        const url = product?.url || null;
         const images = product?.map_data?.images || [];
-        const thumbnail = images.length > 0 ? images[0] : null;
-
+        const thumbnail = images[0] || null;
+        const shippingFee = record.metadata.infos?.codInJapan ?? 0;
+        const isJapanPrice =
+          record.metadata.items?.[0]?.product?.currency_code === "JPY"
+            ? "¥"
+            : "$";
+        const isPendingApproval =
+          record.status === OrderStatusType.PENDING_APPROVAL;
+        const shouldShowWarning = isPendingApproval && !shippingFee;
         return (
           <div className="flex gap-2">
             {thumbnail && (
@@ -320,7 +365,8 @@ export default function OrderHub() {
                 alt={name}
                 className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/48?text=No+Image';
+                  (e.target as HTMLImageElement).src =
+                    "https://via.placeholder.com/48?text=No+Image";
                 }}
               />
             )}
@@ -329,8 +375,46 @@ export default function OrderHub() {
               <div className="text-xs">
                 <span className="text-gray-500">Giá: </span>
                 <span className="text-green-600 font-medium">
-                  {price ? `¥${parseFloat(price).toLocaleString()}` : "-"}
+                  {price && !isNaN(Number(price))
+                    ? `¥${Number(price).toLocaleString("ja-JP")}`
+                    : "-"}
                 </span>
+              </div>
+              <div className="text-xs">
+                <div className="text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Cước vc: </span>
+                    {shouldShowWarning ? (
+                      <Tooltip title="Chưa có phí COD">
+                        <ExclamationCircleOutlined
+                          className="text-amber-500 text-sm cursor-help"
+                          style={{ color: "#f59e0b" }}
+                        />
+                      </Tooltip>
+                    ) : (
+                      <span className="text-gray-800">
+                        {shippingFee
+                          ? `${shippingFee.toLocaleString(
+                              "vi-VN"
+                            )}${isJapanPrice}`
+                          : "-"}
+                      </span>
+                    )}
+                  </div>
+                  {shouldShowWarning && (
+                    <EditOutlined
+                      className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                      onClick={() => {
+                        setOrderDetail(record);
+                        setEditingFeesRates({
+                          orderId: record.id,
+                          codOption: 1,
+                          codAmount: "",
+                        });
+                      }}
+                    />
+                  )}
+                </div>
               </div>
               {url && (
                 <a
@@ -339,7 +423,7 @@ export default function OrderHub() {
                   rel="noopener noreferrer"
                   className="text-xs text-blue-500 hover:underline inline-block"
                 >
-                  Xem link
+                  {extractPathId(url)}
                 </a>
               )}
             </div>
@@ -348,25 +432,12 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Phụ Phí",
-      key: "extra_fee",
-      width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-800 text-left">-</div>
-      ),
-    },
-    {
       title: "Ghi Chú",
       key: "note",
       width: 140,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => (
@@ -376,64 +447,28 @@ export default function OrderHub() {
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-            onClick={() => setEditingNote({ orderId: record.id, value: record.note || record.description || "" })}
+            onClick={() =>
+              setEditingNote({
+                id: record.id,
+                note: record.note || record.description || "",
+              })
+            }
           />
         </div>
       ),
     },
     {
-      title: "Phí & Tỷ Giá",
-      key: "fees_rates",
-      width: 160,
+      title: "Phụ Phí",
+      key: "extra_fee",
+      width: 110,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) => {
-        const shippingFee = record.shipping_fee;
-        const weightFee = record.weight_fee;
-        const rate = record.rate;
-        const isPendingApproval = record.status === OrderStatusType.PENDING_APPROVAL;
-        const shouldShowWarning = isPendingApproval && !shippingFee;
-
-        return (
-          <div className="space-y-1">
-            <div className="text-xs flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                <span className="text-gray-500">COD: </span>
-                {shouldShowWarning ? (
-                  <Tooltip title="Chưa có phí COD">
-                    <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-                  </Tooltip>
-                ) : (
-                  <span className="text-gray-800">
-                    {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}¥` : "-"}
-                  </span>
-                )}
-              </div>
-              <EditOutlined
-                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                onClick={() => setEditingFeesRates({
-                  orderId: record.id,
-                  codOption: "",
-                  codAmount: ""
-                })}
-              />
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">CN: </span>
-              <span className="text-gray-800">
-                {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">TG Yên: </span>
-              <span className="text-gray-800">{rate || "-"}</span>
-            </div>
-          </div>
-        );
-      },
+      render: (_, record) => (
+        <div className="text-xs text-gray-800 text-left">-</div>
+      ),
     },
     {
       title: "Thanh Toán & Công Nợ",
@@ -441,12 +476,12 @@ export default function OrderHub() {
       width: 170,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => {
-        const depositFee = record.deposit_fee || 0;
-        const totalAmount = record.amount_vnd || 0;
+        const depositFee = record.deposit_fee ?? 0;
+        const totalAmount = record.amount_vnd ?? 0;
         const remaining = totalAmount - depositFee;
 
         return (
@@ -454,7 +489,9 @@ export default function OrderHub() {
             <div className="text-xs">
               <span className="text-gray-500">Cọc: </span>
               <span className="text-green-600 font-medium">
-                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+                {depositFee > 0
+                  ? `${depositFee.toLocaleString("vi-VN")}đ`
+                  : "-"}
               </span>
             </div>
             <div className="text-xs">
@@ -463,18 +500,18 @@ export default function OrderHub() {
                 {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
               </span>
             </div>
-            <div className="text-xs">
+            {/* <div className="text-xs">
               <span className="text-gray-500">Ngày TT: </span>
               <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
+            </div> */}
+            {/* <div className="text-xs">
               <span className="text-gray-500">Đã TT: </span>
               <span className="text-gray-800">-</span>
             </div>
             <div className="text-xs">
               <span className="text-gray-500">Công nợ: </span>
               <span className="text-gray-800">-</span>
-            </div>
+            </div> */}
           </div>
         );
       },
@@ -485,7 +522,7 @@ export default function OrderHub() {
       width: 180,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => {
@@ -506,7 +543,9 @@ export default function OrderHub() {
             <div className="text-xs">
               <span className="text-gray-500">Giá: </span>
               <span className="text-gray-800 font-medium">
-                {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
+                {shippingPrice > 0
+                  ? `${shippingPrice.toLocaleString("vi-VN")}đ`
+                  : "-"}
               </span>
             </div>
             <div className="text-xs">
@@ -520,56 +559,39 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Tổng Chi Phí",
-      key: "total_cost",
-      width: 130,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const shippingFee = record.shipping_fee || 0;
-        const weightFee = record.weight_fee || 0;
-        const totalCost = shippingFee + weightFee;
-
-        return (
-          <div className="text-xs text-gray-800 text-left font-medium">
-            {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tổng",
+      title: "Tổng chi phí",
       key: "total",
       width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
       render: (_, record) => (
         <div className="text-xs font-medium text-blue-600">
-          {record.amount_vnd.toLocaleString("vi-VN")}đ
+          {record.amount_vnd
+            ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
+            : "-"}
         </div>
       ),
     },
     {
       title: "Ghi Chú (Admin)",
-      key: "note_extra",
+      key: "admin_notes",
       width: 140,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
-          <div className="text-xs text-gray-600 flex-1">-</div>
+          <div className="text-xs text-gray-600 flex-1">
+            {record?.admin_notes?.note ? record?.admin_notes?.note : "-"}
+          </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-            onClick={() => setEditingNoteExtra({ orderId: record.id, value: "" })}
+            onClick={() =>
+              setEditingNoteExtra({
+                orderId: record.id,
+                value: record?.admin_notes?.note,
+              })
+            }
           />
         </div>
       ),
@@ -794,13 +816,13 @@ export default function OrderHub() {
               color={color}
               className="!text-[11px] m-0 !py-1 !px-2 !leading-4 !font-medium"
               style={{
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minWidth: '100px',
-                height: '22px',
-                borderRadius: '4px'
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minWidth: "100px",
+                height: "22px",
+                borderRadius: "4px",
               }}
             >
               {text}
@@ -865,15 +887,13 @@ export default function OrderHub() {
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
-        {/* Header */}
-
         <div className="flex flex-col mb-2 gap-4 ">
           <Form form={form} onFinish={handleFinish}>
             <div className="w-full grid grid-cols-5 gap-3 items-center bg-white rounded-lg">
               <Form.Item name="keyword" className="mb-0">
                 <Input
                   placeholder={t("placeholder.searchOrderCustomer")}
-                  className="w-full !h-8 !text-xs"
+                  className="!w-full !h-11 !text-xs"
                   size="small"
                 />
               </Form.Item>
@@ -881,7 +901,7 @@ export default function OrderHub() {
               <Form.Item name="status" className="mb-0">
                 <Select
                   placeholder={t("statusPlaceholder")}
-                  className="w-full"
+                  className="!w-full !h-11"
                   size="small"
                   allowClear
                 >
@@ -894,7 +914,7 @@ export default function OrderHub() {
               </Form.Item>
 
               <Form.Item name="date" className="mb-0">
-                <DatePicker className="w-full !h-8" size="small" />
+                <DatePicker className="!w-full !h-11" size="small" />
               </Form.Item>
 
               <Form.Item className="mb-0">
@@ -937,21 +957,12 @@ export default function OrderHub() {
             headerHeight={48}
           />
         </EnhancedTableWrapper>
-      
       </div>
       <CreateOrderModal
         isOpen={open}
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {/* {orderDetail?.id && (
-        <OrderDetailModal
-          open={openDetail}
-          onClose={() => setOpenDetail(false)}
-          idOrder={+orderDetail?.id}
-        />
-      )} */}
-
       {orderDetail?.id && (
         <EditOrderModal
           isOpen={openDetail}
@@ -964,13 +975,18 @@ export default function OrderHub() {
       {orderDetail && (
         <ApproveOrderModal
           open={isOpenApproveOrder}
-          customerName={orderDetail?.customer_name}
-          orderCode={orderDetail.invoice_no}
+          customerName={
+            orderDetail?.customer_name ? orderDetail?.customer_name : ""
+          }
+          orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
           onCancel={() => setIsOpenApproveOrder(false)}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
               {
-                body: data,
+                body: {
+                  ...data,
+                  cod_shipping_price: data.cod_shipping_price,
+                },
                 id: orderDetail.id.toString(),
               },
               {
@@ -998,6 +1014,10 @@ export default function OrderHub() {
           onCancel={() => setIsOpenCheckOrder(false)}
           onSubmit={handleCheckOrder}
           orderCode={orderDetail.invoice_no}
+          customerId={orderDetail.id}
+          productName={
+            orderDetail?.metadata?.items[0]?.product?.map_data?.productName
+          }
         />
       )}
 
@@ -1100,15 +1120,32 @@ export default function OrderHub() {
       )}
 
       {/* Modal Edit Tracking/Kiện/SL/CN */}
-      {isEditingTracking && (
+      {orderDetail && (
         <EditTrackingModal
-          open={!!isEditingTracking}
-          onClose={() => setIsEditingTracking(null)}
-          initialData={isEditingTracking}
+          orderId={orderDetail.id}
+          open={isEditingTrackingModal}
+          onClose={() => setIsEditingTrackingModal(false)}
           onSave={(records) => {
-            // TODO: Call API to save tracking records
-            console.log("Save tracking records:", records);
-            toast.success("Đã lưu thông tin tracking");
+            useUpdateOrderTracking.mutate(
+              {
+                body: records,
+                id: orderDetail.id,
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Update mã kiện thành công");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setIsEditingTrackingModal(false);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+
             setIsEditingTracking(null);
             queryClient.invalidateQueries({
               queryKey: ["listorder"],
@@ -1119,67 +1156,108 @@ export default function OrderHub() {
 
       {/* Modal Edit Note */}
       {editingNote && (
-        <Modal
+        <NoteModal
           open={!!editingNote}
+          note={editingNote?.note}
           onCancel={() => setEditingNote(null)}
-          title="Cập nhật Ghi Chú"
-          width={500}
-          footer={[
-            <Button key="cancel" onClick={() => setEditingNote(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save note:", editingNote);
-              toast.success("Đã lưu ghi chú");
-              setEditingNote(null);
-            }}>Lưu</Button>,
-          ]}
-        >
-          <Form layout="vertical" className="py-4">
-            <Form.Item label="Ghi Chú">
-              <Input.TextArea
-                rows={4}
-                value={editingNote.value}
-                onChange={(e) => setEditingNote({...editingNote, value: e.target.value})}
-                placeholder="Nhập ghi chú"
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
+          onSave={(note) => {
+            useAddNoteClient.mutate(
+              {
+                id: editingNote.id,
+                param: {
+                  note: editingNote.note,
+                },
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Update ghi chú ADMIN thành công");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setEditingNote(null);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+        />
       )}
 
       {/* Modal Edit Fees & Rates */}
-      {editingFeesRates && (
+      {editingFeesRates && orderDetail && (
         <Modal
           open={!!editingFeesRates}
           onCancel={() => setEditingFeesRates(null)}
           title="Cập nhật Phí COD"
           width={500}
+          centered
           footer={[
-            <Button key="cancel" onClick={() => setEditingFeesRates(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save fees & rates:", editingFeesRates);
-              toast.success("Đã lưu phí COD");
-              setEditingFeesRates(null);
-            }}>Lưu</Button>,
+            <Button key="cancel" onClick={() => setEditingFeesRates(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                updateCodForEarchOrderMutation.mutate(
+                  {
+                    id: orderDetail?.id,
+                    param: {
+                      cod_shipping_price: +editingFeesRates.codAmount,
+                      cod_type: editingFeesRates.codOption,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Đã lưu phí COD");
+                      queryClient.invalidateQueries({
+                        queryKey: ["listorder"],
+                      });
+                      setEditingNote(null);
+                    },
+                    onError: (err: any) =>
+                      toast.error(
+                        err.response?.data?.localizedMessage ||
+                          t("common.error")
+                      ),
+                  }
+                );
+                console.log("Save fees & rates:", editingFeesRates);
+                setEditingFeesRates(null);
+              }}
+            >
+              Lưu
+            </Button>,
           ]}
         >
           <Form layout="vertical" className="py-4">
-            <Form.Item label="COD (Nhật)">
+            <Form.Item label="VC (Nhật)">
               <Select
                 value={editingFeesRates.codOption}
-                onChange={(value) => setEditingFeesRates({...editingFeesRates, codOption: value})}
+                onChange={(value) =>
+                  setEditingFeesRates({ ...editingFeesRates, codOption: value })
+                }
                 placeholder="Chọn loại COD"
               >
-                <Select.Option value="free">Miễn phí vận chuyển</Select.Option>
-                <Select.Option value="admin_cod">Admin điền phí COD</Select.Option>
+                <Select.Option value={1}>Miễn phí vận chuyển</Select.Option>
+                <Select.Option value={2}>Admin điền phí COD</Select.Option>
               </Select>
             </Form.Item>
 
-            {editingFeesRates.codOption === "admin_cod" && (
+            {editingFeesRates.codOption === 2 && (
               <Form.Item label="Phí COD">
                 <Input
                   type="number"
                   value={editingFeesRates.codAmount}
-                  onChange={(e) => setEditingFeesRates({...editingFeesRates, codAmount: e.target.value})}
+                  onChange={(e) =>
+                    setEditingFeesRates({
+                      ...editingFeesRates,
+                      codAmount: e.target.value,
+                    })
+                  }
                   placeholder="Nhập phí COD"
                   suffix="¥"
                 />
@@ -1196,13 +1274,42 @@ export default function OrderHub() {
           onCancel={() => setEditingNoteExtra(null)}
           title="Cập nhật Ghi Chú"
           width={500}
+          centered
           footer={[
-            <Button key="cancel" onClick={() => setEditingNoteExtra(null)}>Hủy</Button>,
-            <Button key="submit" type="primary" onClick={() => {
-              console.log("Save note extra:", editingNoteExtra);
-              toast.success("Đã lưu ghi chú");
-              setEditingNoteExtra(null);
-            }}>Lưu</Button>,
+            <Button key="cancel" onClick={() => setEditingNoteExtra(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                useAddNote.mutate(
+                  {
+                    param: {
+                      order_id: editingNoteExtra.orderId,
+                      note: editingNoteExtra.value,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Update ghi chú ADMIN thành công");
+                      queryClient.invalidateQueries({
+                        queryKey: ["listorder"],
+                      });
+                      setEditingNote(null);
+                    },
+                    onError: (err: any) =>
+                      toast.error(
+                        err.response?.data?.localizedMessage ||
+                          t("common.error")
+                      ),
+                  }
+                );
+                setEditingNoteExtra(null);
+              }}
+            >
+              Lưu
+            </Button>,
           ]}
         >
           <Form layout="vertical" className="py-4">
@@ -1210,7 +1317,12 @@ export default function OrderHub() {
               <Input.TextArea
                 rows={4}
                 value={editingNoteExtra.value}
-                onChange={(e) => setEditingNoteExtra({...editingNoteExtra, value: e.target.value})}
+                onChange={(e) =>
+                  setEditingNoteExtra({
+                    ...editingNoteExtra,
+                    value: e.target.value,
+                  })
+                }
                 placeholder="Nhập ghi chú"
               />
             </Form.Item>
@@ -1222,159 +1334,3 @@ export default function OrderHub() {
 }
 
 // Modal Edit Tracking Component
-function EditTrackingModal({
-  open,
-  onClose,
-  initialData,
-  onSave,
-}: {
-  open: boolean;
-  onClose: () => void;
-  initialData: {
-    orderId: number;
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
-  };
-  onSave: (data: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>) => void;
-}) {
-  const [records, setRecords] = React.useState(initialData.records);
-
-  const handleAddRecord = () => {
-    setRecords([...records, { tracking: "", packageCode: "", quantity: 0, weight: "" }]);
-  };
-
-  const handleRemoveRecord = (index: number) => {
-    const newRecords = [...records];
-    newRecords.splice(index, 1);
-    setRecords(newRecords);
-  };
-
-  const handleRecordChange = (index: number, field: string, value: any) => {
-    const newRecords = [...records];
-    newRecords[index] = { ...newRecords[index], [field]: value };
-    setRecords(newRecords);
-  };
-
-  const handleGeneratePackageCode = (index: number) => {
-    const today = new Date();
-    const month = today.getMonth() + 1;
-    const code = `T${month}nt${Math.floor(Math.random() * 1000)}`;
-    handleRecordChange(index, "packageCode", code);
-  };
-
-  const handleSubmit = () => {
-    onSave(records);
-  };
-
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      title="Cập nhật Tracking / Kiện / Số lượng / Cân nặng"
-      width={800}
-      centered
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Hủy
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Lưu
-        </Button>,
-      ]}
-    >
-      <div className="space-y-3 py-4">
-        {/* Header như Excel */}
-        <div className="grid grid-cols-[40px_200px_180px_100px_100px_50px] gap-2 bg-gray-100 p-2 rounded font-medium text-xs text-gray-700">
-          <div className="text-center">#</div>
-          <div>Mã Tracking</div>
-          <div>Mã Kiện</div>
-          <div className="text-center">Số Kiện</div>
-          <div className="text-center">Cân Nặng</div>
-          <div></div>
-        </div>
-
-        {/* Rows như Excel */}
-        <div className="max-h-[50vh] overflow-y-auto space-y-2">
-          {records.map((record, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-[40px_200px_180px_100px_100px_50px] gap-2 items-center p-2 bg-white border rounded hover:bg-gray-50"
-            >
-              {/* STT */}
-              <div className="text-center text-xs text-gray-600 font-medium">
-                {index + 1}
-              </div>
-
-              {/* Mã Tracking */}
-              <Input
-                value={record.tracking}
-                onChange={(e) => handleRecordChange(index, "tracking", e.target.value)}
-                placeholder="Mã tracking"
-                size="small"
-                className="text-xs"
-              />
-
-              {/* Mã Kiện với icon Gen bên trong */}
-              <Input
-                value={record.packageCode}
-                onChange={(e) => handleRecordChange(index, "packageCode", e.target.value)}
-                placeholder="Mã kiện"
-                size="small"
-                className="text-xs"
-                suffix={
-                  <ReloadOutlined
-                    className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                    onClick={() => handleGeneratePackageCode(index)}
-                    title="Generate mã kiện"
-                  />
-                }
-              />
-
-              {/* Số Kiện */}
-              <Input
-                type="number"
-                value={record.quantity}
-                onChange={(e) => handleRecordChange(index, "quantity", Number(e.target.value))}
-                placeholder="0"
-                size="small"
-                className="text-xs text-center"
-              />
-
-              {/* Cân Nặng */}
-              <Input
-                value={record.weight}
-                onChange={(e) => handleRecordChange(index, "weight", e.target.value)}
-                placeholder="3.5kg"
-                size="small"
-                className="text-xs"
-              />
-
-              {/* Delete Button */}
-              {records.length > 1 && (
-                <Button
-                  danger
-                  size="small"
-                  onClick={() => handleRemoveRecord(index)}
-                  className="!px-2"
-                  title="Xóa"
-                >
-                  ×
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Add Record Button */}
-        <Button
-          type="dashed"
-          onClick={handleAddRecord}
-          icon={<PlusOutlined />}
-          className="w-full"
-          size="small"
-        >
-          Thêm dòng mới
-        </Button>
-      </div>
-    </Modal>
-  );
-}
