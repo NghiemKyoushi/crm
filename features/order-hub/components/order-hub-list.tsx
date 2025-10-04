@@ -660,7 +660,6 @@ const [editingNote, setEditingNote] = useState<{
             text = status;
         }
 
-        // Xác định nút action chính dựa trên trạng thái
         let actionButton: React.ReactNode = null;
 
         switch (record.status) {
