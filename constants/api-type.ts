@@ -83,7 +83,11 @@ export const API_TYPE_CONST = {
   GET_TRACKING_ORDER:`${FEATURE}/admin/orders/get-tracking-ship`,
   COMPLETE_SHIPPING:`${FEATURE}/admin/orders/complete-shipping`,
   DASHBOARD_STATS:`${FEATURE}/admin/dashboard/stats`,
-  GET_INFO_WEIGHT: `${FEATURE}/admin/general-policy/get-info-by-user`,
-  CREATE_PRIVATE_NOTE:`${FEATURE}/admin/orders/create-private-note`,
-  GENERAL_POLICY:`${FEATURE}/admin/general-policy`
+  GET_INFO_WEIGHT: `${FEATURE}/product/fee/get-dosmestic-info`,
+  CREATE_PRIVATE_NOTE:`${FEATURE}/admin/orders/note`,
+  CREATE_PRIVATE_NOTE_CLIENT:`${FEATURE}/orders/order-note`,
+  GENERAL_POLICY:`${FEATURE}/admin/general-policy`,
+  GEN_PACKAGE_CODE:`${FEATURE}/admin/tracking/gen-package-code`,
+  CREATE_TRACKING_ORDER:`${FEATURE}/admin/tracking/order`,
+  UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`
 } as const;

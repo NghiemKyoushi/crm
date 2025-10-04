@@ -669,8 +669,8 @@ const ProductManagement: React.FC = () => {
                 body: {
                   shipping_code: value.shipping_code,
                   // shipping_fee: +value.shipping_fee,
-                  cod_fee: value.code_fee,
-                  shipping_option: value.shipping_option,
+                  shipping_type: value.shipping_type,
+                  shipping_fee: value.shipping_fee,
                 },
               },
               {

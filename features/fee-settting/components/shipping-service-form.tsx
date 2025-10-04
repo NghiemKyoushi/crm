@@ -17,7 +17,7 @@ export default function ShippingServiceForm() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const { data: listService } = useListService();
+  const { data: listService } = useListService({routeId: 1});
 
   const useUpdateServiceMutation = useUpdateListService();
   const handleSubmit = (values: Record<string, any>) => {

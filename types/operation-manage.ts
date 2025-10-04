@@ -8,8 +8,19 @@ export interface Order {
   amount: number;
   amountvnd: number;
   created_at?: string;
+  tracking_ship_list: TrackingRecord[]
 }
 
+export interface TrackingRecord {
+  id: number;
+  order_id: number;
+  tracking_code: string;
+  created_at: string;   // ISO datetime string
+  updated_at: string | null;
+  package_code: string;
+  package_number: number;
+  weight: number;
+}
 export interface OrderItem {
   id: number;
   invoice_no?: string;

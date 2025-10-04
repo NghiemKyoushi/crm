@@ -52,7 +52,9 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       if (customerId) {
         try {
           console.log("customerId", customerId);
-          const res = await getDataWeight({ userId: customerId });
+          const res = await getDataWeight(customerId);
+          console.log('res', res);
+          
           setFeeKg(res.storage_fee_per_kg_per_day);
         } catch (error) {
           console.error("Error fetching weight:", error);
@@ -70,7 +72,6 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
   useEffect(() => {
     if (actualWeight && feeKg) {
       const weightFee = actualWeight * feeKg;
-      console.log("weightFee", weightFee);
       form.setFieldsValue({
         feePerKg: weightFee,
       });
