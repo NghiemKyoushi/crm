@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 // types/fee-setting.ts
 export interface Fee {
@@ -28,7 +28,7 @@ export interface ServiceFee {
   fees: Fee[];
 }
 
-import { Form, InputNumber, Button, Card } from "antd";
+import { Form, InputNumber, Button, Card, Select } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSave, faRoute } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
@@ -59,11 +59,51 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const [currencyChanges, setCurrencyChanges] = useState<Record<string, string>>({});
 
   const { data: listService, isPending } = useListDataGeneral(
     groupId ? { customerGroupId: groupId } : undefined
   );
   const updateServiceMutation = useUpdateListService();
+
+  // Build currency data from API response and user changes
+  const currencyData = useMemo(() => {
+    const result: Record<string, string> = {};
+
+    if (listService) {
+      listService.forEach((routeItem: ServiceFee) => {
+        routeItem.fees.forEach((fee: Fee) => {
+          const key = `${routeItem.route.id}_${fee.code}`;
+          // Use user change if exists, otherwise use API value
+          result[key] = currencyChanges[key] || fee.currency_code || "VND";
+        });
+      });
+    }
+
+    return result;
+  }, [listService, currencyChanges]);
+
+  // Build initial form values from API response
+  const initialValues = useMemo(() => {
+    const formValues: Record<string, number> = {};
+    if (listService) {
+      listService.forEach((routeItem: ServiceFee) => {
+        routeItem.fees.forEach((fee: Fee) => {
+          const key = `${routeItem.route.id}_${fee.code}`;
+          formValues[key] = fee.amount ?? 0;
+        });
+      });
+    }
+    console.log('Initial values:', formValues);
+    return formValues;
+  }, [listService]);
+
+  // Log currency data for debugging
+  useEffect(() => {
+    if (Object.keys(currencyData).length > 0) {
+      console.log('Currency data:', currencyData);
+    }
+  }, [currencyData]);
   const handleSubmit = (values: Record<string, any>) => {
     if (!listService) return;
     // const dataCheck: Fees[] = [],
@@ -96,7 +136,7 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
           dataCheck.push({
             code: fee.code,
             amount: inputAmount,
-            currency_code: fee.currency_code,
+            currency_code: currencyData[key] || fee.currency_code,
             route_id: routeItem.route.id,
           });
         }
@@ -124,9 +164,18 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
 
   };
 
+  if (isPending || !listService) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
+
   return (
-    <Form form={form} layout="vertical" onFinish={handleSubmit}>
-      {listService?.map((routeItem: ServiceFee) => (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleSubmit}
+      initialValues={initialValues}
+    >
+      {listService.map((routeItem: ServiceFee) => (
         <Card
           key={routeItem.route.id}
           title={
@@ -139,24 +188,55 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
           className="mb-6 rounded-lg shadow-sm"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {routeItem.fees.map((fee: Fee) => (
-              <Form.Item
-                key={`${routeItem.route.id}_${fee.code}`}
-                label={fee.name}
-                name={`${routeItem.route.id}_${fee.code}`}
-                initialValue={fee.amount ?? 0}
-                rules={[{ required: true, message: t("validation.required") }]}
-              >
-                <InputNumber
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value: any) => value?.replace(/\D/g, "")}
-                  className="!w-full"
-                  min={0}
-                />
-              </Form.Item>
-            ))}
+            {routeItem.fees.map((fee: Fee) => {
+              const key = `${routeItem.route.id}_${fee.code}`;
+
+              // Filter currency options based on route
+              const isUSRoute = routeItem.route.code === "US_VN";
+              const isJPRoute = routeItem.route.code === "JP_VN";
+
+              const currencyOptions = [
+                { label: "VND", value: "VND" },
+                ...(isUSRoute ? [{ label: "USD", value: "USD" }] : []),
+                ...(isJPRoute ? [{ label: "JPY", value: "JPY" }] : []),
+                { label: "%", value: "%" },
+              ];
+
+              return (
+                <div key={key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {fee.name}
+                  </label>
+                  <Form.Item
+                    name={key}
+                    rules={[{ required: true, message: t("validation.required") }]}
+                    className="!mb-0"
+                  >
+                    <InputNumber
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value: any) => value?.replace(/\D/g, "")}
+                      className="!w-full"
+                      min={0}
+                      addonAfter={
+                        <Select
+                          className="!w-20 !border-0"
+                          value={currencyData[key]}
+                          onChange={(value) =>
+                            setCurrencyChanges((prev) => ({
+                              ...prev,
+                              [key]: value,
+                            }))
+                          }
+                          options={currencyOptions}
+                        />
+                      }
+                    />
+                  </Form.Item>
+                </div>
+              );
+            })}
           </div>
         </Card>
       ))}
