@@ -49,21 +49,20 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
 
   useEffect(() => {
     const fetchWeight = async () => {
-      if (customerId) {
+      if (open && customerId) {
         try {
           console.log("customerId", customerId);
           const res = await getDataWeight(customerId);
-          console.log('res', res);
-          
+          console.log("res", res);
           setFeeKg(res.storage_fee_per_kg_per_day);
         } catch (error) {
           console.error("Error fetching weight:", error);
         }
       }
     };
-
+  
     fetchWeight();
-  }, [customerId]);
+  }, [open, customerId]);
 
   // Get form values realtime to calculate fees
   const actualWeight = Form.useWatch("actualWeight", form);
@@ -77,6 +76,7 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       });
     }
   }, [actualWeight, feeKg, form]);
+  
 
   return (
     <Modal
@@ -127,14 +127,14 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
             />
           </Form.Item>
           <Form.Item name="feePerKg" label={t("inspection.weightFee")}>
-  <InputNumber
-    formatter={(value) =>
-      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    }
-    className="!w-full"
-    disabled
-  />
-</Form.Item>
+            <InputNumber
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              className="!w-full"
+              disabled
+            />
+          </Form.Item>
         </div>
         <Form.Item name="note" label={t("inspection.note")}>
           <Input.TextArea

@@ -70,7 +70,7 @@ export interface Invoice {
   deposit_fee?: number;
   package_code: string;
   tracking_ship_list: TrackingRecord[],
-  admin_notes: any
+  note_admin: string;
 }
 
 export interface InvoiceMetadata {

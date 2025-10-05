@@ -84,8 +84,8 @@ export const useUpdateCodForEarchOrder = () => {
 
 export const useUpdateNoteOrder = () => {
   return useMutation({
-    mutationFn: ({ param }: { param: { order_id: number; note: string } }) =>
-      updateNoteOrder(param),
+    mutationFn: ({ order_id, param }: {order_id: number,  param: { note: string } }) =>
+      updateNoteOrder(order_id, param),
   });
 };
 
