@@ -91,7 +91,7 @@ const ProductTypeTable: React.FC = () => {
             onSuccess: () => {
               toast.success(t('productType.updateSuccess'));
               queryClient.invalidateQueries({
-                queryKey: ["listwebsite"],
+                queryKey: ["listProductType"],
               });
               setIsModalOpen(false);
             },

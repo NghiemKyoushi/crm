@@ -78,6 +78,9 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
   };
 
   React.useEffect(() => {
+    console.log("listGereralPolicy", listGereralPolicy);
+
+    
     if (listGereralPolicy) {
       console.log("listGereralPolicy?.data", listGereralPolicy?.data);
 
