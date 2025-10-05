@@ -39,7 +39,7 @@
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
-    "operation": "Quản lý vận hành"
+    "operation": "Quản lý vận đơn"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -773,7 +773,7 @@
   },
   "page": {
     "orderManagement": "Quản lý Đơn hàng",
-    "importedProductList": "Danh sách sản phẩm đã nhập"
+    "importedProductList": "Sẵn sàng xuất kho"
   },
   "system": {
     "noData": "Không có dữ liệu",

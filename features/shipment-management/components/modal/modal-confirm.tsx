@@ -38,7 +38,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
       <div className="bg-blue-50 rounded p-3 mb-2">
         <p className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</p>
         <p className="!mb-1">
-          <span className="font-semibold">Mã đơn:</span> {orderCode}
+          <span className="font-semibold">Mã vận đơn:</span> {orderCode}
         </p>
         <p className="!mb-1">
           <span className="font-semibold">Khách hàng:</span> {customerName}
@@ -54,12 +54,12 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
         className="!mb-2"
       >
         <Form.Item
-          label="Mã shipping"
+          label="Mã tracking"
           name="shipping_code"
           rules={[
             {
               required: true,
-              message: "Vui lòng nhập mã shipping!",
+              message: "Vui lòng nhập mã tracking!",
             },
           ]}
           className="!mb-2"

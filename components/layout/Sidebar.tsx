@@ -93,13 +93,13 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/operation-management":["system.admin"]
+  "/shipment-management":["system.admin"]
 };
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
-  { key: "/operation-management", icon: faWarehouse, label: "operation" },
+  { key: "/shipment-management", icon: faWarehouse, label: "operation" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/finance-management", icon: faWallet, label: "finance" },

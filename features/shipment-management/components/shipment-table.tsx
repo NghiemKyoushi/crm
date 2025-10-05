@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip } from "antd";
+import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip, Table } from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -14,11 +14,11 @@ import { toast } from "react-toastify";
 import TrackingModalShip from "./modal/modal-confirm";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Order } from "@/types/operation-manage";
+import { Order, OrderItem } from "@/types/shipment-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { EyeOutlined, EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
 
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
@@ -27,10 +27,6 @@ const ProductManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const [isViewingTracking, setIsViewingTracking] = useState<{
-    orderId: number,
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
-  } | null>(null);
 
   const { data: listOrder } = useListOrderTracking({
     page,
@@ -57,13 +53,19 @@ const ProductManagement: React.FC = () => {
 
   const columns: ColumnsType<Order> = [
     {
-      title: "No",
-      key: "invoice_no",
-      width: 40,
+      title: "Mã VĐ / SL",
+      key: "tracking_ship",
+      width: 100,
       align: "center",
       render: (_, record) => {
-        const invoice_no = record.order_list?.[0]?.invoice_no;
-        return <div className="text-xs font-medium text-blue-600">{invoice_no || "-"}</div>;
+        return (
+          <div className="space-y-1">
+            <div className="text-xs font-medium text-blue-600">{record.tracking_ship}</div>
+            <div className="text-xs text-gray-500">
+              <span className="font-medium text-orange-600">{record.quantity || record.order_list?.length || 0}</span> đơn
+            </div>
+          </div>
+        );
       },
     },
     {
@@ -88,74 +90,38 @@ const ProductManagement: React.FC = () => {
       ),
     },
     {
-      title: "Tracking / Kiện / SL / CN",
+      title: "Mã VN / CN",
       key: "tracking_package",
-      width: 200,
+      width: 180,
       render: (_, record) => {
-        const orderData = record.order_list?.[0];
-        const trackingRecords = [
-          {
-            tracking: record.tracking_ship || "",
-            packageCode: orderData?.tracking_vn || "",
-            quantity: 0, // Số lượng đơn - chưa có trong response, để sau
-            weight: orderData?.weight ? `${orderData.weight}g` : ""
-          }
-        ].filter(r => r.tracking || r.packageCode);
+        const orderList = record.order_list || [];
 
-        const hasData = trackingRecords.length > 0;
-        const firstRecord = trackingRecords[0];
+        // Tính tổng cân nặng từ tất cả orders
+        const totalWeight = orderList.reduce((sum, order) => sum + (order.weight || 0), 0);
+
+        // Lấy tất cả tracking_vn
+        const trackingVnList = orderList
+          .map(order => order.tracking_vn)
+          .filter(Boolean);
+
+        const firstTrackingVn = trackingVnList[0] || "-";
+        const remainingCount = trackingVnList.length - 1;
 
         return (
           <div className="space-y-1">
-            <div className="flex items-center justify-between gap-1">
-              <div className="flex-1 min-w-0">
-                {hasData ? (
-                  <>
-                    <div className="text-xs truncate">
-                      <span className="text-gray-500">Track: </span>
-                      <span className="text-gray-800">{firstRecord.tracking || "-"}</span>
-                    </div>
-                    <div className="text-xs">
-                      <span className="text-gray-500">Kiện: </span>
-                      <span className="text-gray-800">{firstRecord.packageCode || "-"}</span>
-                    </div>
-                    <div className="text-xs">
-                      <span className="text-gray-500">SL: </span>
-                      <span className="text-gray-800">{firstRecord.quantity > 0 ? firstRecord.quantity : "-"}</span>
-                      <span className="text-gray-500"> | CN: </span>
-                      <span className="text-gray-800">{firstRecord.weight || "-"}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-xs text-gray-400">Chưa có dữ liệu</div>
-                )}
-              </div>
-              <Button
-                type="text"
-                size="small"
-                icon={<EyeOutlined className="text-xs" />}
-                className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => setIsViewingTracking({
-                  orderId: record.tracking_ship ? parseInt(record.tracking_ship) : 0,
-                  records: trackingRecords.length > 0 ? trackingRecords : [
-                    { tracking: "", packageCode: "", quantity: 0, weight: "" }
-                  ]
-                })}
-              />
+            <div className="text-xs truncate">
+              <span className="text-gray-500">Mã VN: </span>
+              <span className="text-gray-800">{firstTrackingVn}</span>
             </div>
-            {trackingRecords.length > 1 && (
-              <Button
-                type="link"
-                size="small"
-                className="!p-0 !h-auto !text-xs"
-                onClick={() => setIsViewingTracking({
-                  orderId: record.tracking_ship ? parseInt(record.tracking_ship) : 0,
-                  records: trackingRecords
-                })}
-              >
-                +{trackingRecords.length - 1} mục khác
-              </Button>
+            {remainingCount > 0 && (
+              <div className="text-xs text-blue-600">
+                +{remainingCount} mã khác
+              </div>
             )}
+            <div className="text-xs">
+              <span className="text-gray-500">Tổng CN: </span>
+              <span className="text-gray-800 font-medium">{totalWeight}kg</span>
+            </div>
           </div>
         );
       },
@@ -184,51 +150,71 @@ const ProductManagement: React.FC = () => {
       width: 280,
       render: (_, record) => {
         const orderList = record.order_list || [];
-        const firstItem = orderList.length > 0 ? orderList[0] : null;
 
-        let productName = "Không có sản phẩm";
-        let quantity = 0;
-        let productImage = null;
+        // Lấy tất cả sản phẩm từ tất cả orders
+        const allProducts: Array<{ name: string; quantity: number; image: string | null }> = [];
 
-        if (firstItem?.metadata) {
-          try {
-            const metadata = typeof firstItem.metadata === 'string'
-              ? JSON.parse(firstItem.metadata)
-              : firstItem.metadata;
+        orderList.forEach((order) => {
+          if (order.metadata) {
+            try {
+              const metadata = typeof order.metadata === 'string'
+                ? JSON.parse(order.metadata)
+                : order.metadata;
 
-            const items = metadata?.items || [];
-            if (items.length > 0) {
-              const product = items[0].product;
-              productName = product?.map_data?.productName || productName;
-              quantity = items[0].count || 0;
-              const images = product?.map_data?.images || [];
-              productImage = images.length > 0 ? images[0] : null;
+              const items = metadata?.items || [];
+              items.forEach((item: any) => {
+                const product = item.product;
+                const productName = product?.map_data?.productName || "Sản phẩm";
+                const quantity = item.count || 0;
+                const images = product?.map_data?.images || [];
+                const productImage = images.length > 0 ? images[0] : null;
+
+                allProducts.push({ name: productName, quantity, image: productImage });
+              });
+            } catch (e) {
+              console.error("Error parsing metadata:", e);
             }
-          } catch (e) {
-            console.error("Error parsing metadata:", e);
           }
-        }
+        });
+
+        // Tính tổng số lượng sản phẩm
+        const totalProductQty = allProducts.reduce((sum, p) => sum + p.quantity, 0);
+
+        const firstProduct = allProducts[0];
+        const remainingProducts = allProducts.length - 1;
 
         return (
           <div className="flex gap-2">
-            <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
-              {productImage ? (
-                <img src={productImage} alt="Product" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-xs text-gray-400">No img</span>
+            {firstProduct && (
+              <>
+                <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
+                  {firstProduct.image ? (
+                    <img src={firstProduct.image} alt="Product" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-xs text-gray-400">No img</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="text-xs text-gray-800 line-clamp-2">
-                {productName}
-              </div>
-              <div className="text-xs">
-                <span className="text-gray-500">SL: </span>
-                <span className="text-gray-800">{quantity}</span>
-              </div>
-            </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="text-xs text-gray-800 line-clamp-2">
+                    {firstProduct.name}
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-500">Tổng SL: </span>
+                    <span className="text-gray-800 font-medium">{totalProductQty}</span>
+                  </div>
+                  {remainingProducts > 0 && (
+                    <div className="text-xs text-blue-600">
+                      +{remainingProducts} SP khác
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+            {!firstProduct && (
+              <div className="text-xs text-gray-400">Không có sản phẩm</div>
+            )}
           </div>
         );
       },
@@ -256,9 +242,20 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const description = record.order_list?.[0]?.description;
+        const orderList = record.order_list || [];
+        const descriptions = orderList
+          .map(order => order.description)
+          .filter(Boolean);
+
+        const firstDescription = descriptions[0] || "-";
+
         return (
-          <div className="text-xs text-gray-600 line-clamp-2">{description || "-"}</div>
+          <div className="space-y-1">
+            <div className="text-xs text-gray-600 line-clamp-2">{firstDescription}</div>
+            {descriptions.length > 1 && (
+              <div className="text-xs text-blue-600">+{descriptions.length - 1} ghi chú khác</div>
+            )}
+          </div>
         );
       },
     },
@@ -272,26 +269,31 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const orderData = record.order_list?.[0];
-        const shippingFee = orderData?.shipping_fee;
-        const weightFee = orderData?.weight_fee;
-        const rate = orderData?.rate;
+        const orderList = record.order_list || [];
+
+        // Tính tổng shipping fee và weight fee
+        const totalShippingFee = orderList.reduce((sum, order) => sum + (order.shipping_fee || 0), 0);
+        const totalWeightFee = orderList.reduce((sum, order) => sum + (order.weight_fee || 0), 0);
+
+        // Lấy rate (giả sử rate giống nhau cho tất cả orders)
+        const rate = orderList[0]?.rate;
+
         return (
           <div className="space-y-1">
             <div className="text-xs">
-              <span className="text-gray-500">COD: </span>
-              <span className="text-gray-800">
-                {shippingFee ? `${shippingFee.toLocaleString("vi-VN")}¥` : "-"}
+              <span className="text-gray-500">Ship: </span>
+              <span className="text-gray-800 font-medium">
+                {totalShippingFee > 0 ? `${totalShippingFee.toLocaleString("vi-VN")}¥` : "-"}
               </span>
             </div>
             <div className="text-xs">
               <span className="text-gray-500">CN: </span>
-              <span className="text-gray-800">
-                {weightFee ? `${weightFee.toLocaleString("vi-VN")}đ` : "-"}
+              <span className="text-gray-800 font-medium">
+                {totalWeightFee > 0 ? `${totalWeightFee.toLocaleString("vi-VN")}đ` : "-"}
               </span>
             </div>
             <div className="text-xs">
-              <span className="text-gray-500">TG Yên: </span>
+              <span className="text-gray-500">TG: </span>
               <span className="text-gray-800">{rate || "-"}</span>
             </div>
           </div>
@@ -387,31 +389,27 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const orderData = record.order_list?.[0];
-        const depositFee = orderData?.deposit_fee || 0;
-        const totalAmount = orderData?.amount_vnd || 0;
-        const remaining = totalAmount - depositFee;
+        const orderList = record.order_list || [];
+
+        // Tính tổng deposit fee và amount_vnd từ tất cả orders
+        const totalDepositFee = orderList.reduce((sum, order) => sum + (order.deposit_fee || 0), 0);
+        const totalAmountVnd = orderList.reduce((sum, order) => sum + (order.amount_vnd || 0), 0);
+        const remaining = totalAmountVnd - totalDepositFee;
 
         return (
           <div className="space-y-1">
             <div className="text-xs">
               <span className="text-gray-500">Cọc: </span>
               <span className="text-green-600 font-medium">
-                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
+                {totalDepositFee > 0 ? `${totalDepositFee.toLocaleString("vi-VN")}đ` : "-"}
               </span>
             </div>
             <div className="text-xs">
-              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-gray-500">Còn lại: </span>
               <span className="text-orange-600 font-medium">
                 {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
               </span>
             </div>
-            {/* <div className="text-xs">
-              <span className="text-gray-500">Đã TT: </span>
-              <span className="text-gray-800">
-                {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div> */}
           </div>
         );
       },
@@ -426,10 +424,13 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const orderData = record.order_list?.[0];
-        const weightFee = orderData?.weight_fee || 0;
-        const shippingFee = orderData?.shipping_fee || 0;
-        const totalCost = weightFee + shippingFee;
+        const orderList = record.order_list || [];
+
+        // Tính tổng chi phí (weight fee + shipping fee) từ tất cả orders
+        const totalCost = orderList.reduce(
+          (sum, order) => sum + (order.weight_fee || 0) + (order.shipping_fee || 0),
+          0
+        );
 
         return (
           <div className="text-xs text-gray-800 text-left font-medium">
@@ -448,7 +449,8 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const amountVnd = record.order_list?.[0]?.amount_vnd || record.amountvnd || 0;
+        // Sử dụng amountvnd từ response (đã tính tổng từ backend)
+        const amountVnd = record.amountvnd || 0;
         return (
           <div className="text-xs font-medium text-blue-600">
             {amountVnd > 0 ? `${amountVnd.toLocaleString("vi-VN")}đ` : "-"}
@@ -466,9 +468,21 @@ const ProductManagement: React.FC = () => {
         },
       }),
       render: (_, record) => {
-        const address = record.order_list?.[0]?.address;
+        const orderList = record.order_list || [];
+        const addresses = orderList
+          .map(order => order.address)
+          .filter(Boolean);
+
+        const firstAddress = addresses[0] || "-";
+        const uniqueAddresses = new Set(addresses);
+
         return (
-          <div className="text-xs text-gray-600 line-clamp-3">{address || "-"}</div>
+          <div className="space-y-1">
+            <div className="text-xs text-gray-600 line-clamp-3">{firstAddress}</div>
+            {uniqueAddresses.size > 1 && (
+              <div className="text-xs text-amber-600">Có {uniqueAddresses.size} địa chỉ khác nhau</div>
+            )}
+          </div>
         );
       },
     },
@@ -644,16 +658,33 @@ const ProductManagement: React.FC = () => {
         </div>
 
         <EnhancedTableWrapper className="overflow-x-auto">
-          <TableComponent
+          <Table
             columns={columns}
             dataSource={listOrder || []}
-            rowHeight={100}
-            pageSize={20}
-            page={(listOrder && listOrder.current_page + 1) || 0}
-            onPageChange={handleChangePage}
-            response={undefined}
-            fontSize={12}
-            headerHeight={48}
+            rowKey="tracking_ship"
+            pagination={{
+              current: (listOrder && listOrder.current_page + 1) || 1,
+              pageSize: 20,
+              onChange: handleChangePage,
+              showSizeChanger: false,
+            }}
+            expandable={{
+              expandedRowRender: (record: Order) => (
+                <ExpandedOrderDetails orderList={record.order_list || []} />
+              ),
+              rowExpandable: (record) => (record.order_list || []).length > 0,
+              expandIcon: ({ expanded, onExpand, record }) => (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<DownOutlined className={`text-xs transition-transform ${expanded ? 'rotate-180' : ''}`} />}
+                  onClick={(e) => onExpand(record, e)}
+                  className="!p-1"
+                />
+              ),
+            }}
+            scroll={{ x: 'max-content' }}
+            size="small"
           />
         </EnhancedTableWrapper>
       </div>
@@ -692,93 +723,201 @@ const ProductManagement: React.FC = () => {
         />
       )}
 
-      {/* Modal View Tracking/Kiện/SL/CN */}
-      {isViewingTracking && (
-        <ViewTrackingModal
-          open={!!isViewingTracking}
-          onClose={() => setIsViewingTracking(null)}
-          data={isViewingTracking}
-        />
-      )}
     </div>
   );
 };
 
-// Modal View Tracking Component (Read-only)
-function ViewTrackingModal({
-  open,
-  onClose,
-  data,
-}: {
-  open: boolean;
-  onClose: () => void;
-  data: {
-    orderId: number;
-    records: Array<{tracking: string, packageCode: string, quantity: number, weight: string}>
+// Component hiển thị chi tiết từng order trong vận đơn
+function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
+  const { t } = useTranslation();
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case OrderStatusType.PENDING_APPROVAL:
+        return "orange";
+      case OrderStatusType.PENDING_DEPOSIT:
+        return "gold";
+      case OrderStatusType.DEPOSIT_PAID:
+        return "green";
+      case OrderStatusType.PURCHASED:
+        return "blue";
+      case OrderStatusType.ARRIVED_JP_WAREHOUSE:
+        return "purple";
+      case OrderStatusType.ARRIVED_VN_WAREHOUSE:
+        return "cyan";
+      case OrderStatusType.UNDER_INSPECTION:
+        return "lime";
+      case OrderStatusType.READY_TO_SHIP:
+        return "geekblue";
+      case OrderStatusType.SHIPPED:
+        return "volcano";
+      case OrderStatusType.SHIPPING_REQUEST_CLIENT:
+        return "magenta";
+      default:
+        return "default";
+    }
   };
-}) {
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      title="Thông tin Tracking / Kiện / Số lượng / Cân nặng"
-      width="auto"
-      centered
-      footer={[
-        <Button key="close" type="primary" onClick={onClose}>
-          Đóng
-        </Button>,
-      ]}
-      styles={{
-        body: { width: 'fit-content', minWidth: '600px', maxWidth: '90vw' }
-      }}
-    >
-      <div className="space-y-3 py-4">
-        {/* Header */}
-        <div className="grid grid-cols-[50px_1fr_1fr_120px_120px] gap-3 bg-gray-100 p-3 rounded font-medium text-sm text-gray-700 min-w-[600px]">
-          <div className="text-center">#</div>
-          <div>Mã Tracking</div>
-          <div>Mã Kiện</div>
-          <div className="text-center">Số Kiện</div>
-          <div className="text-center">Cân Nặng</div>
+
+  const orderDetailColumns: ColumnsType<OrderItem> = [
+    {
+      title: "STT",
+      key: "index",
+      width: 60,
+      align: "center",
+      render: (_: any, __: any, index: number) => (
+        <div className="text-xs font-medium">{index + 1}</div>
+      ),
+    },
+    {
+      title: "Mã đơn",
+      key: "invoice_no",
+      width: 120,
+      render: (_, record) => (
+        <div className="text-xs font-medium text-blue-600">{record.invoice_no || "-"}</div>
+      ),
+    },
+    {
+      title: "Mã VN / JP",
+      key: "tracking",
+      width: 150,
+      render: (_, record) => (
+        <div className="space-y-1">
+          <div className="text-xs">
+            <span className="text-gray-500">VN: </span>
+            <span className="text-gray-800">{record.tracking_vn || "-"}</span>
+          </div>
+          <div className="text-xs">
+            <span className="text-gray-500">JP: </span>
+            <span className="text-gray-800">{record.tracking_other || "-"}</span>
+          </div>
         </div>
+      ),
+    },
+    {
+      title: "Sản phẩm",
+      key: "product",
+      width: 250,
+      render: (_, record) => {
+        let productName = "-";
+        let productImage = null;
+        let quantity = 0;
 
-        {/* Read-only Rows */}
-        <div className="max-h-[60vh] overflow-y-auto space-y-2">
-          {data.records.map((record, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-[50px_1fr_1fr_120px_120px] gap-3 items-center p-3 bg-gray-50 border rounded min-w-[600px]"
-            >
-              {/* STT */}
-              <div className="text-center text-sm text-gray-600 font-medium">
-                {index + 1}
-              </div>
+        if (record.metadata) {
+          try {
+            const metadata = typeof record.metadata === 'string'
+              ? JSON.parse(record.metadata)
+              : record.metadata;
 
-              {/* Mã Tracking */}
-              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border break-all">
-                {record.tracking || "-"}
-              </div>
+            const items = metadata?.items || [];
+            if (items.length > 0) {
+              const product = items[0].product;
+              productName = product?.map_data?.productName || productName;
+              quantity = items[0].count || 0;
+              const images = product?.map_data?.images || [];
+              productImage = images.length > 0 ? images[0] : null;
+            }
+          } catch (e) {
+            console.error("Error parsing metadata:", e);
+          }
+        }
 
-              {/* Mã Kiện */}
-              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border break-all">
-                {record.packageCode || "-"}
-              </div>
-
-              {/* Số Kiện */}
-              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border text-center">
-                {record.quantity > 0 ? record.quantity : "-"}
-              </div>
-
-              {/* Cân Nặng */}
-              <div className="text-sm text-gray-800 px-3 py-2 bg-white rounded border text-center">
-                {record.weight || "-"}
-              </div>
+        return (
+          <div className="flex gap-2">
+            <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
+              {productImage ? (
+                <img src={productImage} alt="Product" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-[10px] text-gray-400">No img</span>
+                </div>
+              )}
             </div>
-          ))}
+            <div className="flex-1 min-w-0">
+              <div className="text-xs text-gray-800 line-clamp-2">{productName}</div>
+              <div className="text-xs text-gray-500">SL: {quantity}</div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "CN",
+      key: "weight",
+      width: 80,
+      align: "center",
+      render: (_, record) => (
+        <div className="text-xs text-gray-800">{record.weight ? `${record.weight}kg` : "-"}</div>
+      ),
+    },
+    {
+      title: "Số tiền",
+      key: "amount",
+      width: 120,
+      render: (_, record) => (
+        <div className="space-y-1">
+          <div className="text-xs">
+            <span className="text-gray-500">JPY: </span>
+            <span className="text-gray-800 font-medium">
+              {record.amount ? `${record.amount.toLocaleString("vi-VN")}¥` : "-"}
+            </span>
+          </div>
+          <div className="text-xs">
+            <span className="text-gray-500">VND: </span>
+            <span className="text-blue-600 font-medium">
+              {record.amount_vnd ? `${record.amount_vnd.toLocaleString("vi-VN")}đ` : "-"}
+            </span>
+          </div>
         </div>
+      ),
+    },
+    {
+      title: "Cọc",
+      key: "deposit",
+      width: 100,
+      render: (_, record) => (
+        <div className="text-xs text-green-600 font-medium">
+          {record.deposit_fee ? `${record.deposit_fee.toLocaleString("vi-VN")}đ` : "-"}
+        </div>
+      ),
+    },
+    {
+      title: "Ghi chú",
+      key: "description",
+      width: 150,
+      render: (_, record) => (
+        <div className="text-xs text-gray-600 line-clamp-2">{record.description || "-"}</div>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      key: "status",
+      width: 120,
+      align: "center",
+      render: (_, record) => (
+        <Tag color={getStatusColor(record.status)} className="!text-[10px] !py-0.5 !px-2">
+          {record.status || "-"}
+        </Tag>
+      ),
+    },
+  ];
+
+  return (
+    <div className="bg-gray-50 p-4">
+      <div className="mb-3">
+        <h4 className="text-sm font-semibold text-gray-700">
+          Chi tiết đơn hàng ({orderList.length} đơn)
+        </h4>
       </div>
-    </Modal>
+      <Table
+        columns={orderDetailColumns}
+        dataSource={orderList}
+        rowKey="id"
+        pagination={false}
+        size="small"
+        scroll={{ x: 'max-content' }}
+        className="order-detail-table"
+      />
+    </div>
   );
 }
 
