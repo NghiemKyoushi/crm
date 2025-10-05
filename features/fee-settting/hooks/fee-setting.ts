@@ -46,7 +46,7 @@ export const useListInsurance = () => {
 export const useListGeneralPolicy = (customer_group_id?: number) => {
   return useQuery({
     queryKey: ["generalPolicy", customer_group_id],
-    queryFn: () => getListGeneralPolicy({customer_group_id: customer_group_id}),
+    queryFn: () => getListGeneralPolicy({customerGroupId: customer_group_id}),
     // enabled: !!customer_group_id, // chỉ gọi khi có id
   });
 };
