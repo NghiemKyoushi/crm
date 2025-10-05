@@ -406,12 +406,12 @@ const ProductManagement: React.FC = () => {
                 {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
               </span>
             </div>
-            <div className="text-xs">
+            {/* <div className="text-xs">
               <span className="text-gray-500">Đã TT: </span>
               <span className="text-gray-800">
                 {depositFee > 0 ? `${depositFee.toLocaleString("vi-VN")}đ` : "-"}
               </span>
-            </div>
+            </div> */}
           </div>
         );
       },

@@ -192,3 +192,9 @@ export const updateCodForEarchOrder = async (id: number, body: updateCodEachRowM
   const res = await api.post(`${API_TYPE_CONST.UPDATE_COD_EACH_ROW}/${id}`, body);
   return res.data.data;
 };
+
+export const getDataGeneral = async (params?: {customerGroupId?: number}) => {
+  const res = await api.get(API_TYPE_CONST.GET_DATA_CHECK, {params});  
+  return res.data.data;
+};
+

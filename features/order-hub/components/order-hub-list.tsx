@@ -1165,7 +1165,7 @@ export default function OrderHub() {
               {
                 id: editingNote.id,
                 param: {
-                  note: editingNote.note,
+                  note: note,
                 },
               },
               {

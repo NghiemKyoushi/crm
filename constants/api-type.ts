@@ -89,5 +89,6 @@ export const API_TYPE_CONST = {
   GENERAL_POLICY:`${FEATURE}/admin/general-policy`,
   GEN_PACKAGE_CODE:`${FEATURE}/admin/tracking/gen-package-code`,
   CREATE_TRACKING_ORDER:`${FEATURE}/admin/tracking/order`,
-  UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`
+  UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`,
+  GET_DATA_CHECK:`${FEATURE}/fee/get-data`,
 } as const;
