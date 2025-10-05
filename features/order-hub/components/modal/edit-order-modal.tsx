@@ -245,7 +245,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             SERVICE_FEE: res.service_fee ?? 0,
             SHIPPING_SURCHARGE_FEE: res.shipping_surcharge_fee ?? 0,
           });
-          form.setFieldValue("feeY", res.service_fee / rateProduct);
+          form.setFieldValue("feeY", Math.ceil(res.service_fee / rateProduct));
           setPercenDeposit(res.min_deposit_percent);
         } catch (error) {
           console.error("Error fetching fee service:", error);
@@ -267,7 +267,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     paymentAmount,
   ]);
 
-  useEffect(() => {
+  useEffect(() => {    
     if (listInsurance && listInsurance.length > 0) {
       setInsurance(listInsurance[0]);
     }
@@ -293,6 +293,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         order.metadata.items?.[0]?.product?.currency_code ?? "VND"
       );
       setPaymentType(order.metadata.infos?.codeType ?? 1);
+      setInsurance(order.metadata.infos?.insurancePackage)
       form.setFieldsValue({
         link: order.metadata.items?.[0]?.product?.url ?? "",
         productName:
@@ -311,7 +312,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         paymentAmount: order.metadata.infos?.codInJapan,
       });
     }
-  }, [order, form,isOpen]);
+  }, [order, form,orderId]);
 
   const totalFeeCheck =
     fees.DOMESTIC_SHIPPING_FEE +
@@ -330,6 +331,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setPercenDeposit(0);
     setIdProduct(null);
     setSearchValue("");
+    setRateProduct(0)
     onCancel();
   };
   return (
