@@ -39,7 +39,7 @@
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
     "partnerManagement": "Raw Material Management",
-    "operation": "Operation management"
+    "operation": "Shipment Management"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -774,7 +774,7 @@
   },
   "page": {
     "orderManagement": "Order Management",
-    "importedProductList": "Imported Product List"
+    "importedProductList": "Ready for Export"
   },
   "system": {
     "noData": "No data",

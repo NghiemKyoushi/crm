@@ -586,7 +586,7 @@ const ProductManagement: React.FC = () => {
     },
     {
       value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
+      label: t("status.shippingRequest"),
     },
     { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
   ];
@@ -663,7 +663,7 @@ const ProductManagement: React.FC = () => {
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.tracking_ship}
           onCancel={() => setIsOpenTrackingOrder(false)}
-          onSubmit={(value) => {
+          onSubmit={(value:any) => {
             useCompleteShippingMutation.mutate(
               {
                 body: {

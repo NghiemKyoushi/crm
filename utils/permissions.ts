@@ -159,8 +159,8 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     requireAll: false,
     fallbackAction: 'notFound'
   },
-  // Operation management
-  '/operation-management': {
+  // Shipment management
+  '/shipment-management': {
     required: [
       'system.admin',
       'system.config'

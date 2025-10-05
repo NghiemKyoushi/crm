@@ -217,7 +217,7 @@ export default function OrderHub() {
           body: {
             description: value.note,
             weight: value.actualWeight,
-            weight_fee: value.feePerKg ? value.feePerKg : 0,
+            weight_fee: value.weight_rate_fee ? value.weight_rate_fee : 0,
           },
           id: orderDetail.id.toString(),
         },
@@ -250,23 +250,23 @@ export default function OrderHub() {
         </div>
       ),
     },
-    {
-      title: "Ngày TT",
-      key: "payment_created_date",
-      // render: (_, record) => (
-      //   <div className="text-xs text-gray-800">
-      //     {record.created_at
-      //       ? dayjs(record.created_at).format("DD/MM/YY")
-      //       : "-"}
-      //   </div>
-      // ),
-    },
-    {
-      title: "Ngày Về",
-      key: "arrival_date",
-      width: 80,
-      render: (_, record) => <div className="text-xs text-gray-800">-</div>,
-    },
+    // {
+    //   title: "Ngày TT",
+    //   key: "payment_created_date",
+    //   // render: (_, record) => (
+    //   //   <div className="text-xs text-gray-800">
+    //   //     {record.created_at
+    //   //       ? dayjs(record.created_at).format("DD/MM/YY")
+    //   //       : "-"}
+    //   //   </div>
+    //   // ),
+    // },
+    // {
+    //   title: "Ngày Về",
+    //   key: "arrival_date",
+    //   width: 80,
+    //   render: (_, record) => <div className="text-xs text-gray-800">-</div>,
+    // },
     {
       title: "Tracking / Kiện / SL / CN",
       key: "tracking_package",
@@ -527,7 +527,7 @@ export default function OrderHub() {
       }),
       render: (_, record) => {
         const shippingCode = record.tracking_vn || "-";
-        const codShippingPrice = record.cod_shipping_price || 0;
+        const codShippingPrice = record.shipping_fee || 0;
         const shippingPrice = codShippingPrice || record.shipping_fee || 0;
 
         const isCOD = codShippingPrice > 0;
@@ -944,7 +944,9 @@ export default function OrderHub() {
           </Form>
         </div>
 
-        <EnhancedTableWrapper className="overflow-x-auto">
+        <EnhancedTableWrapper
+        //  className="overflow-x-auto"
+         >
           <TableComponent
             columns={columns}
             dataSource={listOrder?.data || []}

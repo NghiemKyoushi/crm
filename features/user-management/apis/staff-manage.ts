@@ -51,9 +51,9 @@ export const createNewCateCustomer = async (params: CategoryRequest) => {
 export const updateCateCustomer = async (params: CategoryRequest, id: string) => {
   const res = await api.put(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`, {
     ...params,
-    cancellation_fee: 0,
-    service_fee_percentage: 0,
-    deposit_percentage: 0,
+    // cancellation_fee: 0,
+    // service_fee_percentage: 0,
+    // deposit_percentage: 0,
   });
   return res.data;
 };

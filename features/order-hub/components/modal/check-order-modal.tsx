@@ -40,7 +40,7 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      onSubmit(values);
+      onSubmit({ ...values, weight_rate_fee: feeKg });
       form.resetFields();
     } catch {
       // Error validation will be highlighted
@@ -54,13 +54,13 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
           console.log("customerId", customerId);
           const res = await getDataWeight(customerId);
           console.log("res", res);
-          setFeeKg(res.storage_fee_per_kg_per_day);
+          setFeeKg(res);
         } catch (error) {
           console.error("Error fetching weight:", error);
         }
       }
     };
-  
+
     fetchWeight();
   }, [open, customerId]);
 
@@ -69,14 +69,15 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
   const codFee = Form.useWatch("codFee", form);
 
   useEffect(() => {
-    if (actualWeight && feeKg) {
+    if (actualWeight) {
       const weightFee = actualWeight * feeKg;
+      console.log("feeKg", weightFee);
+
       form.setFieldsValue({
         feePerKg: weightFee,
       });
     }
   }, [actualWeight, feeKg, form]);
-  
 
   return (
     <Modal
