@@ -289,7 +289,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             "priceVnd",
             +form.getFieldValue("priceY") * rateValueForPrice
           );
-          form.setFieldValue("feeY", res.service_fee / rateValueForPrice);
+          form.setFieldValue("feeY", Math.ceil(res.service_fee / rateValueForPrice));
           // form.setFieldValue("feeVnd", res.fee_vnd);
           setPercenDeposit(res.min_deposit_percent);
         } catch (error) {
@@ -863,12 +863,12 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 <div className="flex justify-between text-green-600 font-semibold">
                   <span>{t("form.total")}:</span>
                   <span>
-                    {totalFeeCheck
-                      ? (
-                          totalFeeCheck +
-                          priceVND * (quantity ?? 1)
-                        ).toLocaleString("en-US")
-                      : 0}
+                  {
+  (
+    (Number(totalFeeCheck) || 0) +
+    (Number(priceVND) || 0) * (Number(quantity) || 1)
+  ).toLocaleString("en-US")
+}
                     đ
                   </span>
                 </div>
