@@ -47,7 +47,6 @@ const ExchangeRateSettings: React.FC = () => {
   }, [id]);
 
   const onFinish = (values: ExchangeRateFormValues) => {
-    console.log("Exchange Rate Saved:", values);
     message.success(t("categoryCustomer.exchangeRateUpdateSuccess"));
   };
 
@@ -65,9 +64,11 @@ const ExchangeRateSettings: React.FC = () => {
   const handleSave = async () => {
     try {
       if (id)
-        await updateListExchangRateCategory(id.toString(), {
-          data: rates.map((r) => ({
-            id: r.id, // cần id
+        await updateListExchangRateCategory( {
+          
+          customer_group_id: +id,
+          list:rates.map((r) => ({
+            // id: r.id, // cần id
             rate_to_vnd: r.rate_to_vnd,
             currency_code: r.currency_code,
           })),
@@ -136,17 +137,8 @@ const ExchangeRateSettings: React.FC = () => {
                       <p className="block text-gray-600 text-sm font-medium">
                         {/* {item.currency_code}  */}
                       </p>
-
-                      {/* <Form.Item
-                name="usdToVnd"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tỷ giá USD → VNĐ" },
-                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
-                ]}
-              > */}
                       <InputNumber
                         className="!w-full !h-[46px]"
-                        min={0}
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         }
@@ -182,96 +174,6 @@ const ExchangeRateSettings: React.FC = () => {
                   </>
                 );
               })}
-            {/* <Card className="!bg-white !rounded-lg !border !shadow-sm">
-              <div className="font-semibold text-gray-800 mb-4 flex items-center text-base">
-                <FontAwesomeIcon
-                  icon={faDollarSign}
-                  className="w-4 h-4 text-green-600"
-                />
-                Tỷ giá USD → VNĐ
-              </div>
-              <p className="block text-gray-600 text-sm font-medium">
-                1 USD = ? VNĐ
-              </p>
-
-              <Form.Item
-                name="usdToVnd"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tỷ giá USD → VNĐ" },
-                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
-                ]}
-              >
-                <InputNumber
-                  className="!w-full !h-[46px]"
-                  min={0}
-                  placeholder="Nhập tỷ giá USD → VNĐ"
-                />
-              </Form.Item>
-
-              <div className="text-xs text-gray-500 mt-2 space-y-1">
-                <p>
-                  <FontAwesomeIcon
-                    icon={faClock}
-                    className="w-4 h-4 text-gray-500"
-                  />
-                  Cập nhật lần cuối: 23/09/2025 14:30
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    icon={faUser}
-                    className="w-4 h-4 text-gray-500"
-                  />
-                  Được cập nhật bởi:
-                  <span className="font-semibold">Admin</span>
-                </p>
-              </div>
-            </Card> */}
-
-            {/* JPY -> VND */}
-            {/* <Card>
-              <div className="font-semibold text-gray-800 mb-4 flex items-center  text-base">
-                <FontAwesomeIcon
-                  icon={faYenSign}
-                  className="w-4 h-4 text-red-500"
-                />
-                Tỷ giá JPY → VNĐ
-              </div>
-              <p className="block text-gray-600 text-sm font-medium">
-                1 JPY = ? VNĐ
-              </p>
-
-              <Form.Item
-                name="jpyToVnd"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tỷ giá JPY → VNĐ" },
-                  { type: "number", min: 1, message: "Giá trị phải lớn hơn 0" },
-                ]}
-              >
-                <InputNumber
-                  className="!w-full !h-[46px]"
-                  min={0}
-                  placeholder="Nhập tỷ giá JPY → VNĐ"
-                />
-              </Form.Item>
-
-              <div className="text-xs text-gray-500 mt-2 space-y-1">
-                <p>
-                  <FontAwesomeIcon
-                    icon={faClock}
-                    className="w-4 h-4 text-gray-500"
-                  />{" "}
-                  Cập nhật lần cuối: 23/09/2025 14:30
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    icon={faUser}
-                    className="w-4 h-4 text-gray-500"
-                  />{" "}
-                  Được cập nhật bởi:{" "}
-                  <span className="font-semibold">Admin</span>
-                </p>
-              </div>
-            </Card> */}
           </div>
         </Form>
       </Card>

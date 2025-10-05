@@ -252,3 +252,10 @@ export interface ServiceFee {
   amount: number;
   currency_code: string;
 }
+
+export interface GeneralPolicyModel {
+  customer_group_id: number;
+  free_storage_days: number;
+  min_deposit_percent: number;
+  storage_fee_per_kg_per_day: number;
+}
