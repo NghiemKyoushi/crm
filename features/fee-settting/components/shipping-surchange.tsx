@@ -224,14 +224,14 @@ export default function ShippingSurchangeTable(
       },
       {
         title: t("table.orderType"),
-        dataIndex: "order_type",
+        dataIndex: "x",
         width: 180,
         render: (val, record) => (
           <Select
             className="!w-full !h-9 !bg-gray-100"
-            value={val ?? 1}
+            value={record.type ?? 1}
             onChange={(value) =>
-              handleChange(+route, record.id.toString(), "order_type", value)
+              handleChange(+route, record.id.toString(), "type", value)
             }
             options={[
               { value: 1, label: "Tính trên giá sản phẩm" },
@@ -247,7 +247,7 @@ export default function ShippingSurchangeTable(
         render: (val, record) => {
           console.log('record.condition_type', record.condition_type);
           
-          if (record.order_type === 2) return null;
+          if (record.type === 2) return null;
           return (
             <Select
               className="!w-full !h-9 !bg-gray-100"
@@ -277,7 +277,7 @@ export default function ShippingSurchangeTable(
         dataIndex: "price_to",
         width: 200,
         render: (val, record: MaterialItem) => {
-          if (record.order_type === 2) return null;
+          if (record.type === 2) return null;
           const placeholder = isUSRoute ? "$" : "¥";
 
           if (record.condition_type === "RANGE") {
