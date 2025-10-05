@@ -131,10 +131,10 @@ const ExchangeRateSettings: React.FC = () => {
                           }
                           className="w-4 h-4 text-green-600"
                         />
-                        Tỷ giá {item.currency_code} → VNĐ
+                        Tỷ giá {item.currency_code}
                       </div>
                       <p className="block text-gray-600 text-sm font-medium">
-                        1 {item.currency_code} = ? VNĐ
+                        {/* {item.currency_code}  */}
                       </p>
 
                       {/* <Form.Item

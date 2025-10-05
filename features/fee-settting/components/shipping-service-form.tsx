@@ -53,10 +53,14 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
   );
   const updateServiceMutation = useUpdateListService();
   const handleSubmit = (values: Record<string, any>) => {
-    if (!listService?.data) return;
+    console.log('check222', );
+
+    if (!listService) return;
 
     // map lại data để gửi API
-    const updated: ServiceFee[] = listService.data.map(
+    console.log('check222', );
+    
+    const updated: ServiceFee[] = listService.map(
       (routeItem: ServiceFee) => ({
         ...routeItem,
         fees: routeItem.fees.map((fee: Fee) => ({

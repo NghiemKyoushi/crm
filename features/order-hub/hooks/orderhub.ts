@@ -186,9 +186,10 @@ export const useCompleteShippingOrder = () => {
       body,
     }: {
       body: {
-        shipping_code: number;
+        shipping_code: string;
         shipping_type?: number;
         shipping_fee?: number;
+        shipping_tracking?: string;
       };
     }) => completeShippingOrder(body),
   });

@@ -35,6 +35,7 @@ const ProductManagement: React.FC = () => {
       OrderStatusType.ARRIVED_VN_WAREHOUSE,
       OrderStatusType.READY_TO_SHIP,
       OrderStatusType.SHIPPING_REQUEST_CLIENT,
+      OrderStatusType.SHIPPED
     ],
   });
 
@@ -81,14 +82,14 @@ const ProductManagement: React.FC = () => {
         );
       },
     },
-    {
-      title: "Ngày Về",
-      key: "arrival_date",
-      width: 80,
-      render: (_, record) => (
-        <div className="text-xs text-gray-800">-</div>
-      ),
-    },
+    // {
+    //   title: "Ngày Về",
+    //   key: "arrival_date",
+    //   width: 80,
+    //   render: (_, record) => (
+    //     <div className="text-xs text-gray-800">-</div>
+    //   ),
+    // },
     {
       title: "Mã VN / CN",
       key: "tracking_package",
@@ -135,7 +136,7 @@ const ProductManagement: React.FC = () => {
         return (
           <div className="space-y-1">
             <div className="text-xs text-gray-800 font-medium">{record.customer_name || "-"}</div>
-            <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
+            {/* <div className="text-xs text-gray-500">{record.customer_code || "-"}</div> */}
             <div className="text-xs text-blue-600">
               <span className="text-gray-500">NTạo: </span>
               {createdByName || "-"}
@@ -144,303 +145,303 @@ const ProductManagement: React.FC = () => {
         );
       },
     },
-    {
-      title: "Sản Phẩm",
-      key: "product",
-      width: 280,
-      render: (_, record) => {
-        const orderList = record.order_list || [];
+    // {
+    //   title: "Sản Phẩm",
+    //   key: "product",
+    //   width: 280,
+    //   render: (_, record) => {
+    //     const orderList = record.order_list || [];
 
-        // Lấy tất cả sản phẩm từ tất cả orders
-        const allProducts: Array<{ name: string; quantity: number; image: string | null }> = [];
+    //     // Lấy tất cả sản phẩm từ tất cả orders
+    //     const allProducts: Array<{ name: string; quantity: number; image: string | null }> = [];
 
-        orderList.forEach((order) => {
-          if (order.metadata) {
-            try {
-              const metadata = typeof order.metadata === 'string'
-                ? JSON.parse(order.metadata)
-                : order.metadata;
+    //     orderList.forEach((order) => {
+    //       if (order.metadata) {
+    //         try {
+    //           const metadata = typeof order.metadata === 'string'
+    //             ? JSON.parse(order.metadata)
+    //             : order.metadata;
 
-              const items = metadata?.items || [];
-              items.forEach((item: any) => {
-                const product = item.product;
-                const productName = product?.map_data?.productName || "Sản phẩm";
-                const quantity = item.count || 0;
-                const images = product?.map_data?.images || [];
-                const productImage = images.length > 0 ? images[0] : null;
+    //           const items = metadata?.items || [];
+    //           items.forEach((item: any) => {
+    //             const product = item.product;
+    //             const productName = product?.map_data?.productName || "Sản phẩm";
+    //             const quantity = item.count || 0;
+    //             const images = product?.map_data?.images || [];
+    //             const productImage = images.length > 0 ? images[0] : null;
 
-                allProducts.push({ name: productName, quantity, image: productImage });
-              });
-            } catch (e) {
-              console.error("Error parsing metadata:", e);
-            }
-          }
-        });
+    //             allProducts.push({ name: productName, quantity, image: productImage });
+    //           });
+    //         } catch (e) {
+    //           console.error("Error parsing metadata:", e);
+    //         }
+    //       }
+    //     });
 
-        // Tính tổng số lượng sản phẩm
-        const totalProductQty = allProducts.reduce((sum, p) => sum + p.quantity, 0);
+    //     // Tính tổng số lượng sản phẩm
+    //     const totalProductQty = allProducts.reduce((sum, p) => sum + p.quantity, 0);
 
-        const firstProduct = allProducts[0];
-        const remainingProducts = allProducts.length - 1;
+    //     const firstProduct = allProducts[0];
+    //     const remainingProducts = allProducts.length - 1;
 
-        return (
-          <div className="flex gap-2">
-            {firstProduct && (
-              <>
-                <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
-                  {firstProduct.image ? (
-                    <img src={firstProduct.image} alt="Product" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-xs text-gray-400">No img</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="text-xs text-gray-800 line-clamp-2">
-                    {firstProduct.name}
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-gray-500">Tổng SL: </span>
-                    <span className="text-gray-800 font-medium">{totalProductQty}</span>
-                  </div>
-                  {remainingProducts > 0 && (
-                    <div className="text-xs text-blue-600">
-                      +{remainingProducts} SP khác
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-            {!firstProduct && (
-              <div className="text-xs text-gray-400">Không có sản phẩm</div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Phụ Phí",
-      key: "extra_fee",
-      width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-800 text-left">-</div>
-      ),
-    },
-    {
-      title: "Ghi Chú",
-      key: "note",
-      width: 140,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const orderList = record.order_list || [];
-        const descriptions = orderList
-          .map(order => order.description)
-          .filter(Boolean);
+    //     return (
+    //       <div className="flex gap-2">
+    //         {firstProduct && (
+    //           <>
+    //             <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
+    //               {firstProduct.image ? (
+    //                 <img src={firstProduct.image} alt="Product" className="w-full h-full object-cover" />
+    //               ) : (
+    //                 <div className="w-full h-full flex items-center justify-center">
+    //                   <span className="text-xs text-gray-400">No img</span>
+    //                 </div>
+    //               )}
+    //             </div>
+    //             <div className="flex-1 min-w-0 space-y-1">
+    //               <div className="text-xs text-gray-800 line-clamp-2">
+    //                 {firstProduct.name}
+    //               </div>
+    //               <div className="text-xs">
+    //                 <span className="text-gray-500">Tổng SL: </span>
+    //                 <span className="text-gray-800 font-medium">{totalProductQty}</span>
+    //               </div>
+    //               {remainingProducts > 0 && (
+    //                 <div className="text-xs text-blue-600">
+    //                   +{remainingProducts} SP khác
+    //                 </div>
+    //               )}
+    //             </div>
+    //           </>
+    //         )}
+    //         {!firstProduct && (
+    //           <div className="text-xs text-gray-400">Không có sản phẩm</div>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Phụ Phí",
+    //   key: "extra_fee",
+    //   width: 110,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="text-xs text-gray-800 text-left">-</div>
+    //   ),
+    // },
+    // {
+    //   title: "Ghi Chú",
+    //   key: "note",
+    //   width: 140,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const orderList = record.order_list || [];
+    //     const descriptions = orderList
+    //       .map(order => order.description)
+    //       .filter(Boolean);
 
-        const firstDescription = descriptions[0] || "-";
+    //     const firstDescription = descriptions[0] || "-";
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs text-gray-600 line-clamp-2">{firstDescription}</div>
-            {descriptions.length > 1 && (
-              <div className="text-xs text-blue-600">+{descriptions.length - 1} ghi chú khác</div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Phí & Tỷ Giá",
-      key: "fees_rates",
-      width: 160,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const orderList = record.order_list || [];
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs text-gray-600 line-clamp-2">{firstDescription}</div>
+    //         {descriptions.length > 1 && (
+    //           <div className="text-xs text-blue-600">+{descriptions.length - 1} ghi chú khác</div>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Phí & Tỷ Giá",
+    //   key: "fees_rates",
+    //   width: 160,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const orderList = record.order_list || [];
 
-        // Tính tổng shipping fee và weight fee
-        const totalShippingFee = orderList.reduce((sum, order) => sum + (order.shipping_fee || 0), 0);
-        const totalWeightFee = orderList.reduce((sum, order) => sum + (order.weight_fee || 0), 0);
+    //     // Tính tổng shipping fee và weight fee
+    //     const totalShippingFee = orderList.reduce((sum, order) => sum + (order.shipping_fee || 0), 0);
+    //     const totalWeightFee = orderList.reduce((sum, order) => sum + (order.weight_fee || 0), 0);
 
-        // Lấy rate (giả sử rate giống nhau cho tất cả orders)
-        const rate = orderList[0]?.rate;
+    //     // Lấy rate (giả sử rate giống nhau cho tất cả orders)
+    //     const rate = orderList[0]?.rate;
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Ship: </span>
-              <span className="text-gray-800 font-medium">
-                {totalShippingFee > 0 ? `${totalShippingFee.toLocaleString("vi-VN")}¥` : "-"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">CN: </span>
-              <span className="text-gray-800 font-medium">
-                {totalWeightFee > 0 ? `${totalWeightFee.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">TG: </span>
-              <span className="text-gray-800">{rate || "-"}</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "COD (Việt)",
-      key: "transfer_fee",
-      width: 180,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const orderData = record.order_list?.[0];
-        const codPrice = orderData?.cod_shipping_price || 0;
-        const shippingPrice = codPrice || orderData?.shipping_fee || 0;
-        const shippingCode = orderData?.tracking_vn || "";
-        const isShippingRequest = record.status === OrderStatusType.SHIPPING_REQUEST_CLIENT;
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Ship: </span>
+    //           <span className="text-gray-800 font-medium">
+    //             {totalShippingFee > 0 ? `${totalShippingFee.toLocaleString("vi-VN")}¥` : "-"}
+    //           </span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">CN: </span>
+    //           <span className="text-gray-800 font-medium">
+    //             {totalWeightFee > 0 ? `${totalWeightFee.toLocaleString("vi-VN")}đ` : "-"}
+    //           </span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">TG: </span>
+    //           <span className="text-gray-800">{rate || "-"}</span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "COD (Việt)",
+    //   key: "transfer_fee",
+    //   width: 180,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const orderData = record.order_list?.[0];
+    //     const codPrice = orderData?.cod_shipping_price || 0;
+    //     const shippingPrice = codPrice || orderData?.shipping_fee || 0;
+    //     const shippingCode = orderData?.tracking_vn || "";
+    //     const isShippingRequest = record.status === OrderStatusType.SHIPPING_REQUEST_CLIENT;
 
-        let shippingTypeText = "-";
-        let shippingTypeColor = "text-gray-600";
+    //     let shippingTypeText = "-";
+    //     let shippingTypeColor = "text-gray-600";
 
-        if (codPrice > 0) {
-          shippingTypeText = "COD";
-          shippingTypeColor = "text-blue-600";
-        }
+    //     if (codPrice > 0) {
+    //       shippingTypeText = "COD";
+    //       shippingTypeColor = "text-blue-600";
+    //     }
 
-        const showWarningCode = isShippingRequest && !shippingCode;
-        const showWarningPrice = isShippingRequest && !shippingPrice;
-        const showWarningType = isShippingRequest && shippingTypeText === "-";
+    //     const showWarningCode = isShippingRequest && !shippingCode;
+    //     const showWarningPrice = isShippingRequest && !shippingPrice;
+    //     const showWarningType = isShippingRequest && shippingTypeText === "-";
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1">
-                <span className="text-gray-500">Mã: </span>
-                {showWarningCode ? (
-                  <Tooltip title="Chưa có mã vận chuyển">
-                    <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-                  </Tooltip>
-                ) : (
-                  <span className="text-gray-800">{shippingCode || "-"}</span>
-                )}
-              </div>
-              {isShippingRequest && (
-                <EditOutlined
-                  className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenTrackingOrder(true);
-                  }}
-                />
-              )}
-            </div>
-            <div className="text-xs flex items-center gap-1">
-              <span className="text-gray-500">Giá: </span>
-              {showWarningPrice ? (
-                <Tooltip title="Chưa có giá vận chuyển">
-                  <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-                </Tooltip>
-              ) : (
-                <span className="text-gray-800 font-medium">
-                  {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
-                </span>
-              )}
-            </div>
-            <div className="text-xs flex items-center gap-1">
-              <span className="text-gray-500">HT: </span>
-              {showWarningType ? (
-                <Tooltip title="Chưa có hình thức">
-                  <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-                </Tooltip>
-              ) : (
-                <span className={`font-medium ${shippingTypeColor}`}>
-                  {shippingTypeText}
-                </span>
-              )}
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Thanh Toán & Công Nợ",
-      key: "payment_info",
-      width: 170,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const orderList = record.order_list || [];
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs flex items-center justify-between gap-2">
+    //           <div className="flex items-center gap-1">
+    //             <span className="text-gray-500">Mã: </span>
+    //             {showWarningCode ? (
+    //               <Tooltip title="Chưa có mã vận chuyển">
+    //                 <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+    //               </Tooltip>
+    //             ) : (
+    //               <span className="text-gray-800">{shippingCode || "-"}</span>
+    //             )}
+    //           </div>
+    //           {isShippingRequest && (
+    //             <EditOutlined
+    //               className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+    //               onClick={() => {
+    //                 setOrderDetail(record);
+    //                 setIsOpenTrackingOrder(true);
+    //               }}
+    //             />
+    //           )}
+    //         </div>
+    //         <div className="text-xs flex items-center gap-1">
+    //           <span className="text-gray-500">Giá: </span>
+    //           {showWarningPrice ? (
+    //             <Tooltip title="Chưa có giá vận chuyển">
+    //               <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+    //             </Tooltip>
+    //           ) : (
+    //             <span className="text-gray-800 font-medium">
+    //               {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
+    //             </span>
+    //           )}
+    //         </div>
+    //         <div className="text-xs flex items-center gap-1">
+    //           <span className="text-gray-500">HT: </span>
+    //           {showWarningType ? (
+    //             <Tooltip title="Chưa có hình thức">
+    //               <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
+    //             </Tooltip>
+    //           ) : (
+    //             <span className={`font-medium ${shippingTypeColor}`}>
+    //               {shippingTypeText}
+    //             </span>
+    //           )}
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Thanh Toán & Công Nợ",
+    //   key: "payment_info",
+    //   width: 170,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const orderList = record.order_list || [];
 
-        // Tính tổng deposit fee và amount_vnd từ tất cả orders
-        const totalDepositFee = orderList.reduce((sum, order) => sum + (order.deposit_fee || 0), 0);
-        const totalAmountVnd = orderList.reduce((sum, order) => sum + (order.amount_vnd || 0), 0);
-        const remaining = totalAmountVnd - totalDepositFee;
+    //     // Tính tổng deposit fee và amount_vnd từ tất cả orders
+    //     const totalDepositFee = orderList.reduce((sum, order) => sum + (order.deposit_fee || 0), 0);
+    //     const totalAmountVnd = orderList.reduce((sum, order) => sum + (order.amount_vnd || 0), 0);
+    //     const remaining = totalAmountVnd - totalDepositFee;
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Cọc: </span>
-              <span className="text-green-600 font-medium">
-                {totalDepositFee > 0 ? `${totalDepositFee.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Còn lại: </span>
-              <span className="text-orange-600 font-medium">
-                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Cọc: </span>
+    //           <span className="text-green-600 font-medium">
+    //             {totalDepositFee > 0 ? `${totalDepositFee.toLocaleString("vi-VN")}đ` : "-"}
+    //           </span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Còn lại: </span>
+    //           <span className="text-orange-600 font-medium">
+    //             {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+    //           </span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Tổng Chi Phí",
+    //   key: "total_cost",
+    //   width: 130,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const orderList = record.order_list || [];
+
+    //     // Tính tổng chi phí (weight fee + shipping fee) từ tất cả orders
+    //     const totalCost = orderList.reduce(
+    //       (sum, order) => sum + (order.weight_fee || 0) + (order.shipping_fee || 0),
+    //       0
+    //     );
+
+    //     return (
+    //       <div className="text-xs text-gray-800 text-left font-medium">
+    //         {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Tổng Chi Phí",
-      key: "total_cost",
-      width: 130,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        const orderList = record.order_list || [];
-
-        // Tính tổng chi phí (weight fee + shipping fee) từ tất cả orders
-        const totalCost = orderList.reduce(
-          (sum, order) => sum + (order.weight_fee || 0) + (order.shipping_fee || 0),
-          0
-        );
-
-        return (
-          <div className="text-xs text-gray-800 text-left font-medium">
-            {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tổng",
       key: "total",
       width: 110,
       onCell: () => ({
@@ -573,7 +574,8 @@ const ProductManagement: React.FC = () => {
             >
               {text}
             </Tag>
-            <Button
+            {
+             status === OrderStatusType.SHIPPING_REQUEST_CLIENT && <Button
               size="small"
               className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               onClick={() => {
@@ -583,6 +585,7 @@ const ProductManagement: React.FC = () => {
             >
               {t('button.shipped')}
             </Button>
+            }
           </div>
         );
       },
@@ -600,7 +603,7 @@ const ProductManagement: React.FC = () => {
     },
     {
       value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
+      label: t("status.shippingRequest"),
     },
     { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
   ];
@@ -698,10 +701,11 @@ const ProductManagement: React.FC = () => {
             useCompleteShippingMutation.mutate(
               {
                 body: {
-                  shipping_code: value.shipping_code,
+                  shipping_code: orderDetail.tracking_ship,
                   // shipping_fee: +value.shipping_fee,
                   shipping_type: value.shipping_type,
                   shipping_fee: value.shipping_fee,
+                  shipping_tracking: value.shipping_code
                 },
               },
               {

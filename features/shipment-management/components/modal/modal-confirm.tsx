@@ -66,27 +66,6 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
         >
           <Input className="!h-11" placeholder="" />
         </Form.Item>
-        {/* <Form.Item
-          label="Shipping giá"
-          name="shipping_fee"
-          rules={[
-            {
-              required: true,
-              pattern: /^[A-Za-z0-9-]*$/,
-              message: "Mã tracking không hợp lệ",
-            },
-          ]}
-          className="!mb-2"
-        >
-          <InputNumber
-            formatter={(value) =>
-              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
-            parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
-            className="!h-11"
-            placeholder=""
-          />
-        </Form.Item> */}
         {/* 3 tùy chọn phí vận chuyển */}
         <Form.Item
           label="Phí vc nội địa"

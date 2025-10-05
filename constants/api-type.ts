@@ -84,7 +84,7 @@ export const API_TYPE_CONST = {
   COMPLETE_SHIPPING:`${FEATURE}/admin/orders/complete-shipping`,
   DASHBOARD_STATS:`${FEATURE}/admin/dashboard/stats`,
   GET_INFO_WEIGHT: `${FEATURE}/product/fee/get-dosmestic-info`,
-  CREATE_PRIVATE_NOTE:`${FEATURE}/admin/orders/note`,
+  CREATE_PRIVATE_NOTE:`${FEATURE}/admin/orders/admin-note`,
   CREATE_PRIVATE_NOTE_CLIENT:`${FEATURE}/orders/order-note`,
   GENERAL_POLICY:`${FEATURE}/admin/general-policy`,
   GEN_PACKAGE_CODE:`${FEATURE}/admin/tracking/gen-package-code`,
