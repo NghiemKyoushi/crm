@@ -97,7 +97,7 @@ export const deleteProductType = async (id: number) => {
   return res.data;
 };
 
-export const getListGeneralPolicy = async (params: {customer_group_id?: number}) => {
+export const getListGeneralPolicy = async (params: {customerGroupId?: number}) => {
   const res = await api.get(API_TYPE_CONST.GENERAL_POLICY, {params});
   return res.data.data;
 }; 
