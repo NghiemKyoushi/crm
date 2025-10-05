@@ -97,7 +97,7 @@ const ProductManagement: React.FC = () => {
           {
             tracking: record.tracking_ship || "",
             packageCode: orderData?.tracking_vn || "",
-            quantity: 0, // Số lượng đơn - chưa có trong response, để sau
+            quantity: 0, 
             weight: orderData?.weight ? `${orderData.weight}g` : ""
           }
         ].filter(r => r.tracking || r.packageCode);
