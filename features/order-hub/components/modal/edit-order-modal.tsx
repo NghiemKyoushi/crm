@@ -322,6 +322,16 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     (paymentAmount ? paymentAmount : 0);
   const totalFee = ((totalFeeCheck + priceVND) * percenDeposit) / 100;
 
+  const handleCancel = () => {
+    form.resetFields();
+    setServices([]);
+    setInsurance(null);
+    setPrice(0);
+    setPercenDeposit(0);
+    setIdProduct(null);
+    setSearchValue("");
+    onCancel();
+  };
   return (
     <>
       <Modal
@@ -335,7 +345,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         }}
         title="Chỉnh sửa Đơn hàng cho Khách hàng"
         open={isOpen}
-        onCancel={onCancel}
+        onCancel={handleCancel}
         centered
         footer={[
           <Button key="cancel" onClick={onCancel}>

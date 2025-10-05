@@ -202,7 +202,7 @@ const SettingsDetail = () => {
           </Button>
           <Button
             size="large"
-            onClick={() => router.push("/category-product")}
+            onClick={() => router.push("/fee-setting")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faTags} />}
           >
@@ -222,7 +222,7 @@ const SettingsDetail = () => {
         <div className="flex flex-col gap-3">
           <Button
             size="large"
-            onClick={() => router.push("/category-customer")}
+            onClick={() => router.push("/user-management")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
             icon={<FontAwesomeIcon className="w-4 h-4" icon={faLayerGroup} />}
           >

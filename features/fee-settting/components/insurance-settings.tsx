@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import {
   useListGeneralPolicy,
   useListInsurance,
+  useUpdateGeneralPolicy,
   useUpdateInsurance,
 } from "../hooks/fee-setting";
 import { InsuranceOption } from "@/types/fee-setting";
@@ -26,16 +27,20 @@ interface InsuranceFormValues {
   depositRate: number;
 }
 
-const InsuranceSettings: React.FC = () => {
+interface InsuranceSettingsProps {
+  groupId?: number;
+}
+export default function InsuranceSettings(props: InsuranceSettingsProps) {
+  const { groupId } = props;
   const { t } = useTranslation();
   const [form] = Form.useForm<InsuranceFormValues>();
   const [formGeneral] = Form.useForm();
 
   const { data: listInsurance, isPending } = useListInsurance();
-  const { data: listGereralPolicy } =
-    useListGeneralPolicy();
+  const { data: listGereralPolicy } = useListGeneralPolicy(groupId);
 
   const updateInsuranceMutation = useUpdateInsurance();
+  const useUpdateGeneralPolicyMutation = useUpdateGeneralPolicy();
   const onFinish = (values: any) => {
     // values.insurance = { id: { fee_percentage: number }, ... }
     const result = listInsurance.map((item: InsuranceOption) => ({
@@ -49,7 +54,7 @@ const InsuranceSettings: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Cập nhật thành công!");
+          toast.success(t("shippingSettings.updateFeeSuccess"));
         },
         onError: (err: any) =>
           toast.error(
@@ -60,21 +65,26 @@ const InsuranceSettings: React.FC = () => {
   };
 
   const onFinishGeneral = (values: any) => {
-    // updateGeneralPolicyMutation.mutate(values, {
-    //   onSuccess: () => toast.success("Cập nhật quy định thành công!"),
-    //   onError: (err: any) => toast.error(err.response?.data?.localizedMessage || t("common.error")),
-    // });
+    useUpdateGeneralPolicyMutation.mutate(
+      { param: { ...values, customer_group_id: groupId ? groupId : null } },
+      {
+        onSuccess: () => toast.success(t("shippingSettings.updateFeeSuccess")),
+        onError: (err: any) =>
+          toast.error(
+            err.response?.data?.localizedMessage || t("common.error")
+          ),
+      }
+    );
   };
 
   React.useEffect(() => {
-    console.log('listGereralPolicy?.data', listGereralPolicy);
-
     if (listGereralPolicy) {
-      console.log('listGereralPolicy?.data', listGereralPolicy?.data);
-      
+      console.log("listGereralPolicy?.data", listGereralPolicy?.data);
+
       formGeneral.setFieldsValue({
         free_storage_days: listGereralPolicy.free_storage_days ?? 0,
-        storage_fee_per_kg_per_day: listGereralPolicy.storage_fee_per_kg_per_day ?? 0,
+        storage_fee_per_kg_per_day:
+          listGereralPolicy.storage_fee_per_kg_per_day ?? 0,
         min_deposit_percent: listGereralPolicy.min_deposit_percent ?? 0,
       });
     }
@@ -155,24 +165,46 @@ const InsuranceSettings: React.FC = () => {
               name="free_storage_days"
               label={t("insuranceSettings.freeStorageDays")}
             >
-              <InputNumber min={0} className="!w-full" />
+              <InputNumber
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+                min={0}
+                className="!w-full"
+              />
             </Form.Item>
             <Form.Item
               name="storage_fee_per_kg_per_day"
               label={t("insuranceSettings.storageFeeAfter")}
             >
-              <InputNumber min={0} className="!w-full" />
+              <InputNumber
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+                min={0}
+                className="!w-full"
+              />
             </Form.Item>
             <Form.Item
               name="min_deposit_percent"
               label={t("insuranceSettings.minDepositRate")}
             >
-              <InputNumber min={0} max={100} className="!w-full" />
+              <InputNumber
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+                min={0}
+                max={100}
+                className="!w-full"
+              />
             </Form.Item>
           </div>
         </Card>
         <div className="text-right pt-4">
-        <Button
+          <Button
             type="primary"
             size="large"
             htmlType="submit"
@@ -185,6 +217,4 @@ const InsuranceSettings: React.FC = () => {
       </Form>
     </div>
   );
-};
-
-export default InsuranceSettings;
+}

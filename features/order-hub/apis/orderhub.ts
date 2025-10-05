@@ -1,5 +1,6 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
+import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
 import { ServiceFee } from "@/types/fee-setting";
 import {
   ApproveOrderModel,
@@ -41,9 +42,7 @@ export const getListOrderTracking = async (params: {
 };
 
 export const getDetailOrder = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);
-  console.log('res.data.data', res.data.data);
-  
+  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);  
   return res.data.data;
 };
 
@@ -57,8 +56,8 @@ export const getListService = async (params: {routeId: number}) => {
   return res.data.data;
 };
 
-export const updateListService = async (body: ServiceFee[]) => {
-  const res = await api.put(API_TYPE_CONST.FEE_GET, body);
+export const updateListService = async (body: FeeData) => {
+  const res = await api.post(API_TYPE_CONST.FEE_GET, body);
   return res.data.data;
 };
 

@@ -32,6 +32,7 @@ import {
 } from "@/types/orderhub";
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
 import { ServiceFee } from "@/types/fee-setting";
+import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
 
 export const useListOrder = (params: {
   page: number;
@@ -71,7 +72,7 @@ export const useListService = (
 };
 export const useUpdateListService = () => {
   return useMutation({
-    mutationFn: ({ param }: { param: ServiceFee[] }) =>
+    mutationFn: ({ param }: { param: FeeData }) =>
       updateListService(param),
   });
 };
