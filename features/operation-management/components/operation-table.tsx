@@ -11,10 +11,10 @@ import { OrderStatusType } from "@/types/orderhub";
 import { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
-import TrackingModalShip from "./modal/modal-confirm";
+// import TrackingModalShip from "./modal/modal-confirm";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Order } from "@/types/operation-manage";
+// import { Order } from "@/types/operation-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
@@ -23,7 +23,7 @@ import { EyeOutlined, EditOutlined, ExclamationCircleOutlined } from "@ant-desig
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
   const [page, setPage] = useState(0);
-  const [orderDetail, setOrderDetail] = useState<Order>();
+  const [orderDetail, setOrderDetail] = useState<any>();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
@@ -55,7 +55,7 @@ const ProductManagement: React.FC = () => {
 
   const useCompleteShippingMutation = useCompleteShippingOrder();
 
-  const columns: ColumnsType<Order> = [
+  const columns: ColumnsType<any> = [
     {
       title: "No",
       key: "invoice_no",
@@ -483,7 +483,7 @@ const ProductManagement: React.FC = () => {
           textAlign: "center",
         },
       }),
-      render: (_, record: Order) => {
+      render: (_, record: any) => {
         let color: string;
         let text: string;
         const status = record.status;
@@ -658,7 +658,7 @@ const ProductManagement: React.FC = () => {
         </EnhancedTableWrapper>
       </div>
 
-      {orderDetail && (
+      {/* {orderDetail && (
         <TrackingModalShip
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.tracking_ship}
@@ -690,7 +690,7 @@ const ProductManagement: React.FC = () => {
           }}
           open={isOpenTrackingOrder}
         />
-      )}
+      )} */}
 
       {/* Modal View Tracking/Kiện/SL/CN */}
       {isViewingTracking && (
