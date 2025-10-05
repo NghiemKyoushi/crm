@@ -75,7 +75,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
   const [paymentType, setPaymentType] = useState(1);
   const [currencyCode, setCurrencyCode] = useState("");
-
+  const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
   const { data: listService } = useListService(
     { routeId: routeId },
     {
@@ -137,7 +137,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           }
         );
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log('err', err);
+      
+    }
   };
 
   const { mutate } = useMutation<DataFromLink, Error, string>({
@@ -286,7 +289,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             "priceVnd",
             +form.getFieldValue("priceY") * rateValueForPrice
           );
-          form.setFieldValue("feeY", res.service_fee/rateValueForPrice);
+          form.setFieldValue("feeY", res.service_fee / rateValueForPrice);
           // form.setFieldValue("feeVnd", res.fee_vnd);
           setPercenDeposit(res.min_deposit_percent);
         } catch (error) {
@@ -322,11 +325,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     fees.SERVICE_FEE +
     fees.SHIPPING_SURCHARGE_FEE -
     (paymentAmount ? paymentAmount : 0);
-  const totalFee = ((totalFeeCheck + priceVND) * percenDeposit) / 100;
+  // const totalFee = ((totalFeeCheck + priceVND) * percenDeposit) / 100;
 
-  useEffect(() => {
-    if (totalFee) form.setFieldValue("deposit", totalFee);
-  }, [totalFee, percenDeposit]);
+  // useEffect(() => {
+  //   if (totalFee) form.setFieldValue("deposit", totalFee);
+  // }, [totalFee, percenDeposit]);
 
   const handleCancel = () => {
     form.resetFields();
@@ -732,7 +735,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 </Form.Item>
               </div>
 
-              <div className="flex flex-row gap-1">
+              {/* <div className="flex flex-row gap-1">
                 <Form.Item
                   label={t("form.depositVnd")}
                   name="deposit"
@@ -754,7 +757,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     min={0}
                   />
                 </Form.Item>
-              </div>
+              </div> */}
               <div className="flex flex-row gap-1">
                 <Form.Item
                   className="!flex-1 !mb-1"
@@ -791,47 +794,80 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                 />
               </Form.Item>
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="text-red-600 font-semibold  mb-3">{t("form.orderSummary")}</h4>
+                <h4 className="text-red-600 font-semibold  mb-3">
+                  {t("form.orderSummary")}
+                </h4>
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span>Tỷ giá quy đổi</span>
-                    <span>{rateValueForPrice ? rateValueForPrice : 0} đ</span>
+                    <span>
+                      {rateValueForPrice
+                        ? rateValueForPrice.toLocaleString("en-US")
+                        : 0}{" "}
+                      đ
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("form.productPrice")}</span>
-                    <span>{priceY ? priceY : 0} đ</span>
+                    <span>
+                      {priceY ? priceY.toLocaleString("en-US") : 0}{" "}
+                      {currencyCheckCode}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Cước VC nội địa</span>
-                    <span>{paymentAmount ? paymentAmount : 0} đ</span>
+                    <span>
+                      {paymentAmount
+                        ? paymentAmount.toLocaleString("en-US")
+                        : 0}{" "}
+                      {currencyCheckCode}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("form.serviceFee")}</span>
-                    <span>{fees.SERVICE_FEE} đ</span>
+                    <span>{fees.SERVICE_FEE.toLocaleString("en-US")} đ</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phí thanh toán</span>
-                    <span>{fees.PAYMENT_FEE} đ</span>
+                    <span>{fees.PAYMENT_FEE.toLocaleString("en-US")} đ</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Cước vc quốc tế</span>
-                    <span>{fees.DOMESTIC_SHIPPING_FEE} đ</span>
+                    <span>
+                      {fees.DOMESTIC_SHIPPING_FEE.toLocaleString("en-US")} đ
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phụ thu VC</span>
-                    <span>{fees.SHIPPING_SURCHARGE_FEE} đ</span>
+                    <span>
+                      {fees.SHIPPING_SURCHARGE_FEE.toLocaleString("en-US")} đ
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phí bảo hiểm</span>
-                    <span>{fees.INSURANCE_FEE} đ</span>
+                    <span>{fees.INSURANCE_FEE.toLocaleString("en-US")} đ</span>
                   </div>
+                  {listService?.map((item: any) => (
+                    <>
+                      {services.includes(item.code) && (
+                        <div className="flex justify-between">
+                          <span>{item.name}</span>
+                          <span>{item.amount.toLocaleString("en-US")} đ</span>
+                        </div>
+                      )}
+                    </>
+                  ))}
                 </div>
                 <hr className="my-2 border-gray-200" />
+
                 <div className="flex justify-between text-green-600 font-semibold">
                   <span>{t("form.total")}:</span>
                   <span>
                     {totalFeeCheck
-                      ? (totalFeeCheck + priceVND * (quantity ?? 0)).toLocaleString("en-US")
+                      ? (
+                          totalFeeCheck +
+                          priceVND * (quantity ?? 1)
+                        ).toLocaleString("en-US")
                       : 0}
                     đ
                   </span>

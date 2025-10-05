@@ -572,7 +572,7 @@ export default function OrderHub() {
     },
     {
       title: "Ghi Chú (Admin)",
-      key: "admin_notes",
+      key: "note_admin",
       width: 140,
       onCell: () => ({
         style: {
@@ -582,14 +582,14 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
           <div className="text-xs text-gray-600 flex-1">
-            {record?.admin_notes?.note ? record?.admin_notes?.note : "-"}
+            {record?.note_admin ? record?.note_admin : "-"}
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
             onClick={() =>
               setEditingNoteExtra({
                 orderId: record.id,
-                value: record?.admin_notes?.note,
+                value: record?.note_admin,
               })
             }
           />
@@ -922,7 +922,7 @@ export default function OrderHub() {
                   type="primary"
                   htmlType="submit"
                   icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-                  className="w-full !bg-gray-700 !text-white !font-medium !h-8 !text-xs"
+                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
                   size="small"
                 >
                   {t("filter")}
@@ -933,7 +933,7 @@ export default function OrderHub() {
                 <Button
                   type="primary"
                   icon={<PlusOutlined className="text-xs" />}
-                  className="w-full !bg-blue-600 !text-white !font-medium !h-8 !text-xs"
+                  className="!w-full !h-11 !bg-blue-600 !text-white !font-medium !text-xs"
                   size="small"
                   onClick={() => setOpen(true)}
                 >
@@ -1285,8 +1285,8 @@ export default function OrderHub() {
               onClick={() => {
                 useAddNote.mutate(
                   {
+                    order_id: editingNoteExtra.orderId,
                     param: {
-                      order_id: editingNoteExtra.orderId,
                       note: editingNoteExtra.value,
                     },
                   },

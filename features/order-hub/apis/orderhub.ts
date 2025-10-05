@@ -158,8 +158,8 @@ export const getDataWeight = async (id: number) => {
   return res.data.data;
 };
 
-export const updateNoteOrder = async (body: {order_id: number, note: string}) => {
-  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE}`, body);
+export const updateNoteOrder = async (order_id: number, body: { note: string}) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE}/${order_id}`, body);
   return res.data.data;
 };
 

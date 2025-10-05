@@ -604,7 +604,7 @@ const ProductManagement: React.FC = () => {
               <Form.Item name="keyword" className="mb-0">
                 <Input
                   placeholder="Tìm kiếm theo tracking, khách hàng..."
-                  className="w-full !h-8 !text-xs"
+                  className="!w-full !h-11 !text-xs"
                   size="small"
                 />
               </Form.Item>
@@ -612,7 +612,7 @@ const ProductManagement: React.FC = () => {
               <Form.Item name="status" className="mb-0">
                 <Select
                   placeholder="Chọn trạng thái"
-                  className="w-full"
+                  className="!w-full !h-11"
                   size="small"
                   allowClear
                 >
@@ -625,7 +625,7 @@ const ProductManagement: React.FC = () => {
               </Form.Item>
 
               <Form.Item name="date" className="mb-0">
-                <DatePicker className="w-full !h-8" size="small" placeholder="Chọn ngày" />
+                <DatePicker className="!w-full !h-11" size="small" placeholder="Chọn ngày" />
               </Form.Item>
 
               <Form.Item className="mb-0">
@@ -633,7 +633,7 @@ const ProductManagement: React.FC = () => {
                   type="primary"
                   htmlType="submit"
                   icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-                  className="w-full !bg-gray-700 !text-white !font-medium !h-8 !text-xs"
+                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
                   size="small"
                 >
                   Lọc
