@@ -225,11 +225,17 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
             control={control}
             render={({ field }) => (
               <Radio.Group {...field} className="flex flex-col gap-3">
-                {listRole?.map((item, index) => (
-                  <Radio value={item.role_id.toString()} key={index}>
-                    {item.role_name}
-                  </Radio>
-                ))}
+                {listRole
+                  ?.filter(
+                    (item) =>
+                      item.role_id.toString() !== "8" &&
+                      item.role_name !== "USER"
+                  )
+                  .map((item, index) => (
+                    <Radio value={item.role_id.toString()} key={index}>
+                      {item.role_name}
+                    </Radio>
+                  ))}
               </Radio.Group>
             )}
           />
