@@ -196,12 +196,12 @@ export default function ShippingSurchangeTable(
         render: (val, record) => {
           // Lấy tất cả category_id đã chọn trong route này
           const usedIds = data[+route]?.map((r) => r.product_category_id) || [];
-      
+
           // Nếu đang edit row này thì cho phép giữ nguyên value hiện tại
           const filteredOptions = categoryOptions.filter(
-            (opt:any) => opt.value === val || !usedIds.includes(opt.value)
+            (opt: any) => opt.value === val || !usedIds.includes(opt.value)
           );
-      
+
           return (
             <Select
               showSearch
@@ -245,8 +245,8 @@ export default function ShippingSurchangeTable(
         dataIndex: "condition_type",
         width: 100,
         render: (val, record) => {
-          console.log('record.condition_type', record.condition_type);
-          
+          console.log("record.condition_type", record.condition_type);
+
           if (record.type === 2) return null;
           return (
             <Select
@@ -425,21 +425,22 @@ export default function ShippingSurchangeTable(
                     (value ?? "0") + unitPart // nối với đơn vị
                   )
                 }
-              />
-
-              <Select
-                className="!h-9 !w-6/12"
-                value={unitPart}
-                onChange={(cur) => {
-                  const cleanNumber = numberPart || "0";
-                  handleChange(
-                    +route,
-                    record.id.toString(),
-                    "value_data",
-                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                  );
-                }}
-                options={currencyOptions}
+                addonAfter={
+                  <Select
+                    className="!h-9 !w-20"
+                    value={unitPart}
+                    onChange={(cur) => {
+                      const cleanNumber = numberPart || "0";
+                      handleChange(
+                        +route,
+                        record.id.toString(),
+                        "value_data",
+                        cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                      );
+                    }}
+                    options={currencyOptions}
+                  />
+                }
               />
             </div>
           );
@@ -448,7 +449,7 @@ export default function ShippingSurchangeTable(
       {
         title: t("table.surcharge"),
         dataIndex: "value_shipping_data",
-        width: 140,
+        width: 200,
         render: (val, record) => {
           // Bắt cả USD, JPY, VND, %
           const match = (val ?? "")
@@ -501,21 +502,22 @@ export default function ShippingSurchangeTable(
                     (value ?? "0") + unitPart // nối với đơn vị
                   )
                 }
-              />
-
-              <Select
-                className="!h-9 !w-6/12"
-                value={unitPart}
-                onChange={(cur) => {
-                  const cleanNumber = numberPart || "0";
-                  handleChange(
-                    +route,
-                    record.id.toString(),
-                    "value_shipping_data",
-                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                  );
-                }}
-                options={optionList}
+                addonAfter={
+                  <Select
+                    className="!h-9 !w-20"
+                    value={unitPart}
+                    onChange={(cur) => {
+                      const cleanNumber = numberPart || "0";
+                      handleChange(
+                        +route,
+                        record.id.toString(),
+                        "value_shipping_data",
+                        cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                      );
+                    }}
+                    options={optionList}
+                  />
+                }
               />
             </div>
           );
