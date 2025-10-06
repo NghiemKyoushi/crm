@@ -88,7 +88,7 @@ export default function BankPartnerSetting() {
   const useAddBankPermission = (idBank: number, onSuccess?: () => void) => {
     return useMutation({
       mutationFn: (admin_user_ids: number[]) =>
-        addUserBankPermission(idBank, { admin_user_ids }),
+        addUserBankPermission(idBank, { admin_user_ids, type: 2 }),
       onSuccess: () => {
         toast.success(t("bankPartner.updatePermissionSuccess"));
         if (onSuccess) onSuccess();
