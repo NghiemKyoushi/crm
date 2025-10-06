@@ -6,6 +6,7 @@ export interface CurrencyRate {
   created_by: number;
   updated_at: string;      
   updated_by: number;
+  full_name: string
 }
 
 export interface CurrencyRateResponse {
@@ -16,8 +17,13 @@ export interface UpdateListRateParams{
   data: ListRateParams[];
 }
 
+export interface UpdateListRateParamsCheck{
+  list: ListRateParams[];
+  customer_group_id?: number;
+}
+
 export interface ListRateParams{
-  id: number;
+  id?: number;
   rate_to_vnd: number;
   currency_code: string;
 }

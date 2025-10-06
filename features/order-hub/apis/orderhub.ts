@@ -1,10 +1,14 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
+import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
+import { ServiceFee } from "@/types/fee-setting";
 import {
   ApproveOrderModel,
+  CreateTrackingModel,
   OrderFeeRequest,
   RateOrderRequest,
   TrackingWeightInfo,
+  updateCodEachRowModel,
 } from "@/types/orderhub";
 import qs from "qs";
 
@@ -38,7 +42,7 @@ export const getListOrderTracking = async (params: {
 };
 
 export const getDetailOrder = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);
+  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);  
   return res.data.data;
 };
 
@@ -47,8 +51,13 @@ export const getDataProductFromLink = async (link: string) => {
   return res.data.data;
 };
 
-export const getListService = async () => {
-  const res = await api.get(API_TYPE_CONST.FEE_GET);
+export const getListService = async (params: {routeId: number}) => {
+  const res = await api.get(API_TYPE_CONST.FEE_GET, {params});
+  return res.data.data;
+};
+
+export const updateListService = async (body: FeeData) => {
+  const res = await api.post(API_TYPE_CONST.FEE_GET, body);
   return res.data.data;
 };
 
@@ -135,10 +144,57 @@ export const completeOrder = async (id: string) => {
 };
 
 export const completeShippingOrder = async (body: {
-  shipping_code: number;
-  cod_fee?: number;
-  shipping_option?: string;
+  shipping_code: string;
+  shipping_type?: number;
+  shipping_fee?: number;
+  shipping_tracking?: string;
 }) => {
   const res = await api.put(`${API_TYPE_CONST.COMPLETE_SHIPPING}`, body);
   return res.data.data;
 };
+
+export const getDataWeight = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.GET_INFO_WEIGHT}/${id}`);
+  return res.data.data;
+};
+
+export const updateNoteOrder = async (order_id: number, body: { note: string}) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE}/${order_id}`, body);
+  return res.data.data;
+};
+
+export const updateNoteOrderClient = async (id: number ,params: { note: string}) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE_CLIENT}/${id}`, params);
+  return res.data.data;
+};
+
+export const createTrackingOrder = async (id: number, body: CreateTrackingModel) => {
+  const res = await api.post(`${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`, body);
+  return res.data.data;
+};
+
+export const updateTrackingOrder = async (id: number, body: CreateTrackingModel[]) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`, body);
+  return res.data.data;
+};
+
+export const getTrackingOrder = async (id: number) => {
+  const res = await api.get(`${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`);
+  return res.data.data;
+};
+
+export const genPackageCode = async () => {
+  const res = await api.get(API_TYPE_CONST.GEN_PACKAGE_CODE);  
+  return res.data.message;
+};
+
+export const updateCodForEarchOrder = async (id: number, body: updateCodEachRowModel) => {
+  const res = await api.post(`${API_TYPE_CONST.UPDATE_COD_EACH_ROW}/${id}`, body);
+  return res.data.data;
+};
+
+export const getDataGeneral = async (params?: {customerGroupId?: number}) => {
+  const res = await api.get(API_TYPE_CONST.GET_DATA_CHECK, {params});  
+  return res.data.data;
+};
+

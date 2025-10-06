@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Form, Input, Select, Radio, Button, InputNumber } from "antd";
+import { Modal, Form, Input, Select, Button, InputNumber } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -18,9 +18,10 @@ interface ApproveOrderModalProps {
 }
 
 export interface FormValuesApprove {
-  cod_shipping: number;
   description: string;
   product_category_id: number;
+  cod_shipping_price: number;
+  cod_type: number;
 }
 
 const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
@@ -31,14 +32,16 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
   customerName,
 }) => {
   const [form] = Form.useForm();
+  const [paymentType, setPaymentType] = useState<number | null>(null);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
       onSubmit(values);
       form.resetFields();
+      setPaymentType(null);
     } catch (error) {
-      // nếu có lỗi validate thì antd sẽ highlight input
+      // antd tự highlight field lỗi
     }
   };
 
@@ -57,14 +60,12 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 p-3 rounded mb-2">
-        <h4 className="font-semibold text-blue-900 !mb-1">
-          Thông tin đơn hàng
-        </h4>
+        <h4 className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</h4>
         <p className="!mb-1">
-          <strong>Mã đơn:</strong> {orderCode}
+          <strong>Mã đơn:</strong> {orderCode || ""}
         </p>
         <p className="!mb-1">
-          <strong>Khách hàng:</strong> {customerName}
+          <strong>Khách hàng:</strong> {customerName || ""}
         </p>
       </div>
 
@@ -77,32 +78,49 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           className="!mb-3"
         >
           <Select className="!h-11" placeholder="-- Chọn loại sản phẩm --">
-            {categories?.map((cat: any) => {
-              return (
-                <>
-                  <Option value={cat.id}>{cat.name}</Option>
-                </>
-              );
-            })}
+            {categories && categories?.map((cat: any) => (
+              <Option key={cat.id} value={cat.id}>
+                {cat.name}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
 
-        {/* Phí COD */}
+        {/* Phí vận chuyển nội địa */}
         <Form.Item
-          name="cod_shipping"
-          label="Phí COD"
-          rules={[{ required: true, message: "Vui lòng nhập phí COD!" }]}
+          name="cod_type"
+          label="Phí vận chuyển nội địa"
+          rules={[{ required: true, message: "Vui lòng chọn hình thức" }]}
           className="!mb-3"
         >
-          <InputNumber
-            formatter={(value) =>
-              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
-            style={{ display: "flex", alignItems: "center" }}
+          <Select
+            placeholder="Chọn hình thức"
             className="!w-full !h-11"
-            min={0}
+            onChange={(val) => setPaymentType(val)}
+            options={[
+              { label: "Miễn phí vận chuyển", value: 1 },
+              { label: "ADMIN điền COD", value: 2 },
+            ]}
           />
         </Form.Item>
+
+        {paymentType === 2 && (
+          <Form.Item
+            name="cod_shipping_price"
+            label="Số tiền thanh toán"
+            className="!mb-3"
+            rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
+          >
+            <InputNumber
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value?.replace(/,/g, "") as any}
+              className="!w-full !h-11"
+              min={0}
+            />
+          </Form.Item>
+        )}
 
         {/* Ghi chú admin */}
         <Form.Item

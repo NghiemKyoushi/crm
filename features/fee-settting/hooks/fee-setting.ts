@@ -5,6 +5,7 @@ import {
   CategoryItem,
   CreateModel,
   FormData,
+  GeneralPolicyModel,
   InsuranceModelParamSend,
   ItemShippingList,
   MaterialResponse,
@@ -17,6 +18,7 @@ import {
   deleteInsurance,
   getFeeSettingDefault,
   getFeeShippingDefault,
+  getListGeneralPolicy,
   getListInsurance,
   getListProductType,
   getMaterial,
@@ -24,6 +26,7 @@ import {
   updateFeeSettingDefault,
   updateFeeShippingDefault,
   updateInsurance,
+  updateListGeneralPolicy,
   updateProductType,
   updateShippingFee,
 } from "../apis/fee-setting";
@@ -37,6 +40,14 @@ export const useListInsurance = () => {
   return useQuery({
     queryKey: [...INSURANCE_QUERY_KEY],
     queryFn: () => getListInsurance(),
+  });
+};
+
+export const useListGeneralPolicy = (customer_group_id?: number) => {
+  return useQuery({
+    queryKey: ["generalPolicy", customer_group_id],
+    queryFn: () => getListGeneralPolicy({customerGroupId: customer_group_id}),
+    // enabled: !!customer_group_id, // chỉ gọi khi có id
   });
 };
 
@@ -163,3 +174,11 @@ export const useUpdateProductType = () => {
 //     mutationFn: ({ id }: { id: number }) => deleteWebsite(id),
 //   });
 // };
+
+export const useUpdateGeneralPolicy = () => {
+  return useMutation({
+    mutationFn: ({ param }: { param: GeneralPolicyModel }) =>
+      updateListGeneralPolicy(param),
+  });
+};
+// updateListGeneralPolicy

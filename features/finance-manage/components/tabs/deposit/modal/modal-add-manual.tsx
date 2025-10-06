@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Modal, Input, Select, Button, Form, message } from "antd";
+import { Modal, Input, Select, Button, Form, message, InputNumber } from "antd";
 import type { SelectProps } from "antd";
 import axios from "axios";
 import {
@@ -151,7 +151,13 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           name="amount"
           rules={[{ required: true, message: "Nhập số tiền!" }]}
         >
-          <Input type="number" placeholder="VD: 5000000" />
+          <InputNumber
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            placeholder="VD: 5000000"
+            className="!w-full "
+          />
         </Form.Item>
 
         {/* <Form.Item

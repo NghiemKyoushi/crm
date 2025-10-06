@@ -1,7 +1,21 @@
 import React, { useState } from "react";
-import { Tag, Button, Input, Select, Form, DatePicker } from "antd";
+import {
+  Tag,
+  Button,
+  Input,
+  Select,
+  Form,
+  DatePicker,
+  Modal,
+  Tooltip,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  ReloadOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -11,9 +25,9 @@ import {
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
-import OrderDetailModal from "./modal/orderhub-detail-modal";
 import { useTranslation } from "react-i18next";
 import {
+  extractPathId,
   useApproveOrder,
   useCancelOrder,
   useCheckOrder,
@@ -22,6 +36,10 @@ import {
   usePurchaseOrder,
   useTrackingOrder,
   useTrackingOrderVN,
+  useUpdateCodForEarchOrder,
+  useUpdateNoteOrder,
+  useUpdateNoteOrderClient,
+  useUpdateTrackingOrder,
 } from "../hooks/orderhub";
 import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
@@ -35,6 +53,9 @@ import PopupConfirm from "@/components/PopupConfirm";
 import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit/modal/modal-cancel-statement";
 import TrackingModalJP from "./modal/tracking-modal-jp";
 import EditOrderModal from "./modal/edit-order-modal";
+import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
+import NoteModal from "./modal/update-note-modal";
+import { EditTrackingModal } from "./modal/edit-tracking-modal";
 
 const { Option } = Select;
 
@@ -54,6 +75,32 @@ export default function OrderHub() {
   const [openConfirmComplete, setOpenConfirmComplete] = useState(false);
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
+  const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
+  const [isEditingTracking, setIsEditingTracking] = useState<{
+    orderId: number;
+    records: Array<{
+      tracking: string;
+      packageCode: string;
+      quantity: number;
+      weight: string;
+    }>;
+  } | null>(null);
+
+  // Edit modal states
+  const [editingNote, setEditingNote] = useState<{
+    id: number;
+    note: string;
+  } | null>(null);
+  const [editingFeesRates, setEditingFeesRates] = useState<{
+    orderId: number;
+    codOption: number;
+    codAmount: string;
+  } | null>(null);
+  const [editingNoteExtra, setEditingNoteExtra] = useState<{
+    orderId: number;
+    value: string;
+  } | null>(null);
+
   const [filters, setFilters] = useState({
     search: undefined,
     status: undefined,
@@ -74,12 +121,18 @@ export default function OrderHub() {
   const trackingVNMutation = useTrackingOrderVN();
   const checkOrderVNMutation = useCheckOrder();
   const useCompleteMutation = useCompleteOrder();
-
+  const useAddNote = useUpdateNoteOrder();
+  const useAddNoteClient = useUpdateNoteOrderClient();
+  const useUpdateOrderTracking = useUpdateTrackingOrder();
   const queryClient = useQueryClient();
+  const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
   const handleFinish = (values: any) => {
     setFilters({
-      search: values.keyword && values.keyword.trim() !== "" ? values.keyword : undefined,
+      search:
+        values.keyword && values.keyword.trim() !== ""
+          ? values.keyword
+          : undefined,
       status: values.status !== "" ? values.status : undefined,
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
     });
@@ -164,7 +217,7 @@ export default function OrderHub() {
           body: {
             description: value.note,
             weight: value.actualWeight,
-            weight_fee: value.feePerKg,
+            weight_fee: value.weight_rate_fee ? value.weight_rate_fee : 0,
           },
           id: orderDetail.id.toString(),
         },
@@ -186,157 +239,380 @@ export default function OrderHub() {
 
   const columns: ColumnsType<Invoice> = [
     {
-      title: t("table.orderCode"),
+      title: "No",
       dataIndex: "invoice_no",
       key: "invoice_no",
-      width: 140,
-      render: (text, record) => (
-        <div>
-          <a className="text-blue-600">{text}</a>
-          <div className="text-xs text-gray-500">
-            {dayjs(record.created_at).format("DD/MM/YYYY HH:mm")}
-          </div>
+      width: 40,
+      align: "center",
+      render: (invoice_no: string) => (
+        <div className="text-xs font-medium text-blue-600">
+          {invoice_no || "-"}
         </div>
       ),
     },
+    // {
+    //   title: "Ngày TT",
+    //   key: "payment_created_date",
+    //   // render: (_, record) => (
+    //   //   <div className="text-xs text-gray-800">
+    //   //     {record.created_at
+    //   //       ? dayjs(record.created_at).format("DD/MM/YY")
+    //   //       : "-"}
+    //   //   </div>
+    //   // ),
+    // },
+    // {
+    //   title: "Ngày Về",
+    //   key: "arrival_date",
+    //   width: 80,
+    //   render: (_, record) => <div className="text-xs text-gray-800">-</div>,
+    // },
     {
-      title: t("table.customer"),
-      key: "customer",
-      width: 150,
-      render: (_, record) => (
-        <div>
-          <div className="text-gray-800">{record.customer_name}</div>
-          <div className="text-xs text-gray-500">{record.customer_code || "-"}</div>
-        </div>
-      ),
-    },
-    {
-      title: "Sản phẩm",
-      key: "product",
-      width: 350,
+      title: "Tracking / Kiện / SL / CN",
+      key: "tracking_package",
+      width: 200,
       render: (_, record) => {
-        const product = record.metadata.items[0].product;
-        const url = product.url;
-        const name = product.map_data.productName;
-        const price = product.map_data.price;
-        const images = product.map_data.images || [];
-        const thumbnail = images.length > 0 ? images[0] : null;
+        const trackingRecords = record.tracking_ship_list || [];
+        const firstRecord = trackingRecords[0];
 
         return (
-          <div className="flex gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between gap-1">
+              <div className="flex-1 min-w-0">
+                {firstRecord ? (
+                  <>
+                    <div className="text-xs truncate">
+                      <span className="text-gray-500">Track: </span>
+                      <span className="text-gray-800">
+                        {firstRecord.tracking_code || "-"}
+                      </span>
+                    </div>
+                    <div className="text-xs">
+                      <span className="text-gray-500">Kiện: </span>
+                      <span className="text-gray-800">
+                        {firstRecord.package_code || "-"}
+                      </span>
+                    </div>
+                    <div className="text-xs">
+                      <span className="text-gray-500">SL: </span>
+                      <span className="text-gray-800">
+                        {firstRecord.package_number > 0
+                          ? firstRecord.package_number
+                          : "-"}
+                      </span>
+                      <span className="text-gray-500"> | CN: </span>
+                      <span className="text-gray-800">
+                        {firstRecord.weight || "-"}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xs text-gray-400">Chưa có dữ liệu</div>
+                )}
+              </div>
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined className="text-xs" />}
+                className="!p-0 !h-auto flex-shrink-0"
+                onClick={() => {
+                  setIsEditingTrackingModal(true);
+                  setOrderDetail(record);
+                }}
+              />
+            </div>
+            {trackingRecords.length > 1 && (
+              <Button
+                type="link"
+                size="small"
+                className="!p-0 !h-auto !text-xs"
+                onClick={() => {
+                  setIsEditingTrackingModal(true);
+                  setOrderDetail(record);
+                }}
+              >
+                +{trackingRecords.length - 1} mục khác
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Giá SP",
+      key: "product",
+      width: 280,
+      render: (_, record) => {
+        const product = record.metadata?.items?.[0]?.product;
+        const name = product?.map_data?.productName || "-";
+        const price = product?.map_data?.price;
+        const url = product?.url || null;
+        const images = product?.map_data?.images || [];
+        const thumbnail = images[0] || null;
+        const shippingFee = record.metadata.infos?.codInJapan ?? 0;
+        const isJapanPrice =
+          record.metadata.items?.[0]?.product?.currency_code === "JPY"
+            ? "¥"
+            : "$";
+        const isPendingApproval =
+          record.status === OrderStatusType.PENDING_APPROVAL;
+        const shouldShowWarning = isPendingApproval && !shippingFee;
+        return (
+          <div className="flex gap-2">
             {thumbnail && (
               <img
                 src={thumbnail}
                 alt={name}
-                className="w-16 h-16 object-cover rounded border border-gray-200"
+                className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64?text=No+Image';
+                  (e.target as HTMLImageElement).src =
+                    "https://via.placeholder.com/48?text=No+Image";
                 }}
               />
             )}
-            <div className="flex-1 space-y-1 min-w-0">
-              <div className="text-gray-800 line-clamp-2 text-sm">{name}</div>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-500 hover:underline block truncate"
-              >
-                {url}
-              </a>
-              <div className="text-xs text-gray-500">
-                Giá: {price ? `¥${parseFloat(price).toLocaleString()}` : "-"}
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="text-xs text-gray-800 line-clamp-2">{name}</div>
+              <div className="text-xs">
+                <span className="text-gray-500">Giá: </span>
+                <span className="text-green-600 font-medium">
+                  {price && !isNaN(Number(price))
+                    ? `¥${Number(price).toLocaleString("ja-JP")}`
+                    : "-"}
+                </span>
               </div>
+              <div className="text-xs">
+                <div className="text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Cước vc: </span>
+                    {shouldShowWarning ? (
+                      <Tooltip title="Chưa có phí COD">
+                        <ExclamationCircleOutlined
+                          className="text-amber-500 text-sm cursor-help"
+                          style={{ color: "#f59e0b" }}
+                        />
+                      </Tooltip>
+                    ) : (
+                      <span className="text-gray-800">
+                        {shippingFee
+                          ? `${shippingFee.toLocaleString(
+                              "vi-VN"
+                            )}${isJapanPrice}`
+                          : "-"}
+                      </span>
+                    )}
+                  </div>
+                  {shouldShowWarning && (
+                    <EditOutlined
+                      className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                      onClick={() => {
+                        setOrderDetail(record);
+                        setEditingFeesRates({
+                          orderId: record.id,
+                          codOption: 1,
+                          codAmount: "",
+                        });
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              {url && (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-500 hover:underline inline-block"
+                >
+                  {extractPathId(url)}
+                </a>
+              )}
             </div>
           </div>
         );
       },
     },
     {
-      title: "Thông tin đơn hàng",
-      key: "order_info",
-      width: 180,
+      title: "Ghi Chú",
+      key: "note",
+      width: 140,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
-        <div className="space-y-1">
-          <div className="text-sm">
-            <span className="text-gray-500">Tổng: </span>
-            <span className="text-gray-800">{record.amount_vnd.toLocaleString("vi-VN")}đ</span>
+        <div className="flex items-center justify-between gap-2 h-full">
+          <div className="text-xs text-gray-600 line-clamp-2 flex-1">
+            {record.note || record.description || "-"}
           </div>
-          {record.deposit_amount && (
+          <EditOutlined
+            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
+            onClick={() =>
+              setEditingNote({
+                id: record.id,
+                note: record.note || record.description || "",
+              })
+            }
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Phụ Phí",
+      key: "extra_fee",
+      width: 110,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => (
+        <div className="text-xs text-gray-800 text-left">-</div>
+      ),
+    },
+    {
+      title: "Thanh Toán & Công Nợ",
+      key: "payment_info",
+      width: 170,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => {
+        const depositFee = record.deposit_fee ?? 0;
+        const totalAmount = record.amount_vnd ?? 0;
+        const remaining = totalAmount - depositFee;
+
+        return (
+          <div className="space-y-1">
             <div className="text-xs">
               <span className="text-gray-500">Cọc: </span>
-              <span className="text-green-600">{record.deposit_amount.toLocaleString("vi-VN")}đ</span>
+              <span className="text-green-600 font-medium">
+                {depositFee > 0
+                  ? `${depositFee.toLocaleString("vi-VN")}đ`
+                  : "-"}
+              </span>
             </div>
-          )}
-          {record.remain_amount && (
             <div className="text-xs">
-              <span className="text-gray-500">Còn lại: </span>
-              <span className="text-orange-600">{record.remain_amount.toLocaleString("vi-VN")}đ</span>
+              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-orange-600 font-medium">
+                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+              </span>
             </div>
-          )}
+            {/* <div className="text-xs">
+              <span className="text-gray-500">Ngày TT: </span>
+              <span className="text-gray-800">-</span>
+            </div> */}
+            {/* <div className="text-xs">
+              <span className="text-gray-500">Đã TT: </span>
+              <span className="text-gray-800">-</span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Công nợ: </span>
+              <span className="text-gray-800">-</span>
+            </div> */}
+          </div>
+        );
+      },
+    },
+    {
+      title: "COD (Việt)",
+      key: "transfer_fee",
+      width: 180,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => {
+        const shippingCode = record.tracking_vn || "-";
+        const codShippingPrice = record.shipping_fee || 0;
+        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
+
+        const isCOD = codShippingPrice > 0;
+        const shippingTypeText = isCOD ? "COD" : "-";
+        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
+
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">
+              <span className="text-gray-500">Mã: </span>
+              <span className="text-gray-800">{shippingCode}</span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">Giá: </span>
+              <span className="text-gray-800 font-medium">
+                {shippingPrice > 0
+                  ? `${shippingPrice.toLocaleString("vi-VN")}đ`
+                  : "-"}
+              </span>
+            </div>
+            <div className="text-xs">
+              <span className="text-gray-500">HT: </span>
+              <span className={`font-medium ${shippingTypeColor}`}>
+                {shippingTypeText}
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Tổng chi phí",
+      key: "total",
+      width: 110,
+      render: (_, record) => (
+        <div className="text-xs font-medium text-blue-600">
+          {record.amount_vnd
+            ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
+            : "-"}
         </div>
       ),
     },
     {
-      title: "Tracking & Cân nặng",
-      key: "tracking",
-      width: 150,
-      render: (_, record) => (
-        <div className="space-y-1">
-          {record.tracking_other || record.tracking_vn ? (
-            <>
-              <a href="#" className="text-blue-500 text-sm hover:underline">
-                {record.status === OrderStatusType.ARRIVED_JP_WAREHOUSE &&
-                  record.tracking_other}
-                {record.status === OrderStatusType.ARRIVED_VN_WAREHOUSE &&
-                  record.tracking_vn}
-              </a>
-              {record.weight && (
-                <div className="text-xs text-gray-600">
-                  <span className="text-gray-500">KL: </span>
-                  {record.weight}
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="text-gray-400 text-sm">Chưa có</span>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Ghi chú",
-      key: "note",
-      width: 150,
-      render: (_, record) => (
-        <div className="text-sm text-gray-600 line-clamp-2">
-          {record.note || record.description || "-"}
-        </div>
-      ),
-    },
-    {
-      title: t("table.creator"),
-      key: "created_by_name",
-      width: 120,
-      render: (_, record) => (
-        <div className="text-sm text-gray-700">{record.created_by_name}</div>
-      ),
-    },
-    {
-      title: t("table.status"),
-      dataIndex: "status",
-      key: "status",
+      title: "Ghi Chú (Admin)",
+      key: "note_admin",
       width: 140,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => (
+        <div className="flex items-center justify-between gap-2 h-full">
+          <div className="text-xs text-gray-600 flex-1">
+            {record?.note_admin ? record?.note_admin : "-"}
+          </div>
+          <EditOutlined
+            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+            onClick={() =>
+              setEditingNoteExtra({
+                orderId: record.id,
+                value: record?.note_admin,
+              })
+            }
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Hành Động",
+      key: "status_actions",
+      width: 160,
       align: "center",
+      fixed: "right",
       onCell: () => ({
         style: {
           textAlign: "center",
         },
       }),
-      render: (status: OrderStatusType) => {
+      render: (_, record: Invoice) => {
+        const status = record.status;
         let color: string;
         let text: string;
 
+        // Xác định màu và text cho tag trạng thái
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
@@ -391,79 +667,74 @@ export default function OrderHub() {
             text = status;
         }
 
-        return (
-          <Tag key={color} color={color} className="text-xs">
-            {text}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: t("table.actions"),
-      key: "actions",
-      width: 200,
-      align: "right",
-      fixed: "right",
-      onCell: () => ({
-        style: {
-          textAlign: "right",
-        },
-      }),
-      render: (_, record: Invoice) => {
-        const actions: React.ReactNode[] = [];
+        let actionButton: React.ReactNode = null;
 
         switch (record.status) {
           case OrderStatusType.PENDING_APPROVAL:
             if (record.is_user_created) {
-              actions.push(
-                <Button
-                  key={`approve-${record.id}`}
-                  size="small"
-                  icon={<FontAwesomeIcon icon={faCheck} className="text-xs" />}
-                  className="!bg-green-500 !text-white !border-0 !text-xs !px-2"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenApproveOrder(true);
-                  }}
-                >
-                  Duyệt
-                </Button>
-              );
-              actions.push(
-                <Button
-                  key={`reject-${record.id}`}
-                  size="small"
-                  className="!bg-red-500 !text-white !border-0 !text-xs !px-2"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancel(true);
-                  }}
-                >
-                  Từ chối
-                </Button>
+              actionButton = (
+                <div className="flex gap-1.5 justify-center w-full">
+                  <Button
+                    key={`approve-${record.id}`}
+                    size="small"
+                    className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenApproveOrder(true);
+                    }}
+                  >
+                    ✓ Duyệt
+                  </Button>
+                  <Button
+                    key={`reject-${record.id}`}
+                    size="small"
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancel(true);
+                    }}
+                  >
+                    ✕ Từ chối
+                  </Button>
+                </div>
               );
             }
             break;
 
-          case OrderStatusType.PURCHASED:
-            actions.push(
+          case OrderStatusType.DEPOSIT_PAID:
+            actionButton = (
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
-                className="!bg-purple-500 !text-white !border-0 !text-xs !px-2"
+                onClick={() => {
+                  setOrderDetail(record);
+                  setOpenConfirmPurchase(true);
+                }}
+                className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+              >
+                🛒 Đã mua
+              </Button>
+            );
+            break;
+
+          case OrderStatusType.PURCHASED:
+            actionButton = (
+              <Button
+                key={record.status}
+                size="small"
+                className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenTrackingOrder(true);
                 }}
               >
-                Kho JP
+                🏢 Kho JP
               </Button>
             );
             break;
 
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
-            actions.push(
+            actionButton = (
               <Button
                 key={record.status}
                 size="small"
@@ -498,83 +769,81 @@ export default function OrderHub() {
                     );
                   }
                 }}
-                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
+                className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               >
-                Kho VN
+                🏭 Kho VN
               </Button>
             );
             break;
 
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
-            actions.push(
+            actionButton = (
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
+                className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setIsOpenCheckOrder(true);
                 }}
               >
-                Kiểm
-              </Button>
-            );
-            break;
-
-          case OrderStatusType.DEPOSIT_PAID:
-            actions.push(
-              <Button
-                key={record.status}
-                size="small"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setOpenConfirmPurchase(true);
-                }}
-                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
-                className="!bg-indigo-500 !text-white !border-0 !text-xs !px-2"
-              >
-                Mua
+                📦 Kiểm hàng
               </Button>
             );
             break;
 
           case OrderStatusType.READY_TO_SHIP:
-            actions.push(
+            actionButton = (
               <Button
                 key={record.status}
                 size="small"
-                icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
-                className="!bg-emerald-500 !text-white !border-0 !text-xs !px-2"
+                className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
                   setOpenConfirmComplete(true);
                 }}
               >
-                Giao
+                🚚 Giao hàng
               </Button>
             );
             break;
         }
 
-        // nút mặc định luôn có
-        actions.push(
-          <Button
-            key={"1"}
-            size="small"
-            className="!bg-blue-500 !text-white !border-0 !text-xs !px-2"
-            onClick={() => {
-              setOpenDetail(true);
-              setOrderDetail(record);
-            }}
-          >
-            Chi tiết
-          </Button>
-        );
-
         return (
-          <div className="flex gap-1 flex-wrap justify-end">{actions}</div>
+          <div className="flex flex-col items-center justify-center gap-2 py-2">
+            {/* Tag trạng thái */}
+            <Tag
+              color={color}
+              className="!text-[11px] m-0 !py-1 !px-2 !leading-4 !font-medium"
+              style={{
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minWidth: "100px",
+                height: "22px",
+                borderRadius: "4px",
+              }}
+            >
+              {text}
+            </Tag>
+
+            {/* Nút hành động chính (nếu có) */}
+            {actionButton}
+
+            {/* Button chi tiết luôn hiển thị */}
+            <Button
+              size="small"
+              type="link"
+              className="!text-[11px] !p-0 !h-auto !font-medium hover:!text-blue-700"
+              onClick={() => {
+                setOpenDetail(true);
+                setOrderDetail(record);
+              }}
+            >
+              Chi tiết
+            </Button>
+          </div>
         );
       },
     },
@@ -618,34 +887,22 @@ export default function OrderHub() {
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {t("page.orderManagement")}
-          </h2>
-          <Button
-            type="primary"
-            onClick={() => setOpen(true)}
-            icon={<PlusOutlined />}
-            className="bg-blue-500 hover:bg-blue-600"
-          >
-            {t("button.createNewOrder")}
-          </Button>
-        </div>
         <div className="flex flex-col mb-2 gap-4 ">
           <Form form={form} onFinish={handleFinish}>
-            <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
+            <div className="w-full grid grid-cols-5 gap-3 items-center bg-white rounded-lg">
               <Form.Item name="keyword" className="mb-0">
                 <Input
                   placeholder={t("placeholder.searchOrderCustomer")}
-                  className="w-full h-11"
+                  className="!w-full !h-11 !text-xs"
+                  size="small"
                 />
               </Form.Item>
 
               <Form.Item name="status" className="mb-0">
                 <Select
                   placeholder={t("statusPlaceholder")}
-                  className="w-full !h-11"
+                  className="!w-full !h-11"
+                  size="small"
                   allowClear
                 >
                   {orderStatusOptions.map((opt) => (
@@ -657,50 +914,57 @@ export default function OrderHub() {
               </Form.Item>
 
               <Form.Item name="date" className="mb-0">
-                <DatePicker className="w-full h-11" />
+                <DatePicker className="!w-full !h-11" size="small" />
               </Form.Item>
 
               <Form.Item className="mb-0">
                 <Button
                   type="primary"
                   htmlType="submit"
-                  icon={<FontAwesomeIcon icon={faFilter} />}
-                  className="w-full  !bg-gray-700 !text-white !font-medium !h-11 !text-base"
+                  icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
+                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
+                  size="small"
                 >
                   {t("filter")}
+                </Button>
+              </Form.Item>
+
+              <Form.Item className="mb-0">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined className="text-xs" />}
+                  className="!w-full !h-11 !bg-blue-600 !text-white !font-medium !text-xs"
+                  size="small"
+                  onClick={() => setOpen(true)}
+                >
+                  Tạo đơn
                 </Button>
               </Form.Item>
             </div>
           </Form>
         </div>
 
-        <div className="overflow-x-auto">
+        <EnhancedTableWrapper
+        //  className="overflow-x-auto"
+         >
           <TableComponent
             columns={columns}
             dataSource={listOrder?.data || []}
-            rowHeight={70}
+            rowHeight={100}
             pageSize={10}
             page={(listOrder && listOrder.current_page + 1) || 0}
             onPageChange={handleChangePage}
             response={listOrder}
-            fontSize={13}
+            fontSize={12}
             headerHeight={48}
           />
-        </div>
+        </EnhancedTableWrapper>
       </div>
       <CreateOrderModal
         isOpen={open}
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {/* {orderDetail?.id && (
-        <OrderDetailModal
-          open={openDetail}
-          onClose={() => setOpenDetail(false)}
-          idOrder={+orderDetail?.id}
-        />
-      )} */}
-
       {orderDetail?.id && (
         <EditOrderModal
           isOpen={openDetail}
@@ -713,13 +977,18 @@ export default function OrderHub() {
       {orderDetail && (
         <ApproveOrderModal
           open={isOpenApproveOrder}
-          customerName={orderDetail?.customer_name}
-          orderCode={orderDetail.invoice_no}
+          customerName={
+            orderDetail?.customer_name ? orderDetail?.customer_name : ""
+          }
+          orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
           onCancel={() => setIsOpenApproveOrder(false)}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
               {
-                body: data,
+                body: {
+                  ...data,
+                  cod_shipping_price: data.cod_shipping_price,
+                },
                 id: orderDetail.id.toString(),
               },
               {
@@ -747,6 +1016,10 @@ export default function OrderHub() {
           onCancel={() => setIsOpenCheckOrder(false)}
           onSubmit={handleCheckOrder}
           orderCode={orderDetail.invoice_no}
+          customerId={orderDetail.id}
+          productName={
+            orderDetail?.metadata?.items[0]?.product?.map_data?.productName
+          }
         />
       )}
 
@@ -847,6 +1120,219 @@ export default function OrderHub() {
           onConfirm={handleCancel}
         />
       )}
+
+      {/* Modal Edit Tracking/Kiện/SL/CN */}
+      {orderDetail && (
+        <EditTrackingModal
+          orderId={orderDetail.id}
+          open={isEditingTrackingModal}
+          onClose={() => setIsEditingTrackingModal(false)}
+          onSave={(records) => {
+            useUpdateOrderTracking.mutate(
+              {
+                body: records,
+                id: orderDetail.id,
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Update mã kiện thành công");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setIsEditingTrackingModal(false);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+
+            setIsEditingTracking(null);
+            queryClient.invalidateQueries({
+              queryKey: ["listorder"],
+            });
+          }}
+        />
+      )}
+
+      {/* Modal Edit Note */}
+      {editingNote && (
+        <NoteModal
+          open={!!editingNote}
+          note={editingNote?.note}
+          onCancel={() => setEditingNote(null)}
+          onSave={(note) => {
+            useAddNoteClient.mutate(
+              {
+                id: editingNote.id,
+                param: {
+                  note: note,
+                },
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Update ghi chú ADMIN thành công");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorder"],
+                  });
+                  setEditingNote(null);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage || t("common.error")
+                  ),
+              }
+            );
+          }}
+        />
+      )}
+
+      {/* Modal Edit Fees & Rates */}
+      {editingFeesRates && orderDetail && (
+        <Modal
+          open={!!editingFeesRates}
+          onCancel={() => setEditingFeesRates(null)}
+          title="Cập nhật Phí COD"
+          width={500}
+          centered
+          footer={[
+            <Button key="cancel" onClick={() => setEditingFeesRates(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                updateCodForEarchOrderMutation.mutate(
+                  {
+                    id: orderDetail?.id,
+                    param: {
+                      cod_shipping_price: +editingFeesRates.codAmount,
+                      cod_type: editingFeesRates.codOption,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Đã lưu phí COD");
+                      queryClient.invalidateQueries({
+                        queryKey: ["listorder"],
+                      });
+                      setEditingNote(null);
+                    },
+                    onError: (err: any) =>
+                      toast.error(
+                        err.response?.data?.localizedMessage ||
+                          t("common.error")
+                      ),
+                  }
+                );
+                console.log("Save fees & rates:", editingFeesRates);
+                setEditingFeesRates(null);
+              }}
+            >
+              Lưu
+            </Button>,
+          ]}
+        >
+          <Form layout="vertical" className="py-4">
+            <Form.Item label="VC (Nhật)">
+              <Select
+                value={editingFeesRates.codOption}
+                onChange={(value) =>
+                  setEditingFeesRates({ ...editingFeesRates, codOption: value })
+                }
+                placeholder="Chọn loại COD"
+              >
+                <Select.Option value={1}>Miễn phí vận chuyển</Select.Option>
+                <Select.Option value={2}>Admin điền phí COD</Select.Option>
+              </Select>
+            </Form.Item>
+
+            {editingFeesRates.codOption === 2 && (
+              <Form.Item label="Phí COD">
+                <Input
+                  type="number"
+                  value={editingFeesRates.codAmount}
+                  onChange={(e) =>
+                    setEditingFeesRates({
+                      ...editingFeesRates,
+                      codAmount: e.target.value,
+                    })
+                  }
+                  placeholder="Nhập phí COD"
+                  suffix="¥"
+                />
+              </Form.Item>
+            )}
+          </Form>
+        </Modal>
+      )}
+
+      {/* Modal Edit Note Extra */}
+      {editingNoteExtra && (
+        <Modal
+          open={!!editingNoteExtra}
+          onCancel={() => setEditingNoteExtra(null)}
+          title="Cập nhật Ghi Chú"
+          width={500}
+          centered
+          footer={[
+            <Button key="cancel" onClick={() => setEditingNoteExtra(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                useAddNote.mutate(
+                  {
+                    order_id: editingNoteExtra.orderId,
+                    param: {
+                      note: editingNoteExtra.value,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Update ghi chú ADMIN thành công");
+                      queryClient.invalidateQueries({
+                        queryKey: ["listorder"],
+                      });
+                      setEditingNote(null);
+                    },
+                    onError: (err: any) =>
+                      toast.error(
+                        err.response?.data?.localizedMessage ||
+                          t("common.error")
+                      ),
+                  }
+                );
+                setEditingNoteExtra(null);
+              }}
+            >
+              Lưu
+            </Button>,
+          ]}
+        >
+          <Form layout="vertical" className="py-4">
+            <Form.Item label="Ghi Chú">
+              <Input.TextArea
+                rows={4}
+                value={editingNoteExtra.value}
+                onChange={(e) =>
+                  setEditingNoteExtra({
+                    ...editingNoteExtra,
+                    value: e.target.value,
+                  })
+                }
+                placeholder="Nhập ghi chú"
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
     </div>
   );
 }
+
+// Modal Edit Tracking Component

@@ -4,6 +4,7 @@ import {
   CategoryItem,
   CreateModel,
   FormData,
+  GeneralPolicyModel,
   InsuranceModelParamSend,
   ItemShippingList,
   MaterialResponse,
@@ -95,3 +96,13 @@ export const deleteProductType = async (id: number) => {
   const res = await api.delete(`${API_TYPE_CONST.PRODUCT_CATEGORIES}/${id}`);
   return res.data;
 };
+
+export const getListGeneralPolicy = async (params: {customerGroupId?: number}) => {
+  const res = await api.get(API_TYPE_CONST.GENERAL_POLICY, {params});
+  return res.data.data;
+}; 
+
+export const updateListGeneralPolicy = async (body: GeneralPolicyModel) => {
+  const res = await api.put(API_TYPE_CONST.GENERAL_POLICY,body );
+  return res.data.data;
+}; 

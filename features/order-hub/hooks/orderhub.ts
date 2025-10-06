@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import {
   aproveOrder,
   cancelOrder,
@@ -7,24 +7,40 @@ import {
   completeShippingOrder,
   confirmPurchaeOrder,
   createOrder,
+  getDataGeneral,
   getDetailOrder,
   getListOrder,
   getListOrderTracking,
   getListService,
   trackingToJp,
   trackingToVn,
+  updateCodForEarchOrder,
+  updateListService,
+  updateNoteOrder,
+  updateNoteOrderClient,
   updateOrder,
+  updateTrackingOrder,
 } from "../apis/orderhub";
 import {
   ApproveOrderModel,
+  CreateTrackingModel,
   FeeServiceCheck,
   InvoiceResponse,
   OrderFeeRequest,
   TrackingWeightInfo,
+  updateCodEachRowModel,
 } from "@/types/orderhub";
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
+import { ServiceFee } from "@/types/fee-setting";
+import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
 
-export const useListOrder = (params: { page: number; size: number , status?: string, search?: string, date?: string}) => {
+export const useListOrder = (params: {
+  page: number;
+  size: number;
+  status?: string;
+  search?: string;
+  date?: string;
+}) => {
   return useQuery<InvoiceResponse>({
     queryKey: ["listorder", params],
     queryFn: () => getListOrder(params),
@@ -32,7 +48,11 @@ export const useListOrder = (params: { page: number; size: number , status?: str
   });
 };
 
-export const useListOrderTracking = (params: { page: number; size: number , status?: Array<string>}) => {
+export const useListOrderTracking = (params: {
+  page: number;
+  size: number;
+  status?: Array<string>;
+}) => {
   return useQuery({
     queryKey: ["listorderTracking", params],
     queryFn: () => getListOrderTracking(params),
@@ -40,14 +60,43 @@ export const useListOrderTracking = (params: { page: number; size: number , stat
   });
 };
 
-
-export const useListService = () => {
+export const useListService = (
+  params: { routeId: number },
+  options?: UseQueryOptions<any, Error> // <-- thêm options ở đây
+) => {
   return useQuery({
-    queryKey: ["listService"],
-    queryFn: () => getListService(),
-    // keepPreviousData: true,
+    queryKey: ["listService", params],
+    queryFn: () => getListService(params),
+    ...options,
   });
 };
+export const useUpdateListService = () => {
+  return useMutation({
+    mutationFn: ({ param }: { param: FeeData }) =>
+      updateListService(param),
+  });
+};
+export const useUpdateCodForEarchOrder = () => {
+  return useMutation({
+    mutationFn: ({ param, id }: { param: updateCodEachRowModel; id: number }) =>
+      updateCodForEarchOrder(id, param),
+  });
+};
+
+export const useUpdateNoteOrder = () => {
+  return useMutation({
+    mutationFn: ({ order_id, param }: {order_id: number,  param: { note: string } }) =>
+      updateNoteOrder(order_id, param),
+  });
+};
+
+export const useUpdateNoteOrderClient = () => {
+  return useMutation({
+    mutationFn: ({ id, param }: { id: number; param: { note: string } }) =>
+      updateNoteOrderClient(id, param),
+  });
+};
+
 export const useCreateNewOrder = () => {
   return useMutation({
     mutationFn: (param: OrderFeeRequest) => createOrder(param),
@@ -77,8 +126,24 @@ export const useTrackingOrder = () => {
 
 export const useTrackingOrderVN = () => {
   return useMutation({
-    mutationFn: ({ body, id }: { body: {image_ids?: Array<number>, is_repacked?: boolean, count_verify?: number}; id: string  }) =>
-      trackingToVn(id, body),
+    mutationFn: ({
+      body,
+      id,
+    }: {
+      body: {
+        image_ids?: Array<number>;
+        is_repacked?: boolean;
+        count_verify?: number;
+      };
+      id: string;
+    }) => trackingToVn(id, body),
+  });
+};
+
+export const useUpdateTrackingOrder = () => {
+  return useMutation({
+    mutationFn: ({ body, id }: { body: CreateTrackingModel[]; id: number }) =>
+      updateTrackingOrder(id, body),
   });
 };
 
@@ -91,8 +156,7 @@ export const useApproveOrder = () => {
 
 export const usePurchaseOrder = () => {
   return useMutation({
-    mutationFn: ({ id }: { id: string }) =>
-      confirmPurchaeOrder(id),
+    mutationFn: ({ id }: { id: string }) => confirmPurchaeOrder(id),
   });
 };
 
@@ -113,14 +177,40 @@ export const useCheckOrder = () => {
 
 export const useCompleteOrder = () => {
   return useMutation({
-    mutationFn: ({ id }: { id: string }) =>
-      completeOrder(id),
+    mutationFn: ({ id }: { id: string }) => completeOrder(id),
   });
 };
 
 export const useCompleteShippingOrder = () => {
   return useMutation({
-    mutationFn: ({ body }: {  body: { shipping_code: number,  cod_fee?: number, shipping_option?: string } }) =>
-      completeShippingOrder(body),
+    mutationFn: ({
+      body,
+    }: {
+      body: {
+        shipping_code: string;
+        shipping_type?: number;
+        shipping_fee?: number;
+        shipping_tracking?: string;
+      };
+    }) => completeShippingOrder(body),
+  });
+};
+
+export function extractPathId(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const path = new URL(url).pathname; // /item/z495005608
+    const segments = path.split("/").filter(Boolean);
+    return segments[segments.length - 1] || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export const useListDataGeneral = (params?: { customerGroupId?: number }) => {
+  return useQuery({
+    queryKey: ["listDataGeneral", params], // thêm params vào key để cache riêng
+    queryFn: () => getDataGeneral(params),
+    // enabled: !!params?.customerGroupId || params === undefined, 
   });
 };

@@ -80,6 +80,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       onChange={onChange}
       items={items}
       type="line"
+      className="finance-management-tabs"
     />
   );
 };

@@ -365,7 +365,6 @@ const TelesalesPage: React.FC = () => {
               ? { ...c, tags: [...(c.tags || []), tagId] }
               : c
           );
-          console.log("Updated data", updated);
           setIsOpenTagModal(false);
         }}
       />

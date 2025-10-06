@@ -49,11 +49,23 @@ export default function TransactionCompleteModal({
   useEffect(() => {
     const fetchWithdrawDetail = async () => {
       if (!open || !selectId || !typeDetail) {
-        console.log("Skipping fetch - open:", open, "selectId:", selectId, "typeDetail:", typeDetail);
+        console.log(
+          "Skipping fetch - open:",
+          open,
+          "selectId:",
+          selectId,
+          "typeDetail:",
+          typeDetail
+        );
         return;
       }
 
-      console.log("Fetching deposit detail - ID:", selectId, "Type:", typeDetail);
+      console.log(
+        "Fetching deposit detail - ID:",
+        selectId,
+        "Type:",
+        typeDetail
+      );
       setLoading(true);
       setError(null);
 
@@ -67,7 +79,11 @@ export default function TransactionCompleteModal({
       } catch (error: any) {
         console.error("Error fetching deposit detail:", error);
         console.error("Error response:", error?.response?.data);
-        setError(error?.response?.data?.localizedMessage || error?.message || "Không thể tải thông tin giao dịch");
+        setError(
+          error?.response?.data?.localizedMessage ||
+            error?.message ||
+            "Không thể tải thông tin giao dịch"
+        );
         setWithdrawDetail(null);
       } finally {
         setLoading(false);
@@ -113,7 +129,7 @@ export default function TransactionCompleteModal({
         case "CANCELED_BY_USER": {
           return (
             <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
-              Người dùng huỷ
+              {t("status.cancelledByUser")}
             </span>
           );
         }
@@ -129,9 +145,7 @@ export default function TransactionCompleteModal({
       centered
       width={600}
       className="rounded-xl"
-      title={
-        <h2 className="text-lg font-semibold">Chi tiết Giao dịch</h2>
-      }
+      title={<h2 className="text-lg font-semibold">Chi tiết Giao dịch</h2>}
     >
       {loading ? (
         <div className="flex justify-center items-center py-12">

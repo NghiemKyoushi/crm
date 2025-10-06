@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Form, InputNumber, Radio, Input, Button, Alert } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheck,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
+import { getDataWeight } from "../../apis/orderhub";
 
 interface CheckOrderModalProps {
   open: boolean;
@@ -16,6 +15,7 @@ interface CheckOrderModalProps {
   customerName: string;
   productName?: string;
   feePerKg: number;
+  customerId: number;
 }
 
 interface FormValues {
@@ -32,30 +32,56 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
   customerName,
   productName,
   feePerKg,
+  customerId,
 }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-
+  const [feeKg, setFeeKg] = useState(0);
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      onSubmit(values);
+      onSubmit({ ...values, weight_rate_fee: feeKg });
       form.resetFields();
     } catch {
       // Error validation will be highlighted
     }
   };
 
+  useEffect(() => {
+    const fetchWeight = async () => {
+      if (open && customerId) {
+        try {
+          console.log("customerId", customerId);
+          const res = await getDataWeight(customerId);
+          console.log("res", res);
+          setFeeKg(res);
+        } catch (error) {
+          console.error("Error fetching weight:", error);
+        }
+      }
+    };
+
+    fetchWeight();
+  }, [open, customerId]);
+
   // Get form values realtime to calculate fees
-  const actualWeight = Form.useWatch("actualWeight", form) || 0;
+  const actualWeight = Form.useWatch("actualWeight", form);
   const codFee = Form.useWatch("codFee", form);
 
-  const weightFee = actualWeight * feePerKg;
-  const codDisplay = codFee === "FIXED" ? t('status.calculated') : t('status.calculateLater');
+  useEffect(() => {
+    if (actualWeight) {
+      const weightFee = actualWeight * feeKg;
+      console.log("feeKg", weightFee);
+
+      form.setFieldsValue({
+        feePerKg: weightFee,
+      });
+    }
+  }, [actualWeight, feeKg, form]);
 
   return (
     <Modal
-      title={t('modal.inspectAndCalculateFee')}
+      title={t("modal.inspectAndCalculateFee")}
       open={open}
       onCancel={onCancel}
       footer={null}
@@ -72,23 +98,24 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
       {/* Order Information */}
       <div className="bg-blue-50 p-3 rounded mb-4">
         <p className="!mb-1">
-          <strong>{t('table.orderCode')}:</strong> {orderCode}
+          <strong>{t("table.orderCode")}:</strong> {orderCode}
         </p>
         <p className="!mb-1">
-          <strong>{t('form.customer')}:</strong> {customerName}
+          <strong>{t("form.customer")}:</strong> {customerName}
         </p>
         <p className="!mb-1">
-          <strong>{t('form.productName')}:</strong> {productName ?? "N/A"}
+          <strong>{t("form.productName")}:</strong> {productName ?? "N/A"}
         </p>
       </div>
 
       <Form layout="vertical" form={form}>
-        {/* Weight */}
         <div className="grid grid-cols-2 gap-4">
           <Form.Item
             name="actualWeight"
-            label={t('inspection.actualWeight')}
-            rules={[{ required: true, message: t('validation.weight.required') }]}
+            label={t("inspection.actualWeight")}
+            rules={[
+              { required: true, message: t("validation.weight.required") },
+            ]}
           >
             <InputNumber
               className="!w-full"
@@ -100,84 +127,31 @@ const CheckOrderModal: React.FC<CheckOrderModalProps> = ({
               }
             />
           </Form.Item>
-          <Form.Item name="feePerKg" label={t('inspection.weightFee')}>
+          <Form.Item name="feePerKg" label={t("inspection.weightFee")}>
             <InputNumber
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
               className="!w-full"
+              disabled
             />
           </Form.Item>
         </div>
-
-        {/* Cảnh báo COD */}
-        {/* <Alert
-          message={
-            <p className="font-semibold text-yellow-800 text-xs m-0">
-              Phí COD chưa được thiết lập
-            </p>
-          }
-          description={
-            <p className="text-xs text-yellow-700 m-0">
-              Đơn hàng này chưa có phí COD. Vui lòng thiết lập phí COD bên dưới.
-            </p>
-          }
-          type="warning"
-          showIcon
-          icon={
-            <FontAwesomeIcon
-              icon={faExclamationTriangle}
-              className="text-yellow-600"
-            />
-          }
-          className="!py-1 !px-2 !pt-3" // thu nhỏ chiều cao
-        /> */}
-
-        {/* Phí COD */}
-        {/* <Form.Item
-          className="!mt-2"
-          name="codFee"
-          label="Phí COD"
-          rules={[{ required: true, message: "Vui lòng chọn phí COD!" }]}
-        >
-          <Radio.Group className="!flex !flex-col !gap-2">
-            <Radio value="FIXED">Điền phí cố định</Radio>
-            <Radio value="LATER">Đợi tính phí sau</Radio>
-          </Radio.Group>
-        </Form.Item> */}
-
-        {/* Tính toán phí */}
-        {/* <div className="bg-gray-50 rounded p-3 mb-4">
-          <p className="font-semibold text-gray-700 mb-3">Tính toán phí</p>
-          <p className="space-y-2 text-sm flex flex-row justify-between">
-            Phí cân nặng: <span>{weightFee.toLocaleString()} đ</span> 
-          </p>
-          <p className="space-y-2 text-sm flex flex-row justify-between">Phí COD: <span>{codDisplay}</span></p>
-          <div className="border-t border-gray-300 my-2"></div>
-
-          <p className="text-red-600 font-semibold flex flex-row justify-between">
-            Tổng phí phát sinh: <span>{weightFee.toLocaleString()} đ</span>  
-          </p>
-        </div> */}
-
-        {/* Notes */}
-        <Form.Item name="note" label={t('inspection.note')}>
+        <Form.Item name="note" label={t("inspection.note")}>
           <Input.TextArea
             className="!h-25"
-            placeholder={t('inspection.notePlaceholder')}
+            placeholder={t("inspection.notePlaceholder")}
           />
         </Form.Item>
-
-        {/* Footer */}
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onCancel}>{t('button.cancel')}</Button>
+          <Button onClick={onCancel}>{t("button.cancel")}</Button>
           <Button
             type="primary"
             className="!bg-green-600"
             icon={<FontAwesomeIcon icon={faCheck} />}
             onClick={handleOk}
           >
-            {t('button.inspectGoods')}
+            {t("button.inspectGoods")}
           </Button>
         </div>
       </Form>

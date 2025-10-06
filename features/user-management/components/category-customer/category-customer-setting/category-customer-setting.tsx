@@ -54,7 +54,7 @@ const CategorySettingsPage: React.FC = () => {
           {t("categoryCustomer.servicesAndDelivery")}
         </span>
       ),
-      children: <ShippingServiceForm />,
+      children: id ? <ShippingServiceForm groupId={+id} /> : null,
     },
     {
       key: "4",
@@ -64,7 +64,7 @@ const CategorySettingsPage: React.FC = () => {
           {t("categoryCustomer.insuranceAndRegulations")}
         </span>
       ),
-      children: <InsuranceSettings />,
+      children: id ? <InsuranceSettings groupId={+id} /> : null,
     },
   ];
 

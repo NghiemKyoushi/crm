@@ -40,6 +40,8 @@ export const renderTransactionStatus = (
 
     case "FAILED":
       return "Thất bại";
+    case "CANCELED_BY_USER":
+      return t("status.cancelledByUser");
     default:
       return status; // fallback nếu có trạng thái khác
   }

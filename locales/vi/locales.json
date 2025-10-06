@@ -39,7 +39,7 @@
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
-    "operation": "Quản lý vận hành"
+    "operation": "Quản lý vận đơn"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -729,7 +729,8 @@
     "purchased": "Đã mua",
     "details": "Chi tiết",
     "save": "Lưu",
-    "filter": "Lọc"
+    "filter": "Lọc",
+    "shipped": "Giao hàng"
   },
   "modal": {
     "createOrderForCustomer": "Tạo Đơn hàng cho Khách hàng",
@@ -737,7 +738,8 @@
     "orderPurchased": "Đơn hàng đã được mua!",
     "confirmCompleteOrder": "Xác nhận hoàn thành đơn hàng",
     "orderCompleted": "Đơn hàng đã được hoàn thành!",
-    "addTrackingCode": "Thêm mã tracking"
+    "addTrackingCode": "Thêm mã tracking",
+    "inspectAndCalculateFee": "Kiểm hàng và tính phí"
   },
   "table": {
     "customerCode": "Mã KH",
@@ -765,11 +767,13 @@
     "priceKgHN": "Giá Kg - HN",
     "surcharge": "Phụ thu",
     "trackingShip": "Tracking ship",
-    "orderType": "Phân loại hàng"
+    "orderType": "Phân loại hàng",
+    "codePackage":"Mã kiện"
+
   },
   "page": {
     "orderManagement": "Quản lý Đơn hàng",
-    "importedProductList": "Danh sách sản phẩm đã nhập"
+    "importedProductList": "Sẵn sàng xuất kho"
   },
   "system": {
     "noData": "Không có dữ liệu",

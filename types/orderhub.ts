@@ -54,18 +54,28 @@ export interface Invoice {
   source?: string; // Amazon JP
   purchase_type?: string; // Mua thẳng / Đấu giá
   tracking_code?: string; // JP1234567890
-  weight?: string; // 2.1kg
+  weight?: number; // Cân nặng (gram)
   is_user_created: boolean;
   tracking_other?: string;
-  tracking_vn?:string;
+  tracking_vn?: string;
+  tracking_ship?: string;
   take_photo: boolean;
   is_repacked: boolean;
   is_verify_count: boolean;
   note?: string;
+  shipping_fee?: number;
+  weight_fee?: number;
+  rate?: number;
+  cod_shipping_price?: number;
+  deposit_fee?: number;
+  package_code: string;
+  tracking_ship_list: TrackingRecord[],
+  note_admin: string;
 }
 
 export interface InvoiceMetadata {
   items: InvoiceItem[];
+  infos: any
 }
 
 export interface InvoiceItem {
@@ -79,6 +89,7 @@ export interface Product {
   map_data: ProductMapData;
   created_at: string;
   updated_at: string;
+  currency_code: string;
 }
 
 export interface ProductMapData {
@@ -95,6 +106,8 @@ export interface DataFromLink {
   price: number;
   product_name: string;
   quantity: null;
+  currency_code: string;
+  route_id: number;
 }
 
 export interface InsuranceOptionModel {
@@ -121,14 +134,17 @@ export interface ServiceFee {
 }
 
 export interface RateOrderRequest {
-  user_id: number;
-  fee_codes: string[]; // mảng code phụ phí, có thể rỗng
-  insurance_id: number;
   category_fee_id: number;
-  price: number; // giá trị đơn hàng
-  product_ids: number[];
-  cod: number;
+  cod_in_japan: number;
+  currency_code: string;
+  fee_codes: string[];
+  insurance_id: number;
+  price: number;
+  quantity: number;
+  route_id: number;
+  user_id: number;
 }
+
 
 export interface OrderFeeRequest {
   data: {
@@ -137,25 +153,31 @@ export interface OrderFeeRequest {
     price: number;
     description: string;
     name: string;
-  }[];
+  };
   fee_codes: string[];
   insurance_id: number;
   description: string;
   user_id: number;
-  deposit_fee: number;
+  // deposit_fee: number;
   product_category_id: number;
+  cod_shipping_price: number;
+  cod_type: number
 }
 
 export interface FeeServiceCheck {
-  fee: number;
-  fee_vnd: number;
+  domestic_shipping_fee: number | null;
+  service_fee: number;
+  payment_fee: number;
+  shipping_surcharge_fee: number | null;
   min_deposit_percent: number;
+  insurance_fee: number;
 }
 
 export interface ApproveOrderModel {
-  cod_shipping: number;
   description: string;
   product_category_id: number;
+  cod_shipping_price: number;
+  cod_type: number;
 }
 
 export interface TrackingWeightInfo {
@@ -168,4 +190,37 @@ export interface TrackingWeightInfo {
   weight: number;        
   weight_fee: number;    
   description: string; 
+}
+
+export interface CreateTrackingModel {
+  package_code: string;
+  package_number: number;
+  tracking_code: string;
+  weight: number;
+  id?:number 
+}
+
+export interface OrderFeeModel {
+  domestic_shipping_fee: number | null;
+  service_fee: number;
+  payment_fee: number;
+  shipping_surcharge_fee: number | null;
+  min_deposit_percent: number;
+  insurance_fee: number;
+}
+
+export interface TrackingRecord {
+  id: number;
+  order_id: number;
+  tracking_code: string;
+  created_at: string;   // ISO datetime string
+  updated_at: string | null;
+  package_code: string;
+  package_number: number;
+  weight: number;
+}
+
+export interface updateCodEachRowModel {
+  cod_shipping_price: number;
+  cod_type: number;
 }

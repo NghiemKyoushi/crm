@@ -45,28 +45,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TextArea from "antd/es/input/TextArea";
 import TiptapEditor from "../TiptapEditor";
-// import { useEditor, EditorContent } from "@tiptap/react";
-// import StarterKit from "@tiptap/starter-kit";
+import { CURRENCY_CODE } from "./add-orderhub-modal";
 
 const { Option } = Select;
 const { Panel } = Collapse;
-
-// const TiptapEditor = ({ value = "", onChange }: { value?: string; onChange?: (html: string) => void }) => {
-//     const editor = useEditor({
-//       extensions: [StarterKit],
-//       immediatelyRender: false,
-//       content: value || "<p></p>",
-//       onUpdate: ({ editor }) => {
-//         onChange?.(editor.getHTML());
-//       },
-//     });
-
-//     return (
-//       <div className="border rounded-md p-2 min-h-[150px]">
-//         <EditorContent editor={editor} />
-//       </div>
-//     );
-//   };
 interface CreateOrderModalProps {
   isOpen: boolean;
   onCancel: () => void;
@@ -82,42 +64,65 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const [idProduct, setIdProduct] = React.useState<number | null>(null);
   const queryClient = useQueryClient();
   const updateOrderMutation = useUpdateOrder();
+  const [rateValueForPrice, setRateValueForPrice] = useState<number>(0);
+
+  const [routeId, setRouteId] = useState(0);
+
   const { data: listInsurance } = useListInsurance();
-  const { data: listService } = useListService();
+  const { data: listService } = useListService(
+    { routeId: routeId },
+    {
+      enabled: routeId !== 0,
+      queryKey: [],
+    }
+  );
   const [services, setServices] = useState<string[]>([]);
   const [insurance, setInsurance] = useState<InsuranceOptionModel | null>(null);
   const [prices, setPrice] = useState<number>(0);
   const [percenDeposit, setPercenDeposit] = useState<number>(0);
+  const [currencyCode, setCurrencyCode] = useState("");
   const customer = Form.useWatch("customer", form);
-  const deposit = Form.useWatch("deposit", form);
-  const feeVnd = Form.useWatch("feeVnd", form);
   const priceVND = Form.useWatch("priceVnd", form);
   const priceY = Form.useWatch("priceY", form);
-  const codFee = Form.useWatch("cod", form);
-
+  const quantity = Form.useWatch("quantity", form);
+  const category = Form.useWatch("category", form);
+  const paymentAmount = Form.useWatch("paymentAmount", form);
+  const paymentTypeForm = Form.useWatch("paymentType", form);
+  const [paymentType, setPaymentType] = useState(1);
   const [rateProduct, setRateProduct] = useState(0);
+  const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
 
-  const totalFee = ((feeVnd + priceVND) * percenDeposit) / 100;
+  const [fees, setFees] = useState({
+    DOMESTIC_SHIPPING_FEE: 0,
+    INSURANCE_FEE: 0,
+    MIN_DEPOSIT_PERCENT: 0,
+    PAYMENT_FEE: 0,
+    SERVICE_FEE: 0,
+    SHIPPING_SURCHARGE_FEE: 0,
+  });
+
   const handleOk = async () => {
     try {
       await form.validateFields();
       if (idProduct && insurance) {
+        const serviceOptionTrue = listService
+          .filter((item: any) => item.optional === true)
+          .map((item: any) => item.code);
         const bodyNewOrder: OrderFeeRequest = {
-          data: [
-            {
-              product_id: idProduct,
-              count: 1,
-              description: form.getFieldValue("description"),
-              price: priceY,
-              name: form.getFieldValue("productName"),
-            },
-          ],
-          deposit_fee: deposit,
+          data: {
+            product_id: idProduct,
+            count: quantity,
+            description: form.getFieldValue("description"),
+            price: priceY,
+            name: form.getFieldValue("productName"),
+          },
           description: form.getFieldValue("note"),
-          fee_codes: services,
+          fee_codes: [...serviceOptionTrue, ...services],
           insurance_id: insurance?.id,
           user_id: customer,
           product_category_id: form.getFieldValue("category"),
+          cod_shipping_price: paymentAmount ? paymentAmount : 0,
+          cod_type: paymentTypeForm,
         };
         updateOrderMutation.mutate(
           {
@@ -140,7 +145,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           }
         );
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const { mutate } = useMutation<DataFromLink, Error, string>({
@@ -155,39 +162,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   useEffect(() => {
     if (props.isOpen) {
-      refetch(); // gọi lại API mỗi lần modal mở
+      refetch();
     }
   }, [props.isOpen, refetch]);
-
-  const options =
-    data?.data.map((c) => ({
-      value: c.user_id,
-      label: `${c.full_name} - ${c.email}`,
-    })) ?? [];
-
-  const handleGetInfo = () => {
-    const linkValue = form.getFieldValue("link");
-    if (!linkValue) {
-      toast.warning("Vui lòng nhập link trước!");
-      return;
-    }
-    mutate(linkValue, {
-      onSuccess: (data: DataFromLink) => {
-        form.setFieldsValue({
-          productName: data?.product_name || "",
-        });
-        form.setFieldsValue({
-          description: data.description || "",
-        });
-        setIdProduct(data.id);
-        form.setFieldValue("priceY", data.price);
-        toast.success("Lấy thông tin sản phẩm thành công!");
-      },
-      onError: () => {
-        toast.error("Không thể lấy thông tin từ link!");
-      },
-    });
-  };
 
   const { data: categories } = useQuery({
     queryKey: ["productCategories"],
@@ -242,21 +219,33 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   useEffect(() => {
     const fetchFeeService = async () => {
       if (customer) {
+        const serviceOptionTrue = listService
+          .filter((item: any) => item.optional === true)
+          .map((item: any) => item.code);
         const bodyGetFeeService: RateOrderRequest = {
-          category_fee_id: form.getFieldValue("category"),
-          fee_codes: services,
-          price: priceVND ? priceVND : 0,
-          product_ids: idProduct ? [idProduct] : [],
+          category_fee_id: category,
+          fee_codes: [...services, ...serviceOptionTrue],
+          price: priceY ? priceY : 0,
           user_id: form.getFieldValue("customer"),
           insurance_id: insurance ? insurance.id : 0,
-          cod: codFee ? codFee : 0,
+          cod_in_japan: paymentAmount ? paymentAmount : 0,
+          currency_code: currencyCode,
+          quantity: quantity ? quantity : 0,
+          route_id: routeId,
         };
         try {
           const res: FeeServiceCheck = await getDataFeeService(
             bodyGetFeeService
           );
-          form.setFieldValue("feeY", res.fee);
-          form.setFieldValue("feeVnd", res.fee_vnd);
+          setFees({
+            DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee ?? 0,
+            INSURANCE_FEE: res.insurance_fee ?? 0,
+            MIN_DEPOSIT_PERCENT: res.min_deposit_percent ?? 0,
+            PAYMENT_FEE: res.payment_fee ?? 0,
+            SERVICE_FEE: res.service_fee ?? 0,
+            SHIPPING_SURCHARGE_FEE: res.shipping_surcharge_fee ?? 0,
+          });
+          form.setFieldValue("feeY", Math.ceil(res.service_fee / rateProduct));
           setPercenDeposit(res.min_deposit_percent);
         } catch (error) {
           console.error("Error fetching fee service:", error);
@@ -265,41 +254,86 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     };
 
     fetchFeeService();
-  }, [form, services, customer, priceVND, prices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    form,
+    services,
+    customer,
+    priceVND,
+    prices,
+    quantity,
+    priceY,
+    category,
+    paymentAmount,
+  ]);
 
-  useEffect(() => {
+  useEffect(() => {    
     if (listInsurance && listInsurance.length > 0) {
       setInsurance(listInsurance[0]);
     }
   }, [listInsurance]);
 
-  useEffect(() => {
-    if (totalFee) form.setFieldValue("deposit", totalFee);
-  }, [totalFee, percenDeposit]);
+  // useEffect(() => {
+  //   if (totalFee) form.setFieldValue("deposit", totalFee);
+  // }, [totalFee, percenDeposit]);
 
   useEffect(() => {
-    if (order) {
-      setPrice(order.amount_vnd);
-      setIdProduct(order.metadata.items[0]?.product.id);
-      order.metadata.infos.fees.map((item) => {
-        services.push(item.code);
+    if (order !== undefined && isOpen) {
+      setPrice(order.amount_vnd ?? 0);
+      setIdProduct(order.metadata.items?.[0]?.product?.id ?? null);
+
+      const services: string[] = [];
+      order.metadata.infos?.fees?.forEach((item: any) => {
+        if (item?.code) services.push(item.code);
       });
-      //   setServices
+
+      setRouteId(order.metadata.items?.[0]?.product?.route_id ?? null);
+      setRateValueForPrice(order.rate ?? 0);
+      setCurrencyCode(
+        order.metadata.items?.[0]?.product?.currency_code ?? "VND"
+      );
+      setPaymentType(order.metadata.infos?.codeType ?? 1);
+      setInsurance(order.metadata.infos?.insurancePackage)
       form.setFieldsValue({
-        link: order.metadata.items[0]?.product.url,
-        productName: order.metadata.items[0]?.product.map_data.productName,
-        description: order.metadata.items[0]?.product.map_data.description,
-        category: order.metadata.items[0]?.product.id,
-        priceY: order.metadata.items[0]?.product.map_data.price,
-        priceVnd: order.amount_vnd,
-        customer: order.user_id,
-        deposit: order.deposit_fee,
-        note: order.description,
-        customerName: order.customer_name,
+        link: order.metadata.items?.[0]?.product?.url ?? "",
+        productName:
+          order.metadata.items?.[0]?.product?.map_data?.productName ?? "",
+        description:
+          order.metadata.items?.[0]?.product?.map_data?.description ?? "",
+        category: order.metadata.infos?.productCategory?.id ?? null,
+        priceY: order.metadata.items?.[0]?.product?.map_data?.price ?? 0,
+        priceVnd: order.amount_vnd ?? 0,
+        customer: order.user_id ?? null,
+        deposit: order.deposit_fee ?? 0,
+        note: order.description ?? "",
+        customerName: order.customer_name ?? "",
+        quantity: order.metadata.items?.[0]?.count ?? 1,
+        paymentType: order.metadata.infos?.codeType ?? null,
+        paymentAmount: order.metadata.infos?.codInJapan,
       });
     }
-  }, [order, form]);
+  }, [order, form,orderId]);
 
+  const totalFeeCheck =
+    fees.DOMESTIC_SHIPPING_FEE +
+    fees.INSURANCE_FEE +
+    fees.PAYMENT_FEE +
+    fees.SERVICE_FEE +
+    fees.SHIPPING_SURCHARGE_FEE -
+    (paymentAmount ? paymentAmount : 0);
+  const totalFee = ((totalFeeCheck + priceVND) * percenDeposit) / 100;
+
+  const handleCancel = () => {
+    form.resetFields();
+    setServices([]);
+    setInsurance(null);
+    setPrice(0);
+    setPercenDeposit(0);
+    setIdProduct(null);
+    setSearchValue("");
+    setRateProduct(0)
+    onCancel();
+  };
   return (
     <>
       <Modal
@@ -313,7 +347,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         }}
         title="Chỉnh sửa Đơn hàng cho Khách hàng"
         open={isOpen}
-        onCancel={onCancel}
+        onCancel={handleCancel}
         centered
         footer={[
           <Button key="cancel" onClick={onCancel}>
@@ -323,13 +357,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             key="submit"
             type="primary"
             onClick={() => {
-              if (order?.status !== OrderStatusType.PENDING_DEPOSIT) {
+              if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
                 return;
               }
               handleOk();
             }}
             className="bg-blue-500"
-            disabled={order?.status !== OrderStatusType.PENDING_DEPOSIT}
+            disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
           >
             Chỉnh sửa đơn hàng
           </Button>,
@@ -359,11 +393,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Input
                   placeholder="https://..."
                   className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
-                  //   addonAfter={
-                  //     <Button type="dashed" onClick={handleGetInfo}>
-                  //       Get info
-                  //     </Button>
-                  //   }
                 />
               </Form.Item>
               <Form.Item
@@ -462,6 +491,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   className="!flex-1 !mb-1"
                   label="Giá (VND)"
                   name="priceVnd"
+                  style={{ display: "none" }}
                 >
                   <InputNumber
                     formatter={(value) =>
@@ -475,6 +505,45 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
+
+              <Form.Item
+                label="Phí vc nội địa"
+                name="paymentType"
+                className="!mb-1 "
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn hình thức thanh toán",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Chọn hình thức"
+                  onChange={(value) => setPaymentType(value)}
+                  options={[
+                    { label: "Miễn phí vận chuyển", value: 1 },
+                    { label: "ADMIN điền cod", value: 2 },
+                  ]}
+                  className="!w-full !h-11"
+                />
+              </Form.Item>
+              {paymentType === 2 && (
+                <Form.Item
+                  label="Số tiền thanh toán"
+                  name="paymentAmount"
+                  className="!mb-1"
+                  rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
+                >
+                  <InputNumber
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value?.replace(/,/g, "") as any}
+                    className="!w-full !h-11"
+                    min={0}
+                  />
+                </Form.Item>
+              )}
 
               <div className="space-y-4 mt-4">
                 <Collapse
@@ -626,6 +695,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 <Form.Item
                   className="!flex-1 !mb-1 "
                   label="Phí DV (VND)"
+                  style={{ display: "none" }}
                   name="feeVnd"
                 >
                   <InputNumber
@@ -639,28 +709,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   />
                 </Form.Item>
               </div>
-
-              <div className="flex flex-row gap-1">
-                <Form.Item
-                  label="Tiền cọc (VND)"
-                  name="deposit"
-                  style={{display: "none"}}
-                  rules={[
-                    { required: true, message: "Vui lòng nhập tiền cọc!" },
-                  ]}
-                  className="!flex-1 !mb-1 "
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    min={0}
-                  />
-                </Form.Item>
-              </div>
-              <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+              <Form.Item
+                className="!flex-1 !mb-1"
+                label="Số lượng"
+                name="quantity"
+              >
                 <InputNumber
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -669,6 +722,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   className="!w-full !h-11"
                 />
               </Form.Item>
+              {/* <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  style={{ display: "flex", alignItems: "center" }}
+                  className="!w-full !h-11"
+                />
+              </Form.Item> */}
               <Form.Item label="Ghi chú" name="note" className="!mb-1">
                 <Input.TextArea
                   className="!h-25"
@@ -677,50 +739,76 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               </Form.Item>
 
               <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="font-medium mb-3">Tổng kết Đơn hàng</h4>
+                <h4 className="font-medium mb-3">{t("form.orderSummary")}</h4>
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span>Giá sản phẩm</span>
+                    <span>Tỷ giá quy đổi</span>
                     <span>
-                      {form.getFieldValue("priceVnd")
-                        ? form.getFieldValue("priceVnd").toLocaleString("en-US")
-                        : 0}
+                      {rateValueForPrice
+                        ? rateValueForPrice.toLocaleString("en-US")
+                        : 0}{" "}
                       đ
                     </span>
                   </div>
-
                   <div className="flex justify-between">
-                    <span>Phí dịch vụ</span>
-                    <span>{feeVnd ? feeVnd.toLocaleString("en-US") : 0} đ</span>
+                    <span>{t("form.productPrice")}</span>
+                    <span>{priceY ? priceY.toLocaleString("en-US") : 0} {currencyCheckCode}</span>
                   </div>
-
-                  {listService &&
-                    listService.map((item: ServiceFee) =>
-                      item.optional ? (
-                        <div key={item.name} className="flex justify-between">
+                  <div className="flex justify-between">
+                    <span>Cước VC nội địa</span>
+                    <span>
+                      {paymentAmount
+                        ? paymentAmount.toLocaleString("en-US")
+                        : 0}{" "}
+                      {currencyCheckCode}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t("form.serviceFee")}</span>
+                    <span>{fees.SERVICE_FEE.toLocaleString("en-US")} đ</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Phí thanh toán</span>
+                    <span>{fees.PAYMENT_FEE.toLocaleString("en-US")} đ</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Cước vc quốc tế</span>
+                    <span>
+                      {fees.DOMESTIC_SHIPPING_FEE.toLocaleString("en-US")} đ
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Phụ thu VC</span>
+                    <span>
+                      {fees.SHIPPING_SURCHARGE_FEE.toLocaleString("en-US")} đ
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Phí bảo hiểm</span>
+                    <span>{fees.INSURANCE_FEE.toLocaleString("en-US")} đ</span>
+                  </div>
+                  {listService?.map((item: any) => (
+                    <>
+                      {services.includes(item.code) && (
+                        <div className="flex justify-between">
                           <span>{item.name}</span>
-                          <span>
-                            {item.amount
-                              ? item.amount.toLocaleString("en-US")
-                              : 0}{" "}
-                            đ
-                          </span>
+                          <span>{item.amount.toLocaleString("en-US")} đ</span>
                         </div>
-                      ) : null
-                    )}
+                      )}
+                    </>
+                  ))}
                 </div>
 
                 <hr className="my-2 border-gray-200" />
 
                 <div className="flex justify-between font-semibold">
-                  <span>Tổng cộng:</span>
+                  <span>{t("form.total")}:</span>
                   <span>
-                    {form.getFieldValue("priceVnd") &&
-                    form.getFieldValue("feeVnd")
+                    {totalFeeCheck
                       ? (
-                          form.getFieldValue("priceVnd") +
-                          form.getFieldValue("feeVnd")
+                          totalFeeCheck +
+                          priceVND * (quantity ?? 0)
                         ).toLocaleString("en-US")
                       : 0}
                     đ
@@ -728,23 +816,25 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                 </div>
 
                 <div className="flex justify-between text-green-600 font-semibold">
-                  <span>Tiền cọc:</span>
+                  <span>{t("form.deposit")}:</span>
                   <span>
-                    {totalFee ? Number(totalFee).toLocaleString("en-US") : 0} đ
+                    {fees.INSURANCE_FEE.toLocaleString("en-US")} đ
                   </span>
                 </div>
-
-                <div className="flex justify-between text-red-600 font-semibold">
-                  <span>Còn lại:</span>
+                {/* <div className="flex justify-between text-red-600 font-semibold">
+                  <span>{t("form.remaining")}:</span>
                   <span>
-                    {(
-                      (form.getFieldValue("priceVnd") ?? 0) +
-                      (form.getFieldValue("feeVnd") ?? 0) -
-                      (totalFee ?? 0)
-                    ).toLocaleString("en-US")}{" "}
+                    {(() => {
+                      const value =
+                        totalFeeCheck +
+                        priceVND * (quantity ?? 0) -
+                        (totalFee ?? 0);
+
+                      return isNaN(value) ? 0 : value.toLocaleString("en-US");
+                    })()}{" "}
                     đ
                   </span>
-                </div>
+                </div> */}
               </div>
             </Col>
           </Row>
