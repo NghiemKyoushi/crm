@@ -108,7 +108,7 @@ export const getListBankPermission = async (id: number) => {
   return res.data.data;
 };
 
-export const addUserBankPermission = async (id: number, body: {admin_user_ids: number[]}) => {
+export const addUserBankPermission = async (id: number, body: {admin_user_ids: number[], type: number}) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_USER_MANAGE_ACCOUNT_BANK}${id}/permissions`, body);
   return res.data.data;
 };
