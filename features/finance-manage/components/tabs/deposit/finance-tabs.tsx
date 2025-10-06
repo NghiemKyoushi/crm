@@ -5,7 +5,7 @@ import { Spin } from "antd";
 import FinanceTabs from "../withdraw/finance-tabs";
 import DepositTable from "./deposit-table";
 import WithdrawTable from "../withdraw/withdraw-table";
-import BankAccountSetting from "../bank-setting/deposit-bank-setting";
+import BankAccountSetting from "@/features/finance-manage/components/tabs/bank-company/bank-company";
 import {useSearchParams } from "next/navigation";
 import BankPartnerSetting from "../bank-partner/bank-partner";
 
