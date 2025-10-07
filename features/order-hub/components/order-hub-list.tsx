@@ -988,7 +988,10 @@ export default function OrderHub() {
       {orderDetail?.id && (
         <EditOrderModal
           isOpen={openDetail}
-          onCancel={() => setOpenDetail(false)}
+          onCancel={() => {
+            setOpenDetail(false);
+            setOrderDetail(undefined)
+          }}
           orderId={+orderDetail?.id}
           onConfirm={() => console.log()}
         />

@@ -156,6 +156,7 @@ export interface OrderFeeRequest {
     description: string;
     name: string;
     items_per_unit?: number;
+    item_quantity: number;
   };
   fee_codes: string[];
   insurance_id: number;
@@ -164,7 +165,8 @@ export interface OrderFeeRequest {
   // deposit_fee: number;
   product_category_id: number;
   cod_shipping_price: number;
-  cod_type: number
+  cod_type: number;
+  // item_quantity: number;
 }
 
 export interface FeeServiceCheck {
