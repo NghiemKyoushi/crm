@@ -108,6 +108,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         const serviceOptionTrue = listService
           .filter((item: any) => item.optional === true)
           .map((item: any) => item.code);
+        const itemsPerUnit = form.getFieldValue("itemsPerUnit");
         const bodyNewOrder: OrderFeeRequest = {
           data: {
             product_id: idProduct,
@@ -115,6 +116,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             description: form.getFieldValue("description"),
             price: priceY,
             name: form.getFieldValue("productName"),
+            ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
           fee_codes: [...serviceOptionTrue, ...services],
@@ -308,6 +310,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         note: order.description ?? "",
         customerName: order.customer_name ?? "",
         quantity: order.metadata.items?.[0]?.count ?? 1,
+        itemsPerUnit: order.metadata.items?.[0]?.product?.items_per_unit ?? null,
         paymentType: order.metadata.infos?.codeType ?? null,
         paymentAmount: order.metadata.infos?.codInJapan,
       });
@@ -339,199 +342,246 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       <Modal
         styles={{
           body: {
-            maxHeight: "80vh",
+            maxHeight: "85vh",
             overflowY: "auto",
-            paddingRight: "8px",
             overflowX: "hidden",
           },
         }}
-        title="Chỉnh sửa Đơn hàng cho Khách hàng"
+        title={
+          <div className="flex items-center gap-3 pb-4 border-b">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa Đơn hàng</h3>
+              <p className="text-sm text-gray-500">Cập nhật thông tin đơn hàng cho khách hàng</p>
+            </div>
+          </div>
+        }
         open={isOpen}
         onCancel={handleCancel}
         centered
-        footer={[
-          <Button key="cancel" onClick={onCancel}>
-            Hủy
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={() => {
-              if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
-                return;
-              }
-              handleOk();
-            }}
-            className="bg-blue-500"
-            disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
-          >
-            Chỉnh sửa đơn hàng
-          </Button>,
-        ]}
-        width={800}
+        footer={
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              key="cancel"
+              onClick={handleCancel}
+              size="large"
+              className="!h-11 !px-6"
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              key="submit"
+              type="primary"
+              onClick={() => {
+                if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
+                  return;
+                }
+                handleOk();
+              }}
+              size="large"
+              className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
+              disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
+            >
+              Lưu thay đổi
+            </Button>
+          </div>
+        }
+        width={1000}
       >
         <Form
-          // onValuesChange={(changed, allValues) => {
-          //     form.setFieldsValue({
-          //       deposit: totalFee,
-          //     });
-          // }}
           form={form}
           layout="vertical"
           initialValues={{ method: "buy" }}
+          className="mt-6"
         >
           <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
-            <Col span={12}>
-              <Divider orientation="left">Thông tin Sản phẩm</Divider>
+            <Col span={14}>
+              {/* Product Information Section */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h4 className="text-base font-semibold text-gray-900">Thông tin Sản phẩm</h4>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-5">
               <Form.Item
-                label="Link Sản phẩm"
+                label={<span className="text-sm font-medium text-gray-700">Link Sản phẩm</span>}
                 name="link"
                 rules={[{ required: true, message: "Vui lòng nhập link!" }]}
-                className="!mb-1 "
+                className="!mb-4"
               >
                 <Input
                   placeholder="https://..."
-                  className="[&_.ant-input]:!h-11 [&_.ant-input-group-addon]:!p-0"
+                  prefix={<svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>}
+                  className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                 />
               </Form.Item>
               <Form.Item
-                label="Tên Sản phẩm"
+                label={<span className="text-sm font-medium text-gray-700">Tên Sản phẩm</span>}
                 name="productName"
                 rules={[
                   { required: true, message: "Vui lòng nhập tên sản phẩm!" },
                 ]}
-                className="!mb-1"
+                className="!mb-4"
               >
-                <Input className="!h-11" placeholder="" />
+                <Input
+                  className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
+                  placeholder="Nhập tên sản phẩm"
+                />
               </Form.Item>
-              {/* <Form.Item
-                label="Mô tả Sản phẩm"
-                name="description"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
-                ]}
-                className="!mb-1"
-              >
-
-                <TextArea rows={4} maxLength={500} placeholder="" />
-              </Form.Item> */}
               <Form.Item
-                label="Mô tả Sản phẩm"
+                label={<span className="text-sm font-medium text-gray-700">Mô tả Sản phẩm</span>}
                 name="description"
                 rules={[
                   { required: true, message: "Vui lòng nhập mô tả sản phẩm!" },
                 ]}
+                className="!mb-4"
               >
-                {/* AntD sẽ clone element và pass `value` + `onChange` => TiptapEditor nhận và đồng bộ */}
                 <TiptapEditor />
               </Form.Item>
-              <Form.Item
-                label="Loại sản phẩm"
-                name="category"
-                rules={[{ required: true, message: "Chọn loại sản phẩm!" }]}
-                className="!mb-1"
-              >
-                <Select
-                  className="!h-11"
-                  placeholder="-- Chọn loại sản phẩm --"
-                >
-                  {categories?.map((cat: any) => {
-                    return (
-                      <>
-                        <Option value={cat.id}>{cat.name}</Option>
-                      </>
-                    );
-                  })}
-                </Select>
-              </Form.Item>
 
-              <Form.Item
-                label="Phương thức"
-                name="method"
-                rules={[{ required: true, message: "Chọn phương thức!" }]}
-                className=" !w-full !mb-1"
-              >
-                <Radio.Group className="!flex !flex-row !w-full gap-4  ">
-                  <Radio
-                    disabled
-                    value="buy"
-                    className="!text-blue-500 flex-1 !p-3 rounded-md hover:border-blue-500 border-2 border-blue-300 bg-blue-50"
+              <Row gutter={12}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<span className="text-sm font-medium text-gray-700">Loại sản phẩm</span>}
+                    name="category"
+                    rules={[{ required: true, message: "Chọn loại sản phẩm!" }]}
+                    className="!mb-4"
                   >
-                    <div className="font-medium text-blue-800">Mua thẳng</div>
-                    <div className="text-xs text-blue-600">
-                      Phương thức duy nhất được hỗ trợ
-                    </div>
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
+                    <Select
+                      className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!rounded-lg"
+                      placeholder="-- Chọn loại --"
+                      suffixIcon={<svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>}
+                    >
+                      {categories?.map((cat: any) => (
+                        <Option key={cat.id} value={cat.id}>{cat.name}</Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<span className="text-sm font-medium text-gray-700">Số lượng</span>}
+                    name="quantity"
+                    className="!mb-4"
+                  >
+                    <InputNumber
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
+                      className="!w-full !h-11 !rounded-lg"
+                      placeholder="1"
+                      min={1}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <div className="flex flex-row gap-1">
-                <Form.Item
-                  className="!flex-1 !mb-1"
-                  label="Giá (¥)"
-                  name="priceY"
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              <Row gutter={12}>
+                <Col span={24}>
+                  <Form.Item
+                    label={
+                      <span className="text-sm font-medium text-gray-700">
+                        Số lượng sản phẩm/bộ
+                        <span className="text-xs text-gray-500 ml-2">(VD: 1 bộ kẹp tóc có 3 chiếc)</span>
+                      </span>
                     }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    // disabled
-                    onChange={(e) => {
-                      form.setFieldValue("priceVnd", +priceY * rateProduct);
-                    }}
-                    min={0}
-                  />
-                </Form.Item>
+                    name="itemsPerUnit"
+                    className="!mb-4"
+                  >
+                    <InputNumber
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
+                      prefix={
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      }
+                      className="!w-full !h-11 !rounded-lg"
+                      placeholder="Nhập số lượng sản phẩm trong 1 bộ (nếu có)"
+                      min={1}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-                <Form.Item
-                  className="!flex-1 !mb-1"
-                  label="Giá (VND)"
-                  name="priceVnd"
-                  style={{ display: "none" }}
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value: any) => value.replace(/\$\s?|(,*)/g, ",")}
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    disabled
-                    placeholder="Tự động tính"
-                  />
-                </Form.Item>
-              </div>
+              <Row gutter={12}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<span className="text-sm font-medium text-gray-700">Giá ({currencyCheckCode}) <span className="text-red-500">*</span></span>}
+                    name="priceY"
+                    className="!mb-4"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập giá sản phẩm!",
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value: any) => value.replace(/\$\s?|(,*)/g, "")}
+                      prefix={<span className="text-gray-400">{currencyCheckCode}</span>}
+                      className="!w-full !h-11 !rounded-lg"
+                      onChange={(e) => {
+                        form.setFieldValue("priceVnd", +priceY * rateProduct);
+                      }}
+                      min={0}
+                      placeholder="0"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="priceVnd"
+                    style={{ display: "none" }}
+                  >
+                    <InputNumber />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<span className="text-sm font-medium text-gray-700">Phí VC nội địa</span>}
+                    name="paymentType"
+                    className="!mb-4"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn hình thức",
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Chọn hình thức"
+                      onChange={(value) => setPaymentType(value)}
+                      options={[
+                        { label: "Miễn phí vận chuyển", value: 1 },
+                        { label: "ADMIN điền cod", value: 2 },
+                        { label: "Xác định sau", value: 3 },
+                      ]}
+                      className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!rounded-lg"
+                      suffixIcon={<svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Form.Item
-                label="Phí vc nội địa"
-                name="paymentType"
-                className="!mb-1 "
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn hình thức thanh toán",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Chọn hình thức"
-                  onChange={(value) => setPaymentType(value)}
-                  options={[
-                    { label: "Miễn phí vận chuyển", value: 1 },
-                    { label: "ADMIN điền cod", value: 2 },
-                  ]}
-                  className="!w-full !h-11"
-                />
-              </Form.Item>
               {paymentType === 2 && (
                 <Form.Item
-                  label="Số tiền thanh toán"
+                  label={<span className="text-sm font-medium text-gray-700">Số tiền thanh toán</span>}
                   name="paymentAmount"
-                  className="!mb-1"
+                  className="!mb-4"
                   rules={[{ required: true, message: "Vui lòng nhập số tiền" }]}
                 >
                   <InputNumber
@@ -539,56 +589,67 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
                     parser={(value) => value?.replace(/,/g, "") as any}
-                    className="!w-full !h-11"
+                    prefix={<span className="text-gray-400">{currencyCheckCode}</span>}
+                    className="!w-full !h-11 !rounded-lg"
                     min={0}
+                    placeholder="0"
                   />
                 </Form.Item>
               )}
 
-              <div className="space-y-4 mt-4">
+              {/* Services Section */}
+              <div className="mt-4">
                 <Collapse
                   defaultActiveKey={["1"]}
-                  className="!bg-blue-50 !rounded-sm !border !border-blue-200 "
+                  className="!bg-gradient-to-br !from-blue-50 !to-blue-100 !rounded-lg !border-0 !shadow-sm"
+                  expandIconPosition="end"
                 >
                   <Panel
                     key="1"
                     header={
-                      <span className="font-semibold text-blue-800 text-base flex items-center gap-2">
-                        <FontAwesomeIcon icon={faCog} /> Dịch vụ bổ sung (tùy
-                        chọn)
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                          <FontAwesomeIcon icon={faCog} className="text-white text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-blue-900 text-sm">Dịch vụ bổ sung</div>
+                          <div className="text-xs text-blue-600">Tùy chọn thêm</div>
+                        </div>
+                      </div>
                     }
+                    className="[&_.ant-collapse-header]:!py-3"
                   >
-                    <div className="space-y-1 ">
+                    <div className="space-y-2">
                       {listService?.map((item: ServiceFee) => {
                         if (item.optional) return null;
                         const isChecked = services.includes(item.code);
                         return (
                           <div
                             key={item.id}
-                            className="flex items-start justify-between bg-white rounded-md p-4 border border-blue-200 hover:shadow-sm transition"
+                            className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
+                              isChecked
+                                ? 'border-blue-400 shadow-md'
+                                : 'border-gray-200 hover:border-blue-200'
+                            }`}
                           >
-                            <div className="flex-1 pr-4">
+                            <div className="flex-1 pr-3">
                               <Checkbox
                                 checked={isChecked}
-                                onChange={(e) =>
-                                  handleServiceChange(e, item.code)
-                                }
-                                className="!text-blue-600"
+                                onChange={(e) => handleServiceChange(e, item.code)}
+                                className="[&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-blue-500"
                               >
                                 <div>
-                                  <div className="font-medium text-blue-700">
+                                  <div className="font-medium text-gray-900 text-sm">
                                     {item.name}
                                   </div>
-                                  <div className="text-blue-500 text-sm mt-1">
+                                  <div className="text-gray-500 text-xs mt-0.5">
                                     {item.description}
                                   </div>
                                 </div>
                               </Checkbox>
                             </div>
-                            <div className="text-blue-600 font-semibold text-sm min-w-[60px] text-right">
-                              {item.amount}
-                              {item.currency_code}
+                            <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
+                              {item.amount} {item.currency_code}
                             </div>
                           </div>
                         );
@@ -596,44 +657,59 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     </div>
                   </Panel>
                 </Collapse>
+              </div>
+
+              {/* Insurance Section */}
+              <div className="mt-3">
                 <Collapse
                   defaultActiveKey={["2"]}
-                  className="!bg-yellow-50 !rounded-sm !border !border-yellow-200  !mt-4"
+                  className="!bg-gradient-to-br !from-amber-50 !to-amber-100 !rounded-lg !border-0 !shadow-sm"
+                  expandIconPosition="end"
                 >
                   <Panel
                     key="2"
                     header={
-                      <span className="font-semibold text-yellow-800 text-base flex items-center gap-1">
-                        <FontAwesomeIcon icon={faShield} /> Bảo hiểm đơn hàng
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                          <FontAwesomeIcon icon={faShield} className="text-white text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-amber-900 text-sm">Bảo hiểm đơn hàng</div>
+                          <div className="text-xs text-amber-600">Bảo vệ đơn hàng của bạn</div>
+                        </div>
+                      </div>
                     }
+                    className="[&_.ant-collapse-header]:!py-3"
                   >
                     <div className="space-y-2">
                       {listInsurance?.map((item: InsuranceOptionModel) => {
                         const isChecked = insurance?.id === item.id;
-
                         return (
                           <div
                             key={item.id}
-                            className="flex items-start justify-between bg-white rounded-md p-4 border border-yellow-200 hover:shadow-sm transition"
+                            className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
+                              isChecked
+                                ? 'border-amber-400 shadow-md'
+                                : 'border-gray-200 hover:border-amber-200'
+                            }`}
                           >
-                            <div className="flex-1 pr-4">
+                            <div className="flex-1 pr-3">
                               <Checkbox
                                 checked={isChecked}
                                 onChange={(e) => handleInsuranceChange(e, item)}
-                                className="!text-yellow-700"
+                                className="[&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-amber-500"
                               >
                                 <div>
-                                  <div className="font-medium text-yellow-700">
+                                  <div className="font-medium text-gray-900 text-sm">
                                     {item.name}
                                   </div>
-                                  <div className="text-yellow-500 text-xs mt-1">
+                                  <div className="text-gray-500 text-xs mt-0.5">
                                     {item.description}
                                   </div>
                                 </div>
                               </Checkbox>
                             </div>
-                            <div className="text-yellow-600 font-semibold text-sm min-w-[50px] text-right">
+                            <div className="text-amber-600 font-semibold text-sm whitespace-nowrap">
                               {item.fee_percentage ?? 0}%
                             </div>
                           </div>
@@ -643,198 +719,194 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   </Panel>
                 </Collapse>
               </div>
+                </div>
+              </div>
             </Col>
-            <Col span={12}>
-              <Divider orientation="left">Thông tin Đơn hàng</Divider>
+            <Col span={10}>
+              {/* Order Information Section */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-base font-semibold text-gray-900">Thông tin Đơn hàng</h4>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-5">
               <Form.Item
-                label="Khách hàng"
                 name="customer"
-                className="!mb-1"
                 style={{ display: "none" }}
               >
-                <Input
-                  style={{ display: "flex", alignItems: "center" }}
-                  className="!w-full !h-11"
-                  disabled
-                  min={0}
-                />
+                <Input />
               </Form.Item>
               <Form.Item
-                label="Khách hàng"
+                label={<span className="text-sm font-medium text-gray-700">Khách hàng</span>}
                 name="customerName"
-                className="!mb-1"
+                className="!mb-4"
                 rules={[
                   { required: true, message: "Vui lòng chọn khách hàng!" },
                 ]}
               >
                 <Input
-                  style={{ display: "flex", alignItems: "center" }}
-                  className="!w-full !h-11"
+                  prefix={<svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
+                  className="!h-11 !rounded-lg !bg-gray-50"
                   disabled
-                  min={0}
                 />
               </Form.Item>
 
-              <div className="flex flex-row gap-1">
-                <Form.Item
-                  className="!flex-1 !mb-1"
-                  label="Phí DV (¥)"
-                  name="feeY"
-                >
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    style={{ display: "flex", alignItems: "center" }}
-                    className="!w-full !h-11"
-                    disabled
-                    min={0}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  className="!flex-1 !mb-1 "
-                  label="Phí DV (VND)"
-                  style={{ display: "none" }}
-                  name="feeVnd"
-                >
-                  <InputNumber
-                    className="!w-full !h-11"
-                    disabled
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    style={{ display: "flex", alignItems: "center" }}
-                    placeholder="Tự động tính"
-                  />
-                </Form.Item>
-              </div>
               <Form.Item
-                className="!flex-1 !mb-1"
-                label="Số lượng"
-                name="quantity"
+                label={<span className="text-sm font-medium text-gray-700">Phí dịch vụ ({currencyCheckCode})</span>}
+                name="feeY"
+                className="!mb-4"
               >
                 <InputNumber
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  style={{ display: "flex", alignItems: "center" }}
-                  className="!w-full !h-11"
+                  prefix={<span className="text-gray-400">{currencyCheckCode}</span>}
+                  className="!w-full !h-11 !rounded-lg !bg-gray-50"
+                  disabled
+                  placeholder="Tự động tính"
                 />
               </Form.Item>
-              {/* <Form.Item className="!flex-1 !mb-1" label="Phí COD" name="cod">
-                <InputNumber
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  style={{ display: "flex", alignItems: "center" }}
-                  className="!w-full !h-11"
-                />
-              </Form.Item> */}
-              <Form.Item label="Ghi chú" name="note" className="!mb-1">
+              <Form.Item
+                name="feeVnd"
+                style={{ display: "none" }}
+              >
+                <InputNumber />
+              </Form.Item>
+
+              <Form.Item
+                label={<span className="text-sm font-medium text-gray-700">Ghi chú</span>}
+                name="note"
+                className="!mb-0"
+              >
                 <Input.TextArea
-                  className="!h-25"
+                  rows={3}
+                  className="!rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                   placeholder="Ghi chú thêm về đơn hàng..."
                 />
               </Form.Item>
+                </div>
+              </div>
 
-              <div className="p-4 rounded-lg bg-blue-50 mt-4">
-                <h4 className="font-medium mb-3">{t("form.orderSummary")}</h4>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <span>Tỷ giá quy đổi</span>
-                    <span>
-                      {rateValueForPrice
-                        ? rateValueForPrice.toLocaleString("en-US")
-                        : 0}{" "}
-                      đ
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t("form.productPrice")}</span>
-                    <span>{priceY ? priceY.toLocaleString("en-US") : 0} {currencyCheckCode}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Cước VC nội địa</span>
-                    <span>
-                      {paymentAmount
-                        ? paymentAmount.toLocaleString("en-US")
-                        : 0}{" "}
-                      {currencyCheckCode}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t("form.serviceFee")}</span>
-                    <span>{fees.SERVICE_FEE.toLocaleString("en-US")} đ</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Phí thanh toán</span>
-                    <span>{fees.PAYMENT_FEE.toLocaleString("en-US")} đ</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Cước vc quốc tế</span>
-                    <span>
-                      {fees.DOMESTIC_SHIPPING_FEE.toLocaleString("en-US")} đ
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Phụ thu VC</span>
-                    <span>
-                      {fees.SHIPPING_SURCHARGE_FEE.toLocaleString("en-US")} đ
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Phí bảo hiểm</span>
-                    <span>{fees.INSURANCE_FEE.toLocaleString("en-US")} đ</span>
-                  </div>
-                  {listService?.map((item: any) => (
-                    <>
-                      {services.includes(item.code) && (
-                        <div className="flex justify-between">
-                          <span>{item.name}</span>
-                          <span>{item.amount.toLocaleString("en-US")} đ</span>
-                        </div>
-                      )}
-                    </>
-                  ))}
+              {/* Order Summary */}
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-3 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <h4 className="font-semibold text-white">{t("form.orderSummary")}</h4>
                 </div>
 
-                <hr className="my-2 border-gray-200" />
+                <div className="p-4 space-y-2.5">
+                  {/* Exchange Rate */}
+                  <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                    <span className="text-sm text-gray-600 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                      </svg>
+                      Tỷ giá quy đổi
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {rateValueForPrice ? rateValueForPrice.toLocaleString("en-US") : 0} đ
+                    </span>
+                  </div>
 
-                <div className="flex justify-between font-semibold">
-                  <span>{t("form.total")}:</span>
-                  <span>
-                    {totalFeeCheck
-                      ? (
-                          totalFeeCheck +
-                          priceVND * (quantity ?? 0)
-                        ).toLocaleString("en-US")
-                      : 0}
-                    đ
-                  </span>
+                  {/* Product Price */}
+                  <div className="flex justify-between items-center py-2 px-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <span className="text-sm text-blue-700 font-medium">{t("form.productPrice")}</span>
+                    <span className="text-sm font-bold text-blue-900">
+                      {priceY && quantity ? (priceY * quantity).toLocaleString("en-US") : 0} {currencyCheckCode}
+                    </span>
+                  </div>
+
+                  {/* Domestic Shipping */}
+                  {paymentAmount > 0 && (
+                    <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                      <span className="text-sm text-gray-600">Cước VC nội địa</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {paymentAmount.toLocaleString("en-US")} {currencyCheckCode}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Fees Section */}
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Chi phí</div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                        <span className="text-sm text-gray-600">{t("form.serviceFee")}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {fees.SERVICE_FEE.toLocaleString("en-US")} đ
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                        <span className="text-sm text-gray-600">Phí thanh toán</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {fees.PAYMENT_FEE.toLocaleString("en-US")} đ
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                        <span className="text-sm text-gray-600">Cước VC quốc tế</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {fees.DOMESTIC_SHIPPING_FEE.toLocaleString("en-US")} đ
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                        <span className="text-sm text-gray-600">Phụ thu VC</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {fees.SHIPPING_SURCHARGE_FEE.toLocaleString("en-US")} đ
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                        <span className="text-sm text-gray-600">Phí bảo hiểm</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {fees.INSURANCE_FEE.toLocaleString("en-US")} đ
+                        </span>
+                      </div>
+
+                      {/* Additional Services */}
+                      {listService?.map((item: any) => (
+                        services.includes(item.code) && (
+                          <div key={item.code} className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
+                            <span className="text-sm text-gray-600">{item.name}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {item.amount.toLocaleString("en-US")} đ
+                            </span>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="mt-3 pt-3 border-t-2 border-gray-300">
+                    <div className="flex justify-between items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-md">
+                      <span className="text-base font-bold text-white">{t("form.total")}:</span>
+                      <span className="text-lg font-bold text-white">
+                        {totalFeeCheck
+                          ? (totalFeeCheck + priceVND * (quantity ?? 0)).toLocaleString("en-US")
+                          : 0} đ
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Deposit */}
+                  <div className="flex justify-between items-center py-2.5 px-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+                    <span className="text-sm font-semibold text-green-700 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {t("form.deposit")}:
+                    </span>
+                    <span className="text-base font-bold text-green-700">
+                      {fees.INSURANCE_FEE.toLocaleString("en-US")} đ
+                    </span>
+                  </div>
                 </div>
-
-                <div className="flex justify-between text-green-600 font-semibold">
-                  <span>{t("form.deposit")}:</span>
-                  <span>
-                    {fees.INSURANCE_FEE.toLocaleString("en-US")} đ
-                  </span>
-                </div>
-                {/* <div className="flex justify-between text-red-600 font-semibold">
-                  <span>{t("form.remaining")}:</span>
-                  <span>
-                    {(() => {
-                      const value =
-                        totalFeeCheck +
-                        priceVND * (quantity ?? 0) -
-                        (totalFee ?? 0);
-
-                      return isNaN(value) ? 0 : value.toLocaleString("en-US");
-                    })()}{" "}
-                    đ
-                  </span>
-                </div> */}
               </div>
             </Col>
           </Row>

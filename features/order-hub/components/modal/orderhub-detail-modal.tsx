@@ -14,6 +14,7 @@ export interface Product {
   created_at: string; // ISO datetime
   updated_at: string;
   currency_code: string;
+  items_per_unit?: number;
 }
 
 // Item trong metadata.items

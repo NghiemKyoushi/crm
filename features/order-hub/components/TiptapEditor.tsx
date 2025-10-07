@@ -43,69 +43,116 @@ export default function TiptapEditor({
   }, [value, editor]);
 
   return (
-    <div className={className}>
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          padding: 8,
-          border: "1px solid #eee",
-          borderBottom: "none",
-          borderRadius: "6px 6px 0 0",
-        }}
-      >
+    <div className={`w-full ${className || ''}`}>
+      {/* Toolbar */}
+      <div className="flex gap-2 p-2 border border-gray-200 border-b-0 rounded-t-lg bg-gray-50">
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleBold().run()}
+          className={`px-3 py-1 rounded hover:bg-gray-200 transition ${
+            editor?.isActive('bold') ? 'bg-gray-300 font-bold' : ''
+          }`}
+          title="Bold"
         >
-          B
+          <strong>B</strong>
         </button>
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleItalic().run()}
+          className={`px-3 py-1 rounded hover:bg-gray-200 transition ${
+            editor?.isActive('italic') ? 'bg-gray-300 italic' : ''
+          }`}
+          title="Italic"
         >
-          I
+          <em>I</em>
         </button>
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleStrike().run()}
+          className={`px-3 py-1 rounded hover:bg-gray-200 transition ${
+            editor?.isActive('strike') ? 'bg-gray-300 line-through' : ''
+          }`}
+          title="Strikethrough"
         >
-          S
+          <s>S</s>
         </button>
+        <div className="w-px bg-gray-300 mx-1" />
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
+          className={`px-3 py-1 rounded hover:bg-gray-200 transition ${
+            editor?.isActive('bulletList') ? 'bg-gray-300' : ''
+          }`}
+          title="Bullet List"
         >
-          •
+          • List
         </button>
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+          className={`px-3 py-1 rounded hover:bg-gray-200 transition ${
+            editor?.isActive('orderedList') ? 'bg-gray-300' : ''
+          }`}
+          title="Numbered List"
         >
-          1.
+          1. List
         </button>
       </div>
 
-      <div
-        style={{
-          border: "1px solid #eee",
-          borderTop: "none",
-          borderRadius: "0 0 6px 6px",
-          minHeight: 160,
-        }}
-      >
+      {/* Editor Content */}
+      <div className="border border-gray-200 border-t-0 rounded-b-lg min-h-[180px] bg-white">
         <EditorContent
-          rows={5}
-          minLength={10}
           editor={editor}
-          style={{
-            padding: 12,
-            height: "100%", // fill the parent div
-            boxSizing: "border-box",
-            outline: "none", // remove focus outline
-          }}
+          className="tiptap-editor w-full h-full p-3 prose prose-sm max-w-none focus:outline-none"
         />
       </div>
+
+      {/* Global Styles for TipTap */}
+      <style jsx global>{`
+        .tiptap-editor .ProseMirror {
+          min-height: 160px;
+          outline: none;
+          width: 100%;
+        }
+
+        .tiptap-editor .ProseMirror:focus {
+          outline: none;
+        }
+
+        .tiptap-editor p {
+          margin: 0.5em 0;
+        }
+
+        .tiptap-editor p:first-child {
+          margin-top: 0;
+        }
+
+        .tiptap-editor p:last-child {
+          margin-bottom: 0;
+        }
+
+        .tiptap-editor ul,
+        .tiptap-editor ol {
+          padding-left: 1.5rem;
+          margin: 0.5em 0;
+        }
+
+        .tiptap-editor li {
+          margin: 0.25em 0;
+        }
+
+        .tiptap-editor strong {
+          font-weight: 700;
+        }
+
+        .tiptap-editor em {
+          font-style: italic;
+        }
+
+        .tiptap-editor s {
+          text-decoration: line-through;
+        }
+      `}</style>
     </div>
   );
 }
