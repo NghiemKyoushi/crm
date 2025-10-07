@@ -317,18 +317,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   ]);
 
   useEffect(() => {
-    if (listInsurance) {
-      console.log('listInsurance', listInsurance);
-      
+    if (listInsurance) {      
       setInsurance(listInsurance[1]);
     }
   }, [listInsurance,isOpen]);
-
-  // useEffect(() => {
-  //   if (!isOpen) {
-  //     setInsurance(null);
-  //   }
-  // }, [isOpen]);
 
   const totalFeeCheck =
     fees.DOMESTIC_SHIPPING_FEE +
