@@ -3,6 +3,7 @@ import i18n from "@/locales/i18n";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { CacheManager } from "@/utils/cache-manager";
+import { useQueryClient } from "@tanstack/react-query";
 
 // API Response interface
 interface ApiResponse<T = any> {
@@ -215,10 +216,12 @@ api.interceptors.response.use(
       err.response.data.localizedMessage = translateMessageKey(err.response.data.message_key, err.response.data.message);
     }
     const originalRequest = err.config;
+    const queryClient = useQueryClient();
     const logout = () => {
       // Use CacheManager for more thorough cleanup
       CacheManager.clearAuthData();
       localStorage.clear();
+      queryClient.clear();
       window.location.href = "/login";
       Cookies.remove("token", { path: "/" }); 
       Cookies.remove("accessToken", { path: "" }); 

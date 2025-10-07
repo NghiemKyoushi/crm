@@ -21,6 +21,7 @@ export interface Product {
 export interface Item {
   count: number;
   product: Product;
+  item_quantity: number;
 }
 
 // Phí dịch vụ trong metadata.infos.fees
