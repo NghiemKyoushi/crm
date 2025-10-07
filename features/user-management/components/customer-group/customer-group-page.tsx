@@ -1,6 +1,6 @@
 'use client';
 
-import CategoryCustomerTable from "./category-customer-table";
+import CategoryCustomerTable from "./customer-group-table";
 
 export default function CategoryCustomerPage() {
 

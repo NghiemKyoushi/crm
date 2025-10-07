@@ -13,7 +13,7 @@ import {
 import InsuranceSettings from "@/features/fee-settting/components/insurance-settings";
 import ShippingServiceForm from "@/features/fee-settting/components/shipping-service-form";
 import ShippingSurchangeTable from "@/features/fee-settting/components/shipping-surchange";
-import ExchangeRateSettings from "./category-rate-setting";
+import ExchangeRateSettings from "./customer-group-rate-setting";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 

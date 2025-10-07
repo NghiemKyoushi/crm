@@ -217,6 +217,7 @@ export default function StaffManageTable() {
               size="small"
               value={role}
               style={{ width: 160 }}
+              disabled={record.user_id === 1}
               onChange={(value, option) => {
                 if (value) {
                   updateStaffMutation.mutate({
@@ -232,7 +233,7 @@ export default function StaffManageTable() {
                 }
               }}
               options={listRole.map((r: any) => ({
-                value: r.role_id, 
+                value: r.role_id,
                 label: r.role_name,
               }))}
             />
@@ -258,51 +259,74 @@ export default function StaffManageTable() {
       key: "actions",
       width: 140,
       fixed: "right",
-      render: (_: any, record: UserData) => (
-        <div className="flex gap-3 text-sm justify-center">
-          <FontAwesomeIcon
-            icon={faEdit}
-            onClick={() => handleOpenEdit(record.user_id)}
-            className="cursor-pointer text-blue-500 hover:text-blue-700"
-            title="Sửa"
-          />
-          <FontAwesomeIcon
-            icon={faKey}
-            className="cursor-pointer text-gray-600 hover:text-gray-800"
-            onClick={() =>
-              handleOpenConfirm("reset", record.user_id.toString())
-            }
-            title="Reset mật khẩu"
-          />
-          {record.active ? (
+      render: (_: any, record: UserData) => {
+        const isSystemUser = record.user_id === 1;
+        return (
+          <div className="flex gap-3 text-sm justify-center">
             <FontAwesomeIcon
-              icon={faLock}
-              className="cursor-pointer text-amber-500 hover:text-amber-700"
-              onClick={() =>
-                handleOpenConfirm("lock", record.user_id.toString())
+              icon={faEdit}
+              onClick={() => !isSystemUser && handleOpenEdit(record.user_id)}
+              className={
+                isSystemUser
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "cursor-pointer text-blue-500 hover:text-blue-700"
               }
-              title="Khóa"
+              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.edit")}
             />
-          ) : (
             <FontAwesomeIcon
-              icon={faLock}
-              className="cursor-pointer text-green-500 hover:text-green-700"
-              onClick={() => {
-                handleOpenConfirm("unlock", record.user_id.toString());
-              }}
-              title="Mở khóa"
+              icon={faKey}
+              className={
+                isSystemUser
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "cursor-pointer text-gray-600 hover:text-gray-800"
+              }
+              onClick={() =>
+                !isSystemUser && handleOpenConfirm("reset", record.user_id.toString())
+              }
+              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.resetPassword")}
             />
-          )}
-          <FontAwesomeIcon
-            icon={faTrash}
-            className="cursor-pointer text-red-500 hover:text-red-700"
-            onClick={() =>
-              handleOpenConfirm("delete", record.user_id.toString())
-            }
-            title="Xóa"
-          />
-        </div>
-      ),
+            {record.active ? (
+              <FontAwesomeIcon
+                icon={faLock}
+                className={
+                  isSystemUser
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "cursor-pointer text-amber-500 hover:text-amber-700"
+                }
+                onClick={() =>
+                  !isSystemUser && handleOpenConfirm("lock", record.user_id.toString())
+                }
+                title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.lock")}
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faLock}
+                className={
+                  isSystemUser
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "cursor-pointer text-green-500 hover:text-green-700"
+                }
+                onClick={() => {
+                  !isSystemUser && handleOpenConfirm("unlock", record.user_id.toString());
+                }}
+                title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.unlock")}
+              />
+            )}
+            <FontAwesomeIcon
+              icon={faTrash}
+              className={
+                isSystemUser
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "cursor-pointer text-red-500 hover:text-red-700"
+              }
+              onClick={() =>
+                !isSystemUser && handleOpenConfirm("delete", record.user_id.toString())
+              }
+              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.delete")}
+            />
+          </div>
+        );
+      },
     },
   ];
 
