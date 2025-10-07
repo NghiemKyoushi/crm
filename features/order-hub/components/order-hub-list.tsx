@@ -244,6 +244,11 @@ export default function OrderHub() {
       key: "invoice_no",
       width: 40,
       align: "center",
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (invoice_no: string) => (
         <div className="text-xs font-medium text-blue-600">
           {invoice_no || "-"}
@@ -271,6 +276,11 @@ export default function OrderHub() {
       title: "Tracking / Kiện / SL / CN",
       key: "tracking_package",
       width: 200,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         const trackingRecords = record.tracking_ship_list || [];
         const firstRecord = trackingRecords[0];
@@ -342,6 +352,11 @@ export default function OrderHub() {
       title: "Giá SP",
       key: "product",
       width: 280,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         const product = record.metadata?.items?.[0]?.product;
         const name = product?.map_data?.productName || "-";
@@ -395,8 +410,8 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "vi-VN"
-                            )}${isJapanPrice}`
+                            "vi-VN"
+                          )}${isJapanPrice}`
                           : "-"}
                       </span>
                     )}
@@ -562,6 +577,11 @@ export default function OrderHub() {
       title: "Tổng chi phí",
       key: "total",
       width: 110,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="text-xs font-medium text-blue-600">
           {record.amount_vnd
@@ -763,7 +783,7 @@ export default function OrderHub() {
                         onError: (err: any) =>
                           toast.error(
                             err.response?.data?.localizedMessage ||
-                              t("common.error")
+                            t("common.error")
                           ),
                       }
                     );
@@ -946,7 +966,7 @@ export default function OrderHub() {
 
         <EnhancedTableWrapper
         //  className="overflow-x-auto"
-         >
+        >
           <TableComponent
             columns={columns}
             dataSource={listOrder?.data || []}
@@ -1223,7 +1243,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
@@ -1303,7 +1323,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
