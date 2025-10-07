@@ -90,6 +90,8 @@ export interface Product {
   created_at: string;
   updated_at: string;
   currency_code: string;
+  items_per_unit?: number;
+  route_id?: number;
 }
 
 export interface ProductMapData {
@@ -153,6 +155,7 @@ export interface OrderFeeRequest {
     price: number;
     description: string;
     name: string;
+    items_per_unit?: number;
   };
   fee_codes: string[];
   insurance_id: number;
