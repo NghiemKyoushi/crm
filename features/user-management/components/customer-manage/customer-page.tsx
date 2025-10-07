@@ -11,7 +11,7 @@ import {
 import CustomerTable from "./customer-table";
 import SalesPage from "../sale-manage/sales-page";
 import StaffManagePage from "../staff-manage/staff-manage-page";
-import CategoryCustomerPage from "../category-customer/category-page";
+import CategoryCustomerPage from "../customer-group/customer-group-page";
 import RoleManagerPage from "../role-manage/role-manage-pages";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "@/components/layout/PermissionContext";

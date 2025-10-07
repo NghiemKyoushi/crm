@@ -1,6 +1,6 @@
 "use client";
 
-import CategorySettingsPage from "@/features/user-management/components/category-customer/category-customer-setting/category-customer-setting";
+import CategorySettingsPage from "@/features/user-management/components/customer-group/customer-group-setting/customer-group-setting";
 import { useParams } from "next/navigation";
 
 export default function CustomerDetailPage() {

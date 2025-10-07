@@ -1,6 +1,6 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { CategoryRequest, getListCateParams } from "@/types/category-customer";
+import { CategoryRequest, getListCateParams } from "@/types/customer-group";
 import { getPagination } from "@/types/common-type";
 import { addressModel, bankAccountModel, CustomerNoteParams, CustomerParam } from "@/types/customer-type";
 import { Permission, PermissionGroup, RoleRequest } from "@/types/roles";

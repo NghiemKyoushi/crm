@@ -1,7 +1,7 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole } from "../apis/staff-manage";
-import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/category-customer";
+import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/customer-group";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
 import { Role, RoleRequest } from "@/types/roles";

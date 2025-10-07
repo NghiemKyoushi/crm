@@ -209,6 +209,9 @@
     "lock": "Lock",
     "unlock": "Unlock",
     "reset": "Reset",
+    "edit": "Edit",
+    "resetPassword": "Reset Password",
+    "cannotEditSystemUser": "Cannot edit system user!",
     "toast": {
       "createSuccess": "Staff created successfully!",
       "updateSuccess": "Account updated successfully!",
@@ -608,6 +611,8 @@
     "createSuccess": "New customer category created successfully!",
     "updateSuccess": "Customer category updated successfully!",
     "deleteSuccess": "Customer category deleted successfully!",
+    "cannotDeleteDefaultGroup": "Cannot delete default customer group!",
+    "cannotEditDefaultGroup": "Cannot edit default customer group!",
     "exchangeRateUpdateSuccess": "Exchange rate updated successfully!",
     "editCategory": "Edit Customer Category",
     "addNewCategory": "Add New Customer Category",
