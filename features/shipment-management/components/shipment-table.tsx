@@ -58,6 +58,11 @@ const ProductManagement: React.FC = () => {
       key: "tracking_ship",
       width: 100,
       align: "center",
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         return (
           <div className="space-y-1">
@@ -73,6 +78,11 @@ const ProductManagement: React.FC = () => {
       title: "Ngày TT",
       key: "payment_created_date",
       width: 80,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         const createdAt = record.order_list?.[0]?.created_at;
         return (
@@ -94,6 +104,11 @@ const ProductManagement: React.FC = () => {
       title: "Mã VN / CN",
       key: "tracking_package",
       width: 180,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         const orderList = record.order_list || [];
 
@@ -131,6 +146,11 @@ const ProductManagement: React.FC = () => {
       title: "Khách Hàng / NTạo",
       key: "customer_info",
       width: 200,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         const createdByName = record.order_list?.[0]?.created_by_name;
         return (
@@ -575,16 +595,16 @@ const ProductManagement: React.FC = () => {
               {text}
             </Tag>
             {
-             status === OrderStatusType.SHIPPING_REQUEST_CLIENT && <Button
-              size="small"
-              className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-              onClick={() => {
-                setIsOpenTrackingOrder(true);
-                setOrderDetail(record);
-              }}
-            >
-              {t('button.shipped')}
-            </Button>
+              status === OrderStatusType.SHIPPING_REQUEST_CLIENT && <Button
+                size="small"
+                className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                onClick={() => {
+                  setIsOpenTrackingOrder(true);
+                  setOrderDetail(record);
+                }}
+              >
+                {t('button.shipped')}
+              </Button>
             }
           </div>
         );
@@ -768,6 +788,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       key: "index",
       width: 60,
       align: "center",
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_: any, __: any, index: number) => (
         <div className="text-xs font-medium">{index + 1}</div>
       ),
@@ -776,6 +801,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Mã đơn",
       key: "invoice_no",
       width: 120,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="text-xs font-medium text-blue-600">{record.invoice_no || "-"}</div>
       ),
@@ -784,6 +814,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Mã VN / JP",
       key: "tracking",
       width: 150,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="space-y-1">
           <div className="text-xs">
@@ -801,6 +836,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Sản phẩm",
       key: "product",
       width: 250,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => {
         let productName = "-";
         let productImage = null;
@@ -849,6 +889,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       key: "weight",
       width: 80,
       align: "center",
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="text-xs text-gray-800">{record.weight ? `${record.weight}kg` : "-"}</div>
       ),
@@ -857,6 +902,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Số tiền",
       key: "amount",
       width: 120,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="space-y-1">
           <div className="text-xs">
@@ -878,6 +928,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Cọc",
       key: "deposit",
       width: 100,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="text-xs text-green-600 font-medium">
           {record.deposit_fee ? `${record.deposit_fee.toLocaleString("vi-VN")}đ` : "-"}
@@ -888,6 +943,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       title: "Ghi chú",
       key: "description",
       width: 150,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <div className="text-xs text-gray-600 line-clamp-2">{record.description || "-"}</div>
       ),
@@ -897,6 +957,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       key: "status",
       width: 120,
       align: "center",
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
       render: (_, record) => (
         <Tag color={getStatusColor(record.status)} className="!text-[10px] !py-0.5 !px-2">
           {record.status || "-"}
