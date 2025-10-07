@@ -941,7 +941,7 @@
     "addButton": "+ Add",
     "addSuccess": "Sales staff added successfully!",
     "addFailed": "Failed to add sales staff",
-    "managingCustomers": "Managing {count} Customers",
+    "managingCustomers": "Managing {{count}} Customers",
     "noMoreData": "No more data"
   },
   "customerDetail": {
