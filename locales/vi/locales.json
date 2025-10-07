@@ -940,7 +940,7 @@
     "addButton": "Thêm",
     "addSuccess": "Thêm nhân viên sale thành công!",
     "addFailed": "Thêm nhân viên sale thất bại",
-    "managingCustomers": "Đang quản lý {count} Khách hàng",
+    "managingCustomers": "Đang quản lý {{count}} Khách hàng",
     "noMoreData": "Hết dữ liệu"
   },
   "customerDetail": {

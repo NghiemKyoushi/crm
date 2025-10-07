@@ -6,7 +6,7 @@ import SalesDetail from "./sales-detail";
 import { getListSaleStaff } from "../../apis/staff-manage";
 import { UserSaleItem } from "@/types/sale-manage";
 
-export default function SalesPage() {
+export default function SalesPage() {  
   const [selectedSales, setSelectedSales] = useState<number | undefined>(undefined);
   const [nameSelect, setNameSelect] = useState("");
   const [salesData, setSalesData] = useState<UserSaleItem[]>([]);
