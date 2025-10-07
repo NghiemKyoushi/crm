@@ -99,7 +99,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
             onChange={(val) => setPaymentType(val)}
             options={[
               { label: "Miễn phí vận chuyển", value: 1 },
-              { label: "ADMIN điền COD", value: 2 },
+              { label: "Admin điền phí COD", value: 2 },
               { label: "Xác định sau", value: 3 },
             ]}
           />

@@ -216,16 +216,14 @@ api.interceptors.response.use(
       err.response.data.localizedMessage = translateMessageKey(err.response.data.message_key, err.response.data.message);
     }
     const originalRequest = err.config;
-    const queryClient = useQueryClient();
     const logout = () => {
       // Use CacheManager for more thorough cleanup
       CacheManager.clearAuthData();
       localStorage.clear();
-      queryClient.clear();
       window.location.href = "/login";
       Cookies.remove("token", { path: "/" }); 
       Cookies.remove("accessToken", { path: "" }); 
-      Cookies.remove("refreshToken", { path: "" }); 
+      Cookies.remove("refreshToken", { path: "" });
     };
 
     if (err.response?.status === 401 && !originalRequest._retry) {

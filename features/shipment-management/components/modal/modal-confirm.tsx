@@ -83,7 +83,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
             onChange={(value) => setPaymentType(value)}
             options={[
               { label: "Miễn phí vận chuyển", value: 1 },
-              { label: "ADMIN điền cod", value: 2 },
+              { label: "Admin điền phí COD", value: 2 },
               { label: "Xác định sau", value: 3 },
             ]}
             className="!w-full !h-11"

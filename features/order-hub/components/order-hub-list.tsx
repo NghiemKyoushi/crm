@@ -416,7 +416,7 @@ export default function OrderHub() {
                       </span>
                     )}
                   </div>
-                  {shouldShowWarning && (
+                  {/* {shouldShowWarning && ( */}
                     <EditOutlined
                       className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                       onClick={() => {
@@ -428,7 +428,7 @@ export default function OrderHub() {
                         });
                       }}
                     />
-                  )}
+                  {/* )} */}
                 </div>
               </div>
               {url && (
@@ -1269,6 +1269,7 @@ export default function OrderHub() {
               >
                 <Select.Option value={1}>Miễn phí vận chuyển</Select.Option>
                 <Select.Option value={2}>Admin điền phí COD</Select.Option>
+                <Select.Option value={3}>Xác định sau</Select.Option>
               </Select>
             </Form.Item>
 

@@ -131,6 +131,13 @@ export const RoleModal: React.FC<RoleModalProps> = ({
       cancelText={t('common.cancel')}
       destroyOnClose
       width={500}
+      centered
+      styles={{
+        body: {
+          maxHeight: "70vh",
+          overflowY: "auto",
+        },
+      }}
     >
       <Form layout="vertical" className="">
         {/* Tên vai trò */}

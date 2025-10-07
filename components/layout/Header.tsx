@@ -42,12 +42,11 @@ export const Header: React.FC = () => {
 
   const handleLogout = async () => {
     await logout();
-    queryClient.clear();
     storage.clear();
     Cookies.remove("token", { path: "/" });
     Cookies.remove("accessToken", { path: "/" });
     Cookies.remove("refreshToken", { path: "/" });
-
+    queryClient.clear();
     router.push("/login");
   };
 
