@@ -196,16 +196,16 @@ export default function ShippingSurchangeTable(
         render: (val, record) => {
           // Lấy tất cả category_id đã chọn trong route này
           const usedIds = data[+route]?.map((r) => r.product_category_id) || [];
-      
+
           // Nếu đang edit row này thì cho phép giữ nguyên value hiện tại
           const filteredOptions = categoryOptions.filter(
-            (opt:any) => opt.value === val || !usedIds.includes(opt.value)
+            (opt: any) => opt.value === val || !usedIds.includes(opt.value)
           );
-      
+
           return (
             <Select
               showSearch
-              className="!w-[180px] !h-9 !bg-gray-100"
+              className="!w-full"
               value={val}
               loading={isLoadingCategories}
               onChange={(value) =>
@@ -228,7 +228,7 @@ export default function ShippingSurchangeTable(
         width: 180,
         render: (val, record) => (
           <Select
-            className="!w-full !h-9 !bg-gray-100"
+            className="!w-full"
             value={record.type ?? 1}
             onChange={(value) =>
               handleChange(+route, record.id.toString(), "type", value)
@@ -241,41 +241,9 @@ export default function ShippingSurchangeTable(
         ),
       },
       {
-        title: t("table.conditionType"),
-        dataIndex: "condition_type",
-        width: 100,
-        render: (val, record) => {
-          console.log('record.condition_type', record.condition_type);
-          
-          if (record.type === 2) return null;
-          return (
-            <Select
-              className="!w-full !h-9 !bg-gray-100"
-              value={val}
-              onChange={(value) =>
-                handleChange(
-                  +route,
-                  record.id.toString(),
-                  "condition_type",
-                  value
-                )
-              }
-              options={[
-                { value: "GTE", label: ">=" },
-                { value: "LTE", label: "<=" },
-                { value: "EQ", label: "==" },
-                { value: "GT", label: ">" },
-                { value: "LT", label: "<" },
-                { value: "RANGE", label: "Range" },
-              ]}
-            />
-          );
-        },
-      },
-      {
         title: isUSRoute ? "Giá trị (USD)" : "Giá trị (JPY)",
         dataIndex: "price_to",
-        width: 200,
+        width: 280,
         render: (val, record: MaterialItem) => {
           if (record.type === 2) return null;
           const placeholder = isUSRoute ? "$" : "¥";
@@ -283,16 +251,36 @@ export default function ShippingSurchangeTable(
           if (record.condition_type === "RANGE") {
             return (
               <div className="flex items-center gap-1">
+                <Select
+                  className="!w-24 !border-0"
+                  value={record.condition_type}
+                  onChange={(value) =>
+                    handleChange(
+                      +route,
+                      record.id.toString(),
+                      "condition_type",
+                      value
+                    )
+                  }
+                  options={[
+                    { value: "GTE", label: ">=" },
+                    { value: "LTE", label: "<=" },
+                    { value: "EQ", label: "==" },
+                    { value: "GT", label: ">" },
+                    { value: "LT", label: "<" },
+                    { value: "RANGE", label: "Range" },
+                  ]}
+                />
                 <InputNumber<string>
-                  className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                  className="flex-1"
                   value={record.price_from.toString()}
                   step={0.01}
                   stringMode
                   placeholder={placeholder}
                   formatter={(value) =>
-                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                  parser={(value: any) => value?.replace(/\D/g, "")}
                   onChange={(value) =>
                     handleChange(
                       +route,
@@ -301,18 +289,19 @@ export default function ShippingSurchangeTable(
                       value ?? 0
                     )
                   }
+                  min="0"
                 />
                 <span className="px-1">~</span>
                 <InputNumber<string>
-                  className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                  className="flex-1"
                   value={record.price_to.toString()}
                   step={0.01}
                   stringMode
                   placeholder={placeholder}
                   formatter={(value) =>
-                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
+                  parser={(value: any) => value?.replace(/\D/g, "")}
                   onChange={(value) =>
                     handleChange(
                       +route,
@@ -321,6 +310,7 @@ export default function ShippingSurchangeTable(
                       value ?? 0
                     )
                   }
+                  min="0"
                 />
               </div>
             );
@@ -328,7 +318,7 @@ export default function ShippingSurchangeTable(
 
           return (
             <InputNumber<string>
-              className="!bg-gray-100 !w-full [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+              className="!w-full"
               value={
                 record.condition_type === "GT" ||
                 record.condition_type === "GTE"
@@ -342,9 +332,9 @@ export default function ShippingSurchangeTable(
               stringMode
               placeholder={placeholder}
               formatter={(value) =>
-                value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
-              parser={(value) => (value ? value.replace(/,/g, "") : "")}
+              parser={(value: any) => value?.replace(/\D/g, "")}
               onChange={(value) => {
                 let fieldCheck = "";
                 if (
@@ -365,6 +355,29 @@ export default function ShippingSurchangeTable(
                   value ?? 0
                 );
               }}
+              min="0"
+              addonBefore={
+                <Select
+                  className="!w-24 !border-0"
+                  value={record.condition_type}
+                  onChange={(value) =>
+                    handleChange(
+                      +route,
+                      record.id.toString(),
+                      "condition_type",
+                      value
+                    )
+                  }
+                  options={[
+                    { value: "GTE", label: ">=" },
+                    { value: "LTE", label: "<=" },
+                    { value: "EQ", label: "==" },
+                    { value: "GT", label: ">" },
+                    { value: "LT", label: "<" },
+                    { value: "RANGE", label: "Range" },
+                  ]}
+                />
+              }
             />
           );
         },
@@ -405,18 +418,14 @@ export default function ShippingSurchangeTable(
           return (
             <div className="flex items-center gap-1">
               <InputNumber<string>
-                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                className="!w-full"
                 value={numberPart}
                 step={0.01}
                 stringMode
-                formatter={(value) => {
-                  if (!value) return "";
-                  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
-                }}
-                parser={(value) => {
-                  if (!value) return "";
-                  return value.replace(/,/g, "").trim(); // parse số
-                }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value: any) => value?.replace(/\D/g, "")}
                 onChange={(value) =>
                   handleChange(
                     +route,
@@ -425,21 +434,23 @@ export default function ShippingSurchangeTable(
                     (value ?? "0") + unitPart // nối với đơn vị
                   )
                 }
-              />
-
-              <Select
-                className="!h-9 !w-6/12"
-                value={unitPart}
-                onChange={(cur) => {
-                  const cleanNumber = numberPart || "0";
-                  handleChange(
-                    +route,
-                    record.id.toString(),
-                    "value_data",
-                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                  );
-                }}
-                options={currencyOptions}
+                min="0"
+                addonAfter={
+                  <Select
+                    className="!w-20 !border-0"
+                    value={unitPart}
+                    onChange={(cur) => {
+                      const cleanNumber = numberPart || "0";
+                      handleChange(
+                        +route,
+                        record.id.toString(),
+                        "value_data",
+                        cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                      );
+                    }}
+                    options={currencyOptions}
+                  />
+                }
               />
             </div>
           );
@@ -448,7 +459,7 @@ export default function ShippingSurchangeTable(
       {
         title: t("table.surcharge"),
         dataIndex: "value_shipping_data",
-        width: 140,
+        width: 200,
         render: (val, record) => {
           // Bắt cả USD, JPY, VND, %
           const match = (val ?? "")
@@ -481,18 +492,14 @@ export default function ShippingSurchangeTable(
           return (
             <div className="flex items-center gap-1">
               <InputNumber<string>
-                className="!bg-gray-100 flex-1 [&_.ant-input-number-input]:!h-9 [&_.ant-input-number-input]:!py-0 !text-center"
+                className="!w-full"
                 value={numberPart}
                 step={0.01}
                 stringMode
-                formatter={(value) => {
-                  if (!value) return "";
-                  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // format số
-                }}
-                parser={(value) => {
-                  if (!value) return "";
-                  return value.replace(/,/g, "").trim(); // parse số
-                }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value: any) => value?.replace(/\D/g, "")}
                 onChange={(value) =>
                   handleChange(
                     +route,
@@ -501,21 +508,23 @@ export default function ShippingSurchangeTable(
                     (value ?? "0") + unitPart // nối với đơn vị
                   )
                 }
-              />
-
-              <Select
-                className="!h-9 !w-6/12"
-                value={unitPart}
-                onChange={(cur) => {
-                  const cleanNumber = numberPart || "0";
-                  handleChange(
-                    +route,
-                    record.id.toString(),
-                    "value_shipping_data",
-                    cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
-                  );
-                }}
-                options={optionList}
+                min="0"
+                addonAfter={
+                  <Select
+                    className="!w-20 !border-0"
+                    value={unitPart}
+                    onChange={(cur) => {
+                      const cleanNumber = numberPart || "0";
+                      handleChange(
+                        +route,
+                        record.id.toString(),
+                        "value_shipping_data",
+                        cleanNumber + cur // đổi đơn vị => lưu số + đơn vị
+                      );
+                    }}
+                    options={optionList}
+                  />
+                }
               />
             </div>
           );

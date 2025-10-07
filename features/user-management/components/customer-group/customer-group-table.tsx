@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Form, Input, Tag, Tooltip } from "antd";
-import AddCustomerTypeModal from "./modal-edit-category-customer";
+import AddCustomerTypeModal from "./modal-edit-customer-group";
 import TableComponent from "@/components/TableComponent";
 import {
   useCreateNewCateGoryCus,
@@ -9,7 +9,7 @@ import {
   useUpdateCateGoryCus,
 } from "../../hooks/staff-manage";
 import { ColumnsType } from "antd/es/table";
-import { Category, CategoryRequest } from "@/types/category-customer";
+import { Category, CategoryRequest } from "@/types/customer-group";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -156,23 +156,24 @@ export default function CategoryCustomerTable() {
       fixed: "right",
       render: (_: any, record: Category) => (
         <div className="flex space-x-2 justify-center">
-          <Tooltip title={t("customerCate.editPolicy")}>
+          <Tooltip title={record.id === 1 ? t("categoryCustomer.cannotEditDefaultGroup") : t("customerCate.editPolicy")}>
             <Button
               type="text"
               size="small"
+              disabled={record.id === 1}
               icon={
                 <FontAwesomeIcon
                   icon={faEdit}
-                  className="text-indigo-600 hover:text-indigo-800 text-sm"
+                  className={record.id === 1 ? "text-gray-400 text-sm" : "text-indigo-600 hover:text-indigo-800 text-sm"}
                 />
               }
               onClick={()=>{
-                router.push(`/category-customer/${record.id}`)
+                router.push(`/customer-group/${record.id}`)
               }}
             />
           </Tooltip>
 
-          <Tooltip title={t("customerCate.editCategory")}>
+          <Tooltip title={record.id === 1 ? t("categoryCustomer.cannotEditDefaultGroup") : t("customerCate.editCategory")}>
             <Button
               onClick={() => {
                 setId(record.id.toString());
@@ -186,23 +187,25 @@ export default function CategoryCustomerTable() {
               }}
               type="text"
               size="small"
+              disabled={record.id === 1}
               icon={
                 <FontAwesomeIcon
                   icon={faTags}
-                  className="text-green-600 hover:text-green-800 text-sm"
+                  className={record.id === 1 ? "text-gray-400 text-sm" : "text-green-600 hover:text-green-800 text-sm"}
                 />
               }
             />
           </Tooltip>
-          <Tooltip title={t("customerCate.delete")}>
+          <Tooltip title={record.id === 1 ? t("categoryCustomer.cannotDeleteDefaultGroup") : t("customerCate.delete")}>
             <Button
               type="text"
               size="small"
               danger
+              disabled={record.id === 1}
               icon={
                 <FontAwesomeIcon
                   icon={faTrash}
-                  className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                  className={record.id === 1 ? "text-gray-400 transition-colors duration-200" : "text-red-600 hover:text-red-800 transition-colors duration-200"}
                 />
               }
               onClick={() => {

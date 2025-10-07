@@ -208,6 +208,9 @@
     "lock": "Khoá",
     "unlock": "Mở khoá",
     "reset": "Reset",
+    "edit": "Chỉnh sửa",
+    "resetPassword": "Reset mật khẩu",
+    "cannotEditSystemUser": "Không thể chỉnh sửa tài khoản hệ thống!",
     "toast": {
       "createSuccess": "Tạo nhân viên mới thành công!",
       "updateSuccess": "Cập nhật tài khoản thành công!",
@@ -607,6 +610,8 @@
     "createSuccess": "Tạo loại khách hàng mới thành công!",
     "updateSuccess": "Cập nhật loại khách hàng thành công!",
     "deleteSuccess": "Xóa loại khách hàng thành công!",
+    "cannotDeleteDefaultGroup": "Không thể xóa nhóm khách hàng mặc định!",
+    "cannotEditDefaultGroup": "Không thể sửa nhóm khách hàng mặc định!",
     "exchangeRateUpdateSuccess": "Cập nhật tỉ giá thành công!",
     "editCategory": "Chỉnh sửa Loại khách hàng",
     "addNewCategory": "Thêm Loại khách hàng mới",

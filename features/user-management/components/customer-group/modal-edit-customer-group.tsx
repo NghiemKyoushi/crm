@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { Modal, Button, Input } from "antd";
-import { CategoryRequest } from "@/types/category-customer";
+import { CategoryRequest } from "@/types/customer-group";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
