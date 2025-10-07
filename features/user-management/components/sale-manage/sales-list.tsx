@@ -5,6 +5,7 @@ import { useCreateSaleStaff } from "../../hooks/staff-manage";
 import { toast } from "react-toastify";
 import { UserSaleItem } from "@/types/sale-manage";
 import { useTranslation } from "react-i18next";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 interface SalesListProps {
   data: UserSaleItem[];
@@ -17,7 +18,7 @@ interface SalesListProps {
 }
 
 export default function SalesList({ data, loading, hasMore, setPage, selected, onSelect, refetchSales }: SalesListProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation();  
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
   const createNewSaleMutation = useCreateSaleStaff();
