@@ -70,7 +70,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const category = Form.useWatch("category", form);
   const paymentAmount = Form.useWatch("paymentAmount", form);
   const paymentTypeForm = Form.useWatch("paymentType", form);
-
+  const itemQuantity= Form.useWatch("item_quantity", form);
   const [paymentType, setPaymentType] = useState(1);
   const [currencyCode, setCurrencyCode] = useState("");
   const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
@@ -271,6 +271,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           currency_code: currencyCode,
           quantity: quantity ? quantity : 0,
           route_id: routeId,
+          item_quantity: itemQuantity ? itemQuantity : 0
         };
         try {
           const res: FeeServiceCheck = await getDataFeeService(
@@ -312,6 +313,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     priceY,
     category,
     paymentAmount,
+    itemQuantity
   ]);
 
   useEffect(() => {
@@ -704,7 +706,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           onChange={(value) => setPaymentType(value)}
                           options={[
                             { label: "Miễn phí vận chuyển", value: 1 },
-                            { label: "ADMIN điền cod", value: 2 },
+                            { label: "Admin điền phí COD", value: 2 },
                             { label: "Xác định sau", value: 3 },
                           ]}
                           className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!rounded-lg"

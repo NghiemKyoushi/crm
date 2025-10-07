@@ -145,6 +145,7 @@ export interface RateOrderRequest {
   quantity: number;
   route_id: number;
   user_id: number;
+  item_quantity: number;
 }
 
 

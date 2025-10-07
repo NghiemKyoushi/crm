@@ -11,6 +11,7 @@ type Props = {
   onChange?: (html: string) => void;
   placeholder?: string;
   className?: string;
+  isDisable?: boolean;
 };
 
 export default function TiptapEditor({
@@ -18,6 +19,7 @@ export default function TiptapEditor({
   onChange,
   placeholder,
   className,
+  isDisable
 }: Props) {
   const editor = useEditor({
     extensions: [StarterKit, Link, Image],
@@ -32,6 +34,7 @@ export default function TiptapEditor({
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
     },
+    editable: isDisable 
   });
 
   useEffect(() => {

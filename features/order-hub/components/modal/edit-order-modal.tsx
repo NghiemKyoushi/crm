@@ -43,7 +43,6 @@ import { useListCustomerWithSearch } from "@/features/user-management/hooks/staf
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
-import TextArea from "antd/es/input/TextArea";
 import TiptapEditor from "../TiptapEditor";
 import { CURRENCY_CODE } from "./add-orderhub-modal";
 
@@ -91,7 +90,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const [paymentType, setPaymentType] = useState(1);
   const [rateProduct, setRateProduct] = useState(0);
   const [depositFee, setDepositFee] = useState(0);
+  const [isCheckDisableInput, setIsCheckDisableInput] = useState(false);
+
   const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
+  const itemQuantity= Form.useWatch("item_quantity", form);
 
   const [fees, setFees] = useState({
     DOMESTIC_SHIPPING_FEE: 0,
@@ -236,6 +238,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           currency_code: currencyCode,
           quantity: quantity ? quantity : 0,
           route_id: routeId,
+          item_quantity: itemQuantity ? itemQuantity : 0
         };
         try {
           const res: FeeServiceCheck = await getDataFeeService(
@@ -274,6 +277,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     priceY,
     category,
     paymentAmount,
+    itemQuantity
   ]);
 
   useEffect(() => {
@@ -295,7 +299,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       order.metadata.infos?.fees?.forEach((item: any) => {
         if (item?.code) services.push(item.code);
       });
-
+      setIsCheckDisableInput(order?.status !== OrderStatusType.PENDING_APPROVAL)
       setRouteId(order.metadata.items?.[0]?.product?.route_id ?? null);
       setRateValueForPrice(order.rate ?? 0);
       setCurrencyCode(
@@ -402,14 +406,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               key="submit"
               type="primary"
               onClick={() => {
-                if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
-                  return;
-                }
+                // if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
+                //   return;
+                // }
                 handleOk();
               }}
               size="large"
               className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
-              disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
+              // disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
             >
               Lưu thay đổi
             </Button>
@@ -460,6 +464,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-10 !h-11"
                   >
                     <Input
+                      disabled={isCheckDisableInput}
                       placeholder="https://..."
                       prefix={
                         <svg
@@ -495,6 +500,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-4"
                   >
                     <Input
+                      disabled={isCheckDisableInput}
                       className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Nhập tên sản phẩm"
                     />
@@ -514,7 +520,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     ]}
                     className="!mb-4"
                   >
-                    <TiptapEditor />
+                    <TiptapEditor isDisable ={isCheckDisableInput} />
                   </Form.Item>
 
                   <Row gutter={12}>
@@ -569,6 +575,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         className="!mb-4"
                       >
                         <InputNumber
+                          disabled={isCheckDisableInput}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -646,6 +653,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <InputNumber
+                          disabled={isCheckDisableInput}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -689,11 +697,12 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <Select
+                          disabled={isCheckDisableInput}
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
                           options={[
                             { label: "Miễn phí vận chuyển", value: 1 },
-                            { label: "ADMIN điền cod", value: 2 },
+                            { label: "Admin điền phí COD", value: 2 },
                             { label: "Xác định sau", value: 3 },
                           ]}
                           className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!rounded-lg"
@@ -731,6 +740,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       ]}
                     >
                       <InputNumber
+                        disabled={isCheckDisableInput}
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         }
@@ -791,6 +801,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
+                                    disabled={isCheckDisableInput}
                                     checked={isChecked}
                                     onChange={(e) =>
                                       handleServiceChange(e, item.code)
@@ -808,7 +819,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                   </Checkbox>
                                 </div>
                                 <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
-                                  {item.amount} {item.currency_code}
+                                  {item.amount ? item.amount.toLocaleString("en-US"): 0} {item.currency_code === "VND" ? "đ" : item.currency_code}
                                 </div>
                               </div>
                             );
@@ -861,6 +872,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
+                                    disabled={isCheckDisableInput}
                                     checked={isChecked}
                                     onChange={(e) =>
                                       handleInsuranceChange(e, item)
@@ -987,6 +999,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-0"
                   >
                     <Input.TextArea
+                      disabled={isCheckDisableInput}
                       rows={3}
                       className="!rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Ghi chú thêm về đơn hàng..."
