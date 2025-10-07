@@ -1,6 +1,13 @@
 "use client";
 import { useUserRole } from "@/features/user-profile/hooks/user-profile";
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface Permission {
   name: string;
@@ -29,8 +36,8 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
   const { data: listRole, isLoading } = useUserRole(); // hook trả về thêm isLoading
 
   useEffect(() => {
-    if (listRole) {      
-      const allPerms = listRole.groups.flatMap((g) => g.permissions);      
+    if (listRole) {
+      const allPerms = listRole.groups.flatMap((g) => g.permissions);
       setPermissions(allPerms);
     }
   }, [listRole]);
@@ -41,13 +48,13 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const hasPermission = useCallback(
     (permName: string) => {
-      if (isAdmin) return true; 
+      if (isAdmin) return true;
       return permissions.some((p) => p.name === permName && p.active);
     },
     [permissions, isAdmin]
   );
- 
-const stillLoading = isLoading || !listRole || permissions.length === 0;
+
+  const stillLoading = isLoading || !listRole || permissions.length === 0;
   return (
     <PermissionContext.Provider
       value={{ permissions, hasPermission, loading: stillLoading }}

@@ -3,6 +3,7 @@ import i18n from "@/locales/i18n";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { CacheManager } from "@/utils/cache-manager";
+import { useQueryClient } from "@tanstack/react-query";
 
 // API Response interface
 interface ApiResponse<T = any> {
@@ -222,7 +223,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
       Cookies.remove("token", { path: "/" }); 
       Cookies.remove("accessToken", { path: "" }); 
-      Cookies.remove("refreshToken", { path: "" }); 
+      Cookies.remove("refreshToken", { path: "" });
     };
 
     if (err.response?.status === 401 && !originalRequest._retry) {

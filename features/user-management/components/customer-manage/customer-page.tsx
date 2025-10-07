@@ -47,7 +47,7 @@ export default function CustomerPage() {
         </span>
       ),
       children: <CustomerTable />,
-      perm: "user.categorize_customers",
+      perm: "user.view",
     },
     {
       key: "2",
@@ -58,7 +58,7 @@ export default function CustomerPage() {
         </span>
       ),
       children: <SalesPage />,
-      perm: "user.categorize_customers",
+      perm: "sales.view_customer_orders",
     },
     {
       key: "3",
@@ -69,7 +69,7 @@ export default function CustomerPage() {
         </span>
       ),
       children: <StaffManagePage />,
-      perm: "user.manage_staff_roles",
+      perm: "user.view",
     },
     {
       key: "4",
@@ -91,7 +91,7 @@ export default function CustomerPage() {
         </span>
       ),
       children: <RoleManagerPage />,
-      perm: "user.manage_staff_roles",
+      perm: "role.view",
     },
   ];
 

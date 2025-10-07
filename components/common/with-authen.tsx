@@ -20,8 +20,6 @@ export function WithAuth<P extends JSX.IntrinsicAttributes>(
      
       // Nếu 1 trong 2 không còn => logout
       if (!tokenCookie) {
-        console.log('checkk333');
-
         logout();
         router.push("/login");
       }

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Form, InputNumber, Button, Card, message, Spin } from "antd";
+import { Form, InputNumber, Button, Card, message, Spin, Input } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faInfoCircle,
@@ -41,13 +41,22 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
 
   const updateInsuranceMutation = useUpdateInsurance();
   const useUpdateGeneralPolicyMutation = useUpdateGeneralPolicy();
-  const onFinish = (values: any) => {
+  const onFinish = (values: any) => {    
     // values.insurance = { id: { fee_percentage: number }, ... }
-    const result = listInsurance.map((item: InsuranceOption) => ({
-      ...item,
-      fee_percentage:
-        values.insurance?.[item.id]?.fee_percentage ?? item.fee_percentage,
-    }));
+    const result = listInsurance.map((item: InsuranceOption) => {
+      const formValue = values.insurance?.[item.id] || {};
+      return {
+        ...item,
+        fee_percentage:
+          formValue.fee_percentage !== undefined
+            ? formValue.fee_percentage
+            : item.fee_percentage,
+        description:
+          formValue.description !== undefined
+            ? formValue.description
+            : item.description,
+      };
+    });
     updateInsuranceMutation.mutate(
       {
         body: result,
@@ -78,9 +87,6 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
   };
 
   React.useEffect(() => {
-    console.log("listGereralPolicy", listGereralPolicy);
-
-    
     if (listGereralPolicy) {
       console.log("listGereralPolicy?.data", listGereralPolicy?.data);
 
@@ -136,12 +142,32 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
                 >
                   <InputNumber className="!w-full" size="large" min={0} />
                 </Form.Item>
+
+                <Form.Item
+                  label={
+                    <span className="text-sm text-gray-700">
+                      {t("insuranceSettings.description")}
+                    </span>
+                  }
+                  name={["insurance", item.id, "description"]}
+                  initialValue={item.description ?? ""}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("validation.validationField"),
+                    },
+                  ]}
+                  className="!mb-0"
+                >
+                  <Input.TextArea
+                    rows={5}
+                    placeholder={t("insuranceSettings.enterDescription")}
+                  />
+                </Form.Item>
               </div>
             ))}
           </div>
         </Card>
-
-        {/* Quy định chung */}
 
         <div className="text-right border-t border-gray-200 pt-6 mt-8 mb-8">
           <Button
