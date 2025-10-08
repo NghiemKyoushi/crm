@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Tag,
   Button,
@@ -410,24 +410,27 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                            "vi-VN"
-                          )}${isJapanPrice}`
+                              "vi-VN"
+                            )}${isJapanPrice}`
                           : "-"}
                       </span>
                     )}
                   </div>
                   {/* {shouldShowWarning && ( */}
-                    <EditOutlined
-                      className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                      onClick={() => {
-                        setOrderDetail(record);
-                        setEditingFeesRates({
-                          orderId: record.id,
-                          codOption: 1,
-                          codAmount: "",
-                        });
-                      }}
-                    />
+                  <EditOutlined
+                    className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                    onClick={() => {
+                      const codeType = record.metadata?.infos?.codeType ?? null;
+                      const codInJapan =
+                        record.metadata?.infos?.codInJapan ?? null;
+                      setOrderDetail(record);
+                      setEditingFeesRates({
+                        orderId: record.id,
+                        codOption: codeType ?? 1,
+                        codAmount: codInJapan ?? "",
+                      });
+                    }}
+                  />
                   {/* )} */}
                 </div>
               </div>
@@ -783,7 +786,7 @@ export default function OrderHub() {
                         onError: (err: any) =>
                           toast.error(
                             err.response?.data?.localizedMessage ||
-                            t("common.error")
+                              t("common.error")
                           ),
                       }
                     );
@@ -990,7 +993,7 @@ export default function OrderHub() {
           isOpen={openDetail}
           onCancel={() => {
             setOpenDetail(false);
-            setOrderDetail(undefined)
+            setOrderDetail(undefined);
           }}
           orderId={+orderDetail?.id}
           onConfirm={() => console.log()}
@@ -1003,8 +1006,12 @@ export default function OrderHub() {
           customerName={
             orderDetail?.customer_name ? orderDetail?.customer_name : ""
           }
+          orderDetail={orderDetail}
           orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
-          onCancel={() => setIsOpenApproveOrder(false)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setIsOpenApproveOrder(false);
+          }}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
               {
@@ -1036,7 +1043,10 @@ export default function OrderHub() {
           open={isOpenCheckOrder}
           customerName={orderDetail.customer_name}
           feePerKg={10}
-          onCancel={() => setIsOpenCheckOrder(false)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setIsOpenCheckOrder(false);
+          }}
           onSubmit={handleCheckOrder}
           orderCode={orderDetail.invoice_no}
           customerId={orderDetail.id}
@@ -1050,7 +1060,10 @@ export default function OrderHub() {
         <TrackingModalJP
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.invoice_no}
-          onCancel={() => setIsOpenTrackingOrder(false)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setIsOpenTrackingOrder(false);
+          }}
           onSubmit={(value) => {
             trackingJPMutation.mutate(
               {
@@ -1138,7 +1151,10 @@ export default function OrderHub() {
       {orderDetail && (
         <CancelReasonModal
           transactionCode={orderDetail.invoice_no}
-          onClose={() => setIsOpenCancel(false)}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsOpenCancel(false);
+          }}
           open={isOpenCancel}
           onConfirm={handleCancel}
         />
@@ -1149,7 +1165,10 @@ export default function OrderHub() {
         <EditTrackingModal
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
-          onClose={() => setIsEditingTrackingModal(false)}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsEditingTrackingModal(false);
+          }}
           onSave={(records) => {
             useUpdateOrderTracking.mutate(
               {
@@ -1184,7 +1203,10 @@ export default function OrderHub() {
         <NoteModal
           open={!!editingNote}
           note={editingNote?.note}
-          onCancel={() => setEditingNote(null)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setEditingNote(null);
+          }}
           onSave={(note) => {
             useAddNoteClient.mutate(
               {
@@ -1215,7 +1237,10 @@ export default function OrderHub() {
       {editingFeesRates && orderDetail && (
         <Modal
           open={!!editingFeesRates}
-          onCancel={() => setEditingFeesRates(null)}
+          onCancel={() => {
+            setEditingNote(null);
+            setEditingFeesRates(null);
+          }}
           title="Cập nhật Phí COD"
           width={500}
           centered
@@ -1246,7 +1271,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
@@ -1327,7 +1352,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );

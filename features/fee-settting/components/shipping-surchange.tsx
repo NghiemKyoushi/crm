@@ -111,19 +111,60 @@ export default function ShippingSurchangeTable(
     });
   };
 
+  // const handleChange = (
+  //   routeId: number,
+  //   key: string,
+  //   field: string,
+  //   value?: any
+  // ) => {
+  //   setData((prev) => ({
+  //     ...prev,
+  //     [routeId]: prev[routeId].map((row) =>
+  //       row.id.toString() === key ? { ...row, [field]: value } : row
+  //     ),
+  //   }));
+  // };
   const handleChange = (
     routeId: number,
     key: string,
     field: string,
     value?: any
   ) => {
-    setData((prev) => ({
-      ...prev,
-      [routeId]: prev[routeId].map((row) =>
+    setData((prev) => {
+      const currentRows = prev[routeId] || [];
+      let newRows = [...currentRows];
+  
+      // Cập nhật dòng hiện tại
+      newRows = newRows.map((row) =>
         row.id.toString() === key ? { ...row, [field]: value } : row
-      ),
-    }));
+      );
+        if (field === "type" && value === 2) {
+        const currentRow = currentRows.find((r) => r.id.toString() === key);
+        const productId = currentRow?.product_category_id;
+  
+        if (productId) {
+          newRows = newRows.filter(
+            (r) => r.product_category_id !== productId || r.id.toString() === key
+          );
+        }
+      }
+      if (field === "price_from_price_to") {
+        console.log('check222');
+        
+        newRows = newRows.map((row) =>
+          row.id.toString() === key
+            ? { ...row, price_from: value, price_to: value }
+            : row
+        );
+      }
+  
+      return {
+        ...prev,
+        [routeId]: newRows,
+      };
+    });
   };
+  
   const handleSaveAll = () => {
     const allData = Object.values(data).flat();
     // const filteredData = allData.filter((item) => item.route_id === 1);
@@ -194,13 +235,31 @@ export default function ShippingSurchangeTable(
         dataIndex: "product_category_id",
         width: 160,
         render: (val, record) => {
-          // Lấy tất cả category_id đã chọn trong route này
-          const usedIds = data[+route]?.map((r) => r.product_category_id) || [];
+          // // Lấy tất cả category_id đã chọn trong route này
+          // const usedIds = data[+route]?.map((r) => r.product_category_id) || [];
 
-          // Nếu đang edit row này thì cho phép giữ nguyên value hiện tại
-          const filteredOptions = categoryOptions.filter(
-            (opt: any) => opt.value === val || !usedIds.includes(opt.value)
-          );
+          // // Nếu đang edit row này thì cho phép giữ nguyên value hiện tại
+          // const filteredOptions = categoryOptions.filter(
+          //   (opt: any) => opt.value === val || !usedIds.includes(opt.value)
+          // );
+
+          const currentRouteData = data[+route] || [];
+
+          // Tìm tất cả category_id đã được chọn bởi type = 2
+          const lockedByType2 = currentRouteData
+            .filter((r) => r.type === 2 && r.product_category_id)
+            .map((r) => r.product_category_id);
+      
+          let filteredOptions = categoryOptions;
+      
+          // Nếu có ít nhất 1 dòng type=2, thì lọc category đó ra khỏi danh sách (trừ chính nó)
+          if (lockedByType2.length > 0) {
+            filteredOptions = categoryOptions.filter(
+              (opt: any) =>
+                opt.value === val || // giữ option đang chọn (nếu đang edit)
+                !lockedByType2.includes(opt.value)
+            );
+          }
 
           return (
             <Select
@@ -326,7 +385,9 @@ export default function ShippingSurchangeTable(
                   : record.condition_type === "LT" ||
                     record.condition_type === "LTE"
                   ? record.price_to?.toString()
-                  : ""
+                  : record.condition_type === "EQ" 
+                  ? record.price_to?.toString()
+                  :""
               }
               step={0.01}
               stringMode
@@ -348,6 +409,17 @@ export default function ShippingSurchangeTable(
                 ) {
                   fieldCheck = "price_to";
                 }
+                if (record.condition_type === "EQ") {
+                  // console.log('check333', value);
+                  
+                  // handleChange(+route, record.id.toString(), "price_from", value ?? 0);
+                  // handleChange(+route, record.id.toString(), "price_to", value ?? 0);
+                  // return;
+                  const newValue = value ?? 0;
+                  handleChange(+route, record.id.toString(), "price_from_price_to", newValue);
+                  return;
+                }
+
                 handleChange(
                   +route,
                   record.id.toString(),
