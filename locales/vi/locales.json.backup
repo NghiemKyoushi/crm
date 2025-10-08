@@ -1052,7 +1052,7 @@
     "generalRegulations": "Quy Định Chung",
     "freeStorageDays": "Thời gian lưu kho miễn phí (ngày)",
     "storageFeeAfter": "Phí lưu kho sau đó (VNĐ/kg/ngày)",
-    "minDepositRate": "Đặt cọc mua hộ tối thiểu (%)",
+    "minDepositRate": "Thanh toán trước tối thiểu (%)",
     "saveAllChanges": "Lưu Tất Cả Thay Đổi",
     "saveSuccess": "Lưu thành công!"
   },

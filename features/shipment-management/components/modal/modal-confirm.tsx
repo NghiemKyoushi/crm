@@ -21,7 +21,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
   const [form] = Form.useForm();
   const [paymentType, setPaymentType] = useState(1);
 
-  const handleFinish = (values: any) => {    
+  const handleFinish = (values: any) => {
     onSubmit(values);
   };
 
@@ -82,9 +82,9 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
             placeholder="Chọn hình thức"
             onChange={(value) => setPaymentType(value)}
             options={[
-              { label: "Miễn phí vận chuyển", value: 1 },
-              { label: "Admin điền phí COD", value: 2 },
-              { label: "Xác định sau", value: 3 },
+              { label: "Miễn phí", value: 1 },
+              { label: "Có phí", value: 2 },
+              { label: "Cập nhật sau", value: 3 },
             ]}
             className="!w-full !h-11"
           />

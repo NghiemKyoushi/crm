@@ -277,7 +277,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     priceY,
     category,
     paymentAmount,
-    itemQuantity
+    itemQuantity,
   ]);
 
   useEffect(() => {
@@ -291,7 +291,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   // }, [totalFee, percenDeposit]);
 
   useEffect(() => {
-    if (order !== undefined && isOpen) {
+    if (order && isOpen) {      
       setPrice(order.amount_vnd ?? 0);
       setIdProduct(order.metadata.items?.[0]?.product?.id ?? null);
 
@@ -299,6 +299,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       order.metadata.infos?.fees?.forEach((item: any) => {
         if (item?.code) services.push(item.code);
       });
+      setServices(services);
       setIsCheckDisableInput(order?.status !== OrderStatusType.PENDING_APPROVAL)
       setRouteId(order.metadata.items?.[0]?.product?.route_id ?? null);
       setRateValueForPrice(order.rate ?? 0);
@@ -701,9 +702,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
                           options={[
-                            { label: "Miễn phí vận chuyển", value: 1 },
-                            { label: "Admin điền phí COD", value: 2 },
-                            { label: "Xác định sau", value: 3 },
+                            { label: "Miễn phí", value: 1 },
+                            { label: "Có phí", value: 2 },
+                            { label: "Cập nhật sau", value: 3 },
                           ]}
                           className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!rounded-lg"
                           suffixIcon={
@@ -789,6 +790,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         <div className="space-y-2">
                           {listService?.map((item: ServiceFee) => {
                             if (item.optional) return null;
+                            console.log('services', services);
+                            
                             const isChecked = services.includes(item.code);
                             return (
                               <div
@@ -806,8 +809,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                     onChange={(e) =>
                                       handleServiceChange(e, item.code)
                                     }
-                                    className="[&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-blue-500"
-                                  >
+                                    className="
+                                    [&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-blue-500
+                                    [&_.ant-checkbox-checked_.ant-checkbox-inner]:!border-blue-500
+                                    [&_.ant-checkbox-disabled.ant-checkbox-checked_.ant-checkbox-inner]:!bg-blue-500
+                                    [&_.ant-checkbox-disabled.ant-checkbox-checked_.ant-checkbox-inner]:!border-blue-500
+                                    [&_.ant-checkbox-disabled.ant-checkbox-checked_.ant-checkbox-inner::after]:!border-white
+                                  "                                  >
                                     <div>
                                       <div className="font-medium text-gray-900 text-sm">
                                         {item.name}
