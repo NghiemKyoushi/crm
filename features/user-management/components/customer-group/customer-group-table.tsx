@@ -156,15 +156,14 @@ export default function CategoryCustomerTable() {
       fixed: "right",
       render: (_: any, record: Category) => (
         <div className="flex space-x-2 justify-center">
-          <Tooltip title={record.id === 1 ? t("categoryCustomer.cannotEditDefaultGroup") : t("customerCate.editPolicy")}>
+          <Tooltip title={t("customerCate.editPolicy")}>
             <Button
               type="text"
               size="small"
-              disabled={record.id === 1}
               icon={
                 <FontAwesomeIcon
                   icon={faEdit}
-                  className={record.id === 1 ? "text-gray-400 text-sm" : "text-indigo-600 hover:text-indigo-800 text-sm"}
+                  className={"text-indigo-600 hover:text-indigo-800 text-sm"}
                 />
               }
               onClick={()=>{
@@ -173,7 +172,7 @@ export default function CategoryCustomerTable() {
             />
           </Tooltip>
 
-          <Tooltip title={record.id === 1 ? t("categoryCustomer.cannotEditDefaultGroup") : t("customerCate.editCategory")}>
+          <Tooltip title={t("customerCate.editCategory")}>
             <Button
               onClick={() => {
                 setId(record.id.toString());
@@ -270,12 +269,12 @@ export default function CategoryCustomerTable() {
           setEditingCate(null);
           setId("null");
         }}
-        initialData={editingCate} // 👈 nếu null = thêm mới, có data = edit
+        initialData={editingCate}
         onSubmit={(data, isEdit) => {
           if (isEdit) {
-            handleUpdate(data); // gọi API update
+            handleUpdate(data);
           } else {
-            handleAdd(data); // gọi API create
+            handleAdd(data);
           }
         }}
       />
