@@ -17,9 +17,18 @@ const FinanceDepositApprovalPage = () => {
   const { hasPermission, loading } = usePermission();
   // const router = useRouter();
   // const pathname = usePathname();
-  const allowedTabs = [
-    hasPermission("finance.approve_topup") && "deposit",
-    hasPermission("finance.process_withdrawal") && "withdraw",
+  const allowedTabs = [ 
+    (
+      hasPermission("finance.view_all_transactions") &&
+      hasPermission("finance.approve_topup") &&
+      hasPermission("finance.approve_topup_requests") && 
+      hasPermission("finance.manual_topup")
+    ) && "deposit",
+    (
+      hasPermission("finance.view_all_transactions") &&
+      hasPermission("finance.process_withdrawal") &&
+      hasPermission("finance.process_withdrawal_requests")
+    ) && "withdraw",
     hasPermission("finance.manage_bank_accounts") && "bank-settings",
     hasPermission("finance.manage_bank_permissions") && "bank-partner",
     hasPermission("finance.manage_bank_accounts") && "account-partner",

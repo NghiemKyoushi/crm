@@ -25,7 +25,14 @@
     "uploadFailed": "Upload thất bại",
     "pleaseEnterCount": "Vui lòng nhập kiểm đếm!",
     "pleaseSelectRepackage": "Vui lòng chọn Repackage!",
-    "validationField": "Trường bắt buộc"
+    "validationField": "Trường bắt buộc",
+    "email": {
+      "required": "Vui lòng nhập email!",
+      "invalid": "Email không hợp lệ!"
+    },
+    "password": {
+      "required": "Vui lòng nhập mật khẩu!"
+    }
   },
   "menu": {
     "dashboard": "Bảng điều khiển",
@@ -890,7 +897,8 @@
     "storageFeeAfter": "Phí lưu kho sau đó (VNĐ/kg/ngày)",
     "minDepositRate": "Đặt cọc mua hộ tối thiểu (%)",
     "saveAllChanges": "Lưu Tất Cả Thay Đổi",
-    "saveSuccess": "Lưu thành công!"
+    "saveSuccess": "Lưu thành công!",
+    "description": "Mô tả"
   },
   "shippingSettings": {
     "updateFeeSuccess": "Cập nhật phí thành công!",
@@ -932,7 +940,7 @@
     "addButton": "Thêm",
     "addSuccess": "Thêm nhân viên sale thành công!",
     "addFailed": "Thêm nhân viên sale thất bại",
-    "managingCustomers": "Đang quản lý {count} Khách hàng",
+    "managingCustomers": "Đang quản lý {{count}} Khách hàng",
     "noMoreData": "Hết dữ liệu"
   },
   "customerDetail": {

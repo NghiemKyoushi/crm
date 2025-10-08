@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
 import Cookies from "js-cookie";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Header: AntHeader } = Layout;
 
@@ -24,6 +25,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { hasPermission, loading } = usePermission();
+  const queryClient = useQueryClient();
 
   // xác định menu hiện tại
   const currentMenu = useMemo(() => {
@@ -44,7 +46,7 @@ export const Header: React.FC = () => {
     Cookies.remove("token", { path: "/" });
     Cookies.remove("accessToken", { path: "/" });
     Cookies.remove("refreshToken", { path: "/" });
-
+    queryClient.clear();
     router.push("/login");
   };
 

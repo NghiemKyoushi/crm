@@ -16,6 +16,7 @@ import { Role } from "@/types/roles";
 import { getListPermiss } from "../../apis/staff-manage";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 interface PermissionGroup {
   group_id: number;
@@ -30,6 +31,7 @@ interface PermissionGroup {
 }
 
 export const RoleManager: React.FC = () => {
+  const { hasPermission, loading } = usePermission();
   const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [openModal, setOpenModal] = useState(false);
@@ -52,11 +54,11 @@ export const RoleManager: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success(t('roles.messages.createSuccess'));
+          toast.success(t("roles.messages.createSuccess"));
           queryClient.invalidateQueries({ queryKey: ["listRole"] });
         },
         onError: () => {
-          toast.error(t('roles.messages.createError'));
+          toast.error(t("roles.messages.createError"));
         },
       }
     );
@@ -80,11 +82,11 @@ export const RoleManager: React.FC = () => {
         },
         {
           onSuccess: () => {
-            toast.success(t('roles.messages.updateSuccess'));
+            toast.success(t("roles.messages.updateSuccess"));
             queryClient.invalidateQueries({ queryKey: ["listRole"] });
           },
           onError: () => {
-            toast.error(t('roles.messages.updateError'));
+            toast.error(t("roles.messages.updateError"));
           },
         }
       );
@@ -112,13 +114,14 @@ export const RoleManager: React.FC = () => {
     <div className="flex gap-6 w-full">
       <div className="w-1/3 bg-white shadow rounded p-3">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold">{t('roles.list.title')}</h3>
+          <h3 className="font-semibold">{t("roles.list.title")}</h3>
           <Button
+            disabled={loading || !hasPermission("role.create")}
             size="middle"
             type="primary"
             onClick={() => setOpenModal(true)}
           >
-            {t('roles.list.addButton')}
+            {t("roles.list.addButton")}
           </Button>
         </div>
         <div className="space-y-1 max-h-[400px] overflow-y-auto">
@@ -136,7 +139,7 @@ export const RoleManager: React.FC = () => {
                 <span>{role.role_name}</span>
                 {role.role_name === "ADMIN" && (
                   <Tag color="red" className="ml-2">
-                    {t('roles.tags.superAdmin')}
+                    {t("roles.tags.superAdmin")}
                   </Tag>
                 )}
               </div>
@@ -148,12 +151,12 @@ export const RoleManager: React.FC = () => {
           <>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">
-                {t('roles.permissions.title')}{" "}
+                {t("roles.permissions.title")}{" "}
                 <span className="text-blue-600">{selectedRole.role_name}</span>
               </h3>
               {isSuperAdmin && (
                 <Tag color="red" className="font-semibold">
-                  {t('roles.tags.superAdmin')}
+                  {t("roles.tags.superAdmin")}
                 </Tag>
               )}
             </div>
@@ -176,7 +179,11 @@ export const RoleManager: React.FC = () => {
                     <Checkbox.Group
                       options={group.permissions.map((p) => {
                         const permissionName = p.permission || p.name;
-                        const label = getPermissionLabel(permissionName, t, p.description);
+                        const label = getPermissionLabel(
+                          permissionName,
+                          t,
+                          p.description
+                        );
 
                         return {
                           label,
@@ -186,16 +193,16 @@ export const RoleManager: React.FC = () => {
                       value={activePermissions}
                       disabled={isSuperAdmin}
                       onChange={(checkedValues) => {
-                        console.log('checkedValues', checkedValues);
-                        
+                        console.log("checkedValues", checkedValues);
+
                         // if (isSuperAdmin) return;
                         setSelectedRole((prev) =>
                           prev
                             ? {
                                 ...prev,
                                 groups: prev.groups.map((g: any) => {
-                                  console.log('g', g);
-                                  
+                                  console.log("g", g);
+
                                   if (g.id !== group.group_id) return g;
 
                                   return {
@@ -216,7 +223,7 @@ export const RoleManager: React.FC = () => {
                     />
                   ) : (
                     <div className="text-gray-500 text-sm italic">
-                      {t('roles.form.noPermissions')}
+                      {t("roles.form.noPermissions")}
                     </div>
                   )}
                 </div>
@@ -231,13 +238,13 @@ export const RoleManager: React.FC = () => {
                     hadnleUpdateRole(selectedRole);
                   }}
                 >
-                  {t('roles.permissions.saveButton')}
+                  {t("roles.permissions.saveButton")}
                 </Button>
               </div>
             )}
           </>
         ) : (
-          <p>{t('roles.permissions.selectRole')}</p>
+          <p>{t("roles.permissions.selectRole")}</p>
         )}
       </div>
 

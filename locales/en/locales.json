@@ -25,7 +25,14 @@
     "uploadFailed": "Upload failed",
     "pleaseEnterCount": "Please enter count check!",
     "pleaseSelectRepackage": "Please select Repackage!",
-    "validationField": "Please enter field"
+    "validationField": "Please enter field",
+    "email": {
+      "required": "Please enter email",
+      "invalid": "Email is invalid"
+    },
+    "password": {
+      "required": "Please enter password"
+    }
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -891,7 +898,8 @@
     "storageFeeAfter": "Storage fee thereafter (VND/kg/day)",
     "minDepositRate": "Minimum purchase deposit rate (%)",
     "saveAllChanges": "Save All Changes",
-    "saveSuccess": "Saved successfully!"
+    "saveSuccess": "Saved successfully!",
+    "description": "Description"
   },
   "shippingSettings": {
     "updateFeeSuccess": "Fee updated successfully!",
@@ -933,7 +941,7 @@
     "addButton": "+ Add",
     "addSuccess": "Sales staff added successfully!",
     "addFailed": "Failed to add sales staff",
-    "managingCustomers": "Managing {count} Customers",
+    "managingCustomers": "Managing {{count}} Customers",
     "noMoreData": "No more data"
   },
   "customerDetail": {

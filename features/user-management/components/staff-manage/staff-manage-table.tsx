@@ -12,7 +12,7 @@ import {
 import { Tag, Button, Dropdown, Menu, Select, Input } from "antd";
 import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PopupConfirm from "@/components/PopupConfirm";
 import {
   useCreateNewStaff,
@@ -31,8 +31,11 @@ import {
   updateStaff,
 } from "../../apis/staff-manage";
 import { useTranslation } from "react-i18next";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 export default function StaffManageTable() {
+  const { hasPermission, permissions } = usePermission();
+
   const [open, setOpen] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [modalType, setModalType] = useState<
@@ -183,7 +186,155 @@ export default function StaffManageTable() {
     setSelectedId(id.toString());
     setOpen(true);
   };
-  const columns: ColumnsType<UserData> = [
+  // const columns: ColumnsType<UserData> = [
+  //   {
+  //     title: t("staffManage.fullName"),
+  //     dataIndex: "full_name",
+  //     key: "full_name",
+  //     width: 180,
+  //     render: (text: string, record: UserData) => (
+  //       <div>
+  //         <div className="text-sm text-gray-800">{text}</div>
+  //         <div className="text-xs text-gray-500">{record.email}</div>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: t("staffManage.phoneNumber"),
+  //     dataIndex: "phone_number",
+  //     key: "phone_number",
+  //     width: 130,
+  //     render: (text: string) => (
+  //       <div className="text-sm text-gray-700">{text || "-"}</div>
+  //     ),
+  //   },
+  //   {
+  //     title: t("staffManage.role"),
+  //     dataIndex: "role_name",
+  //     key: "role_name",
+  //     width: 180,
+  //     render: (role: string, record: UserData) => {
+  //       if (listRole) {
+  //         return (
+  //           <Select
+  //             size="small"
+  //             value={role}
+  //             style={{ width: 160 }}
+  //             disabled={record.user_id === 1}
+  //             onChange={(value, option) => {
+  //               if (value) {
+  //                 updateStaffMutation.mutate({
+  //                   param: {
+  //                     email: record.email,
+  //                     full_name: record.full_name,
+  //                     active: record.active,
+  //                     phone_number: record.phone_number,
+  //                     role_id: value,
+  //                   },
+  //                   id: record.user_id.toString(),
+  //                 });
+  //               }
+  //             }}
+  //             options={listRole.map((r: any) => ({
+  //               value: r.role_id,
+  //               label: r.role_name,
+  //             }))}
+  //           />
+  //         );
+  //       }
+  //       return null;
+  //     },
+  //   },
+  //   {
+  //     title: t("staffManage.status"),
+  //     dataIndex: "active",
+  //     key: "active",
+  //     width: 100,
+  //     align: "center",
+  //     render: (active: boolean) => (
+  //       <Tag color={active ? "green" : "red"} className="text-xs">
+  //         {active ? t("staffManage.active") : t("staffManage.locked")}
+  //       </Tag>
+  //     ),
+  //   },
+  //   {
+  //     title: t("staffManage.actions"),
+  //     key: "actions",
+  //     width: 140,
+  //     fixed: "right",
+  //     render: (_: any, record: UserData) => {
+  //       const isSystemUser = record.user_id === 1;
+  //       return (
+  //         <div className="flex gap-3 text-sm justify-center">
+  //           <FontAwesomeIcon
+  //             icon={faEdit}
+  //             onClick={() => !isSystemUser && handleOpenEdit(record.user_id)}
+  //             className={
+  //               (isSystemUser || hasPermission('user.edit'))
+  //                 ? "text-gray-400 cursor-not-allowed"
+  //                 : "cursor-pointer text-blue-500 hover:text-blue-700"
+  //             }
+  //             title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.edit")}
+  //           />
+  //           <FontAwesomeIcon
+  //             icon={faKey}
+  //             className={
+  //               (isSystemUser || hasPermission('user.edit'))
+  //                 ? "text-gray-400 cursor-not-allowed"
+  //                 : "cursor-pointer text-gray-600 hover:text-gray-800"
+  //             }
+  //             onClick={() =>
+  //               !isSystemUser && handleOpenConfirm("reset", record.user_id.toString())
+  //             }
+  //             title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.resetPassword")}
+  //           />
+  //           {record.active ? (
+  //             <FontAwesomeIcon
+  //               icon={faLock}
+  //               className={
+  //                 (isSystemUser || hasPermission('user.edit'))
+  //                   ? "text-gray-400 cursor-not-allowed"
+  //                   : "cursor-pointer text-amber-500 hover:text-amber-700"
+  //               }
+  //               onClick={() =>
+  //                 !isSystemUser && handleOpenConfirm("lock", record.user_id.toString())
+  //               }
+  //               title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.lock")}
+  //             />
+  //           ) : (
+  //             <FontAwesomeIcon
+  //               icon={faLock}
+  //               className={
+  //                 (isSystemUser || hasPermission('user.edit'))
+  //                   ? "text-gray-400 cursor-not-allowed"
+  //                   : "cursor-pointer text-green-500 hover:text-green-700"
+  //               }
+  //               onClick={() => {
+  //                 !isSystemUser && handleOpenConfirm("unlock", record.user_id.toString());
+  //               }}
+  //               title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.unlock")}
+  //             />
+  //           )}
+  //           <FontAwesomeIcon
+  //             icon={faTrash}
+  //             className={
+  //               (isSystemUser || hasPermission('user.delete'))
+  //                 ? "text-gray-400 cursor-not-allowed"
+  //                 : "cursor-pointer text-red-500 hover:text-red-700"
+  //             }
+  //             onClick={() =>
+  //               !isSystemUser && handleOpenConfirm("delete", record.user_id.toString())
+  //             }
+  //             title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.delete")}
+  //           />
+  //         </div>
+  //       );
+  //     },
+  //   },
+  // ];
+console.log('hasPermission("user.delete")', hasPermission("user.edit"));
+
+  const columns = useMemo<ColumnsType<UserData>>(() => [
     {
       title: t("staffManage.fullName"),
       dataIndex: "full_name",
@@ -218,19 +369,17 @@ export default function StaffManageTable() {
               value={role}
               style={{ width: 160 }}
               disabled={record.user_id === 1}
-              onChange={(value, option) => {
-                if (value) {
-                  updateStaffMutation.mutate({
-                    param: {
-                      email: record.email,
-                      full_name: record.full_name,
-                      active: record.active,
-                      phone_number: record.phone_number,
-                      role_id: value,
-                    },
-                    id: record.user_id.toString(),
-                  });
-                }
+              onChange={(value) => {
+                updateStaffMutation.mutate({
+                  param: {
+                    email: record.email,
+                    full_name: record.full_name,
+                    active: record.active,
+                    phone_number: record.phone_number,
+                    role_id: value,
+                  },
+                  id: record.user_id.toString(),
+                });
               }}
               options={listRole.map((r: any) => ({
                 value: r.role_id,
@@ -247,7 +396,7 @@ export default function StaffManageTable() {
       dataIndex: "active",
       key: "active",
       width: 100,
-      align: "center",
+      align: "center" as const,
       render: (active: boolean) => (
         <Tag color={active ? "green" : "red"} className="text-xs">
           {active ? t("staffManage.active") : t("staffManage.locked")}
@@ -258,78 +407,103 @@ export default function StaffManageTable() {
       title: t("staffManage.actions"),
       key: "actions",
       width: 140,
-      fixed: "right",
+      fixed: "right" as const,
       render: (_: any, record: UserData) => {
         const isSystemUser = record.user_id === 1;
         return (
           <div className="flex gap-3 text-sm justify-center">
             <FontAwesomeIcon
               icon={faEdit}
-              onClick={() => !isSystemUser && handleOpenEdit(record.user_id)}
+              onClick={() => (!isSystemUser && hasPermission("user.edit")) && handleOpenEdit(record.user_id)}
               className={
-                isSystemUser
+                isSystemUser || !hasPermission("user.edit")
                   ? "text-gray-400 cursor-not-allowed"
                   : "cursor-pointer text-blue-500 hover:text-blue-700"
               }
-              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.edit")}
+              title={
+                isSystemUser
+                  ? t("staffManage.cannotEditSystemUser")
+                  : t("staffManage.edit")
+              }
             />
             <FontAwesomeIcon
               icon={faKey}
               className={
-                isSystemUser
+                isSystemUser || !hasPermission("user.edit")
                   ? "text-gray-400 cursor-not-allowed"
                   : "cursor-pointer text-gray-600 hover:text-gray-800"
               }
               onClick={() =>
-                !isSystemUser && handleOpenConfirm("reset", record.user_id.toString())
+                (!isSystemUser && hasPermission("user.edit")) &&
+                handleOpenConfirm("reset", record.user_id.toString())
               }
-              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.resetPassword")}
+              title={
+                isSystemUser
+                  ? t("staffManage.cannotEditSystemUser")
+                  : t("staffManage.resetPassword")
+              }
             />
             {record.active ? (
               <FontAwesomeIcon
                 icon={faLock}
                 className={
-                  isSystemUser
+                  isSystemUser || !hasPermission("user.edit")
                     ? "text-gray-400 cursor-not-allowed"
                     : "cursor-pointer text-amber-500 hover:text-amber-700"
                 }
                 onClick={() =>
-                  !isSystemUser && handleOpenConfirm("lock", record.user_id.toString())
+                  (!isSystemUser && hasPermission("user.edit")) &&
+                  handleOpenConfirm("lock", record.user_id.toString())
                 }
-                title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.lock")}
+                title={
+                  isSystemUser
+                    ? t("staffManage.cannotEditSystemUser")
+                    : t("staffManage.lock")
+                }
               />
             ) : (
               <FontAwesomeIcon
                 icon={faLock}
                 className={
-                  isSystemUser
+                  isSystemUser || !hasPermission("user.edit")
                     ? "text-gray-400 cursor-not-allowed"
                     : "cursor-pointer text-green-500 hover:text-green-700"
                 }
-                onClick={() => {
-                  !isSystemUser && handleOpenConfirm("unlock", record.user_id.toString());
-                }}
-                title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.unlock")}
+                onClick={() =>
+                  (!isSystemUser && hasPermission("user.edit")) &&
+                  handleOpenConfirm("unlock", record.user_id.toString())
+                }
+                title={
+                  isSystemUser
+                    ? t("staffManage.cannotEditSystemUser")
+                    : t("staffManage.unlock")
+                }
               />
             )}
             <FontAwesomeIcon
               icon={faTrash}
               className={
-                isSystemUser
+                isSystemUser || !hasPermission("user.delete")
                   ? "text-gray-400 cursor-not-allowed"
                   : "cursor-pointer text-red-500 hover:text-red-700"
               }
               onClick={() =>
-                !isSystemUser && handleOpenConfirm("delete", record.user_id.toString())
+                (!isSystemUser && hasPermission("user.delete")) &&
+                handleOpenConfirm("delete", record.user_id.toString())
               }
-              title={isSystemUser ? t("staffManage.cannotEditSystemUser") : t("staffManage.delete")}
+              title={
+                isSystemUser
+                  ? t("staffManage.cannotEditSystemUser")
+                  : t("staffManage.delete")
+              }
             />
           </div>
         );
       },
     },
-  ];
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [permissions]);
+  
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">
       <div className="flex justify-between items-center mb-4">
