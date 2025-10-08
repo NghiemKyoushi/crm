@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Button, InputNumber } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { useQuery } from "@tanstack/react-query";
 import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
+import { Invoice } from "@/types/orderhub";
 
 const { Option } = Select;
 
@@ -15,6 +16,7 @@ interface ApproveOrderModalProps {
   onSubmit: (values: FormValuesApprove) => void;
   orderCode: string;
   customerName: string;
+  orderDetail: Invoice;
 }
 
 export interface FormValuesApprove {
@@ -30,6 +32,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
   onSubmit,
   orderCode,
   customerName,
+  orderDetail
 }) => {
   const [form] = Form.useForm();
   const [paymentType, setPaymentType] = useState<number | null>(null);
@@ -49,6 +52,18 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     queryKey: ["productCategories"],
     queryFn: getListProductCategory,
   });
+
+  useEffect(() => {
+    if (orderDetail) {
+      const codeType = orderDetail.metadata?.infos?.codeType ?? null;
+      const codInJapan = orderDetail.metadata?.infos?.codInJapan ?? null;
+      form.setFieldsValue({
+        cod_type: codeType ?? 1,
+        cod_shipping_price: codInJapan ?? null,
+        product_category_id: orderDetail.metadata.infos?.productCategory?.id ?? null
+      })
+    }
+  }, [orderDetail]);
 
   return (
     <Modal
