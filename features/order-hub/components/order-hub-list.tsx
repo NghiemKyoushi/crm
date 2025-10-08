@@ -1151,7 +1151,10 @@ export default function OrderHub() {
       {orderDetail && (
         <CancelReasonModal
           transactionCode={orderDetail.invoice_no}
-          onClose={() => setIsOpenCancel(false)}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsOpenCancel(false);
+          }}
           open={isOpenCancel}
           onConfirm={handleCancel}
         />
@@ -1162,7 +1165,10 @@ export default function OrderHub() {
         <EditTrackingModal
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
-          onClose={() => setIsEditingTrackingModal(false)}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsEditingTrackingModal(false);
+          }}
           onSave={(records) => {
             useUpdateOrderTracking.mutate(
               {
@@ -1197,7 +1203,10 @@ export default function OrderHub() {
         <NoteModal
           open={!!editingNote}
           note={editingNote?.note}
-          onCancel={() => setEditingNote(null)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setEditingNote(null);
+          }}
           onSave={(note) => {
             useAddNoteClient.mutate(
               {
@@ -1228,7 +1237,10 @@ export default function OrderHub() {
       {editingFeesRates && orderDetail && (
         <Modal
           open={!!editingFeesRates}
-          onCancel={() => setEditingFeesRates(null)}
+          onCancel={() => {
+            setEditingNote(null);
+            setEditingFeesRates(null);
+          }}
           title="Cập nhật Phí COD"
           width={500}
           centered
