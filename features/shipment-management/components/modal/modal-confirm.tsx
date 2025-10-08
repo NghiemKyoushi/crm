@@ -84,7 +84,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
             options={[
               { label: "Miễn phí", value: 1 },
               { label: "Có phí", value: 2 },
-              { label: "Cập nhật sau", value: 3 },
+              { label: "Khách hàng trả", value: 4 },
             ]}
             className="!w-full !h-11"
           />
