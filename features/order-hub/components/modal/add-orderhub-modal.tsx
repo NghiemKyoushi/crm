@@ -57,7 +57,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const [idProduct, setIdProduct] = React.useState<number | null>(null);
   const queryClient = useQueryClient();
   const createNewOrderMutation = useCreateNewOrder();
-  const { data: listInsurance } = useListInsurance();
+  const { data: listInsurance, refetch } = useListInsurance();
   const [services, setServices] = useState<string[]>([]);
   const [insurance, setInsurance] = useState<InsuranceOptionModel | null>(null);
   const [prices, setPrice] = useState<number>(0);
@@ -317,10 +317,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   ]);
 
   useEffect(() => {
-    if (listInsurance && listInsurance.length > 0) {
+    if (listInsurance) {      
       setInsurance(listInsurance[1]);
     }
-  }, [listInsurance]);
+  }, [listInsurance,isOpen]);
 
   const totalFeeCheck =
     fees.DOMESTIC_SHIPPING_FEE +
