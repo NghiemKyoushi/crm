@@ -369,6 +369,7 @@ export default function OrderHub() {
           record.metadata.items?.[0]?.product?.currency_code === "JPY"
             ? "¥"
             : "$";
+        const codeType = record.metadata.infos?.codeType ?? null;
         const isPendingApproval =
           record.status === OrderStatusType.PENDING_APPROVAL;
         const shouldShowWarning = isPendingApproval && !shippingFee;
@@ -412,6 +413,10 @@ export default function OrderHub() {
                           ? `${shippingFee.toLocaleString(
                               "vi-VN"
                             )}${isJapanPrice}`
+                          : codeType === 1
+                          ? "Miễn phí"
+                          : codeType === 3
+                          ? "Cập nhật sau"
                           : "-"}
                       </span>
                     )}
@@ -988,7 +993,7 @@ export default function OrderHub() {
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {(orderDetail && openDetail) && (
+      {orderDetail && openDetail && (
         <EditOrderModal
           isOpen={openDetail}
           onCancel={() => {
@@ -1234,7 +1239,7 @@ export default function OrderHub() {
       )}
 
       {/* Modal Edit Fees & Rates */}
-      {(editingFeesRates && orderDetail) && (
+      {editingFeesRates && orderDetail && (
         <Modal
           open={!!editingFeesRates}
           onCancel={() => {
