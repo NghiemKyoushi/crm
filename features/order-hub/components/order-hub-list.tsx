@@ -442,7 +442,7 @@ export default function OrderHub() {
                       </span>
                     )}
                   </div>
-                  {/* {shouldShowWarning && ( */}
+                  {(codeType !== 1 && codeType !== 2) && (
                   <EditOutlined
                     className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                     onClick={() => {
@@ -457,7 +457,7 @@ export default function OrderHub() {
                       });
                     }}
                   />
-                  {/* )} */}
+                 )}
                 </div>
               </div>
               {url && (
