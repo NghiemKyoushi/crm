@@ -369,6 +369,7 @@ export default function OrderHub() {
           record.metadata.items?.[0]?.product?.currency_code === "JPY"
             ? "¥"
             : "$";
+        const codeType = record.metadata.infos?.codeType ?? null;
         const isPendingApproval =
           record.status === OrderStatusType.PENDING_APPROVAL;
         const shouldShowWarning = isPendingApproval && !shippingFee;
@@ -412,6 +413,10 @@ export default function OrderHub() {
                           ? `${shippingFee.toLocaleString(
                               "vi-VN"
                             )}${isJapanPrice}`
+                          : codeType === 1
+                          ? "Miễn phí"
+                          : codeType === 3
+                          ? "Cập nhật sau"
                           : "-"}
                       </span>
                     )}
@@ -988,7 +993,7 @@ export default function OrderHub() {
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {orderDetail?.id && (
+      {orderDetail && openDetail && (
         <EditOrderModal
           isOpen={openDetail}
           onCancel={() => {
@@ -1009,8 +1014,8 @@ export default function OrderHub() {
           orderDetail={orderDetail}
           orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
           onCancel={() => {
-            setOrderDetail(undefined);
             setIsOpenApproveOrder(false);
+            setOrderDetail(undefined);
           }}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
@@ -1204,8 +1209,8 @@ export default function OrderHub() {
           open={!!editingNote}
           note={editingNote?.note}
           onCancel={() => {
-            setOrderDetail(undefined);
             setEditingNote(null);
+            setOrderDetail(undefined);
           }}
           onSave={(note) => {
             useAddNoteClient.mutate(
@@ -1239,7 +1244,8 @@ export default function OrderHub() {
           open={!!editingFeesRates}
           onCancel={() => {
             setEditingNote(null);
-            setEditingFeesRates(null);
+            // setEditingFeesRates(null);
+            setOrderDetail(undefined);
           }}
           title="Cập nhật Phí COD"
           width={500}
@@ -1292,9 +1298,9 @@ export default function OrderHub() {
                 }
                 placeholder="Chọn loại COD"
               >
-                <Select.Option value={1}>Miễn phí vận chuyển</Select.Option>
-                <Select.Option value={2}>Admin điền phí COD</Select.Option>
-                <Select.Option value={3}>Xác định sau</Select.Option>
+                <Select.Option value={1}>Miễn phí</Select.Option>
+                <Select.Option value={2}>Có phí</Select.Option>
+                <Select.Option value={3}>Cập nhật sau</Select.Option>
               </Select>
             </Form.Item>
 

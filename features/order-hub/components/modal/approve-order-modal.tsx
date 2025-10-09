@@ -32,7 +32,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
   onSubmit,
   orderCode,
   customerName,
-  orderDetail
+  orderDetail,
 }) => {
   const [form] = Form.useForm();
   const [paymentType, setPaymentType] = useState<number | null>(null);
@@ -60,8 +60,9 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
       form.setFieldsValue({
         cod_type: codeType ?? 1,
         cod_shipping_price: codInJapan ?? null,
-        product_category_id: orderDetail.metadata.infos?.productCategory?.id ?? null
-      })
+        product_category_id:
+          orderDetail.metadata.infos?.productCategory?.id ?? null,
+      });
     }
   }, [orderDetail]);
 
@@ -75,7 +76,9 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     >
       {/* Thông tin đơn hàng */}
       <div className="bg-blue-50 p-3 rounded mb-2">
-        <h4 className="font-semibold text-blue-900 !mb-1">Thông tin đơn hàng</h4>
+        <h4 className="font-semibold text-blue-900 !mb-1">
+          Thông tin đơn hàng
+        </h4>
         <p className="!mb-1">
           <strong>Mã đơn:</strong> {orderCode || ""}
         </p>
@@ -93,11 +96,12 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           className="!mb-3"
         >
           <Select className="!h-11" placeholder="-- Chọn loại sản phẩm --">
-            {categories && categories?.map((cat: any) => (
-              <Option key={cat.id} value={cat.id}>
-                {cat.name}
-              </Option>
-            ))}
+            {categories &&
+              categories?.map((cat: any) => (
+                <Option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </Option>
+              ))}
           </Select>
         </Form.Item>
 
@@ -113,9 +117,9 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
             className="!w-full !h-11"
             onChange={(val) => setPaymentType(val)}
             options={[
-              { label: "Miễn phí vận chuyển", value: 1 },
-              { label: "Admin điền phí COD", value: 2 },
-              { label: "Xác định sau", value: 3 },
+              { label: "Miễn phí", value: 1 },
+              { label: "Có phí", value: 2 },
+              { label: "Cập nhật sau", value: 3 },
             ]}
           />
         </Form.Item>
