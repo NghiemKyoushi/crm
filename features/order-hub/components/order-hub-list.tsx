@@ -51,7 +51,7 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import PopupConfirm from "@/components/PopupConfirm";
 import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit/modal/modal-cancel-statement";
-import TrackingModalJP from "./modal/tracking-modal-jp";
+// import TrackingModalJP from "./modal/tracking-modal-jp";
 import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
@@ -76,6 +76,8 @@ export default function OrderHub() {
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
+  const [isTrackingJP, setIsTrackingJP] = useState(false);
+
   const [isEditingTracking, setIsEditingTracking] = useState<{
     orderId: number;
     records: Array<{
@@ -210,31 +212,47 @@ export default function OrderHub() {
       );
   };
 
-  const handleCheckOrder = (value: any) => {
-    if (orderDetail)
-      checkOrderVNMutation.mutate(
-        {
-          body: {
-            description: value.note,
-            weight: value.actualWeight,
-            weight_fee: value.weight_rate_fee ? value.weight_rate_fee : 0,
-          },
-          id: orderDetail.id.toString(),
-        },
-        {
-          onSuccess: () => {
-            toast.success(t("toast.inspectGoodsSuccess"));
-            queryClient.invalidateQueries({
-              queryKey: ["listorder"],
-            });
-            setIsOpenCheckOrder(false);
-          },
-          onError: (err: any) =>
-            toast.error(
-              err.response?.data?.localizedMessage || t("common.error")
-            ),
-        }
-      );
+  const handleCheckOrder = async (valueForm: any) => {
+    if (!orderDetail) return;
+    const { records, form } = valueForm;
+    try {
+      await Promise.all([
+        new Promise((resolve, reject) => {
+          useUpdateOrderTracking.mutate(
+            {
+              body: records,
+              id: orderDetail.id,
+            },
+            {
+              onSuccess: () => resolve(true),
+              onError: (err: any) => reject(err),
+            }
+          );
+        }),
+        new Promise((resolve, reject) => {
+          checkOrderVNMutation.mutate(
+            {
+              body: {
+                description: form.note,
+                weight: form.actualWeight,
+                weight_fee: form.feePerKg || 0,
+              },
+              id: orderDetail.id.toString(),
+            },
+            {
+              onSuccess: () => resolve(true),
+              onError: (err: any) => reject(err),
+            }
+          );
+        }),
+      ]);
+      toast.success("Cập nhật tracking và kiểm tra hàng thành công");
+      queryClient.invalidateQueries({ queryKey: ["listorder"] });
+      setIsEditingTrackingModal(false);
+      setIsOpenCheckOrder(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.localizedMessage || t("common.error"));
+    }
   };
 
   const columns: ColumnsType<Invoice> = [
@@ -320,16 +338,19 @@ export default function OrderHub() {
                   <div className="text-xs text-gray-400">Chưa có dữ liệu</div>
                 )}
               </div>
-              <Button
-                type="text"
-                size="small"
-                icon={<EditOutlined className="text-xs" />}
-                className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => {
-                  setIsEditingTrackingModal(true);
-                  setOrderDetail(record);
-                }}
-              />
+              {record.status !== OrderStatusType.PENDING_PAYMENT &&
+                record.status !== OrderStatusType.READY_TO_SHIP && (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<EditOutlined className="text-xs" />}
+                    className="!p-0 !h-auto flex-shrink-0"
+                    onClick={() => {
+                      setIsEditingTrackingModal(true);
+                      setOrderDetail(record);
+                    }}
+                  />
+                )}
             </div>
             {trackingRecords.length > 1 && (
               <Button
@@ -753,7 +774,9 @@ export default function OrderHub() {
                 className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
-                  setIsOpenTrackingOrder(true);
+                  setIsTrackingJP(true);
+                  setIsEditingTrackingModal(true);
+                  // setIsOpenTrackingOrder()
                 }}
               >
                 🏢 Kho JP
@@ -821,19 +844,19 @@ export default function OrderHub() {
             break;
 
           case OrderStatusType.READY_TO_SHIP:
-            actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setOpenConfirmComplete(true);
-                }}
-              >
-                🚚 Giao hàng
-              </Button>
-            );
+            // actionButton = (
+            //   <Button
+            //     key={record.status}
+            //     size="small"
+            //     className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+            //     onClick={() => {
+            //       setOrderDetail(record);
+            //       setOpenConfirmComplete(true);
+            //     }}
+            //   >
+            //     🚚 Giao hàng
+            //   </Button>
+            // );
             break;
         }
 
@@ -1047,8 +1070,9 @@ export default function OrderHub() {
         <CheckOrderModal
           open={isOpenCheckOrder}
           customerName={orderDetail.customer_name}
-          feePerKg={10}
-          onCancel={() => {
+          // feePerKg={10}
+          // onClose={}
+          onClose={() => {
             setOrderDetail(undefined);
             setIsOpenCheckOrder(false);
           }}
@@ -1058,11 +1082,14 @@ export default function OrderHub() {
           productName={
             orderDetail?.metadata?.items[0]?.product?.map_data?.productName
           }
+          orderId={orderDetail.id}
+          status={orderDetail.status}
         />
       )}
 
-      {orderDetail && (
+      {/* {orderDetail && (
         <TrackingModalJP
+        orderId={orderDetail.id}
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.invoice_no}
           onCancel={() => {
@@ -1070,29 +1097,29 @@ export default function OrderHub() {
             setIsOpenTrackingOrder(false);
           }}
           onSubmit={(value) => {
-            trackingJPMutation.mutate(
-              {
-                tracking: value.trackingCodes,
-                id: orderDetail.id.toString(),
-              },
-              {
-                onSuccess: () => {
-                  toast.success(t("toast.confirmJpWarehouseSuccess"));
-                  queryClient.invalidateQueries({
-                    queryKey: ["listorder"],
-                  });
-                  setIsOpenTrackingOrder(false);
-                },
-                onError: (err: any) =>
-                  toast.error(
-                    err.response?.data?.localizedMessage || t("common.error")
-                  ),
-              }
-            );
+            // trackingJPMutation.mutate(
+            //   {
+            //     tracking: value.trackingCodes,
+            //     id: orderDetail.id.toString(),
+            //   },
+            //   {
+            //     onSuccess: () => {
+            //       toast.success(t("toast.confirmJpWarehouseSuccess"));
+            //       queryClient.invalidateQueries({
+            //         queryKey: ["listorder"],
+            //       });
+            //       setIsOpenTrackingOrder(false);
+            //     },
+            //     onError: (err: any) =>
+            //       toast.error(
+            //         err.response?.data?.localizedMessage || t("common.error")
+            //       ),
+            //   }
+            // );
           }}
           open={isOpenTrackingOrder}
         />
-      )}
+      )} */}
 
       {orderDetail && (
         <TrackingModal
@@ -1170,35 +1197,41 @@ export default function OrderHub() {
         <EditTrackingModal
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
+          status = {orderDetail.status}
           onClose={() => {
             setOrderDetail(undefined);
+            setIsTrackingJP(false);
             setIsEditingTrackingModal(false);
           }}
-          onSave={(records) => {
-            useUpdateOrderTracking.mutate(
-              {
-                body: records,
-                id: orderDetail.id,
-              },
-              {
-                onSuccess: () => {
-                  toast.success("Update mã kiện thành công");
-                  queryClient.invalidateQueries({
-                    queryKey: ["listorder"],
-                  });
-                  setIsEditingTrackingModal(false);
-                },
-                onError: (err: any) =>
-                  toast.error(
-                    err.response?.data?.localizedMessage || t("common.error")
-                  ),
-              }
-            );
-
-            setIsEditingTracking(null);
-            queryClient.invalidateQueries({
-              queryKey: ["listorder"],
+          onSave={async (records) => {
+            const promises = [];
+            const updatePromise = useUpdateOrderTracking.mutateAsync({
+              body: records,
+              id: orderDetail.id,
             });
+            promises.push(updatePromise);
+            if (isTrackingJP) {
+              const jpPromise = trackingJPMutation.mutateAsync({
+                id: orderDetail.id.toString(),
+              });
+              promises.push(jpPromise);
+            }
+            Promise.all(promises)
+              .then(() => {
+                toast.success("Cập nhật thành công!");
+                queryClient.invalidateQueries({ queryKey: ["listorder"] });
+                setIsEditingTrackingModal(false);
+                setIsOpenTrackingOrder(false);
+                setIsEditingTracking(null);
+              })
+              .catch((err) => {
+                toast.error(
+                  err.response?.data?.localizedMessage || t("common.error")
+                );
+              });
+            setIsEditingTracking(null);
+            setIsTrackingJP(false);
+            queryClient.invalidateQueries({ queryKey: ["listorder"] });
           }}
         />
       )}

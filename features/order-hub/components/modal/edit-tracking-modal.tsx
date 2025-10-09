@@ -3,13 +3,14 @@ import { Button, Input, Modal, Spin } from "antd";
 import React from "react";
 import { toast } from "react-toastify";
 import { genPackageCode, getTrackingOrder } from "../../apis/orderhub";
-import { CreateTrackingModel } from "@/types/orderhub";
+import { CreateTrackingModel, OrderStatusType } from "@/types/orderhub";
 
 export function EditTrackingModal({
   open,
   onClose,
   onSave,
   orderId,
+  status,
 }: {
   orderId: number;
   open: boolean;
@@ -19,6 +20,7 @@ export function EditTrackingModal({
     records: CreateTrackingModel[];
   };
   onSave: (data: CreateTrackingModel[]) => void;
+  status: string;
 }) {
   const [records, setRecords] = React.useState<CreateTrackingModel[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -30,8 +32,6 @@ export function EditTrackingModal({
       setLoading(true);
       getTrackingOrder(orderId)
         .then(async (data: any) => {
-          console.log('data', data);
-          
           if (data && data && data.length > 0) {
             setRecords(data);
             // setIsExisting(true);
@@ -57,6 +57,12 @@ export function EditTrackingModal({
   }, [open, orderId]);
 
   const handleAddRecord = async () => {
+    if (
+      status === OrderStatusType.PENDING_PAYMENT ||
+      status === OrderStatusType.READY_TO_SHIP
+    ) {
+      return;
+    }
     const code = await genPackageCode();
     setRecords((prev) => [
       ...prev,
@@ -65,6 +71,12 @@ export function EditTrackingModal({
   };
 
   const handleRemoveRecord = (index: number) => {
+    if (
+      status === OrderStatusType.PENDING_PAYMENT ||
+      status === OrderStatusType.READY_TO_SHIP
+    ) {
+      return;
+    }
     setRecords((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -87,6 +99,12 @@ export function EditTrackingModal({
   };
 
   const handleSubmit = () => {
+    if (
+      status === OrderStatusType.PENDING_PAYMENT ||
+      status === OrderStatusType.READY_TO_SHIP
+    ) {
+      return;
+    }
     onSave(records);
   };
 
@@ -101,7 +119,15 @@ export function EditTrackingModal({
         <Button key="cancel" onClick={onClose}>
           Hủy
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button
+          disabled={
+            status === OrderStatusType.PENDING_PAYMENT ||
+            status === OrderStatusType.READY_TO_SHIP
+          }
+          key="submit"
+          type="primary"
+          onClick={handleSubmit}
+        >
           Lưu
         </Button>,
       ]}
@@ -194,6 +220,10 @@ export function EditTrackingModal({
                     onClick={() => handleRemoveRecord(index)}
                     className="!px-2"
                     title="Xóa"
+                    disabled={
+                      status === OrderStatusType.PENDING_PAYMENT ||
+                      status === OrderStatusType.READY_TO_SHIP
+                    }
                   >
                     ×
                   </Button>
@@ -209,6 +239,10 @@ export function EditTrackingModal({
               icon={<PlusOutlined />}
               className="w-full"
               size="small"
+              disabled={
+                status === OrderStatusType.PENDING_PAYMENT ||
+                status === OrderStatusType.READY_TO_SHIP
+              }
             >
               Thêm dòng mới
             </Button>

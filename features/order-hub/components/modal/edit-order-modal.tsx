@@ -789,9 +789,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       >
                         <div className="space-y-2">
                           {listService?.map((item: ServiceFee) => {
-                            if (item.optional) return null;
-                            console.log('services', services);
-                            
+                            if (item.optional) return null;                            
                             const isChecked = services.includes(item.code);
                             return (
                               <div

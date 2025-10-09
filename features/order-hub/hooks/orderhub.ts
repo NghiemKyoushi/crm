@@ -119,8 +119,8 @@ export const useCancelOrder = () => {
 
 export const useTrackingOrder = () => {
   return useMutation({
-    mutationFn: ({ tracking, id }: { tracking: Array<string>; id: string }) =>
-      trackingToJp(id, tracking),
+    mutationFn: ({  id }: { id: string }) =>
+      trackingToJp(id),
   });
 };
 

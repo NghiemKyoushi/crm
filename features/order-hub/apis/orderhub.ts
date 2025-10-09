@@ -105,10 +105,10 @@ export const confirmPurchaeOrder = async (id: string) => {
   return res.data.data;
 };
 
-export const trackingToJp = async (id: string, tracking: Array<string>) => {
+export const trackingToJp = async (id: string) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/arrived-jp-warehouse/${id}`,
-    { tracking_code: tracking }
+    // { tracking_code: tracking }
   );
   return res.data.data;
 };
