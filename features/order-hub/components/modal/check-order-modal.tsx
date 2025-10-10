@@ -303,10 +303,10 @@ const CombinedTrackingCheckModal: React.FC<CombinedModalProps> = ({
           toast.error(`Dòng ${i + 1}: Thiếu mã kiện`);
           return;
         }
-        if (r.package_number === undefined || r.package_number === null || r.package_number <= 0) {
-          toast.error(`Dòng ${i + 1}: Số lượng kiện phải lớn hơn 0`);
-          return;
-        }
+        // if (r.package_number === undefined || r.package_number === null || r.package_number <= 0) {
+        //   toast.error(`Dòng ${i + 1}: Số lượng kiện phải lớn hơn 0`);
+        //   return;
+        // }
         // Kiểm tra trọng lượng (weight)
         if (r.weight === undefined || r.weight === null || r.weight <= 0) {
           toast.error(`Dòng ${i + 1}: Trọng lượng phải lớn hơn 0`);
