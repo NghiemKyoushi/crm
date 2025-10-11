@@ -31,7 +31,7 @@ import {
 import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
-import { useCreateNewOrder, useListService } from "../../hooks/orderhub";
+import { useCreateNewOrder, useListService, useListServiceAdmin } from "../../hooks/orderhub";
 import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -63,7 +63,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const [insurance, setInsurance] = useState<InsuranceOptionModel | null>(null);
   const [prices, setPrice] = useState<number>(0);
   const [rateValueForPrice, setRateValueForPrice] = useState<number>(0);
-  const [routeId, setRouteId] = useState(0);
+
   const customer = Form.useWatch("customer", form);
   const priceY = Form.useWatch("priceY", form);
   const quantity = Form.useWatch("quantity", form);
@@ -76,13 +76,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
   const [exchangeRates, setExchangeRates] = useState<any[]>([]);
   const [listInsurancesMap, setListInsurancesMap] = useState<any>([]);
-  console.log('currencyCode', currencyCode);
   
-  const { data: listService } = useListService(
-    { routeId: routeId },
+  // const [userId, setUserId] = useState<number | undefined>(undefined);
+  const [routeId, setRouteId] = useState<number | undefined>(undefined);
+  
+  const { data: listService } = useListServiceAdmin(
+    { userId: customer , routeId },
     {
-      enabled: routeId !== 0,
-      queryKey: [],
+      enabled: !!customer && !!routeId,
+      queryKey: ['listServiceAdmin']
     }
   );
   const [fees, setFees] = useState({
@@ -275,7 +277,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
   useEffect(() => {
     const fetchFeeService = async () => {
-      if (customer) {
+      if (customer && routeId) {
         const serviceOptionTrue = listService.filter(
           (item: any) => item.optional === true
         );
@@ -360,11 +362,14 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setServices([]);
     setInsurance(null);
     setPrice(0);
+    setRouteId(undefined);
     setIdProduct(null);
     setSearchValue("");
     setCustomerPage(0);
     setAllCustomers([]);
     setListInsurancesMap([]);
+    queryClient.removeQueries({ queryKey: ['listServiceAdmin'] });
+
     onCancel();
   };
 
@@ -844,12 +849,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                   </Checkbox>
                                 </div>
                                 <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
-                                  {item.amount.toLocaleString(
+                                {item.amount_vnd
+                                    ? `${item.amount_vnd.toLocaleString(
                                         "en-US"
-                                      )}{" "}
-                                  {item.currency_code === "VND"
-                                    ? " đ"
-                                    : item.currency_code}
+                                      )}đ`
+                                    : `0đ`}
+                                  {/* {item.currency_code === "VND"
+                                    ? "đ"
+                                    : item.currency_code
+                                    } */}
                                 </div>
                               </div>
                             );
@@ -1147,7 +1155,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         Cước VC nội địa
                       </span>
                       <span className="text-sm font-semibold text-gray-900">
-                        {fees.TOTAL_COD_SHIPPING_FEE
+                        {fees.TOTAL_COD_SHIPPING_FEE !== -1
                           ?
                           <>
                           {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")}đ
@@ -1175,7 +1183,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phí dịch vụ
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {fees.SERVICE_FEE
+                          {
+                          fees.SERVICE_FEE !== -1
                             ?  <>
                             {fees.SERVICE_FEE.toLocaleString("en-US")}đ
                             <span className="text-gray-500 !font-medium !text-xs !pl-1">
@@ -1191,7 +1200,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phí thanh toán
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {fees.PAYMENT_FEE
+                          {
+                          fees.PAYMENT_FEE !== -1
                             ? <>
                             {fees.PAYMENT_FEE.toLocaleString("en-US")}đ
                             <span className="text-gray-500 !font-medium !text-xs !pl-1">
@@ -1207,7 +1217,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Cước VC quốc tế
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {fees.DOMESTIC_SHIPPING_FEE &&
+                          {
                           fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
                                 "en-US"
@@ -1220,7 +1230,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phụ thu VC
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {fees.SHIPPING_SURCHARGE_FEE &&
+                          {
                           fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
                                 "en-US"
@@ -1235,7 +1245,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                         {insurance?.id == 1
                             ? "0đ"
-                            : fees.INSURANCE_FEE
+                            : (fees.INSURANCE_FEE !== null  &&
+                            fees.INSURANCE_FEE !== -1)
                             ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
                             : "Cập nhật sau"}
                         </span>

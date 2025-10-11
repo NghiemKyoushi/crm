@@ -56,6 +56,11 @@ export const getListService = async (params: {routeId: number}) => {
   return res.data.data;
 };
 
+export const getListServiceAdmin = async (params: {userId?: number, routeId?: number}) => {
+  const res = await api.get(API_TYPE_CONST.FEE_GET_ADMIN, {params});
+  return res.data.data;
+};
+
 export const updateListService = async (body: FeeData) => {
   const res = await api.post(API_TYPE_CONST.FEE_GET, body);
   return res.data.data;

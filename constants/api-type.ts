@@ -76,6 +76,7 @@ export const API_TYPE_CONST = {
   PRODUCT_CATEGORIES:`${FEATURE}/admin/product-categories`,
   PRODUCT_FEE: `${FEATURE}/product/fee`,
   FEE_GET:`${FEATURE}/fee`,
+  FEE_GET_ADMIN:`${FEATURE}/fee/get-data-admin`,
   EXCHANGE_RATE:`${FEATURE}/exchange-rate/admin/setting/get-data`,
   CALCULATE_FEE:`${FEATURE}/fee/calculate-fee`,
   CREATE_ORDER: `${FEATURE}/admin/orders`,

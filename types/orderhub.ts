@@ -134,6 +134,7 @@ export interface ServiceFee {
   currency_code: string; // ví dụ: "VND", "USD", "JPY"
   method: number; // có thể define enum nếu có nhiều method
   optional: boolean;
+  amount_vnd: number
 }
 
 export interface RateOrderRequest {
