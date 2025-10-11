@@ -57,7 +57,6 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 
-const { Option } = Select;
 
 export default function OrderHub() {
   const [form] = Form.useForm();
@@ -269,7 +268,7 @@ export default function OrderHub() {
       }),
       render: (invoice_no: string) => (
         <div className="text-xs font-medium text-blue-600">
-          {invoice_no || "-"}
+          {invoice_no || "Cập nhật sau"}
         </div>
       ),
     },
@@ -335,7 +334,7 @@ export default function OrderHub() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-xs text-gray-400">Chưa có dữ liệu</div>
+                  <div className="text-xs text-gray-400">Cập nhật sau</div>
                 )}
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
@@ -487,7 +486,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
-            {record.note || record.description || "-"}
+            {record.note || record.description || "Cập nhật sau"}
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
@@ -531,17 +530,17 @@ export default function OrderHub() {
         return (
           <div className="space-y-1">
             <div className="text-xs">
-              <span className="text-gray-500">Cọc: </span>
+              <span className="text-gray-500">Trước: </span>
               <span className="text-green-600 font-medium">
                 {depositFee > 0
                   ? `${depositFee.toLocaleString("vi-VN")}đ`
-                  : "-"}
+                  : "Cập nhật sau"}
               </span>
             </div>
             <div className="text-xs">
-              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-gray-500">Lần 2: </span>
               <span className="text-orange-600 font-medium">
-                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "Cập nhật sau"}
               </span>
             </div>
             {/* <div className="text-xs">
@@ -589,7 +588,7 @@ export default function OrderHub() {
               <span className="text-gray-800 font-medium">
                 {shippingPrice > 0
                   ? `${shippingPrice.toLocaleString("vi-VN")}đ`
-                  : "-"}
+                  : "Cập nhật sau"}
               </span>
             </div>
             <div className="text-xs">
@@ -615,7 +614,7 @@ export default function OrderHub() {
         <div className="text-xs font-medium text-blue-600">
           {record.amount_vnd
             ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
-            : "-"}
+            : "Cập nhật sau"}
         </div>
       ),
     },
@@ -631,7 +630,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
           <div className="text-xs text-gray-600 flex-1">
-            {record?.note_admin ? record?.note_admin : "-"}
+            {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"

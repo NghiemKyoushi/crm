@@ -69,6 +69,13 @@ export const getRateOrder = async (params: {
   return res.data.data;
 };
 
+export const getRateExchanges = async (params: {
+  userId: string;
+}) => {
+  const res = await api.get(`${API_TYPE_CONST.GET_DATA_LIST}`,{params} );
+  return res.data.data;
+};
+
 export const getDataFeeService = async (body: RateOrderRequest) => {
   const res = await api.post(API_TYPE_CONST.CALCULATE_FEE, body);
   return res.data.data;

@@ -120,8 +120,9 @@ export interface InsuranceOptionModel {
   max_value_vnd: number | null;
   status: "ACTIVE" | "INACTIVE" | string; // có thể refine thêm nếu biết rõ enum
   is_delete: boolean;
-  created_at: string; // ISO datetime
-  updated_at: string | null; // có thể null
+  created_at: string; 
+  updated_at: string | null;
+  amount_vnd?: number;
 }
 
 export interface ServiceFee {
@@ -139,13 +140,15 @@ export interface RateOrderRequest {
   category_fee_id: number;
   cod_in_japan: number;
   currency_code: string;
-  fee_codes: string[];
+  fee_codes?: any[];
+  fees: any[];
   insurance_id: number;
   price: number;
   quantity: number;
   route_id: number;
   user_id: number;
   item_quantity: number;
+  exchange_rates: any[];
 }
 
 
@@ -159,7 +162,8 @@ export interface OrderFeeRequest {
     items_per_unit?: number;
     item_quantity: number;
   };
-  fee_codes: string[];
+  fee_codes?: any[];
+  fees: any[];
   insurance_id: number;
   description: string;
   user_id: number;
@@ -170,13 +174,38 @@ export interface OrderFeeRequest {
   // item_quantity: number;
 }
 
+export interface FeeAmount {
+  amount_vnd: number;
+  amount: number;
+  currency_code: string;
+}
+
+export interface ServiceFeeOptional {
+  id: number;
+  code: string;
+  name: string;
+  optional: boolean;
+  method: number;
+  description: string | null;
+  amount: number;
+  currency_code: string;
+  route_id: number | null;
+  amount_vnd: number;
+  is_checked: boolean;
+}
+
 export interface FeeServiceCheck {
+  service_fee_optional_list: ServiceFeeOptional[];
   domestic_shipping_fee: number | null;
-  service_fee: number;
-  payment_fee: number;
-  shipping_surcharge_fee: number | null;
-  min_deposit_percent: number;
-  insurance_fee: number;
+  service_fee: FeeAmount | null;
+  payment_fee: FeeAmount | null;
+  shipping_surcharge_fee: FeeAmount | null;
+  min_deposit_percent: number | null;
+  insurance_fee: FeeAmount | null;
+  total_order: FeeAmount | null;
+  total_products: FeeAmount | null;
+  total_cod_shipping_fee: FeeAmount | null;
+  insurance_package_list: any;
 }
 
 export interface ApproveOrderModel {

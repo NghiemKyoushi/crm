@@ -34,6 +34,8 @@ export interface Fee {
   optional: boolean;
   description: string | null;
   currency_code: string | null;
+  is_checked?: boolean;
+  amount_vnd: number | null;
 }
 
 // Bảo hiểm trong metadata.infos.insurancePackage
@@ -57,7 +59,8 @@ export interface Metadata {
     insurancePackage: InsurancePackage;
     codeType: number,
     productCategory: any,
-    codInJapan: number
+    codInJapan: number,
+    exchangeRateMap: any,
   };
 }
 
@@ -82,6 +85,7 @@ export interface OrderDetail {
   created_by_name: string;
   approved_by_name: string | null;
   is_user_created: boolean | null;
+  fee_list: any;
 }
 interface OrderDetailModalProps {
   open: boolean;
