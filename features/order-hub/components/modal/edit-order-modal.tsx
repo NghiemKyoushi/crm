@@ -125,15 +125,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         //   .filter((item: any) => item.optional === true)
         //   .map((item: any) => item.code);
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
-        const serviceOptionTrue = listService.filter(
-          (item: any) => item.optional === true
-        );
-        const serviceOption = listService
-          ?.filter((item: any) => item.optional === false)
-          .map((item: any) => ({
-            ...item,
-            is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
-          }));
+        // const serviceOptionTrue = listService.filter(
+        //   (item: any) => item.optional === true
+        // );
+        // const serviceOption = listServiceInOrder
+        //   ?.filter((item: any) => item.optional === false)
+        //   .map((item: any) => ({
+        //     ...item,
+        //     is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
+        //   }));          
         const bodyNewOrder: OrderFeeRequest = {
           data: {
             product_id: idProduct,
@@ -145,7 +145,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
-          fees: [...serviceOptionTrue, ...serviceOption],
+          fees: [...listServiceInOrder],
           insurance_id: insurance?.id,
           user_id: customer,
           product_category_id: form.getFieldValue("category"),
@@ -206,12 +206,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     );
     setListServiceInOrder((prev) =>
       prev.map((item) =>
-        item.code === id // hoặc item.id === id nếu dùng id
+        item.code === id 
           ? { ...item, is_checked: checked }
           : item
       )
     );
   };
+console.log('list', listServiceInOrder);
 
   const handleInsuranceChange = (
     e: CheckboxChangeEvent,
