@@ -311,7 +311,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           })          
           setListInsurancesMap(insuranceFees)
           setFees({
-            DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee ?? -1,
+            DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee?.amount_vnd ?? -1,
             INSURANCE_FEE: res.insurance_fee?.amount_vnd ?? -1,
             MIN_DEPOSIT_PERCENT: res.min_deposit_percent ?? -1,
             PAYMENT_FEE: res.payment_fee?.amount_vnd ?? -1,
