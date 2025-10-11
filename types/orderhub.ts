@@ -138,6 +138,7 @@ export interface ServiceFee {
 }
 
 export interface RateOrderRequest {
+  order_id?: any;
   category_fee_id: number;
   cod_in_japan: number;
   currency_code: string;

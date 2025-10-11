@@ -286,6 +286,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         );
 
         const bodyGetFeeService: RateOrderRequest = {
+          order_id: null,
           category_fee_id: category,
           fees: [...serviceOption, ...serviceOptionTrue],
           price: priceY ? priceY : 0,
