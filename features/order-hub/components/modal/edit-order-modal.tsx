@@ -264,6 +264,7 @@ console.log('list', listServiceInOrder);
         //   (item: any) => !item.optional
         // );
         const bodyGetFeeService: RateOrderRequest = {
+          order_id: orderId,
           category_fee_id: category,
           fees: [...listServiceInOrder],
           price: priceY ? priceY : 0,
