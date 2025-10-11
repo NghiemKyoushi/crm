@@ -204,13 +204,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setServices((prev) =>
       checked ? [...prev, id] : prev.filter((k) => k !== id)
     );
-    // setListServiceInOrder((prev) =>
-    //   prev.map((item) =>
-    //     item.code === id // hoặc item.id === id nếu dùng id
-    //       ? { ...item, is_checked: checked }
-    //       : item
-    //   )
-    // );
+    setListServiceInOrder((prev) =>
+      prev.map((item) =>
+        item.code === id // hoặc item.id === id nếu dùng id
+          ? { ...item, is_checked: checked }
+          : item
+      )
+    );
   };
 
   const handleInsuranceChange = (
