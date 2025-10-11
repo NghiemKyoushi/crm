@@ -412,7 +412,7 @@ export default function OrderHub() {
                 <span className="text-gray-500">Giá: </span>
                 <span className="text-green-600 font-medium">
                   {price && !isNaN(Number(price))
-                    ? `¥${Number(price).toLocaleString("ja-JP")}`
+                    ? `${isJapanPrice}${Number(price).toLocaleString("ja-JP")}`
                     : "-"}
                 </span>
               </div>

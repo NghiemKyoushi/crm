@@ -1116,7 +1116,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     </span>
                     <span className="text-sm font-semibold text-gray-900">
                       {rateValueForPrice
-                        ? <span> {`1 ${currencyCode} = ${rateValueForPrice.toLocaleString("en-US")} đ`}</span>
+                        ? <span> {`1 ${currencyCode} = ${rateValueForPrice.toLocaleString("en-US")}đ`}</span>
                         : "Cập nhật sau"}
                     </span>
                   </div>
@@ -1129,9 +1129,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     <span className="text-sm font-bold text-blue-900">
                     {fees.TOTAL_PRODUCT ? (
                         <>
-                          {fees.TOTAL_PRODUCT.toLocaleString("en-US")} đ{" "}
-                          <span className="text-gray-500 !font-medium !text-xs">
-                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")} {currencyCheckCode}
+                          {fees.TOTAL_PRODUCT.toLocaleString("en-US")}đ
+                          <span className="text-gray-500 !font-medium !text-xs !pl-1">
+                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")}{currencyCheckCode}
                           </span>
                         </>
                       ) : (
@@ -1150,9 +1150,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         {fees.TOTAL_COD_SHIPPING_FEE
                           ?
                           <>
-                          {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")} đ
-                          <span className="text-gray-500 !font-medium !text-xs">
-                            {" "}
+                          {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")}đ
+                          <span className="text-gray-500 !font-medium !text-xs !pl-1">
                             {fees.TOTAL_COD_SHIPPING_FEE_JP.toLocaleString("en-US")}
                             {currencyCheckCode}
                           </span>
@@ -1178,9 +1177,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.SERVICE_FEE
                             ?  <>
-                            {fees.SERVICE_FEE.toLocaleString("en-US")} đ
-                            <span className="text-gray-500 !font-medium !text-xs">
-                              {" "}
+                            {fees.SERVICE_FEE.toLocaleString("en-US")}đ
+                            <span className="text-gray-500 !font-medium !text-xs !pl-1">
                               {fees.SERVICE_FEE_JP.toLocaleString("en-US")}
                               {currencyCheckCode}
                             </span>
@@ -1195,9 +1193,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.PAYMENT_FEE
                             ? <>
-                            {fees.PAYMENT_FEE.toLocaleString("en-US")} đ
-                            <span className="text-gray-500 !font-medium !text-xs">
-                              {" "}
+                            {fees.PAYMENT_FEE.toLocaleString("en-US")}đ
+                            <span className="text-gray-500 !font-medium !text-xs !pl-1">
                               {fees.PAYMENT_FEE_JP.toLocaleString("en-US")}
                               {currencyCheckCode}
                             </span>
@@ -1214,7 +1211,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
                                 "en-US"
-                              )} đ`
+                              )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1227,7 +1224,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
                                 "en-US"
-                              )} đ`
+                              )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1237,9 +1234,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         </span>
                         <span className="text-sm font-medium text-gray-900">
                         {insurance?.id == 1
-                            ? "0 đ"
+                            ? "0đ"
                             : fees.INSURANCE_FEE
-                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")} đ`
+                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1280,7 +1277,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                   {item.name}
                                 </span>
                                 <span className="text-sm font-medium text-gray-900">
-                                  {item.amount.toLocaleString("en-US")} đ
+                                  {item.amount.toLocaleString("en-US")}đ
                                 </span>
                               </div>
                             ))}
@@ -1299,8 +1296,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         {Number(fees.TOTAL_ORDER) &&
                           fees.TOTAL_ORDER !== -1 ? (
                           <>
-                            {Number(fees.TOTAL_ORDER).toLocaleString("en-US")} đ
-                            <span className="text-white !font-medium !text-xs">
+                            {Number(fees.TOTAL_ORDER).toLocaleString("en-US")}đ
+                            <span className="text-white !font-medium !text-xs !pl-1">
                               {" "}
                               {fees.TOTAL_ORDER_JP.toLocaleString("en-US")}
                               {currencyCheckCode}

@@ -872,8 +872,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                   {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
                                         "en-US"
-                                      )} đ`
-                                    : 0}{" "}
+                                      )}đ`
+                                    : 0}
                                   {/* {item.currency_code === "VND"
                                     ? "đ"
                                     : item.currency_code} */}
@@ -948,11 +948,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                 </div>
                                 <div className="text-amber-600 font-semibold text-sm whitespace-nowrap">
                                   {item.fee_percentage === 0
-                                    ? "0 đ"
+                                    ? "0đ"
                                     : item.amount_vnd
                                     ? <span> {`${item.amount_vnd.toLocaleString(
                                         "en-US"
-                                      )} đ`}</span>
+                                      )}đ`}</span>
                                     : "Cập nhật sau"}
                                 </div>
                               </div>
@@ -1131,9 +1131,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       {fees.TOTAL_PRODUCT  &&
                           fees.TOTAL_PRODUCT !== -1  ? (
                         <>
-                          {fees.TOTAL_PRODUCT.toLocaleString("en-US")} đ{" "}
-                          <span className="text-gray-500 !font-medium !text-xs">
-                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")}{" "}
+                          {fees.TOTAL_PRODUCT.toLocaleString("en-US")}đ{"  "}
+                          <span className="text-gray-500 !font-medium !text-xs pl-0.5">
+                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")}
                             {currencyCheckCode}
                           </span>
                         </>
@@ -1153,10 +1153,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       {fees.TOTAL_COD_SHIPPING_FEE  &&
                           fees.TOTAL_COD_SHIPPING_FEE !== -1 ? (
                         <>
-                          {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")}{" "}
-                          đ
-                          <span className="text-gray-500 !font-medium !text-xs">
-                            {" "}
+                          {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")}đ
+                          <span className="text-gray-500 !font-medium !text-xs !pl-1">
                             {fees.TOTAL_COD_SHIPPING_FEE_JP.toLocaleString(
                               "en-US"
                             )}
@@ -1185,9 +1183,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           {fees.SERVICE_FEE &&
                           fees.SERVICE_FEE !== -1  ? (
                             <>
-                              {fees.SERVICE_FEE.toLocaleString("en-US")} đ
-                              <span className="text-gray-500 !font-medium !text-xs">
-                                {" "}
+                              {fees.SERVICE_FEE.toLocaleString("en-US")}đ
+                              <span className="text-gray-500 !font-medium !text-xs pl-0.5">
+                                {"  "}
                                 {fees.SERVICE_FEE_JP.toLocaleString("en-US")}
                                 {currencyCheckCode}
                               </span>
@@ -1205,9 +1203,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           {fees.PAYMENT_FEE &&
                           fees.PAYMENT_FEE !== -1 ? (
                             <>
-                              {fees.PAYMENT_FEE.toLocaleString("en-US")} đ
-                              <span className="text-gray-500 !font-medium !text-xs">
-                                {" "}
+                              {fees.PAYMENT_FEE.toLocaleString("en-US")}đ
+                              <span className="text-gray-500 !font-medium !text-xs !pl-1">
                                 {fees.PAYMENT_FEE_JP.toLocaleString("en-US")}
                                 {currencyCheckCode}
                               </span>
@@ -1226,7 +1223,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
                                 "en-US"
-                              )} đ`
+                              )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1239,7 +1236,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
                                 "en-US"
-                              )} đ`
+                              )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1249,9 +1246,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         </span>
                         <span className="text-sm font-medium text-gray-900">
                           {insurance?.id == 1
-                            ? "0 đ"
+                            ? "0đ"
                             : fees.INSURANCE_FEE
-                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")} đ`
+                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1273,8 +1270,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                 <span className="text-sm font-medium text-gray-900">
                                   {item.amount_vnd
                                     ? item.amount_vnd.toLocaleString("en-US")
-                                    : 0}{" "}
-                                  đ
+                                    : 0}đ
                                 </span>
                               </div>
                             ))}
@@ -1293,9 +1289,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         {Number(fees.TOTAL_ORDER) &&
                           fees.TOTAL_ORDER !== -1 ? (
                           <>
-                            {Number(fees.TOTAL_ORDER).toLocaleString("en-US")} đ
-                            <span className="text-white !font-medium !text-xs">
-                              {" "}
+                            {Number(fees.TOTAL_ORDER).toLocaleString("en-US")}đ
+                            <span className="text-white !font-medium !text-xs !pl-1">
                               {fees.TOTAL_ORDER_JP.toLocaleString("en-US")}
                               {currencyCheckCode}
                             </span>
