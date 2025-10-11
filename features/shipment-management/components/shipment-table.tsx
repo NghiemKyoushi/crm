@@ -623,7 +623,7 @@ const ProductManagement: React.FC = () => {
     },
     {
       value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequest"),
+      label: t('status.shippingRequest'),
     },
     { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
   ];
@@ -962,11 +962,55 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) => (
-        <Tag color={getStatusColor(record.status)} className="!text-[10px] !py-0.5 !px-2">
-          {record.status || "-"}
-        </Tag>
-      ),
+      render: (_, record) =>{
+        let text: string ='';
+        const status = record.status;
+
+        switch (status) {
+          case OrderStatusType.PENDING_APPROVAL:
+            text = t('status.pendingApproval');
+            break;
+          case OrderStatusType.PENDING_DEPOSIT:
+            text = t('status.pendingDeposit');
+            break;
+          case OrderStatusType.DEPOSIT_PAID:
+            text = t('status.depositPaid');
+            break;
+          case OrderStatusType.PURCHASED:
+            text = t('status.purchased');
+            break;
+          case OrderStatusType.ARRIVED_JP_WAREHOUSE:
+            text = t('status.arrivedJpWarehouse');
+            break;
+          case OrderStatusType.ARRIVED_VN_WAREHOUSE:
+            text = t('status.arrivedVnWarehouse');
+            break;
+          case OrderStatusType.UNDER_INSPECTION:
+            text = t('status.underInspection');
+            break;
+          case OrderStatusType.PENDING_PAYMENT:
+            text = t('status.pendingPayment');
+            break;
+          case OrderStatusType.READY_TO_SHIP:
+            text = t('status.readyToShip');
+            break;
+          case OrderStatusType.SHIPPED:
+            text = t('status.shipped');
+            break;
+          case OrderStatusType.SHIPPING_REQUEST_CLIENT:
+            text = t('status.shippingRequest');
+            break;
+          case OrderStatusType.CANCELED:
+            text = t('status.cancelled');
+            break;
+          default:
+        }
+        return (
+          <Tag color={getStatusColor(record.status)} className="!text-[10px] !py-0.5 !px-2">
+            {text || "-"}
+          </Tag>
+        )
+      } ,
     },
   ];
 
