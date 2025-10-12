@@ -84,7 +84,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     { userId: customer , routeId },
     {
       enabled: !!customer && !!routeId,
-      queryKey: ['listServiceAdmin']
+      queryKey: ['listService']
     }
   );
   const [fees, setFees] = useState({
@@ -369,7 +369,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setCustomerPage(0);
     setAllCustomers([]);
     setListInsurancesMap([]);
-    queryClient.removeQueries({ queryKey: ['listServiceAdmin'] });
+    queryClient.removeQueries({ queryKey: ['listService'] });
 
     onCancel();
   };
@@ -1289,7 +1289,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                   {item.name}
                                 </span>
                                 <span className="text-sm font-medium text-gray-900">
-                                  {item.amount.toLocaleString("en-US")}đ
+                                {item.amount_vnd
+                                    ? `${item.amount_vnd.toLocaleString(
+                                        "en-US"
+                                      )}đ`
+                                    : `0đ`}
                                 </span>
                               </div>
                             ))}
