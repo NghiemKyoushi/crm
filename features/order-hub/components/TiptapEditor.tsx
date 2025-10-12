@@ -20,7 +20,7 @@ export default function TiptapEditor({
   placeholder,
   className,
   isDisable
-}: Props) {
+}: Props) {  
   const editor = useEditor({
     extensions: [StarterKit, Link, Image],
     content: value || "",
@@ -34,7 +34,7 @@ export default function TiptapEditor({
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
     },
-    editable: isDisable 
+    editable: !isDisable 
   });
 
   useEffect(() => {
@@ -43,7 +43,9 @@ export default function TiptapEditor({
     if ((value || "") !== current) {
       editor.commands.setContent(value || "");
     }
-  }, [value, editor]);
+    editor.setEditable(!isDisable);
+
+  }, [value, editor, isDisable]);
 
   return (
     <div className={`w-full ${className || ''}`}>
