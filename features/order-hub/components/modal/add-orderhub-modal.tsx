@@ -76,17 +76,25 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const currencyCheckCode = currencyCode === CURRENCY_CODE.JPY ? "¥" : "$";
   const [exchangeRates, setExchangeRates] = useState<any[]>([]);
   const [listInsurancesMap, setListInsurancesMap] = useState<any>([]);
-  
+  const [listService, setListService] = useState<any[]>([]);
+
   // const [userId, setUserId] = useState<number | undefined>(undefined);
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
   
-  const { data: listService } = useListServiceAdmin(
+  const { data: listServices } = useListServiceAdmin(
     { userId: customer , routeId },
     {
       enabled: !!customer && !!routeId,
       queryKey: ['listService']
     }
   );
+
+  useEffect(() => {
+    if (listServices) {
+      setListService(listServices);
+    }
+  }, [listServices]);
+
   const [fees, setFees] = useState({
     DOMESTIC_SHIPPING_FEE: 0,
     INSURANCE_FEE: 0,
@@ -148,7 +156,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               queryClient.invalidateQueries({
                 queryKey: ["listorder"],
               });
-              onCancel();
+              handleCancel();
               form.resetFields();
             },
             onError: (err: any) =>
@@ -369,8 +377,29 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setCustomerPage(0);
     setAllCustomers([]);
     setListInsurancesMap([]);
+    setListService([]);
+    setRateValueForPrice(0);
     queryClient.removeQueries({ queryKey: ['listService'] });
-
+    setFees(
+      {
+        DOMESTIC_SHIPPING_FEE: -1,
+        INSURANCE_FEE: -1,
+        MIN_DEPOSIT_PERCENT: -1,
+        PAYMENT_FEE: -1,
+        SERVICE_FEE: -1,
+        SHIPPING_SURCHARGE_FEE: -1,
+        TOTAL_ORDER: -1,
+        TOTAL_PRODUCT: -1,
+        TOTAL_COD_SHIPPING_FEE: -1,
+        INSURANCE_FEE_JP: -1,
+        PAYMENT_FEE_JP: 0,
+        SERVICE_FEE_JP: 0,
+        SHIPPING_SURCHARGE_FEE_JP: 0,
+        TOTAL_ORDER_JP: 0,
+        TOTAL_PRODUCT_JP: 0,
+        TOTAL_COD_SHIPPING_FEE_JP: 0,
+      }
+    )
     onCancel();
   };
 
@@ -1136,7 +1165,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     Tổng tiền sản phẩm
                     </span>
                     <span className="text-sm font-bold text-blue-900">
-                    {fees.TOTAL_PRODUCT ? (
+                    {fees.TOTAL_PRODUCT !== -1 ? (
                         <>
                           {fees.TOTAL_PRODUCT.toLocaleString("en-US")}đ
                           <span className="text-gray-500 !font-medium !text-xs !pl-1">

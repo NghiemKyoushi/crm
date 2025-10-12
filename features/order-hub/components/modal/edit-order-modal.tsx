@@ -163,7 +163,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               queryClient.invalidateQueries({
                 queryKey: ["listorder"],
               });
-              onCancel();
+              handleCancel();
               form.resetFields();
             },
             onError: (err: any) =>
@@ -212,7 +212,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       )
     );
   };
-console.log('list', listServiceInOrder);
 
   const handleInsuranceChange = (
     e: CheckboxChangeEvent,
