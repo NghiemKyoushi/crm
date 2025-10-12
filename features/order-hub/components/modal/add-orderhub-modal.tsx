@@ -286,17 +286,28 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   useEffect(() => {
     const fetchFeeService = async () => {
       if (customer && routeId) {
-        const serviceOptionTrue = listService.filter(
-          (item: any) => item.optional === true
-        );
-        const serviceOption = listService?.filter(
-          (item: any) => !item.optional && services.includes(item.code)
+        // const serviceOptionTrue = listServices.filter(
+        //   (item: any) => item.optional === true
+        // );
+        const serviceOption = listService?.map(
+          (item: any) => {
+            if(!item.optional && services.includes(item.code)){
+              return{
+                ...item,
+                is_checked: true
+              }
+            }
+            return{
+              ...item,
+              is_checked: false
+            }
+          }
         );
 
         const bodyGetFeeService: RateOrderRequest = {
           order_id: null,
           category_fee_id: category,
-          fees: [...serviceOption, ...serviceOptionTrue],
+          fees: [...serviceOption],
           price: priceY ? priceY : 0,
           user_id: form.getFieldValue("customer"),
           insurance_id: insurance ? insurance.id : 0,
@@ -316,7 +327,14 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               amount_vnd: item.amount_vnd,
               ...item.insurance_package,
             }
-          })          
+          }) 
+          const serviceOptionTrue = listService.filter(
+          (item: any) => item.optional === true
+           );
+           if(res.service_fee_optional_list.length > 0){
+            setListService([...serviceOptionTrue, ...res.service_fee_optional_list])       
+
+           }
           setListInsurancesMap(insuranceFees)
           setFees({
             DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee?.amount_vnd ?? -1,

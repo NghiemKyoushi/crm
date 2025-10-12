@@ -133,7 +133,9 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         //   .map((item: any) => ({
         //     ...item,
         //     is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
-        //   }));          
+        //   }));      
+        console.log('form.getFieldValue("description")', form.getFieldValue("description"));
+            
         const bodyNewOrder: OrderFeeRequest = {
           data: {
             product_id: idProduct,
@@ -286,7 +288,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               amount_vnd: item.amount_vnd,
               ...item.insurance_package,
             }
-          })          
+          })       
+          const serviceOptionTrue = listServiceInOrder.filter(
+            (item: any) => item.optional === true
+             );
+             if(res.service_fee_optional_list.length > 0){
+              setListServiceInOrder([...serviceOptionTrue, ...res.service_fee_optional_list])       
+  
+             }   
           setListInsurancesMap(insuranceFees)
           setFees({
             DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee?.amount_vnd ?? -1,
