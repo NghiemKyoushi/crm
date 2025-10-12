@@ -138,6 +138,7 @@ export interface ServiceFee {
 }
 
 export interface RateOrderRequest {
+  order_id?: any;
   category_fee_id: number;
   cod_in_japan: number;
   currency_code: string;
@@ -197,7 +198,7 @@ export interface ServiceFeeOptional {
 
 export interface FeeServiceCheck {
   service_fee_optional_list: ServiceFeeOptional[];
-  domestic_shipping_fee: number | null;
+  domestic_shipping_fee: FeeAmount | null;
   service_fee: FeeAmount | null;
   payment_fee: FeeAmount | null;
   shipping_surcharge_fee: FeeAmount | null;
