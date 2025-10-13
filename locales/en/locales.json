@@ -435,79 +435,80 @@
       "sales": "Sales Management"
     },
     "items": {
-      "viewOrders": "View orders",
-      "viewAllOrders": "View all orders",
-      "createOrder": "Create order",
-      "editOrder": "Edit order",
-      "deleteOrder": "Delete order",
-      "updateOrderStatus": "Update order status",
-      "cancelOrder": "Cancel order",
-      "viewProducts": "View products",
-      "createProduct": "Create product",
-      "editProduct": "Edit product",
-      "deleteProduct": "Delete product",
-      "viewUsers": "View users",
-      "createUser": "Create user",
-      "editUser": "Edit user",
+      "superAdmin": "Full system administration rights",
+      "systemAdmin": "Full system administration access",
+      "viewSystemLogs": "View system logs",
+      "manageSystemConfig": "Manage system configuration",
+      "manageSystemBackup": "Manage system backup",
+      "viewUsers": "View user list",
+      "createUser": "Create new user",
+      "editUser": "Edit user information",
       "deleteUser": "Delete user",
       "viewUserList": "View user list",
       "categorizeCustomers": "Categorize customers",
       "manageStaffRoles": "Manage staff & roles",
-      "viewRoles": "View roles",
-      "createRole": "Create role",
-      "editRole": "Edit role",
+      "viewRoles": "View role list",
+      "createRole": "Create new role",
+      "editRole": "Edit role (including assign/unassign permissions)",
       "deleteRole": "Delete role",
-      "assignRole": "Assign role",
+      "assignRole": "Assign role to user",
       "viewPermissions": "View permissions",
-      "createPermission": "Create permission",
+      "createPermission": "Create custom permission",
       "editPermission": "Edit permission",
-      "deletePermission": "Delete permission",
-      "assignPermission": "Assign permission",
-      "approveTopup": "Approve topup",
-      "processWithdrawal": "Process withdrawal",
-      "viewAllTransactions": "View all transactions",
-      "manageDebt": "Manage debt",
-      "viewBankStats": "View bank statistics",
-      "restoreTransactions": "Restore transactions",
-      "processWithdrawRequests": "Process withdrawal requests",
-      "approveTopupRequests": "Approve topup requests",
-      "manualTopup": "Manual topup",
-      "manageBankAccounts": "Manage bank accounts",
-      "viewTransactionHistory": "View transaction history",
-      "manageBankPermissions": "Manage bank permissions",
-      "manageSalesOrders": "Manage sales orders",
-      "viewAssignedOrders": "View assigned orders",
-      "updateSalesOrderStatus": "Update sales order status",
-      "createOrderForCustomers": "Create orders for customers",
-      "manageAuctions": "Manage auctions",
-      "createAuction": "Create auction",
-      "updateAuction": "Update auction",
-      "viewAuctionResults": "View auction results",
-      "manageBids": "Manage bids",
-      "viewOwnSalary": "View own salary",
-      "viewOwnCommission": "View own commission",
-      "viewOwnPerformance": "View own performance",
-      "viewAssignedCustomers": "View assigned customers",
-      "manageAssignedCustomers": "Manage assigned customers",
-      "updateCustomerInfo": "Update customer info",
-      "addCustomerNotes": "Add customer notes",
-      "viewCustomerOrders": "View customer orders",
-      "accessSalesDashboard": "Access sales dashboard",
-      "viewSalesReports": "View sales reports",
-      "exportSalesData": "Export sales data",
-      "telesalesManager": "Telesales manager",
-      "telesalesMember": "Telesales member",
-      "systemAdmin": "System admin",
-      "viewSystemLogs": "View system logs",
-      "manageSystemConfig": "Manage system config",
-      "manageSystemBackup": "Manage system backup",
-      "viewAudit": "View audit",
+      "deletePermission": "Delete custom permission",
+      "assignPermission": "Assign permission to role",
+      "viewAudit": "View audit logs",
       "exportAudit": "Export audit data",
       "viewReports": "View reports",
-      "createReport": "Create report",
-      "exportReport": "Export report",
-      "viewDashboard": "View dashboard",
-      "editSettings": "Edit settings"
+      "createReport": "Create custom report",
+      "exportReport": "Export report data (CSV, Excel, etc.)",
+      "viewOrders": "View order list",
+      "viewAllOrders": "View all orders",
+      "createOrder": "Create new order",
+      "editOrder": "Edit order status",
+      "deleteOrder": "Cancel/Delete order",
+      "updateOrderStatus": "Update order status",
+      "cancelOrder": "Cancel order",
+      "viewProducts": "View product list",
+      "createProduct": "Create new product",
+      "editProduct": "Edit product information",
+      "deleteProduct": "Delete product",
+      "viewDashboard": "Access dashboard",
+      "editSettings": "Change system general settings",
+      "approveTopup": "Approve topup orders",
+      "processWithdrawal": "Process withdrawal requests",
+      "viewAllTransactions": "View all transactions",
+      "manageDebt": "Manage debt",
+      "viewBankStats": "View bank account usage statistics",
+      "restoreTransactions": "Restore cancelled transactions",
+      "processWithdrawRequests": "Process user withdrawal requests",
+      "approveTopupRequests": "Approve and confirm user topup orders",
+      "manualTopup": "Manual topup for users",
+      "manageBankAccounts": "Manage company bank accounts",
+      "viewTransactionHistory": "View detailed transaction history",
+      "manageBankPermissions": "Manage bank account permissions",
+      "telesalesManager": "Manage entire telesales page",
+      "telesalesMember": "Manage customers according to assigned list",
+      "manageSalesOrders": "Manage assigned orders",
+      "viewAssignedOrders": "View assigned order list",
+      "updateSalesOrderStatus": "Update assigned order status",
+      "createOrderForCustomers": "Create orders for managed customers",
+      "manageAuctions": "Manage auctions",
+      "createAuction": "Create new auction",
+      "updateAuction": "Update auction information",
+      "viewAuctionResults": "View auction results",
+      "manageBids": "Manage bids",
+      "viewOwnSalary": "View personal salary and commission",
+      "viewOwnCommission": "View personal commission report",
+      "viewOwnPerformance": "View personal sales performance report",
+      "viewAssignedCustomers": "View assigned customer list",
+      "manageAssignedCustomers": "Manage assigned customers",
+      "updateCustomerInfo": "Update managed customer information",
+      "addCustomerNotes": "Add notes for managed customers",
+      "viewCustomerOrders": "View managed customer order history",
+      "accessSalesDashboard": "Access Sales dashboard",
+      "viewSalesReports": "View personal sales reports",
+      "exportSalesData": "Export personal sales data"
     }
   },
   "roles": {
@@ -1012,5 +1013,670 @@
     "deleteConfirmContent": "Are you sure you want to delete this account?",
     "companyBankAccountSettings": "Company Bank Account Settings",
     "addNewBankAccount": "Add New Bank Account"
+  },
+  "response": {
+    "common": {
+      "success": "Success",
+      "failed": "Failed",
+      "validation": {
+        "failed": "Validation failed"
+      },
+      "save": {
+        "success": "Saved successfully"
+      },
+      "not": {
+        "found": "Not found"
+      }
+    },
+    "auth": {
+      "login": {
+        "success": "Login successful",
+        "failed": "Login failed"
+      },
+      "token": {
+        "generated": "Token has been generated",
+        "verified": "Token has been verified",
+        "invalid": "Token is invalid",
+        "expired": "Token has expired",
+        "refreshed": "Token has been refreshed",
+        "revoked": "Token has been revoked"
+      },
+      "logout": {
+        "success": "Logout successful"
+      },
+      "password": {
+        "reset": {
+          "success": "Password reset successful",
+          "failed": "Password reset failed"
+        },
+        "change": {
+          "success": "Password changed successfully",
+          "failed": "Password change failed"
+        },
+        "incorrect": "Incorrect password"
+      },
+      "otp": {
+        "sent": "OTP code has been sent",
+        "verified": "OTP verified successfully",
+        "invalid": "Invalid OTP code",
+        "expired": "OTP code has expired"
+      },
+      "register": {
+        "success": "Registration successful",
+        "failed": "Registration failed"
+      },
+      "email": {
+        "verified": "Email verified successfully",
+        "not": {
+          "verified": "Email not verified"
+        }
+      }
+    },
+    "user": {
+      "not": {
+        "found": "User not found"
+      },
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "deleted": "User deleted successfully",
+      "locked": "User account has been locked",
+      "unlocked": "User account has been unlocked",
+      "profile": {
+        "updated": "Profile updated successfully"
+      },
+      "password": {
+        "reset": {
+          "success": "Password has been reset"
+        }
+      },
+      "email": {
+        "exists": "Email already exists",
+        "not": {
+          "exists": "Email does not exist"
+        }
+      },
+      "phone": {
+        "exists": "Phone number already exists"
+      },
+      "status": {
+        "changed": "User status has been changed"
+      },
+      "role": {
+        "assigned": "Role assigned successfully",
+        "removed": "Role removed successfully"
+      }
+    },
+    "profile": {
+      "update": {
+        "success": "Profile updated successfully",
+        "failed": "Profile update failed"
+      },
+      "avatar": {
+        "upload": {
+          "success": "Avatar uploaded successfully",
+          "failed": "Avatar upload failed"
+        }
+      }
+    },
+    "shipping": {
+      "route": {
+        "not": {
+          "found": "Shipping route not found"
+        },
+        "created": "Shipping route created successfully",
+        "updated": "Shipping route updated successfully",
+        "deleted": "Shipping route deleted successfully"
+      },
+      "price": {
+        "updated": "Shipping price updated successfully"
+      },
+      "fee": {
+        "calculated": "Shipping fee calculated successfully"
+      }
+    },
+    "onboarding": {
+      "step": {
+        "completed": "Step completed successfully",
+        "failed": "Step completion failed"
+      },
+      "profile": {
+        "completed": "Profile setup completed"
+      }
+    },
+    "validation": {
+      "email": {
+        "invalid": "Invalid email format"
+      },
+      "phone": {
+        "invalid": "Invalid phone number format"
+      },
+      "password": {
+        "weak": "Password is too weak",
+        "mismatch": "Passwords do not match"
+      },
+      "field": {
+        "required": "This field is required"
+      },
+      "data": {
+        "invalid": "Invalid data"
+      }
+    },
+    "verification": {
+      "email": {
+        "sent": "Verification email has been sent",
+        "verified": "Email verified successfully",
+        "failed": "Email verification failed"
+      },
+      "phone": {
+        "sent": "Verification SMS has been sent",
+        "verified": "Phone verified successfully"
+      }
+    },
+    "wallet": {
+      "balance": {
+        "insufficient": "Insufficient wallet balance",
+        "updated": "Wallet balance updated"
+      },
+      "transaction": {
+        "success": "Transaction successful",
+        "failed": "Transaction failed",
+        "not": {
+          "found": "Transaction not found"
+        }
+      },
+      "topup": {
+        "success": "Top-up successful",
+        "pending": "Top-up is pending approval",
+        "approved": "Top-up has been approved",
+        "rejected": "Top-up has been rejected"
+      },
+      "withdrawal": {
+        "success": "Withdrawal successful",
+        "pending": "Withdrawal is pending approval",
+        "approved": "Withdrawal has been approved",
+        "rejected": "Withdrawal has been rejected",
+        "insufficient": "Insufficient balance for withdrawal"
+      }
+    },
+    "topup": {
+      "request": {
+        "created": "Top-up request created successfully",
+        "approved": "Top-up request has been approved",
+        "rejected": "Top-up request has been rejected",
+        "cancelled": "Top-up request has been cancelled"
+      },
+      "success": "Top-up successful",
+      "failed": "Top-up failed"
+    },
+    "withdrawal": {
+      "request": {
+        "created": "Withdrawal request created successfully",
+        "approved": "Withdrawal request has been approved",
+        "rejected": "Withdrawal request has been rejected",
+        "cancelled": "Withdrawal request has been cancelled",
+        "processed": "Withdrawal request has been processed"
+      },
+      "success": "Withdrawal successful",
+      "failed": "Withdrawal failed",
+      "amount": {
+        "invalid": "Invalid withdrawal amount"
+      }
+    },
+    "bank": {
+      "account": {
+        "not": {
+          "found": "Bank account not found"
+        },
+        "created": "Bank account created successfully",
+        "updated": "Bank account updated successfully",
+        "deleted": "Bank account deleted successfully",
+        "verified": "Bank account verified successfully",
+        "set": {
+          "default": "Default bank account has been set"
+        }
+      }
+    },
+    "role": {
+      "not": {
+        "found": "Role not found"
+      },
+      "created": "Role created successfully",
+      "updated": "Role updated successfully",
+      "deleted": "Role deleted successfully",
+      "assigned": "Role assigned to user successfully",
+      "permission": {
+        "updated": "Role permissions updated successfully"
+      },
+      "name": {
+        "exists": "Role name already exists"
+      }
+    },
+    "permission": {
+      "not": {
+        "found": "Permission not found"
+      },
+      "created": "Permission created successfully",
+      "updated": "Permission updated successfully",
+      "deleted": "Permission deleted successfully",
+      "denied": "You do not have permission to perform this action",
+      "granted": "Permission granted successfully"
+    },
+    "order": {
+      "not": {
+        "found": "Order not found"
+      },
+      "created": "Order created successfully",
+      "updated": "Order updated successfully",
+      "deleted": "Order deleted successfully",
+      "cancelled": "Order has been cancelled",
+      "status": {
+        "changed": "Order status has been changed",
+        "invalid": "Invalid order status"
+      },
+      "approved": "Order has been approved",
+      "rejected": "Order has been rejected",
+      "purchased": "Order has been purchased",
+      "arrived": {
+        "jp": {
+          "warehouse": "Order has arrived at JP warehouse"
+        },
+        "vn": {
+          "warehouse": "Order has arrived at VN warehouse"
+        }
+      },
+      "inspected": "Order has been inspected",
+      "shipped": "Order has been shipped",
+      "delivered": "Order has been delivered",
+      "completed": "Order has been completed",
+      "payment": {
+        "required": "Payment is required to proceed",
+        "confirmed": "Order payment confirmed"
+      },
+      "deposit": {
+        "paid": "Order deposit has been paid",
+        "required": "Deposit payment is required"
+      }
+    },
+    "product": {
+      "not": {
+        "found": "Product not found"
+      },
+      "created": "Product created successfully",
+      "updated": "Product updated successfully",
+      "deleted": "Product deleted successfully",
+      "type": {
+        "not": {
+          "found": "Product type not found"
+        },
+        "created": "Product type created successfully",
+        "updated": "Product type updated successfully",
+        "deleted": "Product type deleted successfully"
+      },
+      "info": {
+        "fetched": "Product information retrieved successfully",
+        "failed": "Failed to retrieve product information"
+      }
+    },
+    "customer": {
+      "not": {
+        "found": "Customer not found"
+      },
+      "created": "Customer created successfully",
+      "updated": "Customer updated successfully",
+      "deleted": "Customer deleted successfully",
+      "category": {
+        "not": {
+          "found": "Customer category not found"
+        },
+        "created": "Customer category created successfully",
+        "updated": "Customer category updated successfully",
+        "deleted": "Customer category deleted successfully",
+        "assigned": "Customer category assigned successfully",
+        "default": {
+          "cannot": {
+            "delete": "Cannot delete default customer category",
+            "edit": "Cannot edit default customer category"
+          }
+        }
+      },
+      "assigned": {
+        "to": {
+          "sales": "Customer assigned to sales successfully"
+        }
+      },
+      "unassigned": {
+        "from": {
+          "sales": "Customer unassigned from sales successfully"
+        }
+      },
+      "note": {
+        "created": "Customer note created successfully",
+        "updated": "Customer note updated successfully"
+      },
+      "address": {
+        "created": "Customer address created successfully",
+        "updated": "Customer address updated successfully",
+        "deleted": "Customer address deleted successfully",
+        "set": {
+          "default": "Default address has been set"
+        }
+      },
+      "bank": {
+        "created": "Customer bank account created successfully",
+        "updated": "Customer bank account updated successfully",
+        "deleted": "Customer bank account deleted successfully",
+        "set": {
+          "default": "Default bank account has been set"
+        }
+      },
+      "group": {
+        "fee": {
+          "insert": {
+            "update": {
+              "success": "Customer group fee settings saved successfully"
+            }
+          }
+        }
+      }
+    },
+    "staff": {
+      "not": {
+        "found": "Staff not found"
+      },
+      "created": "Staff created successfully",
+      "updated": "Staff updated successfully",
+      "deleted": "Staff deleted successfully",
+      "role": {
+        "assigned": "Role assigned to staff successfully",
+        "removed": "Role removed from staff successfully"
+      },
+      "cannot": {
+        "edit": {
+          "system": {
+            "user": "Cannot edit system user"
+          }
+        }
+      }
+    },
+    "sales": {
+      "not": {
+        "found": "Sales staff not found"
+      },
+      "customer": {
+        "assigned": "Customer assigned to sales successfully",
+        "unassigned": "Customer unassigned from sales successfully"
+      },
+      "assignment": {
+        "updated": "Sales assignment updated successfully"
+      }
+    },
+    "finance": {
+      "transaction": {
+        "not": {
+          "found": "Transaction not found"
+        },
+        "created": "Transaction created successfully",
+        "approved": "Transaction has been approved",
+        "rejected": "Transaction has been rejected",
+        "cancelled": "Transaction has been cancelled",
+        "completed": "Transaction completed successfully"
+      },
+      "exchange": {
+        "rate": {
+          "updated": "Exchange rate updated successfully"
+        }
+      },
+      "debt": {
+        "updated": "Debt information updated successfully"
+      }
+    },
+    "settings": {
+      "updated": "Settings updated successfully",
+      "fee": {
+        "updated": "Fee settings updated successfully"
+      },
+      "exchange": {
+        "rate": {
+          "updated": "Exchange rate updated successfully"
+        }
+      },
+      "insurance": {
+        "updated": "Insurance settings updated successfully"
+      },
+      "shipping": {
+        "updated": "Shipping settings updated successfully"
+      }
+    },
+    "website": {
+      "not": {
+        "found": "Website not found"
+      },
+      "created": "Website created successfully",
+      "updated": "Website updated successfully",
+      "deleted": "Website deleted successfully"
+    },
+    "insurance": {
+      "not": {
+        "found": "Insurance package not found"
+      },
+      "created": "Insurance package created successfully",
+      "updated": "Insurance package updated successfully",
+      "deleted": "Insurance package deleted successfully"
+    },
+    "material": {
+      "not": {
+        "found": "Material not found"
+      },
+      "created": "Material created successfully",
+      "updated": "Material updated successfully",
+      "deleted": "Material deleted successfully"
+    },
+    "partner": {
+      "not": {
+        "found": "Partner not found"
+      },
+      "created": "Partner created successfully",
+      "updated": "Partner updated successfully",
+      "deleted": "Partner deleted successfully"
+    },
+    "auction": {
+      "not": {
+        "found": "Auction not found"
+      },
+      "created": "Auction created successfully",
+      "updated": "Auction updated successfully",
+      "deleted": "Auction deleted successfully",
+      "started": "Auction has started",
+      "ended": "Auction has ended",
+      "cancelled": "Auction has been cancelled"
+    },
+    "bid": {
+      "not": {
+        "found": "Bid not found"
+      },
+      "placed": "Bid placed successfully",
+      "updated": "Bid updated successfully",
+      "cancelled": "Bid has been cancelled",
+      "won": "You have won the auction",
+      "lost": "You did not win the auction"
+    },
+    "notification": {
+      "sent": "Notification sent successfully",
+      "marked": {
+        "read": "Notification marked as read"
+      },
+      "deleted": "Notification deleted successfully"
+    },
+    "report": {
+      "generated": "Report generated successfully",
+      "exported": "Report exported successfully",
+      "not": {
+        "found": "Report not found"
+      }
+    },
+    "audit": {
+      "logged": "Action has been logged",
+      "exported": "Audit log exported successfully"
+    },
+    "file": {
+      "uploaded": "File uploaded successfully",
+      "upload": {
+        "failed": "File upload failed"
+      },
+      "deleted": "File deleted successfully",
+      "not": {
+        "found": "File not found"
+      },
+      "size": {
+        "exceeded": "File size exceeded limit"
+      },
+      "type": {
+        "invalid": "Invalid file type"
+      }
+    },
+    "image": {
+      "uploaded": "Image uploaded successfully",
+      "upload": {
+        "failed": "Image upload failed"
+      },
+      "deleted": "Image deleted successfully",
+      "size": {
+        "exceeded": "Image size exceeded limit"
+      },
+      "format": {
+        "invalid": "Invalid image format"
+      }
+    },
+    "tracking": {
+      "code": {
+        "added": "Tracking code added successfully",
+        "updated": "Tracking code updated successfully",
+        "not": {
+          "found": "Tracking code not found"
+        }
+      },
+      "status": {
+        "updated": "Tracking status updated successfully"
+      }
+    },
+    "inspection": {
+      "completed": "Inspection completed successfully",
+      "weight": {
+        "recorded": "Weight recorded successfully"
+      },
+      "fee": {
+        "calculated": "Inspection fee calculated successfully"
+      }
+    },
+    "warehouse": {
+      "not": {
+        "found": "Warehouse not found"
+      },
+      "package": {
+        "received": "Package received at warehouse",
+        "shipped": "Package shipped from warehouse"
+      }
+    },
+    "delivery": {
+      "address": {
+        "not": {
+          "found": "Delivery address not found"
+        },
+        "updated": "Delivery address updated successfully"
+      },
+      "scheduled": "Delivery scheduled successfully",
+      "completed": "Delivery completed successfully",
+      "failed": "Delivery failed"
+    },
+    "payment": {
+      "success": "Payment successful",
+      "failed": "Payment failed",
+      "pending": "Payment is pending",
+      "method": {
+        "not": {
+          "found": "Payment method not found"
+        }
+      },
+      "confirmed": "Payment confirmed successfully"
+    },
+    "refund": {
+      "requested": "Refund requested successfully",
+      "approved": "Refund has been approved",
+      "rejected": "Refund has been rejected",
+      "processed": "Refund has been processed"
+    },
+    "commission": {
+      "calculated": "Commission calculated successfully",
+      "paid": "Commission has been paid"
+    },
+    "salary": {
+      "calculated": "Salary calculated successfully",
+      "paid": "Salary has been paid"
+    },
+    "dashboard": {
+      "loaded": "Dashboard loaded successfully",
+      "data": {
+        "updated": "Dashboard data updated successfully"
+      }
+    },
+    "search": {
+      "completed": "Search completed successfully",
+      "no": {
+        "results": "No results found"
+      }
+    },
+    "export": {
+      "success": "Export successful",
+      "failed": "Export failed",
+      "in": {
+        "progress": "Export in progress"
+      }
+    },
+    "import": {
+      "success": "Import successful",
+      "failed": "Import failed",
+      "in": {
+        "progress": "Import in progress"
+      }
+    },
+    "system": {
+      "error": "System error occurred",
+      "maintenance": "System is under maintenance",
+      "backup": {
+        "created": "Backup created successfully",
+        "restored": "Backup restored successfully"
+      }
+    },
+    "cache": {
+      "cleared": "Cache cleared successfully",
+      "updated": "Cache updated successfully"
+    },
+    "session": {
+      "expired": "Session has expired",
+      "invalid": "Invalid session"
+    },
+    "access": {
+      "denied": "Access denied",
+      "granted": "Access granted"
+    },
+    "rate": {
+      "limit": {
+        "exceeded": "Rate limit exceeded"
+      }
+    },
+    "server": {
+      "error": "Server error occurred",
+      "unavailable": "Server is unavailable"
+    },
+    "database": {
+      "error": "Database error occurred",
+      "connection": {
+        "failed": "Database connection failed"
+      }
+    },
+    "network": {
+      "error": "Network error occurred",
+      "timeout": "Network timeout"
+    }
   }
 }

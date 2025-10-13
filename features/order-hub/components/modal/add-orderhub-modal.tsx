@@ -398,6 +398,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setListService([]);
     setRateValueForPrice(0);
     queryClient.removeQueries({ queryKey: ['listService'] });
+    queryClient.removeQueries({ queryKey: ['listCustomer'] });
     setFees(
       {
         DOMESTIC_SHIPPING_FEE: -1,
