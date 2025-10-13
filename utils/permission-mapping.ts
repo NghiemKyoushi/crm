@@ -5,20 +5,12 @@
 
 export function getPermissionI18nKey(permissionName: string): string {
   const mapping: Record<string, string> = {
-    // Order Management
-    'order.view': 'viewOrders',
-    'order.view_all': 'viewAllOrders',
-    'order.create': 'createOrder',
-    'order.edit': 'editOrder',
-    'order.delete': 'deleteOrder',
-    'order.update_status': 'updateOrderStatus',
-    'order.cancel': 'cancelOrder',
-
-    // Product Management
-    'product.view': 'viewProducts',
-    'product.create': 'createProduct',
-    'product.edit': 'editProduct',
-    'product.delete': 'deleteProduct',
+    // System Administration
+    'system.superAdmin': 'superAdmin',
+    'system.admin': 'systemAdmin',
+    'system.logs': 'viewSystemLogs',
+    'system.config': 'manageSystemConfig',
+    'system.backup': 'manageSystemBackup',
 
     // User Management
     'user.view': 'viewUsers',
@@ -43,6 +35,32 @@ export function getPermissionI18nKey(permissionName: string): string {
     'permission.delete': 'deletePermission',
     'permission.assign': 'assignPermission',
 
+    // Audit & Reporting
+    'audit.view': 'viewAudit',
+    'audit.export': 'exportAudit',
+    'report.view': 'viewReports',
+    'report.create': 'createReport',
+    'report.export': 'exportReport',
+
+    // Order Management
+    'order.view': 'viewOrders',
+    'order.view_all': 'viewAllOrders',
+    'order.create': 'createOrder',
+    'order.edit': 'editOrder',
+    'order.delete': 'deleteOrder',
+    'order.update_status': 'updateOrderStatus',
+    'order.cancel': 'cancelOrder',
+
+    // Product Management
+    'product.view': 'viewProducts',
+    'product.create': 'createProduct',
+    'product.edit': 'editProduct',
+    'product.delete': 'deleteProduct',
+
+    // Dashboard & General
+    'dashboard.view': 'viewDashboard',
+    'settings.edit': 'editSettings',
+
     // Financial Management
     'finance.approve_topup': 'approveTopup',
     'finance.process_withdrawal': 'processWithdrawal',
@@ -56,6 +74,10 @@ export function getPermissionI18nKey(permissionName: string): string {
     'finance.manage_bank_accounts': 'manageBankAccounts',
     'finance.view_transaction_history': 'viewTransactionHistory',
     'finance.manage_bank_permissions': 'manageBankPermissions',
+
+    // Telesales
+    'telesales.manager': 'telesalesManager',
+    'telesales.member': 'telesalesMember',
 
     // Sales Management
     'sales.manage_orders': 'manageSalesOrders',
@@ -78,27 +100,6 @@ export function getPermissionI18nKey(permissionName: string): string {
     'sales.access_dashboard': 'accessSalesDashboard',
     'sales.view_sales_reports': 'viewSalesReports',
     'sales.export_sales_data': 'exportSalesData',
-
-    // Telesales
-    'telesales.manager': 'telesalesManager',
-    'telesales.member': 'telesalesMember',
-
-    // System Administration
-    'system.admin': 'systemAdmin',
-    'system.logs': 'viewSystemLogs',
-    'system.config': 'manageSystemConfig',
-    'system.backup': 'manageSystemBackup',
-
-    // Audit & Reporting
-    'audit.view': 'viewAudit',
-    'audit.export': 'exportAudit',
-    'report.view': 'viewReports',
-    'report.create': 'createReport',
-    'report.export': 'exportReport',
-
-    // Dashboard & General
-    'dashboard.view': 'viewDashboard',
-    'settings.edit': 'editSettings'
   };
 
   return mapping[permissionName] || permissionName;
