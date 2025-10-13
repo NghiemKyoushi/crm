@@ -50,7 +50,8 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
       'order.update_status',
       'order.cancel',
       'sales.manage_orders',
-      'sales.view_assigned_orders'
+      'sales.view_assigned_orders',
+       "sales.view_assigned_orders", "sales.create_order_for_customers"
     ],
     requireAll: false,
     fallbackAction: 'notFound'
@@ -163,7 +164,9 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
   '/shipment-management': {
     required: [
       'system.admin',
-      'system.config'
+      'system.config',
+      "sales.view_assigned_shipments", "sales.create_shipments"
+
     ],
     requireAll: false,
     fallbackAction: 'notFound'

@@ -320,7 +320,7 @@ export default function OrderHub() {
                 )}
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
-                record.status !== OrderStatusType.READY_TO_SHIP && (
+                record.status !== OrderStatusType.READY_TO_SHIP && (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && (
                   <Button
                     type="text"
                     size="small"
@@ -423,7 +423,7 @@ export default function OrderHub() {
                       </span>
                     )}
                   </div>
-                  {(codeType !== 1 && codeType !== 2) && (
+                  {(codeType !== 1 && codeType !== 2) && (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && (
                   <EditOutlined
                     className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                     onClick={() => {
@@ -470,7 +470,8 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
             {record.note || record.description || "Cập nhật sau"}
           </div>
-          <EditOutlined
+          {
+            (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
             onClick={() =>
               setEditingNote({
@@ -479,6 +480,8 @@ export default function OrderHub() {
               })
             }
           />
+          }
+          
         </div>
       ),
     },
@@ -616,7 +619,8 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 flex-1">
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
-          <EditOutlined
+          {
+            (hasPermission("sales.view_assigned_orders") && hasPermission("order.view") ) && <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
             onClick={() =>
               setEditingNoteExtra({
@@ -625,6 +629,8 @@ export default function OrderHub() {
               })
             }
           />
+          }
+          
         </div>
       ),
     },

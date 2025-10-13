@@ -508,7 +508,9 @@
       "viewCustomerOrders": "View managed customer order history",
       "accessSalesDashboard": "Access Sales dashboard",
       "viewSalesReports": "View personal sales reports",
-      "exportSalesData": "Export personal sales data"
+      "exportSalesData": "Export personal sales data",
+      "viewAssignedShipments":"View assigned shipments",
+      "createShipments":"Create shipments"
     }
   },
   "roles": {

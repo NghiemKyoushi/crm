@@ -93,7 +93,7 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin", "sales.view_assigned_orders", "sales.create_order_for_customers"]
+  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ]
 };
 
 export const menuItems = [
