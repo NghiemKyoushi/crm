@@ -434,79 +434,80 @@
       "sales": "Quản lý Bán hàng"
     },
     "items": {
-      "viewOrders": "Xem đơn hàng",
-      "viewAllOrders": "Xem tất cả đơn hàng",
-      "createOrder": "Tạo đơn hàng",
-      "editOrder": "Sửa đơn hàng",
-      "deleteOrder": "Xóa đơn hàng",
-      "updateOrderStatus": "Cập nhật trạng thái đơn hàng",
-      "cancelOrder": "Hủy đơn hàng",
-      "viewProducts": "Xem sản phẩm",
-      "createProduct": "Tạo sản phẩm",
-      "editProduct": "Sửa sản phẩm",
-      "deleteProduct": "Xóa sản phẩm",
-      "viewUsers": "Xem người dùng",
-      "createUser": "Tạo người dùng",
-      "editUser": "Sửa người dùng",
+      "superAdmin": "Quyền quản trị toàn bộ hệ thống",
+      "systemAdmin": "Toàn quyền quản trị hệ thống",
+      "viewSystemLogs": "Xem nhật ký hệ thống",
+      "manageSystemConfig": "Quản lý cấu hình hệ thống",
+      "manageSystemBackup": "Quản lý sao lưu hệ thống",
+      "viewUsers": "Xem danh sách người dùng",
+      "createUser": "Tạo người dùng mới",
+      "editUser": "Chỉnh sửa thông tin người dùng",
       "deleteUser": "Xóa người dùng",
       "viewUserList": "Xem danh sách người dùng",
       "categorizeCustomers": "Phân loại khách hàng",
       "manageStaffRoles": "Quản lý nhân viên & vai trò",
-      "viewRoles": "Xem vai trò",
-      "createRole": "Tạo vai trò",
-      "editRole": "Sửa vai trò",
+      "viewRoles": "Xem danh sách vai trò",
+      "createRole": "Tạo vai trò mới",
+      "editRole": "Chỉnh sửa vai trò (bao gồm gán/bỏ gán quyền)",
       "deleteRole": "Xóa vai trò",
-      "assignRole": "Gán vai trò",
+      "assignRole": "Gán vai trò cho người dùng",
       "viewPermissions": "Xem quyền hạn",
-      "createPermission": "Tạo quyền hạn",
-      "editPermission": "Sửa quyền hạn",
-      "deletePermission": "Xóa quyền hạn",
-      "assignPermission": "Gán quyền hạn",
-      "approveTopup": "Duyệt nạp tiền",
-      "processWithdrawal": "Xử lý rút tiền",
-      "viewAllTransactions": "Xem tất cả giao dịch",
-      "manageDebt": "Quản lý công nợ",
-      "viewBankStats": "Xem thống kê ngân hàng",
-      "restoreTransactions": "Khôi phục giao dịch",
-      "processWithdrawRequests": "Xử lý yêu cầu rút tiền",
-      "approveTopupRequests": "Duyệt yêu cầu nạp tiền",
-      "manualTopup": "Nạp tiền thủ công",
-      "manageBankAccounts": "Quản lý tài khoản ngân hàng",
-      "viewTransactionHistory": "Xem lịch sử giao dịch",
-      "manageBankPermissions": "Quản lý quyền ngân hàng",
-      "manageSalesOrders": "Quản lý đơn hàng sales",
-      "viewAssignedOrders": "Xem đơn hàng được giao",
-      "updateSalesOrderStatus": "Cập nhật trạng thái đơn sales",
-      "createOrderForCustomers": "Tạo đơn cho khách hàng",
-      "manageAuctions": "Quản lý đấu giá",
-      "createAuction": "Tạo đấu giá",
-      "updateAuction": "Cập nhật đấu giá",
-      "viewAuctionResults": "Xem kết quả đấu giá",
-      "manageBids": "Quản lý đặt giá",
-      "viewOwnSalary": "Xem lương cá nhân",
-      "viewOwnCommission": "Xem hoa hồng cá nhân",
-      "viewOwnPerformance": "Xem hiệu suất cá nhân",
-      "viewAssignedCustomers": "Xem khách hàng được giao",
-      "manageAssignedCustomers": "Quản lý khách hàng được giao",
-      "updateCustomerInfo": "Cập nhật thông tin khách hàng",
-      "addCustomerNotes": "Thêm ghi chú khách hàng",
-      "viewCustomerOrders": "Xem đơn hàng khách hàng",
-      "accessSalesDashboard": "Truy cập dashboard sales",
-      "viewSalesReports": "Xem báo cáo bán hàng",
-      "exportSalesData": "Xuất dữ liệu bán hàng",
-      "telesalesManager": "Quản lý telesales",
-      "telesalesMember": "Nhân viên telesales",
-      "systemAdmin": "Quản trị hệ thống",
-      "viewSystemLogs": "Xem log hệ thống",
-      "manageSystemConfig": "Quản lý cấu hình hệ thống",
-      "manageSystemBackup": "Quản lý sao lưu hệ thống",
-      "viewAudit": "Xem kiểm toán",
+      "createPermission": "Tạo quyền hạn tùy chỉnh",
+      "editPermission": "Chỉnh sửa quyền hạn",
+      "deletePermission": "Xóa quyền hạn tùy chỉnh",
+      "assignPermission": "Gán quyền hạn cho vai trò",
+      "viewAudit": "Xem nhật ký kiểm toán",
       "exportAudit": "Xuất dữ liệu kiểm toán",
       "viewReports": "Xem báo cáo",
-      "createReport": "Tạo báo cáo",
-      "exportReport": "Xuất báo cáo",
-      "viewDashboard": "Xem tổng quan",
-      "editSettings": "Sửa cài đặt"
+      "createReport": "Tạo báo cáo tùy chỉnh",
+      "exportReport": "Xuất dữ liệu báo cáo (CSV, Excel,...)",
+      "viewOrders": "Xem danh sách đơn hàng",
+      "viewAllOrders": "Xem tất cả đơn hàng",
+      "createOrder": "Tạo đơn hàng mới",
+      "editOrder": "Chỉnh sửa trạng thái đơn hàng",
+      "deleteOrder": "Hủy/Xóa đơn hàng",
+      "updateOrderStatus": "Sửa/Cập nhật trạng thái đơn hàng",
+      "cancelOrder": "Hủy đơn hàng",
+      "viewProducts": "Xem danh sách sản phẩm",
+      "createProduct": "Tạo sản phẩm mới",
+      "editProduct": "Chỉnh sửa thông tin sản phẩm",
+      "deleteProduct": "Xóa sản phẩm",
+      "viewDashboard": "Truy cập trang tổng quan",
+      "editSettings": "Thay đổi các cài đặt chung của hệ thống",
+      "approveTopup": "Duyệt lệnh nạp tiền",
+      "processWithdrawal": "Xử lý yêu cầu rút tiền",
+      "viewAllTransactions": "Xem tất cả giao dịch",
+      "manageDebt": "Quản lý công nợ",
+      "viewBankStats": "Xem thống kê sử dụng tài khoản ngân hàng",
+      "restoreTransactions": "Khôi phục giao dịch đã hủy",
+      "processWithdrawRequests": "Xử lý các yêu cầu rút tiền của người dùng",
+      "approveTopupRequests": "Duyệt và xác nhận các lệnh nạp tiền của người dùng",
+      "manualTopup": "Nạp tiền thủ công cho người dùng",
+      "manageBankAccounts": "Quản lý tài khoản ngân hàng công ty",
+      "viewTransactionHistory": "Xem lịch sử giao dịch chi tiết",
+      "manageBankPermissions": "Quản lý phân quyền tài khoản ngân hàng",
+      "telesalesManager": "Quản lý toàn bộ trang telesales",
+      "telesalesMember": "Quản lý khách hàng theo danh sách phân công",
+      "manageSalesOrders": "Quản lý đơn hàng được phân công",
+      "viewAssignedOrders": "Xem danh sách đơn hàng được phân công",
+      "updateSalesOrderStatus": "Cập nhật trạng thái đơn hàng được phân công",
+      "createOrderForCustomers": "Tạo đơn hàng cho khách hàng được quản lý",
+      "manageAuctions": "Quản lý đấu giá",
+      "createAuction": "Tạo phiên đấu giá mới",
+      "updateAuction": "Cập nhật thông tin phiên đấu giá",
+      "viewAuctionResults": "Xem kết quả đấu giá",
+      "manageBids": "Quản lý các lượt đặt giá",
+      "viewOwnSalary": "Xem lương và hoa hồng của bản thân",
+      "viewOwnCommission": "Xem báo cáo hoa hồng cá nhân",
+      "viewOwnPerformance": "Xem báo cáo hiệu suất bán hàng cá nhân",
+      "viewAssignedCustomers": "Xem danh sách khách hàng được phân công",
+      "manageAssignedCustomers": "Quản lý khách hàng được phân công",
+      "updateCustomerInfo": "Cập nhật thông tin khách hàng được quản lý",
+      "addCustomerNotes": "Thêm ghi chú cho khách hàng được quản lý",
+      "viewCustomerOrders": "Xem lịch sử đơn hàng của khách hàng được quản lý",
+      "accessSalesDashboard": "Truy cập trang tổng quan Sales",
+      "viewSalesReports": "Xem báo cáo bán hàng cá nhân",
+      "exportSalesData": "Xuất dữ liệu bán hàng cá nhân"
     }
   },
   "roles": {
@@ -1011,5 +1012,1065 @@
     "deleteConfirmContent": "Bạn có chắc chắn muốn xoá tài khoản này?",
     "companyBankAccountSettings": "Cài đặt tài khoản ngân hàng Công ty",
     "addNewBankAccount": "Thêm tài khoản Ngân hàng mới"
+  },
+  "response": {
+    "common": {
+      "success": "Thành công",
+      "validation": {
+        "failed": "Xác thực thất bại"
+      },
+      "error": {
+        "unexpected": "Lỗi không mong đợi"
+      },
+      "operation": {
+        "completed": "Thao tác hoàn thành",
+        "failed": "Thao tác thất bại"
+      }
+    },
+    "auth": {
+      "login": {
+        "success": "Đăng nhập thành công"
+      },
+      "logout": {
+        "success": "Đăng xuất thành công",
+        "all": {
+          "success": "Đăng xuất tất cả thiết bị thành công"
+        }
+      },
+      "token": {
+        "generated": "Token đã được tạo",
+        "verified": "Token đã được xác minh",
+        "invalid": "Token không hợp lệ",
+        "expired": "Token đã hết hạn",
+        "revoked": "Token đã bị thu hồi",
+        "type": {
+          "invalid": "Loại token không hợp lệ"
+        }
+      },
+      "refresh": {
+        "token": {
+          "null": "Refresh token không được để trống"
+        }
+      },
+      "invalid": "Thông tin xác thực không hợp lệ",
+      "unauthorized": "Không có quyền truy cập",
+      "access": {
+        "denied": "Truy cập bị từ chối"
+      },
+      "password": {
+        "incorrect": "Mật khẩu không đúng",
+        "weak": "Mật khẩu quá yếu",
+        "unchanged": "Mật khẩu chưa được thay đổi",
+        "recently": {
+          "used": "Mật khẩu đã được sử dụng gần đây"
+        }
+      },
+      "role": {
+        "not": {
+          "found": "Không tìm thấy vai trò"
+        }
+      },
+      "account": {
+        "locked": "Tài khoản đã bị khóa",
+        "deactivated": "Tài khoản đã bị vô hiệu hóa"
+      },
+      "not": {
+        "authorized": {
+          "action": "Không có quyền thực hiện hành động này"
+        }
+      }
+    },
+    "user": {
+      "not": {
+        "found": "Không tìm thấy người dùng"
+      },
+      "account": {
+        "deleted": "Tài khoản đã bị xóa",
+        "activated": "Tài khoản đã được kích hoạt",
+        "deactivated": "Tài khoản đã bị vô hiệu hóa"
+      },
+      "password": {
+        "changed": "Mật khẩu đã được thay đổi",
+        "reset": "Mật khẩu đã được đặt lại"
+      },
+      "availability": {
+        "checked": "Đã kiểm tra tính khả dụng"
+      },
+      "error": {
+        "retrieving": "Lỗi khi lấy thông tin người dùng"
+      },
+      "cannot": {
+        "reset": {
+          "own": {
+            "password": "Không thể đặt lại mật khẩu của chính mình"
+          }
+        },
+        "deactivate": {
+          "self": "Không thể vô hiệu hóa tài khoản của chính mình"
+        },
+        "activate": {
+          "self": "Không thể kích hoạt tài khoản của chính mình"
+        },
+        "delete": {
+          "self": "Không thể xóa tài khoản của chính mình"
+        },
+        "update": {
+          "own": {
+            "staff": "Không thể cập nhật thông tin nhân viên của chính mình"
+          }
+        },
+        "modify": {
+          "super": {
+            "admin": "Không thể sửa đổi Super Admin"
+          }
+        }
+      },
+      "email": {
+        "exists": "Email đã tồn tại"
+      },
+      "phone": {
+        "exists": "Số điện thoại đã tồn tại"
+      },
+      "already": {
+        "deactivated": "Người dùng đã bị vô hiệu hóa",
+        "active": "Người dùng đã hoạt động"
+      },
+      "statistics": {
+        "retrieved": "Đã lấy thống kê người dùng"
+      }
+    },
+    "profile": {
+      "updated": "Cập nhật hồ sơ thành công",
+      "avatar": {
+        "updated": "Cập nhật ảnh đại diện thành công"
+      },
+      "retrieved": "Đã lấy thông tin hồ sơ"
+    },
+    "shipping": {
+      "address": {
+        "added": "Thêm địa chỉ giao hàng thành công",
+        "updated": "Cập nhật địa chỉ giao hàng thành công",
+        "deleted": "Xóa địa chỉ giao hàng thành công",
+        "default": {
+          "set": "Đặt địa chỉ mặc định thành công"
+        },
+        "retrieved": "Đã lấy địa chỉ giao hàng",
+        "not": {
+          "found": "Không tìm thấy địa chỉ giao hàng"
+        }
+      }
+    },
+    "onboard": {
+      "user": {
+        "registered": "Đăng ký người dùng thành công"
+      },
+      "password": {
+        "reset": {
+          "sent": "Đã gửi email đặt lại mật khẩu"
+        },
+        "created": "Tạo mật khẩu thành công"
+      },
+      "otp": {
+        "verified": "Xác minh OTP thành công",
+        "sent": "Đã gửi mã OTP"
+      },
+      "create": {
+        "user": {
+          "failed": "Tạo người dùng thất bại"
+        }
+      }
+    },
+    "validation": {
+      "email": {
+        "format": "Định dạng email không hợp lệ",
+        "existed": "Email đã tồn tại"
+      },
+      "phone": {
+        "format": "Định dạng số điện thoại không hợp lệ"
+      },
+      "date": {
+        "format": "Định dạng ngày không hợp lệ",
+        "time": {
+          "format": "Định dạng ngày giờ không hợp lệ"
+        }
+      },
+      "invalid": {
+        "characters": "Ký tự không hợp lệ"
+      },
+      "auth": {
+        "type": {
+          "unsupported": "Loại xác thực không được hỗ trợ"
+        }
+      },
+      "media": {
+        "type": {
+          "unsupported": "Loại media không được hỗ trợ"
+        }
+      },
+      "permission": {
+        "names": {
+          "required": "Tên quyền là bắt buộc"
+        }
+      }
+    },
+    "verification": {
+      "email": {
+        "already": {
+          "verified": "Email đã được xác minh"
+        }
+      },
+      "phone": {
+        "already": {
+          "verified": "Số điện thoại đã được xác minh"
+        }
+      },
+      "code": {
+        "not": {
+          "found": "Không tìm thấy mã xác minh"
+        },
+        "expired": "Mã xác minh đã hết hạn",
+        "invalid": "Mã xác minh không hợp lệ"
+      },
+      "otp": {
+        "send": {
+          "limit": "Đã đạt giới hạn gửi OTP"
+        }
+      }
+    },
+    "account": {
+      "exists": "Tài khoản đã tồn tại",
+      "exists": {
+        "wait": {
+          "verification": "Tài khoản đã tồn tại, vui lòng chờ xác minh"
+        }
+      },
+      "already": {
+        "viewed": "Tài khoản đã được xem"
+      }
+    },
+    "condition": {
+      "type": {
+        "conflict": "Xung đột loại điều kiện"
+      }
+    },
+    "social": {
+      "facebook": {
+        "token": {
+          "invalid": "Token Facebook không hợp lệ"
+        },
+        "verify": {
+          "failed": "Xác minh Facebook thất bại"
+        }
+      },
+      "google": {
+        "token": {
+          "invalid": "Token Google không hợp lệ"
+        },
+        "verify": {
+          "failed": "Xác minh Google thất bại"
+        }
+      },
+      "tiktok": {
+        "token": {
+          "invalid": "Token TikTok không hợp lệ"
+        },
+        "verify": {
+          "failed": "Xác minh TikTok thất bại"
+        }
+      }
+    },
+    "media": {
+      "video": {
+        "not": {
+          "found": "Không tìm thấy video"
+        },
+        "stream": {
+          "failed": "Stream video thất bại"
+        },
+        "time": {
+          "out": {
+            "of": {
+              "duration": "Thời gian vượt quá độ dài video"
+            }
+          }
+        }
+      }
+    },
+    "wizard": {
+      "status": {
+        "retrieved": "Đã lấy trạng thái wizard",
+        "failed": "Lấy trạng thái wizard thất bại"
+      },
+      "step": {
+        "completed": "Hoàn thành bước wizard",
+        "failed": "Bước wizard thất bại"
+      },
+      "next": {
+        "step": {
+          "retrieved": "Đã lấy bước tiếp theo",
+          "failed": "Lấy bước tiếp theo thất bại"
+        }
+      },
+      "recommendations": {
+        "retrieved": "Đã lấy đề xuất",
+        "failed": "Lấy đề xuất thất bại"
+      }
+    },
+    "role": {
+      "retrieved": "Đã lấy vai trò",
+      "set": "Đặt vai trò thành công",
+      "checked": "Đã kiểm tra vai trò",
+      "created": "Tạo vai trò thành công",
+      "updated": "Cập nhật vai trò thành công",
+      "deleted": "Xóa vai trò thành công",
+      "not": {
+        "found": "Không tìm thấy vai trò"
+      },
+      "name": {
+        "exists": "Tên vai trò đã tồn tại"
+      },
+      "cannot": {
+        "modify": {
+          "admin": "Không thể sửa đổi vai trò Admin",
+          "system": {
+            "user": "Không thể sửa đổi người dùng hệ thống"
+          }
+        },
+        "delete": {
+          "admin": "Không thể xóa vai trò Admin"
+        },
+        "assign": {
+          "to": {
+            "self": "Không thể tự gán vai trò cho mình",
+            "inactive": "Không thể gán vai trò cho tài khoản không hoạt động"
+          }
+        },
+        "remove": {
+          "from": {
+            "self": "Không thể xóa vai trò của chính mình"
+          }
+        }
+      },
+      "in": {
+        "use": "Vai trò đang được sử dụng"
+      },
+      "user": {
+        "has": {
+          "no": {
+            "role": "Người dùng không có vai trò"
+          }
+        }
+      },
+      "default": {
+        "user": {
+          "not": {
+            "found": "Không tìm thấy người dùng mặc định"
+          }
+        }
+      },
+      "admin": {
+        "insufficient": {
+          "privileges": "Quyền admin không đủ"
+        },
+        "max": {
+          "users": {
+            "reached": "Đã đạt số lượng admin tối đa"
+          }
+        },
+        "cannot": {
+          "remove": {
+            "last": "Không thể xóa admin cuối cùng",
+            "own": {
+              "with": {
+                "few": "Không thể tự xóa vai trò admin khi còn ít admin"
+              }
+            }
+          },
+          "assign": {
+            "to": {
+              "inactive": "Không thể gán admin cho tài khoản không hoạt động"
+            }
+          }
+        },
+        "only": {
+          "admin": {
+            "can": {
+              "remove": "Chỉ admin mới có thể xóa"
+            }
+          }
+        },
+        "user": {
+          "already": {
+            "has": "Người dùng đã có vai trò admin"
+          }
+        }
+      },
+      "assigned": "Gán vai trò thành công",
+      "removed": {
+        "from": {
+          "user": "Xóa vai trò khỏi người dùng thành công"
+        }
+      },
+      "permissions": {
+        "retrieved": "Đã lấy quyền hạn của vai trò"
+      },
+      "change": {
+        "history": {
+          "retrieved": "Đã lấy lịch sử thay đổi vai trò"
+        }
+      }
+    },
+    "roles": {
+      "retrieved": "Đã lấy danh sách vai trò",
+      "bulk": {
+        "assigned": "Gán vai trò hàng loạt thành công"
+      }
+    },
+    "permission": {
+      "not": {
+        "found": "Không tìm thấy quyền hạn"
+      },
+      "cannot": {
+        "modify": {
+          "admin": "Không thể sửa đổi quyền Admin",
+          "super": {
+            "admin": {
+              "role": "Không thể sửa đổi quyền Super Admin"
+            }
+          }
+        },
+        "assign": {
+          "super": {
+            "admin": "Không thể gán quyền Super Admin"
+          }
+        }
+      },
+      "check": {
+        "completed": "Kiểm tra quyền hạn hoàn tất"
+      },
+      "groups": {
+        "retrieved": "Đã lấy nhóm quyền hạn"
+      }
+    },
+    "permissions": {
+      "retrieved": "Đã lấy danh sách quyền hạn",
+      "assigned": "Gán quyền hạn thành công",
+      "removed": "Xóa quyền hạn thành công"
+    },
+    "users": {
+      "by": {
+        "role": {
+          "retrieved": "Đã lấy người dùng theo vai trò"
+        }
+      }
+    },
+    "user": {
+      "permissions": {
+        "retrieved": "Đã lấy quyền hạn của người dùng"
+      },
+      "role": {
+        "history": {
+          "retrieved": "Đã lấy lịch sử vai trò của người dùng"
+        }
+      }
+    },
+    "master": {
+      "data": {
+        "retrieved": "Đã lấy dữ liệu master"
+      }
+    },
+    "loyalty": {
+      "points": {
+        "retrieved": "Đã lấy điểm thưởng",
+        "awarded": "Tặng điểm thưởng thành công",
+        "balance": {
+          "retrieved": "Đã lấy số dư điểm thưởng"
+        },
+        "check": {
+          "completed": "Kiểm tra điểm thưởng hoàn tất"
+        }
+      },
+      "history": {
+        "retrieved": "Đã lấy lịch sử điểm thưởng"
+      }
+    },
+    "business": {
+      "conflict": {
+        "duplicate": {
+          "analysis": "Xung đột phân tích trùng lặp"
+        }
+      },
+      "books": {
+        "not": {
+          "in": {
+            "area": "Sách không có trong khu vực"
+          }
+        }
+      },
+      "plan": {
+        "user": {
+          "not": {
+            "active": "Người dùng kế hoạch không hoạt động"
+          }
+        }
+      },
+      "range": {
+        "not": {
+          "satisfiable": "Phạm vi không thỏa mãn"
+        }
+      }
+    },
+    "wallet": {
+      "balance": {
+        "added": "Nạp tiền vào ví thành công",
+        "deducted": "Trừ tiền từ ví thành công"
+      },
+      "transactions": {
+        "retrieved": "Đã lấy giao dịch ví"
+      },
+      "not": {
+        "found": "Không tìm thấy ví",
+        "active": "Ví không hoạt động"
+      },
+      "insufficient": {
+        "balance": "Số dư ví không đủ",
+        "hold": {
+          "balance": "Số dư giữ không đủ"
+        }
+      },
+      "amount": {
+        "positive": "Số tiền phải là số dương"
+      }
+    },
+    "topup": {
+      "amount": {
+        "minimum": "Số tiền nạp tối thiểu không đạt",
+        "maximum": "Số tiền nạp vượt quá tối đa"
+      },
+      "too": {
+        "many": {
+          "requests": "Quá nhiều yêu cầu nạp tiền"
+        }
+      },
+      "not": {
+        "found": "Không tìm thấy lệnh nạp tiền",
+        "waiting": {
+          "confirmation": "Lệnh nạp tiền không ở trạng thái chờ xác nhận"
+        },
+        "belong": {
+          "to": {
+            "user": "Lệnh nạp tiền không thuộc về người dùng này"
+          }
+        }
+      },
+      "user": {
+        "not": {
+          "confirmed": "Người dùng chưa xác nhận"
+        }
+      },
+      "no": {
+        "permission": "Không có quyền thực hiện"
+      },
+      "cancellation": {
+        "reason": {
+          "required": "Lý do hủy là bắt buộc"
+        }
+      },
+      "cannot": {
+        "be": {
+          "confirmed": "Không thể xác nhận lệnh nạp tiền"
+        }
+      },
+      "confirm": {
+        "failed": "Xác nhận lệnh nạp tiền thất bại"
+      },
+      "bank": {
+        "transaction": {
+          "exists": "Giao dịch ngân hàng đã tồn tại",
+          "id": {
+            "required": "ID giao dịch ngân hàng là bắt buộc"
+          }
+        }
+      },
+      "only": {
+        "cancelled": {
+          "can": {
+            "restore": "Chỉ lệnh đã hủy mới có thể khôi phục"
+          }
+        }
+      },
+      "reason": {
+        "too": {
+          "short": "Lý do quá ngắn"
+        }
+      },
+      "transfer": {
+        "confirmed": "Xác nhận chuyển khoản thành công"
+      },
+      "manual": {
+        "created": "Tạo lệnh nạp tiền thủ công thành công"
+      },
+      "order": {
+        "restored": "Khôi phục lệnh nạp tiền thành công"
+      }
+    },
+    "withdrawal": {
+      "request": {
+        "created": "Tạo yêu cầu rút tiền thành công"
+      },
+      "cancelled": "Hủy yêu cầu rút tiền thành công",
+      "approved": "Duyệt yêu cầu rút tiền thành công",
+      "rejected": "Từ chối yêu cầu rút tiền",
+      "completed": "Hoàn thành rút tiền thành công",
+      "statistics": {
+        "retrieved": "Đã lấy thống kê rút tiền"
+      },
+      "insufficient": {
+        "balance": "Số dư không đủ để rút tiền"
+      },
+      "amount": {
+        "positive": "Số tiền rút phải là số dương",
+        "minimum": "Số tiền rút tối thiểu không đạt",
+        "maximum": "Số tiền rút vượt quá tối đa"
+      },
+      "bank": {
+        "account": {
+          "required": "Tài khoản ngân hàng là bắt buộc",
+          "invalid": "Tài khoản ngân hàng không hợp lệ"
+        }
+      },
+      "not": {
+        "found": "Không tìm thấy yêu cầu rút tiền"
+      },
+      "cannot": {
+        "cancel": "Không thể hủy yêu cầu rút tiền"
+      },
+      "invalid": {
+        "status": "Trạng thái không hợp lệ"
+      },
+      "already": {
+        "processed": "Yêu cầu rút tiền đã được xử lý"
+      },
+      "must": {
+        "be": {
+          "approved": "Yêu cầu rút tiền phải được duyệt trước"
+        }
+      }
+    },
+    "bank": {
+      "account": {
+        "retrieved": "Đã lấy tài khoản ngân hàng",
+        "created": "Tạo tài khoản ngân hàng thành công",
+        "updated": "Cập nhật tài khoản ngân hàng thành công",
+        "deleted": "Xóa tài khoản ngân hàng thành công",
+        "activated": "Kích hoạt tài khoản ngân hàng thành công",
+        "deactivated": "Vô hiệu hóa tài khoản ngân hàng thành công",
+        "details": {
+          "retrieved": "Đã lấy chi tiết tài khoản ngân hàng"
+        },
+        "number": {
+          "exists": "Số tài khoản ngân hàng đã tồn tại"
+        },
+        "not": {
+          "found": "Không tìm thấy tài khoản ngân hàng"
+        },
+        "daily": {
+          "limit": {
+            "negative": "Hạn mức hàng ngày không thể âm",
+            "updated": "Cập nhật hạn mức hàng ngày thành công"
+          }
+        },
+        "inactive": {
+          "permission": {
+            "denied": "Tài khoản không hoạt động, không có quyền"
+          }
+        },
+        "topup": {
+          "single": {
+            "partner": {
+              "only": "Chỉ một đối tác nạp tiền duy nhất"
+            }
+          }
+        },
+        "permission": {
+          "not": {
+            "found": "Không tìm thấy quyền tài khoản ngân hàng"
+          },
+          "granted": "Cấp quyền tài khoản ngân hàng thành công",
+          "revoked": "Thu hồi quyền tài khoản ngân hàng thành công"
+        },
+        "no": {
+          "active": {
+            "accounts": "Không có tài khoản hoạt động"
+          }
+        },
+        "insufficient": {
+          "limit": "Hạn mức tài khoản không đủ"
+        }
+      },
+      "information": {
+        "not": {
+          "found": "Không tìm thấy thông tin ngân hàng"
+        }
+      }
+    },
+    "system": {
+      "internal": {
+        "error": "Lỗi hệ thống nội bộ"
+      },
+      "unknown": {
+        "error": "Lỗi không xác định"
+      },
+      "not": {
+        "found": "Không tìm thấy tài nguyên"
+      },
+      "conflict": "Xung đột dữ liệu",
+      "service": {
+        "unavailable": "Dịch vụ không khả dụng"
+      }
+    },
+    "customer": {
+      "group": {
+        "insertOrUpdate": {
+          "success": "Lưu nhóm khách hàng thành công"
+        },
+        "delete": {
+          "success": "Xóa nhóm khách hàng thành công",
+          "update": {
+            "success": "Cập nhật xóa nhóm khách hàng thành công"
+          }
+        },
+        "addToCustomer": {
+          "success": "Thêm nhóm khách hàng thành công"
+        },
+        "not": {
+          "found": "Không tìm thấy nhóm khách hàng"
+        },
+        "error": {
+          "retrieving": "Lỗi khi lấy nhóm khách hàng"
+        },
+        "name": {
+          "exists": "Tên nhóm khách hàng đã tồn tại"
+        },
+        "created": "Tạo nhóm khách hàng thành công",
+        "updated": "Cập nhật nhóm khách hàng thành công",
+        "deleted": "Xóa nhóm khách hàng thành công",
+        "fee": {
+          "insert": {
+            "update": {
+              "success": "Lưu phí nhóm khách hàng thành công"
+            }
+          }
+        },
+        "surcharge": {
+          "insertOrUpdate": {
+            "success": "Lưu phụ thu nhóm khách hàng thành công"
+          }
+        },
+        "assigned": "Gán nhóm khách hàng thành công"
+      },
+      "addSale": {
+        "success": "Thêm sale cho khách hàng thành công"
+      },
+      "not": {
+        "found": "Không tìm thấy khách hàng"
+      },
+      "error": {
+        "retrieving": "Lỗi khi lấy thông tin khách hàng"
+      },
+      "sale": {
+        "assigned": "Gán sale cho khách hàng thành công",
+        "unassigned": "Hủy gán sale khách hàng thành công",
+        "assigner": {
+          "success": "Phân công sale thành công"
+        }
+      },
+      "bank": {
+        "account": {
+          "created": "Tạo tài khoản ngân hàng khách hàng thành công",
+          "updated": "Cập nhật tài khoản ngân hàng khách hàng thành công",
+          "deleted": "Xóa tài khoản ngân hàng khách hàng thành công"
+        }
+      },
+      "shipping": {
+        "address": {
+          "created": "Tạo địa chỉ giao hàng khách hàng thành công",
+          "updated": "Cập nhật địa chỉ giao hàng khách hàng thành công",
+          "not": {
+            "found": "Không tìm thấy địa chỉ giao hàng khách hàng"
+          }
+        }
+      },
+      "default": {
+        "address": {
+          "set": "Đặt địa chỉ mặc định khách hàng thành công"
+        }
+      },
+      "note": {
+        "added": "Thêm ghi chú khách hàng thành công",
+        "error": {
+          "retrieving": "Lỗi khi lấy ghi chú khách hàng"
+        }
+      }
+    },
+    "exchange": {
+      "rate": {
+        "insertOrUpdate": {
+          "success": "Lưu tỷ giá thành công"
+        }
+      }
+    },
+    "fee": {
+      "setting": {
+        "insertOrUpdate": {
+          "success": "Lưu cài đặt phí thành công"
+        }
+      },
+      "common": {
+        "insertOrUpdate": {
+          "success": "Lưu phí chung thành công"
+        }
+      }
+    },
+    "insurance": {
+      "package": {
+        "insertOrUpdate": {
+          "success": "Lưu gói bảo hiểm thành công"
+        },
+        "delete": {
+          "success": "Xóa gói bảo hiểm thành công"
+        }
+      }
+    },
+    "surcharge": {
+      "insertOrUpdate": {
+        "success": "Lưu phụ thu thành công"
+      },
+      "delete": {
+        "success": "Xóa phụ thu thành công"
+      }
+    },
+    "shipping": {
+      "method": {
+        "success": "Xử lý phương thức vận chuyển thành công"
+      }
+    },
+    "material": {
+      "transactions": {
+        "insertOrUpdate": {
+          "success": "Lưu giao dịch nguyên liệu thành công"
+        },
+        "delete": {
+          "success": "Xóa giao dịch nguyên liệu thành công"
+        }
+      }
+    },
+    "prospect": {
+      "sale": {
+        "notes": {
+          "insertOrUpdate": {
+            "success": "Lưu ghi chú prospect sale thành công"
+          }
+        },
+        "assigner": {
+          "success": "Phân công prospect sale thành công"
+        },
+        "not": {
+          "exists": "Prospect sale không tồn tại"
+        }
+      },
+      "not": {
+        "found": "Không tìm thấy prospect"
+      },
+      "role": {
+        "not": {
+          "found": "Không tìm thấy vai trò prospect"
+        }
+      },
+      "invalid": {
+        "role": "Vai trò prospect không hợp lệ"
+      },
+      "ids": {
+        "not": {
+          "exist": "ID prospect không tồn tại"
+        }
+      },
+      "file": {
+        "required": "File là bắt buộc",
+        "invalid": "File không hợp lệ"
+      },
+      "no": {
+        "data": {
+          "in": {
+            "file": "Không có dữ liệu trong file"
+          }
+        }
+      },
+      "read": {
+        "excel": {
+          "error": "Lỗi đọc file Excel"
+        }
+      },
+      "phone": {
+        "required": "Số điện thoại là bắt buộc",
+        "exists": "Số điện thoại đã tồn tại"
+      },
+      "birthday": {
+        "invalid": "Ngày sinh không hợp lệ"
+      },
+      "email": {
+        "invalid": "Email không hợp lệ"
+      },
+      "gender": {
+        "invalid": "Giới tính không hợp lệ"
+      },
+      "note": {
+        "created": "Tạo ghi chú prospect thành công",
+        "error": {
+          "creating": "Lỗi khi tạo ghi chú prospect"
+        }
+      }
+    },
+    "customerSaleNotes": {
+      "insertOrUpdate": {
+        "success": "Lưu ghi chú khách hàng thành công"
+      }
+    },
+    "tags": {
+      "insertOrUpdate": {
+        "success": "Lưu tag thành công"
+      },
+      "delete": {
+        "success": "Xóa tag thành công"
+      }
+    },
+    "tag": {
+      "max": {
+        "limit": {
+          "reached": "Đã đạt giới hạn số lượng tag"
+        }
+      },
+      "not": {
+        "found": "Không tìm thấy tag",
+        "found": {
+          "or": {
+            "deleted": "Không tìm thấy tag hoặc đã bị xóa"
+          }
+        }
+      },
+      "error": {
+        "creating": "Lỗi khi tạo tag",
+        "updating": "Lỗi khi cập nhật tag",
+        "deleting": "Lỗi khi xóa tag"
+      }
+    },
+    "order": {
+      "not": {
+        "found": "Không tìm thấy đơn hàng"
+      },
+      "created": "Tạo đơn hàng thành công",
+      "updated": "Cập nhật đơn hàng thành công",
+      "confirmed": "Xác nhận đơn hàng thành công",
+      "cancelled": "Hủy đơn hàng thành công",
+      "purchased": "Đã mua đơn hàng thành công",
+      "deposit": {
+        "completed": "Hoàn thành thanh toán cọc"
+      },
+      "payment": {
+        "completed": "Hoàn thành thanh toán đơn hàng"
+      },
+      "rejected": "Từ chối đơn hàng thành công",
+      "arrived": {
+        "jp": {
+          "warehouse": "Đơn hàng đã về kho Nhật"
+        },
+        "vn": {
+          "warehouse": "Đơn hàng đã về kho Việt"
+        }
+      },
+      "inspected": "Kiểm hàng đơn hàng thành công",
+      "ready": {
+        "to": {
+          "ship": "Đơn hàng sẵn sàng giao"
+        }
+      },
+      "shipping": {
+        "completed": "Giao hàng hoàn tất"
+      },
+      "no": {
+        "permission": "Không có quyền thực hiện trên đơn hàng"
+      },
+      "only": {
+        "one": {
+          "source": {
+            "website": "Chỉ được một website nguồn"
+          }
+        }
+      },
+      "error": {
+        "retrieving": {
+          "data": "Lỗi khi lấy dữ liệu đơn hàng"
+        },
+        "validate": {
+          "data": "Lỗi xác thực dữ liệu đơn hàng"
+        }
+      },
+      "insurance": {
+        "package": {
+          "not": {
+            "found": "Không tìm thấy gói bảo hiểm đơn hàng"
+          }
+        }
+      },
+      "feature": {
+        "not": {
+          "implemented": "Tính năng đơn hàng chưa được triển khai"
+        }
+      }
+    },
+    "orderPrivateNote": {
+      "insertOrUpdate": {
+        "success": "Lưu ghi chú riêng đơn hàng thành công"
+      },
+      "delete": {
+        "success": "Xóa ghi chú riêng đơn hàng thành công"
+      }
+    },
+    "product": {
+      "domain": {
+        "not": {
+          "supported": "Tên miền sản phẩm không được hỗ trợ"
+        }
+      },
+      "crawl": {
+        "error": "Lỗi khi thu thập dữ liệu sản phẩm"
+      },
+      "fee": {
+        "price": {
+          "range": {
+            "exists": "Khoảng giá phí sản phẩm đã tồn tại"
+          }
+        },
+        "not": {
+          "found": "Không tìm thấy phí sản phẩm"
+        },
+        "created": "Tạo phí sản phẩm thành công",
+        "updated": "Cập nhật phí sản phẩm thành công",
+        "deleted": "Xóa phí sản phẩm thành công",
+        "insertOrUpdate": {
+          "success": "Lưu phí sản phẩm thành công"
+        },
+        "delete": {
+          "update": {
+            "success": "Xóa phí sản phẩm thành công"
+          }
+        }
+      }
+    },
+    "source": {
+      "website": {
+        "deleted": "Xóa website nguồn thành công"
+      }
+    }
   }
 }
