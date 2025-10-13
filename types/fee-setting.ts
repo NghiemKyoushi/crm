@@ -210,6 +210,7 @@ export interface ShippingConditionAdd {
 
 export interface ShippingConditionParams {
   list: ShippingConditionAdd[];
+  customer_group_id?: number;
 }
 
 export interface CategoryItem {
@@ -217,8 +218,8 @@ export interface CategoryItem {
   name: string;
   icon: string;
   description: string;
-  created_at?: string; // ISO datetime string
-  updated_at?: string; // ISO datetime string
+  created_at?: string; 
+  updated_at?: string; 
 }
 
 export interface InsuranceOption {

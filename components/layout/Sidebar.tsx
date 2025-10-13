@@ -34,7 +34,7 @@ export const menuPermissions: Record<string, string[]> = {
   "/dashboard": ["dashboard.view"],
 
   // Order Management - view permissions for most, edit for operations
-  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create"],
+  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create", "sales.view_assigned_orders", "sales.create_order_for_customers"],
 
   // Finance Management - restricted to finance roles
   "/finance-management": [
@@ -93,7 +93,7 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin"]
+  "/shipment-management":["system.admin", "sales.view_assigned_orders", "sales.create_order_for_customers"]
 };
 
 export const menuItems = [

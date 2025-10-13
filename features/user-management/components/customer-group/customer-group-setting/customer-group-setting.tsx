@@ -22,7 +22,6 @@ const CategorySettingsPage: React.FC = () => {
   const id = params.id;
   const { t } = useTranslation();
   const router = useRouter();
-
   const items = [
     {
       key: "1",
@@ -34,40 +33,42 @@ const CategorySettingsPage: React.FC = () => {
       ),
       children: <ExchangeRateSettings />,
     },
-    {
-      key: "2",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
-          {t("categoryCustomer.shippingAndSurcharge")}
-        </span>
-      ),
-      children: id ? (
-        <ShippingSurchangeTable isCategory={true} idCategory={+id} />
-      ) : null,
-    },
-    {
-      key: "3",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
-          {t("categoryCustomer.servicesAndDelivery")}
-        </span>
-      ),
-      children: id ? <ShippingServiceForm groupId={+id} /> : null,
-    },
-    {
-      key: "4",
-      label: (
-        <span className="flex items-center gap-2">
-          <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
-          {t("categoryCustomer.insuranceAndRegulations")}
-        </span>
-      ),
-      children: id ? <InsuranceSettings groupId={+id} /> : null,
-    },
+    ...(id !== "1"
+      ? [
+          {
+            key: "2",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+                {t("categoryCustomer.shippingAndSurcharge")}
+              </span>
+            ),
+            children: id && <ShippingSurchangeTable isCategory={true} idCategory={+id} />,
+          },
+          {
+            key: "3",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+                {t("categoryCustomer.servicesAndDelivery")}
+              </span>
+            ),
+            children: id && <ShippingServiceForm groupId={+id} />,
+          },
+          {
+            key: "4",
+            label: (
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+                {t("categoryCustomer.insuranceAndRegulations")}
+              </span>
+            ),
+            children: id && <InsuranceSettings groupId={+id} />,
+          },
+        ]
+      : []),
   ];
-
+  
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
       <button className="cursor-pointer" onClick={() => router.back()}>

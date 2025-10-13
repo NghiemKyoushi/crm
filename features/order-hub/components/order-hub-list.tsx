@@ -18,11 +18,7 @@ import {
 } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCheck,
   faFilter,
-  faMagnifyingGlass,
-  faPlus,
-  faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import { useTranslation } from "react-i18next";
@@ -56,9 +52,12 @@ import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
+// import { usePermission } from "@/components/layout/PermissionContext";
 
 
 export default function OrderHub() {
+    // const { hasPermission, loading, permissions } = usePermission();
+  
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
@@ -272,23 +271,6 @@ export default function OrderHub() {
         </div>
       ),
     },
-    // {
-    //   title: "Ngày TT",
-    //   key: "payment_created_date",
-    //   // render: (_, record) => (
-    //   //   <div className="text-xs text-gray-800">
-    //   //     {record.created_at
-    //   //       ? dayjs(record.created_at).format("DD/MM/YY")
-    //   //       : "-"}
-    //   //   </div>
-    //   // ),
-    // },
-    // {
-    //   title: "Ngày Về",
-    //   key: "arrival_date",
-    //   width: 80,
-    //   render: (_, record) => <div className="text-xs text-gray-800">-</div>,
-    // },
     {
       title: "Tracking / Kiện / SL / CN",
       key: "tracking_package",
