@@ -12,6 +12,7 @@ import {
   getListOrder,
   getListOrderTracking,
   getListService,
+  getListServiceAdmin,
   trackingToJp,
   trackingToVn,
   updateCodForEarchOrder,
@@ -70,6 +71,18 @@ export const useListService = (
     ...options,
   });
 };
+
+export const useListServiceAdmin = (
+  params: {userId?: number, routeId?: number },
+  options?: UseQueryOptions<any, Error> // <-- thêm options ở đây
+) => {
+  return useQuery({
+    queryKey: ["listServiceAdmin", params],
+    queryFn: () => getListServiceAdmin(params),
+    ...options,
+  });
+};
+
 export const useUpdateListService = () => {
   return useMutation({
     mutationFn: ({ param }: { param: FeeData }) =>
@@ -119,8 +132,8 @@ export const useCancelOrder = () => {
 
 export const useTrackingOrder = () => {
   return useMutation({
-    mutationFn: ({ tracking, id }: { tracking: Array<string>; id: string }) =>
-      trackingToJp(id, tracking),
+    mutationFn: ({  id }: { id: string }) =>
+      trackingToJp(id),
   });
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Tag,
   Button,
@@ -51,13 +51,12 @@ import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import PopupConfirm from "@/components/PopupConfirm";
 import CancelReasonModal from "@/features/finance-manage/components/tabs/deposit/modal/modal-cancel-statement";
-import TrackingModalJP from "./modal/tracking-modal-jp";
+// import TrackingModalJP from "./modal/tracking-modal-jp";
 import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 
-const { Option } = Select;
 
 export default function OrderHub() {
   const [form] = Form.useForm();
@@ -76,6 +75,8 @@ export default function OrderHub() {
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
+  const [isTrackingJP, setIsTrackingJP] = useState(false);
+
   const [isEditingTracking, setIsEditingTracking] = useState<{
     orderId: number;
     records: Array<{
@@ -210,31 +211,47 @@ export default function OrderHub() {
       );
   };
 
-  const handleCheckOrder = (value: any) => {
-    if (orderDetail)
-      checkOrderVNMutation.mutate(
-        {
-          body: {
-            description: value.note,
-            weight: value.actualWeight,
-            weight_fee: value.weight_rate_fee ? value.weight_rate_fee : 0,
-          },
-          id: orderDetail.id.toString(),
-        },
-        {
-          onSuccess: () => {
-            toast.success(t("toast.inspectGoodsSuccess"));
-            queryClient.invalidateQueries({
-              queryKey: ["listorder"],
-            });
-            setIsOpenCheckOrder(false);
-          },
-          onError: (err: any) =>
-            toast.error(
-              err.response?.data?.localizedMessage || t("common.error")
-            ),
-        }
-      );
+  const handleCheckOrder = async (valueForm: any) => {
+    if (!orderDetail) return;
+    const { records, form } = valueForm;
+    try {
+      await Promise.all([
+        new Promise((resolve, reject) => {
+          useUpdateOrderTracking.mutate(
+            {
+              body: records,
+              id: orderDetail.id,
+            },
+            {
+              onSuccess: () => resolve(true),
+              onError: (err: any) => reject(err),
+            }
+          );
+        }),
+        new Promise((resolve, reject) => {
+          checkOrderVNMutation.mutate(
+            {
+              body: {
+                description: form.note,
+                weight: form.actualWeight,
+                weight_fee: form.feePerKg || 0,
+              },
+              id: orderDetail.id.toString(),
+            },
+            {
+              onSuccess: () => resolve(true),
+              onError: (err: any) => reject(err),
+            }
+          );
+        }),
+      ]);
+      toast.success("Cập nhật tracking và kiểm tra hàng thành công");
+      queryClient.invalidateQueries({ queryKey: ["listorder"] });
+      setIsEditingTrackingModal(false);
+      setIsOpenCheckOrder(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.localizedMessage || t("common.error"));
+    }
   };
 
   const columns: ColumnsType<Invoice> = [
@@ -251,7 +268,7 @@ export default function OrderHub() {
       }),
       render: (invoice_no: string) => (
         <div className="text-xs font-medium text-blue-600">
-          {invoice_no || "-"}
+          {invoice_no || "Cập nhật sau"}
         </div>
       ),
     },
@@ -317,19 +334,22 @@ export default function OrderHub() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-xs text-gray-400">Chưa có dữ liệu</div>
+                  <div className="text-xs text-gray-400">Cập nhật sau</div>
                 )}
               </div>
-              <Button
-                type="text"
-                size="small"
-                icon={<EditOutlined className="text-xs" />}
-                className="!p-0 !h-auto flex-shrink-0"
-                onClick={() => {
-                  setIsEditingTrackingModal(true);
-                  setOrderDetail(record);
-                }}
-              />
+              {record.status !== OrderStatusType.PENDING_PAYMENT &&
+                record.status !== OrderStatusType.READY_TO_SHIP && (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<EditOutlined className="text-xs" />}
+                    className="!p-0 !h-auto flex-shrink-0"
+                    onClick={() => {
+                      setIsEditingTrackingModal(true);
+                      setOrderDetail(record);
+                    }}
+                  />
+                )}
             </div>
             {trackingRecords.length > 1 && (
               <Button
@@ -369,6 +389,7 @@ export default function OrderHub() {
           record.metadata.items?.[0]?.product?.currency_code === "JPY"
             ? "¥"
             : "$";
+        const codeType = record.metadata.infos?.codeType ?? null;
         const isPendingApproval =
           record.status === OrderStatusType.PENDING_APPROVAL;
         const shouldShowWarning = isPendingApproval && !shippingFee;
@@ -391,7 +412,7 @@ export default function OrderHub() {
                 <span className="text-gray-500">Giá: </span>
                 <span className="text-green-600 font-medium">
                   {price && !isNaN(Number(price))
-                    ? `¥${Number(price).toLocaleString("ja-JP")}`
+                    ? `${isJapanPrice}${Number(price).toLocaleString("ja-JP")}`
                     : "-"}
                 </span>
               </div>
@@ -410,25 +431,32 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                            "vi-VN"
-                          )}${isJapanPrice}`
+                              "vi-VN"
+                            )}${isJapanPrice}`
+                          : codeType === 1
+                          ? "Miễn phí"
+                          : codeType === 3
+                          ? "Cập nhật sau"
                           : "-"}
                       </span>
                     )}
                   </div>
-                  {/* {shouldShowWarning && ( */}
-                    <EditOutlined
-                      className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                      onClick={() => {
-                        setOrderDetail(record);
-                        setEditingFeesRates({
-                          orderId: record.id,
-                          codOption: 1,
-                          codAmount: "",
-                        });
-                      }}
-                    />
-                  {/* )} */}
+                  {(codeType !== 1 && codeType !== 2) && (
+                  <EditOutlined
+                    className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                    onClick={() => {
+                      const codeType = record.metadata?.infos?.codeType ?? null;
+                      const codInJapan =
+                        record.metadata?.infos?.codInJapan ?? null;
+                      setOrderDetail(record);
+                      setEditingFeesRates({
+                        orderId: record.id,
+                        codOption: codeType ?? 1,
+                        codAmount: codInJapan ?? "",
+                      });
+                    }}
+                  />
+                 )}
                 </div>
               </div>
               {url && (
@@ -458,7 +486,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
-            {record.note || record.description || "-"}
+            {record.note || record.description || "Cập nhật sau"}
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
@@ -502,17 +530,17 @@ export default function OrderHub() {
         return (
           <div className="space-y-1">
             <div className="text-xs">
-              <span className="text-gray-500">Cọc: </span>
+              <span className="text-gray-500">Trước: </span>
               <span className="text-green-600 font-medium">
                 {depositFee > 0
                   ? `${depositFee.toLocaleString("vi-VN")}đ`
-                  : "-"}
+                  : "Cập nhật sau"}
               </span>
             </div>
             <div className="text-xs">
-              <span className="text-gray-500">Sau cọc: </span>
+              <span className="text-gray-500">Lần 2: </span>
               <span className="text-orange-600 font-medium">
-                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
+                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "Cập nhật sau"}
               </span>
             </div>
             {/* <div className="text-xs">
@@ -560,7 +588,7 @@ export default function OrderHub() {
               <span className="text-gray-800 font-medium">
                 {shippingPrice > 0
                   ? `${shippingPrice.toLocaleString("vi-VN")}đ`
-                  : "-"}
+                  : "Cập nhật sau"}
               </span>
             </div>
             <div className="text-xs">
@@ -586,7 +614,7 @@ export default function OrderHub() {
         <div className="text-xs font-medium text-blue-600">
           {record.amount_vnd
             ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
-            : "-"}
+            : "Cập nhật sau"}
         </div>
       ),
     },
@@ -602,7 +630,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="flex items-center justify-between gap-2 h-full">
           <div className="text-xs text-gray-600 flex-1">
-            {record?.note_admin ? record?.note_admin : "-"}
+            {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
           <EditOutlined
             className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
@@ -745,7 +773,9 @@ export default function OrderHub() {
                 className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
                   setOrderDetail(record);
-                  setIsOpenTrackingOrder(true);
+                  setIsTrackingJP(true);
+                  setIsEditingTrackingModal(true);
+                  // setIsOpenTrackingOrder()
                 }}
               >
                 🏢 Kho JP
@@ -783,7 +813,7 @@ export default function OrderHub() {
                         onError: (err: any) =>
                           toast.error(
                             err.response?.data?.localizedMessage ||
-                            t("common.error")
+                              t("common.error")
                           ),
                       }
                     );
@@ -813,19 +843,19 @@ export default function OrderHub() {
             break;
 
           case OrderStatusType.READY_TO_SHIP:
-            actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setOpenConfirmComplete(true);
-                }}
-              >
-                🚚 Giao hàng
-              </Button>
-            );
+            // actionButton = (
+            //   <Button
+            //     key={record.status}
+            //     size="small"
+            //     className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+            //     onClick={() => {
+            //       setOrderDetail(record);
+            //       setOpenConfirmComplete(true);
+            //     }}
+            //   >
+            //     🚚 Giao hàng
+            //   </Button>
+            // );
             break;
         }
 
@@ -985,12 +1015,12 @@ export default function OrderHub() {
         onCancel={() => setOpen(false)}
         onConfirm={() => setOpen(false)}
       />
-      {orderDetail?.id && (
+      {orderDetail && openDetail && (
         <EditOrderModal
           isOpen={openDetail}
           onCancel={() => {
             setOpenDetail(false);
-            setOrderDetail(undefined)
+            setOrderDetail(undefined);
           }}
           orderId={+orderDetail?.id}
           onConfirm={() => console.log()}
@@ -1003,8 +1033,12 @@ export default function OrderHub() {
           customerName={
             orderDetail?.customer_name ? orderDetail?.customer_name : ""
           }
+          orderDetail={orderDetail}
           orderCode={orderDetail.invoice_no ? orderDetail.invoice_no : ""}
-          onCancel={() => setIsOpenApproveOrder(false)}
+          onCancel={() => {
+            setIsOpenApproveOrder(false);
+            setOrderDetail(undefined);
+          }}
           onSubmit={(data: ApproveOrderModel) => {
             approveMutation.mutate(
               {
@@ -1035,46 +1069,56 @@ export default function OrderHub() {
         <CheckOrderModal
           open={isOpenCheckOrder}
           customerName={orderDetail.customer_name}
-          feePerKg={10}
-          onCancel={() => setIsOpenCheckOrder(false)}
+          // feePerKg={10}
+          // onClose={}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsOpenCheckOrder(false);
+          }}
           onSubmit={handleCheckOrder}
           orderCode={orderDetail.invoice_no}
           customerId={orderDetail.id}
           productName={
             orderDetail?.metadata?.items[0]?.product?.map_data?.productName
           }
+          orderId={orderDetail.id}
+          status={orderDetail.status}
         />
       )}
 
-      {orderDetail && (
+      {/* {orderDetail && (
         <TrackingModalJP
+        orderId={orderDetail.id}
           customerName={orderDetail.customer_name}
           orderCode={orderDetail.invoice_no}
-          onCancel={() => setIsOpenTrackingOrder(false)}
+          onCancel={() => {
+            setOrderDetail(undefined);
+            setIsOpenTrackingOrder(false);
+          }}
           onSubmit={(value) => {
-            trackingJPMutation.mutate(
-              {
-                tracking: value.trackingCodes,
-                id: orderDetail.id.toString(),
-              },
-              {
-                onSuccess: () => {
-                  toast.success(t("toast.confirmJpWarehouseSuccess"));
-                  queryClient.invalidateQueries({
-                    queryKey: ["listorder"],
-                  });
-                  setIsOpenTrackingOrder(false);
-                },
-                onError: (err: any) =>
-                  toast.error(
-                    err.response?.data?.localizedMessage || t("common.error")
-                  ),
-              }
-            );
+            // trackingJPMutation.mutate(
+            //   {
+            //     tracking: value.trackingCodes,
+            //     id: orderDetail.id.toString(),
+            //   },
+            //   {
+            //     onSuccess: () => {
+            //       toast.success(t("toast.confirmJpWarehouseSuccess"));
+            //       queryClient.invalidateQueries({
+            //         queryKey: ["listorder"],
+            //       });
+            //       setIsOpenTrackingOrder(false);
+            //     },
+            //     onError: (err: any) =>
+            //       toast.error(
+            //         err.response?.data?.localizedMessage || t("common.error")
+            //       ),
+            //   }
+            // );
           }}
           open={isOpenTrackingOrder}
         />
-      )}
+      )} */}
 
       {orderDetail && (
         <TrackingModal
@@ -1138,7 +1182,10 @@ export default function OrderHub() {
       {orderDetail && (
         <CancelReasonModal
           transactionCode={orderDetail.invoice_no}
-          onClose={() => setIsOpenCancel(false)}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsOpenCancel(false);
+          }}
           open={isOpenCancel}
           onConfirm={handleCancel}
         />
@@ -1149,32 +1196,41 @@ export default function OrderHub() {
         <EditTrackingModal
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
-          onClose={() => setIsEditingTrackingModal(false)}
-          onSave={(records) => {
-            useUpdateOrderTracking.mutate(
-              {
-                body: records,
-                id: orderDetail.id,
-              },
-              {
-                onSuccess: () => {
-                  toast.success("Update mã kiện thành công");
-                  queryClient.invalidateQueries({
-                    queryKey: ["listorder"],
-                  });
-                  setIsEditingTrackingModal(false);
-                },
-                onError: (err: any) =>
-                  toast.error(
-                    err.response?.data?.localizedMessage || t("common.error")
-                  ),
-              }
-            );
-
-            setIsEditingTracking(null);
-            queryClient.invalidateQueries({
-              queryKey: ["listorder"],
+          status = {orderDetail.status}
+          onClose={() => {
+            setOrderDetail(undefined);
+            setIsTrackingJP(false);
+            setIsEditingTrackingModal(false);
+          }}
+          onSave={async (records) => {
+            const promises = [];
+            const updatePromise = useUpdateOrderTracking.mutateAsync({
+              body: records,
+              id: orderDetail.id,
             });
+            promises.push(updatePromise);
+            if (isTrackingJP) {
+              const jpPromise = trackingJPMutation.mutateAsync({
+                id: orderDetail.id.toString(),
+              });
+              promises.push(jpPromise);
+            }
+            Promise.all(promises)
+              .then(() => {
+                toast.success("Cập nhật thành công!");
+                queryClient.invalidateQueries({ queryKey: ["listorder"] });
+                setIsEditingTrackingModal(false);
+                setIsOpenTrackingOrder(false);
+                setIsEditingTracking(null);
+              })
+              .catch((err) => {
+                toast.error(
+                  err.response?.data?.localizedMessage || t("common.error")
+                );
+              });
+            setIsEditingTracking(null);
+            setIsTrackingJP(false);
+            queryClient.invalidateQueries({ queryKey: ["listorder"] });
           }}
         />
       )}
@@ -1184,7 +1240,10 @@ export default function OrderHub() {
         <NoteModal
           open={!!editingNote}
           note={editingNote?.note}
-          onCancel={() => setEditingNote(null)}
+          onCancel={() => {
+            setEditingNote(null);
+            setOrderDetail(undefined);
+          }}
           onSave={(note) => {
             useAddNoteClient.mutate(
               {
@@ -1215,7 +1274,11 @@ export default function OrderHub() {
       {editingFeesRates && orderDetail && (
         <Modal
           open={!!editingFeesRates}
-          onCancel={() => setEditingFeesRates(null)}
+          onCancel={() => {
+            setEditingNote(null);
+            // setEditingFeesRates(null);
+            setOrderDetail(undefined);
+          }}
           title="Cập nhật Phí COD"
           width={500}
           centered
@@ -1246,7 +1309,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
@@ -1267,9 +1330,9 @@ export default function OrderHub() {
                 }
                 placeholder="Chọn loại COD"
               >
-                <Select.Option value={1}>Miễn phí vận chuyển</Select.Option>
-                <Select.Option value={2}>Admin điền phí COD</Select.Option>
-                <Select.Option value={3}>Xác định sau</Select.Option>
+                <Select.Option value={1}>Miễn phí</Select.Option>
+                <Select.Option value={2}>Có phí</Select.Option>
+                <Select.Option value={3}>Cập nhật sau</Select.Option>
               </Select>
             </Form.Item>
 
@@ -1327,7 +1390,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
