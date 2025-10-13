@@ -52,11 +52,11 @@ import EditOrderModal from "./modal/edit-order-modal";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
-// import { usePermission } from "@/components/layout/PermissionContext";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 
 export default function OrderHub() {
-    // const { hasPermission, loading, permissions } = usePermission();
+    const { hasPermission } = usePermission();
   
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
@@ -505,6 +505,8 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => {
+        console.log('record.deposit_fee ', record.deposit_fee );
+        
         const depositFee = record.deposit_fee ?? 0;
         const totalAmount = record.amount_vnd ?? 0;
         const remaining = totalAmount - depositFee;
@@ -514,8 +516,8 @@ export default function OrderHub() {
             <div className="text-xs">
               <span className="text-gray-500">Trước: </span>
               <span className="text-green-600 font-medium">
-                {depositFee > 0
-                  ? `${depositFee.toLocaleString("vi-VN")}đ`
+                {record.deposit_fee || record.deposit_fee === 0  
+                  ? `${record.deposit_fee.toLocaleString("vi-VN")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
@@ -861,7 +863,7 @@ export default function OrderHub() {
             </Tag>
 
             {/* Nút hành động chính (nếu có) */}
-            {actionButton}
+            {hasPermission("sales.view_assigned_orders") && hasPermission("order.view") ? actionButton : null}
 
             {/* Button chi tiết luôn hiển thị */}
             <Button

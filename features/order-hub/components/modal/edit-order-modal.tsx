@@ -46,6 +46,7 @@ import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TiptapEditor from "../TiptapEditor";
 import { CURRENCY_CODE } from "./add-orderhub-modal";
 import { Fee } from "./orderhub-detail-modal";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -57,6 +58,8 @@ interface CreateOrderModalProps {
 }
 export default function EditOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermission();
+  
   const { data: order, refetch } = useDetailOrder(props.orderId);
 
   const { isOpen, onCancel, orderId } = props;
@@ -134,7 +137,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         //     ...item,
         //     is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
         //   }));      
-        console.log('form.getFieldValue("description")', form.getFieldValue("description"));
             
         const bodyNewOrder: OrderFeeRequest = {
           data: {
@@ -472,11 +474,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               key="submit"
               type="primary"
               onClick={() => {
-                // if (order?.status !== OrderStatusType.PENDING_APPROVAL) {
-                //   return;
-                // }
-                handleOk();
+                if (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) {
+                  handleOk();
+                }
               }}
+              disabled={!(hasPermission("sales.view_assigned_orders") && hasPermission("order.view"))}
               size="large"
               className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
               // disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
@@ -763,7 +765,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <Select
-                          disabled={isCheckDisableInput}
+                          disabled={order?.status === OrderStatusType.PENDING_PAYMENT ||  order?.status === OrderStatusType.READY_TO_SHIP || order?.status === OrderStatusType.SHIPPING_REQUEST_CLIENT}
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
                           options={[
