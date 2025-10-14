@@ -9,6 +9,7 @@ import {
   CustomerDetail,
 } from "@/types/customer-type";
 import AddSalesModal, { Employee } from "./modal/modal-sales-add";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 interface OverviewTabProps {
   customer: CustomerDetail;
@@ -20,6 +21,8 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab(props: OverviewTabProps) {
+  const { hasPermission, permissions } = usePermission();
+
   const {
     customer,
     handleSubmitDataAddressDetail,
@@ -78,6 +81,17 @@ export default function OverviewTab(props: OverviewTabProps) {
     }
   };
 
+  const hasSalesOnly =
+    hasPermission("sales.manage_assigned_customers") &&
+    permissions.filter((p) =>
+      [
+        "user.view",
+        "role.view",
+        "user.categorize_customers",
+        "user.manage_staff_roles",
+      ].includes(p.name)
+    ).length === 0;
+
   return (
     <>
       <div className="flex flex-row justify-center gap-4">
@@ -90,7 +104,10 @@ export default function OverviewTab(props: OverviewTabProps) {
               </span>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setIsOpenAddress(true)}
+                  onClick={() => {
+                    if (hasSalesOnly) return;
+                    setIsOpenAddress(true);
+                  }}
                   type="dashed"
                   className="!text-blue-600 p-0"
                 >
@@ -99,7 +116,10 @@ export default function OverviewTab(props: OverviewTabProps) {
 
                 {customer.shipping_addresses.length > 0 && (
                   <Button
-                    onClick={() => setIsOpenSetDefault(true)}
+                    onClick={() => {
+                      if (hasSalesOnly) return;
+                      setIsOpenSetDefault(true);
+                    }}
                     type="dashed"
                     className="!text-blue-600 p-0"
                   >
@@ -109,7 +129,9 @@ export default function OverviewTab(props: OverviewTabProps) {
               </div>
             </div>
             <div className="text-sm">
-              <div className="font-bold">{t("customerManage.customerOverview.home")}</div>
+              <div className="font-bold">
+                {t("customerManage.customerOverview.home")}
+              </div>
               {customer.shipping_addresses.length > 0 &&
                 (() => {
                   const defaultAddress = customer.shipping_addresses.find(
@@ -136,7 +158,10 @@ export default function OverviewTab(props: OverviewTabProps) {
               <div className="flex gap-2">
                 <Button
                   type="dashed"
-                  onClick={() => setIsOpenBank(true)}
+                  onClick={() => {
+                    if (hasSalesOnly) return;
+                    setIsOpenBank(true);
+                  }}
                   className="!text-blue-600 p-0"
                 >
                   {t("customerManage.customerOverview.addBankAccount")}
@@ -144,7 +169,10 @@ export default function OverviewTab(props: OverviewTabProps) {
 
                 {customer.bank_accounts.length > 0 && (
                   <Button
-                    onClick={() => setIsOpenSetDefaultBank(true)}
+                    onClick={() => {
+                      if (hasSalesOnly) return;
+                      setIsOpenSetDefaultBank(true);
+                    }}
                     type="dashed"
                     className="!text-blue-600 p-0"
                   >
@@ -198,7 +226,10 @@ export default function OverviewTab(props: OverviewTabProps) {
             <Button
               type="dashed"
               className="!text-blue-600 p-0"
-              onClick={() => setIsOpenSaleAdd(true)}
+              onClick={() => {
+                if (hasSalesOnly) return;
+                setIsOpenSaleAdd(true);
+              }}
             >
               {t("customerManage.customerOverview.change")}
             </Button>

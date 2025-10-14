@@ -57,7 +57,8 @@ export const menuPermissions: Record<string, string[]> = {
     "user.manage_staff_roles",
     "user.view",
     "role.view",
-    "permission.view"
+    "permission.view",
+    "sales.manage_assigned_customers"
   ],
 
   // Telesales - manager or member access

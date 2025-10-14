@@ -96,7 +96,8 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
       'permission.create',
       'permission.edit',
       'permission.delete',
-      'permission.assign'
+      'permission.assign',
+      'sales.manage_assigned_customers'
     ],
     requireAll: false,
     fallbackAction: 'notFound'

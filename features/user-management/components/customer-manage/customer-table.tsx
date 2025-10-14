@@ -76,6 +76,17 @@ export default function CustomerTable() {
       ),
     },
     {
+      title: t("staffManage.phone"),
+      dataIndex: "phone_number",
+      key: "phone_number",
+      width: 200,
+      render: (_, record: CustomerModel) => (
+        <div>
+          <div className="text-sm text-gray-800">{record.phone_number}</div>
+        </div>
+      ),
+    },
+    {
       title: t("customerTable.type"),
       dataIndex: "group_name",
       key: "group_name",

@@ -18,6 +18,7 @@ export const getListOrder = async (params: {
   status?: string;
   search?: string;
   date?: string;
+  type?:number;
 }) => {
   const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
   return res.data.data;
@@ -69,6 +70,7 @@ export const updateListService = async (body: FeeData) => {
 export const getRateOrder = async (params: {
   userId: string;
   productId: number;
+  order_id?: number;
 }) => {
   const res = await api.get(API_TYPE_CONST.EXCHANGE_RATE, { params });
   return res.data.data;
