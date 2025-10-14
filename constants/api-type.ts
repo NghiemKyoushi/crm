@@ -27,6 +27,7 @@ export const API_TYPE_CONST = {
   PERMISSION_GROUP:`${FEATURE}/admin/roles/permissions/categories`,
   PERMISSION:`${FEATURE}/admin/roles/permissions`,
   CUSTOMER_LIST:`${FEATURE}/admin/customer`,
+  CUSTOMER_LIST_ADMIN_SALE:`${FEATURE}/admin/orders/get-all-customer`,
   ADD_ADDRESS: `${FEATURE}/admin/customer/add-shipping-address/`,
   ADD_ACCOUNT_BANK: `${FEATURE}/admin/customer/add-bank-user/`,
   CUSTOMER_NOTE: `${FEATURE}/admin/customer/get-notes/`,

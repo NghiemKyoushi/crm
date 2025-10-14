@@ -41,6 +41,7 @@ export const useListOrder = (params: {
   status?: string;
   search?: string;
   date?: string;
+  type?: number;
 }) => {
   return useQuery<InvoiceResponse>({
     queryKey: ["listorder", params],

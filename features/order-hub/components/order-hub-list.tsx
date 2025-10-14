@@ -54,9 +54,14 @@ import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
 
-
+type FilterType = {
+  search?: string;
+  status?: string;
+  date?: string;
+  type?: number;
+};
 export default function OrderHub() {
-    const { hasPermission } = usePermission();
+  const { hasPermission, permissions } = usePermission();
   
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
@@ -101,10 +106,11 @@ export default function OrderHub() {
     value: string;
   } | null>(null);
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterType>({
     search: undefined,
     status: undefined,
     date: undefined,
+    type: undefined,
   });
 
   const { data: listOrder } = useListOrder({
@@ -113,6 +119,7 @@ export default function OrderHub() {
     search: filters.search,
     status: filters.status,
     date: filters.date,
+    type: filters.type,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -135,6 +142,7 @@ export default function OrderHub() {
           : undefined,
       status: values.status !== "" ? values.status : undefined,
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+      type: undefined
     });
     setPage(1);
   };
@@ -252,6 +260,14 @@ export default function OrderHub() {
       toast.error(err?.response?.data?.localizedMessage || t("common.error"));
     }
   };
+
+  useEffect(()=>{
+     if(hasPermission("sales.view_assigned_orders") && hasPermission("order.view")){
+       setFilters({...filters, type: 1})
+     }else{
+      setFilters({...filters, type: 2})
+     }
+  },[permissions])
 
   const columns: ColumnsType<Invoice> = [
     {

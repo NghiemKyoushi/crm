@@ -4,6 +4,7 @@ export interface CustomerParam {
   page_size: number;
   sale_id?: number;
   search?: string;
+  type?:number
 }
 
 export interface CustomerModel {
@@ -16,6 +17,7 @@ export interface CustomerModel {
   category_id: number;
   email: string;
   group_id:number;
+  phone_number: string
 }
 
 export interface CustomerResponse {
