@@ -68,7 +68,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
         </Form.Item>
         {/* 3 tùy chọn phí vận chuyển */}
         <Form.Item
-          label="Phí vc nội địa"
+          label="Cước vc nội địa"
           name="shipping_type"
           className="!mb-1 "
           rules={[

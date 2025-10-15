@@ -768,7 +768,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       <Form.Item
                         label={
                           <span className="text-sm font-medium text-gray-700">
-                            Phí VC nội địa
+                            Cước VC nội địa
                           </span>
                         }
                         name="paymentType"
@@ -1201,7 +1201,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   </div>
 
                   {/* Domestic Shipping */}
-                    <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                    {/* <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
                       <span className="text-sm text-gray-600">
                         Cước VC nội địa
                       </span>
@@ -1216,10 +1216,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           </span>
                         </>
                           : "Cập nhật sau"}
-                        {/* {paymentAmount.toLocaleString("en-US")}{" "}
-                        {currencyCheckCode} */}
+                       
                       </span>
-                    </div>
+                    </div> */}
                   
 
                   {/* Fees Section */}
