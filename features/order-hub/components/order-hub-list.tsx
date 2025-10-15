@@ -523,9 +523,7 @@ export default function OrderHub() {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) => {
-        console.log('record.deposit_fee ', record.deposit_fee );
-        
+      render: (_, record) => {        
         const depositFee = record.deposit_fee ?? 0;
         const totalAmount = record.amount_vnd ?? 0;
         const remaining = totalAmount - depositFee;

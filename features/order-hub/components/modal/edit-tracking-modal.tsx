@@ -1,5 +1,5 @@
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Button, Input, Modal, Spin } from "antd";
+import { Button, Input, InputNumber, Modal, Spin } from "antd";
 import React from "react";
 import { toast } from "react-toastify";
 import { genPackageCode, getTrackingOrder } from "../../apis/orderhub";
@@ -203,14 +203,23 @@ export function EditTrackingModal({
                   className="text-xs text-center"
                 />
 
-                <Input
-                  value={record.weight}
-                  onChange={(e) =>
-                    handleRecordChange(index, "weight", +e.target.value)
-                  }
-                  placeholder="3.5kg"
+                <InputNumber
+                  placeholder="0"
                   size="small"
-                  className="text-xs"
+                  className="!w-full"
+                  min={0}
+                  stringMode
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  value={record.weight}
+                  onChange={(v) =>
+                    handleRecordChange(
+                      index,
+                      "weight",
+                      v ? parseFloat(v.toString()) : 0
+                    )
+                  }
                 />
 
                 {records.length > 1 && !isExisting && (
