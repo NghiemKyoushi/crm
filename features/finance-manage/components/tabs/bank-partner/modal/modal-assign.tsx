@@ -36,7 +36,8 @@ export default function AssignRoleModal({
     if (loading) return;
     setLoading(true);
     try {
-      const response = await getListBankPermission(+idBank);
+      // Thêm param role_id=2
+      const response = await getListBankPermission(+idBank, 2);
       setStaffs(response);
       const preSelected = response
         .filter((user: AdminUserCheck) => user.is_checked)

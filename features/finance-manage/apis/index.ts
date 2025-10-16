@@ -103,8 +103,13 @@ export const getCodeGeneration = async () => {
   return res.data.data;
 };
 
-export const getListBankPermission = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.BANK_LIST_PERMISSION}${id}/get-list-permissions`);
+export const getListBankPermission = async (id: number, role_id?: number) => {
+  const res = await api.get(
+    `${API_TYPE_CONST.BANK_LIST_PERMISSION}${id}/get-list-permissions`,
+    {
+      params: role_id ? { role_id } : {},
+    }
+  );
   return res.data.data;
 };
 
