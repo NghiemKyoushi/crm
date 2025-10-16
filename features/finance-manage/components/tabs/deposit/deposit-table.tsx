@@ -3,10 +3,7 @@ import React, { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./deposit-filter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPlusCircle,
-  faMinusCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlusCircle, faMinusCircle } from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
 import { Tag, Button, Space, Tooltip } from "antd";
@@ -36,6 +33,7 @@ import {
 import dayjs from "dayjs";
 import DepositDetailModal from "./modal/modal-detail-deposit";
 import TransactionCompleteModal from "./modal/transaction-topup-complete-modal";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 interface DepositTableProps {
   action?: string;
@@ -63,6 +61,7 @@ const DepositTable = (props: DepositTableProps) => {
     useState(false);
   const [typeDetail, setTypeDetail] = useState<string>("TOP_UP");
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermission();
 
   const [params, setParams] = useState<DepositParams>({
     page: 0,
@@ -143,7 +142,7 @@ const DepositTable = (props: DepositTableProps) => {
       setTransactionId(code);
       setIsOpenHistory(true);
     } catch (error) {
-      console.error(t('system.errorGettingHistory'), error);
+      console.error(t("system.errorGettingHistory"), error);
     }
   };
 
@@ -155,7 +154,8 @@ const DepositTable = (props: DepositTableProps) => {
       width: 130,
       render: (code: string, record: DepositItem) => {
         if (!code) return "";
-        const displayCode = code.length > 12 ? `${code.slice(0, 8)}...${code.slice(-4)}` : code;
+        const displayCode =
+          code.length > 12 ? `${code.slice(0, 8)}...${code.slice(-4)}` : code;
         return (
           <div>
             <Tooltip title={code}>
@@ -178,7 +178,9 @@ const DepositTable = (props: DepositTableProps) => {
         return (
           <div>
             <Tooltip title={text}>
-              <div className="text-sm text-gray-800 truncate max-w-[140px]">{text}</div>
+              <div className="text-sm text-gray-800 truncate max-w-[140px]">
+                {text}
+              </div>
             </Tooltip>
             <div className="text-xs text-gray-500">ID: {record.user_id}</div>
           </div>
@@ -194,8 +196,13 @@ const DepositTable = (props: DepositTableProps) => {
         if (value == null) return null;
         const formatted = value.toLocaleString("vi-VN");
         return (
-          <div className={`text-sm ${value >= 0 ? "text-green-600" : "text-red-600"}`}>
-            {value >= 0 ? "+" : ""}{formatted}đ
+          <div
+            className={`text-sm ${
+              value >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {value >= 0 ? "+" : ""}
+            {formatted}đ
           </div>
         );
       },
@@ -224,7 +231,9 @@ const DepositTable = (props: DepositTableProps) => {
         return (
           <div>
             <Tooltip title={handler}>
-              <div className="text-sm text-gray-700 truncate max-w-[120px]">{handler}</div>
+              <div className="text-sm text-gray-700 truncate max-w-[120px]">
+                {handler}
+              </div>
             </Tooltip>
             {record.handler_time && (
               <div className="text-xs text-gray-500">
@@ -243,13 +252,22 @@ const DepositTable = (props: DepositTableProps) => {
       fixed: "right",
       render: (_, record) => {
         const statusConfig = {
-          WAITING_CONFIRMATION: { color: "gold", text: t("deposit.status.pending") },
+          WAITING_CONFIRMATION: {
+            color: "gold",
+            text: t("deposit.status.pending"),
+          },
           COMPLETED: { color: "green", text: t("deposit.status.completed") },
           CANCELED: { color: "red", text: t("deposit.status.canceled") },
-          FAILED: { color: "blue", text: t('status.failed') },
-          MANUAL_TOP_UP_COMPLETED: { color: "green", text: t('status.topUp') },
-          MANUAL_WITHDRAWAL_COMPLETED: { color: "red", text: t('status.deduction') },
-          CANCELED_BY_USER: { color: "orange", text: t('status.cancelledByUser') },
+          FAILED: { color: "blue", text: t("status.failed") },
+          MANUAL_TOP_UP_COMPLETED: { color: "green", text: t("status.topUp") },
+          MANUAL_WITHDRAWAL_COMPLETED: {
+            color: "red",
+            text: t("status.deduction"),
+          },
+          CANCELED_BY_USER: {
+            color: "orange",
+            text: t("status.cancelledByUser"),
+          },
         };
         const config = statusConfig[record.status as keyof typeof statusConfig];
 
@@ -279,33 +297,40 @@ const DepositTable = (props: DepositTableProps) => {
               >
                 Chi tiết
               </Button>
-              {record.status === "WAITING_CONFIRMATION" && (
-                <>
-                  <Button
-                    className="!bg-green-500 !text-white !border-0 !text-xs !px-2 !h-6"
-                    size="small"
-                    onClick={() => {
-                      setConfirmAmount(record.amount);
-                      setSelectedId(record.id);
-                      setIsOpenConfirm(true);
-                    }}
-                  >
-                    Duyệt
-                  </Button>
-                  <Button
-                    className="!bg-red-500 !text-white !border-0 !text-xs !px-2 !h-6"
-                    size="small"
-                    onClick={() => {
-                      setSelectedCode(record.deposit_code)
-                      setSelectedId(record.id);
-                      setIsOpenCancel(true);
-                    }}
-                  >
-                    Hủy
-                  </Button>
-                </>
-              )}
-              {["CANCELED", "COMPLETED", "MANUAL_TOP_UP_COMPLETED", "MANUAL_WITHDRAWAL_COMPLETED"].includes(record.status) && (
+              {record.status === "WAITING_CONFIRMATION" &&
+                hasPermission("finance.approve_topup") &&
+                hasPermission("finance.approve_topup_requests") && (
+                  <>
+                    <Button
+                      className="!bg-green-500 !text-white !border-0 !text-xs !px-2 !h-6"
+                      size="small"
+                      onClick={() => {
+                        setConfirmAmount(record.amount);
+                        setSelectedId(record.id);
+                        setIsOpenConfirm(true);
+                      }}
+                    >
+                      Duyệt
+                    </Button>
+                    <Button
+                      className="!bg-red-500 !text-white !border-0 !text-xs !px-2 !h-6"
+                      size="small"
+                      onClick={() => {
+                        setSelectedCode(record.deposit_code);
+                        setSelectedId(record.id);
+                        setIsOpenCancel(true);
+                      }}
+                    >
+                      Hủy
+                    </Button>
+                  </>
+                )}
+              {[
+                "CANCELED",
+                "COMPLETED",
+                "MANUAL_TOP_UP_COMPLETED",
+                "MANUAL_WITHDRAWAL_COMPLETED",
+              ].includes(record.status) && (
                 <Button
                   type="link"
                   size="small"
@@ -327,7 +352,7 @@ const DepositTable = (props: DepositTableProps) => {
   const createTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createTopupManual(data),
     onSuccess: () => {
-      toast.success(t('toast.createDepositSuccess'));
+      toast.success(t("toast.createDepositSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listTopup"] });
     },
     onError: (err: any) =>
@@ -337,7 +362,7 @@ const DepositTable = (props: DepositTableProps) => {
   const createMinusTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createMinusTopupManual(data),
     onSuccess: () => {
-      toast.success(t('toast.createDepositSuccess'));
+      toast.success(t("toast.createDepositSuccess"));
       queryClient.invalidateQueries({ queryKey: ["listTopup"] });
     },
     onError: (err: any) =>
@@ -361,22 +386,28 @@ const DepositTable = (props: DepositTableProps) => {
           {t("deposit.approveDeposit")}
         </h2>
         <div className="flex items-center gap-3">
-          <Button
-            onClick={() => setIsOpen(true)}
-            type="primary"
-            className="!h-9 !bg-green-500 hover:!bg-green-600 !border-green-500 hover:!border-green-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
-          >
-            <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
-            <span>{t("deposit.manualDeposit")}</span>
-          </Button>
-          <Button
-            onClick={() => setIsOpenMinusManual(true)}
-            type="primary"
-            className="!h-9 !bg-red-500 hover:!bg-red-600 !border-red-500 hover:!border-red-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
-          >
-            <FontAwesomeIcon icon={faMinusCircle} className="text-sm" />
-            <span>{t("deposit.manualWithdraw")}</span>
-          </Button>
+          {hasPermission("finance.manual_topup") && (
+            <>
+              <Button
+                onClick={() => setIsOpen(true)}
+                type="primary"
+                className="!h-9 !bg-green-500 hover:!bg-green-600 !border-green-500 hover:!border-green-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
+              >
+                <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
+                <span>{t("deposit.manualDeposit")}</span>
+              </Button>
+            </>
+          )}
+          {hasPermission("finance.finance.manual_withdrawal") && (
+            <Button
+              onClick={() => setIsOpenMinusManual(true)}
+              type="primary"
+              className="!h-9 !bg-red-500 hover:!bg-red-600 !border-red-500 hover:!border-red-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
+            >
+              <FontAwesomeIcon icon={faMinusCircle} className="text-sm" />
+              <span>{t("deposit.manualWithdraw")}</span>
+            </Button>
+          )}
         </div>
       </div>
       <DepositFilter onFilter={handleSearch} code={code} action={action} />
@@ -445,7 +476,7 @@ const DepositTable = (props: DepositTableProps) => {
         onCancel={() => setIsOpenCompleteTransaction(false)}
         open={isOpenCompleteTransaction}
         selectId={selectedId}
-        typeDetail ={typeDetail}
+        typeDetail={typeDetail}
       />
     </div>
   );

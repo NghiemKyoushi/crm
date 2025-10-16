@@ -124,27 +124,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     try {
       await form.validateFields();
       if (idProduct && insurance) {
-        // const serviceOptionTrue = listService
-        //   .filter((item: any) => item.optional === true)
-        //   .map((item: any) => item.code);
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
-        // const serviceOptionTrue = listService.filter(
-        //   (item: any) => item.optional === true
-        // );
-        // const serviceOption = listServiceInOrder
-        //   ?.filter((item: any) => item.optional === false)
-        //   .map((item: any) => ({
-        //     ...item,
-        //     is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
-        //   }));
-
         const bodyNewOrder: OrderFeeRequest = {
           data: {
             product_id: idProduct,
             count: quantity,
             description: form.getFieldValue("description"),
             price: priceY,
-            name: form.getFieldValue("productName"),
+            name: form.getFieldValue("productName"), 
             item_quantity: form.getFieldValue("item_quantity"),
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },

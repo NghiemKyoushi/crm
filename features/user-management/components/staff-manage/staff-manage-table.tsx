@@ -362,11 +362,13 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
       key: "role_name",
       width: 180,
       render: (role: string, record: UserData) => {
+        console.log('role', role);
+        
         if (listRole) {
           return (
             <Select
               size="small"
-              value={role}
+              value={record.role_name}
               style={{ width: 160 }}
               disabled={record.user_id === 1}
               onChange={(value) => {
