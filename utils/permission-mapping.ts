@@ -100,6 +100,8 @@ export function getPermissionI18nKey(permissionName: string): string {
     'sales.access_dashboard': 'accessSalesDashboard',
     'sales.view_sales_reports': 'viewSalesReports',
     'sales.export_sales_data': 'exportSalesData',
+    'sales.view_assigned_shipments':'viewAssignedShipments',
+    'sales.create_shipments':'createShipments'
   };
 
   return mapping[permissionName] || permissionName;

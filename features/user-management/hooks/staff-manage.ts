@@ -1,6 +1,6 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersAdminSale, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/customer-group";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
@@ -108,6 +108,13 @@ export const useListCustomer = (params: CustomerParam) => {
   return useQuery<CustomerResponse>({
     queryKey: ["listCustomer", params], 
     queryFn: () => getListCustomers(params),
+  });
+};
+
+export const useListCustomerSale = (params: CustomerParam) => {
+  return useQuery<CustomerResponse>({
+    queryKey: ["listCustomerSale", params], 
+    queryFn: () => getListCustomersAdminSale(params),
   });
 };
 

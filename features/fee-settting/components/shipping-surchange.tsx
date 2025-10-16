@@ -148,9 +148,7 @@ export default function ShippingSurchangeTable(
           );
         }
       }
-      if (field === "price_from_price_to") {
-        console.log('check222');
-        
+      if (field === "price_from_price_to") {        
         newRows = newRows.map((row) =>
           row.id.toString() === key
             ? { ...row, price_from: value, price_to: value }
@@ -183,8 +181,8 @@ export default function ShippingSurchangeTable(
         route_id: item.route_id,
         product_category_id: item.product_category_id,
         condition_type: item.condition_type,
-        price_from: item.price_from || 0,
-        price_to: item.price_to || 0,
+        price_from: +item.price_from,
+        price_to: +item.price_to ,
         value_data: item.value_data ? item.value_data.toString() : "0",
         value_shipping_data: item.value_shipping_data?.toString() ?? "",
         status: item.status,
@@ -193,7 +191,10 @@ export default function ShippingSurchangeTable(
       };
     });
     updateShippingMutation.mutate(
-      { list: mappedData as ShippingConditionAdd[] },
+      {
+        list: mappedData as ShippingConditionAdd[],
+        customer_group_id: isCategory ? idCategory : undefined
+      },
       {
         onSuccess: () => {
           toast.success(t("shippingSettings.updateFeeSuccess"));

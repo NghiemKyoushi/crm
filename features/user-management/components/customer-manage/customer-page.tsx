@@ -27,7 +27,8 @@ export default function CustomerPage() {
 
     return (
       hasPermission("user.categorize_customers") ||
-      hasPermission("user.manage_staff_roles")
+      hasPermission("user.manage_staff_roles") ||
+      hasPermission("sales.manage_assigned_customers")
     );
   }, [loading, permissions, hasPermission]);
 
@@ -103,8 +104,20 @@ export default function CustomerPage() {
     );
   }
 
-  const allowedTabs = allTabs.filter((tab) => hasPermission(tab.perm));
+  const hasSalesOnly =
+    hasPermission("sales.manage_assigned_customers") &&
+    permissions.filter((p) =>
+      [
+        "user.view",
+        "role.view",
+        "user.categorize_customers",
+        "user.manage_staff_roles",
+      ].includes(p.name)
+    ).length === 0;
 
+  const allowedTabs = hasSalesOnly
+    ? allTabs.filter((tab) => tab.key === "1")
+    : allTabs.filter((tab) => hasPermission(tab.perm));
   return (
     <div className="p-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">

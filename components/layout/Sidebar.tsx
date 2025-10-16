@@ -34,7 +34,7 @@ export const menuPermissions: Record<string, string[]> = {
   "/dashboard": ["dashboard.view"],
 
   // Order Management - view permissions for most, edit for operations
-  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create"],
+  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create", "sales.view_assigned_orders", "sales.create_order_for_customers"],
 
   // Finance Management - restricted to finance roles
   "/finance-management": [
@@ -57,7 +57,8 @@ export const menuPermissions: Record<string, string[]> = {
     "user.manage_staff_roles",
     "user.view",
     "role.view",
-    "permission.view"
+    "permission.view",
+    "sales.manage_assigned_customers"
   ],
 
   // Telesales - manager or member access
@@ -93,7 +94,7 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin"]
+  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ]
 };
 
 export const menuItems = [

@@ -32,11 +32,12 @@ import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
 import { useCreateNewOrder, useListService, useListServiceAdmin } from "../../hooks/orderhub";
-import { useListCustomer } from "@/features/user-management/hooks/staff-manage";
+import { useListCustomer, useListCustomerSale } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TiptapEditor from "../TiptapEditor";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -52,6 +53,7 @@ export const CURRENCY_CODE = {
 
 export default function CreateOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
+  const { hasPermission, permissions } = usePermission();
 
   const { isOpen, onCancel } = props;
   const [form] = Form.useForm();
@@ -177,7 +179,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const [searchValue, setSearchValue] = useState("");
   const [customerPage, setCustomerPage] = useState(0);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
-  const { data, isLoading } = useListCustomer({
+  const { data, isLoading } = useListCustomerSale({
     page: customerPage,
     page_size: 10,
     ...(searchValue && { search: searchValue }),
@@ -398,7 +400,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setListService([]);
     setRateValueForPrice(0);
     queryClient.removeQueries({ queryKey: ['listService'] });
-    queryClient.removeQueries({ queryKey: ['listCustomer'] });
+    queryClient.removeQueries({ queryKey: ['listCustomerSale'] });
     setFees(
       {
         DOMESTIC_SHIPPING_FEE: -1,
@@ -766,7 +768,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       <Form.Item
                         label={
                           <span className="text-sm font-medium text-gray-700">
-                            Phí VC nội địa
+                            Cước VC nội địa
                           </span>
                         }
                         name="paymentType"
@@ -1172,7 +1174,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       Tỷ giá quy đổi
                     </span>
                     <span className="text-sm font-semibold text-gray-900">
-                      {rateValueForPrice
+                      {rateValueForPrice || rateValueForPrice === 0 
                         ? <span> {`1 ${currencyCode} = ${rateValueForPrice.toLocaleString("en-US")}đ`}</span>
                         : "Cập nhật sau"}
                     </span>
@@ -1199,7 +1201,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   </div>
 
                   {/* Domestic Shipping */}
-                    <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                    {/* <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
                       <span className="text-sm text-gray-600">
                         Cước VC nội địa
                       </span>
@@ -1214,10 +1216,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           </span>
                         </>
                           : "Cập nhật sau"}
-                        {/* {paymentAmount.toLocaleString("en-US")}{" "}
-                        {currencyCheckCode} */}
+                       
                       </span>
-                    </div>
+                    </div> */}
                   
 
                   {/* Fees Section */}

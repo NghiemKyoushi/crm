@@ -507,7 +507,9 @@
       "viewCustomerOrders": "Xem lịch sử đơn hàng của khách hàng được quản lý",
       "accessSalesDashboard": "Truy cập trang tổng quan Sales",
       "viewSalesReports": "Xem báo cáo bán hàng cá nhân",
-      "exportSalesData": "Xuất dữ liệu bán hàng cá nhân"
+      "exportSalesData": "Xuất dữ liệu bán hàng cá nhân",
+      "viewAssignedShipments":"Xem danh sách vận đơn được phân công",
+      "createShipments":"Tạo vận đơn cho khách hàng được quản lý"
     }
   },
   "roles": {

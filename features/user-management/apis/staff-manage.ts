@@ -139,6 +139,11 @@ export const getListCustomers= async (params: CustomerParam) => {
   return res.data.data;
 };
 
+export const getListCustomersAdminSale= async (params: CustomerParam) => {
+  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST_ADMIN_SALE, {params});
+  return res.data.data;
+};
+
 export const getDetailCustomer= async (id: string) => {
   const res = await api.get(`${API_TYPE_CONST.CUSTOMER_LIST}/${id}`);
   return res.data.data;
