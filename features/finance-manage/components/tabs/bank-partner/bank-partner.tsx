@@ -20,10 +20,11 @@ import {
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 export default function BankPartnerSetting() {
   const { t } = useTranslation();
-
+  const { hasPermission } = usePermission();
   const [open, setOpen] = useState(false);
   const [openAssign, setOpenAssign] = useState(false);
   const [editingRecord, setEditingRecord] = useState<BankAccount | null>(null);
@@ -191,8 +192,11 @@ export default function BankPartnerSetting() {
           <Button
             type="link"
             size="small"
-            className="!p-0 !h-auto !text-xs !text-green-600"
+            className={`!p-0 !h-auto !text-xs  ${hasPermission('finance.manage_bank_permissions') ? '!text-green-600': '!text-gray-600'}`}
             onClick={() => {
+              if(!hasPermission('finance.manage_bank_permissions')){
+                return;
+              }
               setAccountName(record.account_holder);
               setAccountNumber(record.account_number);
               setSelectId(record.id.toString());
