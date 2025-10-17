@@ -19,18 +19,15 @@ const FinanceDepositApprovalPage = () => {
   // const pathname = usePathname();
   const allowedTabs = [ 
     (
-      hasPermission("finance.view_all_transactions") &&
-      hasPermission("finance.approve_topup") &&
-      hasPermission("finance.approve_topup_requests") && 
-      hasPermission("finance.manual_topup")
+      hasPermission("finance.view_all_transactions") ||
+      hasPermission("finance.view_topup_transactions")
     ) && "deposit",
     (
-      hasPermission("finance.view_all_transactions") &&
-      hasPermission("finance.process_withdrawal") &&
-      hasPermission("finance.process_withdrawal_requests")
+      hasPermission("finance.view_all_transactions") ||
+      hasPermission("finance.view_withdrawal_transactions")
     ) && "withdraw",
     hasPermission("finance.manage_bank_accounts") && "bank-settings",
-    hasPermission("finance.manage_bank_permissions") && "bank-partner",
+    hasPermission("finance.manage_bank_partner") && "bank-partner",
     hasPermission("finance.manage_bank_accounts") && "account-partner",
     hasPermission("finance.manage_debt") && "reconciliation",
   ].filter(Boolean) as string[];
@@ -77,7 +74,7 @@ const FinanceDepositApprovalPage = () => {
             {activeTab === "withdraw" && <WithdrawTable />}
             {activeTab === "bank-settings" && <BankAccountSetting />}
             {activeTab === "bank-partner" && <BankPartnerSetting/>}
-            {activeTab === "account-partner" && <BankAccountSetting />}
+            {/* {activeTab === "account-partner" && <BankAccountSetting />} */}
           </div>
         </div> : <Spin />
       }

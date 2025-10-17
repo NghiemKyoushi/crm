@@ -15,7 +15,7 @@ export const getListStaff = async (params: getListStaffParams) => {
 export const createNewStaff = async (params: NewUserType) => {
   const res = await api.post(API_TYPE_CONST.ADD_STAFF, {
     ...params,
-    active: params.active ? "true" : "false",
+    active: params.active ? true : false,
   });
   return res.data;
 };

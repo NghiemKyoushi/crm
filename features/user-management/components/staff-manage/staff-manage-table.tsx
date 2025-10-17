@@ -362,24 +362,32 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
       key: "role_name",
       width: 180,
       render: (role: string, record: UserData) => {
-        if (listRole) {
+        let matchedRoleId: string | null | undefined;
+        if (listRole && listRole.length > 0) {
+          const foundRole = listRole.find((r: any) => r.role_name === role);
+          matchedRoleId = foundRole ? foundRole.role_id : undefined;
+        }        
+        if (listRole && listRole.length > 0) {
           return (
             <Select
               size="small"
-              value={role}
+              value={matchedRoleId}
               style={{ width: 160 }}
               disabled={record.user_id === 1}
+              loading={!listRole}
               onChange={(value) => {
-                updateStaffMutation.mutate({
-                  param: {
-                    email: record.email,
-                    full_name: record.full_name,
-                    active: record.active,
-                    phone_number: record.phone_number,
-                    role_id: value,
-                  },
-                  id: record.user_id.toString(),
-                });
+                if (value && value !== matchedRoleId) {
+                  updateStaffMutation.mutate({
+                    param: {
+                      email: record.email,
+                      full_name: record.full_name,
+                      active: record.active,
+                      phone_number: record.phone_number,
+                      role_id: value,
+                    },
+                    id: record.user_id.toString(),
+                  });
+                }
               }}
               options={listRole.map((r: any) => ({
                 value: r.role_id,
@@ -388,7 +396,11 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
             />
           );
         }
-        return null;
+        return (
+          <div className="text-sm text-gray-500">
+            {record.role_name || "-"}
+          </div>
+        );
       },
     },
     {
@@ -502,7 +514,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
       },
     },
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [permissions]);
+  ], [permissions, listRole]);
   
   return (
     <div className="p-4 bg-white shadow-md rounded-xl w-full">

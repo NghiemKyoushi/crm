@@ -501,19 +501,19 @@ export default function OrderHub() {
         </div>
       ),
     },
-    {
-      title: "Phụ Phí",
-      key: "extra_fee",
-      width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-800 text-left">-</div>
-      ),
-    },
+    // {
+    //   title: "Phụ Phí",
+    //   key: "extra_fee",
+    //   width: 110,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="text-xs text-gray-800 text-left">-</div>
+    //   ),
+    // },
     {
       title: "Thanh Toán & Công Nợ",
       key: "payment_info",

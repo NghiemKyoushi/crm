@@ -23,6 +23,7 @@ import ConfirmReasonModal from "../deposit/modal/modal-complete-statement";
 import TransactionDetailModal from "./modal/transaction-detail-modal";
 import TransactionCompleteModal from "./modal/transaction-complete-modal";
 import { useSearchParams } from "next/navigation";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const WithdrawTable = ({}) => {
   const queryClient = useQueryClient();
@@ -30,6 +31,7 @@ const WithdrawTable = ({}) => {
   const searchParams = useSearchParams();
   const action = searchParams.get("action");
   const code = searchParams.get("code");
+  const { hasPermission } = usePermission();
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedCode, setSelectedCode] = useState<string>("");
@@ -272,7 +274,9 @@ const WithdrawTable = ({}) => {
               </Tag>
             )}
             <Space size="small" className="flex justify-center">
-              {["PENDING", "APPROVED"].includes(record.status) && (
+              {["PENDING", "APPROVED"].includes(record.status) &&
+                hasPermission("finance.process_withdrawal") &&
+                hasPermission("finance.process_withdrawal_requests") && (
                 <Button
                   type="link"
                   size="small"
