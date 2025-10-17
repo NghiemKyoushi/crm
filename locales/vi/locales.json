@@ -394,7 +394,8 @@
     "toast": {
       "createSuccess": "Tạo Website mới thành công!",
       "updateSuccess": "Cập nhật Website thành công!",
-      "deleteSuccess": "Xóa Website thành công!"
+      "deleteSuccess": "Xóa Website thành công!",
+      "updateSelectorSuccess": "Cập nhật cấu hình Selector thành công!"
     }
   },
   "insurance": {

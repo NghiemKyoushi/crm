@@ -4,6 +4,8 @@ import {
   Region,
   WebsiteListResponse,
   WebsiteParams,
+  UpdateSelectorConfigRequest,
+  TestSelectorConfigRequest
 } from "@/types/website-manage";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -13,6 +15,8 @@ import {
   listRegion,
   listRoute,
   updateWebsite,
+  updateSelectorConfig,
+  testSelectorConfig,
 } from "../apis/web-manage";
 
 export const useListWebsite = (params: WebsiteParams) => {
@@ -53,5 +57,23 @@ export const useListRoutes = () => {
   return useQuery({
     queryKey: ["listRoute"],
     queryFn: () => listRoute(),
+  });
+};
+
+export const useUpdateSelectorConfig = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: number;
+      body: UpdateSelectorConfigRequest;
+    }) => updateSelectorConfig(id, body),
+  });
+};
+
+export const useTestSelectorConfig = () => {
+  return useMutation({
+    mutationFn: (body: TestSelectorConfigRequest) => testSelectorConfig(body),
   });
 };

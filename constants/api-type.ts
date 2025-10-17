@@ -61,6 +61,8 @@ export const API_TYPE_CONST = {
   WITHDRAW_HISTORY:`${FEATURE}/admin/withdrawal/`,
   TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
+  UPDATE_SELECTOR_CONFIG: `${FEATURE}/admin/source-website`, // + /{id}/selector-config
+  TEST_SELECTOR_CONFIG: `${FEATURE}/admin/source-website/test-selector-config`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   DETAIL_ORDER: `${FEATURE}/orders`,
