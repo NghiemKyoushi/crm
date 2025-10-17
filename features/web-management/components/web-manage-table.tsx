@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { Table, Button, Modal, Form, Input, Select } from "antd";
+import { Table, Button, Modal, Form, Input, Select, Tag } from "antd";
+import { SettingOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import TableComponent from "@/components/TableComponent";
 import {
   useCreateNewWebsite,
@@ -19,6 +21,7 @@ import PopupConfirm from "@/components/PopupConfirm";
 
 const WebsiteManageTable: React.FC = () => {
   const { t } = useTranslation();
+  const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
@@ -129,6 +132,10 @@ const WebsiteManageTable: React.FC = () => {
     setId("null");
   };
 
+  const handleOpenSelectorConfig = (record: Website) => {
+    router.push(`/website-manage/selector-config?id=${record.id}`);
+  };
+
   const { data: regionList } = useListRegion();
   const { data: routeList } = useListRoutes();
 
@@ -149,10 +156,30 @@ const WebsiteManageTable: React.FC = () => {
       },
     },
     {
-      title: t("websiteManage.table.region"),
+      title: "Configs",
+      key: "configs",
+      render: (_: any, record: Website) => {
+        const configCount = record.selector_configs?.length || 0;
+        return (
+          <Tag color={configCount > 0 ? "green" : "default"}>
+            {configCount} {configCount === 1 ? "config" : "configs"}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Actions",
       key: "action",
       render: (_: any, record: Website) => (
         <div className="space-x-2">
+          <Button
+            type="link"
+            icon={<SettingOutlined />}
+            className="!text-purple-500"
+            onClick={() => handleOpenSelectorConfig(record)}
+          >
+            Config
+          </Button>
           <Button
             type="link"
             className="!text-blue-500"

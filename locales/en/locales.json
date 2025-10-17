@@ -395,7 +395,8 @@
     "toast": {
       "createSuccess": "Website created successfully!",
       "updateSuccess": "Website updated successfully!",
-      "deleteSuccess": "Website deleted successfully!"
+      "deleteSuccess": "Website deleted successfully!",
+      "updateSelectorSuccess": "Selector configuration updated successfully!"
     }
   },
   "insurance": {

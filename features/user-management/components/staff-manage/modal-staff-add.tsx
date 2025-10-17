@@ -45,7 +45,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
           ? "false"
           : "true",
       phone_number: "",
-      role_id: "",
+      role_id: 0,
       password: "",
       ...initialValues,
     },
@@ -60,23 +60,18 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
   };
   useEffect(() => {
     if (open) {
-      reset({
-        full_name: "",
-        active: initialValues?.active ?? true,
-        phone_number: "",
-        role_id: "",
-        password: "",
-        ...initialValues,
-      });
+      const roleId: number = initialValues?.role_id
+        ? Number(initialValues.role_id)
+        : (listRole && listRole.length > 0 ? Number(listRole[0]?.role_id ?? 0) : 0);
 
-      if (listRole && listRole.length > 0) {
-        reset((prev) => ({
-          ...prev,
-          role_id:
-            initialValues?.role_id?.toString() ||
-            (listRole[0]?.role_id?.toString() ?? ""),
-        }));
-      }
+      reset({
+        full_name: initialValues?.full_name ?? "",
+        active: initialValues?.active ?? true,
+        email: initialValues?.email ?? "",
+        phone_number: initialValues?.phone_number ?? "",
+        role_id: roleId,
+        password: initialValues?.password ?? "",
+      });
     }
   }, [open, initialValues, listRole, reset]);
 
@@ -232,7 +227,7 @@ export default function ModalStaffAdd(props: ModalStaffAddProps) {
                       item.role_name !== "USER"
                   )
                   .map((item, index) => (
-                    <Radio value={item.role_id.toString()} key={index}>
+                    <Radio value={item.role_id} key={index}>
                       {item.role_name}
                     </Radio>
                   ))}

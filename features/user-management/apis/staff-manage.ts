@@ -16,6 +16,7 @@ export const createNewStaff = async (params: NewUserType) => {
   const res = await api.post(API_TYPE_CONST.ADD_STAFF, {
     ...params,
     active: params.active ? true : false,
+    role_id: Number(params.role_id),
   });
   return res.data;
 };
@@ -24,6 +25,7 @@ export const updateStaff = async (params: NewUserType, id:string) => {
   const res = await api.put(`${API_TYPE_CONST.ADD_STAFF}/${id}`, {
     ...params,
     active: params.active ? "true" : "false",
+    role_id: Number(params.role_id),
   });
   return res.data;
 };
