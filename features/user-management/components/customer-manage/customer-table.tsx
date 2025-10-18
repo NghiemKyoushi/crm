@@ -106,20 +106,22 @@ export default function CustomerTable() {
       ),
     },
     // Ẩn cột phân loại nếu KHÔNG có quyền user.categorize_customers
-    canShowCategory && !hasSalesOnly
-      ? {
-          title: t("customerTable.type"),
-          dataIndex: "group_name",
-          key: "group_name",
-          width: 180,
-          render: (_: any, record: CustomerModel) => (
-            <CategorySelect
-              value={record.group_id}
-              onChange={(e: number) => handleUpdateColor(e, record.user_id)}
-            />
-          ),
-        }
-      : null,
+    {
+      title: t("customerTable.type"),
+      dataIndex: "group_name",
+      key: "group_name",
+      width: 180,
+      render: (_: any, record: CustomerModel) => (
+        canShowCategory ? (
+          <CategorySelect
+            value={record.group_id}
+            onChange={(e: number) => handleUpdateColor(e, record.user_id)}
+          />
+        ) : (
+          <span>{record.group_name || "-"}</span>
+        )
+      ),
+    },
     {
       title: t("customerTable.sales"),
       dataIndex: "sale_name",
