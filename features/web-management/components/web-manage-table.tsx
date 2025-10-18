@@ -75,6 +75,7 @@ const WebsiteManageTable: React.FC = () => {
         region_id: values.region_id,
         currency_code: values.currency_code,
         route_id: values.route_id,
+        use_selenium: values.use_selenium || false,
         proxy_enabled: values.proxy_enabled || false,
         proxy_host: values.proxy_enabled ? values.proxy_host : undefined,
         proxy_port: values.proxy_enabled ? values.proxy_port : undefined,
@@ -324,6 +325,14 @@ const WebsiteManageTable: React.FC = () => {
               <Select.Option value="JPY">JPY</Select.Option>
               <Select.Option value="USD">USD</Select.Option>
             </Select>
+          </Form.Item>
+
+          <Divider>Crawling Options</Divider>
+
+          <Form.Item name="use_selenium" valuePropName="checked">
+            <Checkbox>
+              Use Selenium (for dynamic content / JavaScript-rendered pages)
+            </Checkbox>
           </Form.Item>
 
           <Divider>Proxy Configuration (Optional)</Divider>
