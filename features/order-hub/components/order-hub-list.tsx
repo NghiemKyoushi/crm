@@ -739,8 +739,7 @@ export default function OrderHub() {
         let actionButton: React.ReactNode = null;
 
         switch (record.status) {
-          case OrderStatusType.PENDING_APPROVAL:
-            if (record.is_user_created) {
+          case OrderStatusType.ADMIN_PENDING:
               actionButton = (
                 <div className="flex gap-1.5 justify-center w-full">
                   <Button
@@ -767,7 +766,6 @@ export default function OrderHub() {
                   </Button>
                 </div>
               );
-            }
             break;
 
           case OrderStatusType.DEPOSIT_PAID:
