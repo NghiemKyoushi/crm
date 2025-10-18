@@ -15,10 +15,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const { Text } = Typography;
 
 export default function CustomerTable() {
+  const { hasPermission, permissions } = usePermission();
+
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -26,6 +29,21 @@ export default function CustomerTable() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<string>("");
   const router = useRouter();
+
+  // Phân quyền chỉ hiển thị nếu có "user.categorize_customers"
+  const canShowCategory =
+    hasPermission("user.categorize_customers");
+
+  const hasSalesOnly =
+    hasPermission("sales.manage_assigned_customers") &&
+    permissions.filter((p) =>
+      [
+        "user.view",
+        "role.view",
+        "user.categorize_customers",
+        "user.manage_staff_roles",
+      ].includes(p.name)
+    ).length === 0;
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
   const { data } = useListCustomer({
@@ -62,7 +80,8 @@ export default function CustomerTable() {
     );
   };
 
-  const columns: ColumnsType<CustomerModel> = [
+  // Các cột mặc định
+  const baseColumns: ColumnsType<CustomerModel> = [
     {
       title: t("customerTable.name"),
       dataIndex: "full_name",
@@ -80,22 +99,27 @@ export default function CustomerTable() {
       dataIndex: "phone_number",
       key: "phone_number",
       width: 200,
-      render: (_, record: CustomerModel) => (
+      render: (_: any, record: CustomerModel) => (
         <div>
           <div className="text-sm text-gray-800">{record.phone_number}</div>
         </div>
       ),
     },
+    // Ẩn cột phân loại nếu KHÔNG có quyền user.categorize_customers
     {
       title: t("customerTable.type"),
       dataIndex: "group_name",
       key: "group_name",
       width: 180,
-      render: (_, record) => (
-        <CategorySelect
-          value={record.group_id}
-          onChange={(e: number) => handleUpdateColor(e, record.user_id)}
-        />
+      render: (_: any, record: CustomerModel) => (
+        canShowCategory ? (
+          <CategorySelect
+            value={record.group_id}
+            onChange={(e: number) => handleUpdateColor(e, record.user_id)}
+          />
+        ) : (
+          <span>{record.group_name || "-"}</span>
+        )
       ),
     },
     {
@@ -137,7 +161,7 @@ export default function CustomerTable() {
         </Button>
       ),
     },
-  ];
+  ].filter(Boolean) as ColumnsType<CustomerModel>;
 
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
@@ -170,7 +194,7 @@ export default function CustomerTable() {
       </div>
       <div className="overflow-x-auto">
         <TableComponent
-          columns={columns}
+          columns={baseColumns}
           dataSource={data?.data || []}
           rowHeight={55}
           pageSize={10}

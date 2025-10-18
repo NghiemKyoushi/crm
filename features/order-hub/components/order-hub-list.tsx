@@ -17,9 +17,7 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFilter,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import { useTranslation } from "react-i18next";
 import {
@@ -62,7 +60,7 @@ type FilterType = {
 };
 export default function OrderHub() {
   const { hasPermission, permissions } = usePermission();
-  
+
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
@@ -142,7 +140,7 @@ export default function OrderHub() {
           : undefined,
       status: values.status !== "" ? values.status : undefined,
       date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      type: undefined
+      type: undefined,
     });
     setPage(1);
   };
@@ -261,13 +259,16 @@ export default function OrderHub() {
     }
   };
 
-  useEffect(()=>{
-     if(hasPermission("sales.view_assigned_orders") && hasPermission("order.view")){
-       setFilters({...filters, type: 1})
-     }else{
-      setFilters({...filters, type: 2})
-     }
-  },[permissions])
+  useEffect(() => {
+    if (
+      hasPermission("sales.view_assigned_orders") &&
+      hasPermission("order.view")
+    ) {
+      setFilters({ ...filters, type: 1 });
+    } else {
+      setFilters({ ...filters, type: 2 });
+    }
+  }, [permissions]);
 
   const columns: ColumnsType<Invoice> = [
     {
@@ -336,7 +337,9 @@ export default function OrderHub() {
                 )}
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
-                record.status !== OrderStatusType.READY_TO_SHIP && (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && (
+                record.status !== OrderStatusType.READY_TO_SHIP &&
+                hasPermission("sales.view_assigned_orders") &&
+                hasPermission("order.view") && (
                   <Button
                     type="text"
                     size="small"
@@ -429,7 +432,7 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "vi-VN"
+                              "en-US"
                             )}${isJapanPrice}`
                           : codeType === 1
                           ? "Miễn phí"
@@ -439,22 +442,26 @@ export default function OrderHub() {
                       </span>
                     )}
                   </div>
-                  {(codeType !== 1 && codeType !== 2) && (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && (
-                  <EditOutlined
-                    className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                    onClick={() => {
-                      const codeType = record.metadata?.infos?.codeType ?? null;
-                      const codInJapan =
-                        record.metadata?.infos?.codInJapan ?? null;
-                      setOrderDetail(record);
-                      setEditingFeesRates({
-                        orderId: record.id,
-                        codOption: codeType ?? 1,
-                        codAmount: codInJapan ?? "",
-                      });
-                    }}
-                  />
-                 )}
+                  {codeType !== 1 &&
+                    codeType !== 2 &&
+                    hasPermission("sales.view_assigned_orders") &&
+                    hasPermission("order.view") && (
+                      <EditOutlined
+                        className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                        onClick={() => {
+                          const codeType =
+                            record.metadata?.infos?.codeType ?? null;
+                          const codInJapan =
+                            record.metadata?.infos?.codInJapan ?? null;
+                          setOrderDetail(record);
+                          setEditingFeesRates({
+                            orderId: record.id,
+                            codOption: codeType ?? 1,
+                            codAmount: codInJapan ?? "",
+                          });
+                        }}
+                      />
+                    )}
                 </div>
               </div>
               {url && (
@@ -486,18 +493,18 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
             {record.note || record.description || "Cập nhật sau"}
           </div>
-          {
-            (hasPermission("sales.view_assigned_orders") && hasPermission("order.view")) && <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-            onClick={() =>
-              setEditingNote({
-                id: record.id,
-                note: record.note || record.description || "",
-              })
-            }
-          />
-          }
-          
+          {hasPermission("sales.view_assigned_orders") &&
+            hasPermission("order.view") && (
+              <EditOutlined
+                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
+                onClick={() =>
+                  setEditingNote({
+                    id: record.id,
+                    note: record.note || record.description || "",
+                  })
+                }
+              />
+            )}
         </div>
       ),
     },
@@ -523,7 +530,7 @@ export default function OrderHub() {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) => {        
+      render: (_, record) => {
         const depositFee = record.deposit_fee ?? 0;
         const totalAmount = record.amount_vnd ?? 0;
         const remaining = totalAmount - depositFee;
@@ -533,15 +540,17 @@ export default function OrderHub() {
             <div className="text-xs">
               <span className="text-gray-500">Trước: </span>
               <span className="text-green-600 font-medium">
-                {record.deposit_fee || record.deposit_fee === 0  
-                  ? `${record.deposit_fee.toLocaleString("vi-VN")}đ`
+                {record.deposit_fee || record.deposit_fee === 0
+                  ? `${record.deposit_fee.toLocaleString("en-US")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
             <div className="text-xs">
               <span className="text-gray-500">Lần 2: </span>
               <span className="text-orange-600 font-medium">
-                {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "Cập nhật sau"}
+                {remaining > 0
+                  ? `${remaining.toLocaleString("en-US")}đ`
+                  : "Cập nhật sau"}
               </span>
             </div>
             {/* <div className="text-xs">
@@ -588,7 +597,7 @@ export default function OrderHub() {
               <span className="text-gray-500">Giá: </span>
               <span className="text-gray-800 font-medium">
                 {shippingPrice > 0
-                  ? `${shippingPrice.toLocaleString("vi-VN")}đ`
+                  ? `${shippingPrice.toLocaleString("en-US")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
@@ -614,7 +623,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="text-xs font-medium text-blue-600">
           {record.amount_vnd
-            ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
+            ? `${record.amount_vnd.toLocaleString("en-US")}đ`
             : "Cập nhật sau"}
         </div>
       ),
@@ -633,18 +642,18 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 flex-1">
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
-          {
-            (hasPermission("sales.view_assigned_orders") && hasPermission("order.view") ) && <EditOutlined
-            className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-            onClick={() =>
-              setEditingNoteExtra({
-                orderId: record.id,
-                value: record?.note_admin,
-              })
-            }
-          />
-          }
-          
+          {hasPermission("sales.view_assigned_orders") &&
+            hasPermission("order.view") && (
+              <EditOutlined
+                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                onClick={() =>
+                  setEditingNoteExtra({
+                    orderId: record.id,
+                    value: record?.note_admin,
+                  })
+                }
+              />
+            )}
         </div>
       ),
     },
@@ -667,6 +676,14 @@ export default function OrderHub() {
         // Xác định màu và text cho tag trạng thái
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
+            color = "orange";
+            text = t("status.pendingApproval");
+            break;
+          case OrderStatusType.ADMIN_PENDING:
+            color = "orange";
+            text = t("status.approve");
+            break;
+          case OrderStatusType.CLIENT_PENDING:
             color = "orange";
             text = t("status.pendingApproval");
             break;
@@ -722,8 +739,7 @@ export default function OrderHub() {
         let actionButton: React.ReactNode = null;
 
         switch (record.status) {
-          case OrderStatusType.PENDING_APPROVAL:
-            if (record.is_user_created) {
+          case OrderStatusType.ADMIN_PENDING:
               actionButton = (
                 <div className="flex gap-1.5 justify-center w-full">
                   <Button
@@ -750,7 +766,6 @@ export default function OrderHub() {
                   </Button>
                 </div>
               );
-            }
             break;
 
           case OrderStatusType.DEPOSIT_PAID:
@@ -883,7 +898,10 @@ export default function OrderHub() {
             </Tag>
 
             {/* Nút hành động chính (nếu có) */}
-            {hasPermission("sales.view_assigned_orders") && hasPermission("order.view") ? actionButton : null}
+            {hasPermission("sales.view_assigned_orders") &&
+            hasPermission("order.view")
+              ? actionButton
+              : null}
 
             {/* Button chi tiết luôn hiển thị */}
             <Button
@@ -1200,7 +1218,7 @@ export default function OrderHub() {
         <EditTrackingModal
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
-          status = {orderDetail.status}
+          status={orderDetail.status}
           onClose={() => {
             setOrderDetail(undefined);
             setIsTrackingJP(false);
