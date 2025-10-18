@@ -1,6 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { Table, Button, Modal, Form, Input, Select, Tag } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Tag,
+  Checkbox,
+  Divider,
+  Row,
+  Col,
+} from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import TableComponent from "@/components/TableComponent";
@@ -31,6 +43,7 @@ const WebsiteManageTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [id, setId] = useState("");
   const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
+  const [proxyEnabled, setProxyEnabled] = useState(false);
 
   const { data } = useListWebsite({
     page,
@@ -45,26 +58,35 @@ const WebsiteManageTable: React.FC = () => {
     if (record) {
       setEditingWebsite(record);
       form.setFieldsValue(record);
+      setProxyEnabled(record.proxy_enabled || false);
     } else {
       setEditingWebsite(null);
       form.resetFields();
+      setProxyEnabled(false);
     }
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
     form.validateFields().then((values) => {
+      const requestData = {
+        name: values.name,
+        domain: values.domain,
+        region_id: values.region_id,
+        currency_code: values.currency_code,
+        route_id: values.route_id,
+        proxy_enabled: values.proxy_enabled || false,
+        proxy_host: values.proxy_enabled ? values.proxy_host : undefined,
+        proxy_port: values.proxy_enabled ? values.proxy_port : undefined,
+        proxy_username: values.proxy_enabled ? values.proxy_username : undefined,
+        proxy_password: values.proxy_enabled ? values.proxy_password : undefined,
+      };
+
       if (editingWebsite) {
         updateWebMutation.mutate(
           {
             id: editingWebsite.id,
-            param: {
-              name: values.name,
-              domain: values.domain,
-              region_id: values.region_id,
-              currency_code: values.currency_code,
-              route_id: values.route_id,
-            },
+            param: requestData,
           },
           {
             onSuccess: () => {
@@ -82,13 +104,7 @@ const WebsiteManageTable: React.FC = () => {
         );
       } else {
         createNewWebMutation.mutate(
-          {
-            domain: values.domain,
-            name: values.name,
-            region_id: values.region_id,
-            currency_code: values.currency_code,
-            route_id: values.route_id,
-          },
+          requestData,
           {
             onSuccess: () => {
               toast.success(t("websiteManage.toast.createSuccess"));
@@ -309,6 +325,70 @@ const WebsiteManageTable: React.FC = () => {
               <Select.Option value="USD">USD</Select.Option>
             </Select>
           </Form.Item>
+
+          <Divider>Proxy Configuration (Optional)</Divider>
+
+          <Form.Item name="proxy_enabled" valuePropName="checked">
+            <Checkbox
+              onChange={(e) => setProxyEnabled(e.target.checked)}
+            >
+              Enable Proxy
+            </Checkbox>
+          </Form.Item>
+
+          {proxyEnabled && (
+            <>
+              <Row gutter={16}>
+                <Col span={16}>
+                  <Form.Item
+                    label="Proxy Host"
+                    name="proxy_host"
+                    rules={[
+                      {
+                        required: proxyEnabled,
+                        message: "Please enter proxy host",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="e.g., proxy.example.com" />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Proxy Port"
+                    name="proxy_port"
+                    rules={[
+                      {
+                        required: proxyEnabled,
+                        message: "Please enter proxy port",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="e.g., 8080" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Proxy Username"
+                    name="proxy_username"
+                  >
+                    <Input placeholder="Username (optional)" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Proxy Password"
+                    name="proxy_password"
+                  >
+                    <Input.Password placeholder="Password (optional)" />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          )}
         </Form>
       </Modal>
       <PopupConfirm

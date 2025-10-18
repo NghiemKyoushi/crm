@@ -171,7 +171,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                       <Text type="secondary">Product Name:</Text>
                       <br />
                       <Text strong>
-                        {result.extracted_data.product_name || (
+                        {result.extracted_data?.product_name || (
                           <Text type="danger">Not extracted</Text>
                         )}
                       </Text>
@@ -184,7 +184,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                       <Text type="secondary">Price:</Text>
                       <br />
                       <Text strong>
-                        {result.extracted_data.price !== null ? (
+                        {typeof result.extracted_data?.price === 'number' ? (
                           <Text style={{ fontSize: 16, color: "#52c41a" }}>
                             {result.extracted_data.price.toLocaleString()}
                           </Text>
@@ -201,7 +201,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                       <Text type="secondary">Quantity:</Text>
                       <br />
                       <Text strong>
-                        {result.extracted_data.quantity !== null ? (
+                        {typeof result.extracted_data?.quantity === 'number' ? (
                           result.extracted_data.quantity
                         ) : (
                           <Text type="danger">Not extracted</Text>
@@ -215,7 +215,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                     <div>
                       <Text type="secondary">Images:</Text>
                       <br />
-                      {result.extracted_data.images &&
+                      {result.extracted_data?.images &&
                       result.extracted_data.images.length > 0 ? (
                         <div className="mt-2 grid grid-cols-4 gap-2">
                           {result.extracted_data.images.slice(0, 8).map((img, idx) => (
@@ -234,7 +234,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                       ) : (
                         <Text type="danger">Not extracted</Text>
                       )}
-                      {result.extracted_data.images &&
+                      {result.extracted_data?.images &&
                         result.extracted_data.images.length > 8 && (
                           <Text type="secondary" className="mt-1">
                             +{result.extracted_data.images.length - 8} more
@@ -248,7 +248,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                     <div>
                       <Text type="secondary">Description:</Text>
                       <br />
-                      {result.extracted_data.description ? (
+                      {result.extracted_data?.description ? (
                         <div
                           className="mt-2 p-2 bg-gray-50 rounded border max-h-40 overflow-auto"
                           dangerouslySetInnerHTML={{
@@ -261,7 +261,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
                       ) : (
                         <Text type="danger">Not extracted</Text>
                       )}
-                      {result.extracted_data.description &&
+                      {result.extracted_data?.description &&
                         result.extracted_data.description.length > 500 && (
                           <Text type="secondary">
                             ... (truncated, total length:{" "}
