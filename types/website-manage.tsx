@@ -45,6 +45,11 @@ export interface AddWebsiteModel {
   route_id: string;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
+  proxy_enabled?: boolean;                   // Enable proxy for crawling
+  proxy_host?: string;                       // Proxy server host
+  proxy_port?: string;                       // Proxy server port
+  proxy_username?: string;                   // Proxy authentication username
+  proxy_password?: string;                   // Proxy authentication password
 }
 
 export interface Website {
@@ -60,6 +65,11 @@ export interface Website {
   region: Region;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
+  proxy_enabled?: boolean;                   // Enable proxy for crawling
+  proxy_host?: string;                       // Proxy server host
+  proxy_port?: string;                       // Proxy server port
+  proxy_username?: string;                   // Proxy authentication username
+  proxy_password?: string;                   // Proxy authentication password (masked in response)
 }
 
 export interface WebsiteListResponse {

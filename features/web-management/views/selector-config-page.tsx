@@ -16,6 +16,9 @@ import {
   Switch,
   Alert,
   Modal,
+  Table,
+  Descriptions,
+  Popconfirm,
 } from "antd";
 import {
   PlusOutlined,
@@ -213,7 +216,7 @@ const SelectorConfigPage: React.FC = () => {
             queryClient.invalidateQueries({
               queryKey: ["listwebsite"],
             });
-            router.push("/settings/website-management");
+            // Không redirect, để user tiếp tục config
           },
           onError: (err: any) =>
             toast.error(
@@ -295,15 +298,37 @@ const SelectorConfigPage: React.FC = () => {
           </Space>
         </div>
 
-        {/* Info Alert */}
-        <Alert
-          message="Hướng dẫn sử dụng"
-          description="Tạo nhiều configs cho mỗi website để xử lý khi website thay đổi cấu trúc HTML. Backend sẽ tự động chọn config có extraction score cao nhất."
-          type="info"
-          showIcon
-          className="mb-6"
-          closable
-        />
+        {/* Info Alerts */}
+        <Space direction="vertical" style={{ width: "100%" }} className="mb-6">
+          <Alert
+            message="Hướng dẫn sử dụng"
+            description="Tạo nhiều configs cho mỗi website để xử lý khi website thay đổi cấu trúc HTML. Backend sẽ tự động chọn config có extraction score cao nhất."
+            type="info"
+            showIcon
+            closable
+          />
+
+          {website?.proxy_enabled && (
+            <Alert
+              message="Proxy Enabled"
+              description={
+                <Space direction="vertical" size="small">
+                  <Text>
+                    <Text strong>Host:</Text> {website.proxy_host}
+                    {website.proxy_port && `:${website.proxy_port}`}
+                  </Text>
+                  {website.proxy_username && (
+                    <Text>
+                      <Text strong>Username:</Text> {website.proxy_username}
+                    </Text>
+                  )}
+                </Space>
+              }
+              type="success"
+              showIcon
+            />
+          )}
+        </Space>
 
         <Row gutter={24}>
           {/* Left Sidebar - Config List */}
@@ -399,34 +424,33 @@ const SelectorConfigPage: React.FC = () => {
           <Col xs={24} lg={18}>
             {currentConfig && (
               <Space direction="vertical" style={{ width: "100%" }} size="large">
-                {/* Config Info */}
+                {/* Config Info - Table Style */}
                 <Card title="Config Information">
-                  <Row gutter={16}>
-                    <Col span={16}>
-                      <Form.Item label="Config Name">
-                        <Input
-                          value={currentConfig.name}
-                          onChange={(e) =>
-                            handleConfigChange("name", e.target.value)
-                          }
-                          placeholder="E.g., Yahoo Auction v1 (Current - Dec 2024)"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item label="Priority">
-                        <InputNumber
-                          value={currentConfig.priority}
-                          onChange={(value) => handleConfigChange("priority", value)}
-                          min={1}
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  <Descriptions bordered column={2}>
+                    <Descriptions.Item label="Config Name" span={2}>
+                      <Input
+                        value={currentConfig.name}
+                        onChange={(e) =>
+                          handleConfigChange("name", e.target.value)
+                        }
+                        placeholder="E.g., Yahoo Auction v1 (Current - Dec 2024)"
+                      />
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Priority">
+                      <InputNumber
+                        value={currentConfig.priority}
+                        onChange={(value) => handleConfigChange("priority", value)}
+                        min={1}
+                        style={{ width: "100%" }}
+                      />
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total Fields">
+                      <Tag color="blue">{selectorFields.length} fields</Tag>
+                    </Descriptions.Item>
+                  </Descriptions>
                 </Card>
 
-                {/* Selectors Grid */}
+                {/* Selectors Table */}
                 <Card
                   title="Selector Fields"
                   extra={
@@ -446,181 +470,203 @@ const SelectorConfigPage: React.FC = () => {
                     </Select>
                   }
                 >
-                  {selectorFields.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400">
-                      <Text>Chưa có selector nào. Click "Add field..." để thêm.</Text>
-                    </div>
-                  ) : (
-                    <Row gutter={[16, 16]}>
-                      {selectorFields.map((fieldName) => {
-                        const selector = currentSelectors[
-                          fieldName as keyof typeof currentSelectors
-                        ] as SelectorConfig;
-                        const fieldOption = FIELD_OPTIONS.find(
-                          (opt) => opt.value === fieldName
-                        );
-
-                        return (
-                          <Col xs={24} xl={12} key={fieldName}>
-                            <Card
-                              size="small"
-                              title={
-                                <Space>
-                                  <span>{fieldOption?.icon}</span>
-                                  <Text strong>{fieldOption?.label}</Text>
-                                </Space>
-                              }
-                              extra={
-                                <Button
-                                  danger
-                                  type="text"
-                                  size="small"
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => handleRemoveSelector(fieldName)}
-                                />
-                              }
-                              className="h-full"
-                            >
-                              <Space
-                                direction="vertical"
-                                style={{ width: "100%" }}
-                                size="middle"
+                  <Table
+                    dataSource={selectorFields.map((fieldName) => ({
+                      key: fieldName,
+                      fieldName,
+                      selector: currentSelectors[
+                        fieldName as keyof typeof currentSelectors
+                      ] as SelectorConfig,
+                    }))}
+                    columns={[
+                      {
+                        title: "Field Name",
+                        dataIndex: "fieldName",
+                        key: "fieldName",
+                        width: 150,
+                        render: (fieldName: string) => {
+                          const fieldOption = FIELD_OPTIONS.find(
+                            (opt) => opt.value === fieldName
+                          );
+                          return (
+                            <Space>
+                              <span>{fieldOption?.icon}</span>
+                              <Text strong>{fieldOption?.label}</Text>
+                            </Space>
+                          );
+                        },
+                      },
+                      {
+                        title: "CSS Selector",
+                        dataIndex: "selector",
+                        key: "selector",
+                        width: 250,
+                        render: (_: any, record: any) => (
+                          <Input
+                            placeholder="e.g., #itemTitle, .price"
+                            value={record.selector?.selector || ""}
+                            onChange={(e) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "selector",
+                                e.target.value
+                              )
+                            }
+                          />
+                        ),
+                      },
+                      {
+                        title: "Attribute",
+                        dataIndex: "attribute",
+                        key: "attribute",
+                        width: 140,
+                        render: (_: any, record: any) => (
+                          <Select
+                            value={record.selector?.attribute || "text"}
+                            onChange={(value) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "attribute",
+                                value
+                              )
+                            }
+                            style={{ width: "100%" }}
+                          >
+                            {ATTRIBUTE_OPTIONS.map((attr) => (
+                              <Select.Option key={attr.value} value={attr.value}>
+                                {attr.label}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        ),
+                      },
+                      {
+                        title: "Transform",
+                        dataIndex: "transform",
+                        key: "transform",
+                        width: 160,
+                        render: (_: any, record: any) => (
+                          <Select
+                            value={record.selector?.transform}
+                            onChange={(value) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "transform",
+                                value
+                              )
+                            }
+                            allowClear
+                            placeholder="None"
+                            style={{ width: "100%" }}
+                          >
+                            {TRANSFORM_OPTIONS.map((transform) => (
+                              <Select.Option
+                                key={transform.value}
+                                value={transform.value}
                               >
-                                {/* CSS Selector */}
-                                <div>
-                                  <Text type="secondary" className="text-xs">
-                                    CSS Selector *
-                                  </Text>
-                                  <Input
-                                    placeholder="e.g., #itemTitle, .price"
-                                    value={selector?.selector || ""}
-                                    onChange={(e) =>
-                                      handleSelectorChange(
-                                        fieldName,
-                                        "selector",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="mt-1"
-                                  />
-                                </div>
-
-                                {/* Attribute & Transform - 2 columns */}
-                                <Row gutter={8}>
-                                  <Col span={12}>
-                                    <Text type="secondary" className="text-xs">
-                                      Attribute
-                                    </Text>
-                                    <Select
-                                      value={selector?.attribute || "text"}
-                                      onChange={(value) =>
-                                        handleSelectorChange(
-                                          fieldName,
-                                          "attribute",
-                                          value
-                                        )
-                                      }
-                                      style={{ width: "100%" }}
-                                      className="mt-1"
-                                    >
-                                      {ATTRIBUTE_OPTIONS.map((attr) => (
-                                        <Select.Option
-                                          key={attr.value}
-                                          value={attr.value}
-                                        >
-                                          {attr.label}
-                                        </Select.Option>
-                                      ))}
-                                    </Select>
-                                  </Col>
-                                  <Col span={12}>
-                                    <Text type="secondary" className="text-xs">
-                                      Transform
-                                    </Text>
-                                    <Select
-                                      value={selector?.transform}
-                                      onChange={(value) =>
-                                        handleSelectorChange(
-                                          fieldName,
-                                          "transform",
-                                          value
-                                        )
-                                      }
-                                      allowClear
-                                      placeholder="None"
-                                      style={{ width: "100%" }}
-                                      className="mt-1"
-                                    >
-                                      {TRANSFORM_OPTIONS.map((transform) => (
-                                        <Select.Option
-                                          key={transform.value}
-                                          value={transform.value}
-                                        >
-                                          {transform.label}
-                                        </Select.Option>
-                                      ))}
-                                    </Select>
-                                  </Col>
-                                </Row>
-
-                                {/* Options - 3 columns */}
-                                <Row gutter={8}>
-                                  <Col span={8}>
-                                    <div className="flex items-center gap-2">
-                                      <Switch
-                                        size="small"
-                                        checked={selector?.multiple || false}
-                                        onChange={(checked) =>
-                                          handleSelectorChange(
-                                            fieldName,
-                                            "multiple",
-                                            checked
-                                          )
-                                        }
-                                      />
-                                      <Text className="text-xs">Multiple</Text>
-                                    </div>
-                                  </Col>
-                                  <Col span={8}>
-                                    <div className="flex items-center gap-2">
-                                      <Switch
-                                        size="small"
-                                        checked={selector?.selectLast || false}
-                                        onChange={(checked) =>
-                                          handleSelectorChange(
-                                            fieldName,
-                                            "selectLast",
-                                            checked
-                                          )
-                                        }
-                                      />
-                                      <Text className="text-xs">Last</Text>
-                                    </div>
-                                  </Col>
-                                  <Col span={8}>
-                                    <InputNumber
-                                      placeholder="Index"
-                                      value={selector?.selectIndex}
-                                      onChange={(value) =>
-                                        handleSelectorChange(
-                                          fieldName,
-                                          "selectIndex",
-                                          value
-                                        )
-                                      }
-                                      style={{ width: "100%" }}
-                                      size="small"
-                                      min={0}
-                                    />
-                                  </Col>
-                                </Row>
-                              </Space>
-                            </Card>
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                  )}
+                                {transform.label}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        ),
+                      },
+                      {
+                        title: "Multiple",
+                        dataIndex: "multiple",
+                        key: "multiple",
+                        width: 80,
+                        align: "center" as const,
+                        render: (_: any, record: any) => (
+                          <Switch
+                            size="small"
+                            checked={record.selector?.multiple || false}
+                            onChange={(checked) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "multiple",
+                                checked
+                              )
+                            }
+                          />
+                        ),
+                      },
+                      {
+                        title: "Last",
+                        dataIndex: "selectLast",
+                        key: "selectLast",
+                        width: 70,
+                        align: "center" as const,
+                        render: (_: any, record: any) => (
+                          <Switch
+                            size="small"
+                            checked={record.selector?.selectLast || false}
+                            onChange={(checked) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "selectLast",
+                                checked
+                              )
+                            }
+                          />
+                        ),
+                      },
+                      {
+                        title: "Index",
+                        dataIndex: "selectIndex",
+                        key: "selectIndex",
+                        width: 90,
+                        render: (_: any, record: any) => (
+                          <InputNumber
+                            placeholder="Index"
+                            value={record.selector?.selectIndex}
+                            onChange={(value) =>
+                              handleSelectorChange(
+                                record.fieldName,
+                                "selectIndex",
+                                value
+                              )
+                            }
+                            style={{ width: "100%" }}
+                            size="small"
+                            min={0}
+                          />
+                        ),
+                      },
+                      {
+                        title: "Actions",
+                        key: "actions",
+                        width: 100,
+                        align: "center" as const,
+                        render: (_: any, record: any) => (
+                          <Popconfirm
+                            title="Delete this field?"
+                            description="Are you sure to delete this selector field?"
+                            onConfirm={() => handleRemoveSelector(record.fieldName)}
+                            okText="Yes"
+                            cancelText="No"
+                          >
+                            <Button
+                              danger
+                              type="text"
+                              size="small"
+                              icon={<DeleteOutlined />}
+                            />
+                          </Popconfirm>
+                        ),
+                      },
+                    ]}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div className="py-8">
+                          <Text type="secondary">
+                            Chưa có selector nào. Click &quot;Add field...&quot; để thêm.
+                          </Text>
+                        </div>
+                      ),
+                    }}
+                    scroll={{ x: 1200 }}
+                  />
                 </Card>
               </Space>
             )}
