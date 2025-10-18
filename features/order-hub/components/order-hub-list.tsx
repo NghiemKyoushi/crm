@@ -432,7 +432,7 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "vi-VN"
+                              "en-US"
                             )}${isJapanPrice}`
                           : codeType === 1
                           ? "Miễn phí"
@@ -541,7 +541,7 @@ export default function OrderHub() {
               <span className="text-gray-500">Trước: </span>
               <span className="text-green-600 font-medium">
                 {record.deposit_fee || record.deposit_fee === 0
-                  ? `${record.deposit_fee.toLocaleString("vi-VN")}đ`
+                  ? `${record.deposit_fee.toLocaleString("en-US")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
@@ -549,7 +549,7 @@ export default function OrderHub() {
               <span className="text-gray-500">Lần 2: </span>
               <span className="text-orange-600 font-medium">
                 {remaining > 0
-                  ? `${remaining.toLocaleString("vi-VN")}đ`
+                  ? `${remaining.toLocaleString("en-US")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
@@ -597,7 +597,7 @@ export default function OrderHub() {
               <span className="text-gray-500">Giá: </span>
               <span className="text-gray-800 font-medium">
                 {shippingPrice > 0
-                  ? `${shippingPrice.toLocaleString("vi-VN")}đ`
+                  ? `${shippingPrice.toLocaleString("en-US")}đ`
                   : "Cập nhật sau"}
               </span>
             </div>
@@ -623,7 +623,7 @@ export default function OrderHub() {
       render: (_, record) => (
         <div className="text-xs font-medium text-blue-600">
           {record.amount_vnd
-            ? `${record.amount_vnd.toLocaleString("vi-VN")}đ`
+            ? `${record.amount_vnd.toLocaleString("en-US")}đ`
             : "Cập nhật sau"}
         </div>
       ),
