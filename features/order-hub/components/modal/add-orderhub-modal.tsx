@@ -120,15 +120,15 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     try {
       await form.validateFields();
       if (idProduct && insurance) {
-        const serviceOptionTrue = listService.filter(
-          (item: any) => item.optional === true
-        );
+        // const serviceOptionTrue = listServices.filter(
+        //   (item: any) => item.optional
+        // );        
         const serviceOption = listService
-          ?.filter((item: any) => item.optional === false)
+          // ?.filter((item: any) => item.optional === false)
           .map((item: any) => ({
             ...item,
-            is_checked: services?.includes(item.code), // true nếu code có trong services, ngược lại false
-          }));
+            is_checked: services?.includes(item.code), 
+          }));          
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
         const bodyNewOrder: OrderFeeRequest = {
           data: {
@@ -141,7 +141,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
-          fees: [...serviceOptionTrue, ...serviceOption],
+          fees: [...serviceOption],
           insurance_id: insurance?.id,
           user_id: customer,
           product_category_id: form.getFieldValue("category"),
@@ -330,9 +330,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               ...item.insurance_package,
             }
           }) 
-          const serviceOptionTrue = listService.filter(
+          const serviceOptionTrue = listServices.filter(
           (item: any) => item.optional === true
-           );
+           );           
            if(res.service_fee_optional_list.length > 0){
             setListService([...serviceOptionTrue, ...res.service_fee_optional_list])       
 
