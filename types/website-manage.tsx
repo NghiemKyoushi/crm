@@ -45,6 +45,7 @@ export interface AddWebsiteModel {
   route_id: string;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
+  use_selenium?: boolean;                    // Use Selenium for dynamic content (default: false)
   proxy_enabled?: boolean;                   // Enable proxy for crawling
   proxy_host?: string;                       // Proxy server host
   proxy_port?: string;                       // Proxy server port
@@ -65,6 +66,7 @@ export interface Website {
   region: Region;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
+  use_selenium?: boolean;                    // Use Selenium for dynamic content (default: false)
   proxy_enabled?: boolean;                   // Enable proxy for crawling
   proxy_host?: string;                       // Proxy server host
   proxy_port?: string;                       // Proxy server port

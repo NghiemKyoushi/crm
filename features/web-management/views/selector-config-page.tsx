@@ -308,6 +308,15 @@ const SelectorConfigPage: React.FC = () => {
             closable
           />
 
+          {website?.use_selenium && (
+            <Alert
+              message="Selenium Enabled"
+              description="This website uses Selenium for crawling dynamic content and JavaScript-rendered pages."
+              type="warning"
+              showIcon
+            />
+          )}
+
           {website?.proxy_enabled && (
             <Alert
               message="Proxy Enabled"
