@@ -46,7 +46,8 @@
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
-    "operation": "Quản lý vận đơn"
+    "operation": "Quản lý vận đơn",
+    "websiteManagement": "Quản lý Website"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -356,12 +357,14 @@
     "save": "Lưu",
     "saveAllChanges": "Lưu Tất Cả Thay Đổi",
     "search": "Tìm kiếm",
-    "currency": "¥"
+    "currency": "¥",
+    "back": "Quay lại"
   },
   "websiteManage": {
     "table": {
       "name": "Tên Website",
       "region": "Khu vực",
+      "route": "Đường vận chuyển",
       "action": "Hành động"
     },
     "action": {
@@ -381,8 +384,12 @@
       "region": "Khu vực",
       "requiredRegion": "Vui lòng chọn khu vực",
       "placeholderRegion": "Chọn khu vực",
+      "route": "Đường vận chuyển",
+      "requiredRoute": "Vui lòng chọn đường vận chuyển",
+      "placeholderRoute": "Chọn đường vận chuyển",
       "currency": "Chọn đơn vị tiền tệ",
-      "requiredCurrency": "Chọn đơn vị tiền tệ"
+      "requiredCurrency": "Chọn đơn vị tiền tệ",
+      "useSelenium": "Sử dụng Selenium (cho nội dung động / trang render bằng JavaScript)"
     },
     "delete": {
       "title": "Xác nhận xoá website",

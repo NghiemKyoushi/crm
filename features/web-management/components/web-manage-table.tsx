@@ -161,15 +161,24 @@ const WebsiteManageTable: React.FC = () => {
     { title: "URL", dataIndex: "domain", key: "domain" },
     {
       title: t("websiteManage.table.region"),
-      dataIndex: "region",
-      key: "region",
-      render: (region_id: number, record: Website) => {
-        if (record.region !== null && record.region?.name)
-          return record.region.name;
+      dataIndex: "region_id",
+      key: "region_id",
+      render: (region_id: number) => {
         const regionName = regionList?.data.find(
-          (r) => r.id === record.region_id
+          (r: any) => r.id === region_id
         )?.name;
         return regionName ?? "-";
+      },
+    },
+    {
+      title: t("websiteManage.table.route"),
+      dataIndex: "route_id",
+      key: "route_id",
+      render: (route_id: number) => {
+        const routeName = routeList?.data.find(
+          (r: any) => r.id === route_id
+        )?.name;
+        return routeName ?? "-";
       },
     },
     {
@@ -285,7 +294,7 @@ const WebsiteManageTable: React.FC = () => {
             ]}
           >
             <Select placeholder={t("websiteManage.form.placeholderRegion")}>
-              {regionList?.data?.map((region) => (
+              {regionList?.data?.map((region: any) => (
                 <Select.Option key={region.id} value={region.id}>
                   {region.name}
                 </Select.Option>
@@ -294,16 +303,16 @@ const WebsiteManageTable: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label={"Chọn đường di chuyển"}
+            label={t("websiteManage.form.route")}
             name="route_id"
             rules={[
               {
                 required: true,
-                message: "Vui lòng chọn đường di chuyển",
+                message: t("websiteManage.form.requiredRoute"),
               },
             ]}
           >
-            <Select placeholder={""}>
+            <Select placeholder={t("websiteManage.form.placeholderRoute")}>
               {routeList?.data?.map((item: any) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
@@ -331,7 +340,7 @@ const WebsiteManageTable: React.FC = () => {
 
           <Form.Item name="use_selenium" valuePropName="checked">
             <Checkbox>
-              Use Selenium (for dynamic content / JavaScript-rendered pages)
+              {t("websiteManage.form.useSelenium")}
             </Checkbox>
           </Form.Item>
 

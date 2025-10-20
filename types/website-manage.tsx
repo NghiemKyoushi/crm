@@ -42,7 +42,7 @@ export interface AddWebsiteModel {
   name: string;
   region_id: number;
   currency_code: string;
-  route_id: string;
+  route_id: number;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
   use_selenium?: boolean;                    // Use Selenium for dynamic content (default: false)
@@ -57,13 +57,9 @@ export interface Website {
   id: number;
   name: string;
   domain: string;
-  region_id: number;
-  currency_code?: string;
-  route_id?: number;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-  region: Region;
+  region_id?: number;
+  currency_code: string;
+  route_id: number;
   selector_configs?: CrawlConfig[];          // Multiple configs per website
   cache_duration_hours?: number;             // Cache TTL (default: 12)
   use_selenium?: boolean;                    // Use Selenium for dynamic content (default: false)

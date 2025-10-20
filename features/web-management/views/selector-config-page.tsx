@@ -266,7 +266,7 @@ const SelectorConfigPage: React.FC = () => {
           <div className="flex items-center gap-4">
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() => router.push("/settings/website-management")}
+              onClick={() => router.push("/website-manage")}
             >
               {t("common.back")}
             </Button>
