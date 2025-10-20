@@ -460,25 +460,25 @@ const ProductManagement: React.FC = () => {
     //     );
     //   },
     // },
-    {
-      title: "Tổng Chi Phí",
-      key: "total",
-      width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        // Sử dụng amountvnd từ response (đã tính tổng từ backend)
-        const amountVnd = record.amountvnd || 0;
-        return (
-          <div className="text-xs font-medium text-blue-600">
-            {amountVnd > 0 ? `${amountVnd.toLocaleString("en-US")}đ` : "-"}
-          </div>
-        );
-      },
-    },
+    // {
+    //   title: "Tổng Chi Phí",
+    //   key: "total",
+    //   width: 110,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     // Sử dụng amountvnd từ response (đã tính tổng từ backend)
+    //     const amountVnd = record.amountvnd || 0;
+    //     return (
+    //       <div className="text-xs font-medium text-blue-600">
+    //         {amountVnd > 0 ? `${amountVnd.toLocaleString("en-US")}đ` : "-"}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Địa Chỉ",
       key: "address",

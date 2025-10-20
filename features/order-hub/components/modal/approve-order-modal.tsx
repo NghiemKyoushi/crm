@@ -57,6 +57,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
     if (orderDetail) {
       const codeType = orderDetail.metadata?.infos?.codeType ?? null;
       const codInJapan = orderDetail.metadata?.infos?.codInJapan ?? null;
+      setPaymentType(codeType);
       form.setFieldsValue({
         cod_type: codeType ?? 1,
         cod_shipping_price: codInJapan ?? null,
