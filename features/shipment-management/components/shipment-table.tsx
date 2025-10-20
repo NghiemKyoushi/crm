@@ -460,25 +460,25 @@ const ProductManagement: React.FC = () => {
     //     );
     //   },
     // },
-    {
-      title: "Tổng Chi Phí",
-      key: "total",
-      width: 110,
-      onCell: () => ({
-        style: {
-          borderRight: '1px solid #f0f0f0',
-        },
-      }),
-      render: (_, record) => {
-        // Sử dụng amountvnd từ response (đã tính tổng từ backend)
-        const amountVnd = record.amountvnd || 0;
-        return (
-          <div className="text-xs font-medium text-blue-600">
-            {amountVnd > 0 ? `${amountVnd.toLocaleString("vi-VN")}đ` : "-"}
-          </div>
-        );
-      },
-    },
+    // {
+    //   title: "Tổng Chi Phí",
+    //   key: "total",
+    //   width: 110,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: '1px solid #f0f0f0',
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     // Sử dụng amountvnd từ response (đã tính tổng từ backend)
+    //     const amountVnd = record.amountvnd || 0;
+    //     return (
+    //       <div className="text-xs font-medium text-blue-600">
+    //         {amountVnd > 0 ? `${amountVnd.toLocaleString("en-US")}đ` : "-"}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Địa Chỉ",
       key: "address",
@@ -912,13 +912,13 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           <div className="text-xs">
             <span className="text-gray-500">JPY: </span>
             <span className="text-gray-800 font-medium">
-              {record.amount ? `${record.amount.toLocaleString("vi-VN")}¥` : "-"}
+              {record.amount ? `${record.amount.toLocaleString("en-US")}¥` : "-"}
             </span>
           </div>
           <div className="text-xs">
             <span className="text-gray-500">VND: </span>
             <span className="text-blue-600 font-medium">
-              {record.amount_vnd ? `${record.amount_vnd.toLocaleString("vi-VN")}đ` : "-"}
+              {record.amount_vnd ? `${record.amount_vnd.toLocaleString("en-US")}đ` : "-"}
             </span>
           </div>
         </div>
@@ -935,7 +935,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       }),
       render: (_, record) => (
         <div className="text-xs text-green-600 font-medium">
-          {record.deposit_fee ? `${record.deposit_fee.toLocaleString("vi-VN")}đ` : "-"}
+          {record.deposit_fee ? `${record.deposit_fee.toLocaleString("en-US")}đ` : "-"}
         </div>
       ),
     },

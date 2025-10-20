@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Modal,
   Form,
@@ -131,7 +131,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             count: quantity,
             description: form.getFieldValue("description"),
             price: priceY,
-            name: form.getFieldValue("productName"), 
+            name: form.getFieldValue("productName"),
             item_quantity: form.getFieldValue("item_quantity"),
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
@@ -192,6 +192,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   const handleServiceChange = (e: CheckboxChangeEvent, id: string) => {
     const checked = e.target.checked;
+    console.log('checked', checked);
+    
     setServices((prev) =>
       checked ? [...prev, id] : prev.filter((k) => k !== id)
     );
@@ -407,6 +409,16 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     onCancel();
   };
 
+  // Check if user is admin and not in special status
+  const isAdminOrCheckStatusAfterPending = useMemo(() => {
+    const isAdmin = hasPermission("system.admin");
+    const isNotInSpecialStatus =
+      order?.status !== OrderStatusType.PENDING_PAYMENT &&
+      order?.status !== OrderStatusType.READY_TO_SHIP &&
+      order?.status !== OrderStatusType.SHIPPING_REQUEST_CLIENT;
+    return isAdmin && isNotInSpecialStatus;
+  }, [hasPermission, order?.status]);
+  
   return (
     <>
       <Modal
@@ -463,16 +475,18 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               type="primary"
               onClick={() => {
                 if (
-                  hasPermission("sales.view_assigned_orders") &&
-                  hasPermission("order.view")
+                  isAdminOrCheckStatusAfterPending ||
+                  (hasPermission("sales.view_assigned_orders") &&
+                    hasPermission("order.view"))
                 ) {
                   handleOk();
                 }
               }}
               disabled={
                 !(
-                  hasPermission("sales.view_assigned_orders") &&
-                  hasPermission("order.view")
+                  isAdminOrCheckStatusAfterPending ||
+                  (hasPermission("sales.view_assigned_orders") &&
+                    hasPermission("order.view"))
                 )
               }
               size="large"
@@ -528,7 +542,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-10 !h-11"
                   >
                     <Input
-                      disabled={isCheckDisableInput}
+                      disabled={true}
                       placeholder="https://..."
                       prefix={
                         <svg
@@ -564,7 +578,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-4"
                   >
                     <Input
-                      disabled={isCheckDisableInput}
+                      disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                       className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Nhập tên sản phẩm"
                     />
@@ -584,7 +598,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     ]}
                     className="!mb-4"
                   >
-                    <TiptapEditor isDisable={isCheckDisableInput} />
+                    <TiptapEditor isDisable={isCheckDisableInput && !isAdminOrCheckStatusAfterPending} />
                   </Form.Item>
 
                   <Row gutter={12}>
@@ -639,7 +653,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         className="!mb-4"
                       >
                         <InputNumber
-                          disabled={isCheckDisableInput}
+                          disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -717,7 +731,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <InputNumber
-                          disabled={isCheckDisableInput}
+                          disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -874,7 +888,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
-                                    disabled={isCheckDisableInput}
+                                    disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                                     checked={item.is_checked}
                                     onChange={(e) =>
                                       handleServiceChange(e, item.code)
@@ -960,7 +974,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                   >
                                     <div className="flex-1 pr-3">
                                       <Checkbox
-                                        disabled={isCheckDisableInput}
+                                        disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                                         checked={isChecked}
                                         onChange={(e) =>
                                           handleInsuranceChange(e, item)
@@ -1099,7 +1113,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-0"
                   >
                     <Input.TextArea
-                      disabled={isCheckDisableInput}
+                      disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
                       rows={3}
                       className="!rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Ghi chú thêm về đơn hàng..."
