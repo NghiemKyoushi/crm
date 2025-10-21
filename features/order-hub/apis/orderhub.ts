@@ -198,8 +198,8 @@ export const getTrackingOrder = async (id: number) => {
 };
 
 export const genPackageCode = async () => {
-  const res = await api.get(API_TYPE_CONST.GEN_PACKAGE_CODE);  
-  return res.data.message;
+  const res = await api.get(API_TYPE_CONST.GEN_PACKAGE_CODE);
+  return res.data.data;
 };
 
 export const updateCodForEarchOrder = async (id: number, body: updateCodEachRowModel) => {

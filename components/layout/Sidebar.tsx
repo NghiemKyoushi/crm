@@ -21,6 +21,7 @@ import {
   faWarehouse,
   faBars,
   faChevronLeft,
+  faClipboardCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -94,13 +95,17 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ]
+  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ],
+
+  // Check Coming - Warehouse
+  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"]
 };
 
 export const menuItems = [
   { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/shipment-management", icon: faWarehouse, label: "operation" },
+  { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
