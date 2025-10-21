@@ -298,6 +298,16 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     fallbackAction: 'notFound'
   },
 
+  // Check Coming - Warehouse
+  '/check-coming': {
+    required: [
+      'warehouse.check_coming_wh1',
+      'system.admin',
+    ],
+    requireAll: false,
+    fallbackAction: 'notFound'
+  },
+
   // Public routes (no authentication required)
   '/login': {
     required: [],

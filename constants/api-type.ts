@@ -93,5 +93,13 @@ export const API_TYPE_CONST = {
   CREATE_TRACKING_ORDER:`${FEATURE}/admin/tracking/order`,
   UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`,
   GET_DATA_CHECK:`${FEATURE}/fee/get-data`,
-  GET_DATA_LIST: `${FEATURE}/exchange-rate/admin/setting/get-data-list`
+  GET_DATA_LIST: `${FEATURE}/exchange-rate/admin/setting/get-data-list`,
+
+  // Check Coming
+  CHECK_COMING_CREATE: `${FEATURE}/check-coming`,
+  CHECK_COMING_LIST: `${FEATURE}/check-coming`,
+  CHECK_COMING_GET: `${FEATURE}/check-coming`,
+  CHECK_COMING_DELETE: `${FEATURE}/check-coming`,
+  CHECK_COMING_SEARCH: `${FEATURE}/check-coming/search`,
+  CHECK_COMING_DELETED: `${FEATURE}/check-coming/deleted`
 } as const;

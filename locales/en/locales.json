@@ -46,7 +46,9 @@
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
     "partnerManagement": "Raw Material Management",
-    "operation": "Shipment Management"
+    "operation": "Shipment Management",
+    "websiteManagement": "Website Management",
+    "checkComing": "Check Coming"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -358,6 +360,50 @@
     "saveAllChanges": "Save All Changes",
     "search": "Search",
     "currency": "¥"
+  },
+  "checkComing": {
+    "title": "Check Coming",
+    "description": "Scan tracking code to confirm packages arrival",
+    "stats": {
+      "todayTotal": "Today's Total",
+      "currentPackage": "Current Package"
+    },
+    "card": {
+      "scanTitle": "Scan Tracking Code",
+      "historyTitle": "Scan History"
+    },
+    "label": {
+      "packageCode": "Package Code",
+      "trackingCode": "Tracking Code",
+      "items": "items"
+    },
+    "placeholder": {
+      "tracking": "Enter or scan tracking code..."
+    },
+    "button": {
+      "regenerate": "Regenerate",
+      "confirm": "Confirm",
+      "showScanner": "Show Scanner",
+      "hideScanner": "Hide Scanner",
+      "print": "Print Label",
+      "delete": "Delete"
+    },
+    "hint": {
+      "manualInput": "You can enter manually or use QR/Barcode scanner below"
+    },
+    "empty": {
+      "noHistory": "No scan history yet"
+    },
+    "info": {
+      "title": "Instructions",
+      "description": "1. Package code is generated randomly. 2. Enter tracking code manually or use QR/Barcode scanner. 3. Click Confirm to complete."
+    },
+    "error": {
+      "emptyTracking": "Please enter tracking code"
+    },
+    "toast": {
+      "success": "Package confirmed successfully!"
+    }
   },
   "websiteManage": {
     "table": {
