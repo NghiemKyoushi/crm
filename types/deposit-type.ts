@@ -54,6 +54,7 @@ export interface DepositParams {
   status?: string;
   toDate?: string;
   userConfirmed?: string;
+  handler?:string;
 }
 
 export interface DepositRequest {

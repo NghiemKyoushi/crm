@@ -62,7 +62,9 @@
     "debt": "Debt (VND)",
     "actions": "Actions",
     "view360": "view 360°",
-    "searchPlaceholder": "Search customers...",
+    "searchPlaceholder": "Search customers name",
+    "searchByEmail": "Search by email",
+    "searchByPhonennumber": "Search by phonenumber",
     "updateSuccess": "Category updated successfully!",
     "selectCategory": "Select category",
     "customerType": {
@@ -105,7 +107,6 @@
       "addDefaultAddress": "Add Default Address",
       "addDefaultBank": "Add Default Bank",
       "home": "Home"
-     
     },
     "tabs": {
       "overview": "Overview",
@@ -156,7 +157,7 @@
     }
   },
   "staffManage": {
-    "phoneInvalid":"Phone is invalid",
+    "phoneInvalid": "Phone is invalid",
     "addNewStaff": "Add New Staff",
     "editNewStaff": "Edit New Staff",
     "fullName": "Full Name",
@@ -284,7 +285,8 @@
     "manualDeposit": "Manual Deposit",
     "manualWithdraw": "Manual Deduction",
     "bankPartner": "Bank Partner",
-    "accountPartner": "Bank Settings"
+    "accountPartner": "Bank Settings",
+    "handlerPlaceholder": "Search by handler"
   },
   "keywordPlaceholder": "Order ID, Customer ID...",
   "statusPlaceholder": "-- Status --",
@@ -313,7 +315,9 @@
     "underInspection": "Under Inspection",
     "readyToShip": "Ready to Ship",
     "shipped": "Shipped",
-    "shippingRequest": "Shipping Request"
+    "shippingRequest": "Shipping Request",
+    "canceled": "Canceled",
+    "completed": "Completed"
   },
   "fromDate": "From date",
   "toDate": "To date",
@@ -510,8 +514,8 @@
       "accessSalesDashboard": "Access Sales dashboard",
       "viewSalesReports": "View personal sales reports",
       "exportSalesData": "Export personal sales data",
-      "viewAssignedShipments":"View assigned shipments",
-      "createShipments":"Create shipments"
+      "viewAssignedShipments": "View assigned shipments",
+      "createShipments": "Create shipments"
     }
   },
   "roles": {
@@ -785,8 +789,7 @@
     "surcharge": "Surcharge",
     "trackingShip": "Tracking Ship",
     "orderType": "Order type",
-    "codePackage":"Code package"
-
+    "codePackage": "Code package"
   },
   "page": {
     "orderManagement": "Order Management",

@@ -76,6 +76,7 @@ const DepositTable = (props: DepositTableProps) => {
       status: values.status,
       fromDate: values.fromDate,
       toDate: values.toDate,
+      handler: values.handler,
       page: 0,
     };
     setParams(newParams);

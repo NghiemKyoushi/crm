@@ -34,15 +34,18 @@ import {
 import { OrderDetail } from "../components/modal/orderhub-detail-modal";
 import { ServiceFee } from "@/types/fee-setting";
 import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
+import { FilterType } from "../components/order-hub-filter";
 
-export const useListOrder = (params: {
-  page: number;
-  size: number;
-  status?: string;
-  search?: string;
-  date?: string;
-  type?: number;
-}) => {
+export const useListOrder = (params: FilterType
+//   {
+//   page: number;
+//   size: number;
+//   status?: string;
+//   search?: string;
+//   date?: string;
+//   type?: number;
+// }
+) => {
   return useQuery<InvoiceResponse>({
     queryKey: ["listorder", params],
     queryFn: () => getListOrder(params),

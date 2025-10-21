@@ -1,24 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  Tag,
-  Button,
-  Input,
-  Select,
-  Form,
-  DatePicker,
-  Modal,
-  Tooltip,
-} from "antd";
+import { Tag, Button, Modal, Tooltip, Form, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {
-  PlusOutlined,
-  EditOutlined,
-  ReloadOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
+import OrderHubFilter, { FilterType } from "./order-hub-filter";
 import { useTranslation } from "react-i18next";
 import {
   extractPathId,
@@ -37,7 +22,6 @@ import {
 } from "../hooks/orderhub";
 import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
-import dayjs from "dayjs";
 import ApproveOrderModal from "./modal/approve-order-modal";
 import CheckOrderModal from "./modal/check-order-modal";
 import TrackingModal from "./modal/tracking-modal";
@@ -51,17 +35,8 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
-
-type FilterType = {
-  search?: string;
-  status?: string;
-  date?: string;
-  type?: number;
-};
 export default function OrderHub() {
   const { hasPermission, permissions } = usePermission();
-
-  const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const { t } = useTranslation();
@@ -108,7 +83,15 @@ export default function OrderHub() {
     search: undefined,
     status: undefined,
     date: undefined,
-    type: undefined,
+    customer_name: undefined,
+    customer_code: undefined,
+    product_url: undefined,
+    product_name: undefined,
+    invoice_no: undefined,
+    tracking_code: undefined,
+    package_code: undefined,
+    product_id: undefined,
+    note_admin: undefined,
   });
 
   const { data: listOrder } = useListOrder({
@@ -117,7 +100,15 @@ export default function OrderHub() {
     search: filters.search,
     status: filters.status,
     date: filters.date,
-    type: filters.type,
+    customer_name: filters.customer_name,
+    customer_code: filters.customer_code,
+    product_url: filters.product_url,
+    product_name: filters.product_name,
+    invoice_no: filters.invoice_no,
+    tracking_code: filters.tracking_code,
+    package_code: filters.package_code,
+    product_id: filters.product_id,
+    note_admin: filters.note_admin,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -132,16 +123,10 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
-  const handleFinish = (values: any) => {
-    setFilters({
-      search:
-        values.keyword && values.keyword.trim() !== ""
-          ? values.keyword
-          : undefined,
-      status: values.status !== "" ? values.status : undefined,
-      date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      type: undefined,
-    });
+  const handleFilter = (newFilters: FilterType) => {
+    console.log('newFiltersnewFilters', newFilters);
+    
+    setFilters(newFilters);
     setPage(1);
   };
 
@@ -553,18 +538,6 @@ export default function OrderHub() {
                   : "Cập nhật sau"}
               </span>
             </div>
-            {/* <div className="text-xs">
-              <span className="text-gray-500">Ngày TT: </span>
-              <span className="text-gray-800">-</span>
-            </div> */}
-            {/* <div className="text-xs">
-              <span className="text-gray-500">Đã TT: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Công nợ: </span>
-              <span className="text-gray-800">-</span>
-            </div> */}
           </div>
         );
       },
@@ -740,32 +713,32 @@ export default function OrderHub() {
 
         switch (record.status) {
           case OrderStatusType.ADMIN_PENDING:
-              actionButton = (
-                <div className="flex gap-1.5 justify-center w-full">
-                  <Button
-                    key={`approve-${record.id}`}
-                    size="small"
-                    className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                    onClick={() => {
-                      setOrderDetail(record);
-                      setIsOpenApproveOrder(true);
-                    }}
-                  >
-                    ✓ Duyệt
-                  </Button>
-                  <Button
-                    key={`reject-${record.id}`}
-                    size="small"
-                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                    onClick={() => {
-                      setOrderDetail(record);
-                      setIsOpenCancel(true);
-                    }}
-                  >
-                    ✕ Từ chối
-                  </Button>
-                </div>
-              );
+            actionButton = (
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={`approve-${record.id}`}
+                  size="small"
+                  className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenApproveOrder(true);
+                  }}
+                >
+                  ✓ Duyệt
+                </Button>
+                <Button
+                  key={`reject-${record.id}`}
+                  size="small"
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancel(true);
+                  }}
+                >
+                  ✕ Từ chối
+                </Button>
+              </div>
+            );
             break;
 
           case OrderStatusType.DEPOSIT_PAID:
@@ -862,19 +835,6 @@ export default function OrderHub() {
             break;
 
           case OrderStatusType.READY_TO_SHIP:
-            // actionButton = (
-            //   <Button
-            //     key={record.status}
-            //     size="small"
-            //     className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-            //     onClick={() => {
-            //       setOrderDetail(record);
-            //       setOpenConfirmComplete(true);
-            //     }}
-            //   >
-            //     🚚 Giao hàng
-            //   </Button>
-            // );
             break;
         }
 
@@ -920,101 +880,15 @@ export default function OrderHub() {
       },
     },
   ];
-  const orderStatusOptions = [
-    {
-      value: OrderStatusType.PENDING_APPROVAL,
-      label: t("status.pendingApproval"),
-    },
-    {
-      value: OrderStatusType.PENDING_DEPOSIT,
-      label: t("status.pendingDeposit"),
-    },
-    { value: OrderStatusType.DEPOSIT_PAID, label: t("status.depositPaid") },
-    { value: OrderStatusType.PURCHASED, label: t("status.purchased") },
-    {
-      value: OrderStatusType.ARRIVED_JP_WAREHOUSE,
-      label: t("status.arrivedJpWarehouse"),
-    },
-    {
-      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
-      label: t("status.arrivedVnWarehouse"),
-    },
-    {
-      value: OrderStatusType.UNDER_INSPECTION,
-      label: t("status.underInspection"),
-    },
-    {
-      value: OrderStatusType.PENDING_PAYMENT,
-      label: t("status.pendingPayment"),
-    },
-    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") },
-    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
-    {
-      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
-    },
-    { value: OrderStatusType.CANCELED, label: t("status.canceled") },
-  ];
 
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
-        <div className="flex flex-col mb-2 gap-4 ">
-          <Form form={form} onFinish={handleFinish}>
-            <div className="w-full grid grid-cols-5 gap-3 items-center bg-white rounded-lg">
-              <Form.Item name="keyword" className="mb-0">
-                <Input
-                  placeholder={t("placeholder.searchOrderCustomer")}
-                  className="!w-full !h-11 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-
-              <Form.Item name="status" className="mb-0">
-                <Select
-                  placeholder={t("statusPlaceholder")}
-                  className="!w-full !h-11"
-                  size="small"
-                  allowClear
-                >
-                  {orderStatusOptions.map((opt) => (
-                    <Select.Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="date" className="mb-0">
-                <DatePicker className="!w-full !h-11" size="small" />
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
-                  size="small"
-                >
-                  {t("filter")}
-                </Button>
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined className="text-xs" />}
-                  className="!w-full !h-11 !bg-blue-600 !text-white !font-medium !text-xs"
-                  size="small"
-                  onClick={() => setOpen(true)}
-                >
-                  Tạo đơn
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
-        </div>
+        <OrderHubFilter
+          onFilter={handleFilter}
+          onCreateOrder={() => setOpen(true)}
+          initialFilters={filters}
+        />
 
         <EnhancedTableWrapper
         //  className="overflow-x-auto"
@@ -1107,40 +981,6 @@ export default function OrderHub() {
           status={orderDetail.status}
         />
       )}
-
-      {/* {orderDetail && (
-        <TrackingModalJP
-        orderId={orderDetail.id}
-          customerName={orderDetail.customer_name}
-          orderCode={orderDetail.invoice_no}
-          onCancel={() => {
-            setOrderDetail(undefined);
-            setIsOpenTrackingOrder(false);
-          }}
-          onSubmit={(value) => {
-            // trackingJPMutation.mutate(
-            //   {
-            //     tracking: value.trackingCodes,
-            //     id: orderDetail.id.toString(),
-            //   },
-            //   {
-            //     onSuccess: () => {
-            //       toast.success(t("toast.confirmJpWarehouseSuccess"));
-            //       queryClient.invalidateQueries({
-            //         queryKey: ["listorder"],
-            //       });
-            //       setIsOpenTrackingOrder(false);
-            //     },
-            //     onError: (err: any) =>
-            //       toast.error(
-            //         err.response?.data?.localizedMessage || t("common.error")
-            //       ),
-            //   }
-            // );
-          }}
-          open={isOpenTrackingOrder}
-        />
-      )} */}
 
       {orderDetail && (
         <TrackingModal

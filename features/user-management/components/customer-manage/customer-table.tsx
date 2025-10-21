@@ -27,7 +27,12 @@ export default function CustomerTable() {
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState<string>("");
+
+  // --- New: State for search fields ---
+  const [searchName, setSearchName] = useState<string>("");
+  const [searchEmail, setSearchEmail] = useState<string>("");
+  const [searchPhone, setSearchPhone] = useState<string>("");
+
   const router = useRouter();
 
   // Phân quyền chỉ hiển thị nếu có "user.categorize_customers"
@@ -46,16 +51,17 @@ export default function CustomerTable() {
     ).length === 0;
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
+
+  // --- New: build search params object for useListCustomer ---
   const { data } = useListCustomer({
     page,
     page_size: 10,
     category_id: undefined,
-    search: search || undefined,
+    search: searchName || undefined,  
+    email: searchEmail || undefined,
+    phone_number: searchPhone || undefined,
   });
-  // const handleClickPopupdetail = (userId: string) => {
-  //   setSelectedId(userId);
-  //   setIsOpenDetail(true);
-  // };
+
   const handleClosePopupdetail = () => {
     setSelectedId(null);
     setIsOpenDetail(false);
@@ -180,16 +186,36 @@ export default function CustomerTable() {
       <div className="flex gap-2 mb-4">
         <Input
           placeholder={t('customerTable.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
           onPressEnter={handleSearch}
+          allowClear
+          className="!h-10"
+        />
+        <Input
+          placeholder={t('customerTable.searchByEmail') || "Email"}
+          value={searchEmail}
+          onChange={(e) => setSearchEmail(e.target.value)}
+          onPressEnter={handleSearch}
+          allowClear
+          className="!h-10"
+        />
+        <Input
+          placeholder={t('customerTable.searchByPhonennumber') || "Số điện thoại"}
+          value={searchPhone}
+          onChange={(e) => setSearchPhone(e.target.value)}
+          onPressEnter={handleSearch}
+          allowClear
+          className="!h-10"
         />
         <Button
           type="primary"
           icon={<FontAwesomeIcon icon={faSearch} />}
           onClick={handleSearch}
+          className="!h-10"
+
         >
-          {t("customerManage.search")}
+          Tìm kiếm
         </Button>
       </div>
       <div className="overflow-x-auto">
