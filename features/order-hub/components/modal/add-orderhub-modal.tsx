@@ -173,9 +173,12 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   };
 
+  // ---- Modified for get info loading ----
+  const [getInfoLoading, setGetInfoLoading] = useState(false);
   const { mutate } = useMutation<DataFromLink, Error, string>({
     mutationFn: (link: string) => getDataProductFromLink(link),
   });
+
   const [searchValue, setSearchValue] = useState("");
   const [customerPage, setCustomerPage] = useState(0);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
@@ -220,6 +223,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       toast.warning(t("toast.pleaseEnterLink"));
       return;
     }
+    setGetInfoLoading(true);
     mutate(linkValue, {
       onSuccess: (data: DataFromLink) => {
         form.setFieldsValue({
@@ -233,9 +237,11 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         setRouteId(data.route_id);
         form.setFieldValue("priceY", data.price);
         toast.success(t("toast.getProductInfoSuccess"));
+        setGetInfoLoading(false);
       },
       onError: () => {
         toast.error(t("toast.cannotGetInfoFromLink"));
+        setGetInfoLoading(false);
       },
     });
   };
@@ -561,8 +567,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           type="dashed"
                           onClick={handleGetInfo}
                           className="!h-9"
+                          loading={getInfoLoading}
+                          disabled={getInfoLoading}
                         >
                           Get info
+                          {/* {getInfoLoading ? (
+                            <>
+                              <Spin size="small" className="mr-2" />
+                            </>
+                          ) : (
+                            "Get info"
+                          )} */}
                         </Button>
                       }
                     />
