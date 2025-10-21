@@ -1,10 +1,10 @@
-"use client";
-import React from "react";
 import CheckComingView from "@/features/check-coming/views/CheckComingView";
-import { WithAuth } from "@/components/common/with-authen";
+import { RouteGuard } from "@/components/guards/RouteGuard";
 
-const CheckComingPage = () => {
-  return <CheckComingView />;
-};
-
-export default WithAuth(CheckComingPage);
+export default function CheckComing() {
+  return (
+    <RouteGuard>
+      <CheckComingView />
+    </RouteGuard>
+  );
+}
