@@ -11,12 +11,14 @@ import {
   Typography,
   Divider,
   Empty,
+  Table,
 } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   TrophyOutlined,
   ClockCircleOutlined,
+  CrownOutlined,
 } from "@ant-design/icons";
 import { TestSelectorConfigResponse } from "@/types/website-manage";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,131 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
     );
   };
 
+  // Sort results by score descending
+  const sortedResults = [...testResult.test_results].sort(
+    (a, b) => b.extraction_score - a.extraction_score
+  );
+
+  // Comparison table columns
+  const comparisonColumns = [
+    {
+      title: "Config Name",
+      dataIndex: "config_name",
+      key: "config_name",
+      width: 200,
+      render: (text: string, record: any) => (
+        <Space>
+          {record.config_name === testResult.best_config && (
+            <CrownOutlined style={{ color: "#faad14", fontSize: 16 }} />
+          )}
+          <Text strong={record.config_name === testResult.best_config}>
+            {text}
+          </Text>
+          {record.config_name === testResult.best_config && (
+            <Tag color="gold">Best</Tag>
+          )}
+        </Space>
+      ),
+    },
+    {
+      title: "Priority",
+      dataIndex: "priority",
+      key: "priority",
+      width: 80,
+      align: "center" as const,
+    },
+    {
+      title: "Score",
+      dataIndex: "extraction_score",
+      key: "extraction_score",
+      width: 100,
+      align: "center" as const,
+      render: (score: number) => (
+        <Tag color={getScoreColor(score)} style={{ minWidth: 60 }}>
+          {score}/5
+        </Tag>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "success",
+      key: "success",
+      width: 100,
+      align: "center" as const,
+      render: (success: boolean) =>
+        success ? (
+          <Tag color="success" icon={<CheckCircleOutlined />}>
+            Success
+          </Tag>
+        ) : (
+          <Tag color="error" icon={<CloseCircleOutlined />}>
+            Failed
+          </Tag>
+        ),
+    },
+    {
+      title: "Product Name",
+      dataIndex: ["extracted_data", "product_name"],
+      key: "product_name",
+      ellipsis: true,
+      render: (val: any) => (val ? <Text>{val}</Text> : <Text type="danger">✗</Text>),
+    },
+    {
+      title: "Price",
+      dataIndex: ["extracted_data", "price"],
+      key: "price",
+      width: 100,
+      align: "right" as const,
+      render: (val: any) =>
+        typeof val === "number" ? (
+          <Text style={{ color: "#52c41a", fontWeight: 500 }}>
+            {val.toLocaleString()}
+          </Text>
+        ) : (
+          <Text type="danger">✗</Text>
+        ),
+    },
+    {
+      title: "Qty",
+      dataIndex: ["extracted_data", "quantity"],
+      key: "quantity",
+      width: 60,
+      align: "center" as const,
+      render: (val: any) =>
+        typeof val === "number" ? (
+          <Tag>{val}</Tag>
+        ) : (
+          <Text type="danger">✗</Text>
+        ),
+    },
+    {
+      title: "Images",
+      dataIndex: ["extracted_data", "images"],
+      key: "images",
+      width: 80,
+      align: "center" as const,
+      render: (images: any[]) =>
+        images && images.length > 0 ? (
+          <Tag color="blue">{images.length}</Tag>
+        ) : (
+          <Text type="danger">✗</Text>
+        ),
+    },
+    {
+      title: "Description",
+      dataIndex: ["extracted_data", "description"],
+      key: "description",
+      width: 100,
+      align: "center" as const,
+      render: (val: any) =>
+        val ? (
+          <Tag color="green">✓</Tag>
+        ) : (
+          <Text type="danger">✗</Text>
+        ),
+    },
+  ];
+
   return (
     <Modal
       title={
@@ -66,7 +193,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
       open={open}
       onCancel={onClose}
       footer={null}
-      width={900}
+      width={1200}
       centered
     >
       {/* Summary Section */}
@@ -75,6 +202,7 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
           <Alert
             message={
               <Space>
+                <CrownOutlined style={{ color: "#faad14" }} />
                 <span>Best Config:</span>
                 <Text strong>{testResult.best_config}</Text>
                 <Tag color={getScoreColor(testResult.best_score)}>
@@ -108,12 +236,37 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
         </Space>
       </Card>
 
-      {/* Results Tabs */}
+      {/* Comparison Table */}
+      <Card className="mb-4" title={<Space><Text strong>Quick Comparison</Text><Text type="secondary">(Sorted by Score)</Text></Space>}>
+        <Table
+          dataSource={sortedResults}
+          columns={comparisonColumns}
+          pagination={false}
+          size="small"
+          rowKey={(record) => record.config_name}
+          rowClassName={(record) =>
+            record.config_name === testResult.best_config
+              ? "bg-yellow-50"
+              : ""
+          }
+          scroll={{ x: 1100 }}
+          bordered
+        />
+      </Card>
+
+      {/* Detailed Results */}
+      <Divider orientation="left">
+        <Text strong>Detailed Results</Text>
+      </Divider>
+
       <Tabs defaultActiveKey="0">
-        {testResult.test_results.map((result, index) => (
+        {sortedResults.map((result, index) => (
           <TabPane
             tab={
               <Space>
+                {result.config_name === testResult.best_config && (
+                  <CrownOutlined style={{ color: "#faad14" }} />
+                )}
                 {getScoreIcon(result.success)}
                 <span>{result.config_name}</span>
                 <Tag color={getScoreColor(result.extraction_score)}>
@@ -124,6 +277,21 @@ const TestResultModal: React.FC<TestResultModalProps> = ({
             key={index}
           >
             <Space direction="vertical" style={{ width: "100%" }} size="middle">
+              {/* Best Config Alert */}
+              {result.config_name === testResult.best_config && (
+                <Alert
+                  message={
+                    <Space>
+                      <CrownOutlined />
+                      <Text strong>This is the best performing config</Text>
+                    </Space>
+                  }
+                  type="success"
+                  showIcon={false}
+                  banner
+                />
+              )}
+
               {/* Config Info */}
               <Card size="small" title="Config Information">
                 <Descriptions size="small" column={2}>
