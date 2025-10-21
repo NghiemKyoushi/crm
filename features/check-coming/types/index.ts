@@ -19,7 +19,6 @@ export interface ScanResult {
 export interface CheckComingCreateRequest {
   package_code: string;
   tracking_code: string;
-  sender_name: string;
   sent_date: string;
   status?: number;
 }

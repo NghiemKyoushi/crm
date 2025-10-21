@@ -398,7 +398,8 @@
       "description": "1. Mã kiện được tự động tạo ngẫu nhiên. 2. Nhập mã tracking bằng tay hoặc sử dụng máy quét QR/Barcode. 3. Nhấn Xác nhận để hoàn tất."
     },
     "error": {
-      "emptyTracking": "Vui lòng nhập mã tracking"
+      "emptyTracking": "Vui lòng nhập mã tracking",
+      "emptyPackageCode": "Lỗi: Mã kiện chưa được tạo"
     },
     "toast": {
       "success": "Đã xác nhận hàng về thành công!"
