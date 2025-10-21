@@ -2,7 +2,6 @@
 import React, { useEffect, useRef } from "react";
 import { PackageInfo } from "../types";
 import "./print-label.css";
-import JsBarcode from "jsbarcode";
 
 interface PrintLabelProps {
   packageInfo: PackageInfo;
@@ -12,21 +11,28 @@ const PrintLabel: React.FC<PrintLabelProps> = ({ packageInfo }) => {
   const barcodeRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (barcodeRef.current && packageInfo.packageCode && packageInfo.trackingCode) {
-      try {
-        // Combine package code and tracking code for barcode
-        const barcodeData = `${packageInfo.packageCode}|${packageInfo.trackingCode}`;
-        JsBarcode(barcodeRef.current, barcodeData, {
-          format: "CODE128",
-          width: 2,
-          height: 80,
-          displayValue: false,
-          margin: 5,
-        });
-      } catch (error) {
-        console.error("Failed to generate barcode:", error);
+    const generateBarcode = async () => {
+      if (barcodeRef.current && packageInfo.packageCode && packageInfo.trackingCode) {
+        try {
+          // Dynamic import to avoid SSR issues
+          const JsBarcode = (await import("jsbarcode")).default;
+
+          // Combine package code and tracking code for barcode
+          const barcodeData = `${packageInfo.packageCode}|${packageInfo.trackingCode}`;
+          JsBarcode(barcodeRef.current, barcodeData, {
+            format: "CODE128",
+            width: 2,
+            height: 80,
+            displayValue: false,
+            margin: 5,
+          });
+        } catch (error) {
+          console.error("Failed to generate barcode:", error);
+        }
       }
-    }
+    };
+
+    generateBarcode();
   }, [packageInfo]);
 
   return (

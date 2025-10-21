@@ -45,25 +45,32 @@ const CheckComingView: React.FC = () => {
 
   // Load history from API on mount
   useEffect(() => {
-    generatePackageCode();
-    loadHistory();
+    const init = async () => {
+      await generatePackageCode();
+      await loadHistory();
+    };
+    init();
   }, []);
 
   const loadHistory = async () => {
     try {
       const response = await checkComingApi.getList(0, 50);
-      const records: PackageInfo[] = response.content.map((record: CheckComingRecord) => ({
-        id: record.id,
-        packageCode: record.package_code,
-        trackingCode: record.tracking_code,
-        senderName: record.sender_name,
-        sentDate: record.sent_date,
-        timestamp: record.created_at,
-        status: "completed" as const,
-      }));
-      setScanHistory(records);
+      if (response && response.content && Array.isArray(response.content)) {
+        const records: PackageInfo[] = response.content.map((record: CheckComingRecord) => ({
+          id: record.id,
+          packageCode: record.package_code,
+          trackingCode: record.tracking_code,
+          senderName: record.sender_name,
+          sentDate: record.sent_date,
+          timestamp: record.created_at,
+          status: "completed" as const,
+        }));
+        setScanHistory(records);
+      }
     } catch (error) {
       console.error("Failed to load history:", error);
+      // Don't crash - just log error and continue with empty history
+      setScanHistory([]);
     }
   };
 
@@ -71,13 +78,19 @@ const CheckComingView: React.FC = () => {
     try {
       const response = await api.get<{ data: string }>(API_TYPE_CONST.GEN_PACKAGE_CODE);
       const generatedCode = response.data.data; // Mã kiện nằm ở field "data"
-      setPackageCode(generatedCode);
+      console.log("Generated package code:", generatedCode);
+      if (generatedCode) {
+        setPackageCode(generatedCode);
+      } else {
+        throw new Error("Empty package code from API");
+      }
       setTrackingCode("");
       lastScanRef.current = null; // Reset last scan when generating new package code
     } catch (error) {
       console.error("Failed to generate package code:", error);
       // Fallback to random code if API fails
       const randomCode = `PKG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      console.log("Using fallback package code:", randomCode);
       setPackageCode(randomCode);
       setTrackingCode("");
       lastScanRef.current = null;
@@ -107,8 +120,18 @@ const CheckComingView: React.FC = () => {
 
   const handleSubmit = async (code?: string) => {
     const finalCode = code || trackingCode;
-    if (!finalCode.trim()) {
+
+    // Validate tracking code
+    if (!finalCode || !finalCode.trim()) {
+      console.error("Tracking code is empty!");
       toast.error(t("checkComing.error.emptyTracking"));
+      return;
+    }
+
+    // Validate package code
+    if (!packageCode || !packageCode.trim()) {
+      console.error("Package code is empty!");
+      toast.error(t("checkComing.error.emptyPackageCode"));
       return;
     }
 
@@ -116,15 +139,16 @@ const CheckComingView: React.FC = () => {
     try {
       // Call API to create record
       const now = new Date().toISOString();
+      console.log("✅ Submitting with packageCode:", packageCode, "trackingCode:", finalCode);
+
       const createdRecord = await checkComingApi.create({
         package_code: packageCode,
         tracking_code: finalCode,
-        sender_name: "Warehouse Scanner", // Default sender name
         sent_date: now,
         status: 0,
       });
 
-      // Create entry for display
+      // Create entry for display and printing
       const newEntry: PackageInfo = {
         id: createdRecord.id,
         packageCode: createdRecord.package_code,
@@ -135,8 +159,10 @@ const CheckComingView: React.FC = () => {
         status: "completed",
       };
 
-      setScanHistory([newEntry, ...scanHistory]);
       setLastPrintedPackage(newEntry); // Save for printing
+
+      // Reload history from API instead of updating local state
+      await loadHistory();
 
       // Show success effect
       setShowSuccessEffect(true);
@@ -145,7 +171,7 @@ const CheckComingView: React.FC = () => {
       }, 2000);
 
       // Generate new package code for next scan
-      generatePackageCode();
+      await generatePackageCode();
     } catch (error: any) {
       console.error("Failed to create record:", error);
       if (error?.response?.status === 409) {
@@ -170,8 +196,8 @@ const CheckComingView: React.FC = () => {
 
     try {
       await checkComingApi.delete(id);
-      // Remove from local state
-      setScanHistory(scanHistory.filter((item) => item.id !== id));
+      // Reload history from API to ensure consistency
+      await loadHistory();
       toast.success("Đã xóa thành công");
     } catch (error) {
       console.error("Failed to delete:", error);
@@ -255,13 +281,14 @@ const CheckComingView: React.FC = () => {
                       className="text-white"
                       style={{ fontSize: 28, fontFamily: "monospace", color: "white" }}
                     >
-                      {packageCode}
+                      {packageCode || "Đang tạo mã..."}
                     </Text>
                     <Button
                       type="text"
                       icon={<ReloadOutlined style={{ color: "white" }} />}
                       onClick={handleReset}
                       className="hover:bg-white/20"
+                      disabled={!packageCode}
                     />
                   </div>
                 </div>

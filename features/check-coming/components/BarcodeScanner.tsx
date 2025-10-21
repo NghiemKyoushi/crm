@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Card, Space, Typography, Alert, Spin } from "antd";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import type { Html5QrcodeScanner as Html5QrcodeScannerType } from "html5-qrcode";
 
 const { Text } = Typography;
 
@@ -19,7 +19,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>("");
   const [isInitializing, setIsInitializing] = useState(false);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5QrcodeScannerType | null>(null);
   const scannerIdRef = useRef<string>("qr-reader");
   const hasStartedRef = useRef(false);
 
@@ -39,13 +39,16 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     };
   }, [autoStart]);
 
-  const startScanner = () => {
+  const startScanner = async () => {
     if (isScanning || scannerRef.current) return;
 
     setError("");
     setIsInitializing(true);
 
     try {
+      // Dynamic import to avoid SSR issues
+      const { Html5QrcodeScanner, Html5QrcodeScanType } = await import("html5-qrcode");
+
       // Initialize scanner
       scannerRef.current = new Html5QrcodeScanner(
         scannerIdRef.current,

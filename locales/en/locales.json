@@ -400,7 +400,8 @@
       "description": "1. Package code is generated randomly. 2. Enter tracking code manually or use QR/Barcode scanner. 3. Click Confirm to complete."
     },
     "error": {
-      "emptyTracking": "Please enter tracking code"
+      "emptyTracking": "Please enter tracking code",
+      "emptyPackageCode": "Error: Package code not generated"
     },
     "toast": {
       "success": "Package confirmed successfully!"
