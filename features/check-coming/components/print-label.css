@@ -10,9 +10,13 @@
 /* Print styles */
 @media print {
   @page {
-    size: 80mm auto;
-    margin: 0;
+    size: 80mm auto; /* 80mm width, auto height */
+    margin: 0mm;
   }
+
+  /* Alternative sizes for different thermal printers */
+  /* @page { size: 58mm auto; margin: 0; } /* 58mm thermal */
+  /* @page { size: 3.15in auto; margin: 0; } /* 80mm in inches */
 
   /* Hide everything except the print label */
   body * {

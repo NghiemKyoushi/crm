@@ -445,49 +445,64 @@ const CheckComingView: React.FC = () => {
                 renderItem={(item, index) => (
                   <List.Item
                     className="px-4 hover:bg-gray-50"
-                    extra={
-                      <Space direction="vertical" size={4}>
+                    style={{
+                      position: "relative",
+                      paddingRight: 40,
+                      paddingTop: 12,
+                      paddingBottom: 12,
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                  >
+                    {/* Delete button - small, top right corner */}
+                    <Button
+                      danger
+                      type="text"
+                      icon={<DeleteOutlined />}
+                      onClick={() => item.id && handleDelete(item.id)}
+                      size="small"
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 1,
+                      }}
+                    />
+
+                    <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                      <div style={{ width: "100%", display: "flex", alignItems: "center", paddingLeft: 8, paddingRight: 8 }}>
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center" style={{ flexShrink: 0 }}>
+                          <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                        </div>
+                        <div style={{ marginLeft: 12, flex: 1, minWidth: 0 }}>
+                          <Text strong ellipsis style={{ fontSize: 13, display: "block" }}>
+                            {item.trackingCode}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: 11, display: "block" }}>
+                            {item.packageCode}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: 11, display: "block" }}>
+                            {new Date(item.timestamp).toLocaleTimeString("vi-VN")}
+                          </Text>
+                        </div>
+                      </div>
+
+                      {/* Print button - full width, smaller height */}
+                      <div style={{ paddingLeft: 40 }}>
                         <Button
                           type="primary"
                           icon={<PrinterOutlined />}
                           onClick={() => handlePrint(item)}
-                          style={{ width: 100, height: 40 }}
+                          block
+                          style={{
+                            height: 32,
+                            fontSize: 13,
+                            fontWeight: 600,
+                          }}
                         >
-                          In
+                          IN NHÃN
                         </Button>
-                        <Button
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => item.id && handleDelete(item.id)}
-                          style={{ width: 100, height: 40 }}
-                        >
-                          Xóa
-                        </Button>
-                      </Space>
-                    }
-                  >
-                    <List.Item.Meta
-                      avatar={
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                          <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                        </div>
-                      }
-                      title={
-                        <Text strong ellipsis style={{ fontSize: 13 }}>
-                          {item.trackingCode}
-                        </Text>
-                      }
-                      description={
-                        <Space direction="vertical" size={0}>
-                          <Text type="secondary" style={{ fontSize: 11 }}>
-                            {item.packageCode}
-                          </Text>
-                          <Text type="secondary" style={{ fontSize: 11 }}>
-                            {new Date(item.timestamp).toLocaleTimeString("vi-VN")}
-                          </Text>
-                        </Space>
-                      }
-                    />
+                      </div>
+                    </Space>
                   </List.Item>
                 )}
                 style={{ maxHeight: "calc(100vh - 280px)", overflow: "auto" }}
