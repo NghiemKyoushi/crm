@@ -22,7 +22,7 @@ import {
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import BarcodeScanner from "../components/BarcodeScanner";
+import BarcodeScanner from "../components/BarcodeScannerV2";
 import PrintLabel from "../components/PrintLabel";
 import { PackageInfo, CheckComingRecord } from "../types";
 import { checkComingApi } from "../apis/check-coming.api";
@@ -42,6 +42,9 @@ const CheckComingView: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<any>(null);
   const lastScanRef = useRef<{ code: string; timestamp: number } | null>(null);
+  const packageCodeRef = useRef<string>("");
+  const isSubmittingRef = useRef<boolean>(false);
+  const isCodeInViewRef = useRef<boolean>(false);
 
   // Load history from API on mount
   useEffect(() => {
@@ -75,40 +78,74 @@ const CheckComingView: React.FC = () => {
   };
 
   const generatePackageCode = async () => {
+    console.log("🔄 generatePackageCode called");
     try {
       const response = await api.get<{ data: string }>(API_TYPE_CONST.GEN_PACKAGE_CODE);
-      const generatedCode = response.data.data; // Mã kiện nằm ở field "data"
-      console.log("Generated package code:", generatedCode);
+      const generatedCode = response.data.data;
+      console.log("📦 Generated package code from API:", generatedCode);
       if (generatedCode) {
         setPackageCode(generatedCode);
+        packageCodeRef.current = generatedCode;
+        console.log("✅ Package code set to:", generatedCode);
       } else {
         throw new Error("Empty package code from API");
       }
       setTrackingCode("");
-      lastScanRef.current = null; // Reset last scan when generating new package code
+      lastScanRef.current = null;
     } catch (error) {
-      console.error("Failed to generate package code:", error);
-      // Fallback to random code if API fails
+      console.error("❌ Failed to generate package code:", error);
       const randomCode = `PKG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      console.log("Using fallback package code:", randomCode);
+      console.log("⚠️ Using fallback package code:", randomCode);
       setPackageCode(randomCode);
+      packageCodeRef.current = randomCode;
       setTrackingCode("");
       lastScanRef.current = null;
     }
   };
 
+  const handleCodeLeftView = () => {
+    console.log("📤 Barcode left camera view - ready for next scan");
+    isCodeInViewRef.current = false;
+  };
+
   const handleScan = (code: string, type: "qr" | "barcode") => {
-    // Prevent duplicate scans within 3 seconds
     const now = Date.now();
-    if (lastScanRef.current) {
+
+    // Check if this is the same code still in view
+    if (lastScanRef.current && lastScanRef.current.code === code) {
       const timeDiff = now - lastScanRef.current.timestamp;
-      if (lastScanRef.current.code === code && timeDiff < 3000) {
-        console.log("Duplicate scan ignored:", code);
-        return; // Ignore duplicate scan
+
+      // If code is still in view and recently scanned, ignore
+      if (isCodeInViewRef.current && timeDiff < 5000) {
+        console.log("🚫 Same code still in view, ignored:", code, "timeDiff:", timeDiff, "ms");
+        return;
+      }
+
+      // If it's been more than 5 seconds, allow rescan (backup safety)
+      if (timeDiff < 5000) {
+        console.log("🚫 Duplicate scan ignored (time-based):", code, "timeDiff:", timeDiff, "ms");
+        return;
       }
     }
 
-    // Record this scan
+    // Don't scan if a different code is still in view
+    if (isCodeInViewRef.current && lastScanRef.current && lastScanRef.current.code !== code) {
+      console.log("🚫 Another code still in view, wait for it to leave");
+      return;
+    }
+
+    // Also check if already processing
+    if (loading || isSubmittingRef.current) {
+      console.log("🚫 Scan ignored - already processing");
+      return;
+    }
+
+    console.log("📸 Scan detected:", code, "Current packageCode:", packageCodeRef.current);
+
+    // Mark code as in view
+    isCodeInViewRef.current = true;
+
+    // Record this scan BEFORE calling submit
     lastScanRef.current = { code, timestamp: now };
 
     setTrackingCode(code);
@@ -119,30 +156,41 @@ const CheckComingView: React.FC = () => {
   };
 
   const handleSubmit = async (code?: string) => {
+    // Prevent submit if already processing
+    if (loading || isSubmittingRef.current) {
+      console.log("⏳ Already processing, ignoring submit (loading:", loading, "isSubmitting:", isSubmittingRef.current, ")");
+      return;
+    }
+
     const finalCode = code || trackingCode;
+    const currentPackageCode = packageCodeRef.current;
+
+    console.log("🔍 handleSubmit called - packageCode (state):", packageCode, "packageCode (ref):", currentPackageCode, "trackingCode:", finalCode);
 
     // Validate tracking code
     if (!finalCode || !finalCode.trim()) {
-      console.error("Tracking code is empty!");
+      console.error("❌ Tracking code is empty!");
       toast.error(t("checkComing.error.emptyTracking"));
       return;
     }
 
-    // Validate package code
-    if (!packageCode || !packageCode.trim()) {
-      console.error("Package code is empty!");
+    // Validate package code using ref value
+    if (!currentPackageCode || !currentPackageCode.trim()) {
+      console.error("❌ Package code is empty! Current value:", currentPackageCode);
       toast.error(t("checkComing.error.emptyPackageCode"));
       return;
     }
 
+    // Lock submission
+    isSubmittingRef.current = true;
     setLoading(true);
     try {
       // Call API to create record
       const now = new Date().toISOString();
-      console.log("✅ Submitting with packageCode:", packageCode, "trackingCode:", finalCode);
+      console.log("✅ Submitting with packageCode:", currentPackageCode, "trackingCode:", finalCode);
 
       const createdRecord = await checkComingApi.create({
-        package_code: packageCode,
+        package_code: currentPackageCode,
         tracking_code: finalCode,
         sent_date: now,
         status: 0,
@@ -181,6 +229,8 @@ const CheckComingView: React.FC = () => {
       }
     } finally {
       setLoading(false);
+      isSubmittingRef.current = false;
+      console.log("🔓 Submission unlocked");
     }
   };
 
@@ -315,6 +365,7 @@ const CheckComingView: React.FC = () => {
                     <BarcodeScanner
                       onScan={handleScan}
                       onError={(err) => toast.error(err)}
+                      onCodeLeftView={handleCodeLeftView}
                       autoStart={true}
                     />
                   ) : (

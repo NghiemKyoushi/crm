@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Space, Typography, Alert, Spin } from "antd";
-import type { Html5QrcodeScanner as Html5QrcodeScannerType } from "html5-qrcode";
+import { Card, Space, Typography, Alert, Spin, Button } from "antd";
+import type { Html5Qrcode } from "html5-qrcode";
 
 const { Text } = Typography;
 
@@ -12,7 +12,7 @@ interface BarcodeScannerProps {
   autoStart?: boolean;
 }
 
-const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
+const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
   onScan,
   onError,
   onCodeLeftView,
@@ -21,12 +21,14 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>("");
   const [isInitializing, setIsInitializing] = useState(false);
-  const scannerRef = useRef<Html5QrcodeScannerType | null>(null);
-  const scannerIdRef = useRef<string>("qr-reader");
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerIdRef = useRef<string>("qr-reader-v2");
   const hasStartedRef = useRef(false);
   const lastDetectedCodeRef = useRef<string | null>(null);
   const lastDetectionTimeRef = useRef<number>(0);
   const detectionCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastReportedCodeRef = useRef<string | null>(null);
+  const lastReportTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (autoStart && !hasStartedRef.current) {
@@ -38,9 +40,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
     return () => {
       // Cleanup scanner on unmount
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
-      }
+      stopScanner();
       // Cleanup detection check interval
       if (detectionCheckIntervalRef.current) {
         clearInterval(detectionCheckIntervalRef.current);
@@ -52,15 +52,14 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   useEffect(() => {
     if (!isScanning || !onCodeLeftView) return;
 
-    // Check every 500ms if code is still in view
     detectionCheckIntervalRef.current = setInterval(() => {
       const now = Date.now();
       const timeSinceLastDetection = now - lastDetectionTimeRef.current;
 
-      // If we had a code and it hasn't been detected for 1 second, it left the view
       if (lastDetectedCodeRef.current && timeSinceLastDetection > 1000) {
         console.log("📤 Code left view:", lastDetectedCodeRef.current);
         lastDetectedCodeRef.current = null;
+        lastReportedCodeRef.current = null; // Reset to allow re-scan
         onCodeLeftView();
       }
     }, 500);
@@ -72,6 +71,19 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     };
   }, [isScanning, onCodeLeftView]);
 
+  const stopScanner = async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        console.log("📷 Scanner stopped");
+      } catch (err) {
+        console.error("Error stopping scanner:", err);
+      }
+      scannerRef.current = null;
+    }
+    setIsScanning(false);
+  };
+
   const startScanner = async () => {
     if (isScanning || scannerRef.current) return;
 
@@ -80,50 +92,55 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
     try {
       // Dynamic import to avoid SSR issues
-      const { Html5QrcodeScanner, Html5QrcodeScanType } = await import("html5-qrcode");
+      const { Html5Qrcode } = await import("html5-qrcode");
 
-      // Initialize scanner
-      scannerRef.current = new Html5QrcodeScanner(
-        scannerIdRef.current,
-        {
-          fps: 10,
-          qrbox: { width: 280, height: 280 },
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true,
-        },
-        /* verbose= */ false
-      );
+      console.log("🎥 Initializing Html5Qrcode...");
 
-      console.log("🎥 Calling scanner.render()...");
+      scannerRef.current = new Html5Qrcode(scannerIdRef.current);
 
-      scannerRef.current.render(
+      const config = {
+        fps: 10,
+        qrbox: { width: 280, height: 280 },
+      };
+
+      await scannerRef.current.start(
+        { facingMode: "environment" }, // Use rear camera if available
+        config,
         (decodedText) => {
-          // Success callback - code detected
-          const type = decodedText.length > 20 ? "qr" : "barcode";
+          const now = Date.now();
+
+          // Debounce: Only report same code once every 5 seconds
+          if (
+            lastReportedCodeRef.current === decodedText &&
+            now - lastReportTimeRef.current < 5000
+          ) {
+            console.log("🚫 Duplicate detection ignored:", decodedText, "within 5s");
+            return;
+          }
 
           // Update last detection time and code
-          lastDetectionTimeRef.current = Date.now();
+          lastDetectionTimeRef.current = now;
           lastDetectedCodeRef.current = decodedText;
+          lastReportedCodeRef.current = decodedText;
+          lastReportTimeRef.current = now;
 
+          const type = decodedText.length > 20 ? "qr" : "barcode";
+          console.log("📸 Code scanned and reported:", decodedText);
           onScan(decodedText, type);
         },
         (errorMessage) => {
           // Error callback - usually just means no QR/barcode found in frame
           // Don't show these to user as they're too noisy
-          console.debug(errorMessage);
+          // console.debug(errorMessage);
         }
       );
 
-      console.log("✅ Scanner.render() called");
-
-      // Hide loading overlay immediately after render is called
-      // DON'T wait - let scanner show its own UI
+      console.log("✅ Scanner started successfully");
       setIsScanning(true);
       setIsInitializing(false);
     } catch (err: any) {
       console.error("Failed to start scanner:", err);
-      setError("Failed to start scanner. Please check camera permissions.");
+      setError(`Failed to start scanner: ${err.message}`);
       setIsInitializing(false);
       if (onError) {
         onError("Failed to start scanner");
@@ -132,9 +149,26 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   };
 
   return (
-    <Card styles={{ body: { padding: 0 } }}>
-      <Space direction="vertical" style={{ width: "100%" }}>
-        {error && (
+    <>
+      <style>{`
+        #${scannerIdRef.current} video {
+          width: 100% !important;
+          height: auto !important;
+          display: block !important;
+          border-radius: 8px;
+        }
+        #${scannerIdRef.current} canvas {
+          display: none !important;
+        }
+        #${scannerIdRef.current} {
+          background: #000;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+      `}</style>
+      <Card styles={{ body: { padding: 0 } }}>
+        <Space direction="vertical" style={{ width: "100%" }} size="large">
+          {error && (
           <Alert
             message="Scanner Error"
             description={error}
@@ -156,13 +190,14 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
         <div
           id={scannerIdRef.current}
-          key="scanner-container"
           style={{
             width: "100%",
-            minHeight: 400,
-            display: "block",
+            minHeight: isInitializing ? 0 : 400,
+            display: isInitializing ? "none" : "block",
           }}
-        />
+        >
+          {/* Html5Qrcode will inject video element here */}
+        </div>
 
         {isScanning && !isInitializing && (
           <div className="text-center p-3 bg-blue-50">
@@ -173,7 +208,8 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         )}
       </Space>
     </Card>
+    </>
   );
 };
 
-export default BarcodeScanner;
+export default BarcodeScannerV2;
