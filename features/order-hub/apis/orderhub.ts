@@ -212,3 +212,8 @@ export const getDataGeneral = async (params?: {customerGroupId?: number}) => {
   return res.data.data;
 };
 
+export const updateKuponOrder= async (id: number, body: {kupon: number}) => {
+  const res = await api.put(`${API_TYPE_CONST.UPDATE_KUPON}/${id}`, body);
+  return res.data.data;
+};
+

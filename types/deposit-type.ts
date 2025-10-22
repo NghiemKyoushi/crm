@@ -117,11 +117,12 @@ export interface BankSettingAccountModel {
   bank_code: string;
   bank_name: string;
   daily_limit_vnd: number;
-  is_active: boolean;
+  status: boolean;
   id?:number;
   partner_name?: string;
   description?:string;
-  telegram_channel_id?: string
+  telegram_channel_id?: string;
+  per_transaction_limit_vnd?: number
 }
 // Một bản ghi topup
 export interface withdrawItem {

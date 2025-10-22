@@ -45,14 +45,15 @@ const ProductManagement: React.FC = () => {
     status: undefined,
     date: undefined,
     customer_name: undefined,
-    customer_code: undefined,
     product_url: undefined,
     product_name: undefined,
-    invoice_no: undefined,
+    tracking_ship: undefined,
     tracking_code: undefined,
     package_code: undefined,
     product_id: undefined,
     note_admin: undefined,
+    from_date: undefined,
+    to_date: undefined,
   });
 
   // Construct query params by removing undefined
@@ -68,14 +69,15 @@ const ProductManagement: React.FC = () => {
     date: filters.date,
     search: filters.search,
     customer_name: filters.customer_name,
-    customer_code: filters.customer_code,
     product_url: filters.product_url,
     product_name: filters.product_name,
-    invoice_no: filters.invoice_no,
+    tracking_ship: filters.tracking_ship,
     tracking_code: filters.tracking_code,
     package_code: filters.package_code,
     product_id: filters.product_id,
     note_admin: filters.note_admin,
+    from_date: filters.from_date,
+    to_date: filters.to_date,
   });
 
   const { data: listOrder } = useListOrderTracking({

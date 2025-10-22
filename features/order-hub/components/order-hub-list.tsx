@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tag, Button, Modal, Tooltip, Form, Input, Select } from "antd";
+import { Tag, Button, Modal, Tooltip, Form, Input, Select, InputNumber } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
@@ -35,6 +35,7 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
+import { updateKuponOrder } from "../apis/orderhub";
 export default function OrderHub() {
   const { hasPermission, permissions } = usePermission();
   const [open, setOpen] = useState(false);
@@ -78,13 +79,17 @@ export default function OrderHub() {
     orderId: number;
     value: string;
   } | null>(null);
+  // --- Kupon Edit State
+  const [editingKupon, setEditingKupon] = useState<{
+    orderId: number;
+    value: number | null;
+  } | null>(null);
+  const [isKuponLoading, setIsKuponLoading] = useState<boolean>(false);
 
   const [filters, setFilters] = useState<FilterType>({
-    search: undefined,
     status: undefined,
     // date: undefined,
     customer_name: undefined,
-    customer_code: undefined,
     product_url: undefined,
     product_name: undefined,
     invoice_no: undefined,
@@ -92,18 +97,16 @@ export default function OrderHub() {
     package_code: undefined,
     product_id: undefined,
     note_admin: undefined,
-    fromDate: undefined,
-    toDate: undefined,
+    from_date: undefined,
+    to_date: undefined,
   });
 
   const { data: listOrder } = useListOrder({
     page,
     size: 10,
-    search: filters.search,
     status: filters.status,
     // date: filters.date,
     customer_name: filters.customer_name,
-    customer_code: filters.customer_code,
     product_url: filters.product_url,
     product_name: filters.product_name,
     invoice_no: filters.invoice_no,
@@ -111,8 +114,8 @@ export default function OrderHub() {
     package_code: filters.package_code,
     product_id: filters.product_id,
     note_admin: filters.note_admin,
-    fromDate: filters.fromDate,
-    toDate: filters.toDate,
+    from_date: filters.from_date,
+    to_date: filters.to_date,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -258,6 +261,25 @@ export default function OrderHub() {
       setFilters({ ...filters, type: 2 });
     }
   }, [permissions]);
+
+  // Function to call for updating kupon (with toast and loading)
+  const updateOrderKupon = async (orderId: number, value: number | null) => {
+    setIsKuponLoading(true);
+    try {
+      await updateKuponOrder(orderId, { kupon: value ?? 0 });
+      toast.success("Cập nhật kupon thành công");
+      setEditingKupon(null);
+      queryClient.invalidateQueries({
+        queryKey: ["listorder"],
+      });
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.localizedMessage || "Có lỗi khi cập nhật kupon"
+      );
+    } finally {
+      setIsKuponLoading(false);
+    }
+  };
 
   const columns: ColumnsType<Invoice> = [
     {
@@ -507,7 +529,28 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => (
-        <div className="text-xs text-gray-800 text-left">{record.kupon ?? '-'}</div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-800 text-left">{record.kupon ?? '-'}</span>
+          {hasPermission("sales.view_assigned_orders") &&
+            hasPermission("order.view") && (
+              <EditOutlined
+                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                onClick={() => {
+                  setEditingKupon({
+                    orderId: record.id,
+                    value:
+                      typeof record.kupon === "number"
+                        ? record.kupon
+                        : record.kupon && !isNaN(Number(record.kupon))
+                        ? Number(record.kupon)
+                        : null,
+                  });
+                  setOrderDetail(record);
+                }}
+              />
+            )
+          }
+        </div>
       ),
     },
     {
@@ -1134,6 +1177,50 @@ export default function OrderHub() {
             );
           }}
         />
+      )}
+
+      {/* Modal Edit Kupon */}
+      {editingKupon && (
+        <Modal
+          open={!!editingKupon}
+          onCancel={() => setEditingKupon(null)}
+          title="Thêm kupon"
+          width={400}
+          centered
+          footer={[
+            <Button key="cancel" onClick={() => setEditingKupon(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={isKuponLoading}
+              onClick={() => updateOrderKupon(editingKupon.orderId, editingKupon.value)}
+            >
+              Lưu
+            </Button>,
+          ]}
+        >
+          <Form layout="vertical" className="py-4">
+            <Form.Item label="Kupon">
+              <InputNumber
+                value={editingKupon.value ?? 0}
+                onChange={(num) => {
+                  setEditingKupon({
+                    ...editingKupon,
+                    value: num === null || num === undefined ? null : num,
+                  });
+                }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                placeholder="Nhập số kupon"
+                min={0}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
       )}
 
       {/* Modal Edit Fees & Rates */}

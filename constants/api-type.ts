@@ -93,5 +93,6 @@ export const API_TYPE_CONST = {
   CREATE_TRACKING_ORDER:`${FEATURE}/admin/tracking/order`,
   UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`,
   GET_DATA_CHECK:`${FEATURE}/fee/get-data`,
-  GET_DATA_LIST: `${FEATURE}/exchange-rate/admin/setting/get-data-list`
+  GET_DATA_LIST: `${FEATURE}/exchange-rate/admin/setting/get-data-list`,
+  UPDATE_KUPON:`${FEATURE}/admin/orders/update-kupon`
 } as const;

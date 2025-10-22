@@ -12,15 +12,12 @@ export interface FilterTypeShipment {
   search?: string;
   status?: string[]; // Kiểu dữ liệu status vẫn là array string
   date?: string;
-  fromdate?: string;
-  todate?: string;
   type?: number;
   size?: number;
   // New search fields
-  fromDate?: string;
-  toDate?: string;
+  from_date?: string;
+  to_date?: string;
   customer_name?: string;
-  customer_code?: string;
   product_url?: string;
   product_name?: string;
   invoice_no?: string;
@@ -28,6 +25,7 @@ export interface FilterTypeShipment {
   package_code?: string;
   product_id?: string;
   note_admin?: string;
+  tracking_ship?: string;
 }
 
 interface ShipmentFilterProps {
@@ -78,16 +76,15 @@ export default function ShipmentFilter({
       type: initialFilters?.type || undefined,
       // New search fields
       customer_name: values.customer_name?.trim() || undefined,
-      customer_code: values.customer_code?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
-      invoice_no: values.invoice_no?.trim() || undefined,
+      tracking_ship: values.tracking_ship?.trim() || undefined,
       tracking_code: values.tracking_code?.trim() || undefined,
       package_code: values.package_code?.trim() || undefined,
       product_id: values.product_id?.trim() || undefined,
       note_admin: values.note_admin?.trim() || undefined,
-      fromDate,
-      toDate,
+      from_date: fromDate,
+      to_date: toDate,
     };
     console.log("filters", filters);
 
@@ -102,16 +99,15 @@ export default function ShipmentFilter({
       date: undefined,
       type: initialFilters?.type || undefined,
       customer_name: undefined,
-      customer_code: undefined,
       product_url: undefined,
       product_name: undefined,
-      invoice_no: undefined,
+      tracking_ship: undefined,
       tracking_code: undefined,
       package_code: undefined,
       product_id: undefined,
       note_admin: undefined,
-      fromDate: undefined,
-      toDate: undefined,
+      from_date: undefined,
+      to_date: undefined,
     });
   };
 
@@ -171,15 +167,7 @@ export default function ShipmentFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="customer_code" className="!mb-0">
-                <Input
-                  placeholder="Mã khách hàng"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
             </div>
-
             {/* Product Info */}
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">
@@ -211,11 +199,11 @@ export default function ShipmentFilter({
             {/* Order & Tracking Info */}
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">
-                Mã đơn hàng & Tracking
+                Mã vận đơn & Tracking
               </div>
-              <Form.Item name="invoice_no" className="!mb-2">
+              <Form.Item name="tracking_ship" className="!mb-2">
                 <Input
-                  placeholder="Mã đơn hàng"
+                  placeholder="Mã vận đơn"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />

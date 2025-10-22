@@ -9,16 +9,13 @@ import { OrderStatusType } from "@/types/orderhub";
 
 export interface FilterType {
   page?: number;
-  search?: string;
   status?: string;
   date?: string;
   type?: number;
   size?: number;
-  // New search fields
-  fromDate?: string;
-  toDate?: string;
+  from_date?: string;
+  to_date?: string;
   customer_name?: string;
-  customer_code?: string;
   product_url?: string;
   product_name?: string;
   invoice_no?: string;
@@ -84,20 +81,16 @@ export default function OrderHubFilter({
     let fromDate: string | undefined;
     let toDate: string | undefined;
     if (values.date && Array.isArray(values.date) && values.date.length === 2) {
-      fromDate = values.date[0] ? values.date[0].format("YYYY-MM-DD") : undefined;
+      fromDate = values.date[0]
+        ? values.date[0].format("YYYY-MM-DD")
+        : undefined;
       toDate = values.date[1] ? values.date[1].format("YYYY-MM-DD") : undefined;
     }
 
     const filters: FilterType = {
-      search:
-        values.keyword && values.keyword.trim() !== ""
-          ? values.keyword
-          : undefined,
       status: values.status !== "" ? values.status : undefined,
       type: initialFilters?.type || undefined,
-      // New search fields
       customer_name: values.customer_name?.trim() || undefined,
-      customer_code: values.customer_code?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
       invoice_no: values.invoice_no?.trim() || undefined,
@@ -105,23 +98,19 @@ export default function OrderHubFilter({
       package_code: values.package_code?.trim() || undefined,
       product_id: values.product_id?.trim() || undefined,
       note_admin: values.note_admin?.trim() || undefined,
-      fromDate,
-      toDate,
+      from_date: fromDate,
+      to_date: toDate,
     };
-    console.log("filters", filters);
-
     onFilter(filters);
   };
 
   const handleReset = () => {
     form.resetFields();
     onFilter({
-      search: undefined,
       status: undefined,
       date: undefined,
       type: initialFilters?.type || undefined,
       customer_name: undefined,
-      customer_code: undefined,
       product_url: undefined,
       product_name: undefined,
       invoice_no: undefined,
@@ -129,6 +118,8 @@ export default function OrderHubFilter({
       package_code: undefined,
       product_id: undefined,
       note_admin: undefined,
+      from_date: undefined,
+      to_date: undefined,
     });
   };
 
@@ -178,13 +169,6 @@ export default function OrderHubFilter({
               <Form.Item name="customer_name" className="!mb-2">
                 <Input
                   placeholder="Tên khách hàng"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="customer_code" className="!mb-0">
-                <Input
-                  placeholder="Mã khách hàng"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />
