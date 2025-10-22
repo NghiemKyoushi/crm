@@ -73,6 +73,7 @@ export interface Invoice {
   package_code: string;
   tracking_ship_list: TrackingRecord[],
   note_admin: string;
+  kupon?: string;
 }
 
 export interface InvoiceMetadata {

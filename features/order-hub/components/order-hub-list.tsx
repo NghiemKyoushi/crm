@@ -82,7 +82,7 @@ export default function OrderHub() {
   const [filters, setFilters] = useState<FilterType>({
     search: undefined,
     status: undefined,
-    date: undefined,
+    // date: undefined,
     customer_name: undefined,
     customer_code: undefined,
     product_url: undefined,
@@ -92,6 +92,8 @@ export default function OrderHub() {
     package_code: undefined,
     product_id: undefined,
     note_admin: undefined,
+    fromDate: undefined,
+    toDate: undefined,
   });
 
   const { data: listOrder } = useListOrder({
@@ -99,7 +101,7 @@ export default function OrderHub() {
     size: 10,
     search: filters.search,
     status: filters.status,
-    date: filters.date,
+    // date: filters.date,
     customer_name: filters.customer_name,
     customer_code: filters.customer_code,
     product_url: filters.product_url,
@@ -109,6 +111,8 @@ export default function OrderHub() {
     package_code: filters.package_code,
     product_id: filters.product_id,
     note_admin: filters.note_admin,
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -123,9 +127,9 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
-  const handleFilter = (newFilters: FilterType) => {
-    console.log('newFiltersnewFilters', newFilters);
-    
+  const handleFilter = (newFilters: FilterType) => {  
+    console.log('newFilters', newFilters);
+      
     setFilters(newFilters);
     setPage(1);
   };
@@ -493,19 +497,19 @@ export default function OrderHub() {
         </div>
       ),
     },
-    // {
-    //   title: "Phụ Phí",
-    //   key: "extra_fee",
-    //   width: 110,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: "1px solid #f0f0f0",
-    //     },
-    //   }),
-    //   render: (_, record) => (
-    //     <div className="text-xs text-gray-800 text-left">-</div>
-    //   ),
-    // },
+    {
+      title: "Kupon",
+      key: "kupon",
+      width: 110,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => (
+        <div className="text-xs text-gray-800 text-left">{record.kupon ?? '-'}</div>
+      ),
+    },
     {
       title: "Thanh Toán & Công Nợ",
       key: "payment_info",

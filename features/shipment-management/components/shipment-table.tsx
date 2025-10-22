@@ -19,6 +19,19 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { EyeOutlined, EditOutlined, ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
+import ShipmentFilter, { FilterTypeShipment } from "./shipment-filter";
+
+// === Utility: Remove undefined fields from object ===
+function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+  if (!obj) return {};
+  const result: Partial<T> = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value !== undefined) {
+      result[key as keyof T] = value;
+    }
+  });
+  return result;
+}
 
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
@@ -27,16 +40,48 @@ const ProductManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
+  const [filters, setFilters] = useState<FilterTypeShipment>({
+    search: undefined,
+    status: undefined,
+    date: undefined,
+    customer_name: undefined,
+    customer_code: undefined,
+    product_url: undefined,
+    product_name: undefined,
+    invoice_no: undefined,
+    tracking_code: undefined,
+    package_code: undefined,
+    product_id: undefined,
+    note_admin: undefined,
+  });
+
+  // Construct query params by removing undefined
+  const filterQueryParams = removeUndefinedFields({
+    status:
+      filters.status ||
+      [
+        OrderStatusType.ARRIVED_VN_WAREHOUSE,
+        OrderStatusType.READY_TO_SHIP,
+        OrderStatusType.SHIPPING_REQUEST_CLIENT,
+        OrderStatusType.SHIPPED,
+      ],
+    date: filters.date,
+    search: filters.search,
+    customer_name: filters.customer_name,
+    customer_code: filters.customer_code,
+    product_url: filters.product_url,
+    product_name: filters.product_name,
+    invoice_no: filters.invoice_no,
+    tracking_code: filters.tracking_code,
+    package_code: filters.package_code,
+    product_id: filters.product_id,
+    note_admin: filters.note_admin,
+  });
 
   const { data: listOrder } = useListOrderTracking({
     page,
     size: 20,
-    status: [
-      OrderStatusType.ARRIVED_VN_WAREHOUSE,
-      OrderStatusType.READY_TO_SHIP,
-      OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      OrderStatusType.SHIPPED
-    ],
+    ...filterQueryParams,
   });
 
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
@@ -45,9 +90,9 @@ const ProductManagement: React.FC = () => {
     setPage(pageNumber - 1);
   };
 
-  const handleFinish = (values: any) => {
-    // TODO: Implement filter logic
-    console.log("Filter values:", values);
+  const handleFinish = (newFilters: FilterTypeShipment) => {
+    setFilters(newFilters);
+    setPage(1);
   };
 
   const useCompleteShippingMutation = useCompleteShippingOrder();
@@ -92,14 +137,6 @@ const ProductManagement: React.FC = () => {
         );
       },
     },
-    // {
-    //   title: "Ngày Về",
-    //   key: "arrival_date",
-    //   width: 80,
-    //   render: (_, record) => (
-    //     <div className="text-xs text-gray-800">-</div>
-    //   ),
-    // },
     {
       title: "Mã VN / CN",
       key: "tracking_package",
@@ -165,320 +202,6 @@ const ProductManagement: React.FC = () => {
         );
       },
     },
-    // {
-    //   title: "Sản Phẩm",
-    //   key: "product",
-    //   width: 280,
-    //   render: (_, record) => {
-    //     const orderList = record.order_list || [];
-
-    //     // Lấy tất cả sản phẩm từ tất cả orders
-    //     const allProducts: Array<{ name: string; quantity: number; image: string | null }> = [];
-
-    //     orderList.forEach((order) => {
-    //       if (order.metadata) {
-    //         try {
-    //           const metadata = typeof order.metadata === 'string'
-    //             ? JSON.parse(order.metadata)
-    //             : order.metadata;
-
-    //           const items = metadata?.items || [];
-    //           items.forEach((item: any) => {
-    //             const product = item.product;
-    //             const productName = product?.map_data?.productName || "Sản phẩm";
-    //             const quantity = item.count || 0;
-    //             const images = product?.map_data?.images || [];
-    //             const productImage = images.length > 0 ? images[0] : null;
-
-    //             allProducts.push({ name: productName, quantity, image: productImage });
-    //           });
-    //         } catch (e) {
-    //           console.error("Error parsing metadata:", e);
-    //         }
-    //       }
-    //     });
-
-    //     // Tính tổng số lượng sản phẩm
-    //     const totalProductQty = allProducts.reduce((sum, p) => sum + p.quantity, 0);
-
-    //     const firstProduct = allProducts[0];
-    //     const remainingProducts = allProducts.length - 1;
-
-    //     return (
-    //       <div className="flex gap-2">
-    //         {firstProduct && (
-    //           <>
-    //             <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
-    //               {firstProduct.image ? (
-    //                 <img src={firstProduct.image} alt="Product" className="w-full h-full object-cover" />
-    //               ) : (
-    //                 <div className="w-full h-full flex items-center justify-center">
-    //                   <span className="text-xs text-gray-400">No img</span>
-    //                 </div>
-    //               )}
-    //             </div>
-    //             <div className="flex-1 min-w-0 space-y-1">
-    //               <div className="text-xs text-gray-800 line-clamp-2">
-    //                 {firstProduct.name}
-    //               </div>
-    //               <div className="text-xs">
-    //                 <span className="text-gray-500">Tổng SL: </span>
-    //                 <span className="text-gray-800 font-medium">{totalProductQty}</span>
-    //               </div>
-    //               {remainingProducts > 0 && (
-    //                 <div className="text-xs text-blue-600">
-    //                   +{remainingProducts} SP khác
-    //                 </div>
-    //               )}
-    //             </div>
-    //           </>
-    //         )}
-    //         {!firstProduct && (
-    //           <div className="text-xs text-gray-400">Không có sản phẩm</div>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "Phụ Phí",
-    //   key: "extra_fee",
-    //   width: 110,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => (
-    //     <div className="text-xs text-gray-800 text-left">-</div>
-    //   ),
-    // },
-    // {
-    //   title: "Ghi Chú",
-    //   key: "note",
-    //   width: 140,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     const orderList = record.order_list || [];
-    //     const descriptions = orderList
-    //       .map(order => order.description)
-    //       .filter(Boolean);
-
-    //     const firstDescription = descriptions[0] || "-";
-
-    //     return (
-    //       <div className="space-y-1">
-    //         <div className="text-xs text-gray-600 line-clamp-2">{firstDescription}</div>
-    //         {descriptions.length > 1 && (
-    //           <div className="text-xs text-blue-600">+{descriptions.length - 1} ghi chú khác</div>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "Phí & Tỷ Giá",
-    //   key: "fees_rates",
-    //   width: 160,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     const orderList = record.order_list || [];
-
-    //     // Tính tổng shipping fee và weight fee
-    //     const totalShippingFee = orderList.reduce((sum, order) => sum + (order.shipping_fee || 0), 0);
-    //     const totalWeightFee = orderList.reduce((sum, order) => sum + (order.weight_fee || 0), 0);
-
-    //     // Lấy rate (giả sử rate giống nhau cho tất cả orders)
-    //     const rate = orderList[0]?.rate;
-
-    //     return (
-    //       <div className="space-y-1">
-    //         <div className="text-xs">
-    //           <span className="text-gray-500">Ship: </span>
-    //           <span className="text-gray-800 font-medium">
-    //             {totalShippingFee > 0 ? `${totalShippingFee.toLocaleString("vi-VN")}¥` : "-"}
-    //           </span>
-    //         </div>
-    //         <div className="text-xs">
-    //           <span className="text-gray-500">CN: </span>
-    //           <span className="text-gray-800 font-medium">
-    //             {totalWeightFee > 0 ? `${totalWeightFee.toLocaleString("vi-VN")}đ` : "-"}
-    //           </span>
-    //         </div>
-    //         <div className="text-xs">
-    //           <span className="text-gray-500">TG: </span>
-    //           <span className="text-gray-800">{rate || "-"}</span>
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "COD (Việt)",
-    //   key: "transfer_fee",
-    //   width: 180,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     const orderData = record.order_list?.[0];
-    //     const codPrice = orderData?.cod_shipping_price || 0;
-    //     const shippingPrice = codPrice || orderData?.shipping_fee || 0;
-    //     const shippingCode = orderData?.tracking_vn || "";
-    //     const isShippingRequest = record.status === OrderStatusType.SHIPPING_REQUEST_CLIENT;
-
-    //     let shippingTypeText = "-";
-    //     let shippingTypeColor = "text-gray-600";
-
-    //     if (codPrice > 0) {
-    //       shippingTypeText = "COD";
-    //       shippingTypeColor = "text-blue-600";
-    //     }
-
-    //     const showWarningCode = isShippingRequest && !shippingCode;
-    //     const showWarningPrice = isShippingRequest && !shippingPrice;
-    //     const showWarningType = isShippingRequest && shippingTypeText === "-";
-
-    //     return (
-    //       <div className="space-y-1">
-    //         <div className="text-xs flex items-center justify-between gap-2">
-    //           <div className="flex items-center gap-1">
-    //             <span className="text-gray-500">Mã: </span>
-    //             {showWarningCode ? (
-    //               <Tooltip title="Chưa có mã vận chuyển">
-    //                 <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-    //               </Tooltip>
-    //             ) : (
-    //               <span className="text-gray-800">{shippingCode || "-"}</span>
-    //             )}
-    //           </div>
-    //           {isShippingRequest && (
-    //             <EditOutlined
-    //               className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-    //               onClick={() => {
-    //                 setOrderDetail(record);
-    //                 setIsOpenTrackingOrder(true);
-    //               }}
-    //             />
-    //           )}
-    //         </div>
-    //         <div className="text-xs flex items-center gap-1">
-    //           <span className="text-gray-500">Giá: </span>
-    //           {showWarningPrice ? (
-    //             <Tooltip title="Chưa có giá vận chuyển">
-    //               <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-    //             </Tooltip>
-    //           ) : (
-    //             <span className="text-gray-800 font-medium">
-    //               {shippingPrice > 0 ? `${shippingPrice.toLocaleString("vi-VN")}đ` : "-"}
-    //             </span>
-    //           )}
-    //         </div>
-    //         <div className="text-xs flex items-center gap-1">
-    //           <span className="text-gray-500">HT: </span>
-    //           {showWarningType ? (
-    //             <Tooltip title="Chưa có hình thức">
-    //               <ExclamationCircleOutlined className="text-amber-500 text-sm cursor-help" style={{ color: '#f59e0b' }} />
-    //             </Tooltip>
-    //           ) : (
-    //             <span className={`font-medium ${shippingTypeColor}`}>
-    //               {shippingTypeText}
-    //             </span>
-    //           )}
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "Thanh Toán & Công Nợ",
-    //   key: "payment_info",
-    //   width: 170,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     const orderList = record.order_list || [];
-
-    //     // Tính tổng deposit fee và amount_vnd từ tất cả orders
-    //     const totalDepositFee = orderList.reduce((sum, order) => sum + (order.deposit_fee || 0), 0);
-    //     const totalAmountVnd = orderList.reduce((sum, order) => sum + (order.amount_vnd || 0), 0);
-    //     const remaining = totalAmountVnd - totalDepositFee;
-
-    //     return (
-    //       <div className="space-y-1">
-    //         <div className="text-xs">
-    //           <span className="text-gray-500">Cọc: </span>
-    //           <span className="text-green-600 font-medium">
-    //             {totalDepositFee > 0 ? `${totalDepositFee.toLocaleString("vi-VN")}đ` : "-"}
-    //           </span>
-    //         </div>
-    //         <div className="text-xs">
-    //           <span className="text-gray-500">Còn lại: </span>
-    //           <span className="text-orange-600 font-medium">
-    //             {remaining > 0 ? `${remaining.toLocaleString("vi-VN")}đ` : "-"}
-    //           </span>
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "Tổng Chi Phí",
-    //   key: "total_cost",
-    //   width: 130,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     const orderList = record.order_list || [];
-
-    //     // Tính tổng chi phí (weight fee + shipping fee) từ tất cả orders
-    //     const totalCost = orderList.reduce(
-    //       (sum, order) => sum + (order.weight_fee || 0) + (order.shipping_fee || 0),
-    //       0
-    //     );
-
-    //     return (
-    //       <div className="text-xs text-gray-800 text-left font-medium">
-    //         {totalCost > 0 ? `${totalCost.toLocaleString("vi-VN")}đ` : "-"}
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   title: "Tổng Chi Phí",
-    //   key: "total",
-    //   width: 110,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: '1px solid #f0f0f0',
-    //     },
-    //   }),
-    //   render: (_, record) => {
-    //     // Sử dụng amountvnd từ response (đã tính tổng từ backend)
-    //     const amountVnd = record.amountvnd || 0;
-    //     return (
-    //       <div className="text-xs font-medium text-blue-600">
-    //         {amountVnd > 0 ? `${amountVnd.toLocaleString("en-US")}đ` : "-"}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: "Địa Chỉ",
       key: "address",
@@ -611,73 +334,19 @@ const ProductManagement: React.FC = () => {
       },
     },
   ];
-
-  const orderStatusOptions = [
-    {
-      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
-      label: t("status.arrivedVnWarehouse"),
-    },
-    {
-      value: OrderStatusType.READY_TO_SHIP,
-      label: t("status.readyToShip"),
-    },
-    {
-      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t('status.shippingRequest'),
-    },
-    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
-  ];
-
   return (
     <div className="p-6 bg-gray-50">
       <div className="bg-white rounded-xl shadow p-6">
         {/* Header with Filter */}
         <div className="flex flex-col mb-2 gap-4">
-          <h2 className="text-lg font-semibold">
+          {/* <h2 className="text-lg font-semibold">
             {t('page.importedProductList')}
-          </h2>
-          <Form form={form} onFinish={handleFinish}>
-            <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
-              <Form.Item name="keyword" className="mb-0">
-                <Input
-                  placeholder="Tìm kiếm theo tracking, khách hàng..."
-                  className="!w-full !h-11 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
+          </h2> */}
+          <ShipmentFilter
+           onFilter={handleFinish}
+           initialFilters={filters}
+          />
 
-              <Form.Item name="status" className="mb-0">
-                <Select
-                  placeholder="Chọn trạng thái"
-                  className="!w-full !h-11"
-                  size="small"
-                  allowClear
-                >
-                  {orderStatusOptions.map((opt) => (
-                    <Select.Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="date" className="mb-0">
-                <DatePicker className="!w-full !h-11" size="small" placeholder="Chọn ngày" />
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
-                  size="small"
-                >
-                  Lọc
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
         </div>
 
         <EnhancedTableWrapper className="overflow-x-auto">

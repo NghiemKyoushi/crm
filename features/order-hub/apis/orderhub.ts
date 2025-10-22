@@ -12,6 +12,7 @@ import {
 } from "@/types/orderhub";
 import qs from "qs";
 import { FilterType } from "../components/order-hub-filter";
+import { FilterTypeShipment } from "@/features/shipment-management/components/shipment-filter";
 
 export const getListOrder = async (params: FilterType 
 //   {
@@ -27,11 +28,7 @@ export const getListOrder = async (params: FilterType
   return res.data.data;
 };
 
-export const getListOrderTracking = async (params: {
-  page: number;
-  size: number;
-  status?: string[];
-}) => {
+export const getListOrderTracking = async (params: FilterTypeShipment) => {
   const res = await api.get(API_TYPE_CONST.GET_TRACKING_ORDER, {
     params,
     paramsSerializer: (params) =>

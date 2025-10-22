@@ -7,11 +7,13 @@ import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
-export interface FilterType {
+export interface FilterTypeShipment {
   page?: number;
   search?: string;
-  status?: string;
+  status?: string[]; // Kiểu dữ liệu status vẫn là array string
   date?: string;
+  fromdate?: string;
+  todate?: string;
   type?: number;
   size?: number;
   // New search fields
@@ -28,72 +30,51 @@ export interface FilterType {
   note_admin?: string;
 }
 
-interface OrderHubFilterProps {
-  onFilter: (filters: FilterType) => void;
-  onCreateOrder: () => void;
-  initialFilters?: FilterType;
+interface ShipmentFilterProps {
+  onFilter: (filters: FilterTypeShipment) => void;
+  initialFilters?: FilterTypeShipment;
 }
 
-export default function OrderHubFilter({
+export default function ShipmentFilter({
   onFilter,
-  onCreateOrder,
   initialFilters,
-}: OrderHubFilterProps) {
+}: ShipmentFilterProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const { RangePicker } = DatePicker;
 
   const orderStatusOptions = [
     {
-      value: OrderStatusType.PENDING_APPROVAL,
-      label: t("status.pendingApproval"),
-    },
-    {
-      value: OrderStatusType.PENDING_DEPOSIT,
-      label: t("status.pendingDeposit"),
-    },
-    { value: OrderStatusType.DEPOSIT_PAID, label: t("status.depositPaid") },
-    { value: OrderStatusType.PURCHASED, label: t("status.purchased") },
-    {
-      value: OrderStatusType.ARRIVED_JP_WAREHOUSE,
-      label: t("status.arrivedJpWarehouse"),
-    },
-    {
-      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
+      value: OrderStatusType.ARRIVED_VN_WAREHOUSE, //
       label: t("status.arrivedVnWarehouse"),
     },
+    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") }, //
+    { value: OrderStatusType.SHIPPED, label: t("status.shipped") }, //
     {
-      value: OrderStatusType.UNDER_INSPECTION,
-      label: t("status.underInspection"),
+      value: OrderStatusType.SHIPPING_REQUEST_CLIENT, //
+      label: t("status.shippingRequest"),
     },
-    {
-      value: OrderStatusType.PENDING_PAYMENT,
-      label: t("status.pendingPayment"),
-    },
-    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") },
-    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
-    {
-      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
-    },
-    { value: OrderStatusType.CANCELED, label: t("status.canceled") },
   ];
 
   const handleFinish = (values: any) => {
-    // Xử lý lấy fromDate và toDate từ trường "date"
     let fromDate: string | undefined;
     let toDate: string | undefined;
     if (values.date && Array.isArray(values.date) && values.date.length === 2) {
-      fromDate = values.date[0] ? values.date[0].format("YYYY-MM-DD") : undefined;
+      fromDate = values.date[0]
+        ? values.date[0].format("YYYY-MM-DD")
+        : undefined;
       toDate = values.date[1] ? values.date[1].format("YYYY-MM-DD") : undefined;
     }
 
-    const filters: FilterType = {
+    const filters: FilterTypeShipment = {
       search:
         values.keyword && values.keyword.trim() !== ""
           ? values.keyword
           : undefined,
-      status: values.status !== "" ? values.status : undefined,
+      status: values.status
+        ? [values.status].filter((s: string) => s && s !== "")
+        : undefined,
+      date: values.date ? values.date.format?.("YYYY-MM-DD") : undefined,
       type: initialFilters?.type || undefined,
       // New search fields
       customer_name: values.customer_name?.trim() || undefined,
@@ -129,12 +110,29 @@ export default function OrderHubFilter({
       package_code: undefined,
       product_id: undefined,
       note_admin: undefined,
+      fromDate: undefined,
+      toDate: undefined,
     });
+  };
+
+  // If initialFilters.status is string[], convert to a single value (first element) for Select initial value
+  const selectInitialValues = {
+    ...initialFilters,
+    status:
+      initialFilters &&
+      Array.isArray(initialFilters.status) &&
+      initialFilters.status.length > 0
+        ? initialFilters.status[0]
+        : undefined,
   };
 
   return (
     <div className="flex flex-col mb-2 gap-1">
-      <Form form={form} onFinish={handleFinish} initialValues={initialFilters}>
+      <Form
+        form={form}
+        onFinish={handleFinish}
+        initialValues={selectInitialValues}
+      >
         {/* Action Buttons Row */}
         <div className="w-full flex justify-end gap-3 bg-white rounded-lg p-2">
           <Button
@@ -153,15 +151,6 @@ export default function OrderHubFilter({
             size="small"
           >
             {t("filter")}
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined className="text-xs" />}
-            className="!h-10 !bg-blue-600 !text-white !font-medium !text-xs !px-6"
-            size="small"
-            onClick={onCreateOrder}
-          >
-            Tạo đơn
           </Button>
         </div>
         {/* Advanced Search Row */}
@@ -258,6 +247,7 @@ export default function OrderHubFilter({
                   placeholder={<span className="text-xs">Trạng thái</span>}
                   size="small"
                   allowClear
+                  mode={undefined} // Không dùng "multiple" mode => chỉ cho chọn 1 trạng thái
                 >
                   {orderStatusOptions.map((opt) => (
                     <Select.Option
@@ -284,7 +274,6 @@ export default function OrderHubFilter({
                   className="!w-full !text-xs !h-10"
                   rows={2}
                   size="small"
-                  //   style={{minHeight: '40px'}}
                 />
               </Form.Item>
             </div>

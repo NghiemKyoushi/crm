@@ -35,6 +35,7 @@ import { OrderDetail } from "../components/modal/orderhub-detail-modal";
 import { ServiceFee } from "@/types/fee-setting";
 import { FeeData } from "@/features/fee-settting/components/shipping-service-form";
 import { FilterType } from "../components/order-hub-filter";
+import { FilterTypeShipment } from "@/features/shipment-management/components/shipment-filter";
 
 export const useListOrder = (params: FilterType
 //   {
@@ -53,11 +54,13 @@ export const useListOrder = (params: FilterType
   });
 };
 
-export const useListOrderTracking = (params: {
-  page: number;
-  size: number;
-  status?: Array<string>;
-}) => {
+export const useListOrderTracking = (params: FilterTypeShipment
+//    {
+//   page: number;
+//   size: number;
+//   status?: Array<string>;
+// }
+) => {
   return useQuery({
     queryKey: ["listorderTracking", params],
     queryFn: () => getListOrderTracking(params),
