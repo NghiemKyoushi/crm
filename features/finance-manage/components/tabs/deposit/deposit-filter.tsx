@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { Button, Select, DatePicker, Form, SelectProps, Input } from "antd";
+import { Button, Select, DatePicker, Form, Input } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { DepositParams } from "@/types/deposit-type";
@@ -14,6 +14,7 @@ interface FilterSectionProps {
   code?: string;
   action?: string;
 }
+
 const FilterSection = (props: FilterSectionProps) => {
   const { onFilter, code, action } = props;
   const [form] = Form.useForm();
@@ -26,11 +27,14 @@ const FilterSection = (props: FilterSectionProps) => {
       toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
       depositCode: values.keyword,
+      handler: values.handler, // add handler to payload
     };
+    console.log('check33', payload);
+    
     onFilter(payload);
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (code && action === "deposit") {
       form.setFieldsValue({ keyword: code });
       form.submit(); // sẽ trigger onFinish với giá trị đã có
@@ -40,9 +44,15 @@ const FilterSection = (props: FilterSectionProps) => {
   return (
     <div className="flex flex-col mb-2 gap-4 ">
       <Form form={form} onFinish={onFinish}>
-        <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
+        {/* Sử dụng grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] để ô button nhỏ lại */}
+        <div className="w-full grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-center bg-white rounded-lg">
           <Form.Item name="keyword" className="mb-0">
-          <Input placeholder={t("keywordPlaceholder")} className="w-full h-11" />
+            <Input placeholder={t("keywordPlaceholder")} className="w-full h-11" />
+          </Form.Item>
+
+          {/* New field: handler (người xử lý) */}
+          <Form.Item name="handler" className="mb-0">
+            <Input placeholder={t("deposit.handlerPlaceholder") || "Người xử lý"} className="w-full h-11" />
           </Form.Item>
 
           <Form.Item name="status" className="mb-0">
@@ -67,7 +77,8 @@ const FilterSection = (props: FilterSectionProps) => {
               type="primary"
               htmlType="submit"
               icon={<FontAwesomeIcon icon={faFilter} />}
-              className="w-full  !bg-gray-700 !text-white !font-medium !h-11 !text-base"
+              className="min-w-[90px] !px-3 !bg-gray-700 !text-white !font-medium !h-11 !text-sm"
+              // px-3: padding nhỏ, min-w-[40px]: khoá tối thiểu không bị quá nhỏ
             >
               {t("filter")}
             </Button>

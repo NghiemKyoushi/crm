@@ -80,6 +80,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
   const [listInsurancesMap, setListInsurancesMap] = useState<any>([]);
   const [listService, setListService] = useState<any[]>([]);
 
+  // Images state
+  const [productImages, setProductImages] = useState<string[]>([]);
+
   // const [userId, setUserId] = useState<number | undefined>(undefined);
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
   
@@ -173,9 +176,12 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     }
   };
 
+  // ---- Modified for get info loading ----
+  const [getInfoLoading, setGetInfoLoading] = useState(false);
   const { mutate } = useMutation<DataFromLink, Error, string>({
     mutationFn: (link: string) => getDataProductFromLink(link),
   });
+
   const [searchValue, setSearchValue] = useState("");
   const [customerPage, setCustomerPage] = useState(0);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
@@ -220,6 +226,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       toast.warning(t("toast.pleaseEnterLink"));
       return;
     }
+    setGetInfoLoading(true);
     mutate(linkValue, {
       onSuccess: (data: DataFromLink) => {
         form.setFieldsValue({
@@ -232,10 +239,19 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         setIdProduct(data.id);
         setRouteId(data.route_id);
         form.setFieldValue("priceY", data.price);
+        // Handle images
+        if (Array.isArray(data.images)) {
+          setProductImages(data.images);
+        } else {
+          setProductImages([]);
+        }
         toast.success(t("toast.getProductInfoSuccess"));
+        setGetInfoLoading(false);
       },
       onError: () => {
         toast.error(t("toast.cannotGetInfoFromLink"));
+        setProductImages([]); // reset images if failed
+        setGetInfoLoading(false);
       },
     });
   };
@@ -561,12 +577,16 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           type="dashed"
                           onClick={handleGetInfo}
                           className="!h-9"
+                          loading={getInfoLoading}
+                          disabled={getInfoLoading}
                         >
                           Get info
                         </Button>
                       }
                     />
                   </Form.Item>
+                 
+
                   <Form.Item
                     label={
                       <span className="text-sm font-medium text-gray-700">
@@ -604,6 +624,55 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                   >
                     <TiptapEditor />
                   </Form.Item>
+
+                   {/* Hiển thị ảnh sản phẩm theo hàng ngang với scroll ngang, ảnh lớn hơn */}
+                  {productImages && productImages.length > 0 && (
+                    <div className="!mb-4">
+                      <div className="text-xs font-medium text-gray-700 mb-1">
+                        Ảnh sản phẩm
+                      </div>
+                      <div
+                        className="flex gap-3 mb-2 overflow-x-auto"
+                        style={{ maxWidth: "100%", paddingBottom: 4 }}
+                      >
+                        {productImages.map((src, idx) => (
+                          <div
+                            key={src + idx}
+                            style={{
+                              border: "1px solid #eee",
+                              borderRadius: 10,
+                              padding: 4,
+                              background: "#f8fafd",
+                              boxShadow: "0 2px 8px #0001",
+                              minWidth: 120,
+                              minHeight: 120,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <img
+                              src={src}
+                              alt={`product-${idx}`}
+                              style={{
+                                width: 120,
+                                height: 120,
+                                objectFit: "cover",
+                                borderRadius: 10,
+                                background: "#fff",
+                                display: "block",
+                              }}
+                              onError={e => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src =
+                                  "https://via.placeholder.com/120?text=No+Img";
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <Row gutter={12}>
                     <Col span={12}>
@@ -905,10 +974,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                         "en-US"
                                       )}đ`
                                     : `0đ`}
-                                  {/* {item.currency_code === "VND"
-                                    ? "đ"
-                                    : item.currency_code
-                                    } */}
                                 </div>
                               </div>
                             );
@@ -1088,29 +1153,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     />
                   </Form.Item>
 
-                  {/* <Form.Item
-                    label={
-                      <span className="text-sm font-medium text-gray-700">
-                        Phí dịch vụ ({currencyCheckCode})
-                      </span>
-                    }
-                    name="feeY"
-                    className="!mb-4"
-                  >
-                    <InputNumber
-                      formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      prefix={
-                        <span className="text-gray-400">
-                          {currencyCheckCode}
-                        </span>
-                      }
-                      className="!w-full !h-11 !rounded-lg !bg-gray-50"
-                      disabled
-                      placeholder="Tự động tính"
-                    />
-                  </Form.Item> */}
                   <Form.Item name="feeVnd" style={{ display: "none" }}>
                     <InputNumber />
                   </Form.Item>

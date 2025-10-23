@@ -150,10 +150,10 @@ const SettingsDetail = () => {
         className="relative rounded-lg shadow-sm h-full"
       >
         <div className="pb-16">
-          <div className="text-sm text-gray-600 mb-4">
+          {/* <div className="text-sm text-gray-600 mb-4">
             {t("settings.serviceFeesDescription")}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          </div> */}
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
               <li>{t("settings.buyingFeeUS")}</li>
               <li>{t("settings.buyingFeeJP")}</li>
@@ -166,7 +166,7 @@ const SettingsDetail = () => {
               <li>{t("settings.hanoiDeliveryFee")}</li>
               <li>{t("settings.storageFee")}</li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         <div className="absolute bottom-4 left-4 right-4">

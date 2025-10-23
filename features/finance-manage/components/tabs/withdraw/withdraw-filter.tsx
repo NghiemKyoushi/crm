@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { Button, Input, Select, DatePicker, Form } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 const { RangePicker } = DatePicker;
 
@@ -19,13 +18,14 @@ const FilterSection = (props: FilterSectionProps) => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
-  const onFinish = async (values: any) => {    
+  const onFinish = async (values: any) => {
     const payload = {
       ...values,
       fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
       toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
       depositCode: values.keyword,
+      handler: values.handler, // Thêm người xử lý vào payload
     };
     onFilter(payload);
   };
@@ -33,17 +33,26 @@ const FilterSection = (props: FilterSectionProps) => {
   useEffect(() => {
     if (code && action === "withdraw") {
       form.setFieldsValue({ keyword: code });
-      form.submit(); 
+      form.submit();
     }
   }, [form]);
 
   return (
     <div className="flex flex-col mb-2 gap-4 ">
       <Form form={form} onFinish={onFinish}>
-        <div className="w-full grid grid-cols-4 gap-3 items-center bg-white rounded-lg">
+        {/* grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] giống deposit-filter */}
+        <div className="w-full grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-center bg-white rounded-lg">
           <Form.Item name="keyword" className="mb-0">
             <Input
               placeholder={t("keywordPlaceholder")}
+              className="w-full h-11"
+            />
+          </Form.Item>
+
+          {/* Thêm trường handler (người xử lý) giống deposit-filter */}
+          <Form.Item name="handler" className="mb-0">
+            <Input
+              placeholder={t("deposit.handlerPlaceholder") || "Người xử lý"}
               className="w-full h-11"
             />
           </Form.Item>
@@ -54,7 +63,7 @@ const FilterSection = (props: FilterSectionProps) => {
               className="w-full !h-11"
             >
               <Option value="PEDDING">{t("status.waiting")}</Option>
-              <Option value="APPROVED">Đã xác nhận</Option>
+              <Option value="APPROVED">{t("deposit.status.completed")}</Option>
               <Option value="CANCELLED">{t("status.canceled")}</Option>
               <Option value="COMPLETED">{t("status.completed")}</Option>
             </Select>
@@ -73,7 +82,7 @@ const FilterSection = (props: FilterSectionProps) => {
               type="primary"
               htmlType="submit"
               icon={<FontAwesomeIcon icon={faFilter} />}
-              className="w-full  !bg-gray-700 !text-white !font-medium !h-11 !text-base"
+              className="min-w-[90px] !px-3 !bg-gray-700 !text-white !font-medium !h-11 !text-sm"
             >
               {t("filter")}
             </Button>

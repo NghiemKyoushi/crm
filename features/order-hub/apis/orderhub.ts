@@ -11,24 +11,24 @@ import {
   updateCodEachRowModel,
 } from "@/types/orderhub";
 import qs from "qs";
+import { FilterType } from "../components/order-hub-filter";
+import { FilterTypeShipment } from "@/features/shipment-management/components/shipment-filter";
 
-export const getListOrder = async (params: {
-  page: number;
-  size: number;
-  status?: string;
-  search?: string;
-  date?: string;
-  type?:number;
-}) => {
+export const getListOrder = async (params: FilterType 
+//   {
+//   page: number;
+//   size: number;
+//   status?: string;
+//   search?: string;
+//   date?: string;
+//   type?:number;
+// }
+) => {
   const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
   return res.data.data;
 };
 
-export const getListOrderTracking = async (params: {
-  page: number;
-  size: number;
-  status?: string[];
-}) => {
+export const getListOrderTracking = async (params: FilterTypeShipment) => {
   const res = await api.get(API_TYPE_CONST.GET_TRACKING_ORDER, {
     params,
     paramsSerializer: (params) =>
@@ -209,6 +209,11 @@ export const updateCodForEarchOrder = async (id: number, body: updateCodEachRowM
 
 export const getDataGeneral = async (params?: {customerGroupId?: number}) => {
   const res = await api.get(API_TYPE_CONST.GET_DATA_CHECK, {params});  
+  return res.data.data;
+};
+
+export const updateKuponOrder= async (id: number, body: {kupon: number}) => {
+  const res = await api.put(`${API_TYPE_CONST.UPDATE_KUPON}/${id}`, body);
   return res.data.data;
 };
 

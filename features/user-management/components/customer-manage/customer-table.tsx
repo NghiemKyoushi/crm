@@ -27,7 +27,19 @@ export default function CustomerTable() {
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState<string>("");
+
+  // State to hold current inputs (search box states)
+  const [searchNameInput, setSearchNameInput] = useState<string>("");
+  const [searchEmailInput, setSearchEmailInput] = useState<string>("");
+  const [searchPhoneInput, setSearchPhoneInput] = useState<string>("");
+
+  // State to hold last-submitted search (only call api when set)
+  const [searchValues, setSearchValues] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
+
   const router = useRouter();
 
   // Phân quyền chỉ hiển thị nếu có "user.categorize_customers"
@@ -46,16 +58,17 @@ export default function CustomerTable() {
     ).length === 0;
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
+
+  // --- Only call useListCustomer when search is submitted (searchValues state changes) ---
   const { data } = useListCustomer({
     page,
     page_size: 10,
     category_id: undefined,
-    search: search || undefined,
+    search: searchValues.name || undefined,  
+    email: searchValues.email || undefined,
+    phone_number: searchValues.phone || undefined,
   });
-  // const handleClickPopupdetail = (userId: string) => {
-  //   setSelectedId(userId);
-  //   setIsOpenDetail(true);
-  // };
+
   const handleClosePopupdetail = () => {
     setSelectedId(null);
     setIsOpenDetail(false);
@@ -74,7 +87,7 @@ export default function CustomerTable() {
         },
         onError: (err: any) =>
           toast.error(
-            err.response?.data?.localizedMessage || t("common.error")
+            err?.response?.data?.localizedMessage || t("common.error")
           ),
       }
     );
@@ -169,6 +182,12 @@ export default function CustomerTable() {
 
   const handleSearch = () => {
     setPage(0);
+    setSearchValues({
+      name: searchNameInput,
+      email: searchEmailInput,
+      phone: searchPhoneInput
+    });
+    // Only do invalidate to force refetch in page = 0 scenario, NOT on keyup/typing!
     queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
   };
 
@@ -180,16 +199,32 @@ export default function CustomerTable() {
       <div className="flex gap-2 mb-4">
         <Input
           placeholder={t('customerTable.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onPressEnter={handleSearch}
+          value={searchNameInput}
+          onChange={(e) => setSearchNameInput(e.target.value)}
+          allowClear
+          className="!h-10"
+        />
+        <Input
+          placeholder={t('customerTable.searchByEmail') || "Email"}
+          value={searchEmailInput}
+          onChange={(e) => setSearchEmailInput(e.target.value)}
+          allowClear
+          className="!h-10"
+        />
+        <Input
+          placeholder={t('customerTable.searchByPhonennumber') || "Số điện thoại"}
+          value={searchPhoneInput}
+          onChange={(e) => setSearchPhoneInput(e.target.value)}
+          allowClear
+          className="!h-10"
         />
         <Button
           type="primary"
           icon={<FontAwesomeIcon icon={faSearch} />}
           onClick={handleSearch}
+          className="!h-10"
         >
-          {t("customerManage.search")}
+          Tìm kiếm
         </Button>
       </div>
       <div className="overflow-x-auto">

@@ -20,6 +20,7 @@ export interface DepositItem {
   transaction_id: string;
   handler:string;
   handler_time: string;
+  customer_code: string;
 }
 
 export interface Pageable {
@@ -54,6 +55,7 @@ export interface DepositParams {
   status?: string;
   toDate?: string;
   userConfirmed?: string;
+  handler?:string;
 }
 
 export interface DepositRequest {
@@ -85,6 +87,7 @@ export interface BankAccount {
   status: string;
   telegram_channel_id?: string;
   partner_name?: string;
+  per_transaction_limit_vnd?:number
 }
 
 export interface Pageable {
@@ -116,11 +119,12 @@ export interface BankSettingAccountModel {
   bank_code: string;
   bank_name: string;
   daily_limit_vnd: number;
-  is_active: boolean;
+  status: boolean;
   id?:number;
   partner_name?: string;
   description?:string;
-  telegram_channel_id?: string
+  telegram_channel_id?: string;
+  per_transaction_limit_vnd?: number
 }
 // Một bản ghi topup
 export interface withdrawItem {
@@ -140,6 +144,7 @@ export interface withdrawItem {
   created_at: string;
   deposit_code: string;
   username: string;
+  customer_code: string;
 }
 
 export interface PaginatedWithdraw {

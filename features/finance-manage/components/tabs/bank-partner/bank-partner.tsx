@@ -149,7 +149,18 @@ export default function BankPartnerSetting() {
       width: 140,
       render: (value: number) => (
         <div className="text-sm text-gray-700">
-          {value.toLocaleString("vi-VN")}đ
+          {value && value.toLocaleString("vi-VN")}đ
+        </div>
+      ),
+    },
+    {
+      title: 'Hạn mức trên lần (VND)',
+      dataIndex: "per_transaction_limit_vnd",
+      key: "per_transaction_limit_vnd",
+      width: 140,
+      render: (value: number) => (
+        <div className="text-sm text-gray-700">
+          {value ? value.toLocaleString("vi-VN") : 0}đ
         </div>
       ),
     },
@@ -160,15 +171,17 @@ export default function BankPartnerSetting() {
       width: 100,
       align: "center",
       render: (_, record: BankAccount) =>
-        record.is_active ? (
+        record.status === "ACTIVE" ? (
           <Tag color="green" className="!rounded-3xl text-xs">
             {t('status.active')}
           </Tag>
-        ) : (
+        ): record.status === "INACTIVE" ?  (
           <Tag color="default" className="!rounded-3xl text-xs">
             {t('status.paused')}
           </Tag>
-        ),
+        ) :  <Tag color="gold" className="!rounded-3xl text-xs">
+        Internal
+      </Tag>  ,
     },
     {
       title: t('table.actions'),

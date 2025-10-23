@@ -68,6 +68,7 @@ const WithdrawTable = ({}) => {
       status: values.status,
       fromDate: values.fromDate,
       toDate: values.toDate,
+      handler: values.handler,
       page: 0,
     };
     setParams(newParams);
@@ -185,7 +186,7 @@ const WithdrawTable = ({}) => {
             <Tooltip title={text}>
               <div className="text-sm text-gray-800 truncate max-w-[140px]">{text}</div>
             </Tooltip>
-            <div className="text-xs text-gray-500">ID: {record.user_id}</div>
+            <div className="text-xs text-gray-500">ID: {record.  customer_code}</div>
           </div>
         );
       },
