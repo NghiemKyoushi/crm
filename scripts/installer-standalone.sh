@@ -76,16 +76,35 @@ main() {
   if [ -z "$SOURCE_APP" ]; then
     echo -e "${YELLOW}📂 Tìm file .app...${NC}"
 
+    # Get script directory
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
     # Try common locations
-    if [ -d "dist/mac/${APP_NAME}.app" ]; then
+    if [ -d "$SCRIPT_DIR/${APP_NAME}.app" ]; then
+      # Same directory as script (delivery package)
+      SOURCE_APP="$SCRIPT_DIR/${APP_NAME}.app"
+      echo -e "${GREEN}✅ Found: $SOURCE_APP${NC}\n"
+    elif [ -d "$SCRIPT_DIR/../${APP_NAME}.app" ]; then
+      # Parent directory
+      SOURCE_APP="$SCRIPT_DIR/../${APP_NAME}.app"
+      echo -e "${GREEN}✅ Found: $SOURCE_APP${NC}\n"
+    elif [ -d "dist/mac/${APP_NAME}.app" ]; then
+      # Developer build location
       SOURCE_APP="dist/mac/${APP_NAME}.app"
       echo -e "${GREEN}✅ Found: $SOURCE_APP${NC}\n"
     elif [ -d "/Volumes/${APP_NAME}/${APP_NAME}.app" ]; then
+      # Mounted DMG
       SOURCE_APP="/Volumes/${APP_NAME}/${APP_NAME}.app"
       echo -e "${GREEN}✅ Found in mounted DMG: $SOURCE_APP${NC}\n"
     else
       echo -e "${RED}❌ Error: Không tìm thấy file .app${NC}"
-      echo -e "${YELLOW}Usage: $0 /path/to/Stream\\ Cargo\\ CRM.app${NC}"
+      echo -e "${YELLOW}Các vị trí đã kiểm tra:${NC}"
+      echo -e "   - $SCRIPT_DIR/${APP_NAME}.app"
+      echo -e "   - dist/mac/${APP_NAME}.app"
+      echo -e "   - /Volumes/${APP_NAME}/${APP_NAME}.app"
+      echo -e "\n${YELLOW}Cách fix:${NC}"
+      echo -e "   1. Đảm bảo file '${APP_NAME}.app' nằm cùng folder với script"
+      echo -e "   2. Hoặc chỉ định path: $0 /path/to/Stream\\ Cargo\\ CRM.app"
       exit 1
     fi
   fi

@@ -52,7 +52,33 @@ cp scripts/installer-standalone.sh "$PACKAGE_NAME/"
 chmod +x "$PACKAGE_NAME/installer-standalone.sh"
 echo -e "${GREEN}✅ Copied installer${NC}\n"
 
-# Step 5: Create README
+# Step 5: Create QUICK-START
+echo -e "${BLUE}📝 Creating QUICK-START...${NC}"
+cat > "$PACKAGE_NAME/QUICK-START.txt" << EOF
+╔═══════════════════════════════════════════════════════════════╗
+║           STREAM CARGO CRM - HƯỚNG DẪN NHANH                  ║
+║                    (QUICK START GUIDE)                        ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🚀 CÀI ĐẶT TRONG 3 BƯỚC (2 PHÚT):
+
+   BƯỚC 1: Mở Terminal (Cmd+Space → gõ "Terminal")
+
+   BƯỚC 2: Kéo thả "installer-standalone.sh" vào Terminal → Enter
+
+   BƯỚC 3: Click OK khi hỏi camera permission
+
+   ✨ DONE!
+
+═══════════════════════════════════════════════════════════════
+
+📞 Support: support@streamcargo.com | 1900-xxxx-xxx
+📖 Chi tiết: Xem README-INSTALL.txt
+
+EOF
+echo -e "${GREEN}✅ Created QUICK-START${NC}\n"
+
+# Step 6: Create README
 echo -e "${BLUE}📝 Creating README...${NC}"
 cat > "$PACKAGE_NAME/README-INSTALL.txt" << 'EOF'
 ╔═══════════════════════════════════════════════════════════════╗
