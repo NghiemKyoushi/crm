@@ -462,8 +462,8 @@ const CheckComingView: React.FC = () => {
                   message={
                     <Text>
                       {isScanning
-                        ? "🎯 Đưa mã QR/Barcode vào trước camera để quét tự động"
-                        : "⌨️ Nhập mã tracking bằng tay và nhấn Enter hoặc nút Xác nhận"}
+                        ? "Đưa mã QR/Barcode vào trước camera để quét tự động"
+                        : "Nhập mã tracking bằng tay và nhấn Enter hoặc nút Xác nhận"}
                     </Text>
                   }
                   type="info"
