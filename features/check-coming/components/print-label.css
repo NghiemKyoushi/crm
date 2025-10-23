@@ -1,4 +1,14 @@
-/* Print Label Styles - Optimized for 80mm Thermal Printers */
+/*
+ * Print Label Styles - Optimized for Toshiba B-EV4D (60x40mm)
+ *
+ * Printer Specs:
+ * - Model: Toshiba TEC B-EV4D-TC17-R
+ * - Label Size: 60mm x 40mm
+ * - DPI: 203 (8 dots/mm)
+ * - Driver: https://www.toshibatec.com/download_overseas/printer/printer_driver_dl_new2/
+ *
+ * Configuration Guide: See PRINTER-SETUP.md in project root
+ */
 
 /* Hide on screen, only show when printing */
 @media screen {
@@ -10,13 +20,13 @@
 /* Print styles */
 @media print {
   @page {
-    size: 80mm auto; /* 80mm width, auto height */
+    size: 60mm 40mm; /* 60mm width x 40mm height for Toshiba B-EV4D */
     margin: 0mm;
   }
 
   /* Alternative sizes for different thermal printers */
+  /* @page { size: 80mm auto; margin: 0; } /* 80mm thermal */
   /* @page { size: 58mm auto; margin: 0; } /* 58mm thermal */
-  /* @page { size: 3.15in auto; margin: 0; } /* 80mm in inches */
 
   /* Hide everything except the print label */
   body * {
@@ -32,71 +42,83 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm;
+    width: 60mm;
+    height: 40mm;
     margin: 0;
-    padding: 5mm;
+    padding: 2mm; /* Reduced padding for compact label */
     font-family: "Courier New", monospace;
     background: white;
     color: black;
+    box-sizing: border-box;
   }
 
   .print-content {
     width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
-  /* Barcode to ở trên */
+  /* Barcode compact cho 60x40mm */
   .print-barcode {
     text-align: center;
-    margin-bottom: 3mm;
-    padding: 2mm 0;
+    margin-bottom: 1mm;
+    padding: 0;
   }
 
   .print-barcode svg {
     width: 100%;
     height: auto;
+    max-height: 12mm; /* Compact barcode height */
   }
 
-  /* Box chứa 2 mã - hình chữ nhật dài */
+  /* Box chứa 2 mã - compact hơn */
   .print-info-box {
     display: flex;
-    border: 2px solid black;
-    border-radius: 3mm;
+    border: 1.5px solid black;
+    border-radius: 2mm;
     overflow: hidden;
+    margin-bottom: 1mm;
   }
 
   .print-info-left,
   .print-info-right {
     flex: 1;
-    padding: 3mm;
+    padding: 1.5mm;
     text-align: center;
   }
 
   .print-info-left {
-    border-right: 2px solid black;
+    border-right: 1.5px solid black;
   }
 
   .print-label-text {
-    font-size: 9pt;
+    font-size: 6pt; /* Reduced for compact label */
     font-weight: bold;
-    margin-bottom: 1mm;
+    margin-bottom: 0.5mm;
     color: black;
     text-transform: uppercase;
+    line-height: 1.1;
   }
 
   .print-value {
-    font-size: 11pt;
+    font-size: 7pt; /* Reduced for compact label */
     font-weight: bold;
     word-wrap: break-word;
+    word-break: break-all;
     color: black;
+    line-height: 1.2;
   }
 
-  /* Ngày giờ */
+  /* Ngày giờ compact */
   .print-datetime {
     text-align: center;
-    font-size: 10pt;
+    font-size: 6pt; /* Smaller font */
     font-weight: bold;
-    margin-top: 3mm;
-    padding: 2mm 0;
+    margin-top: 0;
+    padding: 1mm 0;
     color: black;
+    line-height: 1.1;
   }
 }

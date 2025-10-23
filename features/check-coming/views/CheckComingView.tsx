@@ -28,6 +28,7 @@ import { PackageInfo, CheckComingRecord } from "../types";
 import { checkComingApi } from "../apis/check-coming.api";
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
+import { useElectronPrinter } from "../hooks/useElectronPrinter";
 
 const { Title, Text } = Typography;
 
@@ -45,6 +46,9 @@ const CheckComingView: React.FC = () => {
   const packageCodeRef = useRef<string>("");
   const isSubmittingRef = useRef<boolean>(false);
   const isCodeInViewRef = useRef<boolean>(false);
+
+  // Electron printer support
+  const { isElectron, printers, preferredPrinter, printDirect } = useElectronPrinter();
 
   // Load history from API on mount
   useEffect(() => {
@@ -234,11 +238,64 @@ const CheckComingView: React.FC = () => {
     }
   };
 
-  const handlePrint = (packageInfo: PackageInfo) => {
+  const handlePrint = async (packageInfo: PackageInfo) => {
     setLastPrintedPackage(packageInfo);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+
+    if (isElectron && preferredPrinter) {
+      // Electron: Direct print to thermal printer
+      try {
+        // Get the print label HTML
+        const printElement = document.querySelector('.print-label');
+        if (!printElement) {
+          toast.error('Print template not found');
+          return;
+        }
+
+        const html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                @page {
+                  size: 60mm 40mm; /* Toshiba B-EV4D: 60x40mm */
+                  margin: 0;
+                }
+                body {
+                  margin: 0;
+                  padding: 0;
+                  font-family: "Courier New", monospace;
+                  width: 60mm;
+                  height: 40mm;
+                  overflow: hidden;
+                }
+                ${document.querySelector('style')?.textContent || ''}
+              </style>
+            </head>
+            <body>
+              ${printElement.outerHTML}
+            </body>
+          </html>
+        `;
+
+        const result = await printDirect(html);
+
+        if (result.success) {
+          toast.success('In nhãn thành công!');
+        } else {
+          toast.error(`Lỗi in: ${result.error || 'Unknown error'}`);
+        }
+      } catch (error: any) {
+        console.error('Print error:', error);
+        toast.error('Lỗi khi in nhãn');
+      }
+    } else {
+      // Browser: Use window.print()
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    }
   };
 
   const handleDelete = async (id: number) => {
