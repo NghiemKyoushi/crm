@@ -1,25 +1,58 @@
-// Order info từ scan tracking API
+// Order metadata - new structure from API v2.0.0
+// Maps to OrderMetadata in backend (order.metadata.infos)
+export interface OrderMetadata {
+  inspection_photo_ids?: number[]; // List<Long> - IDs ảnh kiểm tra
+  verify_counts?: number; // Long - Số lượng đã kiểm đếm
+  is_repacked?: boolean; // Boolean - Đã đóng lại chưa
+}
+
+// Order info từ scan tracking API & Modal display
 export interface OrderInfo {
   id: number;
   order_code: string;
   tracking_code: string;
-  take_photo: boolean;
-  is_repacked: boolean;
-  is_verify_count: boolean;
+  // Requirements - Boolean có thể null từ backend
+  take_photo: boolean | null; // Yêu cầu chụp ảnh
+  is_repacked: boolean | null; // Yêu cầu đóng lại
+  is_verify_count: boolean | null; // Yêu cầu kiểm đếm
   status: string;
-  // Add more fields as needed
+  metadata?: OrderMetadata | null; // Metadata chứa actual values (API v2.0.0)
+  // Backward compatibility - deprecated fields
+  verify_count_value?: number; // @deprecated - use metadata.verify_counts
+  is_repacked_done?: boolean; // @deprecated - use metadata.is_repacked
+  document_image_ids?: number[]; // @deprecated - use metadata.inspection_photo_ids
+  product_image_ids?: number[]; // @deprecated - use metadata.inspection_photo_ids
 }
 
 // Related Order info từ check-coming API v2.0.0
+// Maps exactly to backend OrderInfo DTO
 export interface RelatedOrderInfo {
-  order_id: number;
-  invoice_no: string | null;
-  user_id: number;
-  customer_name: string;
-  status: string;
-  amount_vnd: number;
-  package_code: string;
-  created_at: string;
+  order_id: number; // Long
+  invoice_no: string | null; // String
+  user_id: number; // Integer
+  customer_name: string; // String
+  status: string; // String - VD: "ARRIVED_JP_WAREHOUSE"
+  amount_vnd: number; // Long
+  package_code: string; // String
+  created_at: string; // Instant (ISO8601 string)
+
+  // Requirements - xác định có cần làm nhiệm vụ hay không
+  // Backend: Boolean (có thể null), Frontend: boolean | null
+  take_photo: boolean | null; // Yêu cầu chụp ảnh
+  is_repacked: boolean | null; // Yêu cầu đóng lại
+  is_verify_count: boolean | null; // Yêu cầu kiểm đếm
+
+  // Metadata object chứa actual values
+  metadata?: OrderMetadata | null; // OrderMetadata - Thông tin thực tế đã thực hiện
+}
+
+// Upload image response
+export interface UploadImageResponse {
+  id: number;
+  file_name: string;
+  file_url: string;
+  file_type: string | null;
+  type: string;
 }
 
 // Scan tracking response - có thể trả về nhiều orders
