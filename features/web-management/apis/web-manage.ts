@@ -1,6 +1,12 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { AddWebsiteModel, WebsiteParams } from "@/types/website-manage";
+import {
+  AddWebsiteModel,
+  WebsiteParams,
+  UpdateSelectorConfigRequest,
+  TestSelectorConfigRequest,
+  TestSelectorConfigResponse
+} from "@/types/website-manage";
 
 export const getListWebsite = async (params: WebsiteParams) => {
   const res = await api.get(API_TYPE_CONST.WEBSITE_MANAGE, { params });
@@ -30,4 +36,25 @@ export const listRegion = async () => {
 export const listRoute = async () => {
   const res = await api.get(`${API_TYPE_CONST.SHIP_ROUTE}`);
   return res.data;
+};
+
+export const updateSelectorConfig = async (
+  id: number,
+  body: UpdateSelectorConfigRequest
+) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.UPDATE_SELECTOR_CONFIG}/${id}/selector-config`,
+    body
+  );
+  return res.data;
+};
+
+export const testSelectorConfig = async (
+  body: TestSelectorConfigRequest
+) => {
+  const res = await api.post<{ data: TestSelectorConfigResponse }>(
+    API_TYPE_CONST.TEST_SELECTOR_CONFIG,
+    body
+  );
+  return res.data.data;
 };

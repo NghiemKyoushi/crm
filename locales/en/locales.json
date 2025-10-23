@@ -359,7 +359,8 @@
     "save": "Save",
     "saveAllChanges": "Save All Changes",
     "search": "Search",
-    "currency": "¥"
+    "currency": "¥",
+    "back": "Back"
   },
   "checkComing": {
     "title": "Check Coming",
@@ -410,6 +411,7 @@
     "table": {
       "name": "Website Name",
       "region": "Region",
+      "route": "Shipping Route",
       "action": "Actions"
     },
     "action": {
@@ -429,8 +431,12 @@
       "region": "Region",
       "requiredRegion": "Please select a region",
       "placeholderRegion": "Select region",
+      "route": "Shipping Route",
+      "requiredRoute": "Please select a shipping route",
+      "placeholderRoute": "Select shipping route",
       "currency": "Currency code",
-      "requiredCurrency": "Select currency"
+      "requiredCurrency": "Select currency",
+      "useSelenium": "Use Selenium (for dynamic content / JavaScript-rendered pages)"
     },
     "delete": {
       "title": "Confirm delete website",
@@ -443,7 +449,8 @@
     "toast": {
       "createSuccess": "Website created successfully!",
       "updateSuccess": "Website updated successfully!",
-      "deleteSuccess": "Website deleted successfully!"
+      "deleteSuccess": "Website deleted successfully!",
+      "updateSelectorSuccess": "Selector configuration updated successfully!"
     }
   },
   "insurance": {

@@ -113,7 +113,7 @@ export const menuItems = [
   // { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
   // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
-  // { key: "/website-manage", icon: faGavel, label: "action" },
+  { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
 
   { key: "/settings", icon: faCog, label: "settings" },
 ];
