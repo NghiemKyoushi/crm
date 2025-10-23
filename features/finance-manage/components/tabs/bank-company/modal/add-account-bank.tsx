@@ -29,8 +29,9 @@ export default function AddBankAccountModal({
         bank_code: bank?.code || "",
         bank_name: bank?.name || "",
         daily_limit_vnd: +values.limit,
-        is_active: values.status === "active" ? true : false,
-        telegram_channel_id: values.telegram_channel_id
+        status: values.status,
+        telegram_channel_id: values.telegram_channel_id,
+        per_transaction_limit_vnd: +values.per_transaction_limit_vnd, // new field added
       };
       onOk?.(request);
     } catch (error) {
@@ -65,14 +66,15 @@ export default function AddBankAccountModal({
             account_number: data.account_number,
             account_holder: data.account_holder,
             limit: data.daily_limit_vnd,
-            status: data.is_active ? "active" : "inactive",
+            per_transaction_limit_vnd: data.per_transaction_limit_vnd, // set value if available
+            status: data.status,
             telegram_channel_id: data.telegram_channel_id
           });
         })
         .finally(() => setDetailLoading(false));
     } else if (open) {
       form.resetFields();
-      form.setFieldsValue({ status: "active" });
+      form.setFieldsValue({ status: "ACTIVE" });
     }
   }, [open, record, form, bankList]);
 
@@ -178,7 +180,22 @@ export default function AddBankAccountModal({
             formatter={(value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
-            placeholder="VD: 500000000"
+            placeholder="VD: 500,000,000"
+            className="!w-full"
+          />
+        </Form.Item>
+
+        {/* Thêm field Giới hạn trên lần (VND) */}
+        <Form.Item
+          label="Giới hạn trên lần (VND)"
+          name="per_transaction_limit_vnd"
+          style={{ marginBottom: 12 }}
+        >
+          <InputNumber
+            formatter={(value) =>
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            placeholder="VD: 100,000,000"
             className="!w-full"
           />
         </Form.Item>
@@ -199,8 +216,8 @@ export default function AddBankAccountModal({
           style={{ marginBottom: 12 }}
         >
           <Select>
-            <Option value="active">Hoạt động</Option>
-            <Option value="inactive">Ngừng hoạt động</Option>
+            <Option value="ACTIVE">Hoạt động</Option>
+            <Option value="INACTIVE">Ngừng hoạt động</Option>
           </Select>
         </Form.Item>
       </Form>

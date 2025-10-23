@@ -4,6 +4,8 @@ export interface CustomerParam {
   page_size: number;
   sale_id?: number;
   search?: string;
+  email?: string;
+  phone_number?: string;
   type?:number
 }
 

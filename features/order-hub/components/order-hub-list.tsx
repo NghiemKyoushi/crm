@@ -1,24 +1,9 @@
-import React, { useEffect, useState } from "react";
-import {
-  Tag,
-  Button,
-  Input,
-  Select,
-  Form,
-  DatePicker,
-  Modal,
-  Tooltip,
-} from "antd";
+import React, { useEffect, useState, useRef } from "react";
+import { Tag, Button, Modal, Tooltip, Form, Input, Select, InputNumber } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {
-  PlusOutlined,
-  EditOutlined,
-  ReloadOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
+import OrderHubFilter, { FilterType } from "./order-hub-filter";
 import { useTranslation } from "react-i18next";
 import {
   extractPathId,
@@ -37,7 +22,6 @@ import {
 } from "../hooks/orderhub";
 import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
-import dayjs from "dayjs";
 import ApproveOrderModal from "./modal/approve-order-modal";
 import CheckOrderModal from "./modal/check-order-modal";
 import TrackingModal from "./modal/tracking-modal";
@@ -51,17 +35,19 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
+import { updateKuponOrder } from "../apis/orderhub";
 
-type FilterType = {
-  search?: string;
-  status?: string;
-  date?: string;
-  type?: number;
-};
+function isEqualObject(obj1: any, obj2: any) {
+  // Only compare shallow, including only relevant keys
+  const keys = Object.keys({ ...obj1, ...obj2 });
+  for (const key of keys) {
+    if (obj1[key] !== obj2[key]) return false;
+  }
+  return true;
+}
+
 export default function OrderHub() {
   const { hasPermission, permissions } = usePermission();
-
-  const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const { t } = useTranslation();
@@ -103,21 +89,47 @@ export default function OrderHub() {
     orderId: number;
     value: string;
   } | null>(null);
+  // --- Kupon Edit State
+  const [editingKupon, setEditingKupon] = useState<{
+    orderId: number;
+    value: number | null;
+  } | null>(null);
+  const [isKuponLoading, setIsKuponLoading] = useState<boolean>(false);
 
   const [filters, setFilters] = useState<FilterType>({
-    search: undefined,
     status: undefined,
-    date: undefined,
-    type: undefined,
+    // date: undefined,
+    customer_name: undefined,
+    product_url: undefined,
+    product_name: undefined,
+    invoice_no: undefined,
+    tracking_code: undefined,
+    package_code: undefined,
+    product_id: undefined,
+    note_admin: undefined,
+    from_date: undefined,
+    to_date: undefined,
   });
 
+  // Track the previous filters to know if filters changed
+  const prevFilters = useRef<FilterType>(filters);
+
+  // Lưu ý: useListOrder chạy lại khi filters hoặc page thay đổi; không cần thay đổi ở đây.
   const { data: listOrder } = useListOrder({
     page,
     size: 10,
-    search: filters.search,
     status: filters.status,
-    date: filters.date,
-    type: filters.type,
+    // date: filters.date,
+    customer_name: filters.customer_name,
+    product_url: filters.product_url,
+    product_name: filters.product_name,
+    invoice_no: filters.invoice_no,
+    tracking_code: filters.tracking_code,
+    package_code: filters.package_code,
+    product_id: filters.product_id,
+    note_admin: filters.note_admin,
+    from_date: filters.from_date,
+    to_date: filters.to_date,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
@@ -132,17 +144,17 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
-  const handleFinish = (values: any) => {
-    setFilters({
-      search:
-        values.keyword && values.keyword.trim() !== ""
-          ? values.keyword
-          : undefined,
-      status: values.status !== "" ? values.status : undefined,
-      date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
-      type: undefined,
-    });
-    setPage(1);
+  // Modified handleFilter: Only set filters and reset to page 1 if something actually changed
+  const handleFilter = (newFilters: FilterType) => {
+    if (isEqualObject(newFilters, prevFilters.current)) {
+      // Không thay đổi, không làm gì cả để trigger api
+      // Tuy nhiên: Nếu muốn luôn gọi API khi filter, gọi setFilters để tạo state mới nhưng phải force re-render
+      // Ở đây sẽ không làm gì cả để tránh setFilters với giá trị như cũ.
+      return;
+    }
+    prevFilters.current = newFilters;
+    setFilters(newFilters);
+    setPage(0);
   };
 
   const handleChangePage = (pageNumber: number) => {
@@ -269,6 +281,25 @@ export default function OrderHub() {
       setFilters({ ...filters, type: 2 });
     }
   }, [permissions]);
+
+  // Function to call for updating kupon (with toast and loading)
+  const updateOrderKupon = async (orderId: number, value: number | null) => {
+    setIsKuponLoading(true);
+    try {
+      await updateKuponOrder(orderId, { kupon: value ?? 0 });
+      toast.success("Cập nhật kupon thành công");
+      setEditingKupon(null);
+      queryClient.invalidateQueries({
+        queryKey: ["listorder"],
+      });
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.localizedMessage || "Có lỗi khi cập nhật kupon"
+      );
+    } finally {
+      setIsKuponLoading(false);
+    }
+  };
 
   const columns: ColumnsType<Invoice> = [
     {
@@ -508,19 +539,46 @@ export default function OrderHub() {
         </div>
       ),
     },
-    // {
-    //   title: "Phụ Phí",
-    //   key: "extra_fee",
-    //   width: 110,
-    //   onCell: () => ({
-    //     style: {
-    //       borderRight: "1px solid #f0f0f0",
-    //     },
-    //   }),
-    //   render: (_, record) => (
-    //     <div className="text-xs text-gray-800 text-left">-</div>
-    //   ),
-    // },
+    {
+      title: "Kupon",
+      key: "kupon",
+      width: 110,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => (
+        <div className="flex items-center gap-2 justify-between">
+          <span className="text-xs text-gray-800 text-left">
+            {typeof record.kupon === "number"
+              ? record.kupon.toLocaleString("en-US")
+              : record.kupon && !isNaN(Number(record.kupon))
+              ? Number(record.kupon).toLocaleString("en-US")
+              : "-"}
+          </span>
+          {hasPermission("sales.view_assigned_orders") &&
+            hasPermission("order.view") && (
+              <EditOutlined
+                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+                onClick={() => {
+                  setEditingKupon({
+                    orderId: record.id,
+                    value:
+                      typeof record.kupon === "number"
+                        ? record.kupon
+                        : record.kupon && !isNaN(Number(record.kupon))
+                        ? Number(record.kupon)
+                        : null,
+                  });
+                  setOrderDetail(record);
+                }}
+              />
+            )
+          }
+        </div>
+      ),
+    },
     {
       title: "Thanh Toán & Công Nợ",
       key: "payment_info",
@@ -553,18 +611,6 @@ export default function OrderHub() {
                   : "Cập nhật sau"}
               </span>
             </div>
-            {/* <div className="text-xs">
-              <span className="text-gray-500">Ngày TT: </span>
-              <span className="text-gray-800">-</span>
-            </div> */}
-            {/* <div className="text-xs">
-              <span className="text-gray-500">Đã TT: </span>
-              <span className="text-gray-800">-</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Công nợ: </span>
-              <span className="text-gray-800">-</span>
-            </div> */}
           </div>
         );
       },
@@ -740,32 +786,32 @@ export default function OrderHub() {
 
         switch (record.status) {
           case OrderStatusType.ADMIN_PENDING:
-              actionButton = (
-                <div className="flex gap-1.5 justify-center w-full">
-                  <Button
-                    key={`approve-${record.id}`}
-                    size="small"
-                    className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                    onClick={() => {
-                      setOrderDetail(record);
-                      setIsOpenApproveOrder(true);
-                    }}
-                  >
-                    ✓ Duyệt
-                  </Button>
-                  <Button
-                    key={`reject-${record.id}`}
-                    size="small"
-                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                    onClick={() => {
-                      setOrderDetail(record);
-                      setIsOpenCancel(true);
-                    }}
-                  >
-                    ✕ Từ chối
-                  </Button>
-                </div>
-              );
+            actionButton = (
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={`approve-${record.id}`}
+                  size="small"
+                  className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenApproveOrder(true);
+                  }}
+                >
+                  ✓ Duyệt
+                </Button>
+                <Button
+                  key={`reject-${record.id}`}
+                  size="small"
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancel(true);
+                  }}
+                >
+                  ✕ Từ chối
+                </Button>
+              </div>
+            );
             break;
 
           case OrderStatusType.DEPOSIT_PAID:
@@ -862,19 +908,6 @@ export default function OrderHub() {
             break;
 
           case OrderStatusType.READY_TO_SHIP:
-            // actionButton = (
-            //   <Button
-            //     key={record.status}
-            //     size="small"
-            //     className="!bg-emerald-500 hover:!bg-emerald-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-            //     onClick={() => {
-            //       setOrderDetail(record);
-            //       setOpenConfirmComplete(true);
-            //     }}
-            //   >
-            //     🚚 Giao hàng
-            //   </Button>
-            // );
             break;
         }
 
@@ -920,101 +953,15 @@ export default function OrderHub() {
       },
     },
   ];
-  const orderStatusOptions = [
-    {
-      value: OrderStatusType.PENDING_APPROVAL,
-      label: t("status.pendingApproval"),
-    },
-    {
-      value: OrderStatusType.PENDING_DEPOSIT,
-      label: t("status.pendingDeposit"),
-    },
-    { value: OrderStatusType.DEPOSIT_PAID, label: t("status.depositPaid") },
-    { value: OrderStatusType.PURCHASED, label: t("status.purchased") },
-    {
-      value: OrderStatusType.ARRIVED_JP_WAREHOUSE,
-      label: t("status.arrivedJpWarehouse"),
-    },
-    {
-      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
-      label: t("status.arrivedVnWarehouse"),
-    },
-    {
-      value: OrderStatusType.UNDER_INSPECTION,
-      label: t("status.underInspection"),
-    },
-    {
-      value: OrderStatusType.PENDING_PAYMENT,
-      label: t("status.pendingPayment"),
-    },
-    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") },
-    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
-    {
-      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
-    },
-    { value: OrderStatusType.CANCELED, label: t("status.canceled") },
-  ];
 
   return (
     <div className="p-6 bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
-        <div className="flex flex-col mb-2 gap-4 ">
-          <Form form={form} onFinish={handleFinish}>
-            <div className="w-full grid grid-cols-5 gap-3 items-center bg-white rounded-lg">
-              <Form.Item name="keyword" className="mb-0">
-                <Input
-                  placeholder={t("placeholder.searchOrderCustomer")}
-                  className="!w-full !h-11 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-
-              <Form.Item name="status" className="mb-0">
-                <Select
-                  placeholder={t("statusPlaceholder")}
-                  className="!w-full !h-11"
-                  size="small"
-                  allowClear
-                >
-                  {orderStatusOptions.map((opt) => (
-                    <Select.Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="date" className="mb-0">
-                <DatePicker className="!w-full !h-11" size="small" />
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-                  className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
-                  size="small"
-                >
-                  {t("filter")}
-                </Button>
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined className="text-xs" />}
-                  className="!w-full !h-11 !bg-blue-600 !text-white !font-medium !text-xs"
-                  size="small"
-                  onClick={() => setOpen(true)}
-                >
-                  Tạo đơn
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
-        </div>
+        <OrderHubFilter
+          onFilter={handleFilter}
+          onCreateOrder={() => setOpen(true)}
+          initialFilters={filters}
+        />
 
         <EnhancedTableWrapper
         //  className="overflow-x-auto"
@@ -1107,40 +1054,6 @@ export default function OrderHub() {
           status={orderDetail.status}
         />
       )}
-
-      {/* {orderDetail && (
-        <TrackingModalJP
-        orderId={orderDetail.id}
-          customerName={orderDetail.customer_name}
-          orderCode={orderDetail.invoice_no}
-          onCancel={() => {
-            setOrderDetail(undefined);
-            setIsOpenTrackingOrder(false);
-          }}
-          onSubmit={(value) => {
-            // trackingJPMutation.mutate(
-            //   {
-            //     tracking: value.trackingCodes,
-            //     id: orderDetail.id.toString(),
-            //   },
-            //   {
-            //     onSuccess: () => {
-            //       toast.success(t("toast.confirmJpWarehouseSuccess"));
-            //       queryClient.invalidateQueries({
-            //         queryKey: ["listorder"],
-            //       });
-            //       setIsOpenTrackingOrder(false);
-            //     },
-            //     onError: (err: any) =>
-            //       toast.error(
-            //         err.response?.data?.localizedMessage || t("common.error")
-            //       ),
-            //   }
-            // );
-          }}
-          open={isOpenTrackingOrder}
-        />
-      )} */}
 
       {orderDetail && (
         <TrackingModal
@@ -1290,6 +1203,50 @@ export default function OrderHub() {
             );
           }}
         />
+      )}
+
+      {/* Modal Edit Kupon */}
+      {editingKupon && (
+        <Modal
+          open={!!editingKupon}
+          onCancel={() => setEditingKupon(null)}
+          title="Thêm kupon"
+          width={400}
+          centered
+          footer={[
+            <Button key="cancel" onClick={() => setEditingKupon(null)}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={isKuponLoading}
+              onClick={() => updateOrderKupon(editingKupon.orderId, editingKupon.value)}
+            >
+              Lưu
+            </Button>,
+          ]}
+        >
+          <Form layout="vertical" className="py-4">
+            <Form.Item label="Kupon">
+              <InputNumber
+                value={editingKupon.value ?? 0}
+                onChange={(num) => {
+                  setEditingKupon({
+                    ...editingKupon,
+                    value: num === null || num === undefined ? null : num,
+                  });
+                }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                placeholder="Nhập số kupon"
+                min={0}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
       )}
 
       {/* Modal Edit Fees & Rates */}

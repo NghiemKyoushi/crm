@@ -64,7 +64,9 @@
     "debt": "Công nợ (VND)",
     "actions": "Hành động",
     "view360": "Xem chi tiết 360°",
-    "searchPlaceholder": "Tìm kiếm khách hàng...",
+    "searchPlaceholder": "Tìm kiếm theo tên khách hàng",
+    "searchByEmail":"Tìm kiếm theo email",
+    "searchByPhonennumber":"Tìm kiếm theo số điện thoại",
     "updateSuccess": "Cập nhật phân loại thành công!",
     "selectCategory": "Chọn phân loại",
     "customerType": {
@@ -285,7 +287,8 @@
     "manualDeposit": "Nạp tiền Thủ công",
     "manualWithdraw": "Trừ tiền Thủ công",
     "bankPartner": "Tài khoản đối tác",
-    "accountPartner": "Cài đặt Ngân hàng"
+    "accountPartner": "Cài đặt Ngân hàng",
+    "handlerPlaceholder": "Tìm kiếm theo người xử lý"
   },
   "keywordPlaceholder": "Mã lệnh, Mã KH...",
   "statusPlaceholder": "-- Trạng thái --",
@@ -303,7 +306,7 @@
     "active": "Hoạt động",
     "inactive": "Ngừng hoạt động",
     "paused": "Tạm dừng",
-    "waiting": "Đang chờ",
+    "waiting": "Chờ xác nhận",
     "pendingApproval": "Chờ duyệt",
     "approve": "Duyệt",
     "pendingDeposit": "Chờ thanh toán trước",
@@ -314,7 +317,9 @@
     "underInspection": "Đang kiểm hàng",
     "readyToShip": "Sẵn sàng giao hàng",
     "shipped": "Đã giao hàng",
-    "shippingRequest": "Yêu cầu giao hàng"
+    "shippingRequest": "Yêu cầu giao hàng",
+    "canceled":"Đã từ chối",
+    "completed":"Hoàn thành"
   },
   "fromDate": "Từ ngày",
   "toDate": "Đến ngày",

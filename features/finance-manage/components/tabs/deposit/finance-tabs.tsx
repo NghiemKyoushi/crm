@@ -67,7 +67,7 @@ const FinanceDepositApprovalPage = () => {
             }}
             allowedTabs={allowedTabs}
           />
-          <div className="px-6 pb-6 pt-4">
+          <div className="px-6 pb-6 pt-1">
             {activeTab === "deposit" && (
               <DepositTable action={action ?? undefined} code={code ?? undefined} />
             )}

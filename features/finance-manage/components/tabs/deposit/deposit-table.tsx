@@ -76,6 +76,7 @@ const DepositTable = (props: DepositTableProps) => {
       status: values.status,
       fromDate: values.fromDate,
       toDate: values.toDate,
+      handler: values.handler,
       page: 0,
     };
     setParams(newParams);
@@ -182,7 +183,7 @@ const DepositTable = (props: DepositTableProps) => {
                 {text}
               </div>
             </Tooltip>
-            <div className="text-xs text-gray-500">ID: {record.user_id}</div>
+            <div className="text-xs text-gray-500">ID: {record.customer_code}</div>
           </div>
         );
       },
