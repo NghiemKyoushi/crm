@@ -1,11 +1,18 @@
 /*
- * Print Label Styles - Optimized for Toshiba B-EV4D (60x40mm)
+ * Print Label Styles - Optimized for Toshiba B-EV4D (60x40mm Landscape)
  *
  * Printer Specs:
  * - Model: Toshiba TEC B-EV4D-TC17-R
- * - Label Size: 60mm x 40mm
+ * - Label Size: 60mm x 40mm (Landscape)
  * - DPI: 203 (8 dots/mm)
  * - Driver: https://www.toshibatec.com/download_overseas/printer/printer_driver_dl_new2/
+ *
+ * Layout:
+ * - Tracking code: Bold, top left
+ * - Date/Time: Small, top right
+ * - Package code: Small, not bold, below tracking
+ * - Barcode: Center
+ * - Code text: Small, below barcode
  *
  * Configuration Guide: See PRINTER-SETUP.md in project root
  */
@@ -20,13 +27,12 @@
 /* Print styles */
 @media print {
   @page {
-    size: 60mm 40mm; /* 60mm width x 40mm height for Toshiba B-EV4D */
-    margin: 0mm;
-  }
+    /* Đây chính là khổ giấy in nhiệt của bạn */
+    size: 60mm 40mm landscape; /* THÊM "landscape" ĐỂ ĐẶT HƯỚNG NGANG */
 
-  /* Alternative sizes for different thermal printers */
-  /* @page { size: 80mm auto; margin: 0; } /* 80mm thermal */
-  /* @page { size: 58mm auto; margin: 0; } /* 58mm thermal */
+    /* Xóa toàn bộ lề mặc định của trình duyệt */
+    margin: 0;
+  }
 
   /* Hide everything except the print label */
   body * {
@@ -45,7 +51,7 @@
     width: 60mm;
     height: 40mm;
     margin: 0;
-    padding: 2mm; /* Reduced padding for compact label */
+    padding: 3mm;
     font-family: "Courier New", monospace;
     background: white;
     color: black;
@@ -57,68 +63,66 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 2mm;
   }
 
-  /* Barcode compact cho 60x40mm */
-  .print-barcode {
-    text-align: center;
-    margin-bottom: 1mm;
-    padding: 0;
-  }
-
-  .print-barcode svg {
-    width: 100%;
-    height: auto;
-    max-height: 12mm; /* Compact barcode height */
-  }
-
-  /* Box chứa 2 mã - compact hơn */
-  .print-info-box {
+  /* Header: Tracking code (left) and Date (right) */
+  .print-header {
     display: flex;
-    border: 1.5px solid black;
-    border-radius: 2mm;
-    overflow: hidden;
-    margin-bottom: 1mm;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
   }
 
-  .print-info-left,
-  .print-info-right {
-    flex: 1;
-    padding: 1.5mm;
-    text-align: center;
-  }
-
-  .print-info-left {
-    border-right: 1.5px solid black;
-  }
-
-  .print-label-text {
-    font-size: 6pt; /* Reduced for compact label */
+  /* Tracking code - in đậm ở trên cùng */
+  .print-tracking-code {
+    font-size: 11pt;
     font-weight: bold;
-    margin-bottom: 0.5mm;
-    color: black;
-    text-transform: uppercase;
-    line-height: 1.1;
-  }
-
-  .print-value {
-    font-size: 7pt; /* Reduced for compact label */
-    font-weight: bold;
-    word-wrap: break-word;
-    word-break: break-all;
     color: black;
     line-height: 1.2;
   }
 
-  /* Ngày giờ compact */
+  /* Ngày giờ ở góc bên phải trên cùng bé lại */
   .print-datetime {
-    text-align: center;
-    font-size: 6pt; /* Smaller font */
-    font-weight: bold;
-    margin-top: 0;
-    padding: 1mm 0;
+    font-size: 7pt;
+    font-weight: normal;
     color: black;
-    line-height: 1.1;
+    line-height: 1.2;
+    text-align: right;
+  }
+
+  /* Package code - nhỏ lại không in đậm */
+  .print-package-code {
+    font-size: 8pt;
+    font-weight: normal;
+    color: black;
+    line-height: 1.2;
+  }
+
+  /* Barcode - center */
+  .print-barcode {
+    text-align: center;
+    margin: 2mm 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .print-barcode svg {
+    width: auto;
+    height: 100%;
+    max-height: 18mm;
+    max-width: 100%;
+  }
+
+  /* Code text dưới mã vạch - bé lại */
+  .print-code-text {
+    text-align: center;
+    font-size: 7pt;
+    font-weight: normal;
+    color: black;
+    line-height: 1.2;
   }
 }

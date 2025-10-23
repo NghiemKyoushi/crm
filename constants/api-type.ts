@@ -103,5 +103,9 @@ export const API_TYPE_CONST = {
   CHECK_COMING_GET: `${FEATURE}/check-coming`,
   CHECK_COMING_DELETE: `${FEATURE}/check-coming`,
   CHECK_COMING_SEARCH: `${FEATURE}/check-coming/search`,
-  CHECK_COMING_DELETED: `${FEATURE}/check-coming/deleted`
+  CHECK_COMING_DELETED: `${FEATURE}/check-coming/deleted`,
+
+  // Order Management - VN Warehouse
+  SCAN_TRACKING_CODE: `${FEATURE}/admin/tracking/scan-tracking`,
+  ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`
 } as const;

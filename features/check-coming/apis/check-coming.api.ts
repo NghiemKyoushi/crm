@@ -4,6 +4,8 @@ import {
   CheckComingCreateRequest,
   CheckComingRecord,
   CheckComingListResponse,
+  ScanTrackingResponse,
+  OrderInfo,
 } from "../types";
 
 export const checkComingApi = {
@@ -63,6 +65,33 @@ export const checkComingApi = {
       {
         params: { page, size },
       }
+    );
+    return response.data.data;
+  },
+
+  // Scan tracking code and get order list
+  scanTrackingCode: async (trackingCode: string) => {
+    const response = await api.get<{ data: ScanTrackingResponse }>(
+      API_TYPE_CONST.SCAN_TRACKING_CODE,
+      {
+        params: { tracking_code: trackingCode },
+      }
+    );
+    return response.data.data;
+  },
+
+  // Update order arrived at VN warehouse
+  updateOrderArrivedVN: async (
+    orderId: number,
+    data: {
+      take_photo?: boolean;
+      is_repacked?: boolean;
+      is_verify_count?: boolean;
+    }
+  ) => {
+    const response = await api.patch<{ data: OrderInfo }>(
+      `${API_TYPE_CONST.ORDER_ARRIVED_VN_WAREHOUSE}/${orderId}`,
+      data
     );
     return response.data.data;
   },
