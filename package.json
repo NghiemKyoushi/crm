@@ -9,11 +9,14 @@
     "start": "next start",
     "lint": "next lint",
     "electron:dev": "concurrently \"cross-env NODE_ENV=development yarn dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "electron-builder --config.mac.identity=null",
+    "electron:build": "electron-builder",
     "build:win": "electron-builder --win --config.win.sign=null",
-    "build:mac": "electron-builder --mac --config.mac.identity=null",
+    "build:mac": "electron-builder --mac --config.mac.identity=null && node scripts/sign-mac.js",
+    "build:install": "bash scripts/build-and-install-mac.sh",
+    "build:quick": "electron-builder --mac --config.mac.identity=null && bash scripts/quick-install.sh",
+    "build:delivery": "bash scripts/create-delivery-package.sh",
     "build:linux": "electron-builder --linux",
-    "build:desktop": "electron-builder --win --mac --linux --config.mac.identity=null"
+    "build:desktop": "electron-builder --win --mac --linux --config.mac.identity=null && node scripts/sign-mac.js"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.24.0",
@@ -83,7 +86,8 @@
     "productName": "Stream Cargo CRM",
     "files": [
       "electron/**/*",
-      "!electron/ICON-README.md"
+      "!electron/ICON-README.md",
+      ".env"
     ],
     "directories": {
       "buildResources": "electron",
@@ -92,6 +96,10 @@
     "mac": {
       "category": "public.app-category.business",
       "icon": "electron/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "electron/entitlements.mac.plist",
+      "entitlementsInherit": "electron/entitlements.mac.plist",
       "target": [
         {
           "target": "dmg",
