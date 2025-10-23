@@ -3,6 +3,24 @@ import React, { useEffect, useRef } from "react";
 import { PackageInfo } from "../types";
 import "./print-label.css";
 
+/**
+ * PrintLabel Component - Thermal Label for Toshiba B-EV4D (60x40mm)
+ *
+ * Label Layout (60mm x 40mm):
+ * ┌─────────────────────────────────────┐
+ * │  ▓▓▓▓ BARCODE (CODE128) ▓▓▓▓       │  ~12mm
+ * ├─────────────────────────────────────┤
+ * │ ┌────────────┬────────────────────┐ │
+ * │ │  TRACKING  │     PACKAGE        │ │  ~15mm
+ * │ │  ABC123... │   PKG17612...      │ │
+ * │ └────────────┴────────────────────┘ │
+ * ├─────────────────────────────────────┤
+ * │    22/10/2025 14:30:45             │  ~8mm
+ * └─────────────────────────────────────┘
+ *
+ * Configuration: See PRINTER-SETUP.md
+ */
+
 interface PrintLabelProps {
   packageInfo: PackageInfo;
 }
@@ -21,10 +39,11 @@ const PrintLabel: React.FC<PrintLabelProps> = ({ packageInfo }) => {
           const barcodeData = `${packageInfo.packageCode}|${packageInfo.trackingCode}`;
           JsBarcode(barcodeRef.current, barcodeData, {
             format: "CODE128",
-            width: 2,
-            height: 80,
+            width: 1.5,  // Compact width for 60mm label
+            height: 40,  // Reduced height for 40mm label
             displayValue: false,
-            margin: 5,
+            margin: 2,   // Smaller margin
+            fontSize: 8, // Smaller font if needed
           });
         } catch (error) {
           console.error("Failed to generate barcode:", error);

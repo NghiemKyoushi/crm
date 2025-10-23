@@ -73,8 +73,18 @@ if (typeof window !== 'undefined' && !localStorage.getItem('deviceId')) {
   localStorage.setItem('deviceId', deviceInfo.deviceId);
 }
 
+// Get API base URL from environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_ROOT_STATIC_URL;
+
+// Debug: Log API base URL on initialization (only in browser)
+if (typeof window !== 'undefined') {
+  console.log('🌐 API Base URL:', API_BASE_URL);
+  console.log('📦 NEXT_PUBLIC_API_BASE_URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+  console.log('📦 NEXT_PUBLIC_ROOT_STATIC_URL:', process.env.NEXT_PUBLIC_ROOT_STATIC_URL);
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
@@ -255,7 +265,7 @@ api.interceptors.response.use(
           API_TYPE_CONST.GENERATE_ACCESS_TOKEN,
           {},
           {
-            baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
+            baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
             headers: { Authorization: `Bearer ${refreshToken}` },
           }
         );
