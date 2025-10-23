@@ -2,11 +2,21 @@
   "name": "crm",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron:dev": "concurrently \"cross-env NODE_ENV=development yarn dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "electron-builder",
+    "build:win": "electron-builder --win --config.win.sign=null",
+    "build:mac": "electron-builder --mac --config.mac.identity=null && node scripts/sign-mac.js",
+    "build:install": "bash scripts/build-and-install-mac.sh",
+    "build:quick": "electron-builder --mac --config.mac.identity=null && bash scripts/quick-install.sh",
+    "build:delivery": "bash scripts/create-delivery-package.sh",
+    "build:linux": "electron-builder --linux",
+    "build:desktop": "electron-builder --win --mac --linux --config.mac.identity=null && node scripts/sign-mac.js"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.24.0",
@@ -30,9 +40,12 @@
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.7",
     "dotenv": "^17.2.1",
+    "electron-store": "^11.0.2",
     "google-libphonenumber": "^3.2.43",
+    "html5-qrcode": "^2.3.8",
     "i18next": "^25.3.6",
     "js-cookie": "^3.0.5",
+    "jsbarcode": "^3.12.1",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "moment": "^2.30.1",
@@ -57,9 +70,87 @@
     "@types/qs": "^6.14.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^38.3.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "fs-extra": "^11.3.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.1"
+  },
+  "build": {
+    "appId": "com.streamcargo.crm",
+    "productName": "Stream Cargo CRM",
+    "files": [
+      "electron/**/*",
+      "!electron/ICON-README.md",
+      ".env"
+    ],
+    "directories": {
+      "buildResources": "electron",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "electron/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "electron/entitlements.mac.plist",
+      "entitlementsInherit": "electron/entitlements.mac.plist",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "extendInfo": {
+        "NSCameraUsageDescription": "Stream Cargo CRM needs access to your camera to scan barcodes and QR codes for package tracking.",
+        "NSMicrophoneUsageDescription": "Stream Cargo CRM may need access to your microphone for certain features."
+      }
+    },
+    "win": {
+      "icon": "electron/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "electron/icon.png",
+      "category": "Office",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

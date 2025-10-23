@@ -61,6 +61,8 @@ export const API_TYPE_CONST = {
   WITHDRAW_HISTORY:`${FEATURE}/admin/withdrawal/`,
   TOPUP_DETAIL:`${FEATURE}/admin/topups/`,
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
+  UPDATE_SELECTOR_CONFIG: `${FEATURE}/admin/source-website`, // + /{id}/selector-config
+  TEST_SELECTOR_CONFIG: `${FEATURE}/admin/source-website/test-selector-config`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   DETAIL_ORDER: `${FEATURE}/orders`,
@@ -94,5 +96,18 @@ export const API_TYPE_CONST = {
   UPDATE_COD_EACH_ROW: `${FEATURE}/admin/orders/update-cod`,
   GET_DATA_CHECK:`${FEATURE}/fee/get-data`,
   GET_DATA_LIST: `${FEATURE}/exchange-rate/admin/setting/get-data-list`,
-  UPDATE_KUPON:`${FEATURE}/admin/orders/update-kupon`
+  UPDATE_KUPON:`${FEATURE}/admin/orders/update-kupon`,
+
+  // Check Coming
+  CHECK_COMING_CREATE: `${FEATURE}/check-coming`,
+  CHECK_COMING_LIST: `${FEATURE}/check-coming`,
+  CHECK_COMING_GET: `${FEATURE}/check-coming`,
+  CHECK_COMING_DELETE: `${FEATURE}/check-coming`,
+  CHECK_COMING_SEARCH: `${FEATURE}/check-coming/search`,
+  CHECK_COMING_DELETED: `${FEATURE}/check-coming/deleted`,
+
+  // Order Management - VN Warehouse
+  SCAN_TRACKING_CODE: `${FEATURE}/admin/tracking/scan-tracking`,
+  ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
+  COMPLETE_ORDER_ARRIVED_VN: `${FEATURE}/admin/orders/arrived-vn-warehouse` // PUT to mark as done
 } as const;

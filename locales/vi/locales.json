@@ -46,7 +46,9 @@
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
-    "operation": "Quản lý vận đơn"
+    "checkComing": "Kiểm Tra Hàng Về",
+    "operation": "Quản lý vận đơn",
+    "websiteManagement": "Quản lý Website"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -361,12 +363,59 @@
     "save": "Lưu",
     "saveAllChanges": "Lưu Tất Cả Thay Đổi",
     "search": "Tìm kiếm",
-    "currency": "¥"
+    "currency": "¥",
+    "back": "Quay lại"
+  },
+  "checkComing": {
+    "title": "Kiểm Tra Hàng Về",
+    "description": "Quét mã tracking để xác nhận hàng đã về kho",
+    "stats": {
+      "todayTotal": "Tổng hôm nay",
+      "currentPackage": "Mã kiện hiện tại"
+    },
+    "card": {
+      "scanTitle": "Quét Mã Tracking",
+      "historyTitle": "Lịch Sử Quét"
+    },
+    "label": {
+      "packageCode": "Mã Kiện",
+      "trackingCode": "Mã Tracking",
+      "items": "kiện"
+    },
+    "placeholder": {
+      "tracking": "Nhập hoặc quét mã tracking..."
+    },
+    "button": {
+      "regenerate": "Tạo mới",
+      "confirm": "Xác nhận",
+      "showScanner": "Hiển thị Máy Quét",
+      "hideScanner": "Ẩn Máy Quét",
+      "print": "In Nhãn",
+      "delete": "Xóa"
+    },
+    "hint": {
+      "manualInput": "Bạn có thể nhập tay hoặc sử dụng máy quét QR/Barcode bên dưới"
+    },
+    "empty": {
+      "noHistory": "Chưa có lịch sử quét"
+    },
+    "info": {
+      "title": "Hướng dẫn sử dụng",
+      "description": "1. Mã kiện được tự động tạo ngẫu nhiên. 2. Nhập mã tracking bằng tay hoặc sử dụng máy quét QR/Barcode. 3. Nhấn Xác nhận để hoàn tất."
+    },
+    "error": {
+      "emptyTracking": "Vui lòng nhập mã tracking",
+      "emptyPackageCode": "Lỗi: Mã kiện chưa được tạo"
+    },
+    "toast": {
+      "success": "Đã xác nhận hàng về thành công!"
+    }
   },
   "websiteManage": {
     "table": {
       "name": "Tên Website",
       "region": "Khu vực",
+      "route": "Đường vận chuyển",
       "action": "Hành động"
     },
     "action": {
@@ -386,8 +435,12 @@
       "region": "Khu vực",
       "requiredRegion": "Vui lòng chọn khu vực",
       "placeholderRegion": "Chọn khu vực",
+      "route": "Đường vận chuyển",
+      "requiredRoute": "Vui lòng chọn đường vận chuyển",
+      "placeholderRoute": "Chọn đường vận chuyển",
       "currency": "Chọn đơn vị tiền tệ",
-      "requiredCurrency": "Chọn đơn vị tiền tệ"
+      "requiredCurrency": "Chọn đơn vị tiền tệ",
+      "useSelenium": "Sử dụng Selenium (cho nội dung động / trang render bằng JavaScript)"
     },
     "delete": {
       "title": "Xác nhận xoá website",
@@ -400,7 +453,8 @@
     "toast": {
       "createSuccess": "Tạo Website mới thành công!",
       "updateSuccess": "Cập nhật Website thành công!",
-      "deleteSuccess": "Xóa Website thành công!"
+      "deleteSuccess": "Xóa Website thành công!",
+      "updateSelectorSuccess": "Cập nhật cấu hình Selector thành công!"
     }
   },
   "insurance": {

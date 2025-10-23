@@ -46,7 +46,9 @@
     "saleRecord": "Sale Records",
     "telesaleManagement": "Telesale management",
     "partnerManagement": "Raw Material Management",
-    "operation": "Shipment Management"
+    "operation": "Shipment Management",
+    "websiteManagement": "Website Management",
+    "checkComing": "Check Coming"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -361,12 +363,59 @@
     "save": "Save",
     "saveAllChanges": "Save All Changes",
     "search": "Search",
-    "currency": "¥"
+    "currency": "¥",
+    "back": "Back"
+  },
+  "checkComing": {
+    "title": "Check Coming",
+    "description": "Scan tracking code to confirm packages arrival",
+    "stats": {
+      "todayTotal": "Today's Total",
+      "currentPackage": "Current Package"
+    },
+    "card": {
+      "scanTitle": "Scan Tracking Code",
+      "historyTitle": "Scan History"
+    },
+    "label": {
+      "packageCode": "Package Code",
+      "trackingCode": "Tracking Code",
+      "items": "items"
+    },
+    "placeholder": {
+      "tracking": "Enter or scan tracking code..."
+    },
+    "button": {
+      "regenerate": "Regenerate",
+      "confirm": "Confirm",
+      "showScanner": "Show Scanner",
+      "hideScanner": "Hide Scanner",
+      "print": "Print Label",
+      "delete": "Delete"
+    },
+    "hint": {
+      "manualInput": "You can enter manually or use QR/Barcode scanner below"
+    },
+    "empty": {
+      "noHistory": "No scan history yet"
+    },
+    "info": {
+      "title": "Instructions",
+      "description": "1. Package code is generated randomly. 2. Enter tracking code manually or use QR/Barcode scanner. 3. Click Confirm to complete."
+    },
+    "error": {
+      "emptyTracking": "Please enter tracking code",
+      "emptyPackageCode": "Error: Package code not generated"
+    },
+    "toast": {
+      "success": "Package confirmed successfully!"
+    }
   },
   "websiteManage": {
     "table": {
       "name": "Website Name",
       "region": "Region",
+      "route": "Shipping Route",
       "action": "Actions"
     },
     "action": {
@@ -386,8 +435,12 @@
       "region": "Region",
       "requiredRegion": "Please select a region",
       "placeholderRegion": "Select region",
+      "route": "Shipping Route",
+      "requiredRoute": "Please select a shipping route",
+      "placeholderRoute": "Select shipping route",
       "currency": "Currency code",
-      "requiredCurrency": "Select currency"
+      "requiredCurrency": "Select currency",
+      "useSelenium": "Use Selenium (for dynamic content / JavaScript-rendered pages)"
     },
     "delete": {
       "title": "Confirm delete website",
@@ -400,7 +453,8 @@
     "toast": {
       "createSuccess": "Website created successfully!",
       "updateSuccess": "Website updated successfully!",
-      "deleteSuccess": "Website deleted successfully!"
+      "deleteSuccess": "Website deleted successfully!",
+      "updateSelectorSuccess": "Selector configuration updated successfully!"
     }
   },
   "insurance": {

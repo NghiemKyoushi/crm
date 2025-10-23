@@ -1,6 +1,20 @@
 "use client";
 import React, { useState } from "react";
-import { Table, Button, Modal, Form, Input, Select } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Tag,
+  Checkbox,
+  Divider,
+  Row,
+  Col,
+} from "antd";
+import { SettingOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import TableComponent from "@/components/TableComponent";
 import {
   useCreateNewWebsite,
@@ -19,6 +33,7 @@ import PopupConfirm from "@/components/PopupConfirm";
 
 const WebsiteManageTable: React.FC = () => {
   const { t } = useTranslation();
+  const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
@@ -28,6 +43,7 @@ const WebsiteManageTable: React.FC = () => {
   const queryClient = useQueryClient();
   const [id, setId] = useState("");
   const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
+  const [proxyEnabled, setProxyEnabled] = useState(false);
 
   const { data } = useListWebsite({
     page,
@@ -42,26 +58,36 @@ const WebsiteManageTable: React.FC = () => {
     if (record) {
       setEditingWebsite(record);
       form.setFieldsValue(record);
+      setProxyEnabled(record.proxy_enabled || false);
     } else {
       setEditingWebsite(null);
       form.resetFields();
+      setProxyEnabled(false);
     }
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
     form.validateFields().then((values) => {
+      const requestData = {
+        name: values.name,
+        domain: values.domain,
+        region_id: values.region_id,
+        currency_code: values.currency_code,
+        route_id: values.route_id,
+        use_selenium: values.use_selenium || false,
+        proxy_enabled: values.proxy_enabled || false,
+        proxy_host: values.proxy_enabled ? values.proxy_host : undefined,
+        proxy_port: values.proxy_enabled ? values.proxy_port : undefined,
+        proxy_username: values.proxy_enabled ? values.proxy_username : undefined,
+        proxy_password: values.proxy_enabled ? values.proxy_password : undefined,
+      };
+
       if (editingWebsite) {
         updateWebMutation.mutate(
           {
             id: editingWebsite.id,
-            param: {
-              name: values.name,
-              domain: values.domain,
-              region_id: values.region_id,
-              currency_code: values.currency_code,
-              route_id: values.route_id,
-            },
+            param: requestData,
           },
           {
             onSuccess: () => {
@@ -79,13 +105,7 @@ const WebsiteManageTable: React.FC = () => {
         );
       } else {
         createNewWebMutation.mutate(
-          {
-            domain: values.domain,
-            name: values.name,
-            region_id: values.region_id,
-            currency_code: values.currency_code,
-            route_id: values.route_id,
-          },
+          requestData,
           {
             onSuccess: () => {
               toast.success(t("websiteManage.toast.createSuccess"));
@@ -129,6 +149,10 @@ const WebsiteManageTable: React.FC = () => {
     setId("null");
   };
 
+  const handleOpenSelectorConfig = (record: Website) => {
+    router.push(`/website-manage/selector-config?id=${record.id}`);
+  };
+
   const { data: regionList } = useListRegion();
   const { data: routeList } = useListRoutes();
 
@@ -137,22 +161,51 @@ const WebsiteManageTable: React.FC = () => {
     { title: "URL", dataIndex: "domain", key: "domain" },
     {
       title: t("websiteManage.table.region"),
-      dataIndex: "region",
-      key: "region",
-      render: (region_id: number, record: Website) => {
-        if (record.region !== null && record.region?.name)
-          return record.region.name;
+      dataIndex: "region_id",
+      key: "region_id",
+      render: (region_id: number) => {
         const regionName = regionList?.data.find(
-          (r) => r.id === record.region_id
+          (r: any) => r.id === region_id
         )?.name;
         return regionName ?? "-";
       },
     },
     {
-      title: t("websiteManage.table.region"),
+      title: t("websiteManage.table.route"),
+      dataIndex: "route_id",
+      key: "route_id",
+      render: (route_id: number) => {
+        const routeName = routeList?.data.find(
+          (r: any) => r.id === route_id
+        )?.name;
+        return routeName ?? "-";
+      },
+    },
+    {
+      title: "Configs",
+      key: "configs",
+      render: (_: any, record: Website) => {
+        const configCount = record.selector_configs?.length || 0;
+        return (
+          <Tag color={configCount > 0 ? "green" : "default"}>
+            {configCount} {configCount === 1 ? "config" : "configs"}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Actions",
       key: "action",
       render: (_: any, record: Website) => (
         <div className="space-x-2">
+          <Button
+            type="link"
+            icon={<SettingOutlined />}
+            className="!text-purple-500"
+            onClick={() => handleOpenSelectorConfig(record)}
+          >
+            Config
+          </Button>
           <Button
             type="link"
             className="!text-blue-500"
@@ -241,7 +294,7 @@ const WebsiteManageTable: React.FC = () => {
             ]}
           >
             <Select placeholder={t("websiteManage.form.placeholderRegion")}>
-              {regionList?.data?.map((region) => (
+              {regionList?.data?.map((region: any) => (
                 <Select.Option key={region.id} value={region.id}>
                   {region.name}
                 </Select.Option>
@@ -250,16 +303,16 @@ const WebsiteManageTable: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label={"Chọn đường di chuyển"}
+            label={t("websiteManage.form.route")}
             name="route_id"
             rules={[
               {
                 required: true,
-                message: "Vui lòng chọn đường di chuyển",
+                message: t("websiteManage.form.requiredRoute"),
               },
             ]}
           >
-            <Select placeholder={""}>
+            <Select placeholder={t("websiteManage.form.placeholderRoute")}>
               {routeList?.data?.map((item: any) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
@@ -282,6 +335,78 @@ const WebsiteManageTable: React.FC = () => {
               <Select.Option value="USD">USD</Select.Option>
             </Select>
           </Form.Item>
+
+          <Divider>Crawling Options</Divider>
+
+          <Form.Item name="use_selenium" valuePropName="checked">
+            <Checkbox>
+              {t("websiteManage.form.useSelenium")}
+            </Checkbox>
+          </Form.Item>
+
+          <Divider>Proxy Configuration (Optional)</Divider>
+
+          <Form.Item name="proxy_enabled" valuePropName="checked">
+            <Checkbox
+              onChange={(e) => setProxyEnabled(e.target.checked)}
+            >
+              Enable Proxy
+            </Checkbox>
+          </Form.Item>
+
+          {proxyEnabled && (
+            <>
+              <Row gutter={16}>
+                <Col span={16}>
+                  <Form.Item
+                    label="Proxy Host"
+                    name="proxy_host"
+                    rules={[
+                      {
+                        required: proxyEnabled,
+                        message: "Please enter proxy host",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="e.g., proxy.example.com" />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Proxy Port"
+                    name="proxy_port"
+                    rules={[
+                      {
+                        required: proxyEnabled,
+                        message: "Please enter proxy port",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="e.g., 8080" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Proxy Username"
+                    name="proxy_username"
+                  >
+                    <Input placeholder="Username (optional)" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Proxy Password"
+                    name="proxy_password"
+                  >
+                    <Input.Password placeholder="Password (optional)" />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          )}
         </Form>
       </Modal>
       <PopupConfirm

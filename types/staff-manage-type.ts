@@ -27,6 +27,6 @@ export interface NewUserType {
   active?: string | boolean;
   email: string;
   phone_number: string;
-  role_id: string;
+  role_id: number;
   password?: string;
 }

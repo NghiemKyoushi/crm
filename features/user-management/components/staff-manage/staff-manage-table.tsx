@@ -362,10 +362,10 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
       key: "role_name",
       width: 180,
       render: (role: string, record: UserData) => {
-        let matchedRoleId: string | null | undefined;
+        let matchedRoleId: number | null | undefined;
         if (listRole && listRole.length > 0) {
           const foundRole = listRole.find((r: any) => r.role_name === role);
-          matchedRoleId = foundRole ? foundRole.role_id : undefined;
+          matchedRoleId = foundRole ? Number(foundRole.role_id) : undefined;
         }        
         if (listRole && listRole.length > 0) {
           return (
