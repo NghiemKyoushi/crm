@@ -194,13 +194,6 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="product_id" className="!mb-0">
-                <Input
-                  placeholder="Mã sản phẩm"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
             </div>
 
             {/* Order & Tracking Info */}

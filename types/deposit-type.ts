@@ -20,6 +20,7 @@ export interface DepositItem {
   transaction_id: string;
   handler:string;
   handler_time: string;
+  customer_code: string;
 }
 
 export interface Pageable {
@@ -86,6 +87,7 @@ export interface BankAccount {
   status: string;
   telegram_channel_id?: string;
   partner_name?: string;
+  per_transaction_limit_vnd?:number
 }
 
 export interface Pageable {
@@ -142,6 +144,7 @@ export interface withdrawItem {
   created_at: string;
   deposit_code: string;
   username: string;
+  customer_code: string;
 }
 
 export interface PaginatedWithdraw {

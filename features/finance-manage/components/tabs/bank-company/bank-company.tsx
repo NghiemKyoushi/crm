@@ -152,15 +152,17 @@ export default function BankAccountSetting() {
       width: 100,
       align: "center",
       render: (_, record: BankAccount) =>
-        record.is_active ? (
+        record.status === "ACTIVE" ? (
           <Tag color="green" className="!rounded-3xl text-xs">
             {t('status.active')}
           </Tag>
-        ) : (
+        ): record.status === "INACTIVE" ?  (
           <Tag color="default" className="!rounded-3xl text-xs">
-            {t('status.inactive')}
+            {t('status.paused')}
           </Tag>
-        ),
+        ) :  <Tag color="gold" className="!rounded-3xl text-xs">
+        Internal
+      </Tag>  ,
     },
     {
       title: t('table.actions'),

@@ -347,7 +347,7 @@ export default function ShippingSurchangeTable(
                       record.id.toString(),
                       "price_from",
                       value ?? 0
-                    )
+                    ) 
                   }
                   min="0"
                 />

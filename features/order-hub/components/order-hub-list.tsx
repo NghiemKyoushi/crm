@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Tag, Button, Modal, Tooltip, Form, Input, Select, InputNumber } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
@@ -36,6 +36,16 @@ import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { updateKuponOrder } from "../apis/orderhub";
+
+function isEqualObject(obj1: any, obj2: any) {
+  // Only compare shallow, including only relevant keys
+  const keys = Object.keys({ ...obj1, ...obj2 });
+  for (const key of keys) {
+    if (obj1[key] !== obj2[key]) return false;
+  }
+  return true;
+}
+
 export default function OrderHub() {
   const { hasPermission, permissions } = usePermission();
   const [open, setOpen] = useState(false);
@@ -101,6 +111,10 @@ export default function OrderHub() {
     to_date: undefined,
   });
 
+  // Track the previous filters to know if filters changed
+  const prevFilters = useRef<FilterType>(filters);
+
+  // Lưu ý: useListOrder chạy lại khi filters hoặc page thay đổi; không cần thay đổi ở đây.
   const { data: listOrder } = useListOrder({
     page,
     size: 10,
@@ -130,11 +144,17 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
 
-  const handleFilter = (newFilters: FilterType) => {  
-    console.log('newFilters', newFilters);
-      
+  // Modified handleFilter: Only set filters and reset to page 1 if something actually changed
+  const handleFilter = (newFilters: FilterType) => {
+    if (isEqualObject(newFilters, prevFilters.current)) {
+      // Không thay đổi, không làm gì cả để trigger api
+      // Tuy nhiên: Nếu muốn luôn gọi API khi filter, gọi setFilters để tạo state mới nhưng phải force re-render
+      // Ở đây sẽ không làm gì cả để tránh setFilters với giá trị như cũ.
+      return;
+    }
+    prevFilters.current = newFilters;
     setFilters(newFilters);
-    setPage(1);
+    setPage(0);
   };
 
   const handleChangePage = (pageNumber: number) => {
@@ -529,8 +549,14 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-800 text-left">{record.kupon ?? '-'}</span>
+        <div className="flex items-center gap-2 justify-between">
+          <span className="text-xs text-gray-800 text-left">
+            {typeof record.kupon === "number"
+              ? record.kupon.toLocaleString("en-US")
+              : record.kupon && !isNaN(Number(record.kupon))
+              ? Number(record.kupon).toLocaleString("en-US")
+              : "-"}
+          </span>
           {hasPermission("sales.view_assigned_orders") &&
             hasPermission("order.view") && (
               <EditOutlined

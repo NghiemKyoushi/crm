@@ -151,11 +151,11 @@ export default function ShipmentFilter({
         </div>
         {/* Advanced Search Row */}
         <div className="w-full bg-gray-50 rounded-lg p-4">
-          <div className="text-base  font-semibold text-black-700 mb-2">
+          <div className="text-base font-semibold text-black-700 mb-2">
             Tìm kiếm
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            {/* Customer Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Cột 1: Thông tin khách hàng */}
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">
                 Thông tin khách hàng
@@ -168,66 +168,9 @@ export default function ShipmentFilter({
                 />
               </Form.Item>
             </div>
-            {/* Product Info */}
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">
-                Thông tin sản phẩm
-              </div>
-              <Form.Item name="product_name" className="!mb-2">
-                <Input
-                  placeholder="Tên sản phẩm"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="product_url" className="!mb-2">
-                <Input
-                  placeholder="Link sản phẩm"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="product_id" className="!mb-0">
-                <Input
-                  placeholder="Mã sản phẩm"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-            </div>
-
-            {/* Order & Tracking Info */}
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-600">
-                Mã vận đơn & Tracking
-              </div>
-              <Form.Item name="tracking_ship" className="!mb-2">
-                <Input
-                  placeholder="Mã vận đơn"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="tracking_code" className="!mb-2">
-                <Input
-                  placeholder="Mã tracking"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="package_code" className="!mb-0">
-                <Input
-                  placeholder="Mã kiện"
-                  className="!w-full !h-10 !text-xs"
-                  size="small"
-                />
-              </Form.Item>
-            </div>
-
-            {/* Status, Date & Notes */}
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-600">
-                Trạng thái & Ghi chú
+                Trạng thái
               </div>
               <Form.Item name="status" className="!mb-2">
                 <Select
@@ -235,7 +178,7 @@ export default function ShipmentFilter({
                   placeholder={<span className="text-xs">Trạng thái</span>}
                   size="small"
                   allowClear
-                  mode={undefined} // Không dùng "multiple" mode => chỉ cho chọn 1 trạng thái
+                  mode={undefined}
                 >
                   {orderStatusOptions.map((opt) => (
                     <Select.Option
@@ -248,23 +191,30 @@ export default function ShipmentFilter({
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item name="date" className="!mb-2">
-                <RangePicker
-                  placeholder={[t("fromDate"), t("toDate")]}
-                  className="!w-full !h-10 [&_.ant-picker-input>input]:!h-10 [&_.ant-picker-input>input]:!text-xs"
-                  format="YYYY-MM-DD"
-                  size="small"
-                />
-              </Form.Item>
-              <Form.Item name="note_admin" className="!mb-0">
-                <Input.TextArea
-                  placeholder="Ghi chú admin"
-                  className="!w-full !text-xs !h-10"
-                  rows={2}
-                  size="small"
-                />
-              </Form.Item>
             </div>
+            {/* Cột 2: Mã vận đơn & Tracking */}
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-600">
+                Mã vận đơn & Tracking
+              </div>
+              <div className="flex flex-col gap-2">
+                <Form.Item name="tracking_ship" className="!mb-0">
+                  <Input
+                    placeholder="Mã vận đơn"
+                    className="!w-full !h-10 !text-xs"
+                    size="small"
+                  />
+                </Form.Item>
+                <Form.Item name="tracking_code" className="!mb-0">
+                  <Input
+                    placeholder="Mã tracking"
+                    className="!w-full !h-10 !text-xs"
+                    size="small"
+                  />
+                </Form.Item>
+              </div>
+            </div>
+            
           </div>
         </div>
       </Form>

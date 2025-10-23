@@ -70,7 +70,7 @@ export default function AddBankAccountModal({
             account_holder: data.account_holder,
             limit: data.daily_limit_vnd,
             per_transaction_limit_vnd: data.per_transaction_limit_vnd,
-            status: data.is_active ? "active" : "inactive",
+            status: data.status,
             description: data.description,
             partner_name: data.partner_name,
             telegram_channel_id: data.telegram_channel_id
@@ -79,7 +79,7 @@ export default function AddBankAccountModal({
         .finally(() => setDetailLoading(false));
     } else if (open) {
       form.resetFields();
-      form.setFieldsValue({ status: "active" });
+      form.setFieldsValue({ status: "ACTIVE" });
     }
   }, [open, record, form, bankList]);
 

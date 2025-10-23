@@ -31,7 +31,7 @@ export default function AddBankAccountModal({
         daily_limit_vnd: +values.limit,
         status: values.status,
         telegram_channel_id: values.telegram_channel_id,
-        per_transaction_limit_vnd: +values.limit_per_transaction, // new field added
+        per_transaction_limit_vnd: +values.per_transaction_limit_vnd, // new field added
       };
       onOk?.(request);
     } catch (error) {
@@ -67,14 +67,14 @@ export default function AddBankAccountModal({
             account_holder: data.account_holder,
             limit: data.daily_limit_vnd,
             per_transaction_limit_vnd: data.per_transaction_limit_vnd, // set value if available
-            status: data.is_active ? "active" : "inactive",
+            status: data.status,
             telegram_channel_id: data.telegram_channel_id
           });
         })
         .finally(() => setDetailLoading(false));
     } else if (open) {
       form.resetFields();
-      form.setFieldsValue({ status: "active" });
+      form.setFieldsValue({ status: "ACTIVE" });
     }
   }, [open, record, form, bankList]);
 

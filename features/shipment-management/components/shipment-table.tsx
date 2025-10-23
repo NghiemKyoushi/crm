@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip, Table } from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
@@ -33,6 +33,20 @@ function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T
   return result;
 }
 
+/**
+ * Compare two filter objects. Return true if they are shallow equal.
+ * Note: If a value is array/object reference shallow equality is used.
+ */
+function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+  if (keysA.length !== keysB.length) return false;
+  for (const key of keysA) {
+    if (objA[key] !== objB[key]) return false;
+  }
+  return true;
+}
+
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
   const [page, setPage] = useState(0);
@@ -56,29 +70,40 @@ const ProductManagement: React.FC = () => {
     to_date: undefined,
   });
 
-  // Construct query params by removing undefined
-  const filterQueryParams = removeUndefinedFields({
-    status:
-      filters.status ||
-      [
-        OrderStatusType.ARRIVED_VN_WAREHOUSE,
-        OrderStatusType.READY_TO_SHIP,
-        OrderStatusType.SHIPPING_REQUEST_CLIENT,
-        OrderStatusType.SHIPPED,
-      ],
-    date: filters.date,
-    search: filters.search,
-    customer_name: filters.customer_name,
-    product_url: filters.product_url,
-    product_name: filters.product_name,
-    tracking_ship: filters.tracking_ship,
-    tracking_code: filters.tracking_code,
-    package_code: filters.package_code,
-    product_id: filters.product_id,
-    note_admin: filters.note_admin,
-    from_date: filters.from_date,
-    to_date: filters.to_date,
-  });
+  // Keep previous filter object to detect truthy change (for forcing refresh if object is same keys but values are strictly equal)
+  const prevFiltersRef = useRef<FilterTypeShipment>(filters);
+
+  // Khi setFilters, nếu các key/values giống nhau thì vẫn cần force lại API: Chúng ta sẽ tạo ra 1 biến random fakeKey gắn vào params để force react-query gọi lại
+  // Hoặc có thể dùng page để force gọi lại, nhưng dễ nhất là có thêm forceKey mỗi lần dùng filter
+ 
+  const [forceFilterKey, setForceFilterKey] = useState<number>(Date.now());
+
+  // Construct query params by removing undefined + add forceFilterKey để trigger refetch
+  const filterQueryParams = {
+    ...removeUndefinedFields({
+      status:
+        filters.status ||
+        [
+          OrderStatusType.ARRIVED_VN_WAREHOUSE,
+          OrderStatusType.READY_TO_SHIP,
+          OrderStatusType.SHIPPING_REQUEST_CLIENT,
+          OrderStatusType.SHIPPED,
+        ],
+      date: filters.date,
+      search: filters.search,
+      customer_name: filters.customer_name,
+      product_url: filters.product_url,
+      product_name: filters.product_name,
+      tracking_ship: filters.tracking_ship,
+      tracking_code: filters.tracking_code,
+      package_code: filters.package_code,
+      product_id: filters.product_id,
+      note_admin: filters.note_admin,
+      from_date: filters.from_date,
+      to_date: filters.to_date,
+    }),
+    __forceKey: forceFilterKey,
+  };
 
   const { data: listOrder } = useListOrderTracking({
     page,
@@ -93,8 +118,13 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleFinish = (newFilters: FilterTypeShipment) => {
+    // Nếu filter cũ giống filter mới thì vẫn force update bằng cách tăng force key, để gọi lại API
+    if (shallowEqual(removeUndefinedFields(filters), removeUndefinedFields(newFilters))) {
+      setForceFilterKey(Date.now());
+    }
     setFilters(newFilters);
     setPage(1);
+    prevFiltersRef.current = newFilters;
   };
 
   const useCompleteShippingMutation = useCompleteShippingOrder();
