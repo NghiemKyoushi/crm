@@ -46,9 +46,9 @@
     "saleRecord": "Quản lý lương sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
+    "checkComing": "Kiểm Tra Hàng Về",
     "operation": "Quản lý vận đơn",
-    "websiteManagement": "Quản lý Website",
-    "checkComing": "Kiểm Tra Hàng Về"
+    "websiteManagement": "Quản lý Website"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",

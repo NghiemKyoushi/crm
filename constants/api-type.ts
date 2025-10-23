@@ -107,5 +107,6 @@ export const API_TYPE_CONST = {
 
   // Order Management - VN Warehouse
   SCAN_TRACKING_CODE: `${FEATURE}/admin/tracking/scan-tracking`,
-  ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`
+  ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
+  COMPLETE_ORDER_ARRIVED_VN: `${FEATURE}/admin/orders/arrived-vn-warehouse` // PUT to mark as done
 } as const;

@@ -14,6 +14,9 @@ import {
   Modal,
   Checkbox,
   Table,
+  InputNumber,
+  Upload,
+  Image,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -23,6 +26,8 @@ import {
   PrinterOutlined,
   DeleteOutlined,
   WarningOutlined,
+  UploadOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -201,23 +206,118 @@ const CheckComingView: React.FC = () => {
     isSubmittingRef.current = true;
     setLoading(true);
     try {
-      console.log("📡 Scanning tracking code:", finalCode);
+      const now = new Date().toISOString();
+      console.log("📝 Creating check_coming record first...");
 
-      // Call API to scan tracking code and get order list
-      const scanResult = await checkComingApi.scanTrackingCode(finalCode);
+      // BƯỚC 1: Insert vào check_coming NGAY LẬP TỨC
+      const createdRecord = await checkComingApi.create({
+        package_code: currentPackageCode,
+        tracking_code: finalCode,
+        sent_date: now,
+        status: 0,
+      });
 
-      if (scanResult && scanResult.orders && scanResult.orders.length > 0) {
-        // Show modal with order list
-        setCurrentOrders(scanResult.orders);
-        setCurrentTrackingCode(finalCode);
-        setShowOrderModal(true);
-        console.log("📋 Found", scanResult.orders.length, "orders");
+      console.log("✅ Check_coming created with ID:", createdRecord.id);
+
+      // BƯỚC 2: Lấy related_orders từ response (API v2.0.0)
+      const relatedOrders = createdRecord.related_orders || [];
+      console.log("📋 Found", relatedOrders.length, "related orders");
+
+      // Create PackageInfo for printing
+      const newEntry: PackageInfo = {
+        id: createdRecord.id,
+        packageCode: createdRecord.package_code,
+        trackingCode: createdRecord.tracking_code,
+        senderName: createdRecord.sender_name,
+        sentDate: createdRecord.sent_date,
+        timestamp: createdRecord.created_at,
+        status: "completed",
+        code: createdRecord.code,
+        relatedOrders: relatedOrders,
+      };
+
+      setLastPrintedPackage(newEntry);
+
+      // BƯỚC 3: Filter chỉ lấy orders ở trạng thái ARRIVED_JP_WAREHOUSE
+      const arrivedOrders = relatedOrders.filter(
+        (order) => order.status === "ARRIVED_JP_WAREHOUSE"
+      );
+      console.log(`📋 Found ${arrivedOrders.length}/${relatedOrders.length} orders at ARRIVED_JP_WAREHOUSE`);
+
+      if (arrivedOrders.length > 0) {
+        // BƯỚC 4: Phân loại orders thành auto-done và cần làm
+        const mappedOrders = arrivedOrders.map((order) => ({
+          id: order.order_id,
+          order_code: order.invoice_no || `#${order.order_id}`,
+          tracking_code: finalCode,
+          // Requirements
+          take_photo: order.take_photo,
+          is_repacked: order.is_repacked,
+          is_verify_count: order.is_verify_count,
+          status: order.status,
+          // Metadata - actual values
+          metadata: order.metadata,
+        }));
+
+        // BƯỚC 5: Auto-done những orders không có yêu cầu gì
+        // Chỉ true mới là có yêu cầu, false/null đều là không có yêu cầu
+        const ordersNeedWork = mappedOrders.filter(
+          (order) => order.take_photo === true || order.is_repacked === true || order.is_verify_count === true
+        );
+        const autoCompleteOrders = mappedOrders.filter(
+          (order) => order.take_photo !== true && order.is_repacked !== true && order.is_verify_count !== true
+        );
+
+        console.log(`✅ Auto-complete ${autoCompleteOrders.length} orders (no requirements)`);
+        console.log(`📝 Need work: ${ordersNeedWork.length} orders`);
+
+        // Auto-complete orders không có yêu cầu gì (background)
+        if (autoCompleteOrders.length > 0) {
+          Promise.all(
+            autoCompleteOrders.map((order) =>
+              checkComingApi.completeOrderArrivedVN(order.id, {
+                count_verify: 0,
+                image_ids: [],
+                is_repacked: false,
+              }).catch((err) => console.error(`Failed to auto-complete order ${order.id}:`, err))
+            )
+          );
+        }
+
+        // BƯỚC 6: Hiển thị modal chỉ cho orders cần làm
+        if (ordersNeedWork.length > 0) {
+          setCurrentOrders(ordersNeedWork);
+          setCurrentTrackingCode(finalCode);
+          setShowOrderModal(true);
+          toast.info(`Cần xử lý ${ordersNeedWork.length} đơn hàng`);
+        } else {
+          toast.success(`Tự động hoàn thành ${autoCompleteOrders.length} đơn hàng!`);
+        }
       } else {
-        toast.warning("Không tìm thấy đơn hàng nào cho mã tracking này");
+        // BƯỚC 7: Không có orders ở ARRIVED_JP_WAREHOUSE → chỉ reload history
+        console.log("✅ No orders at ARRIVED_JP_WAREHOUSE");
+
+        // Show success effect
+        setShowSuccessEffect(true);
+        setTimeout(() => {
+          setShowSuccessEffect(false);
+        }, 2000);
+
+        toast.success("Đã ghi nhận thành công! (Không có đơn hàng)");
       }
+
+      // Reload history để hiển thị record mới
+      await loadHistory();
+
+      // Generate new package code for next scan
+      await generatePackageCode();
     } catch (error: any) {
-      console.error("Failed to scan tracking code:", error);
-      toast.error(error?.response?.data?.message || "Lỗi khi quét mã tracking");
+      console.error("Failed to create check_coming:", error);
+      if (error?.response?.status === 409) {
+        toast.error("Mã kiện và mã tracking đã tồn tại!");
+      } else {
+        toast.error(error?.response?.data?.message || "Lỗi khi lưu dữ liệu");
+      }
     } finally {
       setLoading(false);
       isSubmittingRef.current = false;
@@ -303,27 +403,81 @@ const CheckComingView: React.FC = () => {
     generatePackageCode();
   };
 
-  // Handle order field update
+  // Handle click on history item - mở lại modal với orders
+  const handleHistoryItemClick = (item: PackageInfo) => {
+    const orders = item.relatedOrders || [];
+
+    if (orders.length > 0) {
+      // Filter chỉ lấy orders ở ARRIVED_JP_WAREHOUSE và cần làm
+      // Chỉ true mới là có yêu cầu
+      const arrivedOrders = orders.filter(
+        (order) => order.status === "ARRIVED_JP_WAREHOUSE" &&
+          (order.take_photo === true || order.is_repacked === true || order.is_verify_count === true)
+      );
+
+      if (arrivedOrders.length > 0) {
+        // Có orders cần làm → mở modal
+        setCurrentOrders(
+          arrivedOrders.map((order) => ({
+            id: order.order_id,
+            order_code: order.invoice_no || `#${order.order_id}`,
+            tracking_code: item.trackingCode || "",
+            // Requirements
+            take_photo: order.take_photo,
+            is_repacked: order.is_repacked,
+            is_verify_count: order.is_verify_count,
+            status: order.status,
+            // Metadata - actual values
+            metadata: order.metadata,
+          }))
+        );
+        setCurrentTrackingCode(item.trackingCode || "");
+        setShowOrderModal(true);
+        toast.info(`Mở lại ${arrivedOrders.length} đơn hàng`);
+      } else {
+        toast.info("Tất cả đơn hàng đã hoàn thành hoặc không cần xử lý");
+      }
+    }
+  };
+
+  // Handle order field update - update metadata
   const handleOrderFieldUpdate = async (
     orderId: number,
-    field: "take_photo" | "is_repacked" | "is_verify_count",
-    value: boolean
+    metadataField: "verify_counts" | "is_repacked" | "inspection_photo_ids",
+    value: number | boolean | number[]
   ) => {
     setProcessingOrders(true);
     try {
+      // Map metadata field to API field
+      const apiFieldMap: Record<string, string> = {
+        verify_counts: "verify_count_value",
+        is_repacked: "is_repacked_done",
+        inspection_photo_ids: "document_image_ids", // API vẫn dùng document_image_ids
+      };
+      const apiField = apiFieldMap[metadataField];
+
       // Call API to update order
-      const updatedOrder = await checkComingApi.updateOrderArrivedVN(orderId, {
-        [field]: value,
+      await checkComingApi.updateOrderArrivedVN(orderId, {
+        [apiField]: value,
       });
 
-      // Update local state
+      // Update local state - update metadata object
       setCurrentOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId ? { ...order, [field]: value } : order
-        )
+        prevOrders.map((order) => {
+          if (order.id === orderId) {
+            return {
+              ...order,
+              metadata: {
+                ...order.metadata,
+                [metadataField]: value,
+              },
+            };
+          }
+          return order;
+        })
       );
 
-      console.log(`✅ Updated order ${orderId} ${field} to ${value}`);
+      console.log(`✅ Updated order ${orderId} metadata.${metadataField} to`, value);
     } catch (error: any) {
       console.error("Failed to update order:", error);
       toast.error(error?.response?.data?.message || "Lỗi khi cập nhật đơn hàng");
@@ -332,89 +486,137 @@ const CheckComingView: React.FC = () => {
     }
   };
 
-  // Check if all orders are completed
-  const areAllOrdersCompleted = () => {
-    return currentOrders.every(
-      (order) =>
-        order.take_photo === true &&
-        order.is_repacked === true &&
-        order.is_verify_count === true
-    );
+  // Handle upload image - update metadata.inspection_photo_ids
+  const handleUploadImage = async (orderId: number, file: File) => {
+    setProcessingOrders(true);
+    try {
+      // Upload image
+      const uploadResult = await checkComingApi.uploadImage(file, 1);
+      const imageId = uploadResult.id;
+
+      console.log(`✅ Uploaded image ID: ${imageId} for order ${orderId}`);
+
+      // Get current images from metadata
+      const currentOrder = currentOrders.find((o) => o.id === orderId);
+      const currentImages = currentOrder?.metadata?.inspection_photo_ids || [];
+      const newImages = [...currentImages, imageId];
+
+      // Update order with new image ID in metadata.inspection_photo_ids
+      await handleOrderFieldUpdate(orderId, "inspection_photo_ids", newImages);
+
+      toast.success("Upload ảnh thành công!");
+    } catch (error: any) {
+      console.error("Failed to upload image:", error);
+      toast.error("Lỗi khi upload ảnh");
+    } finally {
+      setProcessingOrders(false);
+    }
   };
 
-  // Handle confirm all orders and save to check-coming
-  const handleConfirmOrders = async () => {
-    if (!areAllOrdersCompleted()) {
-      toast.warning("Vui lòng hoàn thành tất cả các yêu cầu cho từng đơn hàng");
+  // Check if single order is ready for Done - based on metadata
+  const isOrderReadyForDone = (order: OrderInfo) => {
+    // Nếu có yêu cầu take_photo (= true) thì BẮT BUỘC phải có ảnh trong metadata.inspection_photo_ids
+    // false hoặc null = không có yêu cầu = OK
+    const photoOk = order.take_photo !== true ||
+      (order.metadata?.inspection_photo_ids && order.metadata.inspection_photo_ids.length > 0);
+
+    // Nếu có yêu cầu repack (= true) thì phải có metadata.is_repacked = true
+    const repackOk = order.is_repacked !== true || order.metadata?.is_repacked === true;
+
+    // Nếu có yêu cầu verify_count (= true) thì phải có metadata.verify_counts > 0
+    const countOk = order.is_verify_count !== true ||
+      (order.metadata?.verify_counts != null && order.metadata.verify_counts > 0);
+
+    return photoOk && repackOk && countOk;
+  };
+
+  // Check if all orders are ready for Done
+  const areAllOrdersReady = () => {
+    return currentOrders.every((order) => isOrderReadyForDone(order));
+  };
+
+  // Handle mark order as done - use metadata
+  const handleMarkOrderDone = async (order: OrderInfo) => {
+    if (!isOrderReadyForDone(order)) {
+      toast.warning("Vui lòng hoàn thành tất cả yêu cầu trước khi Done");
       return;
     }
 
     setProcessingOrders(true);
     try {
-      const now = new Date().toISOString();
-      const currentPackageCode = packageCodeRef.current;
+      // Chuẩn bị data từ metadata
+      const imageIds = order.metadata?.inspection_photo_ids || [];
+      const verifyCount = order.metadata?.verify_counts || 0;
+      const isRepacked = order.metadata?.is_repacked || false;
 
-      // Create check-coming record with order list
-      const createdRecord = await checkComingApi.create({
-        package_code: currentPackageCode,
-        tracking_code: currentTrackingCode,
-        sent_date: now,
-        status: 0,
+      await checkComingApi.completeOrderArrivedVN(order.id, {
+        count_verify: verifyCount,
+        image_ids: imageIds,
+        is_repacked: isRepacked,
       });
 
-      // Create entry for display and printing
-      const newEntry: PackageInfo = {
-        id: createdRecord.id,
-        packageCode: createdRecord.package_code,
-        trackingCode: createdRecord.tracking_code,
-        senderName: createdRecord.sender_name,
-        sentDate: createdRecord.sent_date,
-        timestamp: createdRecord.created_at,
-        status: "completed",
-        orders: currentOrders, // Include orders in the package info
-        code: createdRecord.code, // Include code for barcode
-      };
+      console.log(`✅ Order ${order.id} marked as done`);
 
-      setLastPrintedPackage(newEntry);
+      // Remove from current orders (đã xong)
+      setCurrentOrders((prevOrders) => prevOrders.filter((o) => o.id !== order.id));
 
-      // Reload history
+      // Reload history để cập nhật trạng thái
       await loadHistory();
 
-      // Show success effect
-      setShowSuccessEffect(true);
-      setTimeout(() => {
-        setShowSuccessEffect(false);
-      }, 2000);
+      toast.success(`Đơn hàng ${order.order_code} đã hoàn thành!`);
 
-      // Close modal and reset
-      setShowOrderModal(false);
-      setCurrentOrders([]);
-      setCurrentTrackingCode("");
+      // Nếu không còn orders nào → tự động đóng modal
+      if (currentOrders.length === 1) {
+        setShowOrderModal(false);
+        setCurrentTrackingCode("");
 
-      // Generate new package code for next scan
-      await generatePackageCode();
-
-      toast.success("Đã ghi nhận thành công!");
-    } catch (error: any) {
-      console.error("Failed to create record:", error);
-      if (error?.response?.status === 409) {
-        toast.error("Mã kiện và mã tracking đã tồn tại!");
-      } else {
-        toast.error("Lỗi khi lưu dữ liệu");
+        // Show success effect
+        setShowSuccessEffect(true);
+        setTimeout(() => {
+          setShowSuccessEffect(false);
+        }, 2000);
       }
+    } catch (error: any) {
+      console.error("Failed to mark order as done:", error);
+      toast.error(error?.response?.data?.message || "Lỗi khi hoàn thành đơn hàng");
     } finally {
       setProcessingOrders(false);
     }
+  };
+
+  // Handle confirm all orders completed (close modal if no remaining orders)
+  const handleConfirmOrders = async () => {
+    if (currentOrders.length > 0) {
+      toast.warning("Vui lòng Done từng đơn hàng trước khi đóng");
+      return;
+    }
+
+    // Tất cả orders đã Done → đóng modal
+    setShowOrderModal(false);
+    setCurrentOrders([]);
+    setCurrentTrackingCode("");
+
+    // Reload history để cập nhật trạng thái
+    await loadHistory();
+
+    // Show success effect
+    setShowSuccessEffect(true);
+    setTimeout(() => {
+      setShowSuccessEffect(false);
+    }, 2000);
+
+    toast.success("Đã hoàn thành tất cả đơn hàng!");
   };
 
   // Handle modal close
   const handleCloseModal = () => {
     if (processingOrders) return;
 
-    if (currentOrders.length > 0 && !areAllOrdersCompleted()) {
+    // Nếu còn orders trong list → cảnh báo (vì orders đã Done sẽ bị remove)
+    if (currentOrders.length > 0) {
       Modal.confirm({
         title: "Bạn có chắc muốn đóng?",
-        content: "Các đơn hàng chưa hoàn thành sẽ không được lưu",
+        content: `Còn ${currentOrders.length} đơn hàng chưa hoàn thành. Bạn có muốn đóng không?`,
         okText: "Đóng",
         cancelText: "Hủy",
         onOk: () => {
@@ -424,6 +626,7 @@ const CheckComingView: React.FC = () => {
         },
       });
     } else {
+      // Không còn orders → đóng luôn
       setShowOrderModal(false);
       setCurrentOrders([]);
       setCurrentTrackingCode("");
@@ -613,7 +816,11 @@ const CheckComingView: React.FC = () => {
                     </div>
                   ),
                 }}
-                renderItem={(item, index) => (
+                renderItem={(item, index) => {
+                  // Kiểm tra xem có orders không (hiển thị button tương ứng)
+                  const hasOrders = item.relatedOrders && item.relatedOrders.length > 0;
+
+                  return (
                   <List.Item
                     className="px-4 hover:bg-gray-50"
                     style={{
@@ -641,7 +848,13 @@ const CheckComingView: React.FC = () => {
 
                     <Space direction="vertical" style={{ width: "100%" }} size={8}>
                       <div style={{ width: "100%", display: "flex", alignItems: "center", paddingLeft: 8, paddingRight: 8 }}>
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center" style={{ flexShrink: 0 }}>
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center"
+                          style={{
+                            flexShrink: 0,
+                            backgroundColor: "#f6ffed",
+                          }}
+                        >
                           <CheckCircleOutlined style={{ color: "#52c41a" }} />
                         </div>
                         <div style={{ marginLeft: 12, flex: 1, minWidth: 0 }}>
@@ -659,7 +872,10 @@ const CheckComingView: React.FC = () => {
                           {item.relatedOrders && item.relatedOrders.length > 0 && (
                             <div style={{ marginTop: 4 }}>
                               <Text type="secondary" style={{ fontSize: 10, display: "block" }}>
-                                <Badge count={item.relatedOrders.length} style={{ backgroundColor: "#1890ff" }} />
+                                <Badge
+                                  count={item.relatedOrders.length}
+                                  style={{ backgroundColor: "#1890ff" }}
+                                />
                                 <span style={{ marginLeft: 4 }}>
                                   {item.relatedOrders.map(o => `#${o.order_id}`).join(", ")}
                                 </span>
@@ -681,8 +897,26 @@ const CheckComingView: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Print button - full width, smaller height */}
-                      <div style={{ paddingLeft: 40 }}>
+                      {/* Action buttons */}
+                      <div style={{ paddingLeft: 40, display: "flex", gap: 8 }}>
+                        {/* Button xem orders nếu có */}
+                        {hasOrders && (
+                          <Button
+                            type="default"
+                            icon={<BarcodeOutlined />}
+                            onClick={() => handleHistoryItemClick(item)}
+                            block
+                            style={{
+                              height: 32,
+                              fontSize: 13,
+                              fontWeight: 600,
+                            }}
+                          >
+                            XEM ĐƠN HÀNG
+                          </Button>
+                        )}
+
+                        {/* Print button */}
                         <Button
                           type="primary"
                           icon={<PrinterOutlined />}
@@ -699,7 +933,8 @@ const CheckComingView: React.FC = () => {
                       </div>
                     </Space>
                   </List.Item>
-                )}
+                  );
+                }}
                 style={{ maxHeight: "calc(100vh - 280px)", overflow: "auto" }}
               />
             </Card>
@@ -716,148 +951,171 @@ const CheckComingView: React.FC = () => {
           }
           open={showOrderModal}
           onCancel={handleCloseModal}
-          width={900}
+          width={1200}
           footer={
             <Space>
+              <Text type="secondary">
+                Còn lại: <strong>{currentOrders.length}</strong> đơn hàng
+              </Text>
               <Button onClick={handleCloseModal} disabled={processingOrders}>
-                Hủy
+                Đóng
               </Button>
-              <Button
-                type="primary"
-                onClick={handleConfirmOrders}
-                loading={processingOrders}
-                disabled={!areAllOrdersCompleted()}
-                icon={<CheckCircleOutlined />}
-              >
-                Xác nhận hoàn thành
-              </Button>
+              {currentOrders.length === 0 && (
+                <Button
+                  type="primary"
+                  onClick={handleConfirmOrders}
+                  loading={processingOrders}
+                  icon={<CheckCircleOutlined />}
+                >
+                  Hoàn thành
+                </Button>
+              )}
             </Space>
           }
           closable={!processingOrders}
           maskClosable={false}
         >
-          {!areAllOrdersCompleted() && (
-            <Alert
-              message={
-                <Space>
-                  <WarningOutlined />
-                  <span>Vui lòng hoàn thành tất cả các yêu cầu để tiếp tục quét mã tiếp theo</span>
-                </Space>
-              }
-              type="warning"
-              showIcon={false}
-              className="mb-4"
-            />
-          )}
-
           <Table
             dataSource={currentOrders}
             rowKey="id"
             pagination={false}
-            size="middle"
-            scroll={{ y: 400 }}
+            size="small"
+            scroll={{ x: 1200, y: 400 }}
             columns={[
               {
                 title: "STT",
-                width: 60,
+                width: 50,
+                fixed: "left",
                 render: (_: any, __: any, index: number) => index + 1,
               },
               {
                 title: "Mã đơn hàng",
                 dataIndex: "order_code",
                 key: "order_code",
-                width: 150,
+                width: 130,
+                fixed: "left",
                 render: (text: string) => (
-                  <Text strong style={{ fontFamily: "monospace" }}>
+                  <Text strong style={{ fontFamily: "monospace", fontSize: 12 }}>
                     {text}
                   </Text>
                 ),
               },
               {
-                title: "Trạng thái",
-                dataIndex: "status",
-                key: "status",
-                width: 120,
-                render: (status: string) => (
-                  <Badge
-                    status={status === "completed" ? "success" : "processing"}
-                    text={status}
-                  />
-                ),
-              },
-              {
-                title: "Chụp ảnh",
-                dataIndex: "take_photo",
-                key: "take_photo",
-                width: 100,
-                align: "center",
-                render: (value: boolean, record: OrderInfo) => (
-                  <Checkbox
-                    checked={value}
-                    onChange={(e) =>
-                      handleOrderFieldUpdate(record.id, "take_photo", e.target.checked)
-                    }
-                    disabled={processingOrders}
-                  />
-                ),
-              },
-              {
-                title: "Đóng lại",
-                dataIndex: "is_repacked",
-                key: "is_repacked",
-                width: 100,
-                align: "center",
-                render: (value: boolean, record: OrderInfo) => (
-                  <Checkbox
-                    checked={value}
-                    onChange={(e) =>
-                      handleOrderFieldUpdate(record.id, "is_repacked", e.target.checked)
-                    }
-                    disabled={processingOrders}
-                  />
-                ),
-              },
-              {
                 title: "Kiểm đếm",
-                dataIndex: "is_verify_count",
-                key: "is_verify_count",
-                width: 100,
-                align: "center",
-                render: (value: boolean, record: OrderInfo) => (
-                  <Checkbox
-                    checked={value}
-                    onChange={(e) =>
-                      handleOrderFieldUpdate(record.id, "is_verify_count", e.target.checked)
-                    }
-                    disabled={processingOrders}
-                  />
-                ),
-              },
-              {
-                title: "Hoàn thành",
-                key: "completed",
-                width: 100,
+                key: "verify_count",
+                width: 150,
                 align: "center",
                 render: (_: any, record: OrderInfo) => {
-                  const isCompleted =
-                    record.take_photo && record.is_repacked && record.is_verify_count;
-                  return isCompleted ? (
-                    <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 20 }} />
-                  ) : (
-                    <span style={{ color: "#d9d9d9" }}>-</span>
+                  // Chỉ hiển thị nếu is_verify_count = true
+                  if (record.is_verify_count !== true) {
+                    return <Text type="secondary">-</Text>;
+                  }
+                  return (
+                    <Space direction="vertical" size={4}>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
+                      <InputNumber
+                        min={1}
+                        placeholder="Số lượng"
+                        value={record.metadata?.verify_counts}
+                        onChange={(value) =>
+                          handleOrderFieldUpdate(record.id, "verify_counts", value || 0)
+                        }
+                        disabled={processingOrders}
+                        style={{ width: "100%" }}
+                        size="small"
+                      />
+                    </Space>
+                  );
+                },
+              },
+              {
+                title: "Đóng lại (Repack)",
+                key: "repack",
+                width: 120,
+                align: "center",
+                render: (_: any, record: OrderInfo) => {
+                  // Chỉ hiển thị nếu is_repacked = true
+                  if (record.is_repacked !== true) {
+                    return <Text type="secondary">-</Text>;
+                  }
+                  return (
+                    <Space direction="vertical" size={4}>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
+                      <Checkbox
+                        checked={record.metadata?.is_repacked}
+                        onChange={(e) =>
+                          handleOrderFieldUpdate(record.id, "is_repacked", e.target.checked)
+                        }
+                        disabled={processingOrders}
+                      >
+                        <Text style={{ fontSize: 12 }}>Đã đóng</Text>
+                      </Checkbox>
+                    </Space>
+                  );
+                },
+              },
+              {
+                title: "Ảnh kiểm tra",
+                key: "inspection_images",
+                width: 180,
+                align: "center",
+                render: (_: any, record: OrderInfo) => {
+                  // Chỉ hiển thị nếu take_photo = true
+                  if (record.take_photo !== true) {
+                    return <Text type="secondary">-</Text>;
+                  }
+                  return (
+                    <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
+                      <Upload
+                        beforeUpload={(file) => {
+                          handleUploadImage(record.id, file);
+                          return false;
+                        }}
+                        showUploadList={false}
+                        disabled={processingOrders}
+                      >
+                        <Button
+                          icon={<UploadOutlined />}
+                          size="small"
+                          block
+                          disabled={processingOrders}
+                        >
+                          Upload ({record.metadata?.inspection_photo_ids?.length || 0})
+                        </Button>
+                      </Upload>
+                    </Space>
+                  );
+                },
+              },
+              {
+                title: "Thao tác",
+                key: "action",
+                width: 100,
+                fixed: "right",
+                align: "center",
+                render: (_: any, record: OrderInfo) => {
+                  const ready = isOrderReadyForDone(record);
+
+                  return (
+                    <Button
+                      type="primary"
+                      size="small"
+                      onClick={() => handleMarkOrderDone(record)}
+                      disabled={!ready || processingOrders}
+                      icon={ready ? <CheckCircleOutlined /> : <WarningOutlined />}
+                      style={{
+                        backgroundColor: ready ? "#52c41a" : "#d9d9d9",
+                        borderColor: ready ? "#52c41a" : "#d9d9d9",
+                      }}
+                    >
+                      Done
+                    </Button>
                   );
                 },
               },
             ]}
           />
-
-          <div className="mt-4 p-3 bg-blue-50 rounded">
-            <Text type="secondary">
-              <strong>Hướng dẫn:</strong> Tick vào các checkbox tương ứng khi hoàn thành mỗi
-              công việc. Chỉ khi tất cả đơn hàng đã hoàn thành, bạn mới có thể xác nhận và
-              tiếp tục quét mã tiếp theo.
-            </Text>
-          </div>
         </Modal>
 
         {/* Hidden Print Label */}
