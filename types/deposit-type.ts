@@ -48,12 +48,12 @@ export interface DepositResponse {
 
 export interface DepositParams {
   bankAccountId?: string;
-  depositCode?: string;
-  fromDate?: string;
+  deposit_code?: string;
+  from_date?: string;
   page?: number;
   size?: number;
   status?: string;
-  toDate?: string;
+  to_date?: string;
   userConfirmed?: string;
   handler?:string;
 }

@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip, Table } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Tag,
+  DatePicker,
+  Select,
+  Modal,
+  Tooltip,
+  Table,
+} from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -18,11 +28,18 @@ import { Order, OrderItem } from "@/types/shipment-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { EyeOutlined, EditOutlined, ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 import ShipmentFilter, { FilterTypeShipment } from "./shipment-filter";
 
 // === Utility: Remove undefined fields from object ===
-function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+function removeUndefinedFields<T extends Record<string, any>>(
+  obj: T
+): Partial<T> {
   if (!obj) return {};
   const result: Partial<T> = {};
   Object.entries(obj).forEach(([key, value]) => {
@@ -75,20 +92,18 @@ const ProductManagement: React.FC = () => {
 
   // Khi setFilters, nếu các key/values giống nhau thì vẫn cần force lại API: Chúng ta sẽ tạo ra 1 biến random fakeKey gắn vào params để force react-query gọi lại
   // Hoặc có thể dùng page để force gọi lại, nhưng dễ nhất là có thêm forceKey mỗi lần dùng filter
- 
+
   const [forceFilterKey, setForceFilterKey] = useState<number>(Date.now());
 
   // Construct query params by removing undefined + add forceFilterKey để trigger refetch
   const filterQueryParams = {
     ...removeUndefinedFields({
-      status:
-        filters.status ||
-        [
-          OrderStatusType.ARRIVED_VN_WAREHOUSE,
-          OrderStatusType.READY_TO_SHIP,
-          OrderStatusType.SHIPPING_REQUEST_CLIENT,
-          OrderStatusType.SHIPPED,
-        ],
+      status: filters.status || [
+        OrderStatusType.ARRIVED_VN_WAREHOUSE,
+        OrderStatusType.READY_TO_SHIP,
+        OrderStatusType.SHIPPING_REQUEST_CLIENT,
+        OrderStatusType.SHIPPED,
+      ],
       date: filters.date,
       search: filters.search,
       customer_name: filters.customer_name,
@@ -106,9 +121,10 @@ const ProductManagement: React.FC = () => {
 
   const { data: listOrder } = useListOrderTracking({
     page,
-    size: 20,
+    size: 10,
     ...filterQueryParams,
   });
+  console.log("listOrder", listOrder, page);
 
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
 
@@ -118,11 +134,16 @@ const ProductManagement: React.FC = () => {
 
   const handleFinish = (newFilters: FilterTypeShipment) => {
     // Nếu filter cũ giống filter mới thì vẫn force update bằng cách tăng force key, để gọi lại API
-    if (shallowEqual(removeUndefinedFields(filters), removeUndefinedFields(newFilters))) {
+    if (
+      shallowEqual(
+        removeUndefinedFields(filters),
+        removeUndefinedFields(newFilters)
+      )
+    ) {
       setForceFilterKey(Date.now());
     }
     setFilters(newFilters);
-    setPage(1);
+    setPage(0);
     prevFiltersRef.current = newFilters;
   };
 
@@ -142,9 +163,14 @@ const ProductManagement: React.FC = () => {
       render: (_, record) => {
         return (
           <div className="space-y-1">
-            <div className="text-xs font-medium text-blue-600">{record.tracking_ship}</div>
+            <div className="text-xs font-medium text-blue-600">
+              {record.tracking_ship}
+            </div>
             <div className="text-xs text-gray-500">
-              <span className="font-medium text-orange-600">{record.quantity || record.order_list?.length || 0}</span> đơn
+              <span className="font-medium text-orange-600">
+                {record.quantity || record.order_list?.length || 0}
+              </span>{" "}
+              đơn
             </div>
           </div>
         );
@@ -181,11 +207,14 @@ const ProductManagement: React.FC = () => {
         const orderList = record.order_list || [];
 
         // Tính tổng cân nặng từ tất cả orders
-        const totalWeight = orderList.reduce((sum, order) => sum + (order.weight || 0), 0);
+        const totalWeight = orderList.reduce(
+          (sum, order) => sum + (order.weight || 0),
+          0
+        );
 
         // Lấy tất cả tracking_vn
         const trackingVnList = orderList
-          .map(order => order.tracking_vn)
+          .map((order) => order.tracking_vn)
           .filter(Boolean);
 
         const firstTrackingVn = trackingVnList[0] || "-";
@@ -223,7 +252,9 @@ const ProductManagement: React.FC = () => {
         const createdByName = record.order_list?.[0]?.created_by_name;
         return (
           <div className="space-y-1">
-            <div className="text-xs text-gray-800 font-medium">{record.customer_name || "-"}</div>
+            <div className="text-xs text-gray-800 font-medium">
+              {record.customer_name || "-"}
+            </div>
             {/* <div className="text-xs text-gray-500">{record.customer_code || "-"}</div> */}
             <div className="text-xs text-blue-600">
               <span className="text-gray-500">NTạo: </span>
@@ -239,13 +270,13 @@ const ProductManagement: React.FC = () => {
       width: 160,
       onCell: () => ({
         style: {
-          borderRight: '1px solid #f0f0f0',
+          borderRight: "1px solid #f0f0f0",
         },
       }),
       render: (_, record) => {
         const orderList = record.order_list || [];
         const addresses = orderList
-          .map(order => order.address)
+          .map((order) => order.address)
           .filter(Boolean);
 
         const firstAddress = addresses[0] || "-";
@@ -253,9 +284,13 @@ const ProductManagement: React.FC = () => {
 
         return (
           <div className="space-y-1">
-            <div className="text-xs text-gray-600 line-clamp-3">{firstAddress}</div>
+            <div className="text-xs text-gray-600 line-clamp-3">
+              {firstAddress}
+            </div>
             {uniqueAddresses.size > 1 && (
-              <div className="text-xs text-amber-600">Có {uniqueAddresses.size} địa chỉ khác nhau</div>
+              <div className="text-xs text-amber-600">
+                Có {uniqueAddresses.size} địa chỉ khác nhau
+              </div>
             )}
           </div>
         );
@@ -280,51 +315,51 @@ const ProductManagement: React.FC = () => {
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
             color = "orange";
-            text = t('status.pendingApproval');
+            text = t("status.pendingApproval");
             break;
           case OrderStatusType.PENDING_DEPOSIT:
             color = "gold";
-            text = t('status.pendingDeposit');
+            text = t("status.pendingDeposit");
             break;
           case OrderStatusType.DEPOSIT_PAID:
             color = "green";
-            text = t('status.depositPaid');
+            text = t("status.depositPaid");
             break;
           case OrderStatusType.PURCHASED:
             color = "blue";
-            text = t('status.purchased');
+            text = t("status.purchased");
             break;
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             color = "purple";
-            text = t('status.arrivedJpWarehouse');
+            text = t("status.arrivedJpWarehouse");
             break;
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             color = "cyan";
-            text = t('status.arrivedVnWarehouse');
+            text = t("status.arrivedVnWarehouse");
             break;
           case OrderStatusType.UNDER_INSPECTION:
             color = "lime";
-            text = t('status.underInspection');
+            text = t("status.underInspection");
             break;
           case OrderStatusType.PENDING_PAYMENT:
             color = "red";
-            text = t('status.pendingPayment');
+            text = t("status.pendingPayment");
             break;
           case OrderStatusType.READY_TO_SHIP:
             color = "geekblue";
-            text = t('status.readyToShip');
+            text = t("status.readyToShip");
             break;
           case OrderStatusType.SHIPPED:
             color = "volcano";
-            text = t('status.shipped');
+            text = t("status.shipped");
             break;
           case OrderStatusType.SHIPPING_REQUEST_CLIENT:
             color = "magenta";
-            text = t('status.shippingRequest');
+            text = t("status.shippingRequest");
             break;
           case OrderStatusType.CANCELED:
             color = "red";
-            text = t('status.cancelled');
+            text = t("status.cancelled");
             break;
           default:
             color = "default";
@@ -337,19 +372,19 @@ const ProductManagement: React.FC = () => {
               color={color}
               className="!text-[11px] m-0 !py-1 !px-2 !leading-4 !font-medium"
               style={{
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minWidth: '100px',
-                height: '22px',
-                borderRadius: '4px'
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minWidth: "100px",
+                height: "22px",
+                borderRadius: "4px",
               }}
             >
               {text}
             </Tag>
-            {
-              status === OrderStatusType.SHIPPING_REQUEST_CLIENT && <Button
+            {status === OrderStatusType.SHIPPING_REQUEST_CLIENT && (
+              <Button
                 size="small"
                 className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
                 onClick={() => {
@@ -357,9 +392,9 @@ const ProductManagement: React.FC = () => {
                   setOrderDetail(record);
                 }}
               >
-                {t('button.shipped')}
+                {t("button.shipped")}
               </Button>
-            }
+            )}
           </div>
         );
       },
@@ -373,24 +408,18 @@ const ProductManagement: React.FC = () => {
           {/* <h2 className="text-lg font-semibold">
             {t('page.importedProductList')}
           </h2> */}
-          <ShipmentFilter
-           onFilter={handleFinish}
-           initialFilters={filters}
-          />
-
+          <ShipmentFilter onFilter={handleFinish} initialFilters={filters} />
         </div>
 
         <EnhancedTableWrapper className="overflow-x-auto">
-          <Table
+          <TableComponent
             columns={columns}
-            dataSource={listOrder || []}
+            dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
             rowKey="tracking_ship"
-            pagination={{
-              current: (listOrder && listOrder.current_page + 1) || 1,
-              pageSize: 20,
-              onChange: handleChangePage,
-              showSizeChanger: false,
-            }}
+            pageSize={10}
+            page={typeof listOrder?.current_page === "number" ? listOrder.current_page + 1 : 0}
+            onPageChange={handleChangePage}
+            response={listOrder}
             expandable={{
               expandedRowRender: (record: Order) => (
                 <ExpandedOrderDetails orderList={record.order_list || []} />
@@ -400,13 +429,19 @@ const ProductManagement: React.FC = () => {
                 <Button
                   type="text"
                   size="small"
-                  icon={<DownOutlined className={`text-xs transition-transform ${expanded ? 'rotate-180' : ''}`} />}
+                  icon={
+                    <DownOutlined
+                      className={`text-xs transition-transform ${
+                        expanded ? "rotate-180" : ""
+                      }`}
+                    />
+                  }
                   onClick={(e) => onExpand(record, e)}
                   className="!p-1"
                 />
               ),
             }}
-            scroll={{ x: 'max-content' }}
+            scroll={{ x: "max-content" }}
             size="small"
           />
         </EnhancedTableWrapper>
@@ -425,12 +460,12 @@ const ProductManagement: React.FC = () => {
                   // shipping_fee: +value.shipping_fee,
                   shipping_type: value.shipping_type,
                   shipping_fee: value.shipping_fee,
-                  shipping_tracking: value.shipping_code
+                  shipping_tracking: value.shipping_code,
                 },
               },
               {
                 onSuccess: () => {
-                  toast.success(t('toast.confirmShippingSuccess'));
+                  toast.success(t("toast.confirmShippingSuccess"));
                   queryClient.invalidateQueries({
                     queryKey: ["listorderTracking"],
                   });
@@ -446,7 +481,6 @@ const ProductManagement: React.FC = () => {
           open={isOpenTrackingOrder}
         />
       )}
-
     </div>
   );
 };
@@ -507,7 +541,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         },
       }),
       render: (_, record) => (
-        <div className="text-xs font-medium text-blue-600">{record.invoice_no || "-"}</div>
+        <div className="text-xs font-medium text-blue-600">
+          {record.invoice_no || "-"}
+        </div>
       ),
     },
     {
@@ -527,7 +563,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           </div>
           <div className="text-xs">
             <span className="text-gray-500">JP: </span>
-            <span className="text-gray-800">{record.tracking_other || "-"}</span>
+            <span className="text-gray-800">
+              {record.tracking_other || "-"}
+            </span>
           </div>
         </div>
       ),
@@ -548,9 +586,10 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
 
         if (record.metadata) {
           try {
-            const metadata = typeof record.metadata === 'string'
-              ? JSON.parse(record.metadata)
-              : record.metadata;
+            const metadata =
+              typeof record.metadata === "string"
+                ? JSON.parse(record.metadata)
+                : record.metadata;
 
             const items = metadata?.items || [];
             if (items.length > 0) {
@@ -569,7 +608,11 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           <div className="flex gap-2">
             <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex-shrink-0 overflow-hidden">
               {productImage ? (
-                <img src={productImage} alt="Product" className="w-full h-full object-cover" />
+                <img
+                  src={productImage}
+                  alt="Product"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <span className="text-[10px] text-gray-400">No img</span>
@@ -577,7 +620,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-gray-800 line-clamp-2">{productName}</div>
+              <div className="text-xs text-gray-800 line-clamp-2">
+                {productName}
+              </div>
               <div className="text-xs text-gray-500">SL: {quantity}</div>
             </div>
           </div>
@@ -595,7 +640,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         },
       }),
       render: (_, record) => (
-        <div className="text-xs text-gray-800">{record.weight ? `${record.weight}kg` : "-"}</div>
+        <div className="text-xs text-gray-800">
+          {record.weight ? `${record.weight}kg` : "-"}
+        </div>
       ),
     },
     {
@@ -612,13 +659,17 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           <div className="text-xs">
             <span className="text-gray-500">JPY: </span>
             <span className="text-gray-800 font-medium">
-              {record.amount ? `${record.amount.toLocaleString("en-US")}¥` : "-"}
+              {record.amount
+                ? `${record.amount.toLocaleString("en-US")}¥`
+                : "-"}
             </span>
           </div>
           <div className="text-xs">
             <span className="text-gray-500">VND: </span>
             <span className="text-blue-600 font-medium">
-              {record.amount_vnd ? `${record.amount_vnd.toLocaleString("en-US")}đ` : "-"}
+              {record.amount_vnd
+                ? `${record.amount_vnd.toLocaleString("en-US")}đ`
+                : "-"}
             </span>
           </div>
         </div>
@@ -635,7 +686,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       }),
       render: (_, record) => (
         <div className="text-xs text-green-600 font-medium">
-          {record.deposit_fee ? `${record.deposit_fee.toLocaleString("en-US")}đ` : "-"}
+          {record.deposit_fee
+            ? `${record.deposit_fee.toLocaleString("en-US")}đ`
+            : "-"}
         </div>
       ),
     },
@@ -649,7 +702,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         },
       }),
       render: (_, record) => (
-        <div className="text-xs text-gray-600 line-clamp-2">{record.description || "-"}</div>
+        <div className="text-xs text-gray-600 line-clamp-2">
+          {record.description || "-"}
+        </div>
       ),
     },
     {
@@ -662,55 +717,58 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) =>{
-        let text: string ='';
+      render: (_, record) => {
+        let text: string = "";
         const status = record.status;
 
         switch (status) {
           case OrderStatusType.PENDING_APPROVAL:
-            text = t('status.pendingApproval');
+            text = t("status.pendingApproval");
             break;
           case OrderStatusType.PENDING_DEPOSIT:
-            text = t('status.pendingDeposit');
+            text = t("status.pendingDeposit");
             break;
           case OrderStatusType.DEPOSIT_PAID:
-            text = t('status.depositPaid');
+            text = t("status.depositPaid");
             break;
           case OrderStatusType.PURCHASED:
-            text = t('status.purchased');
+            text = t("status.purchased");
             break;
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
-            text = t('status.arrivedJpWarehouse');
+            text = t("status.arrivedJpWarehouse");
             break;
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
-            text = t('status.arrivedVnWarehouse');
+            text = t("status.arrivedVnWarehouse");
             break;
           case OrderStatusType.UNDER_INSPECTION:
-            text = t('status.underInspection');
+            text = t("status.underInspection");
             break;
           case OrderStatusType.PENDING_PAYMENT:
-            text = t('status.pendingPayment');
+            text = t("status.pendingPayment");
             break;
           case OrderStatusType.READY_TO_SHIP:
-            text = t('status.readyToShip');
+            text = t("status.readyToShip");
             break;
           case OrderStatusType.SHIPPED:
-            text = t('status.shipped');
+            text = t("status.shipped");
             break;
           case OrderStatusType.SHIPPING_REQUEST_CLIENT:
-            text = t('status.shippingRequest');
+            text = t("status.shippingRequest");
             break;
           case OrderStatusType.CANCELED:
-            text = t('status.cancelled');
+            text = t("status.cancelled");
             break;
           default:
         }
         return (
-          <Tag color={getStatusColor(record.status)} className="!text-[10px] !py-0.5 !px-2">
+          <Tag
+            color={getStatusColor(record.status)}
+            className="!text-[10px] !py-0.5 !px-2"
+          >
             {text || "-"}
           </Tag>
-        )
-      } ,
+        );
+      },
     },
   ];
 
@@ -727,7 +785,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         rowKey="id"
         pagination={false}
         size="small"
-        scroll={{ x: 'max-content' }}
+        scroll={{ x: "max-content" }}
         className="order-detail-table"
       />
     </div>

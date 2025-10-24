@@ -23,10 +23,10 @@ const FilterSection = (props: FilterSectionProps) => {
   const onFinish = async (values: any) => {  
     const payload: DepositParams = {
       ...values,
-      fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
-      toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
+      from_date: values.dateRange?.[0]?.format("YYYY-MM-DD"),
+      to_date: values.dateRange?.[1]?.format("YYYY-MM-DD"),
       status: values.status,
-      depositCode: values.keyword,
+      deposit_code: values.keyword,
       handler: values.handler, // add handler to payload
     };    
     onFilter(payload);
@@ -54,7 +54,7 @@ const FilterSection = (props: FilterSectionProps) => {
           </Form.Item>
 
           <Form.Item name="status" className="mb-0">
-            <Select placeholder={t("statusPlaceholder")} className="w-full !h-11">
+            <Select allowClear placeholder={t("statusPlaceholder")} className="w-full !h-11">
               <Option value="WAITING_CONFIRMATION">{t("status.waiting")}</Option>
               <Option value="COMPLETED">{t("status.completed")}</Option>
               <Option value="CANCELED">{t("status.canceled")}</Option>

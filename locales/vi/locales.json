@@ -9,7 +9,8 @@
     "forgotPassword": "Quên mật khẩu",
     "success": "Đăng nhập thành công!",
     "failed": "Đăng nhập thất bại!",
-    "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!"
+    "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!",
+    "noPermission":"Bạn không có quyền truy cập hệ thống"
   },
   "validation": {
     "pleaseEnterLink": "Vui lòng nhập link!",
