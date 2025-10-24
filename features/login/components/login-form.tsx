@@ -12,6 +12,7 @@ import AntdButton from "@/components/ButtonComponent";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Image from "next/image";
 import logoCRM from "@/assets/login/logo_crm.jpg";
+import Cookies from "js-cookie";
 
 interface LoginFormValues {
   email: string;
@@ -31,9 +32,12 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
   const onFinish = useCallback(
     (values: LoginFormValues) => {
       loginMutation.mutate(values, {
-        onSuccess: () => {
-          toast.success(t("login.success"), { position: "top-right" });
-
+        onSuccess: (dataLogin) => {   
+          if(dataLogin.roleUser){
+            toast.warning("Bạn không có quyền truy cập hệ thống", { position: "top-right" });          
+            return
+          }       
+          toast.success(t("login.success"), { position: "top-right" });          
           const params = new URLSearchParams(window.location.search);
           const redirectUrl = params.get("redirect") || "/dashboard";
           const decodedUrl = decodeURIComponent(redirectUrl);

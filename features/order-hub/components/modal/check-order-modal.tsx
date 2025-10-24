@@ -236,15 +236,15 @@ const CombinedTrackingCheckModal: React.FC<CombinedModalProps> = ({
                     onChange={(e) =>
                       handleRecordChange(index, "package_code", e.target.value)
                     }
-                    suffix={
-                      !r.id && (
-                        <ReloadOutlined
-                          className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                          onClick={() => handleGeneratePackageCode(index)}
-                          title="Generate mã kiện"
-                        />
-                      )
-                    }
+                    // suffix={
+                    //   !r.id && (
+                    //     <ReloadOutlined
+                    //       className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                    //       onClick={() => handleGeneratePackageCode(index)}
+                    //       title="Generate mã kiện"
+                    //     />
+                    //   )
+                    // }
                   />
 
                   <Input

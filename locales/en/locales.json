@@ -9,7 +9,8 @@
     "forgotPassword": "Forgot password",
     "success": "Login successful!",
     "failed": "Login failed!",
-    "pleaseCheckInformation": "Please check information!!"
+    "pleaseCheckInformation": "Please check information!!",
+    "noPermission":"You don't have permission to access system"
   },
   "validation": {
     "pleaseEnterLink": "Please enter link!",

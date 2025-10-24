@@ -20,11 +20,11 @@ const FilterSection = (props: FilterSectionProps) => {
 
   const onFinish = async (values: any) => {
     const payload: any = {
-      depositCode: values.keyword || undefined,
+      deposit_code: values.keyword || undefined,
       status: values.status || undefined,
       handler: values.handler || undefined,
-      fromDate: values.dateRange && values.dateRange[0] ? values.dateRange[0].format("YYYY-MM-DD") : undefined,
-      toDate: values.dateRange && values.dateRange[1] ? values.dateRange[1].format("YYYY-MM-DD") : undefined,
+      from_date: values.dateRange && values.dateRange[0] ? values.dateRange[0].format("YYYY-MM-DD") : undefined,
+      to_date: values.dateRange && values.dateRange[1] ? values.dateRange[1].format("YYYY-MM-DD") : undefined,
     };
 
     onFilter(payload);
@@ -61,11 +61,12 @@ const FilterSection = (props: FilterSectionProps) => {
             <Select
               placeholder={t("statusPlaceholder")}
               className="w-full !h-11"
+              allowClear
             >
-              <Option value="PEDDING">{t("status.waiting")}</Option>
-              <Option value="APPROVED">{t("deposit.status.completed")}</Option>
-              <Option value="CANCELLED">{t("status.canceled")}</Option>
-              <Option value="COMPLETED">{t("status.completed")}</Option>
+              <Option value="PENDING">{t("withdraw.statusType.pending")}</Option>
+              <Option value="APPROVED">{t("withdraw.statusType.approved")}</Option>
+              <Option value="CANCELLED">{t("withdraw.statusType.cancelled")}</Option>
+              <Option value="COMPLETED">{t("withdraw.statusType.completed")}</Option>
             </Select>
           </Form.Item>
 

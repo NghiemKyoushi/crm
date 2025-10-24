@@ -64,10 +64,10 @@ const WithdrawTable = ({}) => {
   const handleSearch = (values: DepositParams) => {
     const newParams: any = {
       ...params,
-      code: values.depositCode,
+      deposit_code: values.deposit_code,
       status: values.status,
-      fromDate: values.fromDate,
-      toDate: values.toDate,
+      from_date: values.from_date,
+      toDate: values.to_date,
       handler: values.handler,
       page: 0,
     };

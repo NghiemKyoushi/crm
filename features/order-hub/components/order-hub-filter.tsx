@@ -72,7 +72,7 @@ export default function OrderHubFilter({
     { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
     {
       value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
-      label: t("status.shippingRequestClient"),
+      label: t("status.shippingRequest"),
     },
     { value: OrderStatusType.CANCELED, label: t("status.canceled") },
   ];
