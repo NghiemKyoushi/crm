@@ -238,15 +238,12 @@ const CheckComingView: React.FC = () => {
 
       setLastPrintedPackage(newEntry);
 
-      // BƯỚC 3: Filter chỉ lấy orders ở trạng thái ARRIVED_JP_WAREHOUSE
-      const arrivedOrders = relatedOrders.filter(
-        (order) => order.status === "ARRIVED_JP_WAREHOUSE"
-      );
-      console.log(`📋 Found ${arrivedOrders.length}/${relatedOrders.length} orders at ARRIVED_JP_WAREHOUSE`);
+      // BƯỚC 3: Xử lý tất cả orders (không filter theo status)
+      console.log(`📋 Processing ${relatedOrders.length} orders`);
 
-      if (arrivedOrders.length > 0) {
+      if (relatedOrders.length > 0) {
         // BƯỚC 4: Phân loại orders thành auto-done và cần làm
-        const mappedOrders = arrivedOrders.map((order) => ({
+        const mappedOrders = relatedOrders.map((order) => ({
           id: order.order_id,
           order_code: order.invoice_no || `#${order.order_id}`,
           tracking_code: finalCode,
@@ -257,6 +254,10 @@ const CheckComingView: React.FC = () => {
           status: order.status,
           // Metadata - actual values
           metadata: order.metadata,
+          // Additional fields
+          admin_note: order.admin_note,
+          customer_note: order.customer_note,
+          product_link: order.product_link,
         }));
 
         // BƯỚC 5: Auto-done những orders không có yêu cầu gì
@@ -294,8 +295,8 @@ const CheckComingView: React.FC = () => {
           toast.success(`Tự động hoàn thành ${autoCompleteOrders.length} đơn hàng!`);
         }
       } else {
-        // BƯỚC 7: Không có orders ở ARRIVED_JP_WAREHOUSE → chỉ reload history
-        console.log("✅ No orders at ARRIVED_JP_WAREHOUSE");
+        // BƯỚC 7: Không có orders → chỉ reload history
+        console.log("✅ No orders found");
 
         // Show success effect
         setShowSuccessEffect(true);
@@ -403,41 +404,31 @@ const CheckComingView: React.FC = () => {
     generatePackageCode();
   };
 
-  // Handle click on history item - mở lại modal với orders
+  // Handle click on history item - mở lại modal với orders (hiển thị TẤT CẢ orders)
   const handleHistoryItemClick = (item: PackageInfo) => {
     const orders = item.relatedOrders || [];
 
-    if (orders.length > 0) {
-      // Filter chỉ lấy orders ở ARRIVED_JP_WAREHOUSE và cần làm
-      // Chỉ true mới là có yêu cầu
-      const arrivedOrders = orders.filter(
-        (order) => order.status === "ARRIVED_JP_WAREHOUSE" &&
-          (order.take_photo === true || order.is_repacked === true || order.is_verify_count === true)
-      );
+    // Hiển thị modal với TẤT CẢ orders (không filter theo trạng thái)
+    const mappedOrders = orders.map((order) => ({
+      id: order.order_id,
+      order_code: order.invoice_no || `#${order.order_id}`,
+      tracking_code: item.trackingCode || "",
+      // Requirements
+      take_photo: order.take_photo,
+      is_repacked: order.is_repacked,
+      is_verify_count: order.is_verify_count,
+      status: order.status,
+      // Metadata - actual values
+      metadata: order.metadata,
+      // Additional fields
+      admin_note: order.admin_note,
+      customer_note: order.customer_note,
+      product_link: order.product_link,
+    }));
 
-      if (arrivedOrders.length > 0) {
-        // Có orders cần làm → mở modal
-        setCurrentOrders(
-          arrivedOrders.map((order) => ({
-            id: order.order_id,
-            order_code: order.invoice_no || `#${order.order_id}`,
-            tracking_code: item.trackingCode || "",
-            // Requirements
-            take_photo: order.take_photo,
-            is_repacked: order.is_repacked,
-            is_verify_count: order.is_verify_count,
-            status: order.status,
-            // Metadata - actual values
-            metadata: order.metadata,
-          }))
-        );
-        setCurrentTrackingCode(item.trackingCode || "");
-        setShowOrderModal(true);
-        toast.info(`Mở lại ${arrivedOrders.length} đơn hàng`);
-      } else {
-        toast.info("Tất cả đơn hàng đã hoàn thành hoặc không cần xử lý");
-      }
-    }
+    setCurrentOrders(mappedOrders);
+    setCurrentTrackingCode(item.trackingCode || "");
+    setShowOrderModal(true);
   };
 
   // Handle order field update - update metadata
@@ -513,26 +504,41 @@ const CheckComingView: React.FC = () => {
     }
   };
 
+  // Check if order has any requirements at all
+  const hasAnyRequirement = (order: OrderInfo) => {
+    return order.take_photo === true || order.is_repacked === true || order.is_verify_count === true;
+  };
+
   // Check if single order is ready for Done - based on metadata
   const isOrderReadyForDone = (order: OrderInfo) => {
     // Nếu có yêu cầu take_photo (= true) thì BẮT BUỘC phải có ảnh trong metadata.inspection_photo_ids
     // false hoặc null = không có yêu cầu = OK
     const photoOk = order.take_photo !== true ||
-      (order.metadata?.inspection_photo_ids && order.metadata.inspection_photo_ids.length > 0);
+      ((order.metadata?.inspection_photo_ids?.length || 0) > 0);
 
     // Nếu có yêu cầu repack (= true) thì phải có metadata.is_repacked = true
     const repackOk = order.is_repacked !== true || order.metadata?.is_repacked === true;
 
     // Nếu có yêu cầu verify_count (= true) thì phải có metadata.verify_counts > 0
     const countOk = order.is_verify_count !== true ||
-      (order.metadata?.verify_counts != null && order.metadata.verify_counts > 0);
+      ((order.metadata?.verify_counts || 0) > 0);
 
     return photoOk && repackOk && countOk;
   };
 
-  // Check if all orders are ready for Done
+  // Get count of orders with pending requirements
+  const getPendingOrdersCount = () => {
+    return currentOrders.filter(order => hasAnyRequirement(order) && !isOrderReadyForDone(order)).length;
+  };
+
+  // Check if all orders with requirements are ready
   const areAllOrdersReady = () => {
-    return currentOrders.every((order) => isOrderReadyForDone(order));
+    const ordersWithRequirements = currentOrders.filter(hasAnyRequirement);
+    // Nếu không có order nào có requirements, coi như đã xong
+    if (ordersWithRequirements.length === 0) {
+      return true;
+    }
+    return ordersWithRequirements.every((order) => isOrderReadyForDone(order));
   };
 
   // Handle mark order as done - use metadata
@@ -612,25 +618,10 @@ const CheckComingView: React.FC = () => {
   const handleCloseModal = () => {
     if (processingOrders) return;
 
-    // Nếu còn orders trong list → cảnh báo (vì orders đã Done sẽ bị remove)
-    if (currentOrders.length > 0) {
-      Modal.confirm({
-        title: "Bạn có chắc muốn đóng?",
-        content: `Còn ${currentOrders.length} đơn hàng chưa hoàn thành. Bạn có muốn đóng không?`,
-        okText: "Đóng",
-        cancelText: "Hủy",
-        onOk: () => {
-          setShowOrderModal(false);
-          setCurrentOrders([]);
-          setCurrentTrackingCode("");
-        },
-      });
-    } else {
-      // Không còn orders → đóng luôn
-      setShowOrderModal(false);
-      setCurrentOrders([]);
-      setCurrentTrackingCode("");
-    }
+    // Đóng modal trực tiếp không cần confirm
+    setShowOrderModal(false);
+    setCurrentOrders([]);
+    setCurrentTrackingCode("");
   };
 
   // Auto focus input when not scanning
@@ -689,10 +680,11 @@ const CheckComingView: React.FC = () => {
           </div>
         )}
 
-        <Row gutter={16}>
-          {/* Main Scanning Area */}
-          <Col xs={24} lg={16}>
-            <Card className="shadow-lg" bodyStyle={{ padding: "32px" }}>
+        {/* Top Section - Input and Camera */}
+        <Card className="shadow-lg mb-4">
+          <Row gutter={16}>
+            {/* Left Column - Package Code + Input/Button */}
+            <Col xs={24} lg={12}>
               <Space direction="vertical" style={{ width: "100%" }} size="large">
                 {/* Package Code - Large Display */}
                 <div className="text-center p-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
@@ -717,7 +709,7 @@ const CheckComingView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Scanner Area */}
+                {/* Input/Button Area */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <Space>
@@ -735,14 +727,7 @@ const CheckComingView: React.FC = () => {
                     </Button>
                   </div>
 
-                  {isScanning ? (
-                    <BarcodeScanner
-                      onScan={handleScan}
-                      onError={(err) => toast.error(err)}
-                      onCodeLeftView={handleCodeLeftView}
-                      autoStart={true}
-                    />
-                  ) : (
+                  {!isScanning && (
                     <div>
                       <Input
                         ref={inputRef}
@@ -788,158 +773,213 @@ const CheckComingView: React.FC = () => {
                   className="text-center"
                 />
               </Space>
-            </Card>
-          </Col>
+            </Col>
 
-          {/* History Section - Compact */}
-          <Col xs={24} lg={8}>
-            <Card
-              className="shadow-lg"
-              title={
-                <Space>
-                  <HistoryOutlined />
-                  <span>{t("checkComing.card.historyTitle")}</span>
-                  <Badge count={scanHistory.length} showZero overflowCount={999} />
-                </Space>
-              }
-              bodyStyle={{ padding: 0 }}
-            >
-              <List
-                dataSource={scanHistory.slice(0, 15)}
-                locale={{
-                  emptyText: (
-                    <div className="py-8">
-                      <HistoryOutlined style={{ fontSize: 48, color: "#d9d9d9" }} />
-                      <div className="mt-2">
-                        <Text type="secondary">{t("checkComing.empty.noHistory")}</Text>
-                      </div>
-                    </div>
-                  ),
-                }}
-                renderItem={(item, index) => {
-                  // Kiểm tra xem có orders không (hiển thị button tương ứng)
-                  const hasOrders = item.relatedOrders && item.relatedOrders.length > 0;
-
-                  return (
-                  <List.Item
-                    className="px-4 hover:bg-gray-50"
+            {/* Right Column - Camera Preview */}
+            <Col xs={24} lg={12}>
+              <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                {/*<div className="flex items-center justify-between mb-3">*/}
+                {/*  <Space>*/}
+                {/*    <BarcodeOutlined style={{ fontSize: 20, color: "#1890ff" }} />*/}
+                {/*    <Text strong style={{ fontSize: 16 }}>*/}
+                {/*      Camera Preview*/}
+                {/*    </Text>*/}
+                {/*  </Space>*/}
+                {/*</div>*/}
+                {isScanning ? (
+                  <div style={{ height: 200, width: "100%" }}>
+                    <BarcodeScanner
+                      onScan={handleScan}
+                      onError={(err) => toast.error(err)}
+                      onCodeLeftView={handleCodeLeftView}
+                      autoStart={true}
+                    />
+                  </div>
+                ) : (
+                  <div
                     style={{
-                      position: "relative",
-                      paddingRight: 40,
-                      paddingTop: 12,
-                      paddingBottom: 12,
-                      borderBottom: "1px solid #f0f0f0",
+                      height: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: 8,
+                      border: "2px dashed #d9d9d9"
                     }}
                   >
-                    {/* Delete button - small, top right corner */}
-                    <Button
-                      danger
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      onClick={() => item.id && handleDelete(item.id)}
-                      size="small"
-                      style={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        zIndex: 1,
-                      }}
-                    />
-
-                    <Space direction="vertical" style={{ width: "100%" }} size={8}>
-                      <div style={{ width: "100%", display: "flex", alignItems: "center", paddingLeft: 8, paddingRight: 8 }}>
-                        <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center"
-                          style={{
-                            flexShrink: 0,
-                            backgroundColor: "#f6ffed",
-                          }}
-                        >
-                          <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                        </div>
-                        <div style={{ marginLeft: 12, flex: 1, minWidth: 0 }}>
-                          <Text strong ellipsis style={{ fontSize: 13, display: "block" }}>
-                            {item.trackingCode}
-                          </Text>
-                          <Text type="secondary" style={{ fontSize: 11, display: "block" }}>
-                            {item.packageCode}
-                          </Text>
-                          <Text type="secondary" style={{ fontSize: 11, display: "block" }}>
-                            {new Date(item.timestamp).toLocaleTimeString("vi-VN")}
-                          </Text>
-
-                          {/* Display related orders from API v2.0.0 if available */}
-                          {item.relatedOrders && item.relatedOrders.length > 0 && (
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 10, display: "block" }}>
-                                <Badge
-                                  count={item.relatedOrders.length}
-                                  style={{ backgroundColor: "#1890ff" }}
-                                />
-                                <span style={{ marginLeft: 4 }}>
-                                  {item.relatedOrders.map(o => `#${o.order_id}`).join(", ")}
-                                </span>
-                              </Text>
-                            </div>
-                          )}
-
-                          {/* Display scan tracking orders if available (for backward compatibility) */}
-                          {item.orders && item.orders.length > 0 && (
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 10, display: "block" }}>
-                                <Badge count={item.orders.length} style={{ backgroundColor: "#52c41a" }} />
-                                <span style={{ marginLeft: 4 }}>
-                                  {item.orders.map(o => o.order_code).join(", ")}
-                                </span>
-                              </Text>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div style={{ paddingLeft: 40, display: "flex", gap: 8 }}>
-                        {/* Button xem orders nếu có */}
-                        {hasOrders && (
-                          <Button
-                            type="default"
-                            icon={<BarcodeOutlined />}
-                            onClick={() => handleHistoryItemClick(item)}
-                            block
-                            style={{
-                              height: 32,
-                              fontSize: 13,
-                              fontWeight: 600,
-                            }}
-                          >
-                            XEM ĐƠN HÀNG
-                          </Button>
-                        )}
-
-                        {/* Print button */}
-                        <Button
-                          type="primary"
-                          icon={<PrinterOutlined />}
-                          onClick={() => handlePrint(item)}
-                          block
-                          style={{
-                            height: 32,
-                            fontSize: 13,
-                            fontWeight: 600,
-                          }}
-                        >
-                          IN NHÃN
-                        </Button>
-                      </div>
+                    <Space direction="vertical" align="center">
+                      <BarcodeOutlined style={{ fontSize: 48, color: "#d9d9d9" }} />
+                      <Text type="secondary">Bật scanner để xem camera</Text>
                     </Space>
-                  </List.Item>
+                  </div>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Bottom Section - Scan History Table */}
+        <Card
+          className="shadow-lg"
+          title={
+            <Space>
+              <HistoryOutlined />
+              <span>Lịch Sử Quét</span>
+              <Badge count={scanHistory.length} showZero overflowCount={999} />
+            </Space>
+          }
+        >
+          <Table
+            dataSource={scanHistory}
+            rowKey="id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Tổng ${total} bản ghi`,
+            }}
+            locale={{
+              emptyText: (
+                <div className="py-8">
+                  <HistoryOutlined style={{ fontSize: 48, color: "#d9d9d9" }} />
+                  <div className="mt-2">
+                    <Text type="secondary">{t("checkComing.empty.noHistory")}</Text>
+                  </div>
+                </div>
+              ),
+            }}
+            columns={[
+              {
+                title: "Mã Kiện / Tracking",
+                key: "codes",
+                width: 180,
+                ellipsis: true,
+                render: (_: any, record: PackageInfo) => (
+                  <Space direction="vertical" size={2} style={{ width: "100%" }}>
+                    <Text strong ellipsis style={{ fontFamily: "monospace", display: "block" }}>
+                      {record.packageCode}
+                    </Text>
+                    <Text type="secondary" ellipsis style={{ fontFamily: "monospace", display: "block" }}>
+                      {record.trackingCode}
+                    </Text>
+                  </Space>
+                ),
+              },
+              {
+                title: "Thời Gian",
+                dataIndex: "timestamp",
+                key: "timestamp",
+                width: 130,
+                render: (date: string) => {
+                  if (!date) return "-";
+                  const dateObj = new Date(date);
+                  const dateStr = dateObj.toLocaleDateString("vi-VN", {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  });
+                  const timeStr = dateObj.toLocaleTimeString("vi-VN", {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+
+                  return (
+                    <Space direction="vertical" size={2}>
+                      <Text>{dateStr}</Text>
+                      <Text type="secondary">{timeStr}</Text>
+                    </Space>
                   );
-                }}
-                style={{ maxHeight: "calc(100vh - 280px)", overflow: "auto" }}
-              />
-            </Card>
-          </Col>
-        </Row>
+                },
+              },
+              {
+                title: "Đơn Hàng",
+                key: "ordersStatus",
+                width: 140,
+                align: "center",
+                render: (_: any, record: PackageInfo) => {
+                  const orders = record.relatedOrders || [];
+
+                  if (orders.length === 0) {
+                    return <Text type="secondary">Không có đơn</Text>;
+                  }
+
+                  // Đếm số đơn đã hoàn thành và chưa hoàn thành (tất cả orders, không filter theo status)
+                  let completedCount = 0;
+                  let incompleteCount = 0;
+
+                  orders.forEach(order => {
+                    const photoOk = order.take_photo !== true ||
+                      ((order.metadata?.inspection_photo_ids?.length || 0) > 0);
+                    const repackOk = order.is_repacked !== true || order.metadata?.is_repacked === true;
+                    const countOk = order.is_verify_count !== true ||
+                      ((order.metadata?.verify_counts || 0) > 0);
+
+                    if (photoOk && repackOk && countOk) {
+                      completedCount++;
+                    } else {
+                      incompleteCount++;
+                    }
+                  });
+
+                  return (
+                    <Space direction="vertical" size={2} align="center" style={{ width: "100%" }}>
+                      <Space size={8}>
+                        {completedCount > 0 && (
+                          <Badge
+                            count={completedCount}
+                            style={{ backgroundColor: "#52c41a" }}
+                            title="Đã hoàn thành"
+                          />
+                        )}
+                        {incompleteCount > 0 && (
+                          <Badge
+                            count={incompleteCount}
+                            style={{ backgroundColor: "#faad14" }}
+                            title="Chưa hoàn thành"
+                          />
+                        )}
+                      </Space>
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={() => handleHistoryItemClick(record)}
+                        style={{ padding: 0, height: "auto", fontSize: 12 }}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    </Space>
+                  );
+                },
+              },
+              {
+                title: "Thao Tác",
+                key: "action",
+                width: 120,
+                align: "center",
+                render: (_: any, record: PackageInfo) => {
+                  return (
+                    <Space size="small">
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<PrinterOutlined />}
+                        onClick={() => handlePrint(record)}
+                      >
+                        In
+                      </Button>
+                      <Button
+                        danger
+                        type="text"
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={() => record.id && handleDelete(record.id)}
+                      />
+                    </Space>
+                  );
+                },
+              },
+            ]}
+          />
+        </Card>
 
         {/* Order List Modal */}
         <Modal
@@ -951,16 +991,16 @@ const CheckComingView: React.FC = () => {
           }
           open={showOrderModal}
           onCancel={handleCloseModal}
-          width={1200}
+          width={1600}
           footer={
             <Space>
               <Text type="secondary">
-                Còn lại: <strong>{currentOrders.length}</strong> đơn hàng
+                Còn lại: <strong>{getPendingOrdersCount()}</strong> đơn hàng chưa hoàn thành
               </Text>
               <Button onClick={handleCloseModal} disabled={processingOrders}>
                 Đóng
               </Button>
-              {currentOrders.length === 0 && (
+              {areAllOrdersReady() && (
                 <Button
                   type="primary"
                   onClick={handleConfirmOrders}
@@ -980,7 +1020,7 @@ const CheckComingView: React.FC = () => {
             rowKey="id"
             pagination={false}
             size="small"
-            scroll={{ x: 1200, y: 400 }}
+            scroll={{ x: 1400, y: 400 }}
             columns={[
               {
                 title: "STT",
@@ -1001,6 +1041,56 @@ const CheckComingView: React.FC = () => {
                 ),
               },
               {
+                title: "Thông tin bổ sung",
+                key: "additional_info",
+                width: 400,
+                render: (_: any, record: OrderInfo) => (
+                  <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      <Text strong style={{ fontSize: 11, color: "#1890ff" }}>Link:</Text>
+                      {record.product_link ? (
+                        <a href={record.product_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11 }}>
+                          {record.product_link.length > 30 ? record.product_link.substring(0, 30) + "..." : record.product_link}
+                        </a>
+                      ) : (
+                        <Text type="secondary" style={{ fontSize: 11 }}>-</Text>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <Text strong style={{ fontSize: 11, color: "#1890ff", whiteSpace: "nowrap" }}>KH:</Text>
+                      <Text style={{ fontSize: 11, flex: 1 }} ellipsis={{ tooltip: record.customer_note }}>
+                        {record.customer_note || "-"}
+                      </Text>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <Text strong style={{ fontSize: 11, color: "#1890ff", whiteSpace: "nowrap" }}>Admin:</Text>
+                      <Text style={{ fontSize: 11, flex: 1 }} ellipsis={{ tooltip: record.admin_note }}>
+                        {record.admin_note || "-"}
+                      </Text>
+                    </div>
+                  </Space>
+                ),
+              },
+              {
+                title: "Trạng thái",
+                key: "order_status",
+                width: 110,
+                align: "center",
+                render: (_: any, record: OrderInfo) => {
+                  const photoOk = record.take_photo !== true ||
+                    ((record.metadata?.inspection_photo_ids?.length || 0) > 0);
+                  const repackOk = record.is_repacked !== true || record.metadata?.is_repacked === true;
+                  const countOk = record.is_verify_count !== true ||
+                    ((record.metadata?.verify_counts || 0) > 0);
+
+                  const isCompleted = photoOk && repackOk && countOk;
+
+                  return isCompleted
+                    ? <Badge status="success" text="Hoàn thành" />
+                    : <Badge status="processing" text="Chưa xong" />;
+                },
+              },
+              {
                 title: "Kiểm đếm",
                 key: "verify_count",
                 width: 150,
@@ -1010,6 +1100,23 @@ const CheckComingView: React.FC = () => {
                   if (record.is_verify_count !== true) {
                     return <Text type="secondary">-</Text>;
                   }
+
+                  // Kiểm tra xem đã hoàn thành chưa
+                  const isCompleted = (record.metadata?.verify_counts || 0) > 0;
+
+                  if (isCompleted) {
+                    // Đã hoàn thành → hiển thị readonly
+                    return (
+                      <Space direction="vertical" size={4}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Đã kiểm đếm</Text>
+                        <Text strong style={{ color: "#52c41a" }}>
+                          {record.metadata?.verify_counts} sản phẩm
+                        </Text>
+                      </Space>
+                    );
+                  }
+
+                  // Chưa hoàn thành → hiển thị input
                   return (
                     <Space direction="vertical" size={4}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
@@ -1038,6 +1145,21 @@ const CheckComingView: React.FC = () => {
                   if (record.is_repacked !== true) {
                     return <Text type="secondary">-</Text>;
                   }
+
+                  // Kiểm tra xem đã hoàn thành chưa
+                  const isCompleted = record.metadata?.is_repacked === true;
+
+                  if (isCompleted) {
+                    // Đã hoàn thành → hiển thị readonly
+                    return (
+                      <Space direction="vertical" size={4}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Đã đóng lại</Text>
+                        <Badge status="success" text="Hoàn thành" />
+                      </Space>
+                    );
+                  }
+
+                  // Chưa hoàn thành → hiển thị checkbox
                   return (
                     <Space direction="vertical" size={4}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
@@ -1064,6 +1186,24 @@ const CheckComingView: React.FC = () => {
                   if (record.take_photo !== true) {
                     return <Text type="secondary">-</Text>;
                   }
+
+                  // Kiểm tra xem đã hoàn thành chưa
+                  const imageCount = record.metadata?.inspection_photo_ids?.length || 0;
+                  const isCompleted = imageCount > 0;
+
+                  if (isCompleted) {
+                    // Đã hoàn thành → hiển thị readonly
+                    return (
+                      <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Đã upload</Text>
+                        <Text strong style={{ color: "#52c41a" }}>
+                          {imageCount} ảnh
+                        </Text>
+                      </Space>
+                    );
+                  }
+
+                  // Chưa hoàn thành → hiển thị upload button
                   return (
                     <Space direction="vertical" size={4} style={{ width: "100%" }}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
@@ -1081,7 +1221,7 @@ const CheckComingView: React.FC = () => {
                           block
                           disabled={processingOrders}
                         >
-                          Upload ({record.metadata?.inspection_photo_ids?.length || 0})
+                          Upload ({imageCount})
                         </Button>
                       </Upload>
                     </Space>
@@ -1095,6 +1235,26 @@ const CheckComingView: React.FC = () => {
                 fixed: "right",
                 align: "center",
                 render: (_: any, record: OrderInfo) => {
+                  // Kiểm tra xem order đã hoàn thành chưa
+                  const photoOk = record.take_photo !== true ||
+                    (record.metadata?.inspection_photo_ids && record.metadata.inspection_photo_ids.length > 0);
+                  const repackOk = record.is_repacked !== true || record.metadata?.is_repacked === true;
+                  const countOk = record.is_verify_count !== true ||
+                    (record.metadata?.verify_counts != null && record.metadata.verify_counts > 0);
+
+                  const isCompleted = photoOk && repackOk && countOk;
+
+                  // Nếu đơn đã hoàn thành → chỉ hiển thị badge, ẩn nút Done
+                  if (isCompleted) {
+                    return (
+                      <Badge
+                        status="success"
+                        text={<Text style={{ fontSize: 11, color: "#52c41a" }}>Đã xong</Text>}
+                      />
+                    );
+                  }
+
+                  // Nếu chưa hoàn thành → hiển thị nút Done
                   const ready = isOrderReadyForDone(record);
 
                   return (
