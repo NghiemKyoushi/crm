@@ -28,9 +28,7 @@ const FilterSection = (props: FilterSectionProps) => {
       status: values.status,
       depositCode: values.keyword,
       handler: values.handler, // add handler to payload
-    };
-    console.log('check33', payload);
-    
+    };    
     onFilter(payload);
   };
 

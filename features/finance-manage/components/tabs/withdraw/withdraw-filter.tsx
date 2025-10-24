@@ -19,14 +19,14 @@ const FilterSection = (props: FilterSectionProps) => {
   const { t } = useTranslation();
 
   const onFinish = async (values: any) => {
-    const payload = {
-      ...values,
-      fromDate: values.dateRange?.[0]?.format("YYYY-MM-DD"),
-      toDate: values.dateRange?.[1]?.format("YYYY-MM-DD"),
-      status: values.status,
-      depositCode: values.keyword,
-      handler: values.handler, // Thêm người xử lý vào payload
+    const payload: any = {
+      depositCode: values.keyword || undefined,
+      status: values.status || undefined,
+      handler: values.handler || undefined,
+      fromDate: values.dateRange && values.dateRange[0] ? values.dateRange[0].format("YYYY-MM-DD") : undefined,
+      toDate: values.dateRange && values.dateRange[1] ? values.dateRange[1].format("YYYY-MM-DD") : undefined,
     };
+
     onFilter(payload);
   };
 
