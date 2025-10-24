@@ -22,6 +22,10 @@ export interface OrderInfo {
   is_repacked_done?: boolean; // @deprecated - use metadata.is_repacked
   document_image_ids?: number[]; // @deprecated - use metadata.inspection_photo_ids
   product_image_ids?: number[]; // @deprecated - use metadata.inspection_photo_ids
+  // Additional fields for order details
+  admin_note?: string | null; // Ghi chú của admin
+  customer_note?: string | null; // Ghi chú của khách hàng
+  product_link?: string | null; // Link sản phẩm
 }
 
 // Related Order info từ check-coming API v2.0.0
@@ -44,6 +48,11 @@ export interface RelatedOrderInfo {
 
   // Metadata object chứa actual values
   metadata?: OrderMetadata | null; // OrderMetadata - Thông tin thực tế đã thực hiện
+
+  // Additional fields for order details
+  admin_note?: string | null; // Ghi chú của admin
+  customer_note?: string | null; // Ghi chú của khách hàng
+  product_link?: string | null; // Link sản phẩm
 }
 
 // Upload image response

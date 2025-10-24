@@ -411,7 +411,7 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           border-radius: 12px;
           overflow: hidden;
           position: relative;
-          height: 400px;
+          height: 100%;
           max-width: 100%;
           width: 100%;
         }
@@ -423,13 +423,13 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           max-height: unset !important;
           display: block !important;
           border-radius: 12px;
-          object-fit: cover !important;
+          object-fit: contain !important;
           visibility: visible !important;
           opacity: 1 !important;
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          z-index: 1 !important;
+          z-index: 0 !important;
           background: #000 !important;
         }
 
@@ -474,9 +474,28 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           bottom: 0;
           width: 100%;
           height: 100%;
-          z-index: 1000 !important;
+          z-index: 10 !important;
           pointer-events: none;
           background: transparent !important;
+        }
+
+        /* Blur overlay - làm mờ vùng xung quanh scan frame */
+        .qr-scanner-overlay::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(
+            circle at center,
+            transparent 0%,
+            transparent 120px,
+            rgba(0, 0, 0, 0.5) 200px,
+            rgba(0, 0, 0, 0.7) 100%
+          );
+          -webkit-backdrop-filter: blur(2px);
+          z-index: 10;
         }
 
         /* Scanning frame with corner brackets */
@@ -487,7 +506,9 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           transform: translate(-50%, -50%);
           width: 200px;
           height: 200px;
-          z-index: 1001;
+          z-index: 11;
+          /* Clear area in the center */
+          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
         }
 
         /* Corner brackets */
@@ -540,7 +561,7 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           background: linear-gradient(90deg, transparent, #00ff00, transparent) !important;
           animation: scanAnimation 2s ease-in-out infinite !important;
           box-shadow: 0 0 10px #00ff00, 0 0 20px rgba(0, 255, 0, 0.5) !important;
-          z-index: 1002 !important;
+          z-index: 12 !important;
           margin: 0 !important;
           padding: 0 !important;
         }
@@ -588,7 +609,7 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
           text-align: center;
           white-space: nowrap;
           text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-          z-index: 1003;
+          z-index: 13;
         }
       `}</style>
             <Card styles={{body: {padding: 0}}}>
@@ -639,7 +660,8 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
                         id={scannerIdRef.current}
                         style={{
                             width: "100%",
-                            height: 400,
+                            height: "100%",
+                            minHeight: 200,
                             display: "block",
                             position: "relative",
                             opacity: isInitializing ? 0 : 1,
@@ -672,9 +694,9 @@ const BarcodeScannerV2: React.FC<BarcodeScannerProps> = ({
                     </div>
 
                     {isScanning && !isInitializing && (
-                        <div className="text-center p-3 bg-blue-50">
+                        <div className="text-center bg-blue-50">
                             <Text type="secondary" style={{fontSize: 13}}>
-                                📷 Camera đang hoạt động - Đưa mã vào khung quét
+                                Camera đang hoạt động - Đưa mã vào khung quét
                             </Text>
                         </div>
                     )}
