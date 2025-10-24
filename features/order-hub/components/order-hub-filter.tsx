@@ -16,6 +16,7 @@ export interface FilterType {
   from_date?: string;
   to_date?: string;
   customer_name?: string;
+  customer_code?: string;
   product_url?: string;
   product_name?: string;
   invoice_no?: string;
@@ -91,6 +92,7 @@ export default function OrderHubFilter({
       status: values.status !== "" ? values.status : undefined,
       type: initialFilters?.type || undefined,
       customer_name: values.customer_name?.trim() || undefined,
+      customer_code:  values.customer_code?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
       invoice_no: values.invoice_no?.trim() || undefined,
@@ -120,6 +122,7 @@ export default function OrderHubFilter({
       note_admin: undefined,
       from_date: undefined,
       to_date: undefined,
+      customer_code: undefined
     });
   };
 
@@ -173,6 +176,14 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
+              <Form.Item name="customer_code" className="!mb-2">
+                <Input
+                  placeholder="Mã khách hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              
             </div>
 
             {/* Product Info */}

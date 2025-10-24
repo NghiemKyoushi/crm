@@ -141,7 +141,18 @@ export default function BankAccountSetting() {
       width: 140,
       render: (value: number) => (
         <div className="text-sm text-gray-700">
-          {value.toLocaleString("vi-VN")}đ
+          {value  && value.toLocaleString("vi-VN")}đ
+        </div>
+      ),
+    },
+    {
+      title: 'Hạn mức trên lần (VND)',
+      dataIndex: "per_transaction_limit_vnd",
+      key: "per_transaction_limit_vnd",
+      width: 140,
+      render: (value: number) => (
+        <div className="text-sm text-gray-700">
+          {value ? value.toLocaleString("vi-VN") : 0}đ
         </div>
       ),
     },

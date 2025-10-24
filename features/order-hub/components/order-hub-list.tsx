@@ -130,6 +130,7 @@ export default function OrderHub() {
     note_admin: filters.note_admin,
     from_date: filters.from_date,
     to_date: filters.to_date,
+    customer_code: filters.customer_code,
   });
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
