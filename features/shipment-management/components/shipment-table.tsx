@@ -102,7 +102,6 @@ const ProductManagement: React.FC = () => {
       from_date: filters.from_date,
       to_date: filters.to_date,
     }),
-    __forceKey: forceFilterKey,
   };
 
   const { data: listOrder } = useListOrderTracking({

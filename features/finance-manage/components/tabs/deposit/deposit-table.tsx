@@ -72,12 +72,12 @@ const DepositTable = (props: DepositTableProps) => {
   const handleSearch = (values: DepositParams) => {
     const newParams: DepositParams = {
       ...params,
-      depositCode: values.depositCode,
-      status: values.status,
-      fromDate: values.fromDate,
-      toDate: values.toDate,
-      handler: values.handler,
       page: 0,
+      depositCode: values.depositCode || undefined,
+      status: values.status || undefined,
+      fromDate: values.fromDate || undefined,
+      toDate: values.toDate || undefined,
+      handler: values.handler || undefined,
     };
     setParams(newParams);
   };
