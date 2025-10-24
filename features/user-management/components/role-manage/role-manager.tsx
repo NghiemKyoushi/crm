@@ -109,6 +109,7 @@ export const RoleManager: React.FC = () => {
   }, []);
 
   const isSuperAdmin = selectedRole?.role_name === "ADMIN";
+  const isUserRole = selectedRole?.role_name === "USER"
 
   return (
     <div className="flex gap-6 w-full">
@@ -191,7 +192,7 @@ export const RoleManager: React.FC = () => {
                         };
                       })}
                       value={activePermissions}
-                      disabled={isSuperAdmin}
+                      disabled={isSuperAdmin || isUserRole}
                       onChange={(checkedValues) => {
                         console.log("checkedValues", checkedValues);
 
@@ -230,7 +231,7 @@ export const RoleManager: React.FC = () => {
               );
             })}
 
-            {!isSuperAdmin && (
+            {(!isSuperAdmin && !isUserRole) && (
               <div className="flex justify-end mt-4">
                 <Button
                   type="primary"
