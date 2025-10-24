@@ -121,7 +121,7 @@ const ProductManagement: React.FC = () => {
 
   const { data: listOrder } = useListOrderTracking({
     page,
-    size: 5,
+    size: 10,
     ...filterQueryParams,
   });
   console.log("listOrder", listOrder, page);
@@ -412,40 +412,38 @@ const ProductManagement: React.FC = () => {
         </div>
 
         <EnhancedTableWrapper className="overflow-x-auto">
-          {listOrder && (
-            <TableComponent
-              columns={columns}
-              dataSource={listOrder?.data || []}
-              rowKey="tracking_ship"
-              pageSize={10}
-              page={(listOrder.current_page + 1 ) || 0}
-              onPageChange={handleChangePage}
-              response={listOrder}
-              expandable={{
-                expandedRowRender: (record: Order) => (
-                  <ExpandedOrderDetails orderList={record.order_list || []} />
-                ),
-                rowExpandable: (record) => (record.order_list || []).length > 0,
-                expandIcon: ({ expanded, onExpand, record }) => (
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={
-                      <DownOutlined
-                        className={`text-xs transition-transform ${
-                          expanded ? "rotate-180" : ""
-                        }`}
-                      />
-                    }
-                    onClick={(e) => onExpand(record, e)}
-                    className="!p-1"
-                  />
-                ),
-              }}
-              scroll={{ x: "max-content" }}
-              size="small"
-            />
-          )}
+          <TableComponent
+            columns={columns}
+            dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
+            rowKey="tracking_ship"
+            pageSize={10}
+            page={typeof listOrder?.current_page === "number" ? listOrder.current_page + 1 : 0}
+            onPageChange={handleChangePage}
+            response={listOrder}
+            expandable={{
+              expandedRowRender: (record: Order) => (
+                <ExpandedOrderDetails orderList={record.order_list || []} />
+              ),
+              rowExpandable: (record) => (record.order_list || []).length > 0,
+              expandIcon: ({ expanded, onExpand, record }) => (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={
+                    <DownOutlined
+                      className={`text-xs transition-transform ${
+                        expanded ? "rotate-180" : ""
+                      }`}
+                    />
+                  }
+                  onClick={(e) => onExpand(record, e)}
+                  className="!p-1"
+                />
+              ),
+            }}
+            scroll={{ x: "max-content" }}
+            size="small"
+          />
         </EnhancedTableWrapper>
       </div>
 
