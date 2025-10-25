@@ -67,7 +67,7 @@ const DepositTable = (props: DepositTableProps) => {
     page: 0,
     size: 10,
   });
-  const { data } = useListTopups(params);
+  const { data, isPending } = useListTopups(params);
 
   const handleSearch = (values: DepositParams) => {
     const newParams: DepositParams = {
@@ -426,6 +426,7 @@ const DepositTable = (props: DepositTableProps) => {
           onPageChange={handlePageChange}
           fontSize={13}
           headerHeight={46}
+          loading={isPending}
         />
       </div>
       <ManualDepositModal
