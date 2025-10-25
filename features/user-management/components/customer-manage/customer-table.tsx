@@ -98,7 +98,7 @@ export default function CustomerTable() {
   const updateCateMutation = useUpdateCateGoryForEachCus();
 
   // --- API gọi khi search state thay đổi ---
-  const { data, isFetching } = useListCustomer({
+  const { data, isFetching, isPending } = useListCustomer({
     page,
     page_size: 10,
     category_id: searchValues.category || undefined,
@@ -339,6 +339,7 @@ export default function CustomerTable() {
           response={data}
           fontSize={13}
           headerHeight={46}
+          loading={isPending}
         />
       </div>
       {selectedId && (

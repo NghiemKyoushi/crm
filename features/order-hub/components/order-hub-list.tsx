@@ -115,7 +115,7 @@ export default function OrderHub() {
   const prevFilters = useRef<FilterType>(filters);
 
   // Lưu ý: useListOrder chạy lại khi filters hoặc page thay đổi; không cần thay đổi ở đây.
-  const { data: listOrder } = useListOrder({
+  const { data: listOrder, isPending } = useListOrder({
     page,
     size: 10,
     status: filters.status,
@@ -977,6 +977,7 @@ export default function OrderHub() {
             response={listOrder}
             fontSize={12}
             headerHeight={48}
+            loading={isPending}
           />
         </EnhancedTableWrapper>
       </div>

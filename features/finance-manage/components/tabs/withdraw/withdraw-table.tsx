@@ -60,7 +60,7 @@ const WithdrawTable = ({}) => {
     }));
   };
 
-  const { data } = useListWithdraw(params);
+  const { data, isPending } = useListWithdraw(params);
   const handleSearch = (values: DepositParams) => {
     const newParams: any = {
       ...params,
@@ -353,6 +353,7 @@ const WithdrawTable = ({}) => {
           onPageChange={handlePageChange}
           fontSize={13}
           headerHeight={46}
+          loading={isPending}
         />
       </div>
 
