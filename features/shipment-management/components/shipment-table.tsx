@@ -119,7 +119,7 @@ const ProductManagement: React.FC = () => {
     }),
   };
 
-  const { data: listOrder } = useListOrderTracking({
+  const { data: listOrder,isPending } = useListOrderTracking({
     page,
     size: 10,
     ...filterQueryParams,
@@ -420,6 +420,7 @@ const ProductManagement: React.FC = () => {
             page={typeof listOrder?.current_page === "number" ? listOrder.current_page + 1 : 0}
             onPageChange={handleChangePage}
             response={listOrder}
+            loading={isPending}
             expandable={{
               expandedRowRender: (record: Order) => (
                 <ExpandedOrderDetails orderList={record.order_list || []} />
