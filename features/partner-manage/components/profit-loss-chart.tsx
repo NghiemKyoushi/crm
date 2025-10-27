@@ -15,7 +15,8 @@ import {
 } from "recharts";
 import { useTranslation } from "react-i18next";
 import { useProfitLossByDate } from "../hooks/partner-manage-hook";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "@/utils/dayjs-config";
+import { Dayjs } from "dayjs";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;

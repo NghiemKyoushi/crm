@@ -5,6 +5,7 @@ import "./globals.css";
 import I18nProvider from "@/components/I18nProvider";
 import AntdRegistry from "@/components/AntdRegistry";
 import Script from "next/script";
+import "@/utils/dayjs-config";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
