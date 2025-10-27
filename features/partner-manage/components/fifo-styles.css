@@ -1,12 +1,63 @@
 /* FIFO Management - Equal Width Styling */
 
+/* Reduce font size for entire page */
+.fifo-main-tabs,
+.fifo-sub-tabs,
+.fifo-content-area {
+  font-size: 13px !important;
+}
+
+.fifo-content-area .ant-table {
+  font-size: 12px !important;
+}
+
+.fifo-content-area .ant-table-thead > tr > th {
+  font-size: 12px !important;
+  padding: 8px 12px !important;
+}
+
+.fifo-content-area .ant-table-tbody > tr > td {
+  font-size: 12px !important;
+  padding: 8px 12px !important;
+}
+
+.fifo-content-area .ant-btn {
+  font-size: 12px !important;
+  padding: 4px 12px !important;
+  height: auto !important;
+}
+
+.fifo-content-area .ant-input {
+  font-size: 12px !important;
+}
+
+.fifo-content-area .ant-select {
+  font-size: 12px !important;
+}
+
+.fifo-content-area h3 {
+  font-size: 14px !important;
+}
+
+.fifo-content-area .ant-statistic-title {
+  font-size: 11px !important;
+}
+
+.fifo-content-area .ant-statistic-content {
+  font-size: 13px !important;
+}
+
+.fifo-content-area .ant-card-head-title {
+  font-size: 13px !important;
+}
+
 /* Main Tabs Container - JPY/USD */
 .fifo-main-tabs {
   width: 100%;
 }
 
 .fifo-main-tabs .ant-tabs-content-holder {
-  padding: 16px 0 0 0 !important;
+  padding: 8px 0 0 0 !important;
   width: 100%;
 }
 
@@ -19,16 +70,16 @@
   width: 100%;
 }
 
-/* Main tabs styling - larger, bolder */
+/* Main tabs styling - smaller, compact */
 .fifo-main-tabs .ant-tabs-nav::before {
   border-bottom: 1px solid #d9d9d9 !important;
 }
 
 .fifo-main-tabs .ant-tabs-tab {
-  font-size: 16px !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
-  padding: 12px 24px !important;
-  border-radius: 8px 8px 0 0 !important;
+  padding: 6px 16px !important;
+  border-radius: 6px 6px 0 0 !important;
   border: 1px solid #d9d9d9 !important;
   border-bottom: 1px solid #d9d9d9 !important;
   margin-bottom: -1px !important;
@@ -52,7 +103,7 @@
 }
 
 .fifo-sub-tabs .ant-tabs-content-holder {
-  padding: 24px 0 0 0 !important;
+  padding: 12px 0 0 0 !important;
   width: 100%;
 }
 
@@ -65,7 +116,7 @@
   width: 100%;
 }
 
-/* Sub tabs styling - button-like appearance */
+/* Sub tabs styling - smaller, compact */
 .fifo-sub-tabs .ant-tabs-nav {
   margin-bottom: 0 !important;
 }
@@ -75,10 +126,10 @@
 }
 
 .fifo-sub-tabs .ant-tabs-tab {
-  font-size: 15px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
-  padding: 10px 20px !important;
-  border-radius: 6px 6px 0 0 !important;
+  padding: 5px 14px !important;
+  border-radius: 4px 4px 0 0 !important;
   background-color: #f5f5f5 !important;
   border: 1px solid #d9d9d9 !important;
   border-bottom: 1px solid #d9d9d9 !important;

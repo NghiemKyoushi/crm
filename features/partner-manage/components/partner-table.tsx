@@ -123,11 +123,11 @@ export default function FIFOMaterialManagement() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
+      <div className="mb-4">
+        <h2 className="text-lg font-bold text-gray-800">
           {t("menu.partnerManagement")}
         </h2>
-        <p className="text-gray-600 mt-1">
+        <p className="text-xs text-gray-600 mt-1">
           {t("partnerManage.fifoBalanceTitle")}
         </p>
       </div>
