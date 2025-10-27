@@ -74,8 +74,16 @@ export const API_TYPE_CONST = {
   SHIPPING_METHOD:`${FEATURE}/shipping-method/setting`,
   BANK_PARTNER: `${FEATURE}/admin/bank-accounts/topup`,
   SURCHANGE_SETTING: `${FEATURE}/product/fee`,
-  MATERIAL_TRANSACTIONS_SUMARY:`${FEATURE}/material-transactions/currency-total`,
+  // Material Transactions (FIFO System)
   MATERIAL_TRANSACTIONS:`${FEATURE}/material-transactions`,
+  MATERIAL_TRANSACTIONS_SUMARY:`${FEATURE}/material-transactions/currency-total`,
+  MATERIAL_TRANSACTIONS_FIFO_BALANCE:`${FEATURE}/material-transactions/fifo-balance`,
+  MATERIAL_TRANSACTIONS_RECALCULATE_FIFO:`${FEATURE}/material-transactions/recalculate-fifo`,
+
+  // FIFO Profit/Loss Reports
+  FIFO_PROFIT_LOSS_SUMMARY:`${FEATURE}/fifo/profit-loss/summary`,
+  FIFO_PROFIT_LOSS_BY_DATE:`${FEATURE}/fifo/profit-loss/by-date`,
+  FIFO_PROFIT_LOSS_ORDERS:`${FEATURE}/fifo/profit-loss/orders`,
   PRODUCT_CATEGORIES:`${FEATURE}/admin/product-categories`,
   PRODUCT_FEE: `${FEATURE}/product/fee`,
   FEE_GET:`${FEATURE}/fee`,
