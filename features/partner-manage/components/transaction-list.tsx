@@ -6,7 +6,7 @@ import {
   Table,
   Button,
   Modal,
-  message,
+  App,
   Input,
   Tag,
   Space,
@@ -40,6 +40,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { modal, message } = App.useApp();
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(20);
   const [searchText, setSearchText] = useState<string>("");
@@ -81,14 +82,19 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   const handleRecalculate = async () => {
-    Modal.confirm({
+    console.log('handleRecalculate clicked, currencyCode:', currencyCode);
+
+    modal.confirm({
       title: t("partnerManage.recalculateFifo"),
       content: t("partnerManage.recalculateFifoConfirm"),
       okText: t("partnerManage.saveButton"),
       cancelText: t("partnerManage.cancelButton"),
       onOk: async () => {
+        console.log('Modal OK clicked!');
         try {
-          await recalculateMutation.mutateAsync({ currencyCode });
+          console.log('Calling recalculateMutation with:', { currencyCode });
+          const result = await recalculateMutation.mutateAsync({ currencyCode });
+          console.log('Recalculate result:', result);
           message.success(t("partnerManage.recalculateFifoSuccess"));
 
           // Refresh all queries
@@ -96,10 +102,16 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           queryClient.invalidateQueries({ queryKey: ["fifoBalance"] });
           queryClient.invalidateQueries({ queryKey: ["profitLossSummary"] });
         } catch (error: any) {
+          console.error('Recalculate error:', error);
           message.error(error.message || "Error recalculating FIFO");
         }
       },
+      onCancel: () => {
+        console.log('Modal cancelled');
+      },
     });
+
+    console.log('modal.confirm called');
   };
 
   const formatNumber = (num: number, decimals: number = 2): string => {
@@ -123,15 +135,27 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       title: t("partnerManage.partner"),
       dataIndex: "partnerName",
       key: "partnerName",
-      width: 250,
-      ellipsis: true,
+      width: 180,
+      ellipsis: {
+        showTitle: false,
+      },
       render: (name: string, record) => (
-        <div>
-          <div className="font-semibold text-gray-800">{name}</div>
-          {record.bankName && (
-            <div className="text-xs text-gray-500">{record.bankName}</div>
-          )}
-        </div>
+        <Tooltip
+          title={
+            <div>
+              <div>{name}</div>
+              {record.bankName && <div className="text-xs mt-1">{record.bankName}</div>}
+            </div>
+          }
+          placement="topLeft"
+        >
+          <div className="cursor-pointer">
+            <div className="font-semibold text-gray-800 truncate">{name}</div>
+            {record.bankName && (
+              <div className="text-xs text-gray-500 truncate">{record.bankName}</div>
+            )}
+          </div>
+        </Tooltip>
       ),
     },
     {
@@ -169,19 +193,20 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         );
       },
     },
-    {
-      title: t("partnerManage.remainingAmount"),
-      dataIndex: "remainingAmount",
-      key: "remainingAmount",
-      width: 140,
-      align: "right",
-      render: (value: number | undefined) => {
-        if (value === undefined || value === null) return "-";
-        return (
-          <span className="text-gray-700 font-medium">{formatNumber(Math.abs(value))}</span>
-        );
-      },
-    },
+    // Hidden: Remaining Amount column
+    // {
+    //   title: t("partnerManage.remainingAmount"),
+    //   dataIndex: "remainingAmount",
+    //   key: "remainingAmount",
+    //   width: 140,
+    //   align: "right",
+    //   render: (value: number | undefined) => {
+    //     if (value === undefined || value === null) return "-";
+    //     return (
+    //       <span className="text-gray-700 font-medium">{formatNumber(Math.abs(value))}</span>
+    //     );
+    //   },
+    // },
     {
       title: t("partnerManage.exchangeRateLabel"),
       dataIndex: "exchangeRate",
@@ -196,13 +221,14 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       title: t("partnerManage.note"),
       dataIndex: "note",
       key: "note",
+      width: 150,
       ellipsis: {
         showTitle: false,
       },
       render: (note: string | undefined) =>
         note ? (
-          <Tooltip title={note}>
-            <span className="text-gray-600 text-sm">{note}</span>
+          <Tooltip title={note} placement="topLeft">
+            <span className="text-gray-600 text-sm cursor-pointer">{note}</span>
           </Tooltip>
         ) : (
           <span className="text-gray-400">-</span>

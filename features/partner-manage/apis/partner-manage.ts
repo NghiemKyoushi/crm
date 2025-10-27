@@ -18,7 +18,47 @@ import {
 
 export const getListMaterial = async (params: getListMasterialParams) => {
   const res = await api.get(API_TYPE_CONST.MATERIAL_TRANSACTIONS , { params });
-  return res.data.data;
+
+  console.log('Raw API Response:', JSON.stringify(res.data, null, 2));
+  console.log('res.data.data structure:', res.data.data);
+
+  // Handle different possible API response structures
+  let itemsArray = [];
+  if (Array.isArray(res.data.data?.data)) {
+    itemsArray = res.data.data.data;
+  } else if (Array.isArray(res.data.data)) {
+    itemsArray = res.data.data;
+  } else if (Array.isArray(res.data)) {
+    itemsArray = res.data;
+  }
+
+  console.log('Items array:', itemsArray);
+
+  // Transform snake_case to camelCase
+  const transformedItems = itemsArray.map((item: any) => {
+    console.log('Raw item:', item);
+    const transformed = {
+      id: item.id,
+      partnerName: item.partner_name || item.partnerName || '',
+      bankName: item.bank_name || item.bankName,
+      description: item.description,
+      amount: Number(item.amount) || 0,
+      exchangeRate: Number(item.exchange_rate) || Number(item.exchangeRate) || 0,
+      createdAt: item.created_at || item.createdAt,
+      note: item.note,
+      remainingAmount: item.remaining_amount !== undefined ? Number(item.remaining_amount) : undefined,
+    };
+    console.log('Transformed item:', transformed);
+    return transformed;
+  });
+
+  const transformedData = {
+    ...res.data.data,
+    data: transformedItems
+  };
+
+  console.log('Final transformed data:', transformedData);
+  return transformedData;
 };
 
 export const getMaterialSumary = async () => {
@@ -42,15 +82,37 @@ export const deleteMaterial = async (id: number) => {
 
 export const getFifoBalance = async (): Promise<FifoBalanceResponse> => {
   const res = await api.get(API_TYPE_CONST.MATERIAL_TRANSACTIONS_FIFO_BALANCE);
-  return res.data;
+
+  // Transform snake_case to camelCase
+  const transformedData = {
+    ...res.data,
+    data: res.data.data?.map((item: any) => ({
+      currencyCode: item.currency_code,
+      transactionCount: item.transaction_count,
+      fifoBalance: Number(item.fifo_balance) || 0,
+      totalIncoming: Number(item.total_incoming) || 0,
+      totalOutgoing: Number(item.total_outgoing) || 0,
+    })) || []
+  };
+
+  return transformedData;
 };
 
 export const recalculateFifo = async (params?: RecalculateFifoParams) => {
+  // Convert camelCase to snake_case for backend
+  const queryParams = params?.currencyCode ? { currency_code: params.currencyCode } : undefined;
+
+  console.log('recalculateFifo called with params:', params);
+  console.log('Transformed queryParams:', queryParams);
+  console.log('API endpoint:', API_TYPE_CONST.MATERIAL_TRANSACTIONS_RECALCULATE_FIFO);
+
   const res = await api.post(
     API_TYPE_CONST.MATERIAL_TRANSACTIONS_RECALCULATE_FIFO,
     null,
-    { params }
+    { params: queryParams }
   );
+
+  console.log('recalculateFifo response:', res.data);
   return res.data;
 };
 
@@ -61,7 +123,21 @@ export const recalculateFifo = async (params?: RecalculateFifoParams) => {
 export const getProfitLossSummary = async (currencyCode?: string): Promise<ProfitLossSummaryResponse> => {
   const params = currencyCode ? { currency_code: currencyCode } : undefined;
   const res = await api.get(API_TYPE_CONST.FIFO_PROFIT_LOSS_SUMMARY, { params });
-  return res.data;
+
+  // Transform snake_case to camelCase
+  const transformedData = {
+    ...res.data,
+    data: res.data.data?.map((item: any) => ({
+      currencyCode: item.currency_code || item.currencyCode,
+      totalConsumed: Number(item.total_consumed) || 0,
+      totalProfitLossVnd: Number(item.total_profit_loss_vnd) || 0,
+      avgSellRate: Number(item.avg_sell_rate) || 0,
+      avgCostRate: Number(item.avg_cost_rate) || 0,
+      consumptionCount: Number(item.consumption_count) || 0,
+    })) || []
+  };
+
+  return transformedData;
 };
 
 export const getProfitLossByDate = async (params: ProfitLossByDateParams): Promise<ProfitLossByDateResponse> => {

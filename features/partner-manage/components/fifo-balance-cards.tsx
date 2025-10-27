@@ -52,11 +52,8 @@ export const FifoBalanceCards: React.FC = () => {
   };
 
   return (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-4">
-        {t("partnerManage.fifoBalanceTitle")}
-      </h3>
-      <div className="flex gap-4">
+    <div className="mb-3">
+      <div className="flex gap-3">
         {currencyBalances.map((balance) => {
           const progress = calculateProgress(balance);
           const color = getCurrencyColor(balance.currencyCode);
@@ -64,76 +61,63 @@ export const FifoBalanceCards: React.FC = () => {
           return (
             <div key={balance.currencyCode} className="flex-1">
               <Card
-                className="h-full"
+                size="small"
                 bordered={false}
+                bodyStyle={{ padding: "12px" }}
                 style={{
-                  borderLeft: `4px solid ${color}`,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  borderLeft: `3px solid ${color}`,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
                 }}
               >
-                <div className="mb-4">
-                  <h4
-                    className="text-xl font-bold mb-2"
-                    style={{ color: color }}
-                  >
-                    {balance.currencyCode}
-                  </h4>
-                  <div className="text-3xl font-bold text-gray-800">
-                    {formatNumber(balance.fifoBalance)}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4
+                      className="text-xs font-semibold m-0 mb-0.5"
+                      style={{ color: color }}
+                    >
+                      {balance.currencyCode}
+                    </h4>
+                    <div className="text-base font-bold text-gray-800 leading-tight">
+                      {formatNumber(balance.fifoBalance)}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      Tồn kho
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    {t("partnerManage.fifoBalance")}
-                  </div>
-                </div>
-
-                <div className="mb-4">
                   <Progress
+                    type="circle"
                     percent={progress}
                     strokeColor={color}
-                    trailColor="#e0e0e0"
-                    showInfo={true}
-                    format={(percent) => `${percent}%`}
+                    width={36}
+                    strokeWidth={8}
+                    format={(percent) => (
+                      <span style={{ fontSize: "9px", color: "#666" }}>
+                        {percent}%
+                      </span>
+                    )}
                   />
                 </div>
 
-                <Row gutter={[8, 8]}>
-                  <Col span={12}>
-                    <Statistic
-                      title={
-                        <span className="text-xs text-gray-500">
-                          {t("partnerManage.totalIncoming")}
-                        </span>
-                      }
-                      value={formatNumber(balance.totalIncoming)}
-                      valueStyle={{ fontSize: "14px", color: "#52c41a" }}
-                      prefix="+"
-                    />
-                  </Col>
-                  <Col span={12}>
-                    <Statistic
-                      title={
-                        <span className="text-xs text-gray-500">
-                          {t("partnerManage.totalOutgoing")}
-                        </span>
-                      }
-                      value={formatNumber(balance.totalOutgoing)}
-                      valueStyle={{ fontSize: "14px", color: "#ff4d4f" }}
-                      prefix="-"
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Statistic
-                      title={
-                        <span className="text-xs text-gray-500">
-                          {t("partnerManage.transactionCount")}
-                        </span>
-                      }
-                      value={balance.transactionCount}
-                      valueStyle={{ fontSize: "14px", color: "#1890ff" }}
-                      suffix={t("partnerManage.itemsPerPage").split("/")[0]}
-                    />
-                  </Col>
-                </Row>
+                <div className="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-gray-100">
+                  <div className="text-center">
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">Nhập</div>
+                    <div style={{ fontSize: "11px" }} className="font-semibold text-green-600">
+                      +{formatNumber(balance.totalIncoming)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">Xuất</div>
+                    <div style={{ fontSize: "11px" }} className="font-semibold text-red-600">
+                      -{formatNumber(balance.totalOutgoing)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">GD</div>
+                    <div style={{ fontSize: "11px" }} className="font-semibold text-blue-600">
+                      {balance.transactionCount}
+                    </div>
+                  </div>
+                </div>
               </Card>
             </div>
           );
