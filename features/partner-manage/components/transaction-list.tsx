@@ -27,7 +27,7 @@ import {
 } from "../hooks/partner-manage-hook";
 import { PartnerTransaction } from "@/types/partner";
 import type { ColumnsType } from "antd/es/table";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs-config";
 
 interface TransactionListProps {
   currencyCode: string;

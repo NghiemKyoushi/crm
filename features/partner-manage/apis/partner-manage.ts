@@ -67,7 +67,19 @@ export const getMaterialSumary = async () => {
 };
 
 export const createNewMaterial = async (body: MaterialTransactionRequest) => {
-  const res = await api.post(API_TYPE_CONST.MATERIAL_TRANSACTIONS, body);
+  // Transform camelCase to snake_case for backend
+  const payload = {
+    partner_id: body.partnerId,
+    amount: body.amount,
+    currency_code: body.currencyCode,
+    exchange_rate: body.exchangeRate,
+    note: body.note,
+  };
+
+  console.log('createNewMaterial - Original body:', body);
+  console.log('createNewMaterial - Transformed payload:', payload);
+
+  const res = await api.post(API_TYPE_CONST.MATERIAL_TRANSACTIONS, payload);
   return res.data;
 };
 
