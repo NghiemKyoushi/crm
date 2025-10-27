@@ -34,7 +34,7 @@ export const ProfitLossChart: React.FC = () => {
     end_date: dateRange[1].format("YYYY-MM-DD"),
   });
 
-  const handleDateChange = (dates: null | [Dayjs | null, Dayjs | null]) => {
+  const handleDateChange = (dates: any) => {
     if (dates && dates[0] && dates[1]) {
       setDateRange([dates[0], dates[1]]);
     }
@@ -172,7 +172,7 @@ export const ProfitLossChart: React.FC = () => {
               radius={[8, 8, 0, 0]}
               label={{
                 position: "top",
-                formatter: (value: number) =>
+                formatter: (value: any) =>
                   value !== 0 ? formatCurrency(value) : "",
                 fontSize: 10,
               }}

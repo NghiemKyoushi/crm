@@ -392,7 +392,7 @@ export default function FIFOMaterialManagement() {
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
-              parser={(value) => value!.replace(/,/g, "")}
+              parser={(value) => value?.replace(/,/g, "") as any}
             />
           </Form.Item>
 
@@ -422,7 +422,7 @@ export default function FIFOMaterialManagement() {
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
-              parser={(value) => value!.replace(/,/g, "")}
+              parser={(value) => value?.replace(/,/g, "") as any}
             />
           </Form.Item>
 
