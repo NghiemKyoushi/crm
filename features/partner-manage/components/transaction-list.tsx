@@ -193,20 +193,19 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         );
       },
     },
-    // Hidden: Remaining Amount column
-    // {
-    //   title: t("partnerManage.remainingAmount"),
-    //   dataIndex: "remainingAmount",
-    //   key: "remainingAmount",
-    //   width: 140,
-    //   align: "right",
-    //   render: (value: number | undefined) => {
-    //     if (value === undefined || value === null) return "-";
-    //     return (
-    //       <span className="text-gray-700 font-medium">{formatNumber(Math.abs(value))}</span>
-    //     );
-    //   },
-    // },
+    {
+      title: t("partnerManage.remainingAmount"),
+      dataIndex: "remainingAmount",
+      key: "remainingAmount",
+      width: 140,
+      align: "right",
+      render: (value: number | undefined) => {
+        if (value === undefined || value === null) return "-";
+        return (
+          <span className="text-gray-700 font-medium">{formatNumber(Math.abs(value))}</span>
+        );
+      },
+    },
     {
       title: t("partnerManage.exchangeRateLabel"),
       dataIndex: "exchangeRate",
