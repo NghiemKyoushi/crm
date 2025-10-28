@@ -60,15 +60,15 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
         </span>
       ),
     },
-    // {
-    //   key: "reconciliation",
-    //   label: (
-    //     <span className="flex items-center gap-2">
-    //       <FontAwesomeIcon icon={faBalanceScale} />
-    //       {t("deposit.reconciliation")}
-    //     </span>
-    //   ),
-    // },
+    {
+      key: "manage_debt",
+      label: (
+        <span className="flex items-center gap-2">
+          <FontAwesomeIcon icon={faBalanceScale} />
+          {t("deposit.reconciliation")}
+        </span>
+      ),
+    },
   ];
 
   const items = allItems.filter((item) => allowedTabs.includes(item.key));
