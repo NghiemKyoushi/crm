@@ -4,13 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faExclamationCircle,
   faDollarSign,
-  faBackward,
   faQrcode,
   faChevronLeft,
   faBalanceScale,
-  faTimes
 } from "@fortawesome/free-solid-svg-icons";
 import { DebtDetailModal } from "./debt_history_table";
+import { ConfirmReturnModal } from "./conrfirm_return_modal";
 
 const banks = [
   {
@@ -40,7 +39,6 @@ const banks = [
 ];
 
 // Giả lập lịch sử giao dịch của công nợ - thực tế lấy từ backend
-
 
 const data = [
   {
@@ -261,19 +259,20 @@ const SettlementBankModal = ({
   );
 };
 
-// Modal lịch sử công nợ chi tiết
-
-
-// Main component
 const PartnerDebtTable = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<any>(null);
 
-  // Cho modal chi tiết
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [detailRecord, setDetailRecord] = useState<any>(null);
 
-  // Khai báo lại columns ở trong component để dùng state
+  const [confirmReturnVisible, setConfirmReturnVisible] = useState(false);
+  const [selectedReturnRecord, setSelectedReturnRecord] = useState<any>(null);
+
+  const handleReturnConfirm = () => {
+    setConfirmReturnVisible(false);
+    setTimeout(() => setSelectedReturnRecord(null), 300);
+  };
   const columns = [
     {
       key: "card",
@@ -343,6 +342,10 @@ const PartnerDebtTable = () => {
                   type="primary"
                   size="small"
                   className="!h-[26px] !w-[120px] !text-[12px] !px-[10px] !bg-[#389e0d] hover:!bg-[#46bd18] !border-none"
+                  onClick={() => {
+                    setSelectedReturnRecord(record);
+                    setConfirmReturnVisible(true);
+                  }}
                 >
                   Yêu cầu hoàn trả
                 </Button>
@@ -415,6 +418,15 @@ const PartnerDebtTable = () => {
           setTimeout(() => setDetailRecord(null), 300);
         }}
         record={detailRecord}
+      />
+      <ConfirmReturnModal
+        visible={confirmReturnVisible}
+        onCancel={() => {
+          setConfirmReturnVisible(false);
+          setTimeout(() => setSelectedReturnRecord(null), 300);
+        }}
+        onConfirm={handleReturnConfirm}
+        record={selectedReturnRecord}
       />
     </div>
   );
