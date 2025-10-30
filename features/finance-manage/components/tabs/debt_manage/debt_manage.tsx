@@ -1,42 +1,32 @@
 import React, { useState } from "react";
-import { Table, Tag, Button, Modal, List, Avatar } from "antd";
+import { Table, Tag, Button, Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faExclamationCircle,
   faDollarSign,
-  faQrcode,
-  faChevronLeft,
   faBalanceScale,
 } from "@fortawesome/free-solid-svg-icons";
 import { DebtDetailModal } from "./debt_history_table";
 import { ConfirmReturnModal } from "./conrfirm_return_modal";
+import { RejectActionModal } from "./cancel_modal";
+import { SettlementBankModal } from "./settlement_bank_modal";
 
-const banks = [
-  {
-    code: "VCB",
-    name: "Vietcombank",
-    accountName: "Công ty TNHH ABC",
-    accountNumber: "0123456789",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Logo_Vietcombank.png",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?data=VCB0123456789&type=VCB",
-  },
-  {
-    code: "TCB",
-    name: "Techcombank",
-    accountName: "Công ty TNHH ABC",
-    accountNumber: "9876543210",
-    logo: "https://techcombank.com.vn/themes/custom/techcombank/favicon.ico",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?data=TCB9876543210&type=TCB",
-  },
-  {
-    code: "VTB",
-    name: "Vietinbank",
-    accountName: "Công ty TNHH ABC",
-    accountNumber: "5566778899",
-    logo: "https://seeklogo.com/images/V/vietinbank-logo-64A22AE435-seeklogo.com.png",
-    qr: "https://api.qrserver.com/v1/create-qr-code/?data=VTB5566778899&type=VTB",
-  },
-];
+const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => (
+  <Modal
+    open={visible}
+    title="Xác nhận giao dịch"
+    onOk={onOk}
+    onCancel={onCancel}
+    okText="Xác nhận"
+    cancelText="Huỷ"
+    destroyOnClose
+    centered
+  >
+    <div>
+      Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác <b>{record?.name}</b>?
+    </div>
+  </Modal>
+);
 
 // Giả lập lịch sử giao dịch của công nợ - thực tế lấy từ backend
 
@@ -111,6 +101,18 @@ const data = [
     paid: 50000000,
     date: "17/09/2025",
   },
+  // Demo trạng thái mới: PENDING
+  {
+    key: "8",
+    name: "Fukuoka Foods - VCB",
+    status: "PENDING",
+    note: "Yêu cầu rút tiền của đối tác đang chờ xác nhận.",
+    total: 20000000,
+    debt: 0,
+    surplus: 20000000,
+    paid: 20000000,
+    date: "22/09/2025",
+  },
 ];
 
 const dataDashboard = [
@@ -144,120 +146,6 @@ const dataDashboard = [
 ];
 
 // Modal: ngân hàng tất toán giữ nguyên
-const SettlementBankModal = ({
-  visible,
-  onClose,
-  selectedDebt,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  selectedDebt: any;
-}) => {
-  const [selectedBank, setSelectedBank] = useState<any>(null);
-
-  const handleBankClick = (bank: any) => {
-    setSelectedBank(bank);
-  };
-
-  const handleBackToBanks = () => {
-    setSelectedBank(null);
-  };
-
-  return (
-    <Modal
-      open={visible}
-      onCancel={onClose}
-      footer={null}
-      title={
-        !selectedBank ? (
-          <div className="font-semibold text-base">Chọn ngân hàng để tất toán</div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button
-              icon={<FontAwesomeIcon icon={faChevronLeft} />}
-              size="small"
-              onClick={handleBackToBanks}
-            />
-            <span>Thanh toán qua {selectedBank.name}</span>
-          </div>
-        )
-      }
-      width={600}
-      destroyOnClose
-      centered
-      bodyStyle={{
-        padding: "5px",
-        maxHeight: "70vh",
-        overflowY: "auto"
-      }}
-    >
-      {!selectedBank ? (
-        <div className="max-h-[60vh] overflow-y-auto">
-          <List
-            itemLayout="horizontal"
-            dataSource={banks}
-            renderItem={bank => (
-              <List.Item
-                className="hover:bg-gray-50 rounded-lg cursor-pointer transition !p-3" 
-                onClick={() => handleBankClick(bank)}
-              >
-                <List.Item.Meta
-                  avatar={<Avatar src={bank.logo} size="large" />}
-                  title={<span className="font-medium">{bank.name}</span>}
-                  description={
-                    <span>
-                      <span className="text-xs text-gray-500">Số tài khoản: </span>
-                      <span className="font-medium">{bank.accountNumber}</span>
-                    </span>
-                  }
-                />
-                <FontAwesomeIcon icon={faQrcode} className="text-2xl text-green-500" />
-              </List.Item>
-            )}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-row gap-6 pt-2 min-h-[270px]">
-          <div className="flex flex-col justify-center flex-1 text-sm gap-2">
-            <span>
-              <b>Ngân hàng:</b> {selectedBank.name}
-            </span>
-            <span>
-              <b>Chủ TK:</b> {selectedBank.accountName}
-            </span>
-            <span>
-              <b>Số tài khoản:</b> {selectedBank.accountNumber}
-            </span>
-            <span>
-              <b>Số tiền tất toán:</b>{" "}
-              <span className="text-red-600 font-semibold">
-                {selectedDebt?.debt?.toLocaleString()} ₫
-              </span>
-            </span>
-            <span>
-              <b>Nội dung:</b> TT-{selectedDebt?.key}
-            </span>
-            <div className="flex gap-3 mt-5 md:mt-7">
-              <Button type="primary" onClick={() => {/* TODO: xác nhận logic */}}>
-                Xác nhận đã chuyển
-              </Button>
-              <Button onClick={onClose}>
-                Huỷ
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src={selectedBank.qr}
-              alt="QR"
-              className="w-56 h-56 object-contain bg-white border p-3 rounded-2xl shadow-lg"
-            />
-          </div>
-        </div>
-      )}
-    </Modal>
-  );
-};
 
 const PartnerDebtTable = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -269,19 +157,39 @@ const PartnerDebtTable = () => {
   const [confirmReturnVisible, setConfirmReturnVisible] = useState(false);
   const [selectedReturnRecord, setSelectedReturnRecord] = useState<any>(null);
 
+  // State cho PENDING: xác nhận/từ chối
+  const [pendingConfirmVisible, setPendingConfirmVisible] = useState(false);
+  const [pendingRejectVisible, setPendingRejectVisible] = useState(false);
+  const [pendingRecord, setPendingRecord] = useState<any>(null);
+
   const handleReturnConfirm = () => {
     setConfirmReturnVisible(false);
     setTimeout(() => setSelectedReturnRecord(null), 300);
   };
+
+  // Xác nhận hoặc từ chối (fake handle)
+  const handlePendingConfirm = () => {
+    setPendingConfirmVisible(false);
+    setTimeout(() => setPendingRecord(null), 300);
+    // TODO: Logic gọi API xác nhận nếu cần
+  };
+
+  const handlePendingReject = () => {
+    setPendingRejectVisible(false);
+    setTimeout(() => setPendingRecord(null), 300);
+    // TODO: Logic gọi API từ chối nếu cần
+  };
+
   const columns = [
     {
       key: "card",
       render: (record: any) => {
         const isNo = record.status === "minhno";
+        const isPending = record.status === "PENDING";
         return (
           <div
             className={`flex items-center min-h-[100px] text-[13px] rounded-[8px] px-[14px] py-[10px] 
-              ${isNo ? "bg-[#fff5f5] border border-[#ffccc7]" : "bg-[#f6ffed] border border-[#b7eb8f]"}
+              ${isNo ? "bg-[#fff5f5] border border-[#ffccc7]" : isPending ? "bg-yellow-50 border border-yellow-300" : "bg-[#f6ffed] border border-[#b7eb8f]"}
             `}
           >
             {/* Bên trái (Thông tin chính) */}
@@ -289,10 +197,20 @@ const PartnerDebtTable = () => {
               <div className="flex items-center mb-[2px] gap-2">
                 <span className="font-semibold text-[14px] truncate max-w-[200px]">{record.name}</span>
                 <Tag
-                  color={isNo ? "red" : "green"}
+                  color={
+                    isPending
+                      ? "orange"
+                      : isNo
+                      ? "red"
+                      : "green"
+                  }
                   className="!text-[11px] !py-[1px] !px-[7px] !h-[22px] !leading-[20px]"
                 >
-                  {isNo ? "Mình nợ" : "Đối tác giữ thừa"}
+                  {isPending
+                    ? "Chờ xác nhận"
+                    : isNo
+                    ? "Mình nợ"
+                    : "Đối tác giữ thừa"}
                 </Tag>
               </div>
               <div className="text-[#595959] text-[12px] mb-[6px] leading-[1.3] whitespace-nowrap truncate max-w-[350px]">
@@ -307,10 +225,15 @@ const PartnerDebtTable = () => {
                     Nợ:{" "}
                     <b className="text-red-600">{record.debt.toLocaleString()} ₫</b>
                   </span>
+                ) : isPending ? (
+                  <span>
+                    Thừa:{" "}
+                    <b className="text-yellow-600">{record.surplus?.toLocaleString()} ₫</b>
+                  </span>
                 ) : (
                   <span>
                     Thừa:{" "}
-                    <b className="text-green-600">{record.surplus.toLocaleString()} ₫</b>
+                    <b className="text-green-600">{record.surplus?.toLocaleString()} ₫</b>
                   </span>
                 )}
                 <span>
@@ -324,7 +247,32 @@ const PartnerDebtTable = () => {
             </div>
             {/* Bên phải (Nút hành động) */}
             <div className="flex flex-col gap-1 items-end ml-4">
-              {isNo ? (
+              {isPending ? (
+                <>
+                  <Button
+                    type="primary"
+                    size="small"
+                    className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
+                    onClick={() => {
+                      setPendingRecord(record);
+                      setPendingConfirmVisible(true);
+                    }}
+                  >
+                    Xác nhận
+                  </Button>
+                  <Button
+                    danger
+                    size="small"
+                    className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
+                    onClick={() => {
+                      setPendingRecord(record);
+                      setPendingRejectVisible(true);
+                    }}
+                  >
+                    Từ chối
+                  </Button>
+                </>
+              ) : isNo ? (
                 <Button
                   type="primary"
                   danger
@@ -374,31 +322,45 @@ const PartnerDebtTable = () => {
           Tình trạng Công nợ với Đối tác
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {dataDashboard.map((item, index) => (
-            <div
-              key={index}
-              className={`${item.bg} rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
-              style={{ minHeight: 56 }}
-            >
-              <div>
-                <p className={`text-sm font-semibold ${item.color} mb-0.5`}>
-                  {item.title}
-                </p>
-                <p className={`text-2xl font-bold ${item.color}`}>
-                  {item.amount.toLocaleString()} ₫
-                </p>
-                <p className="text-xs text-gray-500">{item.partners} đối tác</p>
+          {dataDashboard.map((item, index) => {
+            let borderColor = "";
+            if (item.color?.includes("red")) {
+              borderColor = "#f87171"; 
+            } else if (item.color?.includes("green")) {
+              borderColor = "#22c55e"; 
+            } else if (item.color?.includes("gray")) {
+              borderColor = "#6b7280";
+            }
+
+            return (
+              <div
+                key={index}
+                className={`${item.bg} rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
+                style={{
+                  minHeight: 56,
+                  borderLeft: `6px solid ${borderColor}`,
+                }}
+              >
+                <div>
+                  <p className={`text-sm font-semibold ${item.color} mb-0.5`}>
+                    {item.title}
+                  </p>
+                  <p className={`text-2xl font-bold ${item.color}`}>
+                    {item.amount.toLocaleString()} ₫
+                  </p>
+                  <p className="text-xs text-gray-500">{item.partners} đối tác</p>
+                </div>
+                <div className={`text-2xl ${item.iconColor}`}>{item.icon}</div>
               </div>
-              <div className={`text-2xl ${item.iconColor}`}>{item.icon}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <Table
         columns={columns}
         dataSource={data}
         showHeader={false}
-        pagination={{ pageSize: 6 }}
+        pagination={{ pageSize: 10 }}
         rowKey="key"
         size="small"
         style={{ marginTop: 0 }}
@@ -427,6 +389,25 @@ const PartnerDebtTable = () => {
         }}
         onConfirm={handleReturnConfirm}
         record={selectedReturnRecord}
+      />
+      {/* MODAL cho trạng thái PENDING */}
+      <ConfirmActionModal
+        visible={pendingConfirmVisible}
+        record={pendingRecord}
+        onOk={handlePendingConfirm}
+        onCancel={() => {
+          setPendingConfirmVisible(false);
+          setTimeout(() => setPendingRecord(null), 300);
+        }}
+      />
+      <RejectActionModal
+        visible={pendingRejectVisible}
+        record={pendingRecord}
+        onOk={handlePendingReject}
+        onCancel={() => {
+          setPendingRejectVisible(false);
+          setTimeout(() => setPendingRecord(null), 300);
+        }}
       />
     </div>
   );
