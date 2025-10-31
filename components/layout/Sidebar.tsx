@@ -95,10 +95,13 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ],
+  "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
 
   // Check Coming - Warehouse
-  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"]
+  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
+
+  // CRM - open access initially
+  "/cms": []
 };
 
 export const menuItems = [
@@ -106,6 +109,7 @@ export const menuItems = [
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/shipment-management", icon: faWarehouse, label: "operation" },
   { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
+  { key: "/cms", icon: faTags, label: "cms" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
@@ -118,7 +122,7 @@ export const menuItems = [
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
-  const { collapsed ,toggle } = useSidebar();
+  const { collapsed, toggle } = useSidebar();
 
   const pathname = usePathname();
   const { t } = useTranslation();
