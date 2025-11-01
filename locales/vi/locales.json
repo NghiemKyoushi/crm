@@ -666,6 +666,7 @@
     "addIncomingTransaction": "Nhập kho",
     "addOutgoingTransaction": "Xuất kho",
     "partner": "Đối tác",
+    "partnerName": "Tên đối tác",
     "selectPartner": "Chọn đối tác",
     "selectPartnerPlaceholder": "-- Chọn đối tác --",
     "amount": "Số lượng",

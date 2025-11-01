@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import api from "@/api/axiosClient";
-import { getDetailBankCreateAccount } from "@/features/finance-manage/apis";
+import { getDetailBankCreateAccount, getListBankPermission, getListPartner } from "@/features/finance-manage/apis";
 import { BankInfo } from "@/features/user-management/components/customer-manage/modal-customer/tab/modal/modal-overview-add-bank";
 import { BankSettingAccountModel } from "@/types/deposit-type";
 import { Modal, Form, Input, Select, Button, Spin, InputNumber } from "antd";
@@ -9,6 +9,12 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const { Option } = Select;
+
+// Dùng tạm cấu trúc partner: id, name (real API hoặc fake/mock tuỳ hệ thống)
+export interface Partner {
+  email: string;
+  id: string
+}
 
 export default function AddBankAccountModal({
   open,
@@ -34,7 +40,8 @@ export default function AddBankAccountModal({
         description: values.description,
         partner_name: values.partner_name,
         telegram_channel_id: values.telegram_channel_id,
-        per_transaction_limit_vnd: +values.per_transaction_limit_vnd // Thêm field Giới hạn trên lần
+        per_transaction_limit_vnd: +values.per_transaction_limit_vnd, // Thêm field Giới hạn trên lần
+        partner_id: values.partner_id, // Thêm partner_id vào request nếu backend dùng field này.
       };
       onOk?.(request);
     } catch (error) {
@@ -45,6 +52,10 @@ export default function AddBankAccountModal({
   const [bankList, setBankList] = useState<BankInfo[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // State cho danh sách đối tác
+  const [partnerList, setPartnerList] = useState<Partner[]>([]);
+  const [loadingPartner, setLoadingPartner] = useState(false);
+
   useEffect(() => {
     if (open) {
       setLoading(true);
@@ -54,6 +65,17 @@ export default function AddBankAccountModal({
           setBankList(res.data.data);
         })
         .finally(() => setLoading(false));
+
+      // Fake API/hoặc gọi API, ví dụ: features/v1/admin/partners - tuỳ spec.
+      setLoadingPartner(true);
+      getListPartner({page: 0,page_size: 10})
+        .then((res) => {
+          console.log('res',res);
+          
+          setPartnerList(res.data || []);
+        })
+        .catch(() => setPartnerList([]))
+        .finally(() => setLoadingPartner(false));
     }
   }, [open]);
 
@@ -73,7 +95,8 @@ export default function AddBankAccountModal({
             status: data.status,
             description: data.description,
             partner_name: data.partner_name,
-            telegram_channel_id: data.telegram_channel_id
+            telegram_channel_id: data.telegram_channel_id,
+            partner_id: data.partner_id, // prefill partner nếu available
           });
         })
         .finally(() => setDetailLoading(false));
@@ -103,6 +126,7 @@ export default function AddBankAccountModal({
       ]}
       destroyOnClose
       centered
+      style={{ maxHeight: '98vh', overflowY: 'auto' }} // Sử dụng dạng style và 80vh
     >
       <Form
         form={form}
@@ -209,8 +233,8 @@ export default function AddBankAccountModal({
           />
         </Form.Item>
 
-          {/* Thêm field Giới hạn trên lần (VND) */}
-          <Form.Item
+        {/* Thêm field Giới hạn trên lần (VND) */}
+        <Form.Item
           label="Giới hạn trên lần (VND)"
           name="per_transaction_limit_vnd"
           style={{ marginBottom: 12 }}
@@ -243,6 +267,27 @@ export default function AddBankAccountModal({
             <Option value="INTERNAL">Internal</Option>
           </Select>
         </Form.Item>
+
+        {/* Select "Chọn đối tác" - partner_id */}
+        <Form.Item
+          label="Chọn đối tác"
+          name="partner_id"
+          rules={[{ required: true, message: "Vui lòng chọn đối tác" }]}
+          style={{ marginBottom: 12 }}
+        >
+          {loadingPartner ? (
+            <Spin />
+          ) : (
+            <Select placeholder="Chọn đối tác">
+              {partnerList.map((partner) => (
+                <Select.Option key={partner.id} value={partner.id}>
+                  {partner.email}
+                </Select.Option>
+              ))}
+            </Select>
+          )}
+        </Form.Item>
+
       </Form>
     </Modal>
   );
