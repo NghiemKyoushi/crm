@@ -43,22 +43,42 @@ export default function TableComponent<RecordType extends object>({
   fontSize = 12,
   ...rest
 }: TableComponentProps<RecordType>) {
-  return (
-    <div>
-      <Table<RecordType>
-        columns={columns}
-        dataSource={dataSource || []}
-        // rowKey={(record: any, index) =>
-        //   record.id ?? record.user_id ?? `row-${index}`
-        // }
-        rowKey={(record: any, index) =>
-          `${record.id ?? record.user_id ?? "row"}-${index}`
+  // If headerHeight === 0, supply an empty header component to hide header
+  const tableComponents =
+    headerHeight === 0
+      ? {
+          header: {
+            wrapper: () => null, // Hide thead entirely
+          },
+          body: {
+            row: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
+              <tr
+                {...props}
+                style={{
+                  height: rowHeight,
+                  ...props.style,
+                }}
+              />
+            ),
+            cell: (props: any) => {
+              const { style, children, ...restProps } = props;
+              return (
+                <td
+                  {...restProps}
+                  style={{
+                    padding: "4px 8px",
+                    fontSize,
+                    textAlign: props?.column?.align || "left",
+                    ...style,
+                  }}
+                >
+                  {children}
+                </td>
+              );
+            },
+          },
         }
-        pagination={false}
-        {...rest}
-        rowClassName={() => "custom-row"}
-        scroll={{ x: "max-content" }}
-        components={{
+      : {
           header: {
             cell: (props: any) => {
               const { style, children, ...restProps } = props;
@@ -105,7 +125,24 @@ export default function TableComponent<RecordType extends object>({
               );
             },
           },
-        }}
+        };
+
+  return (
+    <div>
+      <Table<RecordType>
+        columns={columns}
+        dataSource={dataSource || []}
+        // rowKey={(record: any, index) =>
+        //   record.id ?? record.user_id ?? `row-${index}`
+        // }
+        rowKey={(record: any, index) =>
+          `${record.id ?? record.user_id ?? "row"}-${index}`
+        }
+        pagination={false}
+        {...rest}
+        rowClassName={() => "custom-row"}
+        scroll={{ x: "max-content" }}
+        components={tableComponents}
       />
 
       {response && response.total_items > response.page_size && (

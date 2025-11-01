@@ -14,12 +14,12 @@ import {
   Row,
   Col,
   Radio,
+  Spin,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
-  useBankAccountsPartnerScreen,
   useCreateNewMaterial,
   useFifoBalance,
 } from "../hooks/partner-manage-hook";
@@ -28,7 +28,9 @@ import { ProfitLossSummaryComponent } from "./profit-loss-summary";
 import { ProfitLossChart } from "./profit-loss-chart";
 import { OrderProfitLossTable } from "./order-profit-loss-table";
 import { TransactionList } from "./transaction-list";
+import { getListPartner } from "@/features/finance-manage/apis";
 import "./fifo-styles.css";
+import { Partner } from "@/features/finance-manage/components/tabs/bank-partner/modal/add-account-bank";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -48,13 +50,18 @@ export default function FIFOMaterialManagement() {
     useState<TransactionType>("incoming");
   const [page, setPage] = useState<number>(0);
 
-  // Queries
-  const { data: bankAccountsData } = useBankAccountsPartnerScreen({
-    page,
-    size: 100,
-    type: 2,
+  // Partner data using API call
+  const {
+    data: partnerData,
+    isLoading: isPartnerLoading,
+    isError: isPartnerError,
+  } = useQuery({
+    queryKey: ["partner-list", page],
+    queryFn: () => getListPartner({ page, page_size: 10 }),
   });
 
+  console.log('partnerData', partnerData);
+  // Queries
   const { data: fifoBalanceData } = useFifoBalance();
   const createMutation = useCreateNewMaterial();
 
@@ -119,6 +126,15 @@ export default function FIFOMaterialManagement() {
       });
     }
   };
+
+  // Build partner select options
+  const partnerOptions =
+    (!isPartnerLoading && !isPartnerError && Array.isArray(partnerData.data)
+      ? partnerData.data.map((partner: Partner) => ({
+          label: `${partner.email}`,
+          value: partner.id,
+        }))
+      : []) || [];
 
   return (
     <div className="p-6">
@@ -329,17 +345,19 @@ export default function FIFOMaterialManagement() {
               placeholder={t("partnerManage.selectPartnerPlaceholder")}
               size="large"
               optionFilterProp="children"
-              filterOption={(input, option) =>
-                (option?.label ?? "")
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
+              loading={isPartnerLoading}
+              filterOption={(input, option) => {
+                const label = option?.label;
+                if (typeof label === 'string') {
+                  return label.toLowerCase().includes(input.toLowerCase());
+                }
+                return false;
+              }}
+              options={partnerOptions}
+              notFoundContent={
+                isPartnerLoading ? <Spin size="small" /> : null
               }
-              options={
-                bankAccountsData?.content.map((account) => ({
-                  label: `${account.account_holder} - ${account.bank_name}`,
-                  value: account.id,
-                })) || []
-              }
+              // If paging needed: onPopupScroll, etc.
             />
           </Form.Item>
 

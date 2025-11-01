@@ -8,6 +8,7 @@ import WithdrawTable from "../withdraw/withdraw-table";
 import BankAccountSetting from "@/features/finance-manage/components/tabs/bank-company/bank-company";
 import {useSearchParams } from "next/navigation";
 import BankPartnerSetting from "../bank-partner/bank-partner";
+import PartnerDebtTable from "../debt_manage/debt_manage";
 
 const FinanceDepositApprovalPage = () => {
   const searchParams = useSearchParams();
@@ -29,7 +30,7 @@ const FinanceDepositApprovalPage = () => {
     hasPermission("finance.manage_bank_accounts") && "bank-settings",
     hasPermission("finance.manage_bank_partner") && "bank-partner",
     hasPermission("finance.manage_bank_accounts") && "account-partner",
-    hasPermission("finance.manage_debt") && "reconciliation",
+    hasPermission("finance.manage_debt") && "manage_debt",
   ].filter(Boolean) as string[];
 
   useEffect(() => {
@@ -53,8 +54,7 @@ const FinanceDepositApprovalPage = () => {
         <Spin tip="Đang tải quyền..." />
       </div>
     );
-  }
-  
+  }  
   return (
     <div className="p-6">
       {
@@ -74,14 +74,10 @@ const FinanceDepositApprovalPage = () => {
             {activeTab === "withdraw" && <WithdrawTable />}
             {activeTab === "bank-settings" && <BankAccountSetting />}
             {activeTab === "bank-partner" && <BankPartnerSetting/>}
-            {/* {activeTab === "account-partner" && <BankAccountSetting />} */}
+            {activeTab === "manage_debt" && <PartnerDebtTable />}
           </div>
         </div> : <Spin />
       }
-
-      {/* {activeTab === "reconciliation" && (
-          <h2 className="text-lg font-semibold">Công nợ & Đối soát</h2>
-        )} */}
     </div>
   );
 };

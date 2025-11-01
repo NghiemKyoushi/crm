@@ -1,6 +1,6 @@
-import { BankAccountListResponse, BankDepositRequest, DepositParams, DepositResponse, PaginatedWithdraw, TopupResponse } from "@/types/deposit-type";
+import { BankAccountListResponse, BankDepositRequest, DebtApiResponse, DepositParams, DepositResponse, PaginatedWithdraw, TopupResponse } from "@/types/deposit-type";
 import { useQuery } from "@tanstack/react-query";
-import { getListBankCreateAccount, getListTopup, getListWithdraw } from "../apis";
+import { getDebtList, getListBankCreateAccount, getListTopup, getListWithdraw } from "../apis";
 import { PaginatedResponse } from "@/components/TableComponent";
 
 export const useListTopups = (params: DepositParams) => {
@@ -55,6 +55,14 @@ export function useBankAccountsPartner(params: BankDepositRequest) {
     // keepPreviousData: true, // giữ data cũ khi chuyển trang
   });
 }
+
+export function useDebtList(params: BankDepositRequest) {
+  return useQuery<DebtApiResponse>({
+    queryKey: ["debtList", params],
+    queryFn: () => getDebtList(params),
+  });
+}
+
 
 
 
