@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Button, Input, Select, Form, DatePicker } from "antd";
+import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
@@ -9,14 +9,13 @@ import { OrderStatusType } from "@/types/orderhub";
 
 export interface FilterType {
   page?: number;
-  status?: string;
+  status?: string[]; // Multi search for status: now array of strings
   date?: string;
   type?: number;
   size?: number;
   from_date?: string;
   to_date?: string;
   customer_name?: string;
-  customer_code?: string;
   product_url?: string;
   product_name?: string;
   invoice_no?: string;
@@ -24,6 +23,9 @@ export interface FilterType {
   package_code?: string;
   product_id?: string;
   note_admin?: string;
+  email?: string;
+  phone_number?: number;
+  customer_code?: string;
 }
 
 interface OrderHubFilterProps {
@@ -60,10 +62,10 @@ export default function OrderHubFilter({
       value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
       label: t("status.arrivedVnWarehouse"),
     },
-    {
-      value: OrderStatusType.UNDER_INSPECTION,
-      label: t("status.underInspection"),
-    },
+    // {
+    //   value: OrderStatusType.UNDER_INSPECTION,
+    //   label: t("status.underInspection"),
+    // },
     {
       value: OrderStatusType.PENDING_PAYMENT,
       label: t("status.pendingPayment"),
@@ -89,10 +91,10 @@ export default function OrderHubFilter({
     }
 
     const filters: FilterType = {
-      status: values.status !== "" ? values.status : undefined,
+      status: Array.isArray(values.status) && values.status.length > 0 ? values.status : undefined,
       type: initialFilters?.type || undefined,
       customer_name: values.customer_name?.trim() || undefined,
-      customer_code:  values.customer_code?.trim() || undefined,
+      customer_code: values.customer_code?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
       invoice_no: values.invoice_no?.trim() || undefined,
@@ -100,8 +102,10 @@ export default function OrderHubFilter({
       package_code: values.package_code?.trim() || undefined,
       product_id: values.product_id?.trim() || undefined,
       note_admin: values.note_admin?.trim() || undefined,
+      email: values.email?.trim() || undefined,
       from_date: fromDate,
       to_date: toDate,
+      phone_number: values.phone_number || undefined,
     };
     onFilter(filters);
   };
@@ -169,9 +173,9 @@ export default function OrderHubFilter({
               <div className="text-xs font-medium text-gray-600">
                 Thông tin khách hàng
               </div>
-              <Form.Item name="customer_name" className="!mb-2">
+              <Form.Item name="email" className="!mb-2">
                 <Input
-                  placeholder="Tên khách hàng"
+                  placeholder="Email"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />
@@ -183,7 +187,18 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              
+              <Form.Item name="phone_number" className="!mb-2">
+                <InputNumber
+                  placeholder="Số điện thoại"
+                  className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
+                  size="small"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, "")
+                  }
+                  style={{ display: 'flex', alignItems: 'center' }}
+                  inputMode="tel"
+                />
+              </Form.Item>
             </div>
 
             {/* Product Info */}
@@ -242,18 +257,27 @@ export default function OrderHubFilter({
               </div>
               <Form.Item name="status" className="!mb-2">
                 <Select
-                  className="!w-full !h-10 !text-xs [&_.ant-select-selection-placeholder]:!text-xs [&_.ant-select-selection-item]:!text-xs [&_.ant-select-selection-selected-value]:!text-xs"
+                  mode="multiple"
+                  // Sử dụng !h-10 để set chiều cao, bỏ min-h-10, không dùng h-10 cho Select mà custom bên trong nếu cần
+                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs 
+                    [&_.ant-select-selection-item]:!text-xs 
+                    [&_.ant-select-selection-overflow]:!flex-wrap [&_.ant-select-selection-item]:!break-normal
+                    [&_.ant-select-selector]:!min-h-[40px]"
                   placeholder={<span className="text-xs">Trạng thái</span>}
                   size="small"
                   allowClear
+                  optionLabelProp="label"
+                  dropdownStyle={{ maxWidth: 350, whiteSpace: 'normal' }}
+                  tokenSeparators={[","]}
                 >
                   {orderStatusOptions.map((opt) => (
                     <Select.Option
-                      className="text-xs"
+                      className="text-xs !whitespace-normal !break-words"
                       key={opt.value}
                       value={opt.value}
+                      label={opt.label}
                     >
-                      {opt.label}
+                      <span className="!whitespace-normal !break-words">{opt.label}</span>
                     </Select.Option>
                   ))}
                 </Select>
@@ -266,13 +290,17 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="note_admin" className="!mb-0">
+              <Form.Item name="note_admin">
                 <Input.TextArea
                   placeholder="Ghi chú admin"
-                  className="!w-full !text-xs !h-10"
+                  className="!w-full !text-xs !h-10 flex items-center pl-3 placeholder:text-left"
                   rows={2}
                   size="small"
-                  //   style={{minHeight: '40px'}}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textAlign: "left",
+                  }}
                 />
               </Form.Item>
             </div>
