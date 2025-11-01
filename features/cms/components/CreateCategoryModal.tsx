@@ -37,9 +37,26 @@ export default function CreateCategoryModal({ open, onClose, onSuccess }: Props)
     });
 
     const handleOk = async () => {
-        const values = await form.validateFields();
-        const payload: CreateCmsCategoryBody = { status: "active", ...values } as CreateCmsCategoryBody;
-        await mutateAsync(payload);
+        try {
+            const values = await form.validateFields();
+            // Ensure image_id is provided, otherwise show error
+            if (!values.image_id) {
+                message.error("Please upload an image");
+                return;
+            }
+            const payload: CreateCmsCategoryBody = { 
+                status: "active", 
+                ...values 
+            } as CreateCmsCategoryBody;
+            await mutateAsync(payload);
+        } catch (error: any) {
+            // Form validation failed
+            if (error?.errorFields) {
+                // Antd validation errors - they will be shown automatically
+                return;
+            }
+            console.error("Error creating category:", error);
+        }
     };
 
     return (

@@ -130,15 +130,8 @@ export const uploadImage = async (file: File) => {
   formData.append("file", file); // confirm lại field đúng với BE
   formData.append("type", "1");
 
-  const token = Cookies.get("accessToken");
-
-  const uploadRes = await axios.post(API_TYPE_CONST.UPLOAD_IMAGE, formData, {
-    baseURL: process.env.NEXT_PUBLIC_ROOT_STATIC_URL,
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-      // ❌ KHÔNG ép Content-Type, axios tự set boundary
-    },
-    withCredentials: true,
+  // Use api from axiosClient to get automatic token refresh on 401
+  const uploadRes = await api.post(API_TYPE_CONST.UPLOAD_IMAGE, formData, {
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
         const percent = Math.round(

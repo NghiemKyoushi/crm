@@ -34,13 +34,42 @@ export default function CMSFeaturePage() {
     const [openCreateContent, setOpenCreateContent] = useState(false);
     const [editingContentId, setEditingContentId] = useState<number | null>(null);
     const invalidateContents = useInvalidateContents();
+
+    // Debug logging
+    React.useEffect(() => {
+        console.log("🔍 Contents in component:", contents);
+        console.log("🔍 Contents length:", contents?.length);
+        console.log("🔍 Loading contents:", loadingContents);
+    }, [contents, loadingContents]);
     const [bannerPageId, setBannerPageId] = useState<number | null>(null);
     const { data: banners = [], isLoading: loadingBanners } = useCmsBanners(bannerPageId);
     const invalidateBanners = useInvalidateBanners();
+
+    // Set default bannerPageId to first page when pages are loaded
+    React.useEffect(() => {
+        if (pages && pages.length > 0 && !bannerPageId) {
+            setBannerPageId(pages[0].id);
+        }
+    }, [pages, bannerPageId]);
+
+    // Debug logging for banners
+    React.useEffect(() => {
+        console.log("🔍 Banners in component:", banners);
+        console.log("🔍 Banners length:", banners?.length);
+        console.log("🔍 Loading banners:", loadingBanners);
+        console.log("🔍 Banner Page ID:", bannerPageId);
+    }, [banners, loadingBanners, bannerPageId]);
     const [openCreateBanner, setOpenCreateBanner] = useState(false);
     const [editingBannerId, setEditingBannerId] = useState<number | null>(null);
     const { data: settings = [], isLoading: loadingSettings } = useCmsSettings();
     const invalidateSettings = useInvalidateSettings();
+
+    // Debug logging for settings
+    React.useEffect(() => {
+        console.log("🔍 Settings in component:", settings);
+        console.log("🔍 Settings length:", settings?.length);
+        console.log("🔍 Loading settings:", loadingSettings);
+    }, [settings, loadingSettings]);
     const [openCreateSetting, setOpenCreateSetting] = useState(false);
     const [editingSettingId, setEditingSettingId] = useState<number | null>(null);
 

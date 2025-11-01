@@ -31,14 +31,13 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
     const { mutateAsync, isLoading } = useMutation({
         mutationFn: async (payload: CreateCmsPageBody | UpdateCmsPageBody) => {
             if (page) {
-                const { slug, ...rest } = payload as any;
-                await updateCmsPage(page.id, rest as UpdateCmsPageBody);
+                await updateCmsPage(page.id, payload as UpdateCmsPageBody);
             } else {
                 await createCmsPage(payload as CreateCmsPageBody);
             }
         },
         onSuccess: () => {
-            message.success("Created successfully");
+            message.success(page ? "Updated successfully" : "Created successfully");
             onSuccess?.();
             form.resetFields();
             onClose();
@@ -112,11 +111,9 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
                         )}
                     </Upload.Dragger>
                 </Form.Item>
-                {!page && (
-                    <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
-                        <Input placeholder="home" />
-                    </Form.Item>
-                )}
+                <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
+                    <Input placeholder="home" />
+                </Form.Item>
                 <Form.Item name="title" label="Title" rules={[{ required: true }]}>
                     <Input placeholder="Trang chủ" />
                 </Form.Item>

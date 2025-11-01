@@ -13,10 +13,28 @@ export type CmsContent = {
 };
 
 export const getCmsContents = async (): Promise<CmsContent[]> => {
-    const res = await api.get(`/v1/admin/cms/contents`);
+    const res = await api.get(`/features/v1/admin/cms/contents`);
+    // API wrapper returns { success, timestamp, code, message, message_key, data, errors }
+    // Try multiple possible response structures
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = res.data;
-    return payload?.data?.data ?? [];
+    console.log("📦 getCmsContents full response:", res);
+    console.log("📦 getCmsContents payload:", payload);
+    console.log("📦 getCmsContents payload.data:", payload?.data);
+    console.log("📦 getCmsContents payload.data?.data:", payload?.data?.data);
+    
+    // Try multiple structures: data, data.data, or direct array
+    let result: CmsContent[] = [];
+    if (Array.isArray(payload?.data)) {
+        result = payload.data;
+    } else if (Array.isArray(payload?.data?.data)) {
+        result = payload.data.data;
+    } else if (Array.isArray(payload)) {
+        result = payload;
+    }
+    
+    console.log("📦 getCmsContents final result:", result);
+    return result;
 };
 
 export type CreateCmsContentBody = {
@@ -33,15 +51,15 @@ export type CreateCmsContentBody = {
 export type UpdateCmsContentBody = CreateCmsContentBody;
 
 export const createCmsContent = async (body: CreateCmsContentBody): Promise<void> => {
-    await api.post(`/v1/admin/cms/contents`, body);
+    await api.post(`/features/v1/admin/cms/contents`, body);
 };
 
 export const updateCmsContent = async (id: number, body: UpdateCmsContentBody): Promise<void> => {
-    await api.put(`/v1/admin/cms/contents/${id}`, body);
+    await api.put(`/features/v1/admin/cms/contents/${id}`, body);
 };
 
 export const deleteCmsContent = async (id: number): Promise<void> => {
-    await api.delete(`/v1/admin/cms/contents/${id}`);
+    await api.delete(`/features/v1/admin/cms/contents/${id}`);
 };
 
 

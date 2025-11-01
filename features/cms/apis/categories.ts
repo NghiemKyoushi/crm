@@ -33,14 +33,16 @@ export type CmsCategoryDetail = CmsCategory & {
 };
 
 export const getCmsCategories = async (): Promise<CmsCategory[]> => {
-    const res = await api.get("/v1/admin/cms/categories");
+    const res = await api.get("/features/v1/admin/cms/categories");
+    // API wrapper returns { success, timestamp, code, message, message_key, data, errors }
+    // data is directly an array of categories
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = res.data;
-    return payload?.data?.data ?? [];
+    return payload?.data ?? [];
 };
 
 export const getCmsCategoryDetail = async (id: number): Promise<CmsCategoryDetail> => {
-    const res = await api.get(`/v1/admin/cms/categories/${id}`);
+    const res = await api.get(`/features/v1/admin/cms/categories/${id}`);
     // API shows data.data as array with one item; support both array/object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const d: any = res.data?.data?.data;
@@ -57,7 +59,7 @@ export type CreateCmsCategoryBody = {
 };
 
 export const createCmsCategory = async (body: CreateCmsCategoryBody): Promise<void> => {
-    await api.post(`/v1/admin/cms/categories`, body);
+    await api.post(`/features/v1/admin/cms/categories`, body);
 };
 
 export type UpdateCmsCategoryBody = CreateCmsCategoryBody;
@@ -66,11 +68,11 @@ export const updateCmsCategory = async (
     id: number,
     body: UpdateCmsCategoryBody
 ): Promise<void> => {
-    await api.put(`/v1/admin/cms/categories/${id}`, body);
+    await api.put(`/features/v1/admin/cms/categories/${id}`, body);
 };
 
 export const deleteCmsCategory = async (id: number): Promise<void> => {
-    await api.delete(`/v1/admin/cms/categories/${id}`);
+    await api.delete(`/features/v1/admin/cms/categories/${id}`);
 };
 
 

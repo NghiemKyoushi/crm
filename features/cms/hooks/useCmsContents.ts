@@ -11,6 +11,12 @@ export function useCmsContents() {
     return useQuery<CmsContent[]>({
         queryKey: CMS_CONTENT_KEYS.list,
         queryFn: getCmsContents,
+        onError: (error) => {
+            console.error("❌ useCmsContents error:", error);
+        },
+        onSuccess: (data) => {
+            console.log("✅ useCmsContents success, data:", data);
+        },
     });
 }
 

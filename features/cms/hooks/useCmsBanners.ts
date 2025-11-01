@@ -10,8 +10,21 @@ export const CMS_BANNER_KEYS = {
 export function useCmsBanners(pageId: number | null) {
     return useQuery<CmsBanner[]>({
         queryKey: pageId ? CMS_BANNER_KEYS.list(pageId) : ["cms", "banners", "idle"],
-        queryFn: () => getCmsBanners(pageId as number),
+        queryFn: () => {
+            if (!pageId) {
+                console.warn("⚠️ useCmsBanners: pageId is null");
+                return Promise.resolve([]);
+            }
+            console.log("🔍 useCmsBanners: fetching banners for pageId:", pageId);
+            return getCmsBanners(pageId);
+        },
         enabled: !!pageId,
+        onError: (error) => {
+            console.error("❌ useCmsBanners error:", error);
+        },
+        onSuccess: (data) => {
+            console.log("✅ useCmsBanners success, data:", data);
+        },
     });
 }
 

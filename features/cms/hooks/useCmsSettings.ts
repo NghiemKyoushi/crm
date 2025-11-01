@@ -11,6 +11,12 @@ export function useCmsSettings() {
     return useQuery<CmsSetting[]>({
         queryKey: CMS_SETTING_KEYS.list,
         queryFn: getCmsSettings,
+        onError: (error) => {
+            console.error("❌ useCmsSettings error:", error);
+        },
+        onSuccess: (data) => {
+            console.log("✅ useCmsSettings success, data:", data);
+        },
     });
 }
 

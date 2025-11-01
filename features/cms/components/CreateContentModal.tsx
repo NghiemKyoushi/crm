@@ -8,6 +8,7 @@ import { uploadImage } from "@/features/user-profile/hooks/user-profile";
 import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent } from "../apis/contents";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
+import TiptapEditor from "@/features/order-hub/components/TiptapEditor";
 
 type Props = {
     open: boolean;
@@ -16,17 +17,56 @@ type Props = {
     content?: CmsContent;
 };
 
-const { TextArea } = Input;
-
 export default function CreateContentModal({ open, onClose, onSuccess, content }: Props) {
     const [form] = Form.useForm<CreateCmsContentBody>();
     const [uploading, setUploading] = useState(false);
+    const [bodyValue, setBodyValue] = useState<string>("");
     const imageId = Form.useWatch("image_id", form);
+    const contentType = Form.useWatch("type", form);
     const thumbUrl = useMemo(() => {
         if (!imageId) return undefined;
         const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
         return `${base}/${VIEW_IMAGE}${imageId}`;
     }, [imageId]);
+
+    // Sync bodyValue with form and initial content
+    React.useEffect(() => {
+        if (open) {
+            const initialBody = content?.body || "";
+            const initialType = content?.type || "html";
+            
+            // For html/text types, use rich text editor (bodyValue)
+            if (initialType === "html" || initialType === "text") {
+                setBodyValue(initialBody);
+                form.setFieldValue("body", initialBody);
+            } else {
+                // For other types, use textarea (form field)
+                setBodyValue("");
+                form.setFieldValue("body", initialBody);
+            }
+        } else {
+            setBodyValue("");
+        }
+    }, [open, content, form]);
+
+    // Sync body when type changes
+    React.useEffect(() => {
+        if (!open || !contentType) return;
+        
+        const currentBody = form.getFieldValue("body") || "";
+        
+        if (contentType === "html" || contentType === "text") {
+            // Switching to html/text - move from form field to bodyValue if needed
+            if (!bodyValue && currentBody) {
+                setBodyValue(currentBody);
+            }
+        } else {
+            // Switching to other types - move from bodyValue to form field if needed
+            if (bodyValue && !currentBody) {
+                form.setFieldValue("body", bodyValue);
+            }
+        }
+    }, [contentType, open, form, bodyValue]);
 
     const { mutateAsync, isLoading } = useMutation({
         mutationFn: async (payload: CreateCmsContentBody | UpdateCmsContentBody) => {
@@ -46,9 +86,37 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
     });
 
     const handleOk = async () => {
-        const values = await form.validateFields();
-        const payload = { status: "active", ...values } as CreateCmsContentBody;
-        await mutateAsync(payload);
+        try {
+            const values = await form.validateFields();
+            
+            // Get body value based on type
+            let finalBody = "";
+            if (contentType === "html" || contentType === "text" || !contentType) {
+                finalBody = bodyValue;
+                // Validate rich text editor body
+                if (!finalBody || finalBody.trim() === "" || finalBody === "<p></p>") {
+                    message.error("Please enter content body");
+                    return;
+                }
+            } else {
+                // For other types, body comes from form field
+                finalBody = values.body || "";
+                if (!finalBody || finalBody.trim() === "") {
+                    message.error("Please enter content body");
+                    return;
+                }
+            }
+            
+            const payload = { 
+                status: "active", 
+                ...values,
+                body: finalBody 
+            } as CreateCmsContentBody;
+            await mutateAsync(payload);
+        } catch (error) {
+            // Form validation errors will be shown automatically
+            console.error("Validation error:", error);
+        }
     };
 
     return (
@@ -71,7 +139,7 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                     body: content?.body,
                     type: content?.type ?? "html",
                     image_id: content?.image_id ?? null,
-                    position: (content as any)?.position ?? "main",
+                    position: content?.position ?? "hero",
                     order_index: content?.order_index ?? 1,
                 }}
             >
@@ -119,17 +187,57 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                     <Input />
                 </Form.Item>
                 <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-                    <Select options={[{ value: "html", label: "html" }, { value: "markdown", label: "markdown" }]} />
+                    <Select 
+                        options={[
+                            { value: "text", label: "Text" },
+                            { value: "html", label: "HTML" },
+                            { value: "image", label: "Image" },
+                            { value: "video", label: "Video" },
+                            { value: "link", label: "Link" },
+                            { value: "embed", label: "Embed" },
+                            { value: "custom", label: "Custom" },
+                        ]} 
+                    />
                 </Form.Item>
                 <Form.Item name="position" label="Position" rules={[{ required: true }]}>
-                    <Select options={[{ value: "main", label: "main" }, { value: "sidebar", label: "sidebar" }]} />
+                    <Select 
+                        options={[
+                            { value: "hero", label: "Banner đầu trang" },
+                            { value: "section_1", label: "Vùng giới thiệu" },
+                            { value: "section_2", label: "Vùng dịch vụ" },
+                            { value: "footer", label: "Dưới chân trang" },
+                            { value: "sidebar", label: "Thanh bên" },
+                        ]} 
+                    />
                 </Form.Item>
                 <Form.Item name="order_index" label="Order" rules={[{ required: true }]}>
                     <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
-                <Form.Item name="body" label="Body" rules={[{ required: true }]}>
-                    <TextArea rows={6} placeholder="<p>...</p>" />
+                <Form.Item 
+                    name="body" 
+                    label="Body" 
+                    rules={[{ required: true, message: "Please enter content body" }]}
+                    hidden
+                >
+                    <Input />
                 </Form.Item>
+                {(contentType === "html" || contentType === "text" || !contentType) && (
+                    <Form.Item label="Body" required>
+                        <TiptapEditor
+                            value={bodyValue}
+                            onChange={(html) => {
+                                setBodyValue(html);
+                                form.setFieldValue("body", html);
+                            }}
+                            placeholder="Enter your content here..."
+                        />
+                    </Form.Item>
+                )}
+                {contentType && contentType !== "html" && contentType !== "text" && (
+                    <Form.Item name="body" label="Body" rules={[{ required: true, message: "Please enter content body" }]}>
+                        <Input.TextArea rows={4} placeholder="Enter your content here..." />
+                    </Form.Item>
+                )}
                 <Form.Item name="image_id" hidden>
                     <Input />
                 </Form.Item>
