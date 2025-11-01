@@ -7,6 +7,7 @@ import {
   createQrDebt,
 } from "@/features/finance-manage/apis";
 import { BankAccount } from "@/types/deposit-type";
+import { toast } from "react-toastify";
 
 export const SettlementBankModal = ({
   visible,
@@ -36,7 +37,6 @@ export const SettlementBankModal = ({
 
   useEffect(() => {
     if (visible && partner_id) {
-      // reset on open
       setBanks([]);
       setSelectedBank(null);
       setPage(0);
@@ -97,7 +97,7 @@ export const SettlementBankModal = ({
       setQrData(res?.qr_content || null);
       setQrInfo(res?.info || null);
     } catch (err: any) {
-      message.error("Không thể tạo mã QR cho ngân hàng đã chọn");
+      toast.error("Không thể tạo mã QR cho ngân hàng đã chọn");
       setSelectedBank(null);
     } finally {
       setQrLoading(false);
@@ -109,11 +109,6 @@ export const SettlementBankModal = ({
     setQrData(null);
     setQrInfo(null);
   };
-  const getQrLink = (bank: BankAccount) =>
-    `https://api.qrserver.com/v1/create-qr-code/?data=${bank?.bank_code || ""}${
-      bank?.account_number || ""
-    }&type=${bank?.bank_code || ""}`;
-
   const getBankData = () => {
     return qrInfo || selectedBank || {};
   };
@@ -168,7 +163,6 @@ export const SettlementBankModal = ({
               >
                 <List.Item.Meta
                   avatar={
-                    // Không có logo hoặc bank_logo trong type, có thể để rỗng hoặc default icon/avatar
                     <Avatar size="large">
                       {bank.bank_name?.charAt(0) ?? "B"}
                     </Avatar>
@@ -248,6 +242,7 @@ export const SettlementBankModal = ({
               <Spin />
             ) : (
               qrData && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrData}
                   alt="QR"

@@ -200,7 +200,6 @@ const PartnerDebtTable = () => {
               }
             `}
           >
-            {/* Bên trái (Thông tin chính) */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center mb-2 gap-2">
                 <div className="flex flex-col min-w-0">

@@ -1,22 +1,19 @@
-import { Modal, Table } from "antd";
-import React, { useState, useEffect, useRef } from "react";
+import { Modal } from "antd";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoryDebt } from "@/features/finance-manage/apis";
 import type { BankDepositRequest } from "@/types/deposit-type";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import TableComponent from "@/components/TableComponent";
-
-// Define the type for debt history items based on the supplied data keys
 export interface DebtHistoryRecord {
   amount_vnd: number;
   status: "PENDING" | "COMPLETE" | "CANCELED" | string;
   action_by: string;
   action_at: string;
   deposit_code: string;
-  id?: string | number; // for table rowKey compatibility
+  id?: string | number;
 }
-
 export const DebtDetailModal = ({
   visible,
   onClose,
@@ -30,28 +27,22 @@ export const DebtDetailModal = ({
     page: 0,
     size: 10,
   });
-
-  // Trigger to force refetch on modal open
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Use ref to store previous visible value
-  const prevVisibleRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    // When visible changes from false to true, trigger refresh
-    if (!prevVisibleRef.current && visible) {
-      setRefreshKey((v) => v + 1);
-    }
-    prevVisibleRef.current = visible;
-  }, [visible]);
-
-  const { data: histories, isPending } = useQuery({
+  const {
+    data: histories,
+    isPending,
+    refetch,
+  } = useQuery({
     enabled: !!record.user_id && visible,
-    queryKey: ["debt-history", record.user_id, params, refreshKey],
+    queryKey: ["debt-history", record.user_id, params],
     queryFn: () => getHistoryDebt(record.user_id, params),
   });
 
-  // Define columns corresponding to the defined DebtHistoryRecord type
+  useEffect(() => {
+    if (visible && !!record.user_id) {
+      refetch();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, record.user_id]);
   const columns: ColumnsType<DebtHistoryRecord> = [
     {
       title: "Mã giao dịch",
@@ -129,7 +120,6 @@ export const DebtDetailModal = ({
       ...prev,
       page: p - 1,
     }));
-    setRefreshKey((v) => v + 1); 
   };
 
   return (
