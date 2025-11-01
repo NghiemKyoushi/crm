@@ -252,8 +252,8 @@ const PartnerDebtTable = () => {
                       <span className="text-[#5a5959] mr-1 text-[14px]">Nợ:</span>
                       <b className="text-[#ff4d4f] font-semibold text-[14px]">
                         {(typeof record.total_debts === "number"
-                          ? record.total_debts.toLocaleString()
-                          : record.total_debts) || 0}{" "}
+                          ? record.total_remaining_debts.toLocaleString()
+                          : record.total_remaining_debts) || 0}{" "}
                         ₫
                       </b>
                     </>
