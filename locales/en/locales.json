@@ -666,6 +666,7 @@
     "addIncomingTransaction": "Incoming",
     "addOutgoingTransaction": "Outgoing",
     "partner": "Partner",
+    "partnerName": "Partner name",
     "selectPartner": "Select Partner",
     "selectPartnerPlaceholder": "-- Select Partner --",
     "amount": "Amount",

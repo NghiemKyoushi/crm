@@ -1,104 +1,21 @@
-import { Button, Modal, Table } from "antd";
-import React from "react";
+import { Modal, Table } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getHistoryDebt } from "@/features/finance-manage/apis";
+import type { BankDepositRequest } from "@/types/deposit-type";
+import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import TableComponent from "@/components/TableComponent";
 
-const debtHistories: Array<{
-  debtKey: string;
-  name: string;
-  date: string;
-  method: string;
-  amount: number;
-}> = [
-  {
-    debtKey: "1",
-    name: "Tokyo ABC Supply",
-    date: "05/09/2025",
-    method: "Chuyển khoản Vietcombank",
-    amount: 10000000
-  },
-  {
-    debtKey: "1",
-    name: "Tokyo ABC Supply",
-    date: "10/09/2025",
-    method: "Chuyển khoản Momo (Techcombank)",
-    amount: 5000000
-  },
-  {
-    debtKey: "1",
-    name: "Tokyo ABC Supply",
-    date: "15/09/2025",
-    method: "Nạp tiền trực tiếp",
-    amount: 5000000
-  },
-  // key 2
-  {
-    debtKey: "2",
-    name: "Osaka Steel Corp",
-    date: "18/09/2025",
-    method: "Chuyển khoản Techcombank",
-    amount: 0
-  },
-  // key 3
-  {
-    debtKey: "3",
-    name: "Kyoto Electronics",
-    date: "14/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 30000000
-  },
-  {
-    debtKey: "3",
-    name: "Kyoto Electronics",
-    date: "16/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 20000000
-  },
-  // key 4
-  {
-    debtKey: "4",
-    name: "Osaka Steel Corp",
-    date: "18/09/2025",
-    method: "Chuyển khoản Techcombank",
-    amount: 0
-  },
-  // key 5
-  {
-    debtKey: "5",
-    name: "Kyoto Electronics",
-    date: "14/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 30000000
-  },
-  {
-    debtKey: "5",
-    name: "Kyoto Electronics",
-    date: "16/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 20000000
-  },
-  // key 6
-  {
-    debtKey: "6",
-    name: "Osaka Steel Corp",
-    date: "18/09/2025",
-    method: "Chuyển khoản Techcombank",
-    amount: 0
-  },
-  // key 7
-  {
-    debtKey: "7",
-    name: "Kyoto Electronics",
-    date: "14/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 30000000
-  },
-  {
-    debtKey: "7",
-    name: "Kyoto Electronics",
-    date: "16/09/2025",
-    method: "Chuyển khoản Vietinbank",
-    amount: 20000000
-  }
-];
+// Define the type for debt history items based on the supplied data keys
+export interface DebtHistoryRecord {
+  amount_vnd: number;
+  status: "PENDING" | "COMPLETE" | "CANCELED" | string;
+  action_by: string;
+  action_at: string;
+  deposit_code: string;
+  id?: string | number; // for table rowKey compatibility
+}
 
 export const DebtDetailModal = ({
   visible,
@@ -109,48 +26,117 @@ export const DebtDetailModal = ({
   onClose: () => void;
   record: any;
 }) => {
-  let histories: typeof debtHistories = [];
-  if (Array.isArray(record)) {
-    const keys = record.map((r: any) => String(r.key));
-    histories = debtHistories.filter(item => keys.includes(item.debtKey));
-  } else if (record) {
-    histories = debtHistories.filter(item => item.debtKey === String(record.key));
-  }
+  const [params, setParams] = useState<BankDepositRequest>({
+    page: 0,
+    size: 10,
+  });
 
-  const columns = [
+  // Trigger to force refetch on modal open
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Use ref to store previous visible value
+  const prevVisibleRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    // When visible changes from false to true, trigger refresh
+    if (!prevVisibleRef.current && visible) {
+      setRefreshKey((v) => v + 1);
+    }
+    prevVisibleRef.current = visible;
+  }, [visible]);
+
+  const { data: histories, isPending } = useQuery({
+    enabled: !!record.user_id && visible,
+    queryKey: ["debt-history", record.user_id, params, refreshKey],
+    queryFn: () => getHistoryDebt(record.user_id, params),
+  });
+
+  // Define columns corresponding to the defined DebtHistoryRecord type
+  const columns: ColumnsType<DebtHistoryRecord> = [
     {
-      title: "Tên khách hàng",
-      dataIndex: "name",
-      key: "name",
-      render: (text: string) => <span className="font-semibold">{text}</span>,
+      title: "Mã giao dịch",
+      dataIndex: "deposit_code",
+      key: "deposit_code",
+      width: 170,
+      ellipsis: true,
     },
     {
-      title: "Khách nạp ngày nào",
-      dataIndex: "date",
-      key: "date",
-      render: (text: string) => <span>{text}</span>,
+      title: "Số tiền (VNĐ)",
+      dataIndex: "amount_vnd",
+      key: "amount_vnd",
+      align: "right",
+      width: 140,
+      render: (amount_vnd: number) =>
+        amount_vnd?.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+          maximumFractionDigits: 0,
+        }),
     },
     {
-      title: "Đã nạp như nào",
-      dataIndex: "method",
-      key: "method",
-      render: (text: string) => <span>{text}</span>,
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 150,
+      render: (status: string) => {
+        let color = "";
+        let txt = "";
+        switch (status) {
+          case "PENDING":
+            color = "text-yellow-600 bg-yellow-50 border border-yellow-200";
+            txt = "Chờ xác nhận";
+            break;
+          case "COMPLETED":
+            color = "text-green-700 bg-green-50 border border-green-200";
+            txt = "Hoàn thành";
+            break;
+          case "CANCELED":
+            color = "text-gray-500 bg-gray-100 border border-gray-200";
+            txt = "Đã từ chối";
+            break;
+          default:
+            color = "";
+            txt = status;
+        }
+        return (
+          <span
+            className={`rounded px-2 py-[2px] text-xs font-medium ${color}`}
+          >
+            {txt}
+          </span>
+        );
+      },
     },
     {
-      title: "Số tiền",
-      dataIndex: "amount",
-      key: "amount",
-      align: "right" as const,
-      render: (value: number) =>
-        <span className="font-semibold">{value ? value.toLocaleString() : 0} ₫</span>
+      title: "Thao tác bởi",
+      dataIndex: "action_by",
+      key: "action_by",
+      width: 170,
+      ellipsis: true,
+    },
+    {
+      title: "Thời gian thao tác",
+      dataIndex: "action_at",
+      key: "action_at",
+      width: 170,
+      render: (action_at: string) =>
+        action_at ? dayjs(action_at).format("DD-MM-YYYY HH:mm:ss") : "",
     },
   ];
+
+  const handlePageChange = (p: number) => {
+    setParams((prev) => ({
+      ...prev,
+      page: p - 1,
+    }));
+    setRefreshKey((v) => v + 1); 
+  };
 
   return (
     <Modal
       open={visible}
       onCancel={onClose}
-      width={800}
+      width={900}
       footer={null}
       title={
         <div className="flex items-center gap-2">
@@ -158,32 +144,39 @@ export const DebtDetailModal = ({
             Lịch sử giao dịch công nợ:{" "}
             <span className="text-base font-semibold">
               {Array.isArray(record)
-                ? record.map(r => r?.name).join(", ")
+                ? record.map((r: any) => r?.name).join(", ")
                 : record?.name}
             </span>
           </span>
           <div className="flex-1"></div>
         </div>
       }
-      bodyStyle={{
-        minHeight: 220,
-        maxHeight: "60vh",
+      style={{
+        maxHeight: "99vh",
         overflowY: "auto",
         paddingTop: 10,
       }}
       centered
       destroyOnClose
     >
-      <Table
-        columns={columns}
-        dataSource={histories}
-        size="small"
-        rowKey={(_, idx) => String(idx)}
-        pagination={false}
-        locale={{
-          emptyText: <div className="text-gray-400">Không có giao dịch nào</div>
+      <div
+        style={{
+          height: "87vh",
+          overflowY: "auto",
+          paddingTop: 10,
         }}
-      />
+      >
+        <TableComponent
+          columns={columns}
+          dataSource={histories?.data || []}
+          response={histories}
+          page={params.page ? params.page + 1 : 0}
+          rowHeight={60}
+          onPageChange={handlePageChange}
+          fontSize={13}
+          loading={isPending}
+        />
+      </div>
     </Modal>
   );
 };

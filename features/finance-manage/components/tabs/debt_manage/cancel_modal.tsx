@@ -5,13 +5,13 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
   const [reason, setReason] = useState("");
 
   const handleOk = () => {
-    onOk && onOk(reason); // truyền lý do ra ngoài nếu cần
-    setReason(""); // reset khi đóng modal
+    onOk && onOk(); 
+    setReason(""); 
   };
 
   const handleCancel = () => {
     onCancel && onCancel();
-    setReason(""); // reset khi đóng modal
+    setReason("");
   };
 
   return (
@@ -21,7 +21,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
       onOk={handleOk}
       onCancel={handleCancel}
       okText="Từ chối"
-      okButtonProps={{ danger: true, disabled: !reason.trim() }}
+      okButtonProps={{ danger: true }}
       cancelText="Huỷ"
       destroyOnClose
       centered
@@ -29,7 +29,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
       <div>
         Bạn chắc chắn muốn <span className="text-red-600"><b>TỪ CHỐI</b></span> giao dịch của đối tác <b>{record?.name}</b>?
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <span className="font-medium text-[12px]">Lý do từ chối</span>
         <Input.TextArea
           placeholder="Nhập lý do từ chối..."
@@ -38,7 +38,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
           value={reason}
           onChange={e => setReason(e.target.value)}
         />
-      </div>
+      </div> */}
     </Modal>
   );
 };

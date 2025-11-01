@@ -1,15 +1,25 @@
 import React, { useState } from "react";
-import { Table, Tag, Button, Modal } from "antd";
+import { Tag, Button, Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faExclamationCircle,
   faDollarSign,
-  faBalanceScale,
 } from "@fortawesome/free-solid-svg-icons";
 import { DebtDetailModal } from "./debt_history_table";
 import { ConfirmReturnModal } from "./conrfirm_return_modal";
 import { RejectActionModal } from "./cancel_modal";
 import { SettlementBankModal } from "./settlement_bank_modal";
+import { useDebtList } from "@/features/finance-manage/hooks";
+import { BankDepositRequest, DebtItem } from "@/types/deposit-type";
+import TableComponent from "@/components/TableComponent";
+import { ColumnsType } from "antd/es/table";
+import {
+  approveDebt,
+  cancelDebt,
+  createDebt,
+} from "@/features/finance-manage/apis";
+import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => (
   <Modal
@@ -23,238 +33,324 @@ const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => (
     centered
   >
     <div>
-      Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác <b>{record?.name}</b>?
+      Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
+      <b>{record?.name || record?.full_name}</b>?
     </div>
   </Modal>
 );
 
-// Giả lập lịch sử giao dịch của công nợ - thực tế lấy từ backend
-
-const data = [
-  {
-    key: "1",
-    name: "Tokyo ABC Supply - VCB",
-    status: "minhno",
-    note: "Khách hàng chưa nạp đủ tiền nhưng đã mua hàng. Đối tác cần tiền để thanh toán cho nhà cung cấp.",
-    total: 65000000,
-    debt: 45000000,
-    paid: 20000000,
-    date: "15/09/2025",
-  },
-  {
-    key: "2",
-    name: "Osaka Steel Corp - TCB",
-    status: "minhno",
-    note: "Đối tác đã ứng tiền mua hàng, chờ khách hàng nạp tiền vào tài khoản.",
-    total: 28500000,
-    debt: 28500000,
-    paid: 0,
-    date: "18/09/2025",
-  },
-  {
-    key: "3",
-    name: "Kyoto Electronics - VTB",
-    status: "giu-thua",
-    note: "Khách hàng nạp tiền nhiều hơn cần thiết, có thể yêu cầu hoàn trả số dư thừa.",
-    total: 35000000,
-    surplus: 15000000,
-    paid: 50000000,
-    date: "17/09/2025",
-  },
-  {
-    key: "4",
-    name: "Osaka Steel Corp - TCB",
-    status: "minhno",
-    note: "Đối tác đã ứng tiền mua hàng, chờ khách hàng nạp tiền vào tài khoản.",
-    total: 28500000,
-    debt: 28500000,
-    paid: 0,
-    date: "18/09/2025",
-  },
-  {
-    key: "5",
-    name: "Kyoto Electronics - VTB",
-    status: "giu-thua",
-    note: "Khách hàng nạp tiền nhiều hơn cần thiết, có thể yêu cầu hoàn trả số dư thừa.",
-    total: 35000000,
-    surplus: 15000000,
-    paid: 50000000,
-    date: "17/09/2025",
-  },
-  {
-    key: "6",
-    name: "Osaka Steel Corp - TCB",
-    status: "minhno",
-    note: "Đối tác đã ứng tiền mua hàng, chờ khách hàng nạp tiền vào tài khoản.",
-    total: 28500000,
-    debt: 28500000,
-    paid: 0,
-    date: "18/09/2025",
-  },
-  {
-    key: "7",
-    name: "Kyoto Electronics - VTB",
-    status: "giu-thua",
-    note: "Khách hàng nạp tiền nhiều hơn cần thiết, có thể yêu cầu hoàn trả số dư thừa.",
-    total: 35000000,
-    surplus: 15000000,
-    paid: 50000000,
-    date: "17/09/2025",
-  },
-  // Demo trạng thái mới: PENDING
-  {
-    key: "8",
-    name: "Fukuoka Foods - VCB",
-    status: "PENDING",
-    note: "Yêu cầu rút tiền của đối tác đang chờ xác nhận.",
-    total: 20000000,
-    debt: 0,
-    surplus: 20000000,
-    paid: 20000000,
-    date: "22/09/2025",
-  },
-];
-
-const dataDashboard = [
-  {
-    title: "Mình đang nợ",
-    amount: 85500000,
-    partners: 3,
-    color: "text-red-600",
-    bg: "bg-red-50",
-    iconColor: "text-red-500",
-    icon: <FontAwesomeIcon icon={faExclamationCircle} />,
-  },
-  {
-    title: "Đối tác giữ thừa",
-    amount: 42300000,
-    partners: 2,
-    color: "text-green-600",
-    bg: "bg-green-50",
-    iconColor: "text-green-500",
-    icon: <FontAwesomeIcon icon={faDollarSign} />,
-  },
-  {
-    title: "Cân bằng",
-    amount: 0,
-    partners: 1,
-    color: "text-gray-600",
-    bg: "bg-gray-50",
-    iconColor: "text-gray-500",
-    icon: <FontAwesomeIcon icon={faBalanceScale} />,
-  },
-];
-
-// Modal: ngân hàng tất toán giữ nguyên
-
 const PartnerDebtTable = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDebt, setSelectedDebt] = useState<any>(null);
+  const [selectedDebt, setSelectedDebt] = useState<DebtItem>();
 
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [detailRecord, setDetailRecord] = useState<any>(null);
 
   const [confirmReturnVisible, setConfirmReturnVisible] = useState(false);
-  const [selectedReturnRecord, setSelectedReturnRecord] = useState<any>(null);
 
-  // State cho PENDING: xác nhận/từ chối
   const [pendingConfirmVisible, setPendingConfirmVisible] = useState(false);
   const [pendingRejectVisible, setPendingRejectVisible] = useState(false);
-  const [pendingRecord, setPendingRecord] = useState<any>(null);
 
-  const handleReturnConfirm = () => {
-    setConfirmReturnVisible(false);
-    setTimeout(() => setSelectedReturnRecord(null), 300);
+  const [params, setParams] = useState<BankDepositRequest>({
+    page: 0,
+    size: 10,
+  });
+  const { data, isPending, refetch } = useDebtList(params);
+
+  const handleReturnConfirm = async () => {
+    if (!selectedDebt?.user_id) return;
+    try {
+      await createDebt(selectedDebt.id);
+      toast.success("Tạo hoàn trả thành công!");
+      setConfirmReturnVisible(false);
+      setTimeout(() => setSelectedDebt(undefined), 300);
+      refetch?.();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Có lỗi xảy ra khi tạo hoàn trả."
+      );
+    }
   };
 
-  // Xác nhận hoặc từ chối (fake handle)
-  const handlePendingConfirm = () => {
-    setPendingConfirmVisible(false);
-    setTimeout(() => setPendingRecord(null), 300);
-    // TODO: Logic gọi API xác nhận nếu cần
+  // Xử lý xác nhận công nợ
+  const handlePendingConfirm = async () => {
+    if (!selectedDebt?.id) return;
+    try {
+      if (selectedDebt && selectedDebt.user_id) {
+        await approveDebt(selectedDebt.user_id);
+        toast.success("Xác nhận giao dịch thành công!");
+        setPendingConfirmVisible(false);
+        setTimeout(() => setSelectedDebt(undefined), 300);
+        refetch?.();
+      }
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Có lỗi xảy ra khi xác nhận giao dịch."
+      );
+    }
   };
 
-  const handlePendingReject = () => {
-    setPendingRejectVisible(false);
-    setTimeout(() => setPendingRecord(null), 300);
-    // TODO: Logic gọi API từ chối nếu cần
+  // Xử lý từ chối công nợ
+  const handlePendingReject = async () => {
+    if (!selectedDebt?.id) return;
+    try {
+      if (selectedDebt && selectedDebt.user_id) {
+        await cancelDebt(selectedDebt.user_id);
+        toast.success("Đã từ chối giao dịch!");
+        setPendingRejectVisible(false);
+        setTimeout(() => setSelectedDebt(undefined), 300);
+        refetch?.();
+      }
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Có lỗi xảy ra khi từ chối giao dịch."
+      );
+    }
   };
 
-  const columns = [
+  const handlePageChange = (p: number) => {
+    setParams((prev) => ({
+      ...prev,
+      page: p - 1,
+    }));
+  };
+
+  const handleConfirmDebt = async () => {
+    if (!selectedDebt?.user_id) return;
+    try {
+      await createDebt(selectedDebt.id);
+      toast.success("Tạo tất toán thành công!");
+      setModalVisible(false);
+      setTimeout(() => setSelectedDebt(undefined), 300);
+      refetch?.();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Có lỗi xảy ra khi tạo tất toán."
+      );
+    }
+  };
+
+  const columns: ColumnsType<DebtItem> = [
     {
       key: "card",
-      render: (record: any) => {
-        const isNo = record.status === "minhno";
-        const isPending = record.status === "PENDING";
+      render: (record: DebtItem) => {
+        const status = record.status;
+        const isNo = +record.total_remaining_debts > 0;
+        const isBalanced =
+          +record.total_remaining_debts === 0 && status !== "PENDING";
+        let statusText = "";
+        let statusColor: "default" | "orange" | "red" | "green" | undefined =
+          "default";
+
+        // Set status text and color
+        switch (status) {
+          case "NEW":
+            if (isNo) {
+              statusText = "Mình nợ";
+              statusColor = "red";
+            } else if (isBalanced) {
+              statusText = "Đã cân bằng";
+              statusColor = "default";
+            } else {
+              statusText = "Đối tác giữ thừa";
+              statusColor = "green";
+            }
+            break;
+          case "PENDING":
+            statusText = "Chờ xác nhận";
+            statusColor = "orange";
+            break;
+          case "COMPLETED":
+            statusText = "Hoàn thành";
+            statusColor = "green";
+            break;
+          case "CANCELED":
+            statusText = "Đã từ chối";
+            statusColor = "default";
+            break;
+          default:
+            statusText = "Đã cân bằng";
+            statusColor = "default";
+        }
+
         return (
           <div
-            className={`flex items-center min-h-[100px] text-[13px] rounded-[8px] px-[14px] py-[10px] 
-              ${isNo ? "bg-[#fff5f5] border border-[#ffccc7]" : isPending ? "bg-yellow-50 border border-yellow-300" : "bg-[#f6ffed] border border-[#b7eb8f]"}
+            className={`flex items-center min-h-[100px] text-[15px] rounded-[8px] px-[16px] py-[12px] 
+              ${
+                status === "PENDING"
+                  ? "bg-yellow-50 border border-yellow-300"
+                  : status === "NEW"
+                  ? isNo
+                    ? "bg-red-50 border border-[#ffccc7]"
+                    : isBalanced
+                    ? "bg-[#f0f0f0] border border-[#d9d9d9]"
+                    : "bg-green-50 border border-[#b7eb8f]"
+                  : status === "COMPLETED"
+                  ? "bg-green-50 border border-[#b7eb8f]"
+                  : status === "CANCELED"
+                  ? "bg-[#f0f0f0] border border-[#d9d9d9]"
+                  : "bg-[#f0f0f0] border border-[#d9d9d9]"
+              }
             `}
           >
             {/* Bên trái (Thông tin chính) */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center mb-[2px] gap-2">
-                <span className="font-semibold text-[14px] truncate max-w-[200px]">{record.name}</span>
+              <div className="flex flex-wrap items-center mb-2 gap-2">
+                <div className="flex flex-col min-w-0">
+                  <span className="font-semibold text-[17px] truncate max-w-[250px] text-[#262626]">
+                    {record.full_name}
+                  </span>
+                  <span className="text-[#5b5a5a] text-sm truncate max-w-[250px]">
+                    {record.email}
+                  </span>
+                </div>
                 <Tag
-                  color={
-                    isPending
-                      ? "orange"
-                      : isNo
-                      ? "red"
-                      : "green"
-                  }
-                  className="!text-[11px] !py-[1px] !px-[7px] !h-[22px] !leading-[20px]"
+                  className={`
+                    !text-[13px] !py-[1px] !px-[10px] !h-[24px] !leading-[22px] 
+                    !rounded-[16px] 
+                    ${
+                      status === "NEW"
+                        ? isNo
+                          ? "!bg-red-100 !text-red-800 "
+                          : isBalanced
+                          ? "!bg-grey-100 !text-grey-800"
+                          : " !bg-green-100 !text-green-800"
+                        : status === "PENDING"
+                        ? "!bg-[#fffbe6] !border-[#ffe58f] !text-[#d48806]"
+                        : status === "COMPLETED"
+                        ? "!bg-[#f6ffed] !border-[#81d83e] !text-[#237804]"
+                        : status === "CANCELED"
+                        ? "!bg-[#fafafa] !border-[#d9d9d9] !text-[#8c8c8c]"
+                        : "!bg-[#fafafa] !border-[#d9d9d9] !text-[#595959]"
+                    }
+                  `}
+                  bordered={false}
                 >
-                  {isPending
-                    ? "Chờ xác nhận"
-                    : isNo
-                    ? "Mình nợ"
-                    : "Đối tác giữ thừa"}
+                  {statusText}
                 </Tag>
               </div>
-              <div className="text-[#595959] text-[12px] mb-[6px] leading-[1.3] whitespace-nowrap truncate max-w-[350px]">
-                {record.note}
-              </div>
-              <div className="flex items-center gap-[18px] text-[12px] leading-[1.4]">
-                <span>
-                  Tổng: <b>{record.total.toLocaleString()} ₫</b>
-                </span>
-                {isNo ? (
-                  <span>
-                    Nợ:{" "}
-                    <b className="text-red-600">{record.debt.toLocaleString()} ₫</b>
-                  </span>
-                ) : isPending ? (
-                  <span>
-                    Thừa:{" "}
-                    <b className="text-yellow-600">{record.surplus?.toLocaleString()} ₫</b>
-                  </span>
-                ) : (
-                  <span>
-                    Thừa:{" "}
-                    <b className="text-green-600">{record.surplus?.toLocaleString()} ₫</b>
-                  </span>
-                )}
-                <span>
-                  Đã nạp: <b>{record.paid.toLocaleString()} ₫</b>
-                </span>
-                <span className="text-[#888]">
-                  <span className="text-[11px] text-[#aaa]">Ngày: </span>
-                  <b>{record.date}</b>
-                </span>
+
+              <div className="grid grid-cols-2 gap-y-1 gap-x-3 text-[14px] leading-[1.4]">
+                <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Tổng nợ:</span>
+                  <b className="text-[#222] text-[14px]">
+                    {(typeof record.total_debts === "number"
+                      ? record.total_debts.toLocaleString()
+                      : record.total_debts) || 0}{" "}
+                    ₫
+                  </b>
+                </div>
+                <div>
+                  {isNo ? (
+                    <>
+                      <span className="text-[#5a5959] mr-1 text-[14px]">Nợ:</span>
+                      <b className="text-[#ff4d4f] font-semibold text-[14px]">
+                        {(typeof record.total_debts === "number"
+                          ? record.total_debts.toLocaleString()
+                          : record.total_debts) || 0}{" "}
+                        ₫
+                      </b>
+                    </>
+                  ) : isBalanced ? (
+                    <>
+                      <span className="text-[#5a5959] mr-1 text-[14px]">Cân bằng:</span>
+                      <b className="text-[#595959] font-medium text-[14px]">0 ₫</b>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={`mr-1 ${
+                          status === "PENDING"
+                            ? "text-[#d48806] font-semibold text-[14px]"
+                            : "text-[#389e0d] font-semibold text-[14px]"
+                        }`}
+                      >
+                        Thừa:
+                      </span>
+                      <b
+                        className={
+                          status === "PENDING"
+                            ? "text-[#d48806] font-semibold text-[14px]"
+                            : "text-[#389e0d] font-semibold text-[14px]"
+                        }
+                      >
+                        {(typeof record.total_remaining_debts === "number"
+                          ? Math.abs(
+                              record.total_remaining_debts
+                            ).toLocaleString()
+                          : Math.abs(Number(record.total_remaining_debts)) ||
+                            0) || 0}{" "}
+                        ₫
+                      </b>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Đã nạp:</span>
+                  <b className="text-[#262626] text-[14px]">
+                    {(typeof record.total_paid_debts === "number"
+                      ? record.total_paid_debts.toLocaleString()
+                      : record.total_paid_debts) || 0}{" "}
+                    ₫
+                  </b>
+                </div>
+                <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Ngày gần nhất:</span>
+                  <b className="text-[#262626] text-[14px]">
+                    {record.transaction_date
+                      ? dayjs(record.transaction_date).format(
+                          "DD-MM-YYYY HH:mm"
+                        )
+                      : "--"}
+                  </b>
+                </div>
               </div>
             </div>
-            {/* Bên phải (Nút hành động) */}
             <div className="flex flex-col gap-1 items-end ml-4">
-              {isPending ? (
+              {status === "NEW" && (
+                <>
+                  {isNo ? (
+                    <Button
+                      type="primary"
+                      size="small"
+                      className="!bg-red-600 !h-[28px] !w-[124px] !text-[14px] !px-[12px]"
+                      onClick={() => {
+                        setSelectedDebt(record);
+                        setModalVisible(true);
+                      }}
+                    >
+                      Tạo tất toán
+                    </Button>
+                  ) : !isBalanced ? (
+                    <Button
+                      type="primary"
+                      size="small"
+                      className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-green-600 hover:!bg-[#46bd18] !border-none"
+                      onClick={() => {
+                        setSelectedDebt(record);
+                        setConfirmReturnVisible(true);
+                      }}
+                    >
+                      Yêu cầu hoàn trả
+                    </Button>
+                  ) : null}
+                </>
+              )}
+              {status === "PENDING" && (
                 <>
                   <Button
                     type="primary"
                     size="small"
-                    className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
+                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
                     onClick={() => {
-                      setPendingRecord(record);
+                      setSelectedDebt(record);
                       setPendingConfirmVisible(true);
                     }}
                   >
@@ -263,47 +359,40 @@ const PartnerDebtTable = () => {
                   <Button
                     danger
                     size="small"
-                    className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
+                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
                     onClick={() => {
-                      setPendingRecord(record);
+                      setSelectedDebt(record);
                       setPendingRejectVisible(true);
                     }}
                   >
                     Từ chối
                   </Button>
                 </>
-              ) : isNo ? (
+              )}
+              {status === "COMPLETED" && (
                 <Button
-                  type="primary"
-                  danger
                   size="small"
-                  className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
-                  onClick={() => {
-                    setSelectedDebt(record);
-                    setModalVisible(true);
-                  }}
+                  className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-[#e6fffb] !border-none !text-[#52c41a]"
+                  disabled
                 >
-                  Tạo tất toán
+                  Hoàn thành
                 </Button>
-              ) : (
+              )}
+              {status === "CANCELED" && (
                 <Button
-                  type="primary"
                   size="small"
-                  className="!h-[26px] !w-[120px] !text-[12px] !px-[10px] !bg-[#389e0d] hover:!bg-[#46bd18] !border-none"
-                  onClick={() => {
-                    setSelectedReturnRecord(record);
-                    setConfirmReturnVisible(true);
-                  }}
+                  className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-[#f5f5f5] !border-none !text-gray-400"
+                  disabled
                 >
-                  Yêu cầu hoàn trả
+                  Đã từ chối
                 </Button>
               )}
               <Button
                 size="small"
-                className="!h-[26px] !w-[120px] !text-[12px] !px-[10px]"
+                className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
                 onClick={() => {
                   setDetailModalVisible(true);
-                  setDetailRecord(record);
+                  setSelectedDebt(record);
                 }}
               >
                 Chi tiết
@@ -321,92 +410,118 @@ const PartnerDebtTable = () => {
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Tình trạng Công nợ với Đối tác
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {dataDashboard.map((item, index) => {
-            let borderColor = "";
-            if (item.color?.includes("red")) {
-              borderColor = "#f87171"; 
-            } else if (item.color?.includes("green")) {
-              borderColor = "#22c55e"; 
-            } else if (item.color?.includes("gray")) {
-              borderColor = "#6b7280";
-            }
-
-            return (
-              <div
-                key={index}
-                className={`${item.bg} rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
-                style={{
-                  minHeight: 56,
-                  borderLeft: `6px solid ${borderColor}`,
-                }}
-              >
-                <div>
-                  <p className={`text-sm font-semibold ${item.color} mb-0.5`}>
-                    {item.title}
-                  </p>
-                  <p className={`text-2xl font-bold ${item.color}`}>
-                    {item.amount.toLocaleString()} ₫
-                  </p>
-                  <p className="text-xs text-gray-500">{item.partners} đối tác</p>
-                </div>
-                <div className={`text-2xl ${item.iconColor}`}>{item.icon}</div>
+        {data?.items && (
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+            <div
+              className={`bg-red-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
+              style={{
+                minHeight: 56,
+                borderLeft: `6px solid #f87171`,
+              }}
+            >
+              <div>
+                <p className={`text-sm font-semibold text-red-600 mb-0.5`}>
+                  Mình đang nợ
+                </p>
+                <p className={`text-2xl font-bold text-red-600`}>
+                  {(data.items?.Debts?.total_amount ?? 0).toLocaleString()} ₫
+                </p>
+                <p className="text-xs text-gray-500">
+                  {data.items?.Debts?.total_account ?? 0} đối tác
+                </p>
               </div>
-            );
-          })}
-        </div>
+              <div className="text-2xl text-red-500">
+                <FontAwesomeIcon icon={faExclamationCircle} />
+              </div>
+            </div>
+            <div
+              className={`bg-green-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
+              style={{
+                minHeight: 56,
+                borderLeft: `6px solid #22c55e`,
+              }}
+            >
+              <div>
+                <p className={`text-sm font-semibold text-green-600 mb-0.5`}>
+                  Đối tác giữ thừa
+                </p>
+                <p className={`text-2xl font-bold text-green-600`}>
+                  {(data.items?.DebtsPaid?.total_amount ?? 0).toLocaleString()}{" "}
+                  ₫
+                </p>
+                <p className="text-xs text-gray-500">
+                  {data.items?.DebtsPaid?.total_account ?? 0} đối tác
+                </p>
+              </div>
+              <div className="text-2xl text-green-500">
+                <FontAwesomeIcon icon={faDollarSign} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <Table
+      <TableComponent
         columns={columns}
-        dataSource={data}
-        showHeader={false}
-        pagination={{ pageSize: 10 }}
-        rowKey="key"
-        size="small"
-        style={{ marginTop: 0 }}
+        dataSource={data?.contents.data || []}
+        response={data?.contents}
+        page={params.page ? params.page + 1 : 0}
+        rowHeight={60}
+        onPageChange={handlePageChange}
+        fontSize={13}
+        headerHeight={46}
+        loading={isPending}
+    
       />
-      <SettlementBankModal
-        visible={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-          setTimeout(() => setSelectedDebt(null), 300);
-        }}
-        selectedDebt={selectedDebt}
-      />
-      <DebtDetailModal
-        visible={detailModalVisible}
-        onClose={() => {
-          setDetailModalVisible(false);
-          setTimeout(() => setDetailRecord(null), 300);
-        }}
-        record={detailRecord}
-      />
+      {selectedDebt?.user_id && (
+        <SettlementBankModal
+          visible={modalVisible}
+          onClose={() => {
+            setModalVisible(false);
+            setTimeout(() => setSelectedDebt(undefined), 300);
+          }}
+          selectedDebt={selectedDebt}
+          partner_id={selectedDebt?.user_id}
+          remainDebt={selectedDebt.total_remaining_debts}
+          onConfirmDebt={handleConfirmDebt}
+        />
+      )}
+
+      {selectedDebt?.id && (
+        <DebtDetailModal
+          visible={detailModalVisible}
+          onClose={() => {
+            setDetailModalVisible(false);
+            setTimeout(() => setSelectedDebt(undefined), 300);
+          }}
+          record={selectedDebt}
+        />
+      )}
+
       <ConfirmReturnModal
         visible={confirmReturnVisible}
         onCancel={() => {
           setConfirmReturnVisible(false);
-          setTimeout(() => setSelectedReturnRecord(null), 300);
+          setTimeout(() => setSelectedDebt(undefined), 300);
         }}
         onConfirm={handleReturnConfirm}
-        record={selectedReturnRecord}
+        record={selectedDebt}
       />
-      {/* MODAL cho trạng thái PENDING */}
       <ConfirmActionModal
         visible={pendingConfirmVisible}
-        record={pendingRecord}
+        record={selectedDebt}
         onOk={handlePendingConfirm}
         onCancel={() => {
           setPendingConfirmVisible(false);
-          setTimeout(() => setPendingRecord(null), 300);
+          setTimeout(() => setSelectedDebt(undefined), 300);
         }}
       />
       <RejectActionModal
         visible={pendingRejectVisible}
-        record={pendingRecord}
+        record={selectedDebt}
         onOk={handlePendingReject}
         onCancel={() => {
           setPendingRejectVisible(false);
-          setTimeout(() => setPendingRecord(null), 300);
+          setTimeout(() => setSelectedDebt(undefined), 300);
         }}
       />
     </div>
