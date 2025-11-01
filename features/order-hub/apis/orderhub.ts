@@ -14,17 +14,26 @@ import qs from "qs";
 import { FilterType } from "../components/order-hub-filter";
 import { FilterTypeShipment } from "@/features/shipment-management/components/shipment-filter";
 
-export const getListOrder = async (params: FilterType 
-//   {
-//   page: number;
-//   size: number;
-//   status?: string;
-//   search?: string;
-//   date?: string;
-//   type?:number;
-// }
+export const getListOrder = async (
+  params: FilterType
+  //   {
+  //   page: number;
+  //   size: number;
+  //   status?: string;
+  //   search?: string;
+  //   date?: string;
+  //   type?:number;
+  // }
 ) => {
-  const res = await api.get(API_TYPE_CONST.LIST_ORDER, { params });
+  const res = await api.get(API_TYPE_CONST.LIST_ORDER, {
+    params,
+    paramsSerializer: (params) =>
+      new URLSearchParams(
+        Object.entries(params).flatMap(([key, value]) =>
+          Array.isArray(value) ? value.map((v) => [key, v]) : [[key, value]]
+        )
+      ).toString(),
+  });
   return res.data.data;
 };
 
@@ -43,7 +52,7 @@ export const getListOrderTracking = async (params: FilterTypeShipment) => {
 };
 
 export const getDetailOrder = async (id: number) => {
-  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);  
+  const res = await api.get(`${API_TYPE_CONST.DETAIL_ORDER}/${id}`);
   return res.data.data;
 };
 
@@ -52,13 +61,16 @@ export const getDataProductFromLink = async (link: string) => {
   return res.data.data;
 };
 
-export const getListService = async (params: {routeId: number}) => {
-  const res = await api.get(API_TYPE_CONST.FEE_GET, {params});
+export const getListService = async (params: { routeId: number }) => {
+  const res = await api.get(API_TYPE_CONST.FEE_GET, { params });
   return res.data.data;
 };
 
-export const getListServiceAdmin = async (params: {userId?: number, routeId?: number}) => {
-  const res = await api.get(API_TYPE_CONST.FEE_GET_ADMIN, {params});
+export const getListServiceAdmin = async (params: {
+  userId?: number;
+  routeId?: number;
+}) => {
+  const res = await api.get(API_TYPE_CONST.FEE_GET_ADMIN, { params });
   return res.data.data;
 };
 
@@ -76,10 +88,8 @@ export const getRateOrder = async (params: {
   return res.data.data;
 };
 
-export const getRateExchanges = async (params: {
-  userId: string;
-}) => {
-  const res = await api.get(`${API_TYPE_CONST.GET_DATA_LIST}`,{params} );
+export const getRateExchanges = async (params: { userId: string }) => {
+  const res = await api.get(`${API_TYPE_CONST.GET_DATA_LIST}`, { params });
   return res.data.data;
 };
 
@@ -121,7 +131,7 @@ export const confirmPurchaeOrder = async (id: string) => {
 
 export const trackingToJp = async (id: string) => {
   const res = await api.put(
-    `${API_TYPE_CONST.CREATE_ORDER}/arrived-jp-warehouse/${id}`,
+    `${API_TYPE_CONST.CREATE_ORDER}/arrived-jp-warehouse/${id}`
     // { tracking_code: tracking }
   );
   return res.data.data;
@@ -172,23 +182,47 @@ export const getDataWeight = async (id: number) => {
   return res.data.data;
 };
 
-export const updateNoteOrder = async (order_id: number, body: { note: string}) => {
-  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE}/${order_id}`, body);
+export const updateNoteOrder = async (
+  order_id: number,
+  body: { note: string }
+) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.CREATE_PRIVATE_NOTE}/${order_id}`,
+    body
+  );
   return res.data.data;
 };
 
-export const updateNoteOrderClient = async (id: number ,params: { note: string}) => {
-  const res = await api.put(`${API_TYPE_CONST.CREATE_PRIVATE_NOTE_CLIENT}/${id}`, params);
+export const updateNoteOrderClient = async (
+  id: number,
+  params: { note: string }
+) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.CREATE_PRIVATE_NOTE_CLIENT}/${id}`,
+    params
+  );
   return res.data.data;
 };
 
-export const createTrackingOrder = async (id: number, body: CreateTrackingModel) => {
-  const res = await api.post(`${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`, body);
+export const createTrackingOrder = async (
+  id: number,
+  body: CreateTrackingModel
+) => {
+  const res = await api.post(
+    `${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`,
+    body
+  );
   return res.data.data;
 };
 
-export const updateTrackingOrder = async (id: number, body: CreateTrackingModel[]) => {
-  const res = await api.put(`${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`, body);
+export const updateTrackingOrder = async (
+  id: number,
+  body: CreateTrackingModel[]
+) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.CREATE_TRACKING_ORDER}/${id}`,
+    body
+  );
   return res.data.data;
 };
 
@@ -202,18 +236,28 @@ export const genPackageCode = async () => {
   return res.data.data;
 };
 
-export const updateCodForEarchOrder = async (id: number, body: updateCodEachRowModel) => {
-  const res = await api.post(`${API_TYPE_CONST.UPDATE_COD_EACH_ROW}/${id}`, body);
+export const updateCodForEarchOrder = async (
+  id: number,
+  body: updateCodEachRowModel
+) => {
+  const res = await api.post(
+    `${API_TYPE_CONST.UPDATE_COD_EACH_ROW}/${id}`,
+    body
+  );
   return res.data.data;
 };
 
-export const getDataGeneral = async (params?: {customerGroupId?: number}) => {
-  const res = await api.get(API_TYPE_CONST.GET_DATA_CHECK, {params});  
+export const getDataGeneral = async (params?: { customerGroupId?: number }) => {
+  const res = await api.get(API_TYPE_CONST.GET_DATA_CHECK, { params });
   return res.data.data;
 };
 
-export const updateKuponOrder= async (id: number, body: {kupon: number}) => {
+export const updateKuponOrder = async (id: number, body: { kupon: number }) => {
   const res = await api.put(`${API_TYPE_CONST.UPDATE_KUPON}/${id}`, body);
   return res.data.data;
 };
 
+export const updateStatusPackaged = async (body: { shipping_code: string }) => {
+  const res = await api.put(`${API_TYPE_CONST.TRACKING_PACKAGED}`, body);
+  return res.data.data;
+};

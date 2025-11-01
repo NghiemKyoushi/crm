@@ -37,11 +37,11 @@ export function EditTrackingModal({
             // setIsExisting(true);
           } else {
             // chưa có record → tạo mặc định
-            const code = await genPackageCode();
+            // const code = await genPackageCode();
             setRecords([
               {
                 tracking_code: "",
-                package_code: code,
+                package_code: "",
                 package_number: 0,
                 weight: 0,
               },
@@ -63,10 +63,9 @@ export function EditTrackingModal({
     ) {
       return;
     }
-    const code = await genPackageCode();
     setRecords((prev) => [
       ...prev,
-      { tracking_code: "", package_code: code, package_number: 0, weight: 0 },
+      { tracking_code: "", package_code: '', package_number: 0, weight: 0 },
     ]);
   };
 
@@ -177,15 +176,15 @@ export function EditTrackingModal({
                   placeholder="Mã kiện"
                   size="small"
                   className="text-xs"
-                  suffix={
-                    !record.id && (
-                      <ReloadOutlined
-                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                        onClick={() => handleGeneratePackageCode(index)}
-                        title="Generate mã kiện"
-                      />
-                    )
-                  }
+                  // suffix={
+                  //   !record.id && (
+                  //     <ReloadOutlined
+                  //       className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                  //       onClick={() => handleGeneratePackageCode(index)}
+                  //       title="Generate mã kiện"
+                  //     />
+                  //   )
+                  // }
                 />
 
                 <Input

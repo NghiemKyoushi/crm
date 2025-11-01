@@ -36,6 +36,7 @@ import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { updateKuponOrder } from "../apis/orderhub";
+import dayjs from "dayjs";
 
 function isEqualObject(obj1: any, obj2: any) {
   // Only compare shallow, including only relevant keys
@@ -115,23 +116,36 @@ export default function OrderHub() {
   const prevFilters = useRef<FilterType>(filters);
 
   // Lưu ý: useListOrder chạy lại khi filters hoặc page thay đổi; không cần thay đổi ở đây.
-  const { data: listOrder, isPending } = useListOrder({
-    page,
-    size: 10,
-    status: filters.status,
-    // date: filters.date,
-    customer_name: filters.customer_name,
-    product_url: filters.product_url,
-    product_name: filters.product_name,
-    invoice_no: filters.invoice_no,
-    tracking_code: filters.tracking_code,
-    package_code: filters.package_code,
-    product_id: filters.product_id,
-    note_admin: filters.note_admin,
-    from_date: filters.from_date,
-    to_date: filters.to_date,
-    customer_code: filters.customer_code,
-  });
+  // Utility: Remove keys with value undefined
+  const removeUndefinedFields = (obj: any) => {
+    return Object.fromEntries(
+      Object.entries(obj).filter(
+        ([, value]) => value !== undefined
+      )
+    );
+  };
+
+  const { data: listOrder, isPending } = useListOrder(
+    removeUndefinedFields({
+      page,
+      size: 10,
+      status: filters.status,
+      // date: filters.date,
+      customer_name: filters.customer_name,
+      product_url: filters.product_url,
+      product_name: filters.product_name,
+      invoice_no: filters.invoice_no,
+      tracking_code: filters.tracking_code,
+      package_code: filters.package_code,
+      product_id: filters.product_id,
+      note_admin: filters.note_admin,
+      from_date: filters.from_date,
+      to_date: filters.to_date,
+      customer_code: filters.customer_code,
+      email: filters.email,
+      phone_number: filters.phone_number,
+    })
+  );
   const approveMutation = useApproveOrder();
   const useCancelMutation = useCancelOrder();
   const purchaseMutation = usePurchaseOrder();
@@ -314,9 +328,14 @@ export default function OrderHub() {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (invoice_no: string) => (
-        <div className="text-xs font-medium text-blue-600">
-          {invoice_no || "Cập nhật sau"}
+      render: (_: string, record: any) => (
+        <div>
+          <div className="text-xs font-medium text-blue-600">
+            {record.invoice_no || "Cập nhật sau"}
+          </div>
+          <div className="text-xs text-gray-400">
+            {record.created_at ? dayjs(record.created_at).format("DD/MM/YYYY") : ""}
+          </div>
         </div>
       ),
     },
@@ -844,7 +863,8 @@ export default function OrderHub() {
                   // setIsOpenTrackingOrder()
                 }}
               >
-                🏢 Kho JP
+                {/* 🏢 Kho JP */}
+                Vận chuyển
               </Button>
             );
             break;
@@ -887,7 +907,8 @@ export default function OrderHub() {
                 }}
                 className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
               >
-                🏭 Kho VN
+                {/* 🏭 Kho VN */}
+                Vc nước ngoài
               </Button>
             );
             break;
@@ -903,7 +924,8 @@ export default function OrderHub() {
                   setIsOpenCheckOrder(true);
                 }}
               >
-                📦 Kiểm hàng
+                {/* 📦 Kiểm hàng */}
+                Kho VN
               </Button>
             );
             break;

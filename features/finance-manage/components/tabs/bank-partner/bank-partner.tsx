@@ -191,7 +191,7 @@ export default function BankPartnerSetting() {
             {t('status.paused')}
           </Tag>
         ) :  <Tag color="gold" className="!rounded-3xl text-xs">
-        Internal
+        {t('status.internal')}
       </Tag>  ,
     },
     {
