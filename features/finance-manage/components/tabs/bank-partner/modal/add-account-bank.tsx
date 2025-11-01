@@ -264,7 +264,7 @@ export default function AddBankAccountModal({
           <Select>
             <Option value="ACTIVE">{t('status.active')}</Option>
             <Option value="INACTIVE">{t('status.inactive')}</Option>
-            <Option value="INTERNAL">Internal</Option>
+            <Option value="INTERNAL">{t('status.internal')}</Option>
           </Select>
         </Form.Item>
 

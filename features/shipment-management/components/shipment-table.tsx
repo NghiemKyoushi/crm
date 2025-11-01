@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  Tag,
-  DatePicker,
-  Select,
-  Modal,
-  Tooltip,
-  Table,
-} from "antd";
+import { Form, Button, Tag, Table, Modal } from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -26,17 +16,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Order, OrderItem } from "@/types/shipment-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import {
-  EyeOutlined,
-  EditOutlined,
-  ExclamationCircleOutlined,
-  DownOutlined,
-} from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import ShipmentFilter, { FilterTypeShipment } from "./shipment-filter";
 
-// === Utility: Remove undefined fields from object ===
 function removeUndefinedFields<T extends Record<string, any>>(
   obj: T
 ): Partial<T> {
@@ -50,10 +32,6 @@ function removeUndefinedFields<T extends Record<string, any>>(
   return result;
 }
 
-/**
- * Compare two filter objects. Return true if they are shallow equal.
- * Note: If a value is array/object reference shallow equality is used.
- */
 function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
   const keysA = Object.keys(objA);
   const keysB = Object.keys(objB);
@@ -64,10 +42,38 @@ function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
   return true;
 }
 
+import { updateStatusPackaged } from "@/features/order-hub/apis/orderhub";
+
+function useConfirmPacked() {
+  const [loading, setLoading] = useState(false);
+
+  return {
+    mutate: async (params: { tracking_ship: string }, callbacks: any) => {
+      setLoading(true);
+      try {
+        await updateStatusPackaged({ shipping_code: params.tracking_ship });
+        setLoading(false);
+        callbacks?.onSuccess?.();
+      } catch (error: any) {
+        setLoading(false);
+        callbacks?.onError?.(
+          error || {
+            response: { data: { localizedMessage: "Thất bại" } },
+          }
+        );
+      }
+    },
+    isLoading: loading,
+  };
+}
+
 const ProductManagement: React.FC = () => {
   const [form] = Form.useForm();
   const [page, setPage] = useState(0);
   const [orderDetail, setOrderDetail] = useState<Order>();
+  const [packedOrder, setPackedOrder] = useState<Order | null>(null);
+  const [isPackedModalOpen, setIsPackedModalOpen] = useState(false);
+
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
@@ -87,15 +93,10 @@ const ProductManagement: React.FC = () => {
     to_date: undefined,
   });
 
-  // Keep previous filter object to detect truthy change (for forcing refresh if object is same keys but values are strictly equal)
   const prevFiltersRef = useRef<FilterTypeShipment>(filters);
-
-  // Khi setFilters, nếu các key/values giống nhau thì vẫn cần force lại API: Chúng ta sẽ tạo ra 1 biến random fakeKey gắn vào params để force react-query gọi lại
-  // Hoặc có thể dùng page để force gọi lại, nhưng dễ nhất là có thêm forceKey mỗi lần dùng filter
 
   const [forceFilterKey, setForceFilterKey] = useState<number>(Date.now());
 
-  // Construct query params by removing undefined + add forceFilterKey để trigger refetch
   const filterQueryParams = {
     ...removeUndefinedFields({
       status: filters.status || [
@@ -103,6 +104,7 @@ const ProductManagement: React.FC = () => {
         OrderStatusType.READY_TO_SHIP,
         OrderStatusType.SHIPPING_REQUEST_CLIENT,
         OrderStatusType.SHIPPED,
+        OrderStatusType.PACKED,
       ],
       date: filters.date,
       search: filters.search,
@@ -116,15 +118,18 @@ const ProductManagement: React.FC = () => {
       note_admin: filters.note_admin,
       from_date: filters.from_date,
       to_date: filters.to_date,
+      customer_code: filters.customer_code,
+      email: filters.email,
+      phone_number: filters.phone_number,
     }),
   };
 
-  const { data: listOrder,isPending } = useListOrderTracking({
+  const { data: listOrder, isPending } = useListOrderTracking({
     page,
     size: 10,
     ...filterQueryParams,
   });
-  console.log("listOrder", listOrder, page);
+  //console.log("listOrder", listOrder, page);
 
   const [isOpenTrackingOrder, setIsOpenTrackingOrder] = useState(false);
 
@@ -133,7 +138,6 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleFinish = (newFilters: FilterTypeShipment) => {
-    // Nếu filter cũ giống filter mới thì vẫn force update bằng cách tăng force key, để gọi lại API
     if (
       shallowEqual(
         removeUndefinedFields(filters),
@@ -148,6 +152,7 @@ const ProductManagement: React.FC = () => {
   };
 
   const useCompleteShippingMutation = useCompleteShippingOrder();
+  const useConfirmPackedMutation = useConfirmPacked();
 
   const columns: ColumnsType<Order> = [
     {
@@ -299,7 +304,7 @@ const ProductManagement: React.FC = () => {
     {
       title: "Hành Động",
       key: "status_actions",
-      width: 160,
+      width: 200,
       align: "center",
       fixed: "right",
       onCell: () => ({
@@ -361,6 +366,10 @@ const ProductManagement: React.FC = () => {
             color = "red";
             text = t("status.cancelled");
             break;
+          case OrderStatusType.PACKED:
+            color = "green";
+            text = t("status.packed");
+            break;
           default:
             color = "default";
             text = status;
@@ -383,7 +392,20 @@ const ProductManagement: React.FC = () => {
             >
               {text}
             </Tag>
+            {/* Nút "Đã đóng hàng" sẽ luôn hiện, nhưng có thể condition status nếu cần */}
             {status === OrderStatusType.SHIPPING_REQUEST_CLIENT && (
+              <Button
+                size="small"
+                className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                onClick={() => {
+                  setPackedOrder(record);
+                  setIsPackedModalOpen(true);
+                }}
+              >
+                Đã đóng hàng
+              </Button>
+            )}
+            {status === OrderStatusType.PACKED && (
               <Button
                 size="small"
                 className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
@@ -417,7 +439,11 @@ const ProductManagement: React.FC = () => {
             dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
             rowKey="tracking_ship"
             pageSize={10}
-            page={typeof listOrder?.current_page === "number" ? listOrder.current_page + 1 : 0}
+            page={
+              typeof listOrder?.current_page === "number"
+                ? listOrder.current_page + 1
+                : 0
+            }
             onPageChange={handleChangePage}
             response={listOrder}
             loading={isPending}
@@ -447,6 +473,49 @@ const ProductManagement: React.FC = () => {
           />
         </EnhancedTableWrapper>
       </div>
+
+      <Modal
+        title="Xác nhận đã đóng hàng"
+        open={isPackedModalOpen}
+        onOk={() => {
+          if (packedOrder) {
+            useConfirmPackedMutation.mutate(
+              { tracking_ship: packedOrder.tracking_ship },
+              {
+                onSuccess: () => {
+                  toast.success("Xác nhận đã đóng hàng thành công!");
+                  queryClient.invalidateQueries({
+                    queryKey: ["listorderTracking"],
+                  });
+                  setIsPackedModalOpen(false);
+                  setPackedOrder(null);
+                },
+                onError: (err: any) =>
+                  toast.error(
+                    err.response?.data?.localizedMessage ||
+                      t("common.error") ||
+                      "Có lỗi"
+                  ),
+              }
+            );
+          }
+        }}
+        okText="Xác nhận"
+        cancelText="Huỷ"
+        confirmLoading={useConfirmPackedMutation.isLoading}
+        onCancel={() => {
+          setIsPackedModalOpen(false);
+          setPackedOrder(null);
+        }}
+      >
+        <div>
+          Bạn có chắc muốn xác nhận{" "}
+          <span className="text-blue-600 font-medium">
+            {packedOrder?.tracking_ship}
+          </span>{" "}
+          đã đóng hàng?
+        </div>
+      </Modal>
 
       {orderDetail && (
         <TrackingModalShip
@@ -511,6 +580,8 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       case OrderStatusType.SHIPPED:
         return "volcano";
       case OrderStatusType.SHIPPING_REQUEST_CLIENT:
+        return "magenta";
+      case OrderStatusType.PACKED:
         return "magenta";
       default:
         return "default";
