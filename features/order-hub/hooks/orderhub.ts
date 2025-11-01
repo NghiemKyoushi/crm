@@ -37,19 +37,11 @@ import { FeeData } from "@/features/fee-settting/components/shipping-service-for
 import { FilterType } from "../components/order-hub-filter";
 import { FilterTypeShipment } from "@/features/shipment-management/components/shipment-filter";
 
-export const useListOrder = (params: FilterType
-//   {
-//   page: number;
-//   size: number;
-//   status?: string;
-//   search?: string;
-//   date?: string;
-//   type?: number;
-// }
-) => {
+export const useListOrder = (params: FilterType) => {
   return useQuery<InvoiceResponse>({
     queryKey: ["listorder", params],
     queryFn: () => getListOrder(params),
+    
     // keepPreviousData: true,
   });
 };
@@ -229,8 +221,7 @@ export function extractPathId(url?: string): string | null {
 
 export const useListDataGeneral = (params?: { customerGroupId?: number }) => {
   return useQuery({
-    queryKey: ["listDataGeneral", params], // thêm params vào key để cache riêng
+    queryKey: ["listDataGeneral", params],
     queryFn: () => getDataGeneral(params),
-    // enabled: !!params?.customerGroupId || params === undefined, 
   });
 };

@@ -118,6 +118,8 @@ export const API_TYPE_CONST = {
   SCAN_TRACKING_CODE: `${FEATURE}/admin/tracking/scan-tracking`,
   ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
   COMPLETE_ORDER_ARRIVED_VN: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
+  
+  TRACKING_PACKAGED:`${FEATURE}/admin/orders/packing`,
   MANAGE_DEBTS: `${FEATURE}/admin/debts`,
   PARTNER_LIST: `${FEATURE}/admin/users/get-all-partner`,
   CREATE_QR_DEBT: `${FEATURE}/admin/debts/create-debt`,
