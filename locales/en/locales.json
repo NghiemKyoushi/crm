@@ -654,8 +654,10 @@
     "actions": "Actions",
     "manageJPY": "Manage JPY",
     "manageUSD": "Manage USD",
+    "manageKG": "Manage KG",
     "overviewJPY": "JPY Overview",
     "overviewUSD": "USD Overview",
+    "overviewKG": "KG Overview",
     "fifoBalanceTitle": "FIFO Inventory Balance",
     "transactionsTab": "Transactions",
     "profitLossTab": "Profit/Loss",
@@ -724,7 +726,11 @@
     "date": "Date",
     "totalPartners": "Total Partners",
     "totalPurchase": "Total Purchase",
-    "totalRemaining": "Total Remaining"
+    "totalRemaining": "Total Remaining",
+    "unit": "Unit",
+    "quantity": "Quantity",
+    "feePerKg":"Phí/Kg",
+    "amountMoney":"Amount Money (VND)"
   },
   "categoryCustomer": {
     "title": "Customer Classification & Associated Policies",
