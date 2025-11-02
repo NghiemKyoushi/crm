@@ -60,7 +60,7 @@ export default function FIFOMaterialManagement() {
     queryFn: () => getListPartner({ page, page_size: 10 }),
   });
 
-  console.log('partnerData', partnerData);
+  console.log("partnerData", partnerData);
   // Queries
   const { data: fifoBalanceData } = useFifoBalance();
   const createMutation = useCreateNewMaterial();
@@ -73,7 +73,9 @@ export default function FIFOMaterialManagement() {
       const payload = {
         partnerId: values.partnerId,
         amount:
-          transactionType === "incoming" ? values.amount : -Math.abs(values.amount),
+          transactionType === "incoming"
+            ? values.amount
+            : -Math.abs(values.amount),
         currencyCode: activeTab,
         exchangeRate: values.exchangeRate,
         note: values.note || undefined,
@@ -95,9 +97,7 @@ export default function FIFOMaterialManagement() {
         // Validation errors
         return;
       }
-      message.error(
-        error.response?.data?.message || t("common.error")
-      );
+      message.error(error.response?.data?.message || t("common.error"));
     }
   };
 
@@ -115,8 +115,8 @@ export default function FIFOMaterialManagement() {
         content: (
           <div>
             <p>
-              {t("partnerManage.fifoBalance")}: {currentBalance.fifoBalance.toLocaleString()}{" "}
-              {activeTab}
+              {t("partnerManage.fifoBalance")}:{" "}
+              {currentBalance.fifoBalance.toLocaleString()} {activeTab}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               {t("partnerManage.note")}: {t("partnerManage.amountNegative")}
@@ -232,7 +232,10 @@ export default function FIFOMaterialManagement() {
             size="large"
             className="fifo-sub-tabs"
           >
-            <TabPane tab={t("partnerManage.transactionsTab")} key="transactions">
+            <TabPane
+              tab={t("partnerManage.transactionsTab")}
+              key="transactions"
+            >
               <div className="fifo-content-area">
                 <TransactionList
                   currencyCode="JPY"
@@ -262,10 +265,78 @@ export default function FIFOMaterialManagement() {
             size="large"
             className="fifo-sub-tabs"
           >
-            <TabPane tab={t("partnerManage.transactionsTab")} key="transactions">
+            <TabPane
+              tab={t("partnerManage.transactionsTab")}
+              key="transactions"
+            >
               <div className="fifo-content-area">
                 <TransactionList
                   currencyCode="USD"
+                  onAddTransaction={() => setModalVisible(true)}
+                />
+              </div>
+            </TabPane>
+            <TabPane tab={t("partnerManage.profitLossTab")} key="profitloss">
+              <div className="fifo-content-area">
+                <ProfitLossSummaryComponent />
+                <OrderProfitLossTable />
+              </div>
+            </TabPane>
+            <TabPane tab={t("partnerManage.reportsTab")} key="reports">
+              <div className="fifo-content-area">
+                <ProfitLossChart />
+              </div>
+            </TabPane>
+          </Tabs>
+        </TabPane>
+
+        <TabPane tab={t("partnerManage.manageKG")} key="KG">
+          <Tabs
+            activeKey={activeSubTab}
+            onChange={setActiveSubTab}
+            type="card"
+            size="large"
+            className="fifo-sub-tabs"
+          >
+            <TabPane
+              tab={t("partnerManage.transactionsTab")}
+              key="transactions"
+            >
+              <div className="fifo-content-area">
+                <TransactionList
+                  currencyCode="KG"
+                  onAddTransaction={() => setModalVisible(true)}
+                />
+              </div>
+            </TabPane>
+            <TabPane tab={t("partnerManage.profitLossTab")} key="profitloss">
+              <div className="fifo-content-area">
+                <ProfitLossSummaryComponent />
+                <OrderProfitLossTable />
+              </div>
+            </TabPane>
+            <TabPane tab={t("partnerManage.reportsTab")} key="reports">
+              <div className="fifo-content-area">
+                <ProfitLossChart />
+              </div>
+            </TabPane>
+          </Tabs>
+        </TabPane>
+        <TabPane tab={t("partnerManage.manageSucharge")} key="PT">
+          <Tabs
+            activeKey={activeSubTab}
+            onChange={setActiveSubTab}
+            type="card"
+            size="large"
+            className="fifo-sub-tabs"
+          >
+            <TabPane
+              tab={t("partnerManage.transactionsTab")}
+              key="transactions"
+            >
+              <div className="fifo-content-area">
+                <TransactionList
+                  currencyCode="PT"
                   onAddTransaction={() => setModalVisible(true)}
                 />
               </div>
@@ -299,16 +370,9 @@ export default function FIFOMaterialManagement() {
         confirmLoading={createMutation.isPending}
         width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          requiredMark="optional"
-        >
+        <Form form={form} layout="vertical" requiredMark="optional">
           {/* Transaction Type */}
-          <Form.Item
-            label={t("partnerManage.transactionType")}
-            required
-          >
+          <Form.Item label={t("partnerManage.transactionType")} required>
             <Radio.Group
               value={transactionType}
               onChange={(e) => handleTransactionTypeChange(e.target.value)}
@@ -325,7 +389,13 @@ export default function FIFOMaterialManagement() {
           </Form.Item>
 
           {/* Currency (read-only, based on tab) */}
-          <Form.Item label={t("partnerManage.currencyCode")}>
+          <Form.Item
+            label={
+              activeTab === "KG"
+                ? t("partnerManage.unit")
+                : t("partnerManage.currencyCode")
+            }
+          >
             <Input value={activeTab} disabled size="large" />
           </Form.Item>
 
@@ -348,22 +418,20 @@ export default function FIFOMaterialManagement() {
               loading={isPartnerLoading}
               filterOption={(input, option) => {
                 const label = option?.label;
-                if (typeof label === 'string') {
+                if (typeof label === "string") {
                   return label.toLowerCase().includes(input.toLowerCase());
                 }
                 return false;
               }}
               options={partnerOptions}
-              notFoundContent={
-                isPartnerLoading ? <Spin size="small" /> : null
-              }
+              notFoundContent={isPartnerLoading ? <Spin size="small" /> : null}
               // If paging needed: onPopupScroll, etc.
             />
           </Form.Item>
 
           {/* Amount */}
           <Form.Item
-            label={t("partnerManage.amount")}
+            label={activeTab === "PT" ? t("partnerManage.amountMoney") : t("partnerManage.amount")}
             name="amount"
             rules={[
               {
@@ -375,14 +443,16 @@ export default function FIFOMaterialManagement() {
                 min: 0.01,
                 message: t("partnerManage.amountPositive"),
               },
-              ...(transactionType === "outgoing" && currentBalance
+              ...(transactionType === "outgoing" && currentBalance && activeTab !== "PT"
                 ? [
                     {
                       validator: (_: any, value: number) => {
                         if (value > currentBalance.fifoBalance) {
                           return Promise.reject(
                             new Error(
-                              `${t("partnerManage.fifoBalance")}: ${currentBalance.fifoBalance.toLocaleString()} ${activeTab}`
+                              `${t(
+                                "partnerManage.fifoBalance"
+                              )}: ${currentBalance.fifoBalance.toLocaleString()} ${activeTab}`
                             )
                           );
                         }
@@ -393,7 +463,7 @@ export default function FIFOMaterialManagement() {
                 : []),
             ]}
             extra={
-              transactionType === "outgoing" && currentBalance ? (
+              transactionType === "outgoing" && currentBalance && activeTab !== "PT" ? (
                 <span className="text-sm text-gray-500">
                   {t("partnerManage.fifoBalance")}:{" "}
                   {currentBalance.fifoBalance.toLocaleString()} {activeTab}
@@ -402,7 +472,7 @@ export default function FIFOMaterialManagement() {
             }
           >
             <InputNumber
-              placeholder={t("partnerManage.enterAmount")}
+              placeholder={ activeTab === "PT" ? t("partnerManage.amountMoney") : t("partnerManage.enterAmount")}
               style={{ width: "100%" }}
               size="large"
               min={0}
@@ -415,40 +485,43 @@ export default function FIFOMaterialManagement() {
           </Form.Item>
 
           {/* Exchange Rate */}
-          <Form.Item
-            label={t("partnerManage.exchangeRateLabel")}
-            name="exchangeRate"
-            rules={[
-              {
-                required: true,
-                message: t("partnerManage.exchangeRateLabel"),
-              },
-              {
-                type: "number",
-                min: 0.01,
-                message: t("partnerManage.exchangeRatePositive"),
-              },
-            ]}
-          >
-            <InputNumber
-              placeholder={t("partnerManage.exchangeRateLabel")}
-              style={{ width: "100%" }}
-              size="large"
-              min={0}
-              precision={2}
-              addonAfter="VND"
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          {activeTab !== "PT" && (
+            <Form.Item
+              label={
+                activeTab === "KG"
+                  ? t("partnerManage.feePerKg")
+                  : t("partnerManage.exchangeRateLabel")
               }
-              parser={(value) => value?.replace(/,/g, "") as any}
-            />
-          </Form.Item>
+              name="exchangeRate"
+              rules={[
+                {
+                  required: true,
+                  message: t("partnerManage.exchangeRateLabel"),
+                },
+                {
+                  type: "number",
+                  min: 0.01,
+                  message: t("partnerManage.exchangeRatePositive"),
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder={t("partnerManage.exchangeRateLabel")}
+                style={{ width: "100%" }}
+                size="large"
+                min={0}
+                precision={2}
+                addonAfter="VND"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+              />
+            </Form.Item>
+          )}
 
           {/* Note */}
-          <Form.Item
-            label={t("partnerManage.noteLabel")}
-            name="note"
-          >
+          <Form.Item label={t("partnerManage.noteLabel")} name="note">
             <Input.TextArea
               placeholder={t("partnerManage.notePlaceholder")}
               rows={3}
