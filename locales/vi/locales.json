@@ -654,8 +654,12 @@
     "actions": "Hành động",
     "manageJPY": "Quản lý JPY",
     "manageUSD": "Quản lý USD",
+    "manageKG": "Quản lý KG",
+    "manageSucharge": "Quản lý Phụ thu",
     "overviewJPY": "Tổng quan JPY",
     "overviewUSD": "Tổng quan USD",
+    "overviewKG": "Tổng quan KG",
+    "overviewSucharge": "Tổng quan Phụ thu",
     "fifoBalanceTitle": "Tồn kho theo FIFO",
     "transactionsTab": "Giao dịch",
     "profitLossTab": "Lãi/Lỗ",
@@ -724,7 +728,11 @@
     "date": "Ngày",
     "totalPartners": "Tổng Đối tác",
     "totalPurchase": "Tổng Mua",
-    "totalRemaining": "Tổng còn lại"
+    "totalRemaining": "Tổng còn lại",
+    "quantity": "Số lượng",
+    "unit": "Đơn vị",
+    "feePerKg":"Phí/Kg",
+    "amountMoney":"Số tiền (VND)"
   },
   "categoryCustomer": {
     "title": "Phân loại Khách hàng & Chính sách đi kèm",

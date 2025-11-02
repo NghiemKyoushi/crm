@@ -184,6 +184,8 @@ export const OrderProfitLossTable: React.FC = () => {
         >
           <Option value="JPY">JPY</Option>
           <Option value="USD">USD</Option>
+          <Option value="KG">KG</Option>
+          <Option value="PT">PT</Option>
         </Select>
       </div>
 
