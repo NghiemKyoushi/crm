@@ -6,6 +6,7 @@ import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useProfitLossSummary } from "../hooks/partner-manage-hook";
 import { ProfitLossSummary } from "@/types/partner";
+import { profitLossCurrencyCodes } from "./profit-loss-chart";
 
 const { Option } = Select;
 
@@ -181,10 +182,13 @@ export const ProfitLossSummaryComponent: React.FC = () => {
           <Option value={undefined}>
             {t("partnerManage.selectCurrency")}
           </Option>
-          <Option value="JPY">JPY</Option>
-          <Option value="USD">USD</Option>
-          <Option value="KG">KG</Option>
-          <Option value="PT">PT</Option>
+          {profitLossCurrencyCodes.map((cod) => {
+                return(
+                  <Option value={cod} key={cod}>
+                    {cod}
+                  </Option>
+                )
+            })}
         </Select>
       </div>
 

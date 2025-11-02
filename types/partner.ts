@@ -114,6 +114,7 @@ export interface MaterialTransactionRequest {
   currencyCode: string;
   exchangeRate: number;
   note?: string;
+  date?: string;
 }
 
 export interface RecalculateFifoParams {

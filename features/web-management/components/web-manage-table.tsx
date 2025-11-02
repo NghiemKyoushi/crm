@@ -39,11 +39,15 @@ const WebsiteManageTable: React.FC = () => {
   const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
   const [form] = Form.useForm();
   const [page, setPage] = useState(0);
-  const [search, setSearch] = useState<string>(""); // 👈 thêm search state
+  const [search, setSearch] = useState<string>("");
   const queryClient = useQueryClient();
   const [id, setId] = useState("");
   const [openConfirmDeleteCate, setOpenConfirmDeleteCate] = useState(false);
   const [proxyEnabled, setProxyEnabled] = useState(false);
+
+  // For auto-select region/currency when route changes
+  const [regionLocked, setRegionLocked] = useState(false);
+  const [currencyLocked, setCurrencyLocked] = useState(false);
 
   const { data } = useListWebsite({
     page,
@@ -54,17 +58,89 @@ const WebsiteManageTable: React.FC = () => {
   const updateWebMutation = useUpdateWebsite();
   const deleteWebMutation = useDeleteWebsite();
 
+  const { data: regionList } = useListRegion();
+  const { data: routeList } = useListRoutes();
+
+  // Helper: Given a routeId, returns info about 'US', 'JP', or null otherwise
+  const getMatchingRegionAndCurrency = (routeId: number) => {
+    // Route
+    const route = routeList?.data.find((r: any) => r.id === routeId);
+    const codeOrName = (route?.code || route?.name || "").toString().toUpperCase();
+
+    if (codeOrName.includes("US") || codeOrName === "US") {
+      // Find region with name/code contains 'US'
+      const region = regionList?.data.find(
+        (r: any) =>
+          (r.code && r.code.toUpperCase().includes("US")) ||
+          (r.name && r.name.toUpperCase().includes("US"))
+      );
+      return {
+        regionId: region?.id,
+        currency: "USD",
+      };
+    }
+    if (codeOrName.includes("JP") || codeOrName === "JP") {
+      const region = regionList?.data.find(
+        (r: any) =>
+          (r.code && r.code.toUpperCase().includes("JP")) ||
+          (r.name && r.name.toUpperCase().includes("JP"))
+      );
+      return {
+        regionId: region?.id,
+        currency: "JPY",
+      };
+    }
+    // No match
+    return null;
+  };
+
   const handleOpenModal = (record?: Website) => {
     if (record) {
       setEditingWebsite(record);
       form.setFieldsValue(record);
       setProxyEnabled(record.proxy_enabled || false);
+      setRegionLocked(false);
+      setCurrencyLocked(false);
     } else {
       setEditingWebsite(null);
       form.resetFields();
       setProxyEnabled(false);
+      setRegionLocked(false);
+      setCurrencyLocked(false);
     }
     setIsModalOpen(true);
+  };
+
+  // Listen to route_id change
+  const handleRouteChange = (routeIdValue: number) => {
+    // First set the value in form
+    form.setFieldValue("route_id", routeIdValue);
+
+    const matched = getMatchingRegionAndCurrency(routeIdValue);
+
+    if (matched && matched.regionId) {
+      // Region auto selection
+      form.setFieldValue("region_id", matched.regionId);
+      setRegionLocked(true);
+    } else {
+      setRegionLocked(false);
+    }
+    if (matched && matched.currency) {
+      form.setFieldValue("currency_code", matched.currency);
+      setCurrencyLocked(true);
+    } else {
+      setCurrencyLocked(false);
+    }
+  };
+
+  const handleRegionChange = (regionIdValue: number) => {
+    // If region auto-locked, keep its value and do nothing
+    if (!regionLocked) form.setFieldValue("region_id", regionIdValue);
+  };
+
+  const handleCurrencyChange = (currencyValue: string) => {
+    // If currency locked, keep its value
+    if (!currencyLocked) form.setFieldValue("currency_code", currencyValue);
   };
 
   const handleSave = () => {
@@ -152,9 +228,6 @@ const WebsiteManageTable: React.FC = () => {
   const handleOpenSelectorConfig = (record: Website) => {
     router.push(`/website-manage/selector-config?id=${record.id}`);
   };
-
-  const { data: regionList } = useListRegion();
-  const { data: routeList } = useListRoutes();
 
   const columns: ColumnsType<Website> = [
     { title: t("websiteManage.table.name"), dataIndex: "name", key: "name" },
@@ -284,25 +357,6 @@ const WebsiteManageTable: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label={t("websiteManage.form.region")}
-            name="region_id"
-            rules={[
-              {
-                required: true,
-                message: t("websiteManage.form.requiredRegion"),
-              },
-            ]}
-          >
-            <Select placeholder={t("websiteManage.form.placeholderRegion")}>
-              {regionList?.data?.map((region: any) => (
-                <Select.Option key={region.id} value={region.id}>
-                  {region.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
             label={t("websiteManage.form.route")}
             name="route_id"
             rules={[
@@ -312,7 +366,11 @@ const WebsiteManageTable: React.FC = () => {
               },
             ]}
           >
-            <Select placeholder={t("websiteManage.form.placeholderRoute")}>
+            <Select
+              placeholder={t("websiteManage.form.placeholderRoute")}
+              onChange={handleRouteChange}
+              allowClear
+            >
               {routeList?.data?.map((item: any) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
@@ -320,6 +378,31 @@ const WebsiteManageTable: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
+
+          <Form.Item
+            label={t("websiteManage.form.region")}
+            name="region_id"
+            rules={[
+              {
+                required: true,
+                message: t("websiteManage.form.requiredRegion"),
+              },
+            ]}
+          >
+            <Select
+              placeholder={t("websiteManage.form.placeholderRegion")}
+              onChange={handleRegionChange}
+              disabled={true}
+              allowClear
+            >
+              {regionList?.data?.map((region: any) => (
+                <Select.Option key={region.id} value={region.id}>
+                  {region.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             label={t("websiteManage.form.currency")}
             name="currency_code"
@@ -330,7 +413,12 @@ const WebsiteManageTable: React.FC = () => {
               },
             ]}
           >
-            <Select placeholder={""}>
+            <Select
+              placeholder={""}
+              onChange={handleCurrencyChange}
+              disabled={true}
+              allowClear
+            >
               <Select.Option value="JPY">JPY</Select.Option>
               <Select.Option value="USD">USD</Select.Option>
             </Select>

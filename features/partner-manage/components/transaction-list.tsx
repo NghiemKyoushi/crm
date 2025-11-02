@@ -206,16 +206,23 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         );
       },
     },
-    {
-      title: t("partnerManage.exchangeRateLabel"),
-      dataIndex: "exchangeRate",
-      key: "exchangeRate",
-      width: 130,
-      align: "right",
-      render: (value: number) => (
-        <span className="text-gray-700">{formatNumber(value)}</span>
-      ),
-    },
+    // Chỉ hiển thị cột exchangeRate nếu currencyCode có 'PT' hoặc 'KG'
+    ...(!currencyCode.includes("PT")
+      ? [
+          {
+            title: currencyCode.includes("KG")
+              ? t("partnerManage.feePerKg")
+              : t("partnerManage.exchangeRateLabel"),
+            dataIndex: "exchangeRate",
+            key: "exchangeRate",
+            width: 130,
+            align: "right" as const,
+            render: (value: number) => (
+              <span className="text-gray-700">{formatNumber(value)}</span>
+            ),
+          },
+        ]
+      : []),
     {
       title: t("partnerManage.note"),
       dataIndex: "note",
@@ -295,13 +302,15 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                 {t("partnerManage.addTransactionTitle")}
               </Button>
             )}
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={handleRecalculate}
-              loading={recalculateMutation.isPending}
-            >
-              {t("partnerManage.recalculateFifo")}
-            </Button>
+            {currencyCode && !currencyCode.includes("PT") && (
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleRecalculate}
+                loading={recalculateMutation.isPending}
+              >
+                {t("partnerManage.recalculateFifo")}
+              </Button>
+            )}
           </Space>
         </div>
 

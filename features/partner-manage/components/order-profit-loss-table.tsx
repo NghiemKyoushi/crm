@@ -5,6 +5,7 @@ import { Card, Table, Select, Tag, Space } from "antd";
 import { useTranslation } from "react-i18next";
 import { useOrderProfitLoss } from "../hooks/partner-manage-hook";
 import type { ColumnsType } from "antd/es/table";
+import { profitLossCurrencyCodes } from "./profit-loss-chart";
 
 const { Option } = Select;
 
@@ -79,9 +80,7 @@ export const OrderProfitLossTable: React.FC = () => {
       width: 150,
       fixed: "left",
       render: (invoiceNo: string, record) => (
-        <span className="text-blue-600 font-semibold">
-          {invoiceNo}
-        </span>
+        <span className="text-blue-600 font-semibold">{invoiceNo}</span>
       ),
     },
     {
@@ -182,79 +181,83 @@ export const OrderProfitLossTable: React.FC = () => {
           allowClear
           placeholder={t("partnerManage.selectCurrency")}
         >
-          <Option value="JPY">JPY</Option>
-          <Option value="USD">USD</Option>
-          <Option value="KG">KG</Option>
-          <Option value="PT">PT</Option>
+          {profitLossCurrencyCodes.map((cod) => {
+            return (
+              <Option value={cod} key={cod}>
+                {cod}
+              </Option>
+            );
+          })}
         </Select>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <Table
-        columns={columns}
-        dataSource={tableData}
-        loading={isLoading}
-        rowKey="orderId"
-        pagination={{
-          current: page + 1,
-          pageSize: pageSize,
-          total: data?.data.total || 0,
-          showSizeChanger: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} ${t("partnerManage.of")} ${total} ${t("partnerManage.itemsPerPage").split("/")[0]}`,
-          onChange: (newPage, newPageSize) => {
-            setPage(newPage - 1);
-            if (newPageSize) setPageSize(newPageSize);
-          },
-          pageSizeOptions: ["10", "20", "50", "100"],
-        }}
-        scroll={{ x: 1000 }}
-        size="middle"
-        summary={(pageData) => {
-          if (pageData.length === 0) return null;
+        <Table
+          columns={columns}
+          dataSource={tableData}
+          loading={isLoading}
+          rowKey="orderId"
+          pagination={{
+            current: page + 1,
+            pageSize: pageSize,
+            total: data?.data.total || 0,
+            showSizeChanger: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} ${t("partnerManage.of")} ${total} ${
+                t("partnerManage.itemsPerPage").split("/")[0]
+              }`,
+            onChange: (newPage, newPageSize) => {
+              setPage(newPage - 1);
+              if (newPageSize) setPageSize(newPageSize);
+            },
+            pageSizeOptions: ["10", "20", "50", "100"],
+          }}
+          scroll={{ x: 1000 }}
+          size="middle"
+          summary={(pageData) => {
+            if (pageData.length === 0) return null;
 
-          const totalProfit = pageData.reduce(
-            (sum, record) => sum + record.profitLossVnd,
-            0
-          );
-          const totalConsumed = pageData.reduce(
-            (sum, record) => sum + record.totalConsumed,
-            0
-          );
+            const totalProfit = pageData.reduce(
+              (sum, record) => sum + record.profitLossVnd,
+              0
+            );
+            const totalConsumed = pageData.reduce(
+              (sum, record) => sum + record.totalConsumed,
+              0
+            );
 
-          return (
-            <Table.Summary fixed>
-              <Table.Summary.Row className="bg-gray-50 font-semibold">
-                <Table.Summary.Cell index={0} colSpan={3} align="right">
-                  <span className="text-gray-700">
-                    {t("partnerManage.page")} {t("partnerManage.totalConsumed")}
-                    :
-                  </span>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={1} align="right">
-                  <span className="text-gray-800">
-                    {formatNumber(totalConsumed)}{" "}
-                    {currencyCode || ""}
-                  </span>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={2} align="right">
-                  <span
-                    className="font-bold"
-                    style={{
-                      color: totalProfit >= 0 ? "#52c41a" : "#ff4d4f",
-                    }}
-                  >
-                    {totalProfit >= 0 ? "+" : ""}
-                    {formatCurrency(totalProfit)}{" "}
-                    {t("partnerManage.currencySymbol")}
-                  </span>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={3} colSpan={3} />
-              </Table.Summary.Row>
-            </Table.Summary>
-          );
-        }}
-      />
+            return (
+              <Table.Summary fixed>
+                <Table.Summary.Row className="bg-gray-50 font-semibold">
+                  <Table.Summary.Cell index={0} colSpan={3} align="right">
+                    <span className="text-gray-700">
+                      {t("partnerManage.page")}{" "}
+                      {t("partnerManage.totalConsumed")}:
+                    </span>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={1} align="right">
+                    <span className="text-gray-800">
+                      {formatNumber(totalConsumed)} {currencyCode || ""}
+                    </span>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={2} align="right">
+                    <span
+                      className="font-bold"
+                      style={{
+                        color: totalProfit >= 0 ? "#52c41a" : "#ff4d4f",
+                      }}
+                    >
+                      {totalProfit >= 0 ? "+" : ""}
+                      {formatCurrency(totalProfit)}{" "}
+                      {t("partnerManage.currencySymbol")}
+                    </span>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={3} colSpan={3} />
+                </Table.Summary.Row>
+              </Table.Summary>
+            );
+          }}
+        />
       </div>
     </div>
   );
