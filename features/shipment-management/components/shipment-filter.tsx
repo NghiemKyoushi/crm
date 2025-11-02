@@ -93,7 +93,7 @@ export default function ShipmentFilter({
       phone_number: values.phone_number || undefined,
       customer_code: values.customer_code?.trim() || undefined,
       email: values.email?.trim() || undefined,
-
+      invoice_no: values.invoice_no?.trim() || undefined,
     };    
     onFilter(filters);
   };
@@ -118,6 +118,7 @@ export default function ShipmentFilter({
       email: undefined,
       phone_number: undefined,
       customer_code: undefined,
+      invoice_no: undefined,
     });
   };
 
@@ -242,6 +243,13 @@ export default function ShipmentFilter({
                 <Form.Item name="tracking_code" className="!mb-0">
                   <Input
                     placeholder="Mã tracking"
+                    className="!w-full !h-10 !text-xs"
+                    size="small"
+                  />
+                </Form.Item>
+                <Form.Item name="invoice_no" className="!mb-0">
+                  <Input
+                    placeholder="Mã đơn hàng"
                     className="!w-full !h-10 !text-xs"
                     size="small"
                   />
