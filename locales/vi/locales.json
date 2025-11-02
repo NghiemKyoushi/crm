@@ -732,7 +732,10 @@
     "quantity": "Số lượng",
     "unit": "Đơn vị",
     "feePerKg":"Phí/Kg",
-    "amountMoney":"Số tiền (VND)"
+    "amountMoney":"Số tiền (VND)",
+    "inputDate": "Ngày nhập",
+    "selectInputDate": "Vui lòng chọn ngày nhập",
+    "inputDatePlaceholder": "Chọn ngày"
   },
   "categoryCustomer": {
     "title": "Phân loại Khách hàng & Chính sách đi kèm",

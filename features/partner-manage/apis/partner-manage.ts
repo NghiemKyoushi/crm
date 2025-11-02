@@ -74,6 +74,7 @@ export const createNewMaterial = async (body: MaterialTransactionRequest) => {
     currency_code: body.currencyCode,
     exchange_rate: body.exchangeRate,
     note: body.note,
+    date: body.date,
   };
 
   console.log('createNewMaterial - Original body:', body);
