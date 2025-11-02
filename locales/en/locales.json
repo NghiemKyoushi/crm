@@ -730,7 +730,10 @@
     "unit": "Unit",
     "quantity": "Quantity",
     "feePerKg":"Phí/Kg",
-    "amountMoney":"Amount Money (VND)"
+    "amountMoney":"Amount Money (VND)",
+    "inputDate": "Input Date",
+    "selectInputDate": "Please select input date",
+    "inputDatePlaceholder": "Select date"
   },
   "categoryCustomer": {
     "title": "Customer Classification & Associated Policies",
