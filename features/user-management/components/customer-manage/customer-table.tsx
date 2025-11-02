@@ -162,6 +162,17 @@ export default function CustomerTable() {
       ),
     },
     {
+      title: t("table.customerCode"),
+      dataIndex: "customer_code",
+      key: "customer_code",
+      width: 150,
+      render: (text: string, record: CustomerModel) => (
+        <div>
+          <div className="text-sm text-gray-800">{record.customer_code}</div>
+        </div>
+      ),
+    },
+    {
       title: t("staffManage.phone"),
       dataIndex: "phone_number",
       key: "phone_number",

@@ -21,7 +21,17 @@ import { Dayjs } from "dayjs";
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-export const ProfitLossChart: React.FC = () => {
+// Only allowed currency codes
+export const profitLossCurrencyCodes: string[] = [
+  "JPY",
+  "USD",
+  "KG-US",
+  "KG-JP",
+  "PT-US",
+  "PT-JP",
+];
+
+export const ProfitLossChart: React.FC<{ code?: string }> = ({ code }) => {
   const { t } = useTranslation();
   const [currencyCode, setCurrencyCode] = useState<string>("JPY");
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -113,10 +123,15 @@ export const ProfitLossChart: React.FC = () => {
             onChange={setCurrencyCode}
             style={{ width: 100 }}
           >
-            <Option value="JPY">JPY</Option>
-            <Option value="USD">USD</Option>
-            <Option value="KG">KG</Option>
-            <Option value="PT">PT</Option>
+            {profitLossCurrencyCodes.map((cod) => {
+              // if(code && cod.includes(code)){
+                return(
+                  <Option value={cod} key={cod}>
+                    {cod}
+                  </Option>
+                )
+              // }
+            })}
           </Select>
           <RangePicker
             value={dateRange}

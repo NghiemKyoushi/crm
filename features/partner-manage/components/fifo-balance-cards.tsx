@@ -6,7 +6,12 @@ import { useTranslation } from "react-i18next";
 import { useFifoBalance } from "../hooks/partner-manage-hook";
 import { CurrencyBalance } from "@/types/partner";
 
-export const FifoBalanceCards: React.FC = () => {
+interface FifoBalanceCardsProps {
+  JP?: boolean;
+  US?: boolean;
+}
+
+export const FifoBalanceCards: React.FC<FifoBalanceCardsProps> = ({ JP, US }) => {
   const { t } = useTranslation();
   const { data, isLoading, error } = useFifoBalance();
 
@@ -26,7 +31,18 @@ export const FifoBalanceCards: React.FC = () => {
     );
   }
 
-  const currencyBalances = data.data;
+  // Filter currencyBalances according to JP/US props
+  let currencyBalances = data.data;
+  if (JP && !US) {
+    currencyBalances = currencyBalances.filter((item) =>
+      item.currencyCode.includes("JP")
+    );
+  } else if (US && !JP) {
+    currencyBalances = currencyBalances.filter((item) =>
+      item.currencyCode.includes("US")
+    );
+  }
+  // If both or none are provided, show all
 
   const getCurrencyColor = (currencyCode: string): string => {
     switch (currencyCode) {
@@ -100,19 +116,25 @@ export const FifoBalanceCards: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-gray-100">
                   <div className="text-center">
-                    <div style={{ fontSize: "10px" }} className="text-gray-400">Nhập</div>
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">
+                      Nhập
+                    </div>
                     <div style={{ fontSize: "11px" }} className="font-semibold text-green-600">
                       +{formatNumber(balance.totalIncoming)}
                     </div>
                   </div>
                   <div className="text-center">
-                    <div style={{ fontSize: "10px" }} className="text-gray-400">Xuất</div>
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">
+                      Xuất
+                    </div>
                     <div style={{ fontSize: "11px" }} className="font-semibold text-red-600">
                       -{formatNumber(balance.totalOutgoing)}
                     </div>
                   </div>
                   <div className="text-center">
-                    <div style={{ fontSize: "10px" }} className="text-gray-400">GD</div>
+                    <div style={{ fontSize: "10px" }} className="text-gray-400">
+                      GD
+                    </div>
                     <div style={{ fontSize: "11px" }} className="font-semibold text-blue-600">
                       {balance.transactionCount}
                     </div>
