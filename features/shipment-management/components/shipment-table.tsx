@@ -121,6 +121,7 @@ const ProductManagement: React.FC = () => {
       customer_code: filters.customer_code,
       email: filters.email,
       phone_number: filters.phone_number,
+      invoice_no: filters.invoice_no,
     }),
   };
 
