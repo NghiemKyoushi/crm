@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Form, Input, InputNumber, Modal, Upload, message } from "antd";
 import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
 import { VIEW_IMAGE } from "@/constants/api-type";
 import { uploadImage } from "@/features/user-profile/hooks/user-profile";
-import { CreateCmsCategoryBody, createCmsCategory } from "../apis/categories";
+import { CmsCategory, CreateCmsCategoryBody, UpdateCmsCategoryBody, createCmsCategory, updateCmsCategory } from "../apis/categories";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
 
@@ -13,9 +13,10 @@ type Props = {
     open: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    category?: CmsCategory; // if provided -> edit mode
 };
 
-export default function CreateCategoryModal({ open, onClose, onSuccess }: Props) {
+export default function CreateCategoryModal({ open, onClose, onSuccess, category }: Props) {
     const [form] = Form.useForm<CreateCmsCategoryBody>();
     const [uploading, setUploading] = useState(false);
     const imageId = Form.useWatch("image_id", form);
@@ -25,10 +26,38 @@ export default function CreateCategoryModal({ open, onClose, onSuccess }: Props)
         return `${base}/${VIEW_IMAGE}${imageId}`;
     }, [imageId]);
 
+    // Update form values when category or open changes
+    useEffect(() => {
+        if (open) {
+            if (category) {
+                form.setFieldsValue({
+                    status: category.status ?? "active",
+                    title: category.title,
+                    slug: category.slug,
+                    short_desc: category.short_desc,
+                    order_index: category.order_index ?? 1,
+                    image_id: category.image_id,
+                });
+            } else {
+                form.resetFields();
+                form.setFieldsValue({
+                    status: "active",
+                    order_index: 1,
+                });
+            }
+        }
+    }, [open, category, form]);
+
     const { mutateAsync, isLoading } = useMutation({
-        mutationFn: createCmsCategory,
+        mutationFn: async (payload: CreateCmsCategoryBody | UpdateCmsCategoryBody) => {
+            if (category) {
+                await updateCmsCategory(category.id, payload as UpdateCmsCategoryBody);
+            } else {
+                await createCmsCategory(payload as CreateCmsCategoryBody);
+            }
+        },
         onSuccess: () => {
-            message.success("Category created");
+            message.success(category ? "Category updated" : "Category created");
             onSuccess?.();
             form.resetFields();
             onClose();
@@ -39,14 +68,10 @@ export default function CreateCategoryModal({ open, onClose, onSuccess }: Props)
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            // Ensure image_id is provided, otherwise show error
-            if (!values.image_id) {
-                message.error("Please upload an image");
-                return;
-            }
             const payload: CreateCmsCategoryBody = { 
                 status: "active", 
-                ...values 
+                ...values,
+                image_id: values.image_id ?? null,
             } as CreateCmsCategoryBody;
             await mutateAsync(payload);
         } catch (error: any) {
@@ -55,20 +80,31 @@ export default function CreateCategoryModal({ open, onClose, onSuccess }: Props)
                 // Antd validation errors - they will be shown automatically
                 return;
             }
-            console.error("Error creating category:", error);
+            console.error("Error saving category:", error);
         }
     };
 
     return (
         <Modal
-            title="Create CMS Category"
+            title={category ? "Update CMS Category" : "Create CMS Category"}
             open={open}
             onCancel={onClose}
             onOk={handleOk}
             confirmLoading={isLoading}
-            okText="Create"
+            okText={category ? "Update" : "Create"}
         >
-            <Form form={form} layout="vertical" initialValues={{ status: "active", order_index: 1 }}>
+            <Form 
+                form={form} 
+                layout="vertical" 
+                initialValues={{ 
+                    status: category?.status ?? "active", 
+                    title: category?.title,
+                    slug: category?.slug,
+                    short_desc: category?.short_desc,
+                    order_index: category?.order_index ?? 1,
+                    image_id: category?.image_id,
+                }}
+            >
                 <Form.Item label="Cover Image">
                     <Upload.Dragger
                         accept="image/*"
@@ -119,7 +155,7 @@ export default function CreateCategoryModal({ open, onClose, onSuccess }: Props)
                 <Form.Item name="order_index" label="Order Index" rules={[{ required: true }]}>
                     <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
-                <Form.Item name="image_id" rules={[{ required: true, message: "Please upload image" }]} hidden>
+                <Form.Item name="image_id" hidden>
                     <Input />
                 </Form.Item>
                 <Form.Item name="status" hidden>

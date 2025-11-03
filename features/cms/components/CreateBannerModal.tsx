@@ -119,7 +119,7 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
                     <Input placeholder="https://..." />
                 </Form.Item>
                 <Form.Item name="section" label="Section" rules={[{ required: true }]}>
-                    <Select options={[{ value: "carousel", label: "carousel" }, { value: "sidebar", label: "sidebar" }]} />
+                    <Select options={[{ value: "hero", label: "hero" }, { value: "carousel", label: "carousel" }, { value: "sidebar", label: "sidebar" }]} />
                 </Form.Item>
                 <Form.Item name="order_index" label="Order" rules={[{ required: true }]}>
                     <InputNumber min={0} style={{ width: "100%" }} />

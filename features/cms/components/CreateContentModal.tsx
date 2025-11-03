@@ -8,7 +8,7 @@ import { uploadImage } from "@/features/user-profile/hooks/user-profile";
 import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent } from "../apis/contents";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
-import TiptapEditor from "@/features/order-hub/components/TiptapEditor";
+import CmsTiptapEditor from "./CmsTiptapEditor";
 
 type Props = {
     open: boolean;
@@ -223,7 +223,7 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                 </Form.Item>
                 {(contentType === "html" || contentType === "text" || !contentType) && (
                     <Form.Item label="Body" required>
-                        <TiptapEditor
+                        <CmsTiptapEditor
                             value={bodyValue}
                             onChange={(html) => {
                                 setBodyValue(html);

@@ -35,8 +35,33 @@ export default function CreateSettingModal({ open, onClose, onSuccess, setting }
 
     const handleOk = async () => {
         const values = await form.validateFields();
-        await mutateAsync(values);
+        const payload: CreateCmsSettingBody | UpdateCmsSettingBody = setting
+            ? { key: setting.key, value: values.value, description: values.description, is_enabled: values.is_enabled }
+            : values;
+        await mutateAsync(payload);
     };
+
+    const toBoolean = (v: unknown): boolean => {
+        if (typeof v === "boolean") return v;
+        if (typeof v === "number") return v !== 0;
+        if (typeof v === "string") {
+            const s = v.trim().toLowerCase();
+            return s === "true" || s === "1" || s === "yes" || s === "y";
+        }
+        return false;
+    };
+
+    React.useEffect(() => {
+        if (!open) return;
+        if (setting) {
+            form.setFieldsValue({
+                key: setting.key,
+                value: setting.value,
+                description: setting.description,
+                is_enabled: toBoolean((setting as any).is_enabled ?? (setting as any).value),
+            });
+        }
+    }, [open, setting, form]);
 
     return (
         <Modal
@@ -55,12 +80,16 @@ export default function CreateSettingModal({ open, onClose, onSuccess, setting }
                     key: setting?.key,
                     value: setting?.value,
                     description: setting?.description,
-                    is_enabled: setting?.is_enabled ?? true,
+                    is_enabled: toBoolean((setting as any)?.is_enabled ?? (setting as any)?.value ?? true),
                 }}
             >
-                {!setting && (
+                {!setting ? (
                     <Form.Item name="key" label="Key" rules={[{ required: true }]}>
                         <Input placeholder="login_enabled" />
+                    </Form.Item>
+                ) : (
+                    <Form.Item label="Key">
+                        <Input value={setting.key} disabled />
                     </Form.Item>
                 )}
                 <Form.Item name="value" label="Value" rules={[{ required: true }]}>

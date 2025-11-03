@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
-import { Button, Popconfirm, Table, message } from "antd";
+import { Button, Popconfirm, Table, message, Select } from "antd";
 import { useCmsPages } from "../hooks/useCmsPages";
 import CreatePageModal from "../components/CreatePageModal";
 import { deleteCmsPage } from "../apis/pages";
 import { useCmsCategories, useCmsCategoryDetail, useInvalidateCategories } from "../hooks/useCmsCategories";
 import CategoryDetailDrawer from "../components/CategoryDetailDrawer";
+import { deleteCmsCategory } from "../apis/categories";
 import { useCmsContents, useInvalidateContents } from "../hooks/useCmsContents";
 import { deleteCmsContent } from "../apis/contents";
-import CreateContentModal from "../components/CreateContentModal";
 import { useCmsBanners, useInvalidateBanners } from "../hooks/useCmsBanners";
 import { deleteCmsBanner } from "../apis/banners";
 import CreateBannerModal from "../components/CreateBannerModal";
@@ -21,28 +22,57 @@ import { linkCategoryContent, linkCategoryRelation, linkPageCategory, linkPageCo
 import CreateCategoryModal from "../components/CreateCategoryModal";
 
 export default function CMSFeaturePage() {
+    const router = useRouter();
     const [activeKey, setActiveKey] = useState<string>("pages");
-    const { data: pages = [], isLoading, refetch } = useCmsPages();
+    // Pagination states
+    const [pagesPage, setPagesPage] = useState<number>(0);
+    const [pagesSize, setPagesSize] = useState<number>(20);
+    const { data: pagesData, isLoading, refetch } = useCmsPages(pagesPage, pagesSize);
+    const pages = Array.isArray(pagesData?.items) ? pagesData?.items : [];
+
+    // Debug logging for pages
+    React.useEffect(() => {
+        console.log("🔍 Pages raw data:", pagesData);
+        console.log("🔍 Pages processed:", pages);
+        console.log("🔍 Pages is array:", Array.isArray(pages));
+        console.log("🔍 Pages length:", pages?.length);
+    }, [pagesData, pages]);
     const [openCreate, setOpenCreate] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
-    const { data: categories = [], isLoading: loadingCategories } = useCmsCategories();
+    const [categoriesPage, setCategoriesPage] = useState<number>(0);
+    const [categoriesSize, setCategoriesSize] = useState<number>(20);
+    const { data: categoriesData, isLoading: loadingCategories } = useCmsCategories(categoriesPage, categoriesSize);
+    const categories = Array.isArray(categoriesData?.items) ? categoriesData?.items : [];
+
+    // Debug logging for categories
+    React.useEffect(() => {
+        console.log("🔍 Categories raw data:", categoriesData);
+        console.log("🔍 Categories processed:", categories);
+        console.log("🔍 Categories is array:", Array.isArray(categories));
+        console.log("🔍 Categories length:", categories?.length);
+    }, [categoriesData, categories]);
     const [viewCategoryId, setViewCategoryId] = useState<number | null>(null);
     const { data: categoryDetail } = useCmsCategoryDetail(viewCategoryId);
     const [openCreateCategory, setOpenCreateCategory] = useState(false);
+    const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
     const invalidateCategories = useInvalidateCategories();
-    const { data: contents = [], isLoading: loadingContents } = useCmsContents();
-    const [openCreateContent, setOpenCreateContent] = useState(false);
-    const [editingContentId, setEditingContentId] = useState<number | null>(null);
+    const [contentsPage, setContentsPage] = useState<number>(1); // contents API is 1-based
+    const [contentsSize, setContentsSize] = useState<number>(20);
+    const { data: contentsData, isLoading: loadingContents } = useCmsContents(contentsPage - 1, contentsSize);
+    const contents = Array.isArray(contentsData?.items) ? contentsData?.items : [];
     const invalidateContents = useInvalidateContents();
 
-    // Debug logging
+    // Debug logging for contents
     React.useEffect(() => {
-        console.log("🔍 Contents in component:", contents);
+        console.log("🔍 Contents raw data:", contentsData);
+        console.log("🔍 Contents processed:", contents);
+        console.log("🔍 Contents is array:", Array.isArray(contents));
         console.log("🔍 Contents length:", contents?.length);
         console.log("🔍 Loading contents:", loadingContents);
-    }, [contents, loadingContents]);
+    }, [contentsData, contents, loadingContents]);
     const [bannerPageId, setBannerPageId] = useState<number | null>(null);
-    const { data: banners = [], isLoading: loadingBanners } = useCmsBanners(bannerPageId);
+    const { data: bannersData, isLoading: loadingBanners } = useCmsBanners(bannerPageId);
+    const banners = Array.isArray(bannersData) ? bannersData : [];
     const invalidateBanners = useInvalidateBanners();
 
     // Set default bannerPageId to first page when pages are loaded
@@ -61,15 +91,43 @@ export default function CMSFeaturePage() {
     }, [banners, loadingBanners, bannerPageId]);
     const [openCreateBanner, setOpenCreateBanner] = useState(false);
     const [editingBannerId, setEditingBannerId] = useState<number | null>(null);
-    const { data: settings = [], isLoading: loadingSettings } = useCmsSettings();
+    const [settingsPage, setSettingsPage] = useState<number>(0);
+    const [settingsSize, setSettingsSize] = useState<number>(20);
+    const { data: settingsData, isLoading: loadingSettings } = useCmsSettings(settingsPage, settingsSize);
+    // Aggregate selectors – independent paginated sources for dropdowns
+    const [aggPagesPage, setAggPagesPage] = useState<number>(0);
+    const [aggPagesSize, setAggPagesSize] = useState<number>(20);
+    const aggPagesData = useCmsPages(aggPagesPage, aggPagesSize).data;
+    const aggPages = Array.isArray(aggPagesData?.items) ? aggPagesData?.items : [];
+
+    const [aggCategoriesPage, setAggCategoriesPage] = useState<number>(0);
+    const [aggCategoriesSize, setAggCategoriesSize] = useState<number>(20);
+    const aggCategoriesData = useCmsCategories(aggCategoriesPage, aggCategoriesSize).data;
+    const aggCategories = Array.isArray(aggCategoriesData?.items) ? aggCategoriesData?.items : [];
+
+    const [aggContentsPage, setAggContentsPage] = useState<number>(1);
+    const [aggContentsSize, setAggContentsSize] = useState<number>(20);
+    const aggContentsData = useCmsContents(aggContentsPage - 1, aggContentsSize).data;
+    const aggContents = Array.isArray(aggContentsData?.items) ? aggContentsData?.items : [];
+
+    // Aggregate selections state
+    const [aggSelectedCategoryForContent, setAggSelectedCategoryForContent] = useState<number | null>(null);
+    const [aggSelectedContent, setAggSelectedContent] = useState<number | null>(null);
+    const [aggSelectedCategoryForPage, setAggSelectedCategoryForPage] = useState<number | null>(null);
+    const [aggSelectedContentForPage, setAggSelectedContentForPage] = useState<number | null>(null);
+    const [aggParentCategoryId, setAggParentCategoryId] = useState<number | null>(null);
+    const [aggChildCategoryId, setAggChildCategoryId] = useState<number | null>(null);
+    const settings = Array.isArray(settingsData?.items) ? settingsData?.items : [];
     const invalidateSettings = useInvalidateSettings();
 
     // Debug logging for settings
     React.useEffect(() => {
-        console.log("🔍 Settings in component:", settings);
+        console.log("🔍 Settings raw data:", settingsData);
+        console.log("🔍 Settings processed:", settings);
+        console.log("🔍 Settings is array:", Array.isArray(settings));
         console.log("🔍 Settings length:", settings?.length);
         console.log("🔍 Loading settings:", loadingSettings);
-    }, [settings, loadingSettings]);
+    }, [settingsData, settings, loadingSettings]);
     const [openCreateSetting, setOpenCreateSetting] = useState(false);
     const [editingSettingId, setEditingSettingId] = useState<number | null>(null);
 
@@ -84,7 +142,15 @@ export default function CMSFeaturePage() {
                                 loading={isLoading}
                                 rowKey="id"
                                 dataSource={pages}
-                                pagination={false}
+                                pagination={{
+                                    current: pagesPage + 1,
+                                    pageSize: pagesSize,
+                                    total: pagesData?.totalElements,
+                                    onChange: (p, s) => {
+                                        setPagesPage(p - 1);
+                                        setPagesSize(s);
+                                    },
+                                }}
                                 columns={[
                                     { title: "ID", dataIndex: "id", width: 80 },
                                     { title: "Slug", dataIndex: "slug" },
@@ -125,7 +191,15 @@ export default function CMSFeaturePage() {
                                 loading={loadingCategories}
                                 rowKey="id"
                                 dataSource={categories}
-                                pagination={false}
+                                pagination={{
+                                    current: categoriesPage + 1,
+                                    pageSize: categoriesSize,
+                                    total: categoriesData?.totalElements,
+                                    onChange: (p, s) => {
+                                        setCategoriesPage(p - 1);
+                                        setCategoriesSize(s);
+                                    },
+                                }}
                                 columns={[
                                     { title: "ID", dataIndex: "id", width: 80 },
                                     { title: "Slug", dataIndex: "slug" },
@@ -135,9 +209,23 @@ export default function CMSFeaturePage() {
                                     { title: "Order", dataIndex: "order_index", width: 80 },
                                     {
                                         title: "Actions",
-                                        width: 120,
+                                        width: 220,
                                         render: (_: any, record: any) => (
-                                            <Button size="small" onClick={() => setViewCategoryId(record.id)}>View</Button>
+                                            <div className="flex gap-2">
+                                                <Button size="small" onClick={() => setViewCategoryId(record.id)}>View</Button>
+                                                <Button size="small" onClick={() => setEditingCategoryId(record.id)}>Edit</Button>
+                                                <Popconfirm
+                                                    title="Delete category?"
+                                                    okButtonProps={{ danger: true }}
+                                                    onConfirm={async () => {
+                                                        await deleteCmsCategory(record.id);
+                                                        message.success("Deleted");
+                                                        invalidateCategories();
+                                                    }}
+                                                >
+                                                    <Button size="small" danger>Delete</Button>
+                                                </Popconfirm>
+                                            </div>
                                         ),
                                     },
                                 ]}
@@ -154,7 +242,15 @@ export default function CMSFeaturePage() {
                                 loading={loadingContents}
                                 rowKey="id"
                                 dataSource={contents}
-                                pagination={false}
+                                pagination={{
+                                    current: contentsPage,
+                                    pageSize: contentsSize,
+                                    total: contentsData?.totalElements,
+                                    onChange: (p, s) => {
+                                        setContentsPage(p);
+                                        setContentsSize(s);
+                                    },
+                                }}
                                 columns={[
                                     { title: "ID", dataIndex: "id", width: 70 },
                                     { title: "Title", dataIndex: "title" },
@@ -167,7 +263,7 @@ export default function CMSFeaturePage() {
                                         width: 160,
                                         render: (_: any, record: any) => (
                                             <div className="flex gap-2">
-                                                <Button size="small" onClick={() => setEditingContentId(record.id)}>Edit</Button>
+                                                <Button size="small" onClick={() => router.push(`/cms/content/${record.id}`)}>Edit</Button>
                                                 <Popconfirm
                                                     title="Delete content?"
                                                     okButtonProps={{ danger: true }}
@@ -186,7 +282,7 @@ export default function CMSFeaturePage() {
                                 title={() => (
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold">Contents</span>
-                                        <Button type="primary" onClick={() => setOpenCreateContent(true)}>Add Content</Button>
+                                        <Button type="primary" onClick={() => router.push('/cms/content/new')}>Add Content</Button>
                                     </div>
                                 )}
                             />
@@ -194,17 +290,28 @@ export default function CMSFeaturePage() {
                         {activeKey === "banners" && (
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm">Page ID:</span>
-                                    <select
-                                        className="border rounded px-2 py-1"
-                                        value={bannerPageId ?? ""}
-                                        onChange={(e) => setBannerPageId(e.target.value ? Number(e.target.value) : null)}
-                                    >
-                                        <option value="">-- Select Page --</option>
-                                        {(pages || []).map((p: any) => (
-                                            <option key={p.id} value={p.id}>{p.title} (#{p.id})</option>
-                                        ))}
-                                    </select>
+                                    <span className="text-sm">Page:</span>
+                                    <Select
+                                        style={{ width: 280 }}
+                                        showSearch
+                                        placeholder="Select Page"
+                                        value={bannerPageId ?? undefined}
+                                        onChange={(v) => setBannerPageId(v || null)}
+                                        allowClear
+                                        options={(aggPages || []).map((p: any) => ({ value: p.id, label: `${p.title} (#${p.id})` }))}
+                                        dropdownRender={(menu) => (
+                                            <div>
+                                                {menu}
+                                                <div className="px-2 py-2 border-t border-gray-100">
+                                                    <div className="flex items-center justify-between">
+                                                        <Button size="small" disabled={aggPagesPage === 0} onClick={() => setAggPagesPage(Math.max(0, aggPagesPage - 1))}>Prev</Button>
+                                                        <span className="text-xs">Page {aggPagesPage + 1} / {Math.max(1, aggPagesData?.totalPages || 1)}</span>
+                                                        <Button size="small" disabled={(aggPagesData?.totalPages || 1) <= (aggPagesPage + 1)} onClick={() => setAggPagesPage(aggPagesPage + 1)}>Next</Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    />
                                     <Button type="primary" disabled={!bannerPageId} onClick={() => setOpenCreateBanner(true)}>Add Banner</Button>
                                 </div>
 
@@ -249,7 +356,15 @@ export default function CMSFeaturePage() {
                                 loading={loadingSettings}
                                 rowKey="id"
                                 dataSource={settings}
-                                pagination={false}
+                                pagination={{
+                                    current: settingsPage + 1,
+                                    pageSize: settingsSize,
+                                    total: settingsData?.totalElements,
+                                    onChange: (p, s) => {
+                                        setSettingsPage(p - 1);
+                                        setSettingsSize(s);
+                                    },
+                                }}
                                 columns={[
                                     { title: "ID", dataIndex: "id", width: 70 },
                                     { title: "Key", dataIndex: "key" },
@@ -296,17 +411,32 @@ export default function CMSFeaturePage() {
                                                 <option key={p.id} value={p.id}>{p.title} (#{p.id})</option>
                                             ))}
                                         </select>
-                                        <select className="border rounded px-2 py-1" id="agg-page-category-category">
-                                            <option value="">-- Select Category --</option>
-                                            {(categories || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Category"
+                                            id="agg-page-category-category"
+                                            value={aggSelectedCategoryForPage ?? undefined}
+                                            onChange={(v) => setAggSelectedCategoryForPage(v ?? null)}
+                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
                                         <Button
                                             type="primary"
                                             disabled={!bannerPageId}
                                             onClick={async () => {
-                                                const cat = (document.getElementById("agg-page-category-category") as HTMLSelectElement)?.value;
+                                                const cat = aggSelectedCategoryForPage;
                                                 if (!bannerPageId || !cat) return;
                                                 await linkPageCategory({ page_id: bannerPageId, category_id: Number(cat) });
                                                 message.success("Linked page-category");
@@ -317,7 +447,7 @@ export default function CMSFeaturePage() {
                                         <Button
                                             danger
                                             onClick={async () => {
-                                                const cat = (document.getElementById("agg-page-category-category") as HTMLSelectElement)?.value;
+                                                const cat = aggSelectedCategoryForPage;
                                                 if (!bannerPageId || !cat) return;
                                                 await unlinkPageCategory({ page_id: bannerPageId, category_id: Number(cat) });
                                                 message.success("Unlinked page-category");
@@ -331,23 +461,53 @@ export default function CMSFeaturePage() {
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
                                     <div className="font-semibold">Category − Content</div>
                                     <div className="flex flex-wrap gap-2 items-center">
-                                        <select className="border rounded px-2 py-1" id="agg-category-content-category">
-                                            <option value="">-- Select Category --</option>
-                                            {(categories || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
-                                        <select className="border rounded px-2 py-1" id="agg-category-content-content">
-                                            <option value="">-- Select Content --</option>
-                                            {(contents || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Category"
+                                            id="agg-category-content-category"
+                                            value={aggSelectedCategoryForContent ?? undefined}
+                                            onChange={(v) => setAggSelectedCategoryForContent(v ?? null)}
+                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Content"
+                                            id="agg-category-content-content"
+                                            value={aggSelectedContent ?? undefined}
+                                            onChange={(v) => setAggSelectedContent(v ?? null)}
+                                            options={(aggContents || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggContentsPage === 1} onClick={() => setAggContentsPage(Math.max(1, aggContentsPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggContentsPage} / {Math.max(1, aggContentsData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggContentsData?.totalPages || 1) <= aggContentsPage} onClick={() => setAggContentsPage(aggContentsPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
                                         <Button
                                             type="primary"
                                             onClick={async () => {
-                                                const cid = (document.getElementById("agg-category-content-category") as HTMLSelectElement)?.value;
-                                                const tid = (document.getElementById("agg-category-content-content") as HTMLSelectElement)?.value;
+                                                const cid = aggSelectedCategoryForContent;
+                                                const tid = aggSelectedContent;
                                                 if (!cid || !tid) return;
                                                 await linkCategoryContent({ category_id: Number(cid), content_id: Number(tid) });
                                                 message.success("Linked category-content");
@@ -358,8 +518,8 @@ export default function CMSFeaturePage() {
                                         <Button
                                             danger
                                             onClick={async () => {
-                                                const cid = (document.getElementById("agg-category-content-category") as HTMLSelectElement)?.value;
-                                                const tid = (document.getElementById("agg-category-content-content") as HTMLSelectElement)?.value;
+                                                const cid = aggSelectedCategoryForContent;
+                                                const tid = aggSelectedContent;
                                                 if (!cid || !tid) return;
                                                 await unlinkCategoryContent({ category_id: Number(cid), content_id: Number(tid) });
                                                 message.success("Unlinked category-content");
@@ -373,23 +533,55 @@ export default function CMSFeaturePage() {
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
                                     <div className="font-semibold">Page − Content</div>
                                     <div className="flex flex-wrap gap-2 items-center">
-                                        <select className="border rounded px-2 py-1" id="agg-page-content-page" value={bannerPageId ?? ""} onChange={(e) => setBannerPageId(e.target.value ? Number(e.target.value) : null)}>
-                                            <option value="">-- Select Page --</option>
-                                            {(pages || []).map((p: any) => (
-                                                <option key={p.id} value={p.id}>{p.title} (#{p.id})</option>
-                                            ))}
-                                        </select>
-                                        <select className="border rounded px-2 py-1" id="agg-page-content-content">
-                                            <option value="">-- Select Content --</option>
-                                            {(contents || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Page"
+                                            id="agg-page-content-page"
+                                            value={bannerPageId ?? undefined}
+                                            onChange={(v) => setBannerPageId(v || null)}
+                                            allowClear
+                                            options={(aggPages || []).map((p: any) => ({ value: p.id, label: `${p.title} (#${p.id})` }))}
+        
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggPagesPage === 0} onClick={() => setAggPagesPage(Math.max(0, aggPagesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggPagesPage + 1} / {Math.max(1, aggPagesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggPagesData?.totalPages || 1) <= (aggPagesPage + 1)} onClick={() => setAggPagesPage(aggPagesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Content"
+                                            id="agg-page-content-content"
+                                            value={aggSelectedContentForPage ?? undefined}
+                                            onChange={(v) => setAggSelectedContentForPage(v ?? null)}
+                                            options={(aggContents || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggContentsPage === 1} onClick={() => setAggContentsPage(Math.max(1, aggContentsPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggContentsPage} / {Math.max(1, aggContentsData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggContentsData?.totalPages || 1) <= aggContentsPage} onClick={() => setAggContentsPage(aggContentsPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
                                         <Button
                                             type="primary"
                                             disabled={!bannerPageId}
                                             onClick={async () => {
-                                                const tid = (document.getElementById("agg-page-content-content") as HTMLSelectElement)?.value;
+                                                const tid = aggSelectedContentForPage;
                                                 if (!bannerPageId || !tid) return;
                                                 await linkPageContent({ page_id: bannerPageId, content_id: Number(tid) });
                                                 message.success("Linked page-content");
@@ -400,7 +592,7 @@ export default function CMSFeaturePage() {
                                         <Button
                                             danger
                                             onClick={async () => {
-                                                const tid = (document.getElementById("agg-page-content-content") as HTMLSelectElement)?.value;
+                                                const tid = aggSelectedContentForPage;
                                                 if (!bannerPageId || !tid) return;
                                                 await unlinkPageContent({ page_id: bannerPageId, content_id: Number(tid) });
                                                 message.success("Unlinked page-content");
@@ -414,23 +606,53 @@ export default function CMSFeaturePage() {
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
                                     <div className="font-semibold">Category − Relation (Parent → Child)</div>
                                     <div className="flex flex-wrap gap-2 items-center">
-                                        <select className="border rounded px-2 py-1" id="agg-category-relation-parent">
-                                            <option value="">-- Select Parent --</option>
-                                            {(categories || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
-                                        <select className="border rounded px-2 py-1" id="agg-category-relation-child">
-                                            <option value="">-- Select Child --</option>
-                                            {(categories || []).map((c: any) => (
-                                                <option key={c.id} value={c.id}>{c.title} (#{c.id})</option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Parent"
+                                            id="agg-category-relation-parent"
+                                            value={aggParentCategoryId ?? undefined}
+                                            onChange={(v) => setAggParentCategoryId(v ?? null)}
+                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Child"
+                                            id="agg-category-relation-child"
+                                            value={aggChildCategoryId ?? undefined}
+                                            onChange={(v) => setAggChildCategoryId(v ?? null)}
+                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
                                         <Button
                                             type="primary"
                                             onClick={async () => {
-                                                const pid = (document.getElementById("agg-category-relation-parent") as HTMLSelectElement)?.value;
-                                                const cid = (document.getElementById("agg-category-relation-child") as HTMLSelectElement)?.value;
+                                                const pid = aggParentCategoryId;
+                                                const cid = aggChildCategoryId;
                                                 if (!pid || !cid) return;
                                                 await linkCategoryRelation({ parent_id: Number(pid), child_id: Number(cid) });
                                                 message.success("Linked category-relation");
@@ -441,8 +663,8 @@ export default function CMSFeaturePage() {
                                         <Button
                                             danger
                                             onClick={async () => {
-                                                const pid = (document.getElementById("agg-category-relation-parent") as HTMLSelectElement)?.value;
-                                                const cid = (document.getElementById("agg-category-relation-child") as HTMLSelectElement)?.value;
+                                                const pid = aggParentCategoryId;
+                                                const cid = aggChildCategoryId;
                                                 if (!pid || !cid) return;
                                                 await unlinkCategoryRelation({ parent_id: Number(pid), child_id: Number(cid) });
                                                 message.success("Unlinked category-relation");
@@ -485,21 +707,13 @@ export default function CMSFeaturePage() {
                     invalidateCategories();
                 }}
             />
-            <CreateContentModal
-                open={openCreateContent}
-                onClose={() => setOpenCreateContent(false)}
+            <CreateCategoryModal
+                open={editingCategoryId !== null}
+                category={(categories || []).find((c: any) => c.id === editingCategoryId)}
+                onClose={() => setEditingCategoryId(null)}
                 onSuccess={() => {
-                    setOpenCreateContent(false);
-                    invalidateContents();
-                }}
-            />
-            <CreateContentModal
-                open={editingContentId !== null}
-                content={(contents || []).find((c: any) => c.id === editingContentId)}
-                onClose={() => setEditingContentId(null)}
-                onSuccess={() => {
-                    setEditingContentId(null);
-                    invalidateContents();
+                    setEditingCategoryId(null);
+                    invalidateCategories();
                 }}
             />
             <CreateBannerModal

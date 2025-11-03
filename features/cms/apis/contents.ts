@@ -12,8 +12,18 @@ export type CmsContent = {
     position?: string;
 };
 
-export const getCmsContents = async (): Promise<CmsContent[]> => {
-    const res = await api.get(`/features/v1/admin/cms/contents`);
+export type CmsContentsResult = {
+    items: CmsContent[];
+    totalElements: number;
+    totalPages: number;
+    page: number;
+    size: number;
+};
+
+export const getCmsContents = async (page: number = 1, size: number = 20): Promise<CmsContentsResult> => {
+    const res = await api.get(`/features/v1/admin/cms/contents`, {
+        params: { page, size }
+    });
     // API wrapper returns { success, timestamp, code, message, message_key, data, errors }
     // Try multiple possible response structures
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,18 +33,32 @@ export const getCmsContents = async (): Promise<CmsContent[]> => {
     console.log("📦 getCmsContents payload.data:", payload?.data);
     console.log("📦 getCmsContents payload.data?.data:", payload?.data?.data);
     
-    // Try multiple structures: data, data.data, or direct array
+    // Handle pagination response structure
+    // Response: { data: { items: [...], currentPage: 0, pageSize: 20, ... } }
     let result: CmsContent[] = [];
-    if (Array.isArray(payload?.data)) {
+    let totalElements = payload?.data?.totalElements ?? payload?.data?.total ?? payload?.totalElements ?? 0;
+    let totalPages = payload?.data?.totalPages ?? payload?.totalPages ?? 1;
+    let currentPage = payload?.data?.currentPage ?? payload?.data?.page ?? page;
+    let pageSize = payload?.data?.pageSize ?? payload?.data?.size ?? size;
+    if (Array.isArray(payload?.data?.items)) {
+        // Pagination structure: { data: { items: [...], currentPage, pageSize, ... } }
+        result = payload.data.items;
+    } else if (Array.isArray(payload?.data)) {
         result = payload.data;
+    } else if (Array.isArray(payload?.data?.content)) {
+        result = payload.data.content;
+        totalElements = payload?.data?.totalElements ?? totalElements;
+        totalPages = payload?.data?.totalPages ?? totalPages;
+        currentPage = payload?.data?.number ?? currentPage;
+        pageSize = payload?.data?.size ?? pageSize;
     } else if (Array.isArray(payload?.data?.data)) {
         result = payload.data.data;
     } else if (Array.isArray(payload)) {
         result = payload;
     }
     
-    console.log("📦 getCmsContents final result:", result);
-    return result;
+    console.log("📦 getCmsContents final result:", { items: result, totalElements, totalPages, page: currentPage, size: pageSize });
+    return { items: result, totalElements, totalPages, page: currentPage, size: pageSize };
 };
 
 export type CreateCmsContentBody = {
@@ -60,6 +84,18 @@ export const updateCmsContent = async (id: number, body: UpdateCmsContentBody): 
 
 export const deleteCmsContent = async (id: number): Promise<void> => {
     await api.delete(`/features/v1/admin/cms/contents/${id}`);
+};
+
+export const getCmsContentDetail = async (id: number): Promise<CmsContent> => {
+    const res = await api.get(`/features/v1/admin/cms/contents/${id}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload: any = res.data;
+    
+    // Try multiple structures
+    if (payload?.data) {
+        return payload.data;
+    }
+    return payload;
 };
 
 
