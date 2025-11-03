@@ -19,7 +19,8 @@ export interface CustomerModel {
   category_id: number;
   email: string;
   group_id:number;
-  phone_number: string
+  phone_number: string;
+  customer_code: string;
 }
 
 export interface CustomerResponse {

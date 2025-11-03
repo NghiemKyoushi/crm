@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Card,
@@ -8,533 +8,596 @@ import {
   Input,
   Button,
   Select,
-  Typography,
-  Spin,
   InputNumber,
-  Empty,
+  Modal,
+  message,
+  Row,
+  Col,
+  Radio,
+  Spin,
+  DatePicker,
 } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDollarSign,
-  faMinus,
-  faPlus,
-  faSearch,
-  faTrash,
-  faUsd,
-  faUsers,
-  faWallet,
-  faYenSign,
-  faExchangeAlt,
-  faCalendarAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
-  useBankAccountsPartnerScreen,
   useCreateNewMaterial,
-  useDeleteMaterial,
-  useListMaterial,
-  useListMaterialSumary,
+  useFifoBalance,
 } from "../hooks/partner-manage-hook";
-import { FinanceSummary, PartnerTransaction } from "@/types/partner";
-import dayjs from "dayjs";
+import { FifoBalanceCards } from "./fifo-balance-cards";
+import { ProfitLossSummaryComponent } from "./profit-loss-summary";
+import { ProfitLossChart } from "./profit-loss-chart";
+import { OrderProfitLossTable } from "./order-profit-loss-table";
+import { TransactionList } from "./transaction-list";
+import { getListPartner } from "@/features/finance-manage/apis";
+import "./fifo-styles.css";
+import { Partner } from "@/features/finance-manage/components/tabs/bank-partner/modal/add-account-bank";
 import { toast } from "react-toastify";
-import { useQueryClient } from "@tanstack/react-query";
-import PopupConfirm from "@/components/PopupConfirm";
-const { Text } = Typography;
+import dayjs from "dayjs";
 
-export default function JPYManagementPage() {
+const { TabPane } = Tabs;
+const { Option } = Select;
+
+type TransactionType = "incoming" | "outgoing";
+
+type CurrencyTab = "JPY" | "USD"; // Only "JPY" or "USD" for the main tab
+type SubTab = "JPY" | "KG-JP" | "PT-JP" | "USD" | "KG-USD" | "PT-USD"; // Detailed sub-tabs based on main tab
+
+// Section tabs within subTab panel (the "bộ ba" as per instruction)
+type SectionTabKey = "transactions" | "profitloss" | "reports";
+
+export default function FIFOMaterialManagement() {
   const { t } = useTranslation();
-
-  const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState("JPY");
-  const [page, setPage] = useState(0);
-  const [pageMaterial, setPageMaterial] = useState(0);
-
   const queryClient = useQueryClient();
-  const [openConfirmDeleteMaterial, setOpenConfirmDeleteMaterial] =
-    useState(false);
-  const [id, setId] = useState("");
+  const [form] = Form.useForm();
 
-  const [search, setSearch] = useState<string>("");
+  // State
+  // mainTabKey = "JPY" or "USD"
+  const [mainTabKey, setMainTabKey] = useState<CurrencyTab>("JPY");
+  // subTabKey = "JPY", "KG-JP", "PT-JP", "USD", "KG-USD", "PT-USD"
+  const [subTabKey, setSubTabKey] = useState<SubTab>("JPY");
 
-  const { data, isLoading, isFetching } = useBankAccountsPartnerScreen({
-    page,
-    size: 20,
-    type: 2,
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>("incoming");
+  const [page, setPage] = useState<number>(0);
+
+  // Date default state for modal
+  const [defaultDate, setDefaultDate] = useState<dayjs.Dayjs | null>(null);
+
+  // Whenever modal opens, set default date
+  useEffect(() => {
+    if (modalVisible) {
+      const now = dayjs();
+      setDefaultDate(now);
+      form.setFieldsValue({ date: now });
+    }
+    // When modal closes, clear the defaultDate (optional, if you want to always use fresh "now" on open)
+    if (!modalVisible) {
+      setDefaultDate(null);
+    }
+  }, [modalVisible, form]);
+
+  const defaultSectionTab: SectionTabKey = "transactions";
+  const [sectionTabs, setSectionTabs] = useState<Record<SubTab, SectionTabKey>>({
+    "JPY": defaultSectionTab,
+    "KG-JP": defaultSectionTab,
+    "PT-JP": defaultSectionTab,
+    "USD": defaultSectionTab,
+    "KG-USD": defaultSectionTab,
+    "PT-USD": defaultSectionTab,
   });
-  const { data: materialData, isLoading: isLoadingMaterial } = useListMaterial({
-    page: pageMaterial,
-    page_size: 10,
-    search: search || undefined,
-    currency_code: activeTab,
-  });
 
-  const { data: listSummary, isLoading: isLoadingSummary } =
-    useListMaterialSumary();
-  const deleteMaterialMutation = useDeleteMaterial();
-
-  const [options, setOptions] = useState<any[]>([]);
-
-  const createNewMaterialMutation = useCreateNewMaterial();
-
-  const handleAdd = async () => {
-    try {
-      const values = await form.validateFields();
-      createNewMaterialMutation.mutate(
-        {
-          partner_id: values.partner,
-          amount: values.amount,
-          currency_code: activeTab,
-          exchange_rate: values.rate,
-          note: values.note,
-          amount_type: "IN",
-        },
-        {
-          onSuccess: () => {
-            toast.success(t('partnerManage.createMaterialSuccess'));
-            queryClient.invalidateQueries({
-              queryKey: ["listMaterial"],
-            });
-            form.resetFields();
-          },
-          onError: (err: any) =>
-            toast.error(
-              err.response?.data?.localizedMessage || t("common.error")
-            ),
-        }
-      );
-    } catch (err) {
-      console.log("Validation failed:", err);
-    }
-  };
-
-  const handleDelete = () => {
-    deleteMaterialMutation.mutate(
-      {
-        id: +id,
-      },
-      {
-        onSuccess: () => {
-          toast.success(t('partnerManage.deleteMaterialSuccess'));
-          queryClient.invalidateQueries({
-            queryKey: ["listMaterial"],
-          });
-          setOpenConfirmDeleteMaterial(false);
-        },
-        onError: (err: any) =>
-          toast.error(
-            err.response?.data?.localizedMessage || t("common.error")
-          ),
-      }
-    );
-    setId("null");
-  };
-
-  const handleChangePage = (direction: 'prev' | 'next') => {
-    if (direction === 'next' && materialData && pageMaterial < materialData.total_pages - 1) {
-      setPageMaterial(pageMaterial + 1);
-    } else if (direction === 'prev' && pageMaterial > 0) {
-      setPageMaterial(pageMaterial - 1);
-    }
-  };
-
-  React.useEffect(() => {
-    if (data && data.content) {
-      setOptions((prev) => {
-        const newData = data.content.filter(
-          (item) => !prev.some((o) => o.value === item.id)
-        );
-        return [
-          ...prev,
-          ...newData.map((item) => ({
-            label: item.account_holder,
-            value: item.id,
-          })),
-        ];
-      });
-    }
-  }, [data]);
-
-  const summaryItem: FinanceSummary = listSummary?.find(
-    (item: FinanceSummary) => item.currency_code === activeTab
-  );
-
-  const renderTransactionCard = (record: PartnerTransaction) => {
-    const isUSRoute = activeTab === "USD";
-    const color =
-      record.amount > 0
-        ? "text-green-600"
-        : record.amount < 0
-        ? "text-red-600"
-        : "text-gray-600";
-
-    return (
-      <div
-        key={record.id}
-        className="bg-white border border-gray-200 rounded-lg p-3 mb-2 hover:shadow-md transition-all duration-200 relative overflow-hidden"
-      >
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-10 -mt-10 opacity-40"></div>
-
-        <div className="relative grid grid-cols-12 gap-3 items-center">
-          {/* Partner Info */}
-          <div className="col-span-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                {record.partner_name?.charAt(0)?.toUpperCase() || "P"}
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-800">
-                  {record.partner_name}
-                </p>
-                <p className="text-[10px] text-gray-500 truncate max-w-[150px]">{record.description}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Amount */}
-          <div className="col-span-2">
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 mb-0.5">Số tiền</p>
-              <div className={`flex items-center justify-center gap-1 ${color} font-bold text-sm`}>
-                {record.amount > 0 && (
-                  <FontAwesomeIcon icon={faPlus} className="text-[10px]" />
-                )}
-                {Math.abs(record.amount).toLocaleString()}
-                <FontAwesomeIcon
-                  icon={isUSRoute ? faUsd : faYenSign}
-                  className="text-xs"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Exchange Rate */}
-          <div className="col-span-2">
-            <div className="text-center bg-gray-50 rounded-md p-1.5">
-              <p className="text-[10px] text-gray-500 mb-0.5">
-                <FontAwesomeIcon icon={faExchangeAlt} className="mr-0.5" />
-                Tỷ giá
-              </p>
-              <p className="text-xs font-medium text-gray-800">
-                {record.exchange_rate?.toLocaleString()} VND
-              </p>
-            </div>
-          </div>
-
-          {/* Note */}
-          <div className="col-span-3">
-            <div className="bg-blue-50 rounded-md p-1.5">
-              <p className="text-[10px] text-blue-600 mb-0.5">Ghi chú</p>
-              <p className="text-xs text-gray-700 truncate">
-                {record.note || "-"}
-              </p>
-            </div>
-          </div>
-
-          {/* Date & Actions */}
-          <div className="col-span-2 flex items-center justify-between gap-2">
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 mb-0.5">
-                <FontAwesomeIcon icon={faCalendarAlt} className="mr-0.5" />
-              </p>
-              <p className="text-[10px] text-gray-600">
-                {record.created_at ? dayjs(record.created_at).format("DD/MM/YY") : "-"}
-              </p>
-            </div>
-            <Button
-              danger
-              type="primary"
-              shape="circle"
-              size="small"
-              icon={<FontAwesomeIcon icon={faTrash} className="text-xs" />}
-              onClick={() => {
-                setId(record.id.toString());
-                setOpenConfirmDeleteMaterial(true);
-              }}
-              className="shadow-sm hover:shadow-md"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const tabItems = [
-    {
-      key: "JPY",
-      label: (
-        <span className="flex items-center gap-2 text-base">
-          <FontAwesomeIcon icon={faYenSign} className="text-red-600" />
-          {t('partnerManage.manageJPY')}
-        </span>
-      ),
-    },
-    {
-      key: "USD",
-      label: (
-        <span className="flex items-center gap-2 text-base">
-          <FontAwesomeIcon icon={faDollarSign} className="text-green-600" />
-          {t('partnerManage.manageUSD')}
-        </span>
-      ),
-    },
+  // Section tab list for each subTab (always show 3)
+  const sectionTabList = [
+    { key: "transactions" as SectionTabKey, label: t("partnerManage.transactionsTab") },
+    { key: "profitloss" as SectionTabKey, label: t("partnerManage.profitLossTab") },
+    { key: "reports" as SectionTabKey, label: t("partnerManage.reportsTab") },
   ];
 
+  // Partner data using API call
+  const {
+    data: partnerData,
+    isLoading: isPartnerLoading,
+    isError: isPartnerError,
+  } = useQuery({
+    queryKey: ["partner-list", page],
+    queryFn: () => getListPartner({ page, page_size: 10 }),
+  });
+
+  // Queries
+  const { data: fifoBalanceData } = useFifoBalance();
+  const createMutation = useCreateNewMaterial();
+  let currencyCode: string = "JPY";
+  if (subTabKey === "JPY" && mainTabKey === "JPY") currencyCode = "JPY";
+  else if (subTabKey === "KG-JP" && mainTabKey === "JPY") currencyCode = "KG-JP";
+  else if (subTabKey === "PT-JP" && mainTabKey === "JPY") currencyCode = "PT-JP";
+  else if (subTabKey === "USD" && mainTabKey === "USD") currencyCode = "USD";
+  else if (subTabKey === "KG-USD" && mainTabKey === "USD") currencyCode = "KG-US";
+  else if (subTabKey === "PT-USD" && mainTabKey === "USD") currencyCode = "PT-US";
+
+  // Get balance for current selected currency
+  const currentBalance = fifoBalanceData?.data?.find(
+    (b) => b.currencyCode === currencyCode
+  );
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // Use the currently mapped currencyCode:
+      const payload = {
+        partnerId: values.partnerId,
+        amount:
+          transactionType === "incoming"
+            ? values.amount
+            : -Math.abs(values.amount),
+        currencyCode: currencyCode,
+        exchangeRate: values.exchangeRate,
+        note: values.note || undefined,
+        date: values.date ? dayjs(values.date).format("YYYY-MM-DD HH:mm:ss") : undefined,
+      };
+
+      await createMutation.mutateAsync(payload);
+      toast.success(t("partnerManage.createMaterialSuccess"));
+
+      // Invalidate all related queries
+      queryClient.invalidateQueries({ queryKey: ["listMaterial"] });
+      queryClient.invalidateQueries({ queryKey: ["fifoBalance"] });
+      queryClient.invalidateQueries({ queryKey: ["listMaterialSumary"] });
+      queryClient.invalidateQueries({ queryKey: ["profitLossSummary"] });
+
+      form.resetFields();
+      setModalVisible(false);
+    } catch (error: any) {
+      if (error.errorFields) {
+        // Validation errors
+        return;
+      }
+      toast.error(error.response?.data?.message || t("common.error"));
+    }
+  };
+
+  // Check if there's enough balance for outgoing transaction
+  const handleTransactionTypeChange = (value: TransactionType) => {
+    setTransactionType(value);
+    if (value === "outgoing" && currentBalance) {
+      Modal.info({
+        title: t("partnerManage.fifoBalance"),
+        content: (
+          <div>
+            <p>
+              {t("partnerManage.fifoBalance")}:{" "}
+              {currentBalance.fifoBalance.toLocaleString()} {currencyCode}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {t("partnerManage.note")}: {t("partnerManage.amountNegative")}
+            </p>
+          </div>
+        ),
+      });
+    }
+  };
+
+  // Partner select options
+  const partnerOptions =
+    (!isPartnerLoading && !isPartnerError && Array.isArray(partnerData?.data)
+      ? partnerData.data.map((partner: Partner) => ({
+          label: `${partner.email}`,
+          value: partner.id,
+        }))
+      : []) || [];
+
+  // Build sub tab list for each main tab
+  const getSubTabs = (main: CurrencyTab) => {
+    if (main === "JPY") {
+      return [
+        { key: "JPY", label: t("partnerManage.manageJPY") },
+        { key: "KG-JP", label: t("partnerManage.manageKG") },
+        { key: "PT-JP", label: t("partnerManage.manageSucharge") },
+      ];
+    }
+    if (main === "USD") {
+      return [
+        { key: "USD", label: t("partnerManage.manageUSD") },
+        { key: "KG-USD", label: t("partnerManage.manageKG") },
+        { key: "PT-USD", label: t("partnerManage.manageSucharge") },
+      ];
+    }
+    return [];
+  };
+
+  // Render content for each section tab (transactions, profitloss, reports)
+  const renderSectionTabContent = (sectionKey: SectionTabKey, sectionTabKey: any) => {
+    switch (sectionKey) {
+      case "transactions":
+        return (
+          <div className="fifo-content-area">
+            <TransactionList
+              currencyCode={currencyCode}
+              onAddTransaction={() => setModalVisible(true)}
+            />
+          </div>
+        );
+      case "profitloss":
+        return (
+          <div className="fifo-content-area">
+            <ProfitLossSummaryComponent />
+            <OrderProfitLossTable />
+          </div>
+        );
+      case "reports":
+        return (
+          <div className="fifo-content-area">
+            <ProfitLossChart code={sectionTabKey.includes("JP") ? "JP": "US"} />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Render each sub tab with its internal "bộ ba" section tabs
+  const renderSubTabPanelWithSectionTabs = (subTab: SubTab) => {
+    const sectionTabKey = sectionTabs[subTab];
+    return (
+      <Tabs
+        activeKey={sectionTabKey}
+        onChange={(sectionKey) => {          
+          setSectionTabs((prev) => ({
+            ...prev,
+            [subTab]: sectionKey as SectionTabKey,
+          }));
+        }}
+        className="fifo-section-tabs"
+        tabBarGutter={32}
+      >
+        {sectionTabList.map((section) => (
+          <TabPane tab={section.label} key={section.key}>
+            {renderSectionTabContent(section.key, sectionTabKey)}
+          </TabPane>
+        ))}
+      </Tabs>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">
-                {activeTab === "JPY" ? t('partnerManage.overviewJPY') : t('partnerManage.overviewUSD')}
-              </h1>
-              <p className="text-xs text-gray-500">Quản lý giao dịch với đối tác</p>
-            </div>
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              items={tabItems}
-              size="middle"
-              className="partner-tabs"
-            />
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Card className="!border-0 !shadow-md !rounded-xl !bg-gradient-to-br !from-blue-500 !to-blue-600 !text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs opacity-90 mb-1">{t('partnerManage.totalPartners')}</p>
-                  <p className="text-2xl font-bold">
-                    {summaryItem ? summaryItem.partner_count : 0}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faUsers} className="text-xl" />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="!border-0 !shadow-md !rounded-xl !bg-gradient-to-br !from-green-500 !to-emerald-600 !text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs opacity-90 mb-1">
-                    {t('partnerManage.totalPurchase')}
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {summaryItem ? Math.abs(summaryItem.total_out).toLocaleString() : 0}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon
-                    icon={activeTab === "JPY" ? faYenSign : faDollarSign}
-                    className="text-xl"
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="!border-0 !shadow-md !rounded-xl !bg-gradient-to-br !from-purple-500 !to-fuchsia-600 !text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs opacity-90 mb-1">
-                    {t('partnerManage.totalRemaining')}
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {summaryItem ? summaryItem.total_in.toLocaleString() : 0}
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faWallet} className="text-xl" />
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-
-        {/* Add Transaction Form */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-4">
-          <h2 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FontAwesomeIcon icon={faPlus} className="text-blue-600 text-sm" />
-            </div>
-            {t('partnerManage.addTransactionTitle')}
-          </h2>
-
-          <Form form={form} layout="vertical">
-            <div className="grid grid-cols-5 gap-3">
-              <Form.Item
-                name="partner"
-                label={<span className="text-xs font-medium text-gray-700">{t('partnerManage.partner')}</span>}
-                rules={[{ required: true, message: t('partnerManage.selectPartner') }]}
-                className="mb-0"
-              >
-                <Select
-                  showSearch
-                  placeholder={t('partnerManage.selectPartnerPlaceholder')}
-                  size="middle"
-                  className="!w-full"
-                  options={options}
-                  loading={isLoading}
-                  notFoundContent={isLoading ? <Spin size="small" /> : null}
-                  onPopupScroll={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (
-                      target.scrollTop + target.offsetHeight >=
-                      target.scrollHeight - 10
-                    ) {
-                      if (!isFetching) {
-                        setPage((p) => p + 1);
-                      }
-                    }
-                  }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="amount"
-                label={<span className="text-xs font-medium text-gray-700">{t('partnerManage.amount')}</span>}
-                rules={[{ required: true, message: t('partnerManage.enterAmount') }]}
-                className="mb-0"
-              >
-                <InputNumber<string>
-                  size="middle"
-                  className="!w-full"
-                  step={0.01}
-                  stringMode
-                  formatter={(value) =>
-                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-                  }
-                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
-                  addonAfter={activeTab === "JPY" ? "¥" : "$"}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="rate"
-                label={<span className="text-xs font-medium text-gray-700">{t('partnerManage.exchangeRateLabel')}</span>}
-                rules={[{ required: true }]}
-                className="mb-0"
-              >
-                <InputNumber<string>
-                  size="middle"
-                  className="!w-full"
-                  step={0.01}
-                  stringMode
-                  formatter={(value) =>
-                    value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
-                  }
-                  parser={(value) => (value ? value.replace(/,/g, "") : "")}
-                  addonAfter="VND"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="note"
-                label={<span className="text-xs font-medium text-gray-700">{t('partnerManage.noteLabel')}</span>}
-                className="mb-0"
-              >
-                <Input size="middle" placeholder={t('partnerManage.notePlaceholder')} className="!w-full" />
-              </Form.Item>
-
-              <Form.Item label=" " className="mb-0">
-                <Button
-                  type="primary"
-                  size="middle"
-                  onClick={handleAdd}
-                  className="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !border-0 !shadow-md w-full !h-full"
-                  icon={<FontAwesomeIcon icon={faPlus} className="mr-1 text-xs" />}
-                >
-                  {t('partnerManage.addButton')}
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
-        </div>
-
-        {/* Transaction List */}
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faWallet} className="text-purple-600 text-sm" />
-              </div>
-              {t('partnerManage.partnerListTitle')}
-              {materialData && (
-                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
-                  {materialData.total_items}
-                </span>
-              )}
-            </h2>
-            <Input
-              placeholder={t('partnerManage.searchPartnerPlaceholder')}
-              size="middle"
-              className="!w-64"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              prefix={<FontAwesomeIcon icon={faSearch} className="text-gray-400" />}
-              allowClear
-            />
-          </div>
-
-          {isLoadingMaterial ? (
-            <div className="text-center py-8">
-              <Spin size="large" />
-            </div>
-          ) : materialData?.data && materialData.data.length > 0 ? (
-            <>
-              <div className="space-y-2">
-                {materialData.data.map((record: PartnerTransaction) => renderTransactionCard(record))}
-              </div>
-
-              {/* Pagination */}
-              {materialData.total_pages > 1 && (
-                <div className="flex items-center justify-center gap-3 mt-4">
-                  <Button
-                    size="middle"
-                    disabled={pageMaterial === 0}
-                    onClick={() => handleChangePage('prev')}
-                    className="!rounded-lg"
-                  >
-                    Trang trước
-                  </Button>
-                  <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium">
-                    {pageMaterial + 1} / {materialData.total_pages}
-                  </div>
-                  <Button
-                    size="middle"
-                    disabled={pageMaterial >= materialData.total_pages - 1}
-                    onClick={() => handleChangePage('next')}
-                    className="!rounded-lg"
-                  >
-                    Trang sau
-                  </Button>
-                </div>
-              )}
-            </>
-          ) : (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Chưa có giao dịch nào"
-              className="py-8"
-            />
-          )}
-        </div>
+    <div className="p-6">
+      {/* Page Header */}
+      <div className="mb-4">
+        <h2 className="text-lg font-bold text-gray-800">
+          {t("menu.partnerManagement")}
+        </h2>
+        <p className="text-xs text-gray-600 mt-1">
+          {t("partnerManage.fifoBalanceTitle")}
+        </p>
       </div>
 
-      <PopupConfirm
-        open={openConfirmDeleteMaterial}
-        type={"delete"}
-        title={t('partnerManage.deleteMaterialTitle')}
-        content={t('partnerManage.deleteMaterialContent')}
-        onConfirm={handleDelete}
-        onCancel={() => setOpenConfirmDeleteMaterial(false)}
-        confirmText={t("common.delete")}
-        cancelText={t("common.cancel")}
-      />
+      {/* FIFO Balance Cards - Always visible at top */}
+
+      {/* Currency Tabs and Section Tab Styling */}
+      <style jsx global>{`
+        .fifo-main-tabs .ant-tabs-nav {
+          width: 100%;
+        }
+        .fifo-main-tabs .ant-tabs-nav-list {
+          width: 100%;
+          display: flex;
+        }
+        .fifo-main-tabs .ant-tabs-tab {
+          flex: 1;
+          justify-content: center;
+          margin: 0 !important;
+        }
+        .fifo-main-tabs .ant-tabs-content-holder {
+          width: 100%;
+          padding: 0 !important;
+        }
+        .fifo-main-tabs .ant-tabs-content {
+          width: 100%;
+        }
+        .fifo-main-tabs .ant-tabs-tabpane {
+          width: 100%;
+          padding: 0 !important;
+        }
+        .fifo-sub-tabs {
+          width: 100%;
+        }
+        .fifo-sub-tabs .ant-tabs-nav {
+          width: 100%;
+        }
+        .fifo-sub-tabs .ant-tabs-nav-list {
+          width: 100%;
+          display: flex;
+        }
+        .fifo-sub-tabs .ant-tabs-tab {
+          flex: 1;
+          justify-content: center;
+        }
+        .fifo-sub-tabs .ant-tabs-content-holder {
+          width: 100%;
+          padding: 24px 0 !important;
+        }
+        .fifo-sub-tabs .ant-tabs-content {
+          width: 100%;
+        }
+        .fifo-sub-tabs .ant-tabs-tabpane {
+          width: 100%;
+          padding: 0 !important;
+        }
+        .fifo-section-tabs {
+          width: 100%;
+        }
+        .fifo-section-tabs .ant-tabs-nav {
+          width: 100%;
+        }
+        .fifo-section-tabs .ant-tabs-nav-list {
+          width: 100%;
+          display: flex;
+        }
+        .fifo-section-tabs .ant-tabs-tab {
+          flex: 1;
+          justify-content: center;
+        }
+        .fifo-section-tabs .ant-tabs-content-holder {
+          width: 100%;
+          padding: 0 !important;
+        }
+        .fifo-section-tabs .ant-tabs-content {
+          width: 100%;
+        }
+        .fifo-section-tabs .ant-tabs-tabpane {
+          width: 100%;
+          padding: 0 !important;
+        }
+        .fifo-main-tabs .ant-card,
+        .fifo-sub-tabs .ant-card,
+        .fifo-section-tabs .ant-card,
+        .fifo-main-tabs > div,
+        .fifo-sub-tabs > div,
+        .fifo-section-tabs > div {
+          width: 100%;
+          max-width: 100%;
+        }
+      `}</style>
+
+      {/* Main Currency Tabs */}
+      <Tabs
+        activeKey={mainTabKey}
+        onChange={(key: string) => {
+          setMainTabKey(key as CurrencyTab);          
+          const subTabs = getSubTabs(key as CurrencyTab);
+          setSubTabKey(subTabs.length ? (subTabs[0].key as SubTab) : "JPY");
+        }}
+        type="card"
+        size="large"
+        className="mb-6 fifo-main-tabs"
+      >
+        {(["JPY", "USD"] as CurrencyTab[]).map((mainTab) => (
+          <TabPane tab={mainTab === "JPY" ? "Tuyến VN -> JP" : "Tuyến VN -> US"} key={mainTab}>
+            {/* Sub-tabs */}
+            <FifoBalanceCards JP={mainTab.includes('JP')} US={mainTab.includes('US')} />
+            <Tabs
+              activeKey={subTabKey}
+              onChange={(key: string) => {
+                setSubTabKey(key as SubTab);
+              }}
+              type="card"
+              size="large"
+              className="fifo-sub-tabs"
+            >
+              {getSubTabs(mainTab).map((sub) => (
+                <TabPane tab={sub.label} key={sub.key}>
+                  {renderSubTabPanelWithSectionTabs(sub.key as SubTab)}
+                </TabPane>
+              ))}
+            </Tabs>
+          </TabPane>
+        ))}
+      </Tabs>
+
+      {/* Add Transaction Modal */}
+      <Modal
+        title={t("partnerManage.addTransactionTitle")}
+        open={modalVisible}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setModalVisible(false);
+          form.resetFields();
+        }}
+        okText={t("partnerManage.saveButton")}
+        cancelText={t("partnerManage.cancelButton")}
+        confirmLoading={createMutation.isPending}
+        width={600}
+      >
+        <Form form={form} layout="vertical" requiredMark="optional">
+          {/* Transaction Type */}
+          <Form.Item label={t("partnerManage.transactionType")} required>
+            <Radio.Group
+              value={transactionType}
+              onChange={(e) => handleTransactionTypeChange(e.target.value)}
+              buttonStyle="solid"
+              size="large"
+            >
+              <Radio.Button value="incoming">
+                {t("partnerManage.addIncomingTransaction")}
+              </Radio.Button>
+              <Radio.Button value="outgoing">
+                {t("partnerManage.addOutgoingTransaction")}
+              </Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+
+          {/* Currency (read-only, based on current selection) */}
+          <Form.Item
+            label={
+              currencyCode === "KG"
+                ? t("partnerManage.unit")
+                : t("partnerManage.currencyCode")
+            }
+          >
+            <Input value={currencyCode} disabled size="large" />
+          </Form.Item>
+
+          {/* Partner Selection */}
+          <Form.Item
+            label={t("partnerManage.partner")}
+            name="partnerId"
+            rules={[
+              {
+                required: true,
+                message: t("partnerManage.selectPartner"),
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder={t("partnerManage.selectPartnerPlaceholder")}
+              size="large"
+              optionFilterProp="children"
+              loading={isPartnerLoading}
+              filterOption={(input, option) => {
+                const label = option?.label;
+                if (typeof label === "string") {
+                  return label.toLowerCase().includes(input.toLowerCase());
+                }
+                return false;
+              }}
+              options={partnerOptions}
+              notFoundContent={isPartnerLoading ? <Spin size="small" /> : null}
+            />
+          </Form.Item>
+
+          {/* Date Field */}
+          <Form.Item
+            label={t("partnerManage.inputDate")}
+            name="date"
+            rules={[
+              {
+                required: true,
+                message: t("partnerManage.selectInputDate"),
+              },
+            ]}
+            initialValue={defaultDate}
+          >
+            <DatePicker
+              style={{ width: "100%" }}
+              size="large"
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder={t("partnerManage.inputDatePlaceholder")}
+              showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm:ss') }}
+              value={form.getFieldValue('date')}
+              // onChange is not necessary unless you want extra sync with form
+            />
+          </Form.Item>
+
+          {/* Amount */}
+          <Form.Item
+            label={currencyCode.includes("PT") ? t("partnerManage.amountMoney") : t("partnerManage.amount")}
+            name="amount"
+            rules={[
+              {
+                required: true,
+                message: t("partnerManage.enterAmount"),
+              },
+              {
+                type: "number",
+                min: 0.01,
+                message: t("partnerManage.amountPositive"),
+              },
+              ...(transactionType === "outgoing" && currentBalance && currencyCode !== "PT"
+                ? [
+                    {
+                      validator: (_: any, value: number) => {
+                        if (value > currentBalance.fifoBalance) {
+                          return Promise.reject(
+                            new Error(
+                              `${t(
+                                "partnerManage.fifoBalance"
+                              )}: ${currentBalance.fifoBalance.toLocaleString()} ${currencyCode}`
+                            )
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]
+                : []),
+            ]}
+            extra={
+              transactionType === "outgoing" && currentBalance && !currencyCode.includes("PT") ? (
+                <span className="text-sm text-gray-500">
+                  {t("partnerManage.fifoBalance")}:{" "}
+                  {currentBalance.fifoBalance.toLocaleString()} {currencyCode}
+                </span>
+              ) : null
+            }
+          >
+            <InputNumber
+              placeholder={
+                currencyCode.includes("PT")
+                  ? t("partnerManage.amountMoney")
+                  : t("partnerManage.enterAmount")
+              }
+              style={{ width: "100%" }}
+              size="large"
+              min={0}
+              precision={2}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value?.replace(/,/g, "") as any}
+            />
+          </Form.Item>
+
+          {/* Exchange Rate */}
+          {!currencyCode.includes("PT") && (
+            <Form.Item
+              label={
+                currencyCode === "KG"
+                  ? t("partnerManage.feePerKg")
+                  : t("partnerManage.exchangeRateLabel")
+              }
+              name="exchangeRate"
+              rules={[
+                {
+                  required: true,
+                  message: t("partnerManage.exchangeRateLabel"),
+                },
+                {
+                  type: "number",
+                  min: 0.01,
+                  message: t("partnerManage.exchangeRatePositive"),
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder={t("partnerManage.exchangeRateLabel")}
+                style={{ width: "100%" }}
+                size="large"
+                min={0}
+                precision={2}
+                addonAfter="VND"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => value?.replace(/,/g, "") as any}
+              />
+            </Form.Item>
+          )}
+
+          {/* Note */}
+          <Form.Item label={t("partnerManage.noteLabel")} name="note">
+            <Input.TextArea
+              placeholder={t("partnerManage.notePlaceholder")}
+              rows={3}
+              maxLength={500}
+              showCount
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

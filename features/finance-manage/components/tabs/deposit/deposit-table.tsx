@@ -67,16 +67,16 @@ const DepositTable = (props: DepositTableProps) => {
     page: 0,
     size: 10,
   });
-  const { data } = useListTopups(params);
+  const { data, isPending } = useListTopups(params);
 
   const handleSearch = (values: DepositParams) => {
     const newParams: DepositParams = {
       ...params,
       page: 0,
-      depositCode: values.depositCode || undefined,
+      deposit_code: values.deposit_code || undefined,
       status: values.status || undefined,
-      fromDate: values.fromDate || undefined,
-      toDate: values.toDate || undefined,
+      from_date: values.from_date || undefined,
+      to_date: values.to_date || undefined,
       handler: values.handler || undefined,
     };
     setParams(newParams);
@@ -426,6 +426,7 @@ const DepositTable = (props: DepositTableProps) => {
           onPageChange={handlePageChange}
           fontSize={13}
           headerHeight={46}
+          loading={isPending}
         />
       </div>
       <ManualDepositModal

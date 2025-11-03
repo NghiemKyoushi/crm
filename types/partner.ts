@@ -1,17 +1,86 @@
+// ============================================================================
+// TRANSACTION TYPES (Updated for FIFO API)
+// ============================================================================
+
 export interface PartnerTransaction {
   id: number;
-  description: string;
+  partnerName: string;
+  bankName?: string;
+  description?: string;
   amount: number;
-  exchange_rate: number;
-  amount_type: "IN" | "OUT"; // giả sử chỉ có 2 loại
-  bank_name: string;
-  partner_name: string;
-  created_at: string;
+  exchangeRate: number;
+  createdAt: string;
   note?: string;
+  remainingAmount?: number;
 }
+
 export type PartnerTransactionList = PartnerTransaction[];
 
-export type CurrencyCode = "VN" | "USD" | "JPY" | string;
+export type CurrencyCode = "VND" | "USD" | "JPY" | "CNY" | string;
+
+// ============================================================================
+// FIFO BALANCE TYPES
+// ============================================================================
+
+export interface CurrencyBalance {
+  currencyCode: string;
+  fifoBalance: number;
+  totalIncoming: number;
+  totalOutgoing: number;
+  transactionCount: number;
+}
+
+export interface FifoBalanceResponse {
+  code: number;
+  message: string;
+  data: CurrencyBalance[];
+}
+
+// ============================================================================
+// PROFIT/LOSS TYPES
+// ============================================================================
+
+export interface ProfitLossSummary {
+  currencyCode: string;
+  totalConsumed: number;
+  totalProfitLossVnd: number;
+  avgSellRate: number;
+  avgCostRate: number;
+  consumptionCount: number;
+}
+
+export interface ProfitLossSummaryResponse {
+  code: number;
+  message: string;
+  data: ProfitLossSummary[];
+}
+
+// Response format: [date, currencyCode, totalConsumed, profitLossVnd, orderCount]
+export type ProfitLossByDateItem = [string, string, number, number, number];
+
+export interface ProfitLossByDateResponse {
+  code: number;
+  message: string;
+  data: ProfitLossByDateItem[];
+}
+
+// Response format: [orderId, invoiceNo, currencyCode, totalConsumed, profitLossVnd, sellRate, costRate]
+export type OrderProfitLossItem = [number, string, string, number, number, number, number];
+
+export interface OrderProfitLossResponse {
+  code: number;
+  message: string;
+  data: {
+    data: OrderProfitLossItem[];
+    page: number;
+    size: number;
+    total: number;
+  };
+}
+
+// ============================================================================
+// LEGACY TYPES (kept for backward compatibility)
+// ============================================================================
 
 export interface FinanceSummary {
   total_in: number;
@@ -19,6 +88,10 @@ export interface FinanceSummary {
   currency_code: CurrencyCode;
   partner_count: number;
 }
+
+// ============================================================================
+// API REQUEST/RESPONSE TYPES
+// ============================================================================
 
 export type getListMasterialParams = {
   page: number;
@@ -36,10 +109,26 @@ export interface MasterialResponse {
 }
 
 export interface MaterialTransactionRequest {
-  partner_id: number;
+  partnerId: number;
   amount: number;
-  currency_code: string;
-  exchange_rate: number;
+  currencyCode: string;
+  exchangeRate: number;
   note?: string;
-  amount_type: "IN" | "OUT";
+  date?: string;
+}
+
+export interface RecalculateFifoParams {
+  currencyCode?: string;
+}
+
+export interface ProfitLossByDateParams {
+  currency_code: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface OrderProfitLossParams {
+  currency_code?: string;
+  page?: number;
+  size?: number;
 }

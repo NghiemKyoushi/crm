@@ -113,6 +113,14 @@ export const getListBankPermission = async (id: number, role_id?: number) => {
   return res.data.data;
 };
 
+export const getListPartner = async (params: {page: number, page_size: number}) => {
+  const res = await api.get(
+    `${API_TYPE_CONST.PARTNER_LIST}`,
+    {params}
+  );
+  return res.data.data;
+};
+
 export const addUserBankPermission = async (id: number, body: {admin_user_ids: number[], type: number}) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_USER_MANAGE_ACCOUNT_BANK}${id}/permissions`, body);
   return res.data.data;
@@ -160,5 +168,37 @@ export const deleteBankCreateAccountPartner = async (id: number) => {
 
 export const getDetailBankCreateAccountPartner = async (id: number) => {
   const res = await api.get(`${API_TYPE_CONST.BANK_LIST_DEPOSIT}/${id}`);
+  return res.data.data;
+};
+
+export const getDebtList = async (params: BankDepositRequest) => {
+  const res = await api.get(`${API_TYPE_CONST.MANAGE_DEBTS}`,{params});
+  return res.data.data;
+};
+
+export const createQrDebt = async (id: number, body: {bank_account_id: number}) => {
+  const res = await api.post(`${API_TYPE_CONST.CREATE_QR_DEBT}/${id}`, body);
+  return res.data.data;
+};
+
+export const createDebt = async (id: number) => {
+  const res = await api.put(`${API_TYPE_CONST.CREATE_DEBT}/${id}`);
+  return res.data.data;
+};
+
+export const getHistoryDebt = async (id: number, params: BankDepositRequest) => {
+  const res = await api.get(`${API_TYPE_CONST.LIST_TRANSTACTION_DEBTS}${id}`,{params});
+  return res.data.data;
+};
+
+
+export const approveDebt = async (id: number) => {
+  const res = await api.post(`${API_TYPE_CONST.APPROVE_DEBT}/${id}`);
+  return res.data.data;
+};
+
+
+export const cancelDebt = async (id: number) => {
+  const res = await api.post(`${API_TYPE_CONST.CANCEL_DEBTS}/${id}`);
   return res.data.data;
 };

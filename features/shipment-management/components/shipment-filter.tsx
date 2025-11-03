@@ -1,16 +1,15 @@
 "use client";
 import React from "react";
-import { Button, Input, Select, Form, DatePicker } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
 export interface FilterTypeShipment {
   page?: number;
   search?: string;
-  status?: string[]; // Kiểu dữ liệu status vẫn là array string
+  status?: string[]; // Multi-search
   date?: string;
   type?: number;
   size?: number;
@@ -26,6 +25,9 @@ export interface FilterTypeShipment {
   product_id?: string;
   note_admin?: string;
   tracking_ship?: string;
+  email?: string;
+  phone_number?: number;
+  customer_code?: string;
 }
 
 interface ShipmentFilterProps {
@@ -43,14 +45,18 @@ export default function ShipmentFilter({
 
   const orderStatusOptions = [
     {
-      value: OrderStatusType.ARRIVED_VN_WAREHOUSE, //
+      value: OrderStatusType.ARRIVED_VN_WAREHOUSE,
       label: t("status.arrivedVnWarehouse"),
     },
-    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") }, //
-    { value: OrderStatusType.SHIPPED, label: t("status.shipped") }, //
+    { value: OrderStatusType.READY_TO_SHIP, label: t("status.readyToShip") },
+    { value: OrderStatusType.SHIPPED, label: t("status.shipped") },
     {
-      value: OrderStatusType.SHIPPING_REQUEST_CLIENT, //
+      value: OrderStatusType.SHIPPING_REQUEST_CLIENT,
       label: t("status.shippingRequest"),
+    },
+    {
+      value: OrderStatusType.PACKED,
+      label: t("status.packed"),
     },
   ];
 
@@ -69,12 +75,11 @@ export default function ShipmentFilter({
         values.keyword && values.keyword.trim() !== ""
           ? values.keyword
           : undefined,
-      status: values.status
-        ? [values.status].filter((s: string) => s && s !== "")
+      status: Array.isArray(values.status) && values.status.length > 0
+        ? values.status.filter((s: string) => s && s !== "")
         : undefined,
       date: values.date ? values.date.format?.("YYYY-MM-DD") : undefined,
       type: initialFilters?.type || undefined,
-      // New search fields
       customer_name: values.customer_name?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
@@ -85,9 +90,11 @@ export default function ShipmentFilter({
       note_admin: values.note_admin?.trim() || undefined,
       from_date: fromDate,
       to_date: toDate,
-    };
-    console.log("filters", filters);
-
+      phone_number: values.phone_number || undefined,
+      customer_code: values.customer_code?.trim() || undefined,
+      email: values.email?.trim() || undefined,
+      invoice_no: values.invoice_no?.trim() || undefined,
+    };    
     onFilter(filters);
   };
 
@@ -108,17 +115,19 @@ export default function ShipmentFilter({
       note_admin: undefined,
       from_date: undefined,
       to_date: undefined,
+      email: undefined,
+      phone_number: undefined,
+      customer_code: undefined,
+      invoice_no: undefined,
     });
   };
 
-  // If initialFilters.status is string[], convert to a single value (first element) for Select initial value
+  // Use as is for initial value for multi-select
   const selectInitialValues = {
     ...initialFilters,
     status:
-      initialFilters &&
-      Array.isArray(initialFilters.status) &&
-      initialFilters.status.length > 0
-        ? initialFilters.status[0]
+      initialFilters && Array.isArray(initialFilters.status)
+        ? initialFilters.status
         : undefined,
   };
 
@@ -160,11 +169,30 @@ export default function ShipmentFilter({
               <div className="text-xs font-medium text-gray-600">
                 Thông tin khách hàng
               </div>
-              <Form.Item name="customer_name" className="!mb-2">
+              <Form.Item name="email" className="!mb-2">
                 <Input
-                  placeholder="Tên khách hàng"
+                  placeholder="Email"
                   className="!w-full !h-10 !text-xs"
                   size="small"
+                />
+              </Form.Item>
+              <Form.Item name="customer_code" className="!mb-2">
+                <Input
+                  placeholder="Mã khách hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="phone_number" className="!mb-2">
+                <InputNumber
+                  placeholder="Số điện thoại"
+                  className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
+                  size="small"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, "")
+                  }
+                  style={{ display: 'flex', alignItems: 'center' }}
+                  inputMode="tel"
                 />
               </Form.Item>
             </div>
@@ -174,19 +202,26 @@ export default function ShipmentFilter({
               </div>
               <Form.Item name="status" className="!mb-2">
                 <Select
-                  className="!w-full !h-10 !text-xs [&_.ant-select-selection-placeholder]:!text-xs [&_.ant-select-selection-item]:!text-xs [&_.ant-select-selection-selected-value]:!text-xs"
+                  mode="multiple"
+                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs 
+                    [&_.ant-select-selection-item]:!text-xs 
+                    [&_.ant-select-selection-overflow]:!flex-wrap [&_.ant-select-selection-item]:!break-normal
+                    [&_.ant-select-selector]:!min-h-[40px]"
                   placeholder={<span className="text-xs">Trạng thái</span>}
                   size="small"
                   allowClear
-                  mode={undefined}
+                  optionLabelProp="label"
+                  dropdownStyle={{ maxWidth: 350, whiteSpace: 'normal' }}
+                  tokenSeparators={[","]}
                 >
                   {orderStatusOptions.map((opt) => (
                     <Select.Option
-                      className="text-xs"
+                      className="text-xs !whitespace-normal !break-words"
                       key={opt.value}
                       value={opt.value}
+                      label={opt.label}
                     >
-                      {opt.label}
+                      <span className="!whitespace-normal !break-words">{opt.label}</span>
                     </Select.Option>
                   ))}
                 </Select>
@@ -212,9 +247,15 @@ export default function ShipmentFilter({
                     size="small"
                   />
                 </Form.Item>
+                <Form.Item name="invoice_no" className="!mb-0">
+                  <Input
+                    placeholder="Mã đơn hàng"
+                    className="!w-full !h-10 !text-xs"
+                    size="small"
+                  />
+                </Form.Item>
               </div>
             </div>
-            
           </div>
         </div>
       </Form>

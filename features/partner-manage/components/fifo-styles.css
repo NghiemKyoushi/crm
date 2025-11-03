@@ -1,0 +1,193 @@
+/* FIFO Management - Equal Width Styling */
+
+/* Reduce font size for entire page */
+.fifo-main-tabs,
+.fifo-sub-tabs,
+.fifo-content-area {
+  font-size: 13px !important;
+}
+
+.fifo-content-area .ant-table {
+  font-size: 12px !important;
+}
+
+.fifo-content-area .ant-table-thead > tr > th {
+  font-size: 12px !important;
+  padding: 8px 12px !important;
+}
+
+.fifo-content-area .ant-table-tbody > tr > td {
+  font-size: 12px !important;
+  padding: 8px 12px !important;
+}
+
+.fifo-content-area .ant-btn {
+  font-size: 12px !important;
+  padding: 4px 12px !important;
+  height: auto !important;
+}
+
+.fifo-content-area .ant-input {
+  font-size: 12px !important;
+}
+
+.fifo-content-area .ant-select {
+  font-size: 12px !important;
+}
+
+.fifo-content-area h3 {
+  font-size: 14px !important;
+}
+
+.fifo-content-area .ant-statistic-title {
+  font-size: 11px !important;
+}
+
+.fifo-content-area .ant-statistic-content {
+  font-size: 13px !important;
+}
+
+.fifo-content-area .ant-card-head-title {
+  font-size: 13px !important;
+}
+
+/* Main Tabs Container - JPY/USD */
+.fifo-main-tabs {
+  width: 100%;
+}
+
+.fifo-main-tabs .ant-tabs-content-holder {
+  padding: 8px 0 0 0 !important;
+  width: 100%;
+}
+
+.fifo-main-tabs .ant-tabs-content {
+  width: 100%;
+}
+
+.fifo-main-tabs .ant-tabs-tabpane {
+  padding: 0 !important;
+  width: 100%;
+}
+
+/* Main tabs styling - smaller, compact */
+.fifo-main-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid #d9d9d9 !important;
+}
+
+.fifo-main-tabs .ant-tabs-tab {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 6px 16px !important;
+  border-radius: 6px 6px 0 0 !important;
+  border: 1px solid #d9d9d9 !important;
+  border-bottom: 1px solid #d9d9d9 !important;
+  margin-bottom: -1px !important;
+  transition: all 0.3s ease !important;
+}
+
+.fifo-main-tabs .ant-tabs-tab:hover {
+  background-color: #f0f0f0 !important;
+}
+
+.fifo-main-tabs .ant-tabs-tab-active {
+  background-color: #fff !important;
+  border-color: #d9d9d9 #d9d9d9 #fff #d9d9d9 !important;
+  z-index: 1 !important;
+}
+
+/* Sub Tabs Container - Giao dịch/Lãi Lỗ/Báo cáo */
+.fifo-sub-tabs {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.fifo-sub-tabs .ant-tabs-content-holder {
+  padding: 12px 0 0 0 !important;
+  width: 100%;
+}
+
+.fifo-sub-tabs .ant-tabs-content {
+  width: 100%;
+}
+
+.fifo-sub-tabs .ant-tabs-tabpane {
+  padding: 0 !important;
+  width: 100%;
+}
+
+/* Sub tabs styling - smaller, compact */
+.fifo-sub-tabs .ant-tabs-nav {
+  margin-bottom: 0 !important;
+}
+
+.fifo-sub-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid #d9d9d9 !important;
+}
+
+.fifo-sub-tabs .ant-tabs-tab {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 5px 14px !important;
+  border-radius: 4px 4px 0 0 !important;
+  background-color: #f5f5f5 !important;
+  border: 1px solid #d9d9d9 !important;
+  border-bottom: 1px solid #d9d9d9 !important;
+  margin-bottom: -1px !important;
+  transition: all 0.3s ease !important;
+  color: #595959 !important;
+}
+
+.fifo-sub-tabs .ant-tabs-tab:hover {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+  border-color: #91d5ff !important;
+  border-bottom-color: #91d5ff !important;
+}
+
+.fifo-sub-tabs .ant-tabs-tab-active {
+  background-color: #fff !important;
+  color: #1890ff !important;
+  border-color: #1890ff #1890ff #fff #1890ff !important;
+  font-weight: 600 !important;
+  z-index: 1 !important;
+}
+
+.fifo-sub-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1890ff !important;
+}
+
+/* Content Area - Force 100% width */
+.fifo-content-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.fifo-content-area > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* All Cards inside FIFO tabs must be 100% width */
+.fifo-content-area .ant-card,
+.fifo-content-area > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Flex containers for equal width cards */
+.fifo-equal-cards {
+  display: flex !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+.fifo-equal-cards > * {
+  flex: 1 !important;
+  min-width: 0 !important;
+}

@@ -134,6 +134,17 @@ export default function BankPartnerSetting() {
       ),
     },
     {
+      title: t('partnerManage.partnerName'),
+      dataIndex: "partner_id_name",
+      key: "partner_id_name",
+      width: 180,
+      render: (text: string ) => (
+        <div>
+          <div className="text-sm text-gray-800">{text}</div>
+        </div>
+      ),
+    },
+    {
       title: "Telegram",
       dataIndex: "telegram_channel_id",
       key: "telegram_channel_id",
@@ -180,7 +191,7 @@ export default function BankPartnerSetting() {
             {t('status.paused')}
           </Tag>
         ) :  <Tag color="gold" className="!rounded-3xl text-xs">
-        Internal
+        {t('status.internal')}
       </Tag>  ,
     },
     {

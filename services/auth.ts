@@ -48,6 +48,8 @@ export const loginRequest = async (email: string, password: string) => {
     }
   );
 
+  
+
   const token = accessToken.data.data.token;
 
   Cookies.set("token", token, {
@@ -57,7 +59,21 @@ export const loginRequest = async (email: string, password: string) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  return { refreshToken, accessToken: token };
+  const checkRole = await api.get(
+    API_TYPE_CONST.ROLE_USER,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const roleUser = checkRole.data.data.role_name === 'USER';  
+  if (roleUser) {
+    Cookies.remove("refreshToken");
+    Cookies.remove("token");
+  }
+
+  return { refreshToken, accessToken: token, roleUser };
 };
 
 export const logout = async () => {

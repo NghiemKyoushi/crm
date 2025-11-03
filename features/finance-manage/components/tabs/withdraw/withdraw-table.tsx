@@ -60,14 +60,14 @@ const WithdrawTable = ({}) => {
     }));
   };
 
-  const { data } = useListWithdraw(params);
+  const { data, isPending } = useListWithdraw(params);
   const handleSearch = (values: DepositParams) => {
     const newParams: any = {
       ...params,
-      code: values.depositCode,
+      deposit_code: values.deposit_code,
       status: values.status,
-      fromDate: values.fromDate,
-      toDate: values.toDate,
+      from_date: values.from_date,
+      toDate: values.to_date,
       handler: values.handler,
       page: 0,
     };
@@ -353,6 +353,7 @@ const WithdrawTable = ({}) => {
           onPageChange={handlePageChange}
           fontSize={13}
           headerHeight={46}
+          loading={isPending}
         />
       </div>
 

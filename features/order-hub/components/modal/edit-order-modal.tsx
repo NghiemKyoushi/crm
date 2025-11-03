@@ -7,12 +7,9 @@ import {
   Select,
   Button,
   InputNumber,
-  Radio,
   Row,
   Col,
-  Divider,
   Collapse,
-  Spin,
 } from "antd";
 import {
   getDataFeeService,
@@ -47,6 +44,7 @@ import TiptapEditor from "../TiptapEditor";
 import { CURRENCY_CODE } from "./add-orderhub-modal";
 import { Fee } from "./orderhub-detail-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
+
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -120,6 +118,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     TOTAL_COD_SHIPPING_FEE_JP: 0,
   });
 
+  // --------- IMAGE PREVIEW STATE ---------
+  const [productImages, setProductImages] = useState<string[]>([]);
+  // ----------------------------------------
+
   const handleOk = async () => {
     try {
       await form.validateFields();
@@ -192,8 +194,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   const handleServiceChange = (e: CheckboxChangeEvent, id: string) => {
     const checked = e.target.checked;
-    console.log('checked', checked);
-    
     setServices((prev) =>
       checked ? [...prev, id] : prev.filter((k) => k !== id)
     );
@@ -247,13 +247,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   useEffect(() => {
     const fetchFeeService = async () => {
       if (customer && routeId) {
-        // const serviceOptionTrue = listServiceInOrder.filter(
-        //   (item: any) => item.optional === true
-        // );
-
-        // const serviceOption = listServiceInOrder.filter(
-        //   (item: any) => !item.optional
-        // );
         const bodyGetFeeService: RateOrderRequest = {
           order_id: orderId,
           category_fee_id: category,
@@ -272,7 +265,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           const res: FeeServiceCheck = await getDataFeeService(
             bodyGetFeeService
           );
-          // setListServiceInOrder([...res?.service_fee_optional_list] as Fee[])
+
           const insuranceFees = res.insurance_package_list.map((item: any) => {
             return {
               amount_vnd: item.amount_vnd,
@@ -352,6 +345,32 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     if (order && isOpen) {
       setPrice(order.amount_vnd ?? 0);
       setIdProduct(order.metadata.items?.[0]?.product?.id ?? null);
+
+      // --------- HANDLE PRODUCT IMAGES ----------
+      let images: string[] = [];
+      // Path 1: Try primary property: order.metadata.items?.[0]?.product?.map_data?.image
+      // Path 2: If it's an array or list: order.metadata.items?.[0]?.product?.map_data?.images 
+      // Path 3: Fallback: order.metadata.items?.[0]?.product?.images (deprecated case)
+      // Gather all possible images, if exist.
+      const mapData = order.metadata.items?.[0]?.product?.map_data;
+      if (mapData) {
+        if (Array.isArray(mapData.images) && mapData.images.length > 0) {
+          images = mapData.images.filter((u: string) => !!u); // take all non-empty
+        } else if (typeof mapData.images === "string" && mapData.images) {
+          images = [mapData.images];
+        }
+      }
+      // Fallback for old structure (rare!)
+      if (
+        (!images || images.length === 0) &&
+        Array.isArray(order.metadata.items?.[0]?.product?.map_data.images) &&
+        order.metadata.items?.[0]?.product?.map_data.images.length > 0
+      ) {
+        images = order.metadata.items?.[0]?.product?.map_data.images.filter((u: string) => !!u);
+      }
+      setProductImages(images || []);
+      // ------------------------------------------
+
       const services: string[] = [];
       order.metadata.infos?.fees?.forEach((item: any) => {
         if (item?.code) services.push(item.code);
@@ -406,6 +425,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setRouteId(undefined);
     queryClient.removeQueries({ queryKey: ["listServiceAdmin"] });
     setListInsurancesMap([]);
+    setProductImages([]); // Clear images when closing modal
     onCancel();
   };
 
@@ -531,6 +551,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   </h4>
                 </div>
                 <div className="bg-white rounded-lg border border-gray-200 p-5">
+                
                   <Form.Item
                     label={
                       <span className="text-sm font-medium text-gray-700">
@@ -600,7 +621,45 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   >
                     <TiptapEditor isDisable={isCheckDisableInput && !isAdminOrCheckStatusAfterPending} />
                   </Form.Item>
-
+                    {/* -------- IMAGE GALLERY PREVIEW -------- */}
+                    {productImages && productImages.length > 0 && (
+                    <div className="mb-5">
+                      <div className="flex space-x-2 overflow-x-auto pb-2">
+                        {productImages.map((src, idx) => (
+                          <div
+                            key={src + idx}
+                            style={{
+                              flex: "none",
+                              borderRadius: 8,
+                              overflow: "hidden",
+                              width: 120,
+                              height: 120,
+                              border: "1.5px solid #e5e7eb",
+                              background: "#fafafa",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {/* Use "img" tag for more flexibility */}
+                            <img
+                              src={src}
+                              alt={`Ảnh sản phẩm ${idx + 1}`}
+                              style={{
+                                objectFit: "cover",
+                                width: 120,
+                                height: 120,
+                                display: "block",
+                              }}
+                              loading="lazy"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* -------------------------------------- */}
+                  {/* ...rest of product form as before... */}
                   <Row gutter={12}>
                     <Col span={12}>
                       <Form.Item
@@ -917,9 +976,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                         "en-US"
                                       )}đ`
                                     : 0}
-                                  {/* {item.currency_code === "VND"
-                                    ? "đ"
-                                    : item.currency_code} */}
                                 </div>
                               </div>
                             );
@@ -1121,8 +1177,6 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   </Form.Item>
                 </div>
               </div>
-
-              {/* Order Summary */}
               <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-3 flex items-center gap-2">
                   <svg

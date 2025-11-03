@@ -29,9 +29,10 @@ export enum OrderStatusType {
   READY_TO_SHIP = "READY_TO_SHIP", // Sẵn sàng chuyển
   SHIPPED = "SHIPPED", // Đã chuyển
   SHIPPING_REQUEST_CLIENT = "SHIPPING_REQUEST_CLIENT", // Tạo yêu cầu chuyển hàng
-  CANCELED="CANCELED", // đã huỷ 
+  CANCELED="CANCELED", 
   CLIENT_PENDING= "CLIENT_PENDING",
   ADMIN_PENDING="ADMIN_PENDING",
+  PACKED="PACKED"
 }
 
 export interface Invoice {
