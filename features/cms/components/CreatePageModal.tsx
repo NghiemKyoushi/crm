@@ -28,7 +28,7 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
         return `${base}/${VIEW_IMAGE}${imageId}`;
     }, [imageId]);
 
-    const { mutateAsync, isLoading } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsPageBody | UpdateCmsPageBody) => {
             if (page) {
                 await updateCmsPage(page.id, payload as UpdateCmsPageBody);
@@ -49,7 +49,7 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
 
     const handleOk = async () => {
         const values = await form.validateFields();
-        const payload = { status: "active", ...values } as CreateCmsPageBody;
+        const payload = { ...values, status: "active" } as CreateCmsPageBody;
         await mutateAsync(payload);
     };
 
@@ -59,7 +59,7 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
             open={open}
             onCancel={onClose}
             onOk={handleOk}
-            confirmLoading={isLoading}
+            confirmLoading={isPending}
             okText={page ? "Update" : "Create"}
         >
             <Form

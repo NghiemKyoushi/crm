@@ -122,10 +122,10 @@ export default function UpdateContentPage() {
                 }
             }
             
-            const payload = { 
-                status: "active", 
+            const payload = {
                 ...values,
-                body: finalBody 
+                body: finalBody,
+                status: "active",
             } as UpdateCmsContentBody;
             
             setSaving(true);

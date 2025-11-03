@@ -68,7 +68,7 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
         }
     }, [contentType, open, form, bodyValue]);
 
-    const { mutateAsync, isLoading } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsContentBody | UpdateCmsContentBody) => {
             if (content) {
                 await updateCmsContent(content.id, payload as UpdateCmsContentBody);
@@ -107,10 +107,10 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                 }
             }
             
-            const payload = { 
-                status: "active", 
+            const payload = {
                 ...values,
-                body: finalBody 
+                body: finalBody,
+                status: "active",
             } as CreateCmsContentBody;
             await mutateAsync(payload);
         } catch (error) {
@@ -125,7 +125,7 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
             open={open}
             onCancel={onClose}
             onOk={handleOk}
-            confirmLoading={isLoading}
+            confirmLoading={isPending}
             okText={content ? "Update" : "Create"}
             width={720}
         >

@@ -84,10 +84,10 @@ export default function CreateContentPage() {
                 }
             }
             
-            const payload = { 
-                status: "active", 
+            const payload = {
                 ...values,
-                body: finalBody 
+                body: finalBody,
+                status: "active",
             } as CreateCmsContentBody;
             
             setSaving(true);

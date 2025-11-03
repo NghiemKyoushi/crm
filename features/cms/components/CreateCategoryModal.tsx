@@ -48,7 +48,7 @@ export default function CreateCategoryModal({ open, onClose, onSuccess, category
         }
     }, [open, category, form]);
 
-    const { mutateAsync, isLoading } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsCategoryBody | UpdateCmsCategoryBody) => {
             if (category) {
                 await updateCmsCategory(category.id, payload as UpdateCmsCategoryBody);
@@ -68,10 +68,10 @@ export default function CreateCategoryModal({ open, onClose, onSuccess, category
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            const payload: CreateCmsCategoryBody = { 
-                status: "active", 
+            const payload: CreateCmsCategoryBody = {
                 ...values,
                 image_id: values.image_id ?? null,
+                status: "active",
             } as CreateCmsCategoryBody;
             await mutateAsync(payload);
         } catch (error: any) {
@@ -90,7 +90,7 @@ export default function CreateCategoryModal({ open, onClose, onSuccess, category
             open={open}
             onCancel={onClose}
             onOk={handleOk}
-            confirmLoading={isLoading}
+            confirmLoading={isPending}
             okText={category ? "Update" : "Create"}
         >
             <Form 

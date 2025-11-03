@@ -16,7 +16,7 @@ type Props = {
 export default function CreateSettingModal({ open, onClose, onSuccess, setting }: Props) {
     const [form] = Form.useForm<CreateCmsSettingBody>();
 
-    const { mutateAsync, isLoading } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsSettingBody | UpdateCmsSettingBody) => {
             if (setting) {
                 await updateCmsSetting(setting.id, payload as UpdateCmsSettingBody);
@@ -69,7 +69,7 @@ export default function CreateSettingModal({ open, onClose, onSuccess, setting }
             open={open}
             onCancel={onClose}
             onOk={handleOk}
-            confirmLoading={isLoading}
+            confirmLoading={isPending}
             okText={setting ? "Update" : "Create"}
             width={600}
         >

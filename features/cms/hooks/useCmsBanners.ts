@@ -19,12 +19,6 @@ export function useCmsBanners(pageId: number | null) {
             return getCmsBanners(pageId);
         },
         enabled: !!pageId,
-        onError: (error) => {
-            console.error("❌ useCmsBanners error:", error);
-        },
-        onSuccess: (data) => {
-            console.log("✅ useCmsBanners success, data:", data);
-        },
     });
 }
 

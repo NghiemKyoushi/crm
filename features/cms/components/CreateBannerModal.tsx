@@ -28,7 +28,7 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
         return `${base}/${VIEW_IMAGE}${imageId}`;
     }, [imageId]);
 
-    const { mutateAsync, isLoading } = useMutation({
+    const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsBannerBody | UpdateCmsBannerBody) => {
             if (banner) {
                 await updateCmsBanner(banner.id, payload as UpdateCmsBannerBody);
@@ -47,7 +47,7 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
 
     const handleOk = async () => {
         const values = await form.validateFields();
-        const payload = { status: "active", ...values } as CreateCmsBannerBody;
+        const payload = { ...values, status: "active" } as CreateCmsBannerBody;
         await mutateAsync(payload);
     };
 
@@ -57,7 +57,7 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
             open={open}
             onCancel={onClose}
             onOk={handleOk}
-            confirmLoading={isLoading}
+            confirmLoading={isPending}
             okText={banner ? "Update" : "Create"}
             width={640}
         >
