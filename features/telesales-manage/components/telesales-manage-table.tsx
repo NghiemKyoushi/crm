@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Table, Button, Input, Select, Tag } from "antd";
+import { Table, Button, Input, Select, Tag, Modal, Checkbox } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckCircle,
@@ -75,6 +75,15 @@ const TelesalesPage: React.FC = () => {
   );
   const [isOpenTagModal, setIsOpenTagModal] = useState(false);
 
+  // New: State quản lý các customer được chọn bằng checkbox
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // New: Modal confirm gán sale cho các khách đã chọn
+  const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
+
+  // New: Gửi bulk danh sách customer đã chọn sang AssignTelesaleModal
+  const [bulkAssignCustomers, setBulkAssignCustomers] = useState<Customer[]>([]);
+
   const [tags, setTags] = useState([
     { id: "1", name: "Khách hàng", color: "red" },
     { id: "2", name: "Gia đình", color: "green" },
@@ -87,6 +96,44 @@ const TelesalesPage: React.FC = () => {
     setPage(pageNumber - 1);
   };
   const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={
+            data.length > 0 && selectedRowKeys.length === data.length
+          }
+          indeterminate={
+            selectedRowKeys.length > 0 &&
+            selectedRowKeys.length < data.length
+          }
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedRowKeys(data.map((d) => d.key));
+            } else {
+              setSelectedRowKeys([]);
+            }
+          }}
+        />
+      ),
+      dataIndex: "select",
+      key: "select",
+      width: 48,
+      render: (_: any, record: Customer) => (
+        <Checkbox
+          checked={selectedRowKeys.includes(record.key)}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            if (checked) {
+              setSelectedRowKeys((prev) => [...prev, record.key]);
+            } else {
+              setSelectedRowKeys((prev) =>
+                prev.filter((k) => k !== record.key)
+              );
+            }
+          }}
+        />
+      ),
+    },
     {
       title: "Khách hàng",
       dataIndex: "name",
@@ -156,48 +203,31 @@ const TelesalesPage: React.FC = () => {
         </div>
       ),
     },
-    // {
-    //   title: "Hành động",
-    //   key: "action",
-    //   render: (_: any, record: Customer) => (
-    //     <div className="flex gap-2 flex-wrap">
-    //       <Button size="small" className="!bg-blue-500  !text-white !text-xs">
-    //         Đã gọi
-    //       </Button>
-    //       <Button
-    //         size="small"
-    //         type="primary"
-    //         className="!bg-green-500 !text-xs"
-    //       >
-    //         Thành công
-    //       </Button>
-    //       <Button size="small" className="!bg-red-500 !text-white !text-xs">
-    //         Thất bại
-    //       </Button>
-    //       {record.status === "Chưa gán" ? (
-    //         <Button
-    //           size="small"
-    //           onClick={() => setIsOpenAssign(true)}
-    //           className="!bg-orange-500 !text-white !text-xs"
-    //         >
-    //           Gán Sale
-    //         </Button>
-    //       ) : (
-    //         <Button size="small" className="!bg-gray-500 !text-white !text-xs">
-    //           Ghi chú
-    //         </Button>
-    //       )}
-    //       <Button
-    //         onClick={() => setIsOpenDetail(true)}
-    //         size="small"
-    //         className="!bg-blue-500 !text-white !text-xs"
-    //       >
-    //         Chi tiết
-    //       </Button>
-    //     </div>
-    //   ),
-    // },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_: any, record: Customer) => (
+        <div className="flex gap-2 flex-wrap">
+          <Button size="small" className="!bg-green-500   !text-white !text-xs">
+            Đã gọi
+          </Button>
+          <Button size="small" className="!bg-red-500 !text-white !text-xs">
+            Thất bại
+          </Button>
+          <Button
+              size="small"
+              onClick={() => setIsOpenAssign(true)}
+              className="!bg-orange-500 !text-white !text-xs"
+            >
+              Gán Sale
+            </Button>
+        </div>
+      ),
+    },
   ];
+
+  // Lấy danh sách khách đã chọn cho popup Confirm Assign
+  const selectedCustomers = data.filter((c) => selectedRowKeys.includes(c.key));
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
@@ -220,9 +250,8 @@ const TelesalesPage: React.FC = () => {
         </div>
       </div>
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {/* Tổng khách hàng */}
-        <div className="border border-blue-200 bg-blue-50 rounded-lg flex items-center justify-start gap-4 ">
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="border border-blue-200 bg-blue-50 rounded-lg flex items-center justify-start gap-4 py-4">
           <div className="p-2 bg-blue-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon icon={faUsers} className=" text-white !h-5 !w-4" />
           </div>
@@ -234,8 +263,7 @@ const TelesalesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Chưa gọi */}
-        <div className="border border-yellow-200 bg-yellow-50 rounded-lg flex items-center justify-start gap-4">
+        <div className="border border-yellow-200 bg-yellow-50 rounded-lg flex items-center justify-start gap-4 py-4">
           <div className="p-2 bg-yellow-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon icon={faPhone} className=" text-white !h-5 !w-4" />
           </div>
@@ -245,8 +273,7 @@ const TelesalesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Thành công */}
-        <div className="bg-green-50 border border-green-200 rounded-lg flex items-center justify-start gap-4">
+        <div className="bg-green-50 border border-green-200 rounded-lg flex items-center justify-start gap-4 py-4">
           <div className="p-2 bg-green-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon
               icon={faCheckCircle}
@@ -259,8 +286,7 @@ const TelesalesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Thất bại */}
-        {/* <div className="bg-red-50 p-2 rounded-lg flex items-center justify-start gap-4">
+        <div className="bg-red-50 p-2 rounded-lg flex items-center justify-start gap-4 py-4">
           <div className="p-2 bg-red-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon
               icon={faTimesCircle}
@@ -272,7 +298,7 @@ const TelesalesPage: React.FC = () => {
             <p className="text-sm text-red-600 !mb-1">Thất bại</p>
             <p className="text-2xl font-bold text-red-900 !mb-1">544</p>
           </div>
-        </div> */}
+        </div>
       </div>
 
       {/* Actions */}
@@ -311,6 +337,12 @@ const TelesalesPage: React.FC = () => {
               />
             }
             className="!w-50 !bg-purple-600 !text-white"
+            // Mở modal xác nhận bulk assign
+            disabled={selectedRowKeys.length === 0}
+            onClick={() => {
+              setBulkAssignCustomers(selectedCustomers);
+              setIsBulkAssignModalOpen(true);
+            }}
           >
             Gán Hàng Loạt
           </Button>
@@ -318,17 +350,55 @@ const TelesalesPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <TableComponent
+      <Table
         columns={columns}
         dataSource={data || []}
-        rowHeight={45}
-        pageSize={10}
-        page={0}
-        onPageChange={handleChangePage}
-        response={undefined}
-        fontSize={14}
-        headerHeight={44}
+        rowKey="key"
+        pagination={false}
+        rowClassName=""
+        scroll={{ x: true }}
+        rowSelection={undefined}
       />
+
+      {/* Modal xác nhận danh sách khách trước khi gán sale */}
+      <Modal
+        title="Xác nhận gán Sale cho các Khách Hàng đã chọn"
+        open={isBulkAssignModalOpen}
+        onCancel={() => setIsBulkAssignModalOpen(false)}
+        footer={null}
+      >
+        {/* Nếu không có khách nào thì chỉ báo */}
+        {bulkAssignCustomers.length === 0 ? (
+          <div>Bạn chưa chọn khách hàng nào để gán sale.</div>
+        ) : (
+          <div className="space-y-2 mb-4">
+            <div className="font-semibold">Danh sách khách hàng đã chọn:</div>
+            <ul className="list-disc ml-4">
+              {bulkAssignCustomers.map((cust) => (
+                <li key={cust.key}>
+                  {cust.name} - SĐT:{" "}
+                  {(cust.contact || "").split("\n")[0]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Nút xác nhận mở modal gán sale thực sự */}
+        <div className="flex justify-end gap-2">
+          <Button onClick={() => setIsBulkAssignModalOpen(false)}>Hủy</Button>
+          <Button
+            type="primary"
+            disabled={bulkAssignCustomers.length === 0}
+            onClick={() => {
+              setIsBulkAssignModalOpen(false);
+              setIsOpenAssign(true);
+            }}
+          >
+            Xác nhận &amp; Gán Sale
+          </Button>
+        </div>
+      </Modal>
 
       <TelesaleDetailModal
         open={isOpenDetail}
@@ -343,9 +413,13 @@ const TelesalesPage: React.FC = () => {
         callHistory={[]}
         onEdit={() => console.log("")}
       />
+      {/* Gán Sale: Nếu là gán nhiều khách hàng thì truyền vào danh sách, ngược lại sẽ để trống hoặc chỉ 1 khách */}
       <AssignTelesaleModal
         onCancel={() => setIsOpenAssign(false)}
-        onSubmit={() => console.log("")}
+        onSubmit={() => {
+          setIsOpenAssign(false);
+          setSelectedRowKeys([]);
+        }}
         open={isOpenAssign}
       />
       <ImportCustomerModal
