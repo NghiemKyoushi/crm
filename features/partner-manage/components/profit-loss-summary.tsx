@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Statistic, Select, Spin, Empty, Tag } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -10,13 +10,18 @@ import { profitLossCurrencyCodes } from "./profit-loss-chart";
 
 const { Option } = Select;
 
-export const ProfitLossSummaryComponent: React.FC = () => {
+export const ProfitLossSummaryComponent: React.FC<{ code?: string }> = ({ code }) => {
   const { t } = useTranslation();
   const [selectedCurrency, setSelectedCurrency] = useState<string | undefined>(
     undefined
   );
   const { data, isLoading, error } = useProfitLossSummary(selectedCurrency);
 
+  useEffect(()=>{
+    if(code){
+      setSelectedCurrency(code)
+    }
+  },[code])
   if (isLoading) {
     return (
       <div className="mb-6 w-full">

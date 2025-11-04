@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   Collapse,
+  Upload,
 } from "antd";
 import {
   getDataFeeService,
@@ -44,6 +45,8 @@ import TiptapEditor from "../TiptapEditor";
 import { CURRENCY_CODE } from "./add-orderhub-modal";
 import { Fee } from "./orderhub-detail-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { uploadImage } from "@/features/user-profile/hooks/user-profile";
 
 
 const { Option } = Select;
@@ -135,6 +138,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             price: priceY,
             name: form.getFieldValue("productName"),
             item_quantity: form.getFieldValue("item_quantity"),
+            images: [...uploadedIds,...productImages],
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
@@ -425,7 +429,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setRouteId(undefined);
     queryClient.removeQueries({ queryKey: ["listServiceAdmin"] });
     setListInsurancesMap([]);
-    setProductImages([]); // Clear images when closing modal
+    setProductImages([]); 
+    setFileList([]);
     onCancel();
   };
 
@@ -439,6 +444,50 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     return isAdmin && isNotInSpecialStatus;
   }, [hasPermission, order?.status]);
   
+
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [uploadedIds, setUploadedIds] = useState<number[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const beforeUpload = async (file: File) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      toast.error(t("validation.onlyImageFiles"));
+      return Upload.LIST_IGNORE;
+    }
+    if (file.size / 1024 / 1024 > 5) {
+      toast.error(t("validation.imageSizeLimit"));
+      return Upload.LIST_IGNORE;
+    }
+
+    setUploading(true); // 👉 bật loading
+
+    try {
+      const newId = await uploadImage(file);
+      setUploadedIds((prev) => [...prev, newId]);
+
+      setFileList((prev) => [
+        ...prev,
+        {
+          uid: String(Date.now()),
+          name: file.name,
+          status: "done",
+          url: URL.createObjectURL(file),
+        },
+      ]);
+      return false;
+    } catch (err) {
+      toast.error(t("validation.uploadFailed"));
+      return Upload.LIST_IGNORE;
+    } finally {
+      setUploading(false); // 👉 tắt loading
+    }
+  };
+
+  const handleChange = ({ fileList }: { fileList: any[] }) => {
+    setFileList(fileList);
+  };
+
   return (
     <>
       <Modal
@@ -658,7 +707,23 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       </div>
                     </div>
                   )}
-                  {/* -------------------------------------- */}
+                  
+                  <Form.Item label={"Tải ảnh sản phẩm"}>
+                    <Upload
+                      listType="picture-card"
+                      fileList={fileList}
+                      onChange={handleChange}
+                      beforeUpload={beforeUpload}
+                      multiple
+                      disabled={uploading} // disable khi upload
+                    >
+                      {fileList.length >= 10 ? null : (
+                        <div>
+                          {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                        </div>
+                      )}
+                    </Upload>
+                  </Form.Item>
                   {/* ...rest of product form as before... */}
                   <Row gutter={12}>
                     <Col span={12}>
