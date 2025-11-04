@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, DatePicker, Select, Button, Empty, Spin } from "antd";
 import {
   BarChart,
@@ -110,6 +110,12 @@ export const ProfitLossChart: React.FC<{ code?: string }> = ({ code }) => {
     }
     return null;
   };
+
+  useEffect(()=>{
+    if(code){
+      setCurrencyCode(code)
+    }
+  },[code])
 
   return (
     <div className="mb-6 w-full">

@@ -11,6 +11,7 @@ import {
   Col,
   Collapse,
   Spin,
+  Upload,
 } from "antd";
 import {
   getDataFeeService,
@@ -31,13 +32,22 @@ import {
 import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useListInsurance } from "@/features/fee-settting/hooks/fee-setting";
-import { useCreateNewOrder, useListService, useListServiceAdmin } from "../../hooks/orderhub";
-import { useListCustomer, useListCustomerSale } from "@/features/user-management/hooks/staff-manage";
+import {
+  useCreateNewOrder,
+  useListService,
+  useListServiceAdmin,
+} from "../../hooks/orderhub";
+import {
+  useListCustomer,
+  useListCustomerSale,
+} from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TiptapEditor from "../TiptapEditor";
 import { usePermission } from "@/components/layout/PermissionContext";
+import { uploadImage } from "@/features/user-profile/hooks/user-profile";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -85,12 +95,12 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
   // const [userId, setUserId] = useState<number | undefined>(undefined);
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
-  
+
   const { data: listServices } = useListServiceAdmin(
-    { userId: customer , routeId },
+    { userId: customer, routeId },
     {
       enabled: !!customer && !!routeId,
-      queryKey: ['listService']
+      queryKey: ["listService"],
     }
   );
 
@@ -125,13 +135,13 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       if (idProduct && insurance) {
         // const serviceOptionTrue = listServices.filter(
         //   (item: any) => item.optional
-        // );        
+        // );
         const serviceOption = listService
           // ?.filter((item: any) => item.optional === false)
           .map((item: any) => ({
             ...item,
-            is_checked: services?.includes(item.code), 
-          }));          
+            is_checked: services?.includes(item.code),
+          }));
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
         const bodyNewOrder: OrderFeeRequest = {
           data: {
@@ -141,6 +151,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             price: form.getFieldValue("priceY"),
             name: form.getFieldValue("productName"),
             item_quantity: form.getFieldValue("item_quantity"),
+            images: [...uploadedIds,...productImages],
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
@@ -307,20 +318,18 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         // const serviceOptionTrue = listServices.filter(
         //   (item: any) => item.optional === true
         // );
-        const serviceOption = listService?.map(
-          (item: any) => {
-            if(!item.optional && services.includes(item.code)){
-              return{
-                ...item,
-                is_checked: true
-              }
-            }
-            return{
+        const serviceOption = listService?.map((item: any) => {
+          if (!item.optional && services.includes(item.code)) {
+            return {
               ...item,
-              is_checked: false
-            }
+              is_checked: true,
+            };
           }
-        );
+          return {
+            ...item,
+            is_checked: false,
+          };
+        });
 
         const bodyGetFeeService: RateOrderRequest = {
           order_id: null,
@@ -340,29 +349,33 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           const res: FeeServiceCheck = await getDataFeeService(
             bodyGetFeeService
           );
-          const insuranceFees = res.insurance_package_list.map((item: any) => {            
+          const insuranceFees = res.insurance_package_list.map((item: any) => {
             return {
               amount_vnd: item.amount_vnd,
               ...item.insurance_package,
-            }
-          }) 
+            };
+          });
           const serviceOptionTrue = listServices.filter(
-          (item: any) => item.optional === true
-           );           
-           if(res.service_fee_optional_list.length > 0){
-            setListService([...serviceOptionTrue, ...res.service_fee_optional_list])       
-
-           }
-          setListInsurancesMap(insuranceFees)
+            (item: any) => item.optional === true
+          );
+          if (res.service_fee_optional_list.length > 0) {
+            setListService([
+              ...serviceOptionTrue,
+              ...res.service_fee_optional_list,
+            ]);
+          }
+          setListInsurancesMap(insuranceFees);
           setFees({
             DOMESTIC_SHIPPING_FEE: res.domestic_shipping_fee?.amount_vnd ?? -1,
             INSURANCE_FEE: res.insurance_fee?.amount_vnd ?? -1,
             MIN_DEPOSIT_PERCENT: res.min_deposit_percent ?? -1,
             PAYMENT_FEE: res.payment_fee?.amount_vnd ?? -1,
             SERVICE_FEE: res.service_fee?.amount_vnd ?? -1,
-            SHIPPING_SURCHARGE_FEE: res.shipping_surcharge_fee?.amount_vnd ?? -1,
+            SHIPPING_SURCHARGE_FEE:
+              res.shipping_surcharge_fee?.amount_vnd ?? -1,
             TOTAL_ORDER: res.total_order?.amount_vnd ?? -1,
-            TOTAL_COD_SHIPPING_FEE: res.total_cod_shipping_fee?.amount_vnd ?? -1,
+            TOTAL_COD_SHIPPING_FEE:
+              res.total_cod_shipping_fee?.amount_vnd ?? -1,
             TOTAL_PRODUCT: res.total_products?.amount_vnd ?? -1,
             INSURANCE_FEE_JP: res.insurance_fee?.amount ?? 0,
             PAYMENT_FEE_JP: res.payment_fee?.amount ?? 0,
@@ -392,7 +405,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     itemQuantity,
     exchangeRates,
     insurance,
-    currencyCode
+    currencyCode,
   ]);
 
   useEffect(() => {
@@ -415,28 +428,28 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setListInsurancesMap([]);
     setListService([]);
     setRateValueForPrice(0);
-    queryClient.removeQueries({ queryKey: ['listService'] });
-    queryClient.removeQueries({ queryKey: ['listCustomerSale'] });
-    setFees(
-      {
-        DOMESTIC_SHIPPING_FEE: -1,
-        INSURANCE_FEE: -1,
-        MIN_DEPOSIT_PERCENT: -1,
-        PAYMENT_FEE: -1,
-        SERVICE_FEE: -1,
-        SHIPPING_SURCHARGE_FEE: -1,
-        TOTAL_ORDER: -1,
-        TOTAL_PRODUCT: -1,
-        TOTAL_COD_SHIPPING_FEE: -1,
-        INSURANCE_FEE_JP: -1,
-        PAYMENT_FEE_JP: 0,
-        SERVICE_FEE_JP: 0,
-        SHIPPING_SURCHARGE_FEE_JP: 0,
-        TOTAL_ORDER_JP: 0,
-        TOTAL_PRODUCT_JP: 0,
-        TOTAL_COD_SHIPPING_FEE_JP: 0,
-      }
-    )
+    queryClient.removeQueries({ queryKey: ["listService"] });
+    queryClient.removeQueries({ queryKey: ["listCustomerSale"] });
+    setFees({
+      DOMESTIC_SHIPPING_FEE: -1,
+      INSURANCE_FEE: -1,
+      MIN_DEPOSIT_PERCENT: -1,
+      PAYMENT_FEE: -1,
+      SERVICE_FEE: -1,
+      SHIPPING_SURCHARGE_FEE: -1,
+      TOTAL_ORDER: -1,
+      TOTAL_PRODUCT: -1,
+      TOTAL_COD_SHIPPING_FEE: -1,
+      INSURANCE_FEE_JP: -1,
+      PAYMENT_FEE_JP: 0,
+      SERVICE_FEE_JP: 0,
+      SHIPPING_SURCHARGE_FEE_JP: 0,
+      TOTAL_ORDER_JP: 0,
+      TOTAL_PRODUCT_JP: 0,
+      TOTAL_COD_SHIPPING_FEE_JP: 0,
+    });
+    setProductImages([]);
+    setFileList([]);
     onCancel();
   };
 
@@ -448,6 +461,49 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       });
     }
   }, [isOpen]);
+
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [uploadedIds, setUploadedIds] = useState<number[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const beforeUpload = async (file: File) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      toast.error(t("validation.onlyImageFiles"));
+      return Upload.LIST_IGNORE;
+    }
+    if (file.size / 1024 / 1024 > 5) {
+      toast.error(t("validation.imageSizeLimit"));
+      return Upload.LIST_IGNORE;
+    }
+
+    setUploading(true); // 👉 bật loading
+
+    try {
+      const newId = await uploadImage(file);
+      setUploadedIds((prev) => [...prev, newId]);
+
+      setFileList((prev) => [
+        ...prev,
+        {
+          uid: String(Date.now()),
+          name: file.name,
+          status: "done",
+          url: URL.createObjectURL(file),
+        },
+      ]);
+      return false;
+    } catch (err) {
+      toast.error(t("validation.uploadFailed"));
+      return Upload.LIST_IGNORE;
+    } finally {
+      setUploading(false); // 👉 tắt loading
+    }
+  };
+
+  const handleChange = ({ fileList }: { fileList: any[] }) => {
+    setFileList(fileList);
+  };
 
   return (
     <>
@@ -585,7 +641,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       }
                     />
                   </Form.Item>
-                 
 
                   <Form.Item
                     label={
@@ -625,7 +680,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     <TiptapEditor />
                   </Form.Item>
 
-                   {/* Hiển thị ảnh sản phẩm theo hàng ngang với scroll ngang, ảnh lớn hơn */}
                   {productImages && productImages.length > 0 && (
                     <div className="!mb-4">
                       <div className="text-xs font-medium text-gray-700 mb-1">
@@ -662,7 +716,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                 background: "#fff",
                                 display: "block",
                               }}
-                              onError={e => {
+                              onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src =
                                   "https://via.placeholder.com/120?text=No+Img";
@@ -673,7 +727,22 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       </div>
                     </div>
                   )}
-
+                  <Form.Item label={"Tải ảnh sản phẩm"}>
+                    <Upload
+                      listType="picture-card"
+                      fileList={fileList}
+                      onChange={handleChange}
+                      beforeUpload={beforeUpload}
+                      multiple
+                      disabled={uploading} // disable khi upload
+                    >
+                      {fileList.length >= 10 ? null : (
+                        <div>
+                          {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                        </div>
+                      )}
+                    </Upload>
+                  </Form.Item>
                   <Row gutter={12}>
                     <Col span={12}>
                       <Form.Item
@@ -969,7 +1038,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                   </Checkbox>
                                 </div>
                                 <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
-                                {item.amount_vnd
+                                  {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
                                         "en-US"
                                       )}đ`
@@ -1013,47 +1082,55 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         className="[&_.ant-collapse-header]:!py-3"
                       >
                         <div className="space-y-2">
-                          {listInsurancesMap.length  > 0 && listInsurancesMap?.map((item: InsuranceOptionModel) => {
-                            const isChecked = insurance?.id === item.id;
-                            return (
-                              <div
-                                key={item.id}
-                                className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
-                                  isChecked
-                                    ? "border-amber-400 shadow-md"
-                                    : "border-gray-200 hover:border-amber-200"
-                                }`}
-                              >
-                                <div className="flex-1 pr-3">
-                                  <Checkbox
-                                    checked={isChecked}
-                                    onChange={(e) =>
-                                      handleInsuranceChange(e, item)
-                                    }
-                                    className="[&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-amber-500"
+                          {listInsurancesMap.length > 0 &&
+                            listInsurancesMap?.map(
+                              (item: InsuranceOptionModel) => {
+                                const isChecked = insurance?.id === item.id;
+                                return (
+                                  <div
+                                    key={item.id}
+                                    className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
+                                      isChecked
+                                        ? "border-amber-400 shadow-md"
+                                        : "border-gray-200 hover:border-amber-200"
+                                    }`}
                                   >
-                                    <div>
-                                      <div className="font-medium text-gray-900 text-sm">
-                                        {item.name}
-                                      </div>
-                                      <div className="text-gray-500 text-xs mt-0.5">
-                                        {item.description}
-                                      </div>
+                                    <div className="flex-1 pr-3">
+                                      <Checkbox
+                                        checked={isChecked}
+                                        onChange={(e) =>
+                                          handleInsuranceChange(e, item)
+                                        }
+                                        className="[&_.ant-checkbox-checked_.ant-checkbox-inner]:!bg-amber-500"
+                                      >
+                                        <div>
+                                          <div className="font-medium text-gray-900 text-sm">
+                                            {item.name}
+                                          </div>
+                                          <div className="text-gray-500 text-xs mt-0.5">
+                                            {item.description}
+                                          </div>
+                                        </div>
+                                      </Checkbox>
                                     </div>
-                                  </Checkbox>
-                                </div>
-                                <div className="text-amber-600 font-semibold text-sm whitespace-nowrap">
-                                   {item.fee_percentage === 0
-                                    ? "0 đ"
-                                    : item.amount_vnd
-                                    ? <span> {`${item.amount_vnd.toLocaleString(
-                                        "en-US"
-                                      )} đ`}</span>
-                                    : "Cập nhật sau"}
-                                </div>
-                              </div>
-                            );
-                          })}
+                                    <div className="text-amber-600 font-semibold text-sm whitespace-nowrap">
+                                      {item.fee_percentage === 0 ? (
+                                        "0 đ"
+                                      ) : item.amount_vnd ? (
+                                        <span>
+                                          {" "}
+                                          {`${item.amount_vnd.toLocaleString(
+                                            "en-US"
+                                          )} đ`}
+                                        </span>
+                                      ) : (
+                                        "Cập nhật sau"
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
                         </div>
                       </Panel>
                     </Collapse>
@@ -1216,23 +1293,31 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       Tỷ giá quy đổi
                     </span>
                     <span className="text-sm font-semibold text-gray-900">
-                      {rateValueForPrice || rateValueForPrice === 0 
-                        ? <span> {`1 ${currencyCode} = ${rateValueForPrice.toLocaleString("en-US")}đ`}</span>
-                        : "Cập nhật sau"}
+                      {rateValueForPrice || rateValueForPrice === 0 ? (
+                        <span>
+                          {" "}
+                          {`1 ${currencyCode} = ${rateValueForPrice.toLocaleString(
+                            "en-US"
+                          )}đ`}
+                        </span>
+                      ) : (
+                        "Cập nhật sau"
+                      )}
                     </span>
                   </div>
 
                   {/* Product Price */}
                   <div className="flex justify-between items-center py-2 px-3 bg-blue-50 rounded-lg border border-blue-100">
                     <span className="text-sm text-blue-700 font-medium">
-                    Tổng tiền sản phẩm
+                      Tổng tiền sản phẩm
                     </span>
                     <span className="text-sm font-bold text-blue-900">
-                    {fees.TOTAL_PRODUCT !== -1 ? (
+                      {fees.TOTAL_PRODUCT !== -1 ? (
                         <>
                           {fees.TOTAL_PRODUCT.toLocaleString("en-US")}đ
                           <span className="text-gray-500 !font-medium !text-xs !pl-1">
-                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")}{currencyCheckCode}
+                            {fees.TOTAL_PRODUCT_JP.toLocaleString("en-US")}
+                            {currencyCheckCode}
                           </span>
                         </>
                       ) : (
@@ -1241,28 +1326,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                       {/* {currencyCheckCode} */}
                     </span>
                   </div>
-
-                  {/* Domestic Shipping */}
-                    {/* <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
-                      <span className="text-sm text-gray-600">
-                        Cước VC nội địa
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {fees.TOTAL_COD_SHIPPING_FEE !== -1
-                          ?
-                          <>
-                          {fees.TOTAL_COD_SHIPPING_FEE.toLocaleString("en-US")}đ
-                          <span className="text-gray-500 !font-medium !text-xs !pl-1">
-                            {fees.TOTAL_COD_SHIPPING_FEE_JP.toLocaleString("en-US")}
-                            {currencyCheckCode}
-                          </span>
-                        </>
-                          : "Cập nhật sau"}
-                       
-                      </span>
-                    </div> */}
-                  
-
                   {/* Fees Section */}
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className="text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -1275,16 +1338,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phí dịch vụ
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {
-                          fees.SERVICE_FEE !== -1
-                            ?  <>
-                            {fees.SERVICE_FEE.toLocaleString("en-US")}đ
-                            <span className="text-gray-500 !font-medium !text-xs !pl-1">
-                              {fees.SERVICE_FEE_JP.toLocaleString("en-US")}
-                              {currencyCheckCode}
-                            </span>
-                          </>
-                            : "Cập nhật sau"}
+                          {fees.SERVICE_FEE !== -1 ? (
+                            <>
+                              {fees.SERVICE_FEE.toLocaleString("en-US")}đ
+                              <span className="text-gray-500 !font-medium !text-xs !pl-1">
+                                {fees.SERVICE_FEE_JP.toLocaleString("en-US")}
+                                {currencyCheckCode}
+                              </span>
+                            </>
+                          ) : (
+                            "Cập nhật sau"
+                          )}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
@@ -1292,16 +1356,17 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phí thanh toán
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {
-                          fees.PAYMENT_FEE !== -1
-                            ? <>
-                            {fees.PAYMENT_FEE.toLocaleString("en-US")}đ
-                            <span className="text-gray-500 !font-medium !text-xs !pl-1">
-                              {fees.PAYMENT_FEE_JP.toLocaleString("en-US")}
-                              {currencyCheckCode}
-                            </span>
-                          </>
-                            : "Cập nhật sau"}
+                          {fees.PAYMENT_FEE !== -1 ? (
+                            <>
+                              {fees.PAYMENT_FEE.toLocaleString("en-US")}đ
+                              <span className="text-gray-500 !font-medium !text-xs !pl-1">
+                                {fees.PAYMENT_FEE_JP.toLocaleString("en-US")}
+                                {currencyCheckCode}
+                              </span>
+                            </>
+                          ) : (
+                            "Cập nhật sau"
+                          )}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 px-3 bg-white rounded">
@@ -1309,8 +1374,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Cước VC quốc tế
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {
-                          fees.DOMESTIC_SHIPPING_FEE !== -1
+                          {fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
                                 "en-US"
                               )}đ`
@@ -1322,8 +1386,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phụ thu VC
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                          {
-                          fees.SHIPPING_SURCHARGE_FEE !== -1
+                          {fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
                                 "en-US"
                               )}đ`
@@ -1335,10 +1398,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                           Phí bảo hiểm
                         </span>
                         <span className="text-sm font-medium text-gray-900">
-                        {insurance?.id == 1
+                          {insurance?.id == 1
                             ? "0đ"
-                            : (fees.INSURANCE_FEE !== null  &&
-                            fees.INSURANCE_FEE !== -1)
+                            : fees.INSURANCE_FEE !== null &&
+                              fees.INSURANCE_FEE !== -1
                             ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
                             : "Cập nhật sau"}
                         </span>
@@ -1380,7 +1443,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                   {item.name}
                                 </span>
                                 <span className="text-sm font-medium text-gray-900">
-                                {item.amount_vnd
+                                  {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
                                         "en-US"
                                       )}đ`
@@ -1400,8 +1463,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         Tổng cộng:
                       </span>
                       <span className="text-lg font-bold text-white">
-                        {Number(fees.TOTAL_ORDER) &&
-                          fees.TOTAL_ORDER !== -1 ? (
+                        {Number(fees.TOTAL_ORDER) && fees.TOTAL_ORDER !== -1 ? (
                           <>
                             {Number(fees.TOTAL_ORDER).toLocaleString("en-US")}đ
                             <span className="text-white !font-medium !text-xs !pl-1">
