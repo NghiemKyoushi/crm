@@ -65,6 +65,8 @@ export const API_TYPE_CONST = {
   TEST_SELECTOR_CONFIG: `${FEATURE}/admin/source-website/test-selector-config`,
   // Website Account Management
   WEBSITE_ACCOUNT: `${FEATURE}/admin/source-website-account`,
+  // User - Website Accounts assignment
+  USER_WEBSITE_ACCOUNTS: `${FEATURE}/admin/users/website-accounts`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   DETAIL_ORDER: `${FEATURE}/orders`,
