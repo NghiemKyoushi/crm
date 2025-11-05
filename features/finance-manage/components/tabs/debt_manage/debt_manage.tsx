@@ -21,23 +21,40 @@ import {
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
-const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => (
-  <Modal
-    open={visible}
-    title="Xác nhận giao dịch"
-    onOk={onOk}
-    onCancel={onCancel}
-    okText="Xác nhận"
-    cancelText="Huỷ"
-    destroyOnClose
-    centered
-  >
-    <div>
-      Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
-      <b>{record?.name || record?.full_name}</b>?
-    </div>
-  </Modal>
-);
+const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
+  const [note, setNote] = useState<string>("");
+
+  return (
+    <Modal
+      open={visible}
+      title="Xác nhận giao dịch"
+      onOk={() => onOk?.(note)}
+      onCancel={onCancel}
+      okText="Xác nhận"
+      cancelText="Huỷ"
+      destroyOnClose
+      centered
+    >
+      <div>
+        Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
+        <b>{record?.name || record?.full_name}</b>?
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <label htmlFor="confirm-note" className="block mb-1 font-medium">
+          Ghi chú (tuỳ chọn):
+        </label>
+        <textarea
+          id="confirm-note"
+          className="w-full border border-gray-300 rounded px-2 py-1"
+          value={note}
+          rows={3}
+          onChange={e => setNote(e.target.value)}
+          placeholder="Nhập ghi chú cho xác nhận (nếu có)..."
+        />
+      </div>
+    </Modal>
+  );
+};
 
 const PartnerDebtTable = () => {
   const [modalVisible, setModalVisible] = useState(false);

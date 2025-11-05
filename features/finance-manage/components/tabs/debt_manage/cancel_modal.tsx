@@ -5,7 +5,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
   const [reason, setReason] = useState("");
 
   const handleOk = () => {
-    onOk && onOk(); 
+    onOk && onOk(reason); 
     setReason(""); 
   };
 
@@ -29,7 +29,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
       <div>
         Bạn chắc chắn muốn <span className="text-red-600"><b>TỪ CHỐI</b></span> giao dịch của đối tác <b>{record?.name}</b>?
       </div>
-      {/* <div className="mt-4">
+      <div className="mt-4">
         <span className="font-medium text-[12px]">Lý do từ chối</span>
         <Input.TextArea
           placeholder="Nhập lý do từ chối..."
@@ -38,7 +38,7 @@ export const RejectActionModal = ({ visible, onOk, onCancel, record }: any) => {
           value={reason}
           onChange={e => setReason(e.target.value)}
         />
-      </div> */}
+      </div>
     </Modal>
   );
 };
