@@ -63,6 +63,8 @@ export const API_TYPE_CONST = {
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
   UPDATE_SELECTOR_CONFIG: `${FEATURE}/admin/source-website`, // + /{id}/selector-config
   TEST_SELECTOR_CONFIG: `${FEATURE}/admin/source-website/test-selector-config`,
+  // Website Account Management
+  WEBSITE_ACCOUNT: `${FEATURE}/admin/source-website-account`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   DETAIL_ORDER: `${FEATURE}/orders`,
