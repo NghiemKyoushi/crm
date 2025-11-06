@@ -5,6 +5,7 @@ import "./globals.css";
 import I18nProvider from "@/components/I18nProvider";
 import AntdRegistry from "@/components/AntdRegistry";
 import Script from "next/script";
+import GoogleFontsLoader from "@/components/GoogleFontsLoader";
 import "@/utils/dayjs-config";
 
 const notoSansJP = Noto_Sans_JP({
@@ -32,6 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${notoSansJP.variable}`}>
+        <GoogleFontsLoader />
         <Script
           id="cache-manager-init"
           strategy="beforeInteractive"

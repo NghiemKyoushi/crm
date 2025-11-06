@@ -124,6 +124,12 @@ export default function TiptapEditor({
           outline: none;
         }
 
+        /* Allow custom fonts from inline styles - don't override if inline style exists */
+        .tiptap-editor .ProseMirror span[style*="font-family"],
+        .tiptap-editor .ProseMirror [style*="font-family"] {
+          font-family: unset !important;
+        }
+
         .tiptap-editor p {
           margin: 0.5em 0;
         }

@@ -23,6 +23,14 @@
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
 
+/* Allow TipTap editor to use custom fonts from inline styles */
+.tiptap-editor span[style*="font-family"],
+.tiptap-editor [style*="font-family"],
+.ProseMirror span[style*="font-family"],
+.ProseMirror [style*="font-family"] {
+    font-family: unset !important;
+}
+
 body {
     font-size: var(--font-size-base);
 }

@@ -53,6 +53,9 @@ export interface RelatedOrderInfo {
   admin_note?: string | null; // Ghi chú của admin
   customer_note?: string | null; // Ghi chú của khách hàng
   product_link?: string | null; // Link sản phẩm
+  // New fields from backend response
+  product_url?: string | null; // Actual link field from API
+  customer_request?: string | null; // Actual customer request field from API
 }
 
 // Upload image response
@@ -83,6 +86,7 @@ export interface PackageInfo {
   orders?: OrderInfo[]; // Danh sách orders từ scan tracking
   code?: string; // Mã code để tạo barcode (F000001, F000002, ...)
   relatedOrders?: RelatedOrderInfo[]; // Danh sách related orders từ check-coming API v2.0.0
+  printCount?: number; // Số lần đã in
 }
 
 export interface ScanResult {

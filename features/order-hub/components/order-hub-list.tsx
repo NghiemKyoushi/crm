@@ -35,7 +35,7 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
-import { updateKuponOrder } from "../apis/orderhub";
+import { updateKuponOrder, getSourceWebsiteByDomain, getWebsiteAccounts, updateOrderSourceAccount } from "../apis/orderhub";
 import dayjs from "dayjs";
 
 function isEqualObject(obj1: any, obj2: any) {
@@ -96,6 +96,11 @@ export default function OrderHub() {
     value: number | null;
   } | null>(null);
   const [isKuponLoading, setIsKuponLoading] = useState<boolean>(false);
+
+  // Account management states
+  const [orderAccounts, setOrderAccounts] = useState<Record<number, Array<{ id: number; username: string }>>>({});
+  const [loadingAccounts, setLoadingAccounts] = useState<Record<number, boolean>>({});
+  const [orderSourceAccount, setOrderSourceAccount] = useState<Record<number, number | null>>({});
 
   const [filters, setFilters] = useState<FilterType>({
     status: undefined,
@@ -316,6 +321,68 @@ export default function OrderHub() {
     }
   };
 
+  // Extract domain from URL
+  const extractDomain = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname.replace(/^www\./, "");
+    } catch {
+      return null;
+    }
+  };
+
+  // Load accounts for an order
+  const loadAccountsForOrder = async (order: Invoice) => {
+    const url = order.metadata?.items?.[0]?.product?.url;
+    const domain = extractDomain(url);
+
+    if (!domain || orderAccounts[order.id]) return; // Already loaded or no domain
+
+    setLoadingAccounts(prev => ({ ...prev, [order.id]: true }));
+    try {
+      // Step 1: Find website by domain
+      const websiteResponse = await getSourceWebsiteByDomain(domain);
+      const websites = websiteResponse?.data || [];
+      const website = websites.find((w: any) => w.domain === domain || w.domain?.includes(domain));
+
+      if (!website?.id) {
+        setLoadingAccounts(prev => ({ ...prev, [order.id]: false }));
+        return;
+      }
+
+      // Step 2: Get accounts for this website
+      const accounts = await getWebsiteAccounts(website.id);
+      setOrderAccounts(prev => ({ ...prev, [order.id]: accounts || [] }));
+    } catch (error: any) {
+      console.error("Failed to load accounts:", error);
+      toast.error("Không thể tải danh sách account");
+    } finally {
+      setLoadingAccounts(prev => ({ ...prev, [order.id]: false }));
+
+      // Step 3: Set current source account if exists (always set, even if no website found)
+      if (order.source_account_id != null && typeof order.source_account_id === 'number') {
+        setOrderSourceAccount(prev => ({ ...prev, [order.id]: order.source_account_id as number }));
+      }
+    }
+  };
+
+  // Handle account selection
+  const handleAccountChange = async (orderId: number, accountId: number) => {
+    try {
+      await updateOrderSourceAccount(orderId, accountId);
+      setOrderSourceAccount(prev => ({ ...prev, [orderId]: accountId }));
+      toast.success("Cập nhật account thành công");
+      queryClient.invalidateQueries({
+        queryKey: ["listorder"],
+      });
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.localizedMessage || "Có lỗi khi cập nhật account"
+      );
+    }
+  };
+
   const columns: ColumnsType<Invoice> = [
     {
       title: "No",
@@ -483,13 +550,13 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "en-US"
-                            )}${isJapanPrice}`
+                            "en-US"
+                          )}${isJapanPrice}`
                           : codeType === 1
-                          ? "Miễn phí"
-                          : codeType === 3
-                          ? "Cập nhật sau"
-                          : "-"}
+                            ? "Miễn phí"
+                            : codeType === 3
+                              ? "Cập nhật sau"
+                              : "-"}
                       </span>
                     )}
                   </div>
@@ -574,8 +641,8 @@ export default function OrderHub() {
             {typeof record.kupon === "number"
               ? record.kupon.toLocaleString("en-US")
               : record.kupon && !isNaN(Number(record.kupon))
-              ? Number(record.kupon).toLocaleString("en-US")
-              : "-"}
+                ? Number(record.kupon).toLocaleString("en-US")
+                : "-"}
           </span>
           {hasPermission("sales.view_assigned_orders") &&
             hasPermission("order.view") && (
@@ -588,8 +655,8 @@ export default function OrderHub() {
                       typeof record.kupon === "number"
                         ? record.kupon
                         : record.kupon && !isNaN(Number(record.kupon))
-                        ? Number(record.kupon)
-                        : null,
+                          ? Number(record.kupon)
+                          : null,
                   });
                   setOrderDetail(record);
                 }}
@@ -722,6 +789,60 @@ export default function OrderHub() {
             )}
         </div>
       ),
+    },
+    {
+      title: "Account",
+      key: "account",
+      width: 150,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => {
+        const url = record.metadata?.items?.[0]?.product?.url;
+        const accounts = orderAccounts[record.id] || [];
+        const currentAccountId = orderSourceAccount[record.id] ?? record.source_account_id;
+        const isLoading = loadingAccounts[record.id];
+
+        // Auto-load accounts when URL exists and not yet loaded
+        if (url && !orderAccounts[record.id] && !isLoading) {
+          // Use setTimeout to avoid calling during render
+          setTimeout(() => {
+            loadAccountsForOrder(record);
+          }, 0);
+        }
+
+        if (!url) {
+          return <div className="text-xs text-gray-400">-</div>;
+        }
+
+        if (isLoading) {
+          return <div className="text-xs text-gray-400">Đang tải...</div>;
+        }
+
+        if (accounts.length === 0) {
+          return <div className="text-xs text-gray-400">Không có account</div>;
+        }
+
+        return (
+          <Select
+            size="small"
+            value={currentAccountId || undefined}
+            onChange={(value) => handleAccountChange(record.id, value)}
+            placeholder="Chọn account"
+            className="w-full"
+            style={{ fontSize: 12 }}
+            loading={isLoading}
+          >
+            {accounts.map((account) => (
+              <Select.Option key={account.id} value={account.id}>
+                {account.username}
+              </Select.Option>
+            ))}
+          </Select>
+        );
+      },
     },
     {
       title: "Hành Động",
@@ -899,7 +1020,7 @@ export default function OrderHub() {
                         onError: (err: any) =>
                           toast.error(
                             err.response?.data?.localizedMessage ||
-                              t("common.error")
+                            t("common.error")
                           ),
                       }
                     );
@@ -955,7 +1076,7 @@ export default function OrderHub() {
 
             {/* Nút hành động chính (nếu có) */}
             {hasPermission("sales.view_assigned_orders") &&
-            hasPermission("order.view")
+              hasPermission("order.view")
               ? actionButton
               : null}
 
@@ -1312,7 +1433,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
@@ -1393,7 +1514,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );

@@ -63,6 +63,10 @@ export const API_TYPE_CONST = {
   WEBSITE_MANAGE: `${FEATURE}/admin/source-website`,
   UPDATE_SELECTOR_CONFIG: `${FEATURE}/admin/source-website`, // + /{id}/selector-config
   TEST_SELECTOR_CONFIG: `${FEATURE}/admin/source-website/test-selector-config`,
+  // Website Account Management
+  WEBSITE_ACCOUNT: `${FEATURE}/admin/website-account`,
+  // User - Website Accounts assignment
+  USER_WEBSITE_ACCOUNTS: `${FEATURE}/admin/users/website-accounts`,
   LIST_REGION: `${FEATURE}/admin/regions`,
   LIST_ORDER: `${FEATURE}/admin/orders`,
   DETAIL_ORDER: `${FEATURE}/orders`,
@@ -113,13 +117,16 @@ export const API_TYPE_CONST = {
   CHECK_COMING_DELETE: `${FEATURE}/check-coming`,
   CHECK_COMING_SEARCH: `${FEATURE}/check-coming/search`,
   CHECK_COMING_DELETED: `${FEATURE}/check-coming/deleted`,
+  CHECK_COMING_PRINTED: `${FEATURE}/check-coming/printed`,
 
   // Order Management - VN Warehouse
   SCAN_TRACKING_CODE: `${FEATURE}/admin/tracking/scan-tracking`,
   ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
   COMPLETE_ORDER_ARRIVED_VN: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
-  
-  TRACKING_PACKAGED:`${FEATURE}/admin/orders/packing`,
+  ORDER_SOURCE_ACCOUNT: `${FEATURE}/admin/orders/source-account`,
+  GET_WEBSITE_ACCOUNTS: `${FEATURE}/admin/website-account`,
+
+  TRACKING_PACKAGED: `${FEATURE}/admin/orders/packing`,
   MANAGE_DEBTS: `${FEATURE}/admin/debts`,
   PARTNER_LIST: `${FEATURE}/admin/users/get-all-partner`,
   CREATE_QR_DEBT: `${FEATURE}/admin/debts/create-debt`,

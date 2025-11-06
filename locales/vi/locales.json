@@ -10,7 +10,7 @@
     "success": "Đăng nhập thành công!",
     "failed": "Đăng nhập thất bại!",
     "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!",
-    "noPermission":"Bạn không có quyền truy cập hệ thống"
+    "noPermission": "Bạn không có quyền truy cập hệ thống"
   },
   "validation": {
     "pleaseEnterLink": "Vui lòng nhập link!",
@@ -49,7 +49,9 @@
     "partnerManagement": "Quản lý nguyên liệu",
     "checkComing": "Kiểm Tra Hàng Về",
     "operation": "Quản lý vận đơn",
-    "websiteManagement": "Quản lý Website"
+    "websiteManagement": "Quản lý Website",
+    "crm": "CRM",
+    "cms": "CMS"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -66,8 +68,8 @@
     "actions": "Hành động",
     "view360": "Xem chi tiết 360°",
     "searchPlaceholder": "Tìm kiếm theo tên khách hàng",
-    "searchByEmail":"Tìm kiếm theo email",
-    "searchByPhonennumber":"Tìm kiếm theo số điện thoại",
+    "searchByEmail": "Tìm kiếm theo email",
+    "searchByPhonennumber": "Tìm kiếm theo số điện thoại",
     "updateSuccess": "Cập nhật phân loại thành công!",
     "selectCategory": "Chọn phân loại",
     "customerType": {
@@ -160,7 +162,7 @@
     }
   },
   "staffManage": {
-    "phoneInvalid":"Số điện thoại không hợp lệ",
+    "phoneInvalid": "Số điện thoại không hợp lệ",
     "addNewStaff": "Thêm Nhân viên mới",
     "editNewStaff": "Chỉnh sửa",
     "fullName": "Họ và tên",
@@ -306,7 +308,7 @@
     "cancelled": "Đã hủy",
     "active": "Hoạt động",
     "inactive": "Ngừng hoạt động",
-    "internal":"Nội bộ",
+    "internal": "Nội bộ",
     "paused": "Tạm dừng",
     "waiting": "Chờ xác nhận",
     "pendingApproval": "Chờ duyệt",
@@ -320,9 +322,9 @@
     "readyToShip": "Sẵn sàng giao hàng",
     "shipped": "Đã giao hàng",
     "shippingRequest": "Yêu cầu giao hàng",
-    "canceled":"Đã từ chối",
-    "completed":"Hoàn thành",
-    "packed":"Đã đóng gói"
+    "canceled": "Đã từ chối",
+    "completed": "Hoàn thành",
+    "packed": "Đã đóng gói"
   },
   "fromDate": "Từ ngày",
   "toDate": "Đến ngày",
@@ -571,8 +573,8 @@
       "accessSalesDashboard": "Truy cập trang tổng quan Sales",
       "viewSalesReports": "Xem báo cáo bán hàng cá nhân",
       "exportSalesData": "Xuất dữ liệu bán hàng cá nhân",
-      "viewAssignedShipments":"Xem danh sách vận đơn được phân công",
-      "createShipments":"Tạo vận đơn cho khách hàng được quản lý"
+      "viewAssignedShipments": "Xem danh sách vận đơn được phân công",
+      "createShipments": "Tạo vận đơn cho khách hàng được quản lý"
     }
   },
   "roles": {
@@ -731,8 +733,8 @@
     "totalRemaining": "Tổng còn lại",
     "quantity": "Số lượng",
     "unit": "Đơn vị",
-    "feePerKg":"Phí/Kg",
-    "amountMoney":"Số tiền (VND)",
+    "feePerKg": "Phí/Kg",
+    "amountMoney": "Số tiền (VND)",
     "inputDate": "Ngày nhập",
     "selectInputDate": "Vui lòng chọn ngày nhập",
     "inputDatePlaceholder": "Chọn ngày"
@@ -907,8 +909,7 @@
     "surcharge": "Phụ thu",
     "trackingShip": "Tracking ship",
     "orderType": "Phân loại hàng",
-    "codePackage":"Mã kiện"
-
+    "codePackage": "Mã kiện"
   },
   "page": {
     "orderManagement": "Quản lý Đơn hàng",

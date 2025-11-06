@@ -88,6 +88,7 @@ const CheckComingView: React.FC = () => {
           status: "completed" as const,
           code: record.code, // Map code field for barcode (API v2.0.0)
           relatedOrders: record.related_orders || [], // Map related_orders (API v2.0.0)
+          printCount: (record as any).print_count,
         }));
         setScanHistory(records);
       }
@@ -256,8 +257,8 @@ const CheckComingView: React.FC = () => {
           metadata: order.metadata,
           // Additional fields
           admin_note: order.admin_note,
-          customer_note: order.customer_note,
-          product_link: order.product_link,
+          customer_note: (order as any).customer_request,
+          product_link: (order as any).product_url,
         }));
 
         // BƯỚC 5: Auto-done những orders không có yêu cầu gì
@@ -370,6 +371,17 @@ const CheckComingView: React.FC = () => {
         const result = await printDirect(html);
 
         if (result.success) {
+          // Mark printed count on server
+          if (packageInfo.id) {
+            try {
+              await checkComingApi.markPrinted(packageInfo.id);
+              // Optimistically update UI and reload history
+              setScanHistory(prev => prev.map(item => item.id === packageInfo.id ? { ...item, printCount: (item.printCount ?? 0) + 1 } : item));
+              await loadHistory();
+            } catch (e) {
+              console.error('Failed to mark printed:', e);
+            }
+          }
           toast.success('In nhãn thành công!');
         } else {
           toast.error(`Lỗi in: ${result.error || 'Unknown error'}`);
@@ -379,7 +391,17 @@ const CheckComingView: React.FC = () => {
         toast.error('Lỗi khi in nhãn');
       }
     } else {
-      // Browser: Use window.print()
+      // Browser: call printed API immediately on click, then open print dialog
+      if (packageInfo.id) {
+        try {
+          await checkComingApi.markPrinted(packageInfo.id);
+          setScanHistory(prev => prev.map(item => item.id === packageInfo.id ? { ...item, printCount: (item.printCount ?? 0) + 1 } : item));
+          // No await here to avoid blocking UI before print dialog
+          loadHistory();
+        } catch (e) {
+          console.error('Failed to mark printed:', e);
+        }
+      }
       setTimeout(() => {
         window.print();
       }, 100);
@@ -422,8 +444,8 @@ const CheckComingView: React.FC = () => {
       metadata: order.metadata,
       // Additional fields
       admin_note: order.admin_note,
-      customer_note: order.customer_note,
-      product_link: order.product_link,
+      customer_note: (order as any).customer_request,
+      product_link: (order as any).product_url,
     }));
 
     setCurrentOrders(mappedOrders);
@@ -431,50 +453,26 @@ const CheckComingView: React.FC = () => {
     setShowOrderModal(true);
   };
 
-  // Handle order field update - update metadata
-  const handleOrderFieldUpdate = async (
+  // Handle order field update - only update local metadata (API will be called on Done)
+  const handleOrderFieldUpdate = (
     orderId: number,
     metadataField: "verify_counts" | "is_repacked" | "inspection_photo_ids",
     value: number | boolean | number[]
   ) => {
-    setProcessingOrders(true);
-    try {
-      // Map metadata field to API field
-      const apiFieldMap: Record<string, string> = {
-        verify_counts: "verify_count_value",
-        is_repacked: "is_repacked_done",
-        inspection_photo_ids: "document_image_ids", // API vẫn dùng document_image_ids
-      };
-      const apiField = apiFieldMap[metadataField];
-
-      // Call API to update order
-      await checkComingApi.updateOrderArrivedVN(orderId, {
-        [apiField]: value,
-      });
-
-      // Update local state - update metadata object
-      setCurrentOrders((prevOrders) =>
-        prevOrders.map((order) => {
-          if (order.id === orderId) {
-            return {
-              ...order,
-              metadata: {
-                ...order.metadata,
-                [metadataField]: value,
-              },
-            };
-          }
-          return order;
-        })
-      );
-
-      console.log(`✅ Updated order ${orderId} metadata.${metadataField} to`, value);
-    } catch (error: any) {
-      console.error("Failed to update order:", error);
-      toast.error(error?.response?.data?.message || "Lỗi khi cập nhật đơn hàng");
-    } finally {
-      setProcessingOrders(false);
-    }
+    setCurrentOrders((prevOrders) =>
+      prevOrders.map((order) => {
+        if (order.id === orderId) {
+          return {
+            ...order,
+            metadata: {
+              ...order.metadata,
+              [metadataField]: value,
+            },
+          };
+        }
+        return order;
+      })
+    );
   };
 
   // Handle upload image - update metadata.inspection_photo_ids
@@ -550,17 +548,30 @@ const CheckComingView: React.FC = () => {
 
     setProcessingOrders(true);
     try {
-      // Chuẩn bị data từ metadata
-      const imageIds = order.metadata?.inspection_photo_ids || [];
-      const verifyCount = order.metadata?.verify_counts || 0;
-      const isRepacked = order.metadata?.is_repacked || false;
+      // Chuẩn bị data theo yêu cầu endpoint (PUT /features/v1/admin/orders/arrived-vn-warehouse/{orderId})
+      // Chỉ gửi các trường tương ứng nếu requirement là true
+      const payload: {
+        image_ids?: number[];
+        is_repacked?: boolean;
+        count_verify?: number;
+      } = {};
 
-      await checkComingApi.completeOrderArrivedVN(order.id, {
-        count_verify: verifyCount,
-        image_ids: imageIds,
-        is_repacked: isRepacked,
-      });
+      // Nếu có yêu cầu take_photo → gửi image_ids
+      if (order.take_photo === true) {
+        payload.image_ids = order.metadata?.inspection_photo_ids || [];
+      }
 
+      // Nếu có yêu cầu is_repacked → gửi is_repacked
+      if (order.is_repacked === true) {
+        payload.is_repacked = order.metadata?.is_repacked || false;
+      }
+
+      // Nếu có yêu cầu is_verify_count → gửi count_verify
+      if (order.is_verify_count === true) {
+        payload.count_verify = order.metadata?.verify_counts || 0;
+      }
+
+      await checkComingApi.completeOrderArrivedVN(order.id, payload);
       console.log(`✅ Order ${order.id} marked as done`);
 
       // Remove from current orders (đã xong)
@@ -958,6 +969,9 @@ const CheckComingView: React.FC = () => {
                 render: (_: any, record: PackageInfo) => {
                   return (
                     <Space size="small">
+                      {(record.printCount ?? 0) > 0 && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>Đã in ({record.printCount})</Text>
+                      )}
                       <Button
                         type="primary"
                         size="small"
@@ -1000,7 +1014,7 @@ const CheckComingView: React.FC = () => {
               <Button onClick={handleCloseModal} disabled={processingOrders}>
                 Đóng
               </Button>
-              {areAllOrdersReady() && (
+              {/* {areAllOrdersReady() && (
                 <Button
                   type="primary"
                   onClick={handleConfirmOrders}
@@ -1009,7 +1023,7 @@ const CheckComingView: React.FC = () => {
                 >
                   Hoàn thành
                 </Button>
-              )}
+              )} */}
             </Space>
           }
           closable={!processingOrders}
@@ -1100,26 +1114,10 @@ const CheckComingView: React.FC = () => {
                   if (record.is_verify_count !== true) {
                     return <Text type="secondary">-</Text>;
                   }
-
-                  // Kiểm tra xem đã hoàn thành chưa
-                  const isCompleted = (record.metadata?.verify_counts || 0) > 0;
-
-                  if (isCompleted) {
-                    // Đã hoàn thành → hiển thị readonly
-                    return (
-                      <Space direction="vertical" size={4}>
-                        <Text type="secondary" style={{ fontSize: 11 }}>Đã kiểm đếm</Text>
-                        <Text strong style={{ color: "#52c41a" }}>
-                          {record.metadata?.verify_counts} sản phẩm
-                        </Text>
-                      </Space>
-                    );
-                  }
-
-                  // Chưa hoàn thành → hiển thị input
+                  // Luôn hiển thị input; chỉ khóa khi đang xử lý API
                   return (
                     <Space direction="vertical" size={4}>
-                      <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Nhập số lượng kiểm đếm</Text>
                       <InputNumber
                         min={1}
                         placeholder="Số lượng"
@@ -1146,20 +1144,7 @@ const CheckComingView: React.FC = () => {
                     return <Text type="secondary">-</Text>;
                   }
 
-                  // Kiểm tra xem đã hoàn thành chưa
-                  const isCompleted = record.metadata?.is_repacked === true;
-
-                  if (isCompleted) {
-                    // Đã hoàn thành → hiển thị readonly
-                    return (
-                      <Space direction="vertical" size={4}>
-                        <Text type="secondary" style={{ fontSize: 11 }}>Đã đóng lại</Text>
-                        <Badge status="success" text="Hoàn thành" />
-                      </Space>
-                    );
-                  }
-
-                  // Chưa hoàn thành → hiển thị checkbox
+                  // Luôn hiển thị checkbox; chỉ khóa khi đang xử lý API
                   return (
                     <Space direction="vertical" size={4}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
@@ -1187,23 +1172,8 @@ const CheckComingView: React.FC = () => {
                     return <Text type="secondary">-</Text>;
                   }
 
-                  // Kiểm tra xem đã hoàn thành chưa
+                  // Luôn hiển thị upload button; chỉ khóa khi đang xử lý API
                   const imageCount = record.metadata?.inspection_photo_ids?.length || 0;
-                  const isCompleted = imageCount > 0;
-
-                  if (isCompleted) {
-                    // Đã hoàn thành → hiển thị readonly
-                    return (
-                      <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                        <Text type="secondary" style={{ fontSize: 11 }}>Đã upload</Text>
-                        <Text strong style={{ color: "#52c41a" }}>
-                          {imageCount} ảnh
-                        </Text>
-                      </Space>
-                    );
-                  }
-
-                  // Chưa hoàn thành → hiển thị upload button
                   return (
                     <Space direction="vertical" size={4} style={{ width: "100%" }}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
@@ -1244,17 +1214,7 @@ const CheckComingView: React.FC = () => {
 
                   const isCompleted = photoOk && repackOk && countOk;
 
-                  // Nếu đơn đã hoàn thành → chỉ hiển thị badge, ẩn nút Done
-                  if (isCompleted) {
-                    return (
-                      <Badge
-                        status="success"
-                        text={<Text style={{ fontSize: 11, color: "#52c41a" }}>Đã xong</Text>}
-                      />
-                    );
-                  }
-
-                  // Nếu chưa hoàn thành → hiển thị nút Done
+                  // Luôn hiển thị nút Done; chỉ enable khi đủ điều kiện
                   const ready = isOrderReadyForDone(record);
 
                   return (
