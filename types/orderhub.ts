@@ -75,6 +75,7 @@ export interface Invoice {
   tracking_ship_list: TrackingRecord[],
   note_admin: string;
   kupon?: number;
+  source_account_id?: number;
 }
 
 export interface InvoiceMetadata {
