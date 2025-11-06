@@ -126,5 +126,8 @@ export const API_TYPE_CONST = {
   CREATE_DEBT: `${FEATURE}/admin/debts/create-debt-transaction`,
   LIST_TRANSTACTION_DEBTS: `${FEATURE}/admin/debts/get-list-transaction-debts/`,
   APPROVE_DEBT: `${FEATURE}/admin/debts/approve`,
-  CANCEL_DEBTS:`${FEATURE}/admin/debts/canceled`
+  CANCEL_DEBTS:`${FEATURE}/admin/debts/canceled`,
+  EXPORT_DATA_DEBT: `${FEATURE}/admin/debts/export-excel`,
+  DOWNLOAD_EXAMPLE_DEBT: `${FEATURE}/admin/debts/export-template`,
+  IMPORT_FILE_DEBT:`${FEATURE}/admin/debts/import-excel`
 } as const;
