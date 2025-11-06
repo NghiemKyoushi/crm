@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Table, Select, Tag, Space } from "antd";
 import { useTranslation } from "react-i18next";
 import { useOrderProfitLoss } from "../hooks/partner-manage-hook";
@@ -19,7 +19,7 @@ interface OrderProfitLossTableData {
   costRate: number;
 }
 
-export const OrderProfitLossTable: React.FC = () => {
+export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
   const { t } = useTranslation();
   const [currencyCode, setCurrencyCode] = useState<string | undefined>("JPY");
   const [page, setPage] = useState<number>(0);
@@ -31,6 +31,12 @@ export const OrderProfitLossTable: React.FC = () => {
     size: pageSize,
   });
 
+  useEffect(()=>{
+    if(code){
+      setCurrencyCode(code)
+    }
+  },[code])
+  
   const formatNumber = (num: number, decimals: number = 2): string => {
     return new Intl.NumberFormat("vi-VN", {
       minimumFractionDigits: decimals,

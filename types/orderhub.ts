@@ -168,6 +168,7 @@ export interface OrderFeeRequest {
     name: string;
     items_per_unit?: number;
     item_quantity: number;
+    images?: any[]
   };
   fee_codes?: any[];
   fees: any[];

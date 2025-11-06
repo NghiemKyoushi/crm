@@ -1,6 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Modal, Input, Select, Button, Form, message, InputNumber } from "antd";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Modal,
+  Input,
+  Select,
+  Button,
+  Form,
+  message,
+  InputNumber,
+  Spin,
+} from "antd";
 import type { SelectProps } from "antd";
 import axios from "axios";
 import {
@@ -28,6 +37,8 @@ interface ManualDepositModalProps {
   type: "PLUS" | "MINUS";
 }
 
+const PAGE_SIZE = 10;
+
 const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   open,
   onClose,
@@ -38,11 +49,18 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   const [options, setOptions] = useState<SelectProps["options"]>([]);
   const [search, setSearch] = useState("");
   const [banks, setBanks] = useState<any[]>([]);
+  const [bankPage, setBankPage] = useState(0);
+  const [bankLoading, setBankLoading] = useState(false);
+  const [bankHasMore, setBankHasMore] = useState(true);
 
-  const [page, setPage] = useState(0);
+  const [form] = Form.useForm();
+
+  const banksLoadedRef = useRef<Set<number>>(new Set());
+
+  const [customerPage, setCustomerPage] = useState(0);
 
   const { data } = useListCustomer({
-    page,
+    page: customerPage,
     page_size: 10,
     category_id: undefined,
     search: search || undefined,
@@ -59,28 +77,73 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     }
   }, [data]);
 
+  // Load first page for banks when modal opens
   useEffect(() => {
-    const fetchBanks = async () => {
-      try {
-        // const params: BankDepositRequest = {
-        //   page: 0,
-        //   size: 10,
-        // };
-        // const data: BankAccountListResponse = await getListBankCreateAccount(
-        //   params
-        // );
-        // const opts = data.content.map((acc: BankAccount) => ({
-        //   label: `${acc.bank_name} - ${acc.account_number}`,
-        //   value: acc.id, // value unique
-        // }));
-        // setBanks(opts || []);
-      } catch (err) {
-        console.error("Failed to fetch bank list:", err);
+    if (open) {
+      setBanks([]);
+      setBankPage(0);
+      setBankHasMore(true);
+      banksLoadedRef.current = new Set();
+      fetchBanks(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Load banks by page
+  const fetchBanks = async (page: number) => {
+    if (bankLoading || banksLoadedRef.current.has(page)) return;
+    setBankLoading(true);
+    try {
+      const params: BankDepositRequest = {
+        page: page,
+        size: PAGE_SIZE,
+      };
+      const data: BankAccountListResponse = await getListBankCreateAccount(params);
+      const opts = data.content.map((acc: BankAccount) => ({
+        label:
+          `${acc.account_holder}-${acc.account_number}-${acc.bank_code}` +
+          (acc.partner_id_name ? `-${acc.partner_id_name}` : ""),
+        value: acc.id, 
+      }));
+      if (page === 0) {
+        setBanks(opts || []);
+        // Nếu có ít nhất 1 bank, set mặc định bank đầu tiên vào form
+        if ((opts || []).length > 0) {
+          form.setFieldValue('company_bank_account_id', opts[0].value);
+        }
+      } else {
+        setBanks(prev => [...prev, ...(opts || [])]);
+      }
+      setBankHasMore((opts || []).length === PAGE_SIZE);
+      banksLoadedRef.current.add(page);
+    } catch (err) {
+      console.error("Failed to fetch bank list:", err);
+    } finally {
+      setBankLoading(false);
+    }
+  };
+
+  // Handler for scroll on Select dropdown for banks
+  const handleBankScroll: React.ComponentProps<typeof Select>["onPopupScroll"] =
+    e => {
+      const target = e.target as HTMLElement;
+      if (
+        !bankLoading &&
+        bankHasMore &&
+        target.scrollTop + target.offsetHeight >= target.scrollHeight - 24 // threshold
+      ) {
+        const nextPage = bankPage + 1;
+        setBankPage(nextPage);
+        fetchBanks(nextPage);
       }
     };
 
-    fetchBanks();
-  }, []);
+  // Also allow manual trigger in case setBankPage runs after popup scroll (ensure fetches new page)
+  useEffect(() => {
+    if (bankPage === 0) return;
+    fetchBanks(bankPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bankPage]);
 
   useEffect(() => {
     const fetchCode = async () => {
@@ -95,9 +158,8 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     };
 
     fetchCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, type]);
-
-  const [form] = Form.useForm();
 
   const handleSubmit = async () => {
     try {
@@ -106,14 +168,16 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       onConfirm({
         amount_vnd: +values.amount,
         bank_transaction_id: values.transactionCode,
-        // company_bank_account_id: values.companyAccount,
+        company_bank_account_id: values.company_bank_account_id,
         note: values.reason,
         user_id: +values.userId,
         reason: values.reason,
+        
       });
       setLoading(false);
       form.resetFields();
     } catch (err) {
+      setLoading(false);
       message.error("Vui lòng nhập đủ thông tin!");
     }
   };
@@ -140,7 +204,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
             showSearch
             placeholder="Nhập UserID, Tên, hoặc Email..."
             filterOption={false}
-            onSearch={(e) => setSearch(e)}
+            onSearch={e => setSearch(e)}
             options={options}
           />
         </Form.Item>
@@ -152,7 +216,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           rules={[{ required: true, message: "Nhập số tiền!" }]}
         >
           <InputNumber
-            formatter={(value) =>
+            formatter={value =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
             placeholder="VD: 5000000"
@@ -160,14 +224,17 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           />
         </Form.Item>
 
-        {/* <Form.Item
+        <Form.Item
           className="!mb-1.5"
-          label="Tài khoản công ty đã nhận"
-          name="companyAccount"
+          label="Tài khoản ngân hàng"
+          name="company_bank_account_id"
           rules={[{ required: true, message: "Chọn tài khoản!" }]}
         >
           <Select
             options={banks}
+            loading={bankLoading}
+            onPopupScroll={handleBankScroll}
+            notFoundContent={bankLoading ? <Spin size="small" /> : null}
             onChange={async () => {
               if (type === "PLUS") {
                 try {
@@ -178,8 +245,23 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
                 }
               }
             }}
+            dropdownRender={menu => (
+              <>
+                {menu}
+                {bankHasMore && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: 8,
+                    }}
+                  >
+                    {bankLoading ? <Spin size="small" /> : ""}
+                  </div>
+                )}
+              </>
+            )}
           />
-        </Form.Item> */}
+        </Form.Item>
 
         {/* Mã giao dịch */}
         <Form.Item
@@ -187,26 +269,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
           label="Mã giao dịch (từ sao kê)"
           name="transactionCode"
         >
-          <Input
-            disabled
-            placeholder=""
-            // addonAfter={
-            //   <Button
-            //     type="dashed"
-            //     size="small"
-            //     onClick={async () => {
-            //       try {
-            //         const code = await getCodeGeneration();
-            //         form.setFieldValue("transactionCode", code);
-            //       } catch (error) {
-            //         console.error(error);
-            //       }
-            //     }}
-            //   >
-            //     Tạo mã
-            //   </Button>
-            // }
-          />
+          <Input disabled placeholder="" />
         </Form.Item>
         <Form.Item
           className="!mb-1.5"
