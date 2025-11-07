@@ -109,7 +109,6 @@ export const menuItems = [
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/shipment-management", icon: faWarehouse, label: "operation" },
   { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
-  { key: "/cms", icon: faTags, label: "cms" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
@@ -118,7 +117,7 @@ export const menuItems = [
   // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
   { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
-
+    { key: "/cms", icon: faTags, label: "cms" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
