@@ -10,7 +10,7 @@
     "success": "Login successful!",
     "failed": "Login failed!",
     "pleaseCheckInformation": "Please check information!!",
-    "noPermission":"You don't have permission to access system"
+    "noPermission": "You don't have permission to access system"
   },
   "validation": {
     "pleaseEnterLink": "Please enter link!",
@@ -264,7 +264,11 @@
       "pending": "Pending",
       "completed": "Completed",
       "canceled": "Canceled",
-      "manual": "Manual"
+      "manual": "Manual",
+      "pendingSettlement": "Pending settlement",
+      "settled": "Settled",
+      "pendindRefund": "Pending refund",
+      "refunded": "Refunded"
     },
     "actions": {
       "confirm": "Confirm",
@@ -308,7 +312,7 @@
     "cancelled": "Cancelled",
     "active": "Active",
     "inactive": "Inactive",
-    "internal":"Internal",
+    "internal": "Internal",
     "paused": "Paused",
     "waiting": "Waiting",
     "pendingApproval": "Pending Approval",
@@ -324,7 +328,7 @@
     "shippingRequest": "Shipping Request",
     "canceled": "Canceled",
     "completed": "Completed",
-    "packed":"Packaged"
+    "packed": "Packaged"
   },
   "fromDate": "From date",
   "toDate": "To date",
@@ -345,7 +349,9 @@
       "approved": "Approved",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "pendindRefund": "Pending refund",
+      "refunded": "Refunded"
     },
     "qrCode": "QR Code",
     "history": "History",
@@ -731,8 +737,8 @@
     "totalRemaining": "Total Remaining",
     "unit": "Unit",
     "quantity": "Quantity",
-    "feePerKg":"Phí/Kg",
-    "amountMoney":"Amount Money (VND)",
+    "feePerKg": "Phí/Kg",
+    "amountMoney": "Amount Money (VND)",
     "inputDate": "Input Date",
     "selectInputDate": "Please select input date",
     "inputDatePlaceholder": "Select date"
