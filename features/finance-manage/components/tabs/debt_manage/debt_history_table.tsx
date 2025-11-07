@@ -2,7 +2,6 @@ import { Modal, Button, DatePicker, Upload, message } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoryDebt, downloadExampleDebt, exportDebt, importDataDebt } from "@/features/finance-manage/apis";
-import type { BankDepositRequest } from "@/types/deposit-type";
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { Dayjs } from "dayjs";
 import TableComponent from "@/components/TableComponent";
@@ -25,30 +24,24 @@ export interface DebtHistoryRecord {
   debt: number;
 }
 
-// Use explicit [Dayjs, Dayjs] for ranges for type safety
 const getDefaultDateRange = (): [Dayjs, Dayjs] => {
   const to_date = dayjs().endOf("day");
   const from_date = to_date.subtract(29, "day").startOf("day");
   return [from_date, to_date];
 };
 
-// Hỗ trợ download file từ base64 hoặc url thông thường
 function downloadFileFromUrl(urlOrBase64: string, filename: string) {
-  // Nếu chuỗi là base64 (rất dài, không có http) thì decode thành Blob
   if (
     typeof urlOrBase64 === "string" &&
     urlOrBase64.length > 500 &&
     !urlOrBase64.startsWith("http")
   ) {
-    // cố gắng parse định dạng base64 (zip, excel, ...)
-    // Tạo link download tạm
     const byteCharacters = atob(urlOrBase64);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
-    // fallback dùng application/octet-stream
     const blob = new Blob([byteArray], { type: "application/octet-stream" });
     const urlBlob = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -59,7 +52,6 @@ function downloadFileFromUrl(urlOrBase64: string, filename: string) {
     link.remove();
     setTimeout(() => window.URL.revokeObjectURL(urlBlob), 200);
   } else {
-    // Nếu là url dạng thông thường
     fetch(urlOrBase64)
       .then((response) => response.blob())
       .then((blob) => {
@@ -132,9 +124,7 @@ export const DebtDetailModal = ({
     }));
   };
 
-  // Defensive: Make sure current and dateRange values are Dayjs objects before calling Dayjs methods
   const disabledDate = (current: any) => {
-    // Antd can pass non-Dayjs values in certain edge-cases, skip those
     if (!current || !dayjs.isDayjs(current)) return false;
     const [start /* , end */] = dateRange;
     if (!start || !dayjs.isDayjs(start)) return false;
@@ -247,7 +237,6 @@ export const DebtDetailModal = ({
     }));
   };
 
-  // Download sample file handler using API
   const handleDownloadSample = async () => {
     try {
       message.loading({ content: "Đang tải file mẫu...", key: "download-sample" });
@@ -255,11 +244,9 @@ export const DebtDetailModal = ({
       console.log('res', res);
 
       if (res && res) {
-        // Download from url in current tab as attachment
         downloadFileFromUrl(res, "file-mau-import-debt.xlsx");
         message.success({ content: "Tải file mẫu thành công!", key: "download-sample", duration: 2 });
       } else if (res && res.file) {
-        // fallback: if file data (base64/Blob) returned, create a link and trigger
         const link = document.createElement("a");
         link.href = res.file;
         link.download = "file-mau-import-debt.xlsx";
@@ -275,13 +262,9 @@ export const DebtDetailModal = ({
     }
   };
 
-  // Actual Import: sử dụng importDataDebt API
   const handleImportChange = async (info: any) => {
-    // Only proceed when upload finishes
     if (info.file.status === "uploading") return;
-
     if (info.file.status === "done" || info.file.status === undefined) {
-      // Gọi API importDataDebt
       try {
         message.loading({ content: "Đang import...", key: "import-debt" });
         const formData = new FormData();
@@ -300,8 +283,6 @@ export const DebtDetailModal = ({
       message.error("Import thất bại!");
     }
   };
-
-  // Export handler using API
   const handleExport = async () => {
     if (!record?.user_id) {
       message.error({ content: "Không có thông tin đối tác!", key: "export" });
@@ -314,13 +295,10 @@ export const DebtDetailModal = ({
         record.user_id,
         { from_date, to_date }
       );
-      // Nếu backend trả về URL:
       if (res && res.url) {
-        // Download from url in current tab as attachment
         downloadFileFromUrl(res.url, "export-debt-history.xlsx");
         message.success({ content: "Xuất file thành công!", key: "export", duration: 2 });
       } else if (res && res.file) {
-        // fallback: if file data (base64/Blob) returned, create a download
         const link = document.createElement("a");
         link.href = res.file;
         link.download = "export-debt-history.xlsx";
@@ -370,7 +348,6 @@ export const DebtDetailModal = ({
           paddingTop: 10,
         }}
       >
-        {/* Các nút và input phía trên table */}
         <div className="flex flex-wrap gap-3 items-end mb-3 justify-end">
           <RangePicker
             className="min-w-[250px]"
