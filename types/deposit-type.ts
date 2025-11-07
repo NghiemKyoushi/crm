@@ -229,8 +229,9 @@ export interface DebtItem {
   updated_at: string;
   is_deleted: boolean;
   telegram_channel_id: string;
-   full_name?: string;
+  full_name?: string;
   total_debts: number;
+  total_adjustments: number;
   total_paid_debts: number;
   total_remaining_debts: number;
   user_id?: number;

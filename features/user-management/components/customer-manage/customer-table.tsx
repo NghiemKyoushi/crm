@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { getListSaleStaff } from "../../apis/staff-manage";
+import AccountAssignButton from "@/features/user-website-accounts/components/account-assign-button";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -225,19 +226,22 @@ export default function CustomerTable() {
     {
       title: t("customerTable.actions"),
       key: "actions",
-      width: 120,
+      width: 260,
       fixed: "right",
       render: (_: any, record: CustomerModel) => (
-        <Button
-          type="link"
-          size="small"
-          className="!p-0 !h-auto !text-xs"
-          onClick={() => {
-            router.push(`user-management/${record.user_id.toString()}`);
-          }}
-        >
-          Xem chi tiết
-        </Button>
+        <div className="flex gap-2 items-center">
+          <AccountAssignButton userId={record.user_id} />
+          <Button
+            type="link"
+            size="small"
+            className="!p-0 !h-auto !text-xs"
+            onClick={() => {
+              router.push(`user-management/${record.user_id.toString()}`);
+            }}
+          >
+            Xem chi tiết
+          </Button>
+        </div>
       ),
     },
   ].filter(Boolean) as ColumnsType<CustomerModel>;
@@ -271,7 +275,7 @@ export default function CustomerTable() {
         {t("customerManage.title")}
       </h2>
       <div className="mb-4">
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
           <Input
             placeholder={t("customerTable.searchPlaceholder")}
@@ -327,16 +331,16 @@ export default function CustomerTable() {
             }
           />
           <div className="flex justify-end">
-          <Button
-            type="primary"
-            icon={<FontAwesomeIcon icon={faSearch} />}
-            onClick={handleSearch}
-            className="!h-10 px-5"
-            loading={isFetching}
-          >
-            Tìm kiếm
-          </Button>
-        </div>
+            <Button
+              type="primary"
+              icon={<FontAwesomeIcon icon={faSearch} />}
+              onClick={handleSearch}
+              className="!h-10 px-5"
+              loading={isFetching}
+            >
+              Tìm kiếm
+            </Button>
+          </div>
         </div>
       </div>
       <div className="overflow-x-auto">

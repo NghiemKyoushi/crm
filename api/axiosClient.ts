@@ -37,20 +37,20 @@ const getDeviceInfo = () => {
   // Client-side device detection
   const userAgent = navigator.userAgent;
   const platform = /iPhone|iPad|iPod/.test(userAgent) ? '2' :
-                   /Android/.test(userAgent) ? '3' : '1'; // 1=Web, 2=iOS, 3=Android
+    /Android/.test(userAgent) ? '3' : '1'; // 1=Web, 2=iOS, 3=Android
 
   return {
     platform,
     deviceId: localStorage.getItem('deviceId') || 'web-' + Date.now(),
     deviceName: navigator.platform || 'WebBrowser',
     osVersion: /Windows NT ([0-9\.]+)/.exec(userAgent)?.[1] ||
-               /Mac OS X ([0-9_]+)/.exec(userAgent)?.[1]?.replace(/_/g, '.') ||
-               /Android ([0-9\.]+)/.exec(userAgent)?.[1] || 'Unknown',
+      /Mac OS X ([0-9_]+)/.exec(userAgent)?.[1]?.replace(/_/g, '.') ||
+      /Android ([0-9\.]+)/.exec(userAgent)?.[1] || 'Unknown',
     os: /Windows/.test(userAgent) ? 'Windows' :
-        /Mac/.test(userAgent) ? 'macOS' :
+      /Mac/.test(userAgent) ? 'macOS' :
         /Linux/.test(userAgent) ? 'Linux' :
-        /Android/.test(userAgent) ? 'Android' :
-        /iPhone|iPad|iPod/.test(userAgent) ? 'iOS' : 'Unknown',
+          /Android/.test(userAgent) ? 'Android' :
+            /iPhone|iPad|iPod/.test(userAgent) ? 'iOS' : 'Unknown',
     ip: '127.0.0.1', // Will be set by backend
     location: localStorage.getItem('userLocation') || 'HN'
   };
@@ -190,7 +190,10 @@ api.interceptors.request.use((config) => {
 
   // Set dynamic headers with real device info
   config.headers["Accept-Language"] = currentLanguage;
-  config.headers["Content-Type"] = "application/json";
+  // Don't set Content-Type for FormData - let axios set it with boundary
+  if (!(config.data instanceof FormData)) {
+    config.headers["Content-Type"] = "application/json";
+  }
   config.headers["Access-Control-Allow-Origin"] = "*";
   config.headers["Access-Control-Allow-Methods"] = "DELETE, POST, GET, OPTIONS";
   config.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With";
@@ -231,8 +234,8 @@ api.interceptors.response.use(
       CacheManager.clearAuthData();
       localStorage.clear();
       window.location.href = "/login";
-      Cookies.remove("token", { path: "/" }); 
-      Cookies.remove("accessToken", { path: "" }); 
+      Cookies.remove("token", { path: "/" });
+      Cookies.remove("accessToken", { path: "" });
       Cookies.remove("refreshToken", { path: "" });
     };
 
@@ -254,7 +257,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       // const refreshToken = localStorage.getItem("refreshToken");
-      const refreshToken = Cookies.get("refreshToken");      
+      const refreshToken = Cookies.get("refreshToken");
       if (!refreshToken) {
         logout();
         return Promise.reject(err);

@@ -261,3 +261,29 @@ export const updateStatusPackaged = async (body: { shipping_code: string }) => {
   const res = await api.put(`${API_TYPE_CONST.TRACKING_PACKAGED}`, body);
   return res.data.data;
 };
+
+// Get source website by domain search
+export const getSourceWebsiteByDomain = async (domain: string) => {
+  const res = await api.get(API_TYPE_CONST.WEBSITE_MANAGE, {
+    params: {
+      page: 0,
+      size: 20,
+      search: domain,
+    },
+  });
+  return res.data.data;
+};
+
+// Get website accounts by website ID
+export const getWebsiteAccounts = async (websiteId: number) => {
+  const res = await api.get(`${API_TYPE_CONST.GET_WEBSITE_ACCOUNTS}/${websiteId}`);
+  return res.data.data;
+};
+
+// Update order source account
+export const updateOrderSourceAccount = async (orderId: number, sourceAccountId: number) => {
+  const res = await api.put(`${API_TYPE_CONST.ORDER_SOURCE_ACCOUNT}/${orderId}`, {
+    sourceAccountId,
+  });
+  return res.data.data;
+};

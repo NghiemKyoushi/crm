@@ -229,6 +229,10 @@ const WebsiteManageTable: React.FC = () => {
     router.push(`/website-manage/selector-config?id=${record.id}`);
   };
 
+  const handleOpenAccountManager = (record: Website) => {
+    router.push(`/website-manage/manager-account-web?id=${record.id}`);
+  };
+
   const columns: ColumnsType<Website> = [
     { title: t("websiteManage.table.name"), dataIndex: "name", key: "name" },
     { title: "URL", dataIndex: "domain", key: "domain" },
@@ -278,6 +282,13 @@ const WebsiteManageTable: React.FC = () => {
             onClick={() => handleOpenSelectorConfig(record)}
           >
             Config
+          </Button>
+          <Button
+            type="link"
+            className="!text-green-600"
+            onClick={() => handleOpenAccountManager(record)}
+          >
+            Account
           </Button>
           <Button
             type="link"
