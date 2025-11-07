@@ -21,6 +21,7 @@ export interface DepositItem {
   handler:string;
   handler_time: string;
   customer_code: string;
+  type?: "DEBIT" | "CREDIT";
 }
 
 export interface Pageable {
@@ -148,6 +149,7 @@ export interface withdrawItem {
   deposit_code: string;
   username: string;
   customer_code: string;
+  type?: "DEBIT" | "CREDIT";
 }
 
 export interface PaginatedWithdraw {

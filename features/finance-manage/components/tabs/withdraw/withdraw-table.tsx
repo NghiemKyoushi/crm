@@ -259,9 +259,9 @@ const WithdrawTable = ({}) => {
       fixed: "right",
       render: (_, record) => {
         const statusConfig = {
-          PENDING: { color: "gold", text: t("withdraw.statusType.pending") },
+          PENDING: { color: "gold", text: record.type === "DEBIT" ? t("withdraw.statusType.pendingRefund") : t("withdraw.statusType.pending") },
           APPROVED: { color: "green", text: t("withdraw.statusType.approved") },
-          COMPLETED: { color: "green", text: t("withdraw.statusType.completed") },
+          COMPLETED: { color: "green", text: record.type === "DEBIT" ? t("withdraw.statusType.refunded"): t("withdraw.statusType.completed") },
           CANCELLED: { color: "red", text: t("withdraw.statusType.cancelled") },
           REJECTED: { color: "red", text: t("withdraw.statusType.rejected") },
         };

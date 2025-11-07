@@ -255,9 +255,9 @@ const DepositTable = (props: DepositTableProps) => {
         const statusConfig = {
           WAITING_CONFIRMATION: {
             color: "gold",
-            text: t("deposit.status.pending"),
+            text: record.type === "DEBIT" ? t("deposit.status.pendingSettlement") : t("deposit.status.pending"),
           },
-          COMPLETED: { color: "green", text: t("deposit.status.completed") },
+          COMPLETED: { color: "green", text: record.type === "DEBIT" ?  t("deposit.status.settled") : t("deposit.status.completed") },
           CANCELED: { color: "red", text: t("deposit.status.canceled") },
           FAILED: { color: "blue", text: t("status.failed") },
           MANUAL_TOP_UP_COMPLETED: { color: "green", text: t("status.topUp") },

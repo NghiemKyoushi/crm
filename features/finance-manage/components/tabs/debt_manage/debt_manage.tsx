@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Tag, Button, Modal, Tooltip } from "antd";
 import { ReloadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,20 +21,33 @@ import {
 } from "@/features/finance-manage/apis";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
   const [note, setNote] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  const handleOk = async () => {
+    setLoading(true);
+    try {
+      await onOk?.(note);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Modal
       open={visible}
       title="Xác nhận giao dịch"
-      onOk={() => onOk?.(note)}
+      onOk={handleOk}
       onCancel={onCancel}
       okText="Xác nhận"
       cancelText="Huỷ"
       destroyOnClose
       centered
+      okButtonProps={{ loading, disabled: loading }}
+      cancelButtonProps={{ disabled: loading }}
     >
       <div>
         Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
@@ -51,6 +64,7 @@ const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
           rows={3}
           onChange={e => setNote(e.target.value)}
           placeholder="Nhập ghi chú cho xác nhận (nếu có)..."
+          disabled={loading}
         />
       </div>
     </Modal>
@@ -67,6 +81,11 @@ const PartnerDebtTable = () => {
 
   const [pendingConfirmVisible, setPendingConfirmVisible] = useState(false);
   const [pendingRejectVisible, setPendingRejectVisible] = useState(false);
+  const { hasPermission } = usePermission();
+
+  // Track loading for Pending Confirm and Pending Reject
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
 
   const [params, setParams] = useState<BankDepositRequest>({
     page: 0,
@@ -77,7 +96,7 @@ const PartnerDebtTable = () => {
   const handleReturnConfirm = async () => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id, {bank_account_id: null});
+      await createDebt(selectedDebt.id, { bank_account_id: null });
       toast.success("Tạo hoàn trả thành công!");
       setConfirmReturnVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -91,12 +110,18 @@ const PartnerDebtTable = () => {
     }
   };
 
+  const isAdmin = useMemo(() => {
+    const isAdmin = hasPermission("system.admin");
+    return isAdmin;
+  }, [hasPermission]);
+
   // Xử lý xác nhận công nợ
   const handlePendingConfirm = async (note: string) => {
     if (!selectedDebt?.id) return;
+    setConfirmLoading(true);
     try {
       if (selectedDebt && selectedDebt.user_id) {
-        await approveDebt(selectedDebt.user_id,{note: note});
+        await approveDebt(selectedDebt.user_id, { note: note });
         toast.success("Xác nhận giao dịch thành công!");
         setPendingConfirmVisible(false);
         setTimeout(() => setSelectedDebt(undefined), 300);
@@ -108,12 +133,15 @@ const PartnerDebtTable = () => {
           error?.message ||
           "Có lỗi xảy ra khi xác nhận giao dịch."
       );
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
   // Xử lý từ chối công nợ
   const handlePendingReject = async () => {
     if (!selectedDebt?.id) return;
+    setRejectLoading(true);
     try {
       if (selectedDebt && selectedDebt.user_id) {
         await cancelDebt(selectedDebt.user_id);
@@ -128,6 +156,8 @@ const PartnerDebtTable = () => {
           error?.message ||
           "Có lỗi xảy ra khi từ chối giao dịch."
       );
+    } finally {
+      setRejectLoading(false);
     }
   };
 
@@ -141,7 +171,7 @@ const PartnerDebtTable = () => {
   const handleConfirmDebt = async (id: string) => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id,{bank_account_id: id});
+      await createDebt(selectedDebt.id, { bank_account_id: id });
       toast.success("Tạo tất toán thành công!");
       setModalVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -321,7 +351,7 @@ const PartnerDebtTable = () => {
             <div className="flex flex-col gap-1 items-end ml-4">
               {status === "NEW" && (
                 <>
-                  {isNo ? (
+                  {isNo && isAdmin ? (
                     <Button
                       type="primary"
                       size="small"
@@ -333,7 +363,7 @@ const PartnerDebtTable = () => {
                     >
                       Tạo tất toán
                     </Button>
-                  ) : !isBalanced ? (
+                  ) : !isBalanced && isAdmin ? (
                     <Button
                       type="primary"
                       size="small"
@@ -358,6 +388,8 @@ const PartnerDebtTable = () => {
                       setSelectedDebt(record);
                       setPendingConfirmVisible(true);
                     }}
+                    loading={confirmLoading}
+                    disabled={confirmLoading || rejectLoading}
                   >
                     Xác nhận
                   </Button>
@@ -369,6 +401,8 @@ const PartnerDebtTable = () => {
                       setSelectedDebt(record);
                       setPendingRejectVisible(true);
                     }}
+                    loading={rejectLoading}
+                    disabled={confirmLoading || rejectLoading}
                   >
                     Từ chối
                   </Button>
@@ -558,6 +592,7 @@ const PartnerDebtTable = () => {
           setPendingRejectVisible(false);
           setTimeout(() => setSelectedDebt(undefined), 300);
         }}
+        loading={rejectLoading}
       />
     </div>
   );

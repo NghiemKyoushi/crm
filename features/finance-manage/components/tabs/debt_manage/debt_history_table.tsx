@@ -2,13 +2,13 @@ import { Modal, Button, DatePicker, Upload, message, Tooltip } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoryDebt, downloadExampleDebt, exportDebt, importDataDebt } from "@/features/finance-manage/apis";
-import type { BankDepositRequest } from "@/types/deposit-type";
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { Dayjs } from "dayjs";
 import TableComponent from "@/components/TableComponent";
 import { DownloadOutlined, UploadOutlined, FileExcelOutlined, CopyOutlined } from "@ant-design/icons";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+import { toast } from "react-toastify";
 const { RangePicker } = DatePicker;
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -33,30 +33,24 @@ export interface DebtHistoryRecord {
   exchange_rate: number;               // Tỷ giá quy đổi
 }
 
-// Use explicit [Dayjs, Dayjs] for ranges for type safety
 const getDefaultDateRange = (): [Dayjs, Dayjs] => {
   const to_date = dayjs().endOf("day");
   const from_date = to_date.subtract(29, "day").startOf("day");
   return [from_date, to_date];
 };
 
-// Hỗ trợ download file từ base64 hoặc url thông thường
 function downloadFileFromUrl(urlOrBase64: string, filename: string) {
-  // Nếu chuỗi là base64 (rất dài, không có http) thì decode thành Blob
   if (
     typeof urlOrBase64 === "string" &&
     urlOrBase64.length > 500 &&
     !urlOrBase64.startsWith("http")
   ) {
-    // cố gắng parse định dạng base64 (zip, excel, ...)
-    // Tạo link download tạm
     const byteCharacters = atob(urlOrBase64);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
-    // fallback dùng application/octet-stream
     const blob = new Blob([byteArray], { type: "application/octet-stream" });
     const urlBlob = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -67,7 +61,6 @@ function downloadFileFromUrl(urlOrBase64: string, filename: string) {
     link.remove();
     setTimeout(() => window.URL.revokeObjectURL(urlBlob), 200);
   } else {
-    // Nếu là url dạng thông thường
     fetch(urlOrBase64)
       .then((response) => response.blob())
       .then((blob) => {
@@ -82,6 +75,10 @@ function downloadFileFromUrl(urlOrBase64: string, filename: string) {
       });
   }
 }
+
+// Helper to get max selectable date range: 3 months (90 days)
+// Used in disabledDate
+const MAX_RANGE_DAYS = 90;
 
 export const DebtDetailModal = ({
   visible,
@@ -131,6 +128,11 @@ export const DebtDetailModal = ({
       !dayjs.isDayjs(range[1])
     )
       return;
+    // Không cho phép chọn ngoài khoảng 3 tháng
+    if (range[1].diff(range[0], "day") > MAX_RANGE_DAYS - 1) {
+      toast.error("Chỉ được chọn tối đa trong vòng 3 tháng!");
+      return;
+    }
     setDateRange([range[0], range[1]]);
     setParams((prev: any) => ({
       ...prev,
@@ -140,15 +142,25 @@ export const DebtDetailModal = ({
     }));
   };
 
-  // Defensive: Make sure current and dateRange values are Dayjs objects before calling Dayjs methods
   const disabledDate = (current: any) => {
-    // Antd can pass non-Dayjs values in certain edge-cases, skip those
     if (!current || !dayjs.isDayjs(current)) return false;
-    const [start /* , end */] = dateRange;
-    if (!start || !dayjs.isDayjs(start)) return false;
-    const earliest = start.subtract(29, "day").startOf("day");
-    const latest = start.add(29, "day").endOf("day");
-    return current.isBefore(earliest) || current.isAfter(latest);
+
+    if (!dateRange || !Array.isArray(dateRange) || (!dateRange[0] && !dateRange[1])) {
+      return false;
+    }
+    const [start, end] = dateRange;
+
+    if (start && !end) {
+      const maxEnd = start.add(MAX_RANGE_DAYS - 1, "day").endOf("day");
+      const minEnd = start; 
+      return current.isBefore(minEnd, "day") || current.isAfter(maxEnd, "day");
+    }
+    if (!start && end) {
+      const minStart = end.subtract(MAX_RANGE_DAYS - 1, "day").startOf("day");
+      const maxStart = end; // không cho chọn start lớn hơn end
+      return current.isAfter(maxStart, "day") || current.isBefore(minStart, "day");
+    }
+    return false;
   };
 
   const columns: ColumnsType<DebtHistoryRecord> = [
@@ -280,9 +292,9 @@ export const DebtDetailModal = ({
         // Hàm copy mã giao dịch
         const handleCopy = () => {
           navigator.clipboard.writeText(deposit_code).then(() => {
-            message.success("Đã copy mã giao dịch!");
+            toast.success("Đã copy mã giao dịch!");
           }).catch(() => {
-            message.error("Copy thất bại!");
+            toast.error("Copy thất bại!");
           });
         };
 
@@ -325,7 +337,6 @@ export const DebtDetailModal = ({
     }));
   };
 
-  // Download sample file handler using API
   const handleDownloadSample = async () => {
     try {
       message.loading({ content: "Đang tải file mẫu...", key: "download-sample" });
@@ -333,56 +344,55 @@ export const DebtDetailModal = ({
       console.log('res', res);
 
       if (res && res) {
-        // Download from url in current tab as attachment
         downloadFileFromUrl(res, "file-mau-import-debt.xlsx");
-        message.success({ content: "Tải file mẫu thành công!", key: "download-sample", duration: 2 });
+        toast.success("Tải file mẫu thành công!");
       } else if (res && res.file) {
-        // fallback: if file data (base64/Blob) returned, create a link and trigger
         const link = document.createElement("a");
         link.href = res.file;
         link.download = "file-mau-import-debt.xlsx";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        message.success({ content: "Tải file mẫu thành công!", key: "download-sample", duration: 2 });
+        toast.success("Tải file mẫu thành công!");
       } else {
         throw new Error("Không tìm thấy file mẫu!");
       }
     } catch (e: any) {
-      message.error({ content: e?.message || "Tải file mẫu thất bại!", key: "download-sample" });
+      toast.error(e?.message || "Tải file mẫu thất bại!");
+    } finally {
+      message.destroy("download-sample");
     }
   };
 
-  // Actual Import: sử dụng importDataDebt API
   const handleImportChange = async (info: any) => {
-    // Only proceed when upload finishes
     if (info.file.status === "uploading") return;
-
     if (info.file.status === "done" || info.file.status === undefined) {
-      // Gọi API importDataDebt
       try {
         message.loading({ content: "Đang import...", key: "import-debt" });
         const formData = new FormData();
         if (info.file.originFileObj) {
-          formData.append("file", info.file.originFileObj);
+          formData.append("fileExcel", info.file.originFileObj);
         } else if (info.file instanceof File) {
-          formData.append("file", info.file);
+          formData.append("fileExcel", info.file);
         }
-        await importDataDebt(formData);
-        message.success({ content: "Import thành công!", key: "import-debt" });
+        const res = await importDataDebt(formData);
+        downloadFileFromUrl(res, "file-mau-import-debt.xlsx");
         refetch();
+        toast.success("Import thành công!");
       } catch (err: any) {
-        message.error({ content: err?.message || "Import thất bại!", key: "import-debt" });
+        toast.error(err?.message || "Import thất bại!");
+      } finally {
+        message.destroy("import-debt");
       }
     } else if (info.file.status === "error") {
-      message.error("Import thất bại!");
+      toast.error("Import thất bại!");
+      message.destroy("import-debt");
     }
   };
 
-  // Export handler using API
   const handleExport = async () => {
     if (!record?.user_id) {
-      message.error({ content: "Không có thông tin đối tác!", key: "export" });
+      toast.error("Không có thông tin đối tác!");
       return;
     }
     try {
@@ -392,25 +402,25 @@ export const DebtDetailModal = ({
         record.user_id,
         { from_date, to_date }
       );
-      // Nếu backend trả về URL:
-      if (res && res.url) {
-        // Download from url in current tab as attachment
-        downloadFileFromUrl(res.url, "export-debt-history.xlsx");
-        message.success({ content: "Xuất file thành công!", key: "export", duration: 2 });
+      // exportDebt trả ra kiểu dữ liệu giống với downloadExampleDebt (có thể là base64 hoặc url hoặc file object)
+      if (res && res) {
+        downloadFileFromUrl(res, "export-debt-history.xlsx");
+        toast.success("Xuất file thành công!");
       } else if (res && res.file) {
-        // fallback: if file data (base64/Blob) returned, create a download
         const link = document.createElement("a");
         link.href = res.file;
         link.download = "export-debt-history.xlsx";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        message.success({ content: "Xuất file thành công!", key: "export", duration: 2 });
+        toast.success("Xuất file thành công!");
       } else {
         throw new Error("Không tìm thấy file export!");
       }
     } catch (e: any) {
-      message.error({ content: e?.message || "Xuất file thất bại!", key: "export" });
+      toast.error(e?.message || "Xuất file thất bại!");
+    } finally {
+      message.destroy("export");
     }
   };
 
@@ -448,22 +458,25 @@ export const DebtDetailModal = ({
           paddingTop: 10,
         }}
       >
-        {/* Các nút và input phía trên table */}
         <div className="flex flex-wrap gap-3 items-end mb-3 justify-end">
           <RangePicker
             className="min-w-[250px]"
             allowClear={false}
             value={dateRange}
-            onChange={(dates) =>
-              handleRangeChange(
-                Array.isArray(dates)
-                  ? ([
+            onChange={(dates) => {
+              const [from, to] =
+                Array.isArray(dates) && dates
+                  ? [
                       dayjs.isDayjs(dates[0]) ? dates[0] : null,
                       dayjs.isDayjs(dates[1]) ? dates[1] : null,
-                    ] as [Dayjs | null, Dayjs | null])
-                  : [null, null]
-              )
-            }
+                    ]
+                  : [null, null];
+              if (from && to && to.diff(from, "day") > MAX_RANGE_DAYS - 1) {
+                toast.error("Chỉ được chọn tối đa trong vòng 3 tháng (90 ngày)!");
+                return;
+              }
+              handleRangeChange([from, to] as [Dayjs | null, Dayjs | null]);
+            }}
             disabledDate={disabledDate}
             format="DD/MM/YYYY"
             presets={[

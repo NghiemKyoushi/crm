@@ -48,7 +48,7 @@
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
     "checkComing": "Kiểm Tra Hàng Về",
-    "operation": "Quản lý vận đơn",
+    "operation": "Quản lý xuất kho",
     "websiteManagement": "Quản lý Website",
     "crm": "CRM",
     "cms": "CMS"
@@ -264,7 +264,11 @@
       "pending": "Chờ xác nhận",
       "completed": "Đã xác nhận",
       "canceled": "Đã từ chối",
-      "manual": "Nạp tay"
+      "manual": "Nạp tay",
+      "pendingSettlement": "Chờ tất toán",
+      "settled": "Đã tất toán",
+      "pendingRefund": "Chờ hoàn trả",
+      "refunded": "Đã hoàn trả"
     },
     "actions": {
       "confirm": "Xác nhận",
@@ -345,7 +349,9 @@
       "approved": "Đã tiếp nhận",
       "completed": "Thành công",
       "cancelled": "Đã huỷ",
-      "rejected": "Đã từ chối"
+      "rejected": "Đã từ chối",
+      "pendingRefund": "Chờ hoàn trả",
+      "refunded": "Đã hoàn trả"
     },
     "qrCode": "Mã QR",
     "history": "Lịch sử",
@@ -573,8 +579,8 @@
       "accessSalesDashboard": "Truy cập trang tổng quan Sales",
       "viewSalesReports": "Xem báo cáo bán hàng cá nhân",
       "exportSalesData": "Xuất dữ liệu bán hàng cá nhân",
-      "viewAssignedShipments": "Xem danh sách vận đơn được phân công",
-      "createShipments": "Tạo vận đơn cho khách hàng được quản lý"
+      "viewAssignedShipments": "Xem danh sách xuất kho được phân công",
+      "createShipments": "Tạo xuất kho cho khách hàng được quản lý"
     }
   },
   "roles": {
