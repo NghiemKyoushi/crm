@@ -748,23 +748,23 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         </div>
       ),
     },
-    {
-      title: "Cọc",
-      key: "deposit",
-      width: 100,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-green-600 font-medium">
-          {record.deposit_fee
-            ? `${record.deposit_fee.toLocaleString("en-US")}đ`
-            : "-"}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Cọc",
+    //   key: "deposit",
+    //   width: 100,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="text-xs text-green-600 font-medium">
+    //       {record.deposit_fee
+    //         ? `${record.deposit_fee.toLocaleString("en-US")}đ`
+    //         : "-"}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Ghi chú",
       key: "description",
