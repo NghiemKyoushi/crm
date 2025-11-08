@@ -101,7 +101,7 @@ export const menuPermissions: Record<string, string[]> = {
   "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
 
   // CRM - open access initially
-  "/cms": []
+  "/cms": ["cms.view_screen", "cms.edit_screen"]
 };
 
 export const menuItems = [

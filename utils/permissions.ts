@@ -317,6 +317,14 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
   '/forgot-password': {
     required: [],
     fallbackAction: 'notFound'
+  },
+  '/cms':{
+    required: [
+      '"cms.view_screen", "cms.edit_screen"',
+      'system.admin',
+    ],
+    requireAll: false,
+    fallbackAction: 'notFound'
   }
 };
 
