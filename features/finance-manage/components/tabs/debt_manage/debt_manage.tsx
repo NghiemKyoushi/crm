@@ -20,34 +20,22 @@ import {
   createDebt,
 } from "@/features/finance-manage/apis";
 import { toast } from "react-toastify";
-import dayjs from "dayjs";
 import { usePermission } from "@/components/layout/PermissionContext";
+import { DebtHistoryScreen } from "./debt_history_screen";
 
 const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
   const [note, setNote] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-
-  const handleOk = async () => {
-    setLoading(true);
-    try {
-      await onOk?.(note);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal
       open={visible}
       title="Xác nhận giao dịch"
-      onOk={handleOk}
+      onOk={() => onOk?.(note)}
       onCancel={onCancel}
       okText="Xác nhận"
       cancelText="Huỷ"
       destroyOnClose
       centered
-      okButtonProps={{ loading, disabled: loading }}
-      cancelButtonProps={{ disabled: loading }}
     >
       <div>
         Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
@@ -64,7 +52,6 @@ const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
           rows={3}
           onChange={e => setNote(e.target.value)}
           placeholder="Nhập ghi chú cho xác nhận (nếu có)..."
-          disabled={loading}
         />
       </div>
     </Modal>
@@ -82,10 +69,6 @@ const PartnerDebtTable = () => {
   const [pendingConfirmVisible, setPendingConfirmVisible] = useState(false);
   const [pendingRejectVisible, setPendingRejectVisible] = useState(false);
   const { hasPermission } = usePermission();
-
-  // Track loading for Pending Confirm and Pending Reject
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [rejectLoading, setRejectLoading] = useState(false);
 
   const [params, setParams] = useState<BankDepositRequest>({
     page: 0,
@@ -118,7 +101,6 @@ const PartnerDebtTable = () => {
   // Xử lý xác nhận công nợ
   const handlePendingConfirm = async (note: string) => {
     if (!selectedDebt?.id) return;
-    setConfirmLoading(true);
     try {
       if (selectedDebt && selectedDebt.user_id) {
         await approveDebt(selectedDebt.user_id, { note: note });
@@ -133,15 +115,12 @@ const PartnerDebtTable = () => {
           error?.message ||
           "Có lỗi xảy ra khi xác nhận giao dịch."
       );
-    } finally {
-      setConfirmLoading(false);
     }
   };
 
   // Xử lý từ chối công nợ
   const handlePendingReject = async () => {
     if (!selectedDebt?.id) return;
-    setRejectLoading(true);
     try {
       if (selectedDebt && selectedDebt.user_id) {
         await cancelDebt(selectedDebt.user_id);
@@ -156,8 +135,6 @@ const PartnerDebtTable = () => {
           error?.message ||
           "Có lỗi xảy ra khi từ chối giao dịch."
       );
-    } finally {
-      setRejectLoading(false);
     }
   };
 
@@ -285,7 +262,7 @@ const PartnerDebtTable = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-y-1 gap-x-3 text-[14px] leading-[1.4]">
-                <div>
+                {/* <div>
                   <span className="text-[#5a5959] mr-1 text-[14px]">Tổng nợ phát sinh:</span>
                   <b className="text-[#222] text-[14px]">
                     {(typeof record.total_debts === "number"
@@ -311,7 +288,7 @@ const PartnerDebtTable = () => {
                       : record.total_paid_debts) || 0}{" "}
                     ₫
                   </b>
-                </div>
+                </div> */}
                 <div>
                   {isNo ? (
                     <>
@@ -378,36 +355,6 @@ const PartnerDebtTable = () => {
                   ) : null}
                 </>
               )}
-              {status === "PENDING" && (
-                <>
-                  <Button
-                    type="primary"
-                    size="small"
-                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
-                    onClick={() => {
-                      setSelectedDebt(record);
-                      setPendingConfirmVisible(true);
-                    }}
-                    loading={confirmLoading}
-                    disabled={confirmLoading || rejectLoading}
-                  >
-                    Xác nhận
-                  </Button>
-                  <Button
-                    danger
-                    size="small"
-                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
-                    onClick={() => {
-                      setSelectedDebt(record);
-                      setPendingRejectVisible(true);
-                    }}
-                    loading={rejectLoading}
-                    disabled={confirmLoading || rejectLoading}
-                  >
-                    Từ chối
-                  </Button>
-                </>
-              )}
               {status === "COMPLETED" && (
                 <Button
                   size="small"
@@ -442,6 +389,18 @@ const PartnerDebtTable = () => {
       },
     },
   ];
+
+  // Decision: If admin, show as-is, else show DebtHistoryTable with first data item
+  if (!isAdmin) {
+    // data?.contents.data is an array, pick first element (if any)
+    const firstItem = data?.contents?.data?.[0];
+    return (
+      <DebtHistoryScreen
+        record={firstItem}
+        onRefresh={() => refetch?.()}
+      />
+    );
+  }
 
   return (
     <div>
@@ -539,7 +498,6 @@ const PartnerDebtTable = () => {
         fontSize={13}
         headerHeight={0}
         loading={isPending}
-    
       />
       {selectedDebt?.user_id && (
         <SettlementBankModal
@@ -592,7 +550,6 @@ const PartnerDebtTable = () => {
           setPendingRejectVisible(false);
           setTimeout(() => setSelectedDebt(undefined), 300);
         }}
-        loading={rejectLoading}
       />
     </div>
   );
