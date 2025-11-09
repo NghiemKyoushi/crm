@@ -22,7 +22,7 @@ export const SettlementBankModal = ({
   selectedDebt: any;
   partner_id: number;
   remainDebt: number;
-  onConfirmDebt: () => void;
+  onConfirmDebt: (id: string) => void;
 }) => {
   const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null);
   const [banks, setBanks] = useState<BankAccount[]>([]);
@@ -227,7 +227,7 @@ export const SettlementBankModal = ({
                     type="primary"
                     onClick={() => {
                       onClose();
-                      onConfirmDebt();
+                      onConfirmDebt(selectedBank.id.toString());
                     }}
                   >
                     Xác nhận đã chuyển

@@ -230,12 +230,12 @@ export default function ShipmentFilter({
             {/* Cột 2: Mã vận đơn & Tracking */}
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">
-                Mã vận đơn & Tracking
+                Mã xuất kho & Tracking
               </div>
               <div className="flex flex-col gap-2">
                 <Form.Item name="tracking_ship" className="!mb-0">
                   <Input
-                    placeholder="Mã vận đơn"
+                    placeholder="Mã xuất kho"
                     className="!w-full !h-10 !text-xs"
                     size="small"
                   />

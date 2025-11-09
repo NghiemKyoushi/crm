@@ -21,6 +21,7 @@ export interface DepositItem {
   handler:string;
   handler_time: string;
   customer_code: string;
+  type?: "DEBIT" | "CREDIT";
 }
 
 export interface Pageable {
@@ -148,6 +149,7 @@ export interface withdrawItem {
   deposit_code: string;
   username: string;
   customer_code: string;
+  type?: "DEBIT" | "CREDIT";
 }
 
 export interface PaginatedWithdraw {
@@ -229,8 +231,9 @@ export interface DebtItem {
   updated_at: string;
   is_deleted: boolean;
   telegram_channel_id: string;
-   full_name?: string;
+  full_name?: string;
   total_debts: number;
+  total_adjustments: number;
   total_paid_debts: number;
   total_remaining_debts: number;
   user_id?: number;

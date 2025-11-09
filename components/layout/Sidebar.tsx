@@ -95,10 +95,13 @@ export const menuPermissions: Record<string, string[]> = {
   // Surcharge - product and pricing
   "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
   //
-  "/shipment-management":["system.admin", "sales.view_assigned_shipments", "sales.create_shipments" ],
+  "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
 
   // Check Coming - Warehouse
-  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"]
+  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
+
+  // CRM - open access initially
+  "/cms": ["cms.view_screen", "cms.edit_screen"]
 };
 
 export const menuItems = [
@@ -114,11 +117,11 @@ export const menuItems = [
   // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
   { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
-
+    { key: "/cms", icon: faTags, label: "cms" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
-  const { collapsed ,toggle } = useSidebar();
+  const { collapsed, toggle } = useSidebar();
 
   const pathname = usePathname();
   const { t } = useTranslation();

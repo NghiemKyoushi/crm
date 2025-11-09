@@ -130,4 +130,26 @@ export const checkComingApi = {
     );
     return response.data.data;
   },
+
+  // Complete order by tracking code (proxy endpoint requires tracking_code + image_ids)
+  completeArrivedByTracking: async (
+    payload: {
+      tracking_code: string;
+      image_ids: number[];
+    }
+  ) => {
+    const response = await api.put<{ data: any }>(
+      `${API_TYPE_CONST.COMPLETE_ORDER_ARRIVED_VN}`,
+      payload
+    );
+    return response.data.data;
+  },
+
+  // Mark check-coming record as printed (increments print_count)
+  markPrinted: async (recordId: number) => {
+    const response = await api.put<{ data: any }>(
+      `${API_TYPE_CONST.CHECK_COMING_PRINTED}/${recordId}`
+    );
+    return response.data.data;
+  },
 };

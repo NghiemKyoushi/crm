@@ -1,0 +1,169 @@
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { Form, Input, InputNumber, Modal, Upload, message } from "antd";
+import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
+import { VIEW_IMAGE } from "@/constants/api-type";
+import { uploadImage } from "@/features/user-profile/hooks/user-profile";
+import { CmsCategory, CreateCmsCategoryBody, UpdateCmsCategoryBody, createCmsCategory, updateCmsCategory } from "../apis/categories";
+import { useMutation } from "@tanstack/react-query";
+import { getResponseMessage } from "@/api/axiosClient";
+
+type Props = {
+    open: boolean;
+    onClose: () => void;
+    onSuccess?: () => void;
+    category?: CmsCategory; // if provided -> edit mode
+};
+
+export default function CreateCategoryModal({ open, onClose, onSuccess, category }: Props) {
+    const [form] = Form.useForm<CreateCmsCategoryBody>();
+    const [uploading, setUploading] = useState(false);
+    const imageId = Form.useWatch("image_id", form);
+    const thumbUrl = useMemo(() => {
+        if (!imageId) return undefined;
+        const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
+        return `${base}/${VIEW_IMAGE}${imageId}`;
+    }, [imageId]);
+
+    // Update form values when category or open changes
+    useEffect(() => {
+        if (open) {
+            if (category) {
+                form.setFieldsValue({
+                    status: category.status ?? "active",
+                    title: category.title,
+                    slug: category.slug,
+                    short_desc: category.short_desc,
+                    order_index: category.order_index ?? 1,
+                    image_id: category.image_id,
+                });
+            } else {
+                form.resetFields();
+                form.setFieldsValue({
+                    status: "active",
+                    order_index: 1,
+                });
+            }
+        }
+    }, [open, category, form]);
+
+    const { mutateAsync, isPending } = useMutation({
+        mutationFn: async (payload: CreateCmsCategoryBody | UpdateCmsCategoryBody) => {
+            if (category) {
+                await updateCmsCategory(category.id, payload as UpdateCmsCategoryBody);
+            } else {
+                await createCmsCategory(payload as CreateCmsCategoryBody);
+            }
+        },
+        onSuccess: () => {
+            message.success(category ? "Category updated" : "Category created");
+            onSuccess?.();
+            form.resetFields();
+            onClose();
+        },
+        onError: (err: any) => message.error(getResponseMessage(err.response)),
+    });
+
+    const handleOk = async () => {
+        try {
+            const values = await form.validateFields();
+            const payload: CreateCmsCategoryBody = {
+                ...values,
+                image_id: values.image_id ?? null,
+                status: "active",
+            } as CreateCmsCategoryBody;
+            await mutateAsync(payload);
+        } catch (error: any) {
+            // Form validation failed
+            if (error?.errorFields) {
+                // Antd validation errors - they will be shown automatically
+                return;
+            }
+            console.error("Error saving category:", error);
+        }
+    };
+
+    return (
+        <Modal
+            title={category ? "Update CMS Category" : "Create CMS Category"}
+            open={open}
+            onCancel={onClose}
+            onOk={handleOk}
+            confirmLoading={isPending}
+            okText={category ? "Update" : "Create"}
+        >
+            <Form 
+                form={form} 
+                layout="vertical" 
+                initialValues={{ 
+                    status: category?.status ?? "active", 
+                    title: category?.title,
+                    slug: category?.slug,
+                    short_desc: category?.short_desc,
+                    order_index: category?.order_index ?? 1,
+                    image_id: category?.image_id,
+                }}
+            >
+                <Form.Item label="Cover Image">
+                    <Upload.Dragger
+                        accept="image/*"
+                        multiple={false}
+                        showUploadList={false}
+                        customRequest={async (options: RcCustomRequestOptions) => {
+                            const { file, onSuccess, onError } = options;
+                            try {
+                                setUploading(true);
+                                const id = await uploadImage(file as File);
+                                form.setFieldValue("image_id", id);
+                                message.success("Image uploaded");
+                                onSuccess && onSuccess({ id } as any);
+                            } catch (e) {
+                                message.error("Upload failed");
+                                onError && onError(e as any);
+                            } finally {
+                                setUploading(false);
+                            }
+                        }}
+                        disabled={uploading}
+                    >
+                        {thumbUrl ? (
+                            <div className="flex flex-col items-center gap-2 py-3">
+                                <img src={thumbUrl} alt="preview" className="max-h-32 rounded" />
+                                <div className="text-xs text-gray-500">Image ID: {imageId}</div>
+                                <div className="text-xs text-gray-400">Drag & drop to replace</div>
+                            </div>
+                        ) : (
+                            <div className="py-6">
+                                <p className="ant-upload-drag-icon">📷</p>
+                                <p className="ant-upload-text">Click or drag image to upload</p>
+                                <p className="ant-upload-hint text-xs">PNG, JPG...</p>
+                            </div>
+                        )}
+                    </Upload.Dragger>
+                </Form.Item>
+
+                <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+                    <Input placeholder="Tin tức nổi bật" />
+                </Form.Item>
+                <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
+                    <Input placeholder="featured-news" />
+                </Form.Item>
+                <Form.Item name="short_desc" label="Short Description" rules={[{ required: true }]}>
+                    <Input placeholder="Tin mới nhất về đấu giá Nhật" />
+                </Form.Item>
+                <Form.Item name="order_index" label="Order Index" rules={[{ required: true }]}>
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item name="image_id" hidden>
+                    <Input />
+                </Form.Item>
+                <Form.Item name="status" hidden>
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
+
+
