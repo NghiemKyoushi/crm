@@ -1,114 +1,180 @@
 "use client";
-import React, { useState } from "react";
-import { Table, Button, Input, Select, Tag, Modal, Checkbox } from "antd";
+import React, { useState, useRef } from "react";
+import {
+  Button,
+  Input,
+  Select,
+  Tag,
+  Modal,
+  Checkbox,
+  Tooltip,
+  message,
+} from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckCircle,
+  faDownload,
   faFileExcel,
   faFilter,
-  faPhone,
   faTimesCircle,
-  faUserPlus,
+  faTrash,
   faUsers,
   faUserTag,
 } from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
 import TelesaleDetailModal from "./telesale-detail-modal";
 import AssignTelesaleModal from "./assign-telesale-modal";
-import ImportCustomerModal from "./import-telesale-modal";
 import TagManagerModal from "./tag-modal";
+import { ColumnsType } from "antd/es/table";
+import {
+  AssignSaleModel,
+  TelesaleCustomer,
+  TelesaleParamsList,
+} from "../types/telesales-mng";
+import {
+  useTelesalesList,
+  useAddCustomerNote,
+  useUpdateTelesaleStatus,
+  useTelesaleUsers,
+  useTelesaleStatistic,
+  useAssignCustomerTag,
+} from "../hooks/telesale-mng";
+import { EditOutlined } from "@ant-design/icons";
+import AddMultiCustomerModal from "./modal/add-multi-customer";
+import {
+  assignTelesale,
+  deleteTelesaleContactTags,
+  downloadTelesaleExample,
+} from "../apis/telesale-mng";
+
+import { importTelesaleCustomers } from "../apis/telesale-mng";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
+import { NoteModal } from "./modal/note-modal";
 
 const { Option } = Select;
-
-interface Customer {
-  key: string;
-  name: string;
-  contact: string;
-  info: string;
-  telesale: string;
-  status: string;
-  tags?: Array<any>;
-}
-
-const data: Customer[] = [
-  {
-    key: "1",
-    name: "Nguyễn Thị Mai",
-    contact: "0901234567\nNữ - 28/03/1985\n123 Nguyễn Trãi, Q1, HCM",
-    info: "Import: 15/01/2025\nNguồn: Facebook Lead",
-    telesale: "Nguyễn Văn A",
-    status: "Thành công",
-  },
-  {
-    key: "2",
-    name: "Trần Văn Hoàng",
-    contact: "0912345678\nNam - 15/07/1990\n456 Lê Lợi, Q3, HCM",
-    info: "Import: 15/01/2025\nNguồn: Google Ads",
-    telesale: "Trần Thị B",
-    status: "Chưa gọi",
-  },
-  {
-    key: "3",
-    name: "Lê Thị Hương",
-    contact: "0923456789\nNữ - 22/11/1992\n789 Điện Biên Phủ, Q10, HCM",
-    info: "Import: 14/01/2025\nNguồn: Zalo Lead",
-    telesale: "Nguyễn Văn A",
-    status: "Thất bại",
-  },
-  {
-    key: "4",
-    name: "Phạm Văn Đức",
-    contact: "0934567890\nNam - 05/05/1988\n321 Võ Văn Tần, Q3, HCM",
-    info: "Import: 15/01/2025\nNguồn: Website Form",
-    telesale: "Chưa gán",
-    status: "Chưa gán",
-  },
-];
 
 const TelesalesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isOpenAssign, setIsOpenAssign] = useState(false);
   const [isOpenImport, setIsOpenImport] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null
-  );
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<TelesaleCustomer | null>(null);
   const [isOpenTagModal, setIsOpenTagModal] = useState(false);
-
-  // New: State quản lý các customer được chọn bằng checkbox
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-  // New: Modal confirm gán sale cho các khách đã chọn
   const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
+  const [noteAssign, setNoteAssign] = useState<string>("");
+  const [bulkAssignCustomers, setBulkAssignCustomers] = useState<
+    TelesaleCustomer[]
+  >([]);
+  const [downloading, setDownloading] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [editingNoteCustomer, setEditingNoteCustomer] =
+    useState<TelesaleCustomer | null>(null);
+  const [confirmCallModal, setConfirmCallModal] = useState<{
+    open: boolean;
+    customer: TelesaleCustomer | null;
+    status: "CALLED" | "FAILED" | null;
+  }>({
+    open: false,
+    customer: null,
+    status: null,
+  });
+  // Popup confirm for deleting tag per tag
+  const [deleteTagModal, setDeleteTagModal] = useState<{
+    open: boolean;
+    tag?: { tagId: number; customerId: number };
+    tagName?: string;
+  }>({ open: false, tag: undefined, tagName: "" });
 
-  // New: Gửi bulk danh sách customer đã chọn sang AssignTelesaleModal
-  const [bulkAssignCustomers, setBulkAssignCustomers] = useState<Customer[]>([]);
+  const { mutate: addCustomerNote } = useAddCustomerNote();
+  const { mutate: updateTelesaleStatus, isPending: isStatusUpdating } =
+    useUpdateTelesaleStatus();
+  const assignTelesaleMutation = useMutation({
+    mutationFn: (body: AssignSaleModel) => assignTelesale(body),
+  });
+  const deleteCustomerTagMutation = useMutation({
+    mutationFn: (data: { customerId: number; tagId: number[] }) => deleteTelesaleContactTags(data.customerId.toString(), data.tagId),
+  });
 
-  const [tags, setTags] = useState([
-    { id: "1", name: "Khách hàng", color: "red" },
-    { id: "2", name: "Gia đình", color: "green" },
-    { id: "3", name: "Công việc", color: "orange" },
-    { id: "4", name: "Bạn bè", color: "purple" },
-    { id: "5", name: "Trả lời sau", color: "gold" },
-    { id: "6", name: "Đồng nghiệp", color: "blue" },
-  ]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [params, setParams] = useState<TelesaleParamsList>({
+    page: 0,
+    pageSize: 10,
+  });
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterSaleId, setFilterSaleId] = useState<string | undefined>("");
+  const [filterStatus, setFilterStatus] = useState<string | undefined>("");
+
+  const { data, isPending, refetch } = useTelesalesList(params);
+  const { data: telesaleUserList, isLoading: isLoadingTelesaleUsers } =
+    useTelesaleUsers();
+
+  const { stat: telesaleStat, reload: reloadTelesaleStat, loading: statLoading } =
+    useTelesaleStatistic();
+  const { mutate: assignTagMutate } = useAssignCustomerTag();
+
+  const handleOpenNoteModal = (customer: TelesaleCustomer) => {
+    setEditingNoteCustomer(customer);
+    setIsNoteModalOpen(true);
+  };
+
+  const handleSaveNote = async (newNote: string) => {
+    if (!editingNoteCustomer) return;
+    addCustomerNote(
+      {
+        customerId: editingNoteCustomer.id,
+        notes: newNote,
+        saleId: editingNoteCustomer.saleId ? +editingNoteCustomer.saleId : 0,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Cập nhật ghi chú thành công!");
+          refetch();
+          setIsNoteModalOpen(false);
+          setEditingNoteCustomer(null);
+        },
+        onError: () => {
+          toast.error("Cập nhật ghi chú thất bại. Vui lòng thử lại.");
+        },
+      }
+    );
+  };
+
+  const handleCancelNote = () => {
+    setIsNoteModalOpen(false);
+    setEditingNoteCustomer(null);
+  };
+
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
+    setParams((prev) => ({
+      ...prev,
+      page: pageNumber - 1,
+    }));
   };
-  const columns = [
+
+  const columns: ColumnsType<TelesaleCustomer> = [
     {
       title: (
         <Checkbox
           checked={
-            data.length > 0 && selectedRowKeys.length === data.length
+            !!data?.data &&
+            data.data.length > 0 &&
+            selectedRowKeys.length === data.data.length
           }
           indeterminate={
+            !!data?.data &&
             selectedRowKeys.length > 0 &&
-            selectedRowKeys.length < data.length
+            selectedRowKeys.length < data.data.length
           }
           onChange={(e) => {
             if (e.target.checked) {
-              setSelectedRowKeys(data.map((d) => d.key));
+              if (data?.data) {
+                setSelectedRowKeys(data.data.map((d) => d.id));
+              }
             } else {
               setSelectedRowKeys([]);
             }
@@ -118,17 +184,15 @@ const TelesalesPage: React.FC = () => {
       dataIndex: "select",
       key: "select",
       width: 48,
-      render: (_: any, record: Customer) => (
+      render: (_: any, record: TelesaleCustomer) => (
         <Checkbox
-          checked={selectedRowKeys.includes(record.key)}
+          checked={selectedRowKeys.includes(record.id)}
           onChange={(e) => {
             const checked = e.target.checked;
             if (checked) {
-              setSelectedRowKeys((prev) => [...prev, record.key]);
+              setSelectedRowKeys((prev) => [...prev, record.id]);
             } else {
-              setSelectedRowKeys((prev) =>
-                prev.filter((k) => k !== record.key)
-              );
+              setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
             }
           }}
         />
@@ -138,30 +202,63 @@ const TelesalesPage: React.FC = () => {
       title: "Khách hàng",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => <span className="font-xs">{text}</span>,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="flex flex-col">
+          <span className="font-xs">{record.name}</span>
+          <span className="text-gray-400 text-xs">
+            {record.date_of_birth ? `${record.date_of_birth}` : "Ngày sinh: --"}
+          </span>
+        </div>
+      ),
     },
     {
       title: "Liên hệ",
-      dataIndex: "contact",
-      key: "contact",
-      render: (text: string) => (
-        <div className="whitespace-pre-line text-gray-600 font-xs">{text}</div>
+      dataIndex: "info",
+      key: "info",
+      render: (_: any, record: TelesaleCustomer) => (
+        <div className="whitespace-pre-line text-gray-600 text-xs">
+          <div>
+            <span className="font-semibold">Ngày sinh:</span>{" "}
+            {record.phone || "--"}
+          </div>
+          <div>
+            <span className="font-semibold">Địa chỉ:</span>{" "}
+            {record.address || "--"}
+          </div>
+        </div>
       ),
     },
     {
       title: "Thông tin",
       dataIndex: "info",
       key: "info",
-      render: (text: string) => (
-        <div className="whitespace-pre-line text-gray-600">{text}</div>
+      render: (_: any, record: any) => (
+        <div className="whitespace-pre-line text-gray-600 text-xs">
+          <div>
+            <span className="font-semibold">Giới tính:</span>{" "}
+            {record.gender || "--"}
+          </div>
+          <div>
+            <span className="font-semibold">Nguồn:</span>{" "}
+            {record.source || "--"}
+          </div>
+        </div>
       ),
     },
     {
       title: "Telesale",
       dataIndex: "telesale",
       key: "telesale",
-      render: (text: string) => (
-        <span className="text-blue-600 font-medium">{text}</span>
+      render: (_: any, record: TelesaleCustomer) => (
+        <div className="flex flex-col text-xs">
+          <span className="text-blue-600 font-medium">
+            {record.saleName || "--"}
+          </span>
+          <span className="text-gray-600">
+            Email: {record.emailSale || "--"}
+          </span>
+          <span className="text-gray-400">ID: {record.saleId || "--"}</span>
+        </div>
       ),
     },
     {
@@ -169,88 +266,361 @@ const TelesalesPage: React.FC = () => {
       dataIndex: "status",
       key: "status",
       render: (status: string) => {
+        let displayText = status;
         let color = "default";
-        if (status === "Thành công") color = "green";
-        else if (status === "Chưa gọi") color = "gold";
-        else if (status === "Thất bại") color = "red";
-        else if (status === "Chưa gán") color = "default";
-        return <Tag color={color}>{status}</Tag>;
+
+        if (status === "NOT_CALLED") {
+          displayText = "Chưa gọi";
+          color = "gold";
+        } else if (status === "CALLED") {
+          displayText = "Đã gọi";
+          color = "green";
+        } else if (status === "UNASSIGNED") {
+          displayText = "Chưa gán";
+          color = "orange";
+        } else if (status === "FAILED") {
+          displayText = "Thất bại";
+          color = "red";
+        }
+
+        return <Tag color={color}>{displayText}</Tag>;
       },
     },
     {
       title: "Tag",
       dataIndex: "tags",
       key: "tags",
-      render: (_: any, record: Customer) => (
-        <div className="flex gap-1 flex-wrap">
-          {record.tags?.map((tagId: string) => {
-            const tag = tags.find((t) => t.id === tagId);
-            return tag ? (
-              <Tag color={tag.color} key={tag.id}>
-                {tag.name}
-              </Tag>
-            ) : null;
-          })}
-          <Button
-            size="small"
-            onClick={() => {
-              setSelectedCustomer(record);
-              setIsOpenTagModal(true);
-            }}
+      width: 180,
+      render: (_: any, record: TelesaleCustomer) => {
+        const hasTags = record.tags && record.tags.length > 0 && record.tags.some(t => t);
+
+        return (
+          <div
+            className={`flex gap-1 flex-wrap items-center ${!hasTags ? "justify-end" : ""}`}
           >
-            + Tag
-          </Button>
+            {record.tags?.map((tag) => {
+              if (!tag) return null;
+              return (
+                <div
+                  key={tag.id}
+                  className="group relative flex items-center"
+                  style={{ lineHeight: 1 }}
+                >
+                  <Tag color={tag.color} className="flex items-center !mb-0">
+                    <span>{tag.name}</span>
+                    <span
+                      className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                      style={{ display: "inline-block" }}
+                      onClick={() => {
+                        setDeleteTagModal({
+                          open: true,
+                          tag: { customerId: record.id, tagId: tag.id },
+                          tagName: tag.name,
+                        });
+                      }}
+                    >
+                      <Tooltip title="Xoá tag">
+                        <span>
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            style={{
+                              fontSize: 12,
+                              verticalAlign: "middle",
+                              color: "red",
+                            }}
+                          />
+                        </span>
+                      </Tooltip>
+                    </span>
+                  </Tag>
+                </div>
+              );
+            })}
+            <EditOutlined
+              className="cursor-pointer"
+              onClick={() => {
+                setSelectedCustomer(record);
+                setIsOpenTagModal(true);
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      width: 200,
+      render: (_: any, record: TelesaleCustomer) => (
+        <div className="flex items-start gap-2">
+          <div style={{ maxWidth: 100, overflow: "hidden" }}>
+            {record.notes && record.notes.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                {record.notes.map((noteObj: any, idx: number) =>
+                  noteObj.note && noteObj.note.trim().length > 0 ? (
+                    <span
+                      key={idx}
+                      style={{
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        display: "block",
+                      }}
+                    >
+                      {noteObj.note}
+                    </span>
+                  ) : null
+                )}
+              </div>
+            ) : (
+              <span className="text-gray-400 italic">-- Chưa có --</span>
+            )}
+          </div>
+          <Tooltip title="Chỉnh sửa ghi chú">
+            <EditOutlined
+              className="cursor-pointer"
+              onClick={() => handleOpenNoteModal(record)}
+            />
+          </Tooltip>
         </div>
       ),
     },
     {
       title: "Hành động",
       key: "action",
-      render: (_: any, record: Customer) => (
-        <div className="flex gap-2 flex-wrap">
-          <Button size="small" className="!bg-green-500   !text-white !text-xs">
-            Đã gọi
-          </Button>
-          <Button size="small" className="!bg-red-500 !text-white !text-xs">
-            Thất bại
-          </Button>
-          <Button
+      minWidth: 160,
+
+      render: (_: any, record: TelesaleCustomer) => {
+        if (record.status === "UNASSIGNED") {
+          return (
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                size="small"
+                onClick={() => {
+                  setSelectedCustomer(record);
+                  setIsOpenAssign(true);
+                }}
+                className="!bg-orange-500 !text-white !text-xs"
+              >
+                Gán Sale
+              </Button>
+            </div>
+          );
+        }
+        return (
+          <div className="flex gap-2 flex-wrap">
+            {/* Button "Đã gọi" */}
+            <Button
               size="small"
-              onClick={() => setIsOpenAssign(true)}
-              className="!bg-orange-500 !text-white !text-xs"
+              className="!bg-green-500 !text-white !text-xs"
+              loading={isStatusUpdating}
+              onClick={() => {
+                setConfirmCallModal({
+                  open: true,
+                  customer: record,
+                  status: "CALLED",
+                });
+              }}
             >
-              Gán Sale
+              Đã gọi
             </Button>
-        </div>
-      ),
+            {/* Button "Thất bại" */}
+            <Button
+              size="small"
+              className="!bg-red-500 !text-white !text-xs"
+              loading={isStatusUpdating}
+              onClick={() => {
+                setConfirmCallModal({
+                  open: true,
+                  customer: record,
+                  status: "FAILED",
+                });
+              }}
+            >
+              Thất bại
+            </Button>
+            {/* <Button
+              size="small"
+              onClick={() => setIsOpenDetail(true)}
+              className="!bg-blue-500 !text-white !text-xs"
+            >
+              Chi tiết
+            </Button> */}
+          </div>
+        );
+      },
     },
   ];
 
-  // Lấy danh sách khách đã chọn cho popup Confirm Assign
-  const selectedCustomers = data.filter((c) => selectedRowKeys.includes(c.key));
+  const selectedCustomers = data?.data?.filter((c) =>
+    selectedRowKeys.includes(c.id)
+  );
+
+  const handleDownloadExample = async () => {
+    setDownloading(true);
+    try {
+      const blob = await downloadTelesaleExample();
+      if (!blob) {
+        throw new Error("Không lấy được file mẫu!");
+      }
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sample.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 0);
+    } catch (e) {
+      message.error("Không thể tải file mẫu. Vui lòng thử lại!");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  // 👉 handleConfirmUpdateStatus: call statistic refresh after status update
+  const handleConfirmUpdateStatus = () => {
+    if (
+      confirmCallModal.customer &&
+      (confirmCallModal.status === "CALLED" ||
+        confirmCallModal.status === "FAILED")
+    ) {
+      updateTelesaleStatus(
+        {
+          contactId: String(confirmCallModal.customer.id),
+          status: confirmCallModal.status,
+        },
+        {
+          onSuccess: () => {
+            message.success(
+              confirmCallModal.status === "CALLED"
+                ? "Cập nhật trạng thái thành công!"
+                : "Cập nhật trạng thái thất bại thành công!"
+            );
+            setConfirmCallModal({ open: false, customer: null, status: null });
+            // Refresh telesale statistics after status updates
+            reloadTelesaleStat();
+            refetch()
+          },
+          onError: () => {
+            message.error("Cập nhật trạng thái thất bại!");
+            setConfirmCallModal({ open: false, customer: null, status: null });
+          },
+        }
+      );
+    }
+  };
+
+  const handleCancelUpdateStatus = () => {
+    setConfirmCallModal({ open: false, customer: null, status: null });
+  };
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
+  };
+
+  // 👉 After import, also refresh telesale statistics
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) {
+      return;
+    }
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await importTelesaleCustomers(formData);
+
+      toast.success("Import thành công!");
+      setIsOpenImport(false);
+      refetch();
+      reloadTelesaleStat(); // refresh statistic after import
+    } catch (error) {
+      toast.error("Import thất bại. Vui lòng thử lại!");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  // Handler for filtering
+  const handleFilter = () => {
+    setParams((prev) => ({
+      ...prev,
+      page: 0,
+      search: filterSearch || undefined,
+      saleId: filterSaleId || undefined,
+      status: filterStatus || undefined,
+    }));
+    setPage(0);
+  };
+
+  // Confirm logic for tag deletion
+  const handleConfirmDeleteTag = () => {
+    if (!deleteTagModal.tag) {
+      setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+      return;
+    }
+    deleteCustomerTagMutation.mutate({customerId: deleteTagModal.tag.customerId, tagId: [deleteTagModal.tag.tagId]}, {
+      onSuccess: () => {
+        toast.success("Xoá tag thành công!");
+        setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+        refetch();
+        reloadTelesaleStat();
+      },
+      onError: () => {
+        toast.error("Xoá tag thất bại, vui lòng thử lại!");
+        setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+      },
+    });
+  };
+
+  const handleCancelDeleteTag = () => {
+    setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+  };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
-      {/* Header */}
       <div className="flex flex-row justify-between">
         <h2 className="text-xl font-bold mb-4">Quản Lý Telesales</h2>
         <div className="flex justify-end mb-4 items-end">
           <div className="flex gap-2">
             <Button
-              className="!bg-green-500 !text-white"
+              className="!bg-green-500 !text-white !h-10"
               icon={<FontAwesomeIcon icon={faFileExcel} />}
-              onClick={() => setIsOpenImport(true)}
+              loading={importing}
+              onClick={handleImportClick}
             >
               Import Excel
             </Button>
-            <Button type="primary" icon={<FontAwesomeIcon icon={faUserPlus} />}>
-              Thêm Telesale
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              accept=".xlsx,.xls"
+              onChange={handleFileChange}
+              disabled={importing}
+            />
+            <Button
+              className="!bg-blue-500 !text-white !h-10"
+              icon={<FontAwesomeIcon icon={faDownload} />}
+              onClick={handleDownloadExample}
+              loading={downloading}
+            >
+              Tải file mẫu
             </Button>
           </div>
         </div>
       </div>
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="border border-blue-200 bg-blue-50 rounded-lg flex items-center justify-start gap-4 py-4">
           <div className="p-2 bg-blue-500 rounded-lg mb-2 ml-4">
             <FontAwesomeIcon icon={faUsers} className=" text-white !h-5 !w-4" />
@@ -259,17 +629,10 @@ const TelesalesPage: React.FC = () => {
             <p className="text-sm font-medium text-blue-600 !mb-1">
               Tổng khách hàng
             </p>
-            <p className="text-2xl font-bold text-blue-900 !mb-1">1,234</p>
-          </div>
-        </div>
-
-        <div className="border border-yellow-200 bg-yellow-50 rounded-lg flex items-center justify-start gap-4 py-4">
-          <div className="p-2 bg-yellow-500 rounded-lg mb-2 ml-4">
-            <FontAwesomeIcon icon={faPhone} className=" text-white !h-5 !w-4" />
-          </div>
-          <div>
-            <p className="text-sm text-yellow-600 !mb-1">Chưa gọi</p>
-            <p className="text-2xl font-bold text-yellow-900 !mb-1">456</p>
+            {/* Show statistic value */}
+            <p className="text-2xl font-bold text-blue-900 !mb-1">
+              {statLoading ? "..." : telesaleStat.total.toLocaleString("vi-VN")}
+            </p>
           </div>
         </div>
 
@@ -282,7 +645,9 @@ const TelesalesPage: React.FC = () => {
           </div>
           <div>
             <p className="text-sm text-green-600 !mb-1">Đã gọi</p>
-            <p className="text-2xl font-bold text-green-900 !mb-1">234</p>
+            <p className="text-2xl font-bold text-green-900 !mb-1">
+              {statLoading ? "..." : telesaleStat.called.toLocaleString("vi-VN")}
+            </p>
           </div>
         </div>
 
@@ -296,26 +661,47 @@ const TelesalesPage: React.FC = () => {
 
           <div>
             <p className="text-sm text-red-600 !mb-1">Thất bại</p>
-            <p className="text-2xl font-bold text-red-900 !mb-1">544</p>
+            <p className="text-2xl font-bold text-red-900 !mb-1">
+              {statLoading ? "..." : telesaleStat.failed.toLocaleString("vi-VN")}
+            </p>
           </div>
         </div>
       </div>
-
-      {/* Actions */}
-
       <div>
         <div className="flex gap-2 mb-4">
-          <Input placeholder="Tìm theo tên, SĐT..." className="!w-full" />
-          <Select defaultValue="all" className="!w-full">
-            <Option value="all">-- Tất cả Telesale --</Option>
-            <Option value="TS001">Nguyễn Văn A</Option>
-            <Option value="TS002">Trần Thị B</Option>
+          <Input
+            placeholder="Tìm theo tên, SĐT..."
+            className="!w-full !h-10"
+            value={filterSearch}
+            onChange={(e) => setFilterSearch(e.target.value)}
+            allowClear
+          />
+          <Select
+            value={filterSaleId}
+            className="!w-full !h-10"
+            loading={isLoadingTelesaleUsers}
+            onChange={(val) => setFilterSaleId(val === "" ? undefined : val)}
+            allowClear
+          >
+            <Option value="">-- Tất cả Telesale --</Option>
+            {Array.isArray(telesaleUserList) &&
+              telesaleUserList.map((telesale: any) => (
+                <Option value={telesale.id} key={telesale.id}>
+                  {telesale.fullname}- {telesale.email}
+                </Option>
+              ))}
           </Select>
-          <Select defaultValue="all" className="!w-full">
-            <Option value="all">-- Tất cả trạng thái --</Option>
-            <Option value="success">Thành công</Option>
-            <Option value="pending">Chưa gọi</Option>
-            <Option value="failed">Thất bại</Option>
+          <Select
+            value={filterStatus}
+            className="!w-full !h-10"
+            onChange={(val) => setFilterStatus(val === "" ? undefined : val)}
+            allowClear
+          >
+            <Option value="">-- Tất cả trạng thái --</Option>
+            <Option value="CALLED">Thành công</Option>
+            <Option value="NOT_CALLED">Chưa gọi</Option>
+            <Option value="FAILED">Thất bại</Option>
+            <Option value="UNASSIGNED">Chưa gán</Option>
           </Select>
           <Button
             type="primary"
@@ -325,7 +711,8 @@ const TelesalesPage: React.FC = () => {
                 className=" text-white !h-6 !w-4"
               />
             }
-            className="!w-48"
+            className="!w-48 !h-10"
+            onClick={handleFilter}
           >
             Lọc
           </Button>
@@ -336,11 +723,10 @@ const TelesalesPage: React.FC = () => {
                 className=" text-white !h-6 !w-4"
               />
             }
-            className="!w-50 !bg-purple-600 !text-white"
-            // Mở modal xác nhận bulk assign
+            className="!w-50 !bg-purple-600 !text-white !h-10"
             disabled={selectedRowKeys.length === 0}
             onClick={() => {
-              setBulkAssignCustomers(selectedCustomers);
+              setBulkAssignCustomers(selectedCustomers || []);
               setIsBulkAssignModalOpen(true);
             }}
           >
@@ -350,55 +736,54 @@ const TelesalesPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <Table
+      <TableComponent
         columns={columns}
-        dataSource={data || []}
-        rowKey="key"
-        pagination={false}
-        rowClassName=""
-        scroll={{ x: true }}
-        rowSelection={undefined}
+        dataSource={data?.data || []}
+        rowHeight={100}
+        pageSize={20}
+        page={(data && data.current_page + 1) || 0}
+        onPageChange={handleChangePage}
+        response={data}
+        fontSize={12}
+        headerHeight={48}
+        loading={isPending}
       />
 
-      {/* Modal xác nhận danh sách khách trước khi gán sale */}
-      <Modal
-        title="Xác nhận gán Sale cho các Khách Hàng đã chọn"
-        open={isBulkAssignModalOpen}
-        onCancel={() => setIsBulkAssignModalOpen(false)}
-        footer={null}
-      >
-        {/* Nếu không có khách nào thì chỉ báo */}
-        {bulkAssignCustomers.length === 0 ? (
-          <div>Bạn chưa chọn khách hàng nào để gán sale.</div>
-        ) : (
-          <div className="space-y-2 mb-4">
-            <div className="font-semibold">Danh sách khách hàng đã chọn:</div>
-            <ul className="list-disc ml-4">
-              {bulkAssignCustomers.map((cust) => (
-                <li key={cust.key}>
-                  {cust.name} - SĐT:{" "}
-                  {(cust.contact || "").split("\n")[0]}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <AddMultiCustomerModal
+        customers={bulkAssignCustomers}
+        isOpen={isBulkAssignModalOpen}
+        note={noteAssign}
+        onClose={() => {
+          setNoteAssign("");
+          setIsBulkAssignModalOpen(false);
+        }}
+        onConfirm={(saleId) => {
+          setIsBulkAssignModalOpen(false);
+          setIsOpenAssign(true);
 
-        {/* Nút xác nhận mở modal gán sale thực sự */}
-        <div className="flex justify-end gap-2">
-          <Button onClick={() => setIsBulkAssignModalOpen(false)}>Hủy</Button>
-          <Button
-            type="primary"
-            disabled={bulkAssignCustomers.length === 0}
-            onClick={() => {
-              setIsBulkAssignModalOpen(false);
-              setIsOpenAssign(true);
-            }}
-          >
-            Xác nhận &amp; Gán Sale
-          </Button>
-        </div>
-      </Modal>
+          const payload: AssignSaleModel = {
+            note: noteAssign,
+            prospect_ids: (bulkAssignCustomers || []).map((customer) => customer.id),
+            sale_id: saleId
+          };
+          assignTelesaleMutation.mutate(payload, {
+            onSuccess: () => {
+              refetch();
+              setIsOpenAssign(false);
+              setSelectedRowKeys([]);
+            },
+          });
+        }}
+        onNoteChange={(note) => {
+          setNoteAssign(note);
+        }}
+      />
+      <NoteModal
+        open={isNoteModalOpen}
+        note=""
+        onOk={handleSaveNote}
+        onCancel={handleCancelNote}
+      />
 
       <TelesaleDetailModal
         open={isOpenDetail}
@@ -413,35 +798,98 @@ const TelesalesPage: React.FC = () => {
         callHistory={[]}
         onEdit={() => console.log("")}
       />
-      {/* Gán Sale: Nếu là gán nhiều khách hàng thì truyền vào danh sách, ngược lại sẽ để trống hoặc chỉ 1 khách */}
-      <AssignTelesaleModal
-        onCancel={() => setIsOpenAssign(false)}
-        onSubmit={() => {
-          setIsOpenAssign(false);
-          setSelectedRowKeys([]);
-        }}
-        open={isOpenAssign}
-      />
-      <ImportCustomerModal
-        onClose={() => setIsOpenImport(false)}
-        open={isOpenImport}
-        onImport={() => console.log("")}
-      />
+
+      {selectedCustomer && (
+        <AssignTelesaleModal
+          onCancel={() => setIsOpenAssign(false)}
+          onSubmit={(value) => {
+            const payload = {
+              ...value,
+              prospect_ids: [selectedCustomer.id],
+            };
+            assignTelesaleMutation.mutate(payload, {
+              onSuccess: () => {
+                refetch();
+                setIsOpenAssign(false);
+                setSelectedRowKeys([]);
+              },
+            });
+          }}
+          open={isOpenAssign}
+        />
+      )}
       <TagManagerModal
         open={isOpenTagModal}
         onClose={() => setIsOpenTagModal(false)}
-        tags={tags}
-        onChange={setTags}
         customer={selectedCustomer}
         onAssignTag={(customerId, tagId) => {
-          const updated = data.map((c) =>
-            c.key === customerId
-              ? { ...c, tags: [...(c.tags || []), tagId] }
-              : c
+          assignTagMutate(
+            { customerId, tagId },
+            {
+              onSuccess: () => {
+                toast.success("Gán tag thành công!");
+                setIsOpenTagModal(false);
+                refetch();
+                reloadTelesaleStat(); // Optionally refresh stat when tag assign affects grouping
+              },
+              onError: () => {
+                toast.error("Gán tag thất bại. Vui lòng thử lại.");
+              },
+            }
           );
-          setIsOpenTagModal(false);
         }}
       />
+
+      {/* Tag delete confirm popup */}
+      <Modal
+        open={deleteTagModal.open}
+        title="Xác nhận xoá tag"
+        onOk={handleConfirmDeleteTag}
+        onCancel={handleCancelDeleteTag}
+        okText="Xoá"
+        cancelText="Huỷ"
+        confirmLoading={deleteCustomerTagMutation.isPending}
+        centered
+        maskClosable={false}
+      >
+        <p>
+          Bạn có chắc chắn muốn xoá tag
+          <span className="font-semibold ml-1">{deleteTagModal.tagName}</span>
+          khỏi khách hàng này?
+        </p>
+      </Modal>
+
+      <Modal
+        open={confirmCallModal.open}
+        title={
+          confirmCallModal.status === "CALLED"
+            ? "Xác nhận đã gọi khách hàng?"
+            : confirmCallModal.status === "FAILED"
+            ? "Xác nhận khách hàng thất bại?"
+            : ""
+        }
+        onOk={handleConfirmUpdateStatus}
+        onCancel={handleCancelUpdateStatus}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        confirmLoading={isStatusUpdating}
+        maskClosable={false}
+        centered
+      >
+        <p>
+          Bạn có chắc muốn chuyển trạng thái khách hàng
+          <span className="font-semibold ml-1">
+            {confirmCallModal.customer?.name
+              ? confirmCallModal.customer.name
+              : ""}
+          </span>
+          {confirmCallModal.status === "CALLED"
+            ? " sang Đã gọi?"
+            : confirmCallModal.status === "FAILED"
+            ? " sang Thất bại?"
+            : ""}
+        </p>
+      </Modal>
     </div>
   );
 };
