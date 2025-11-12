@@ -150,5 +150,6 @@ export const API_TYPE_CONST = {
   TELESSALE_CHANGE_STATUS:`${FEATURE}/admin/telesales/contacts/{contact_id}/status`,
   TELESALE_ACCOUNT:`${FEATURE}/admin/telesales/accounts`,
   TAG_LIST:`${FEATURE}/admin/telesales/tags`,
-  DASHBOARD_TELESALE: `${FEATURE}/admin/telesales/dashboard`
+  DASHBOARD_TELESALE: `${FEATURE}/admin/telesales/dashboard`,
+  MANUAL_PARTNER:`/v1/admin/topups/debt`
 } as const;

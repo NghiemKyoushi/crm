@@ -34,6 +34,7 @@ import dayjs from "dayjs";
 import DepositDetailModal from "./modal/modal-detail-deposit";
 import TransactionCompleteModal from "./modal/transaction-topup-complete-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
+import ManualPartnerModal from "./modal/modal-add-partner-manual";
 
 interface DepositTableProps {
   action?: string;
@@ -387,6 +388,18 @@ const DepositTable = (props: DepositTableProps) => {
           {t("deposit.approveDeposit")}
         </h2>
         <div className="flex items-center gap-3">
+        {/* {hasPermission("finance.manual_topup") && (
+            <>
+              <Button
+                onClick={() => setIsOpen(true)}
+                type="primary"
+                className="!h-9 !bg-blue-500 hover:!bg-blue-600 !border-blue-500 hover:!border-blue-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
+              >
+                <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
+                <span>Nạp tiền cho đối tác</span>
+              </Button>
+            </>
+          )} */}
           {hasPermission("finance.manual_topup") && (
             <>
               <Button
@@ -399,6 +412,7 @@ const DepositTable = (props: DepositTableProps) => {
               </Button>
             </>
           )}
+          
           {hasPermission("finance.finance.manual_withdrawal") && (
             <Button
               onClick={() => setIsOpenMinusManual(true)}
@@ -480,8 +494,13 @@ const DepositTable = (props: DepositTableProps) => {
         selectId={selectedId}
         typeDetail={typeDetail}
       />
+      {/* <ManualPartnerModal
+       onClose={() => console.log('') }
+       onConfirm={(value) => console.log('value', value)}
+       open={true}
+      /> */}
     </div>
-  );
+  );  
 };
 
 export default DepositTable;

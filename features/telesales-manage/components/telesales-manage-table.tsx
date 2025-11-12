@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   Button,
   Input,
@@ -51,10 +51,12 @@ import { importTelesaleCustomers } from "../apis/telesale-mng";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { NoteModal } from "./modal/note-modal";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 const { Option } = Select;
 
 const TelesalesPage: React.FC = () => {
+  const { hasPermission } = usePermission();
   const [page, setPage] = useState(0);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isOpenAssign, setIsOpenAssign] = useState(false);
@@ -95,7 +97,8 @@ const TelesalesPage: React.FC = () => {
     mutationFn: (body: AssignSaleModel) => assignTelesale(body),
   });
   const deleteCustomerTagMutation = useMutation({
-    mutationFn: (data: { customerId: number; tagId: number[] }) => deleteTelesaleContactTags(data.customerId.toString(), data.tagId),
+    mutationFn: (data: { customerId: number; tagId: number[] }) =>
+      deleteTelesaleContactTags(data.customerId.toString(), data.tagId),
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,14 +115,22 @@ const TelesalesPage: React.FC = () => {
   const { data: telesaleUserList, isLoading: isLoadingTelesaleUsers } =
     useTelesaleUsers();
 
-  const { stat: telesaleStat, reload: reloadTelesaleStat, loading: statLoading } =
-    useTelesaleStatistic();
+  const {
+    stat: telesaleStat,
+    reload: reloadTelesaleStat,
+    loading: statLoading,
+  } = useTelesaleStatistic();
   const { mutate: assignTagMutate } = useAssignCustomerTag();
 
   const handleOpenNoteModal = (customer: TelesaleCustomer) => {
     setEditingNoteCustomer(customer);
     setIsNoteModalOpen(true);
   };
+
+  const isAdmin = useMemo(() => {
+    const isAdmin = hasPermission("system.admin");
+    return isAdmin;
+  }, [hasPermission]);
 
   const handleSaveNote = async (newNote: string) => {
     if (!editingNoteCustomer) return;
@@ -292,11 +303,14 @@ const TelesalesPage: React.FC = () => {
       key: "tags",
       width: 180,
       render: (_: any, record: TelesaleCustomer) => {
-        const hasTags = record.tags && record.tags.length > 0 && record.tags.some(t => t);
+        const hasTags =
+          record.tags && record.tags.length > 0 && record.tags.some((t) => t);
 
         return (
           <div
-            className={`flex gap-1 flex-wrap items-center ${!hasTags ? "justify-end" : ""}`}
+            className={`flex gap-1 flex-wrap items-center ${
+              !hasTags ? "justify-end" : ""
+            }`}
           >
             {record.tags?.map((tag) => {
               if (!tag) return null;
@@ -503,7 +517,7 @@ const TelesalesPage: React.FC = () => {
             setConfirmCallModal({ open: false, customer: null, status: null });
             // Refresh telesale statistics after status updates
             reloadTelesaleStat();
-            refetch()
+            refetch();
           },
           onError: () => {
             message.error("Cập nhật trạng thái thất bại!");
@@ -569,18 +583,24 @@ const TelesalesPage: React.FC = () => {
       setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
       return;
     }
-    deleteCustomerTagMutation.mutate({customerId: deleteTagModal.tag.customerId, tagId: [deleteTagModal.tag.tagId]}, {
-      onSuccess: () => {
-        toast.success("Xoá tag thành công!");
-        setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
-        refetch();
-        reloadTelesaleStat();
+    deleteCustomerTagMutation.mutate(
+      {
+        customerId: deleteTagModal.tag.customerId,
+        tagId: [deleteTagModal.tag.tagId],
       },
-      onError: () => {
-        toast.error("Xoá tag thất bại, vui lòng thử lại!");
-        setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success("Xoá tag thành công!");
+          setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+          refetch();
+          reloadTelesaleStat();
+        },
+        onError: () => {
+          toast.error("Xoá tag thất bại, vui lòng thử lại!");
+          setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+        },
+      }
+    );
   };
 
   const handleCancelDeleteTag = () => {
@@ -593,14 +613,17 @@ const TelesalesPage: React.FC = () => {
         <h2 className="text-xl font-bold mb-4">Quản Lý Telesales</h2>
         <div className="flex justify-end mb-4 items-end">
           <div className="flex gap-2">
-            <Button
-              className="!bg-green-500 !text-white !h-10"
-              icon={<FontAwesomeIcon icon={faFileExcel} />}
-              loading={importing}
-              onClick={handleImportClick}
-            >
-              Import Excel
-            </Button>
+            {isAdmin && (
+              <Button
+                className="!bg-green-500 !text-white !h-10"
+                icon={<FontAwesomeIcon icon={faFileExcel} />}
+                loading={importing}
+                onClick={handleImportClick}
+              >
+                Import Excel
+              </Button>
+            )}
+
             <input
               type="file"
               ref={fileInputRef}
@@ -646,7 +669,9 @@ const TelesalesPage: React.FC = () => {
           <div>
             <p className="text-sm text-green-600 !mb-1">Đã gọi</p>
             <p className="text-2xl font-bold text-green-900 !mb-1">
-              {statLoading ? "..." : telesaleStat.called.toLocaleString("vi-VN")}
+              {statLoading
+                ? "..."
+                : telesaleStat.called.toLocaleString("vi-VN")}
             </p>
           </div>
         </div>
@@ -662,7 +687,9 @@ const TelesalesPage: React.FC = () => {
           <div>
             <p className="text-sm text-red-600 !mb-1">Thất bại</p>
             <p className="text-2xl font-bold text-red-900 !mb-1">
-              {statLoading ? "..." : telesaleStat.failed.toLocaleString("vi-VN")}
+              {statLoading
+                ? "..."
+                : telesaleStat.failed.toLocaleString("vi-VN")}
             </p>
           </div>
         </div>
@@ -763,8 +790,10 @@ const TelesalesPage: React.FC = () => {
 
           const payload: AssignSaleModel = {
             note: noteAssign,
-            prospect_ids: (bulkAssignCustomers || []).map((customer) => customer.id),
-            sale_id: saleId
+            prospect_ids: (bulkAssignCustomers || []).map(
+              (customer) => customer.id
+            ),
+            sale_id: saleId,
           };
           assignTelesaleMutation.mutate(payload, {
             onSuccess: () => {

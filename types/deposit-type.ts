@@ -63,7 +63,7 @@ export interface DepositRequest {
   user_id: number;
   amount_vnd: number;
   company_bank_account_id?: number;
-  bank_transaction_id: number;
+  bank_transaction_id?: number;
   reason: string;
   note: string;
 }
