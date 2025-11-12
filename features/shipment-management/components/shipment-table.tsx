@@ -583,7 +583,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       case OrderStatusType.SHIPPING_REQUEST_CLIENT:
         return "magenta";
       case OrderStatusType.PACKED:
-        return "magenta";
+        return "green";
       default:
         return "default";
     }
@@ -830,6 +830,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
             break;
           case OrderStatusType.CANCELED:
             text = t("status.cancelled");
+            break;
+            case OrderStatusType.PACKED:
+            text = t("status.packed");
             break;
           default:
         }
