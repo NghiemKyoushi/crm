@@ -20,6 +20,7 @@ import {
   faBars,
   faChevronLeft,
   faClipboardCheck,
+  faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
