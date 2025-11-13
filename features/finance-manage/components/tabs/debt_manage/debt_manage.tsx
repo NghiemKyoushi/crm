@@ -21,23 +21,40 @@ import {
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
-const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => (
-  <Modal
-    open={visible}
-    title="Xác nhận giao dịch"
-    onOk={onOk}
-    onCancel={onCancel}
-    okText="Xác nhận"
-    cancelText="Huỷ"
-    destroyOnClose
-    centered
-  >
-    <div>
-      Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
-      <b>{record?.name || record?.full_name}</b>?
-    </div>
-  </Modal>
-);
+const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
+  const [note, setNote] = useState<string>("");
+
+  return (
+    <Modal
+      open={visible}
+      title="Xác nhận giao dịch"
+      onOk={() => onOk?.(note)}
+      onCancel={onCancel}
+      okText="Xác nhận"
+      cancelText="Huỷ"
+      destroyOnClose
+      centered
+    >
+      <div>
+        Bạn chắc chắn muốn <b>xác nhận</b> giao dịch cho đối tác{" "}
+        <b>{record?.name || record?.full_name}</b>?
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <label htmlFor="confirm-note" className="block mb-1 font-medium">
+          Ghi chú (tuỳ chọn):
+        </label>
+        <textarea
+          id="confirm-note"
+          className="w-full border border-gray-300 rounded px-2 py-1"
+          value={note}
+          rows={3}
+          onChange={e => setNote(e.target.value)}
+          placeholder="Nhập ghi chú cho xác nhận (nếu có)..."
+        />
+      </div>
+    </Modal>
+  );
+};
 
 const PartnerDebtTable = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -59,7 +76,7 @@ const PartnerDebtTable = () => {
   const handleReturnConfirm = async () => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id);
+      await createDebt(selectedDebt.id, {bank_account_id: null});
       toast.success("Tạo hoàn trả thành công!");
       setConfirmReturnVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -74,11 +91,11 @@ const PartnerDebtTable = () => {
   };
 
   // Xử lý xác nhận công nợ
-  const handlePendingConfirm = async () => {
+  const handlePendingConfirm = async (note: string) => {
     if (!selectedDebt?.id) return;
     try {
       if (selectedDebt && selectedDebt.user_id) {
-        await approveDebt(selectedDebt.user_id);
+        await approveDebt(selectedDebt.user_id,{note: note});
         toast.success("Xác nhận giao dịch thành công!");
         setPendingConfirmVisible(false);
         setTimeout(() => setSelectedDebt(undefined), 300);
@@ -120,10 +137,10 @@ const PartnerDebtTable = () => {
     }));
   };
 
-  const handleConfirmDebt = async () => {
+  const handleConfirmDebt = async (id: string) => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id);
+      await createDebt(selectedDebt.id,{bank_account_id: id});
       toast.success("Tạo tất toán thành công!");
       setModalVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -467,7 +484,7 @@ const PartnerDebtTable = () => {
         rowHeight={60}
         onPageChange={handlePageChange}
         fontSize={13}
-        headerHeight={46}
+        headerHeight={0}
         loading={isPending}
     
       />

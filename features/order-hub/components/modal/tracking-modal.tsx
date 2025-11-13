@@ -65,11 +65,11 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
   const beforeUpload = async (file: File) => {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
-      message.error(t("validation.onlyImageFiles"));
+      toast.error(t("validation.onlyImageFiles"));
       return Upload.LIST_IGNORE;
     }
     if (file.size / 1024 / 1024 > 5) {
-      message.error(t("validation.imageSizeLimit"));
+      toast.error(t("validation.imageSizeLimit"));
       return Upload.LIST_IGNORE;
     }
 
@@ -90,7 +90,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({
       ]);
       return false;
     } catch (err) {
-      message.error(t("validation.uploadFailed"));
+      toast.error(t("validation.uploadFailed"));
       return Upload.LIST_IGNORE;
     } finally {
       setUploading(false); // 👉 tắt loading

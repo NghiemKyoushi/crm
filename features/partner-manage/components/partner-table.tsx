@@ -210,6 +210,8 @@ export default function FIFOMaterialManagement() {
 
   // Render content for each section tab (transactions, profitloss, reports)
   const renderSectionTabContent = (sectionKey: SectionTabKey, sectionTabKey: any) => {
+    console.log('sectionTabKey', sectionTabKey);
+    
     switch (sectionKey) {
       case "transactions":
         return (
@@ -223,14 +225,14 @@ export default function FIFOMaterialManagement() {
       case "profitloss":
         return (
           <div className="fifo-content-area">
-            <ProfitLossSummaryComponent />
-            <OrderProfitLossTable />
+            <ProfitLossSummaryComponent code = {sectionTabKey} />
+            <OrderProfitLossTable code = {sectionTabKey}/>
           </div>
         );
       case "reports":
         return (
           <div className="fifo-content-area">
-            <ProfitLossChart code={sectionTabKey.includes("JP") ? "JP": "US"} />
+            <ProfitLossChart code={sectionTabKey} />
           </div>
         );
       default:
@@ -239,7 +241,7 @@ export default function FIFOMaterialManagement() {
   };
 
   // Render each sub tab with its internal "bộ ba" section tabs
-  const renderSubTabPanelWithSectionTabs = (subTab: SubTab) => {
+  const renderSubTabPanelWithSectionTabs = (subTab: SubTab) => {    
     const sectionTabKey = sectionTabs[subTab];
     return (
       <Tabs
@@ -255,7 +257,7 @@ export default function FIFOMaterialManagement() {
       >
         {sectionTabList.map((section) => (
           <TabPane tab={section.label} key={section.key}>
-            {renderSectionTabContent(section.key, sectionTabKey)}
+            {renderSectionTabContent(section.key, subTab)}
           </TabPane>
         ))}
       </Tabs>
