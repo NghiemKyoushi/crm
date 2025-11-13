@@ -3,8 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Layout } from "antd";
 import { PermissionProvider } from "./PermissionContext";
-import { useState } from "react";
-import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 import ContentWrapper from "./Content";
 
 export const metadata: Metadata = {
