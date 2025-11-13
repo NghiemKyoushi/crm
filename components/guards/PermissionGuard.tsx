@@ -4,7 +4,6 @@ import React from 'react';
 import { usePermission } from '@/components/layout/PermissionContext';
 import { ComponentPermissions } from '@/utils/permissions';
 import { Spin, Result } from 'antd';
-import { useTranslation } from 'react-i18next';
 
 interface PermissionGuardProps {
   children: React.ReactNode;

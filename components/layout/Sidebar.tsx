@@ -15,8 +15,6 @@ import {
   faGavel,
   faTags,
   faCog,
-  faMoneyBill,
-  faHeadset,
   faYenSign,
   faWarehouse,
   faBars,
@@ -25,7 +23,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
-import { useRouter } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
 
 const { Sider } = Layout;
@@ -126,7 +123,6 @@ export const Sidebar: React.FC = () => {
 
   const pathname = usePathname();
   const { t } = useTranslation();
-  const router = useRouter();
 
   const { hasPermission } = usePermission();
 

@@ -459,9 +459,8 @@ const ProductManagement: React.FC = () => {
                   size="small"
                   icon={
                     <DownOutlined
-                      className={`text-xs transition-transform ${
-                        expanded ? "rotate-180" : ""
-                      }`}
+                      className={`text-xs transition-transform ${expanded ? "rotate-180" : ""
+                        }`}
                     />
                   }
                   onClick={(e) => onExpand(record, e)}
@@ -494,8 +493,8 @@ const ProductManagement: React.FC = () => {
                 onError: (err: any) =>
                   toast.error(
                     err.response?.data?.localizedMessage ||
-                      t("common.error") ||
-                      "Có lỗi"
+                    t("common.error") ||
+                    "Có lỗi"
                   ),
               }
             );
@@ -749,7 +748,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       ),
     },
     {
-      title: "Cọc",
+      title: "Tổng tiền sp",
       key: "deposit",
       width: 100,
       onCell: () => ({

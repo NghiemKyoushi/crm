@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
-import { Button, Popconfirm, Table, message, Select } from "antd";
+import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch } from "antd";
 import { useCmsPages } from "../hooks/useCmsPages";
 import CreatePageModal from "../components/CreatePageModal";
 import { deleteCmsPage } from "../apis/pages";
@@ -18,7 +18,7 @@ import CreateBannerModal from "../components/CreateBannerModal";
 import { useCmsSettings, useInvalidateSettings } from "../hooks/useCmsSettings";
 import { deleteCmsSetting } from "../apis/settings";
 import CreateSettingModal from "../components/CreateSettingModal";
-import { linkCategoryContent, linkCategoryRelation, linkPageCategory, linkPageContent, unlinkCategoryContent, unlinkCategoryRelation, unlinkPageCategory, unlinkPageContent } from "../apis/aggregate";
+import { linkCategoryContent, linkCategoryRelation, linkPageCategory, linkPageContent, unlinkCategoryContent, unlinkCategoryRelation, unlinkPageCategory, unlinkPageContent, getPageCategories, getPageContents, getCategoryContents, getCategoryRelations, AggregateItem } from "../apis/aggregate";
 import CreateCategoryModal from "../components/CreateCategoryModal";
 
 export default function CMSFeaturePage() {
@@ -110,6 +110,12 @@ export default function CMSFeaturePage() {
     const aggContentsData = useCmsContents(aggContentsPage - 1, aggContentsSize).data;
     const aggContents = Array.isArray(aggContentsData?.items) ? aggContentsData?.items : [];
 
+    // Pagination states for right tables (same as left tables)
+    // For Page-Category tab: right table uses categories pagination
+    // For Page-Content tab: right table uses contents pagination  
+    // For Category-Content tab: right table uses contents pagination
+    // For Category-Relation tab: right table uses categories pagination
+
     // Aggregate selections state
     const [aggSelectedCategoryForContent, setAggSelectedCategoryForContent] = useState<number | null>(null);
     const [aggSelectedContent, setAggSelectedContent] = useState<number | null>(null);
@@ -117,6 +123,158 @@ export default function CMSFeaturePage() {
     const [aggSelectedContentForPage, setAggSelectedContentForPage] = useState<number | null>(null);
     const [aggParentCategoryId, setAggParentCategoryId] = useState<number | null>(null);
     const [aggChildCategoryId, setAggChildCategoryId] = useState<number | null>(null);
+
+    // Aggregate tabs state
+    const [aggActiveTab, setAggActiveTab] = useState<string>("page-category");
+
+    // Selected items for each tab
+    const [selectedPageId, setSelectedPageId] = useState<number | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [selectedParentCategoryId, setSelectedParentCategoryId] = useState<number | null>(null);
+
+    // Linked items (set of IDs) for each tab
+    const [linkedPageCategories, setLinkedPageCategories] = useState<Set<number>>(new Set());
+    const [linkedPageContents, setLinkedPageContents] = useState<Set<number>>(new Set());
+    const [linkedCategoryContents, setLinkedCategoryContents] = useState<Set<number>>(new Set());
+    const [linkedCategoryRelations, setLinkedCategoryRelations] = useState<Set<number>>(new Set());
+
+    // Selected items data from API aggregate (for switch ON)
+    const [selectedPageCategoriesData, setSelectedPageCategoriesData] = useState<AggregateItem[]>([]);
+    const [selectedPageContentsData, setSelectedPageContentsData] = useState<AggregateItem[]>([]);
+    const [selectedCategoryContentsData, setSelectedCategoryContentsData] = useState<AggregateItem[]>([]);
+    const [selectedCategoryRelationsData, setSelectedCategoryRelationsData] = useState<AggregateItem[]>([]);
+
+    // Loading states
+    const [loadingPageCategories, setLoadingPageCategories] = useState(false);
+    const [loadingPageContents, setLoadingPageContents] = useState(false);
+    const [loadingCategoryContents, setLoadingCategoryContents] = useState(false);
+    const [loadingCategoryRelations, setLoadingCategoryRelations] = useState(false);
+
+    // Loading states for fetching selected items
+    const [loadingSelectedPageCategories, setLoadingSelectedPageCategories] = useState(false);
+    const [loadingSelectedPageContents, setLoadingSelectedPageContents] = useState(false);
+    const [loadingSelectedCategoryContents, setLoadingSelectedCategoryContents] = useState(false);
+    const [loadingSelectedCategoryRelations, setLoadingSelectedCategoryRelations] = useState(false);
+
+    // Switch states for filtering right tables (show only selected items)
+    const [showOnlySelectedPageCategories, setShowOnlySelectedPageCategories] = useState(false);
+    const [showOnlySelectedPageContents, setShowOnlySelectedPageContents] = useState(false);
+    const [showOnlySelectedCategoryContents, setShowOnlySelectedCategoryContents] = useState(false);
+    const [showOnlySelectedCategoryRelations, setShowOnlySelectedCategoryRelations] = useState(false);
+
+    // Reset selected items and linked sets when switching tabs
+    React.useEffect(() => {
+        setSelectedPageId(null);
+        setSelectedCategoryId(null);
+        setSelectedParentCategoryId(null);
+        setLinkedPageCategories(new Set());
+        setLinkedPageContents(new Set());
+        setLinkedCategoryContents(new Set());
+        setLinkedCategoryRelations(new Set());
+        setSelectedPageCategoriesData([]);
+        setSelectedPageContentsData([]);
+        setSelectedCategoryContentsData([]);
+        setSelectedCategoryRelationsData([]);
+        setShowOnlySelectedPageCategories(false);
+        setShowOnlySelectedPageContents(false);
+        setShowOnlySelectedCategoryContents(false);
+        setShowOnlySelectedCategoryRelations(false);
+    }, [aggActiveTab]);
+
+    // Fetch selected items when switch is turned ON
+    React.useEffect(() => {
+        if (showOnlySelectedPageCategories && selectedPageId) {
+            setLoadingSelectedPageCategories(true);
+            getPageCategories(selectedPageId)
+                .then(data => {
+                    setSelectedPageCategoriesData(data);
+                })
+                .catch(error => {
+                    message.error("Failed to load selected categories");
+                    setSelectedPageCategoriesData([]);
+                })
+                .finally(() => {
+                    setLoadingSelectedPageCategories(false);
+                });
+        } else {
+            setSelectedPageCategoriesData([]);
+        }
+    }, [showOnlySelectedPageCategories, selectedPageId]);
+
+    React.useEffect(() => {
+        if (showOnlySelectedPageContents && selectedPageId) {
+            setLoadingSelectedPageContents(true);
+            getPageContents(selectedPageId)
+                .then(data => {
+                    setSelectedPageContentsData(data);
+                })
+                .catch(error => {
+                    message.error("Failed to load selected contents");
+                    setSelectedPageContentsData([]);
+                })
+                .finally(() => {
+                    setLoadingSelectedPageContents(false);
+                });
+        } else {
+            setSelectedPageContentsData([]);
+        }
+    }, [showOnlySelectedPageContents, selectedPageId]);
+
+    React.useEffect(() => {
+        if (showOnlySelectedCategoryContents && selectedCategoryId) {
+            setLoadingSelectedCategoryContents(true);
+            getCategoryContents(selectedCategoryId)
+                .then(data => {
+                    setSelectedCategoryContentsData(data);
+                })
+                .catch(error => {
+                    message.error("Failed to load selected contents");
+                    setSelectedCategoryContentsData([]);
+                })
+                .finally(() => {
+                    setLoadingSelectedCategoryContents(false);
+                });
+        } else {
+            setSelectedCategoryContentsData([]);
+        }
+    }, [showOnlySelectedCategoryContents, selectedCategoryId]);
+
+    React.useEffect(() => {
+        if (showOnlySelectedCategoryRelations && selectedParentCategoryId) {
+            setLoadingSelectedCategoryRelations(true);
+            getCategoryRelations(selectedParentCategoryId)
+                .then(data => {
+                    setSelectedCategoryRelationsData(data);
+                })
+                .catch(error => {
+                    message.error("Failed to load selected relations");
+                    setSelectedCategoryRelationsData([]);
+                })
+                .finally(() => {
+                    setLoadingSelectedCategoryRelations(false);
+                });
+        } else {
+            setSelectedCategoryRelationsData([]);
+        }
+    }, [showOnlySelectedCategoryRelations, selectedParentCategoryId]);
+
+    // Data for right tables based on switch state
+    const filteredPageCategories = showOnlySelectedPageCategories
+        ? selectedPageCategoriesData
+        : categories;
+
+    const filteredPageContents = showOnlySelectedPageContents
+        ? selectedPageContentsData
+        : contents;
+
+    const filteredCategoryContents = showOnlySelectedCategoryContents
+        ? selectedCategoryContentsData
+        : contents;
+
+    const filteredCategoryRelations = showOnlySelectedCategoryRelations
+        ? selectedCategoryRelationsData
+        : categories;
+
     const settings = Array.isArray(settingsData?.items) ? settingsData?.items : [];
     const invalidateSettings = useInvalidateSettings();
 
@@ -401,279 +559,493 @@ export default function CMSFeaturePage() {
                             />
                         )}
                         {activeKey === "aggregate" && (
-                            <div className="grid grid-cols-1 gap-6 p-2">
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
-                                    <div className="font-semibold">Page − Category</div>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <select className="border rounded px-2 py-1" value={bannerPageId ?? ""} onChange={(e) => setBannerPageId(e.target.value ? Number(e.target.value) : null)}>
-                                            <option value="">-- Select Page --</option>
-                                            {(pages || []).map((p: any) => (
-                                                <option key={p.id} value={p.id}>{p.title} (#{p.id})</option>
-                                            ))}
-                                        </select>
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Category"
-                                            id="agg-page-category-category"
-                                            value={aggSelectedCategoryForPage ?? undefined}
-                                            onChange={(v) => setAggSelectedCategoryForPage(v ?? null)}
-                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
-                                                        </div>
+                            <div className="p-2">
+                                <Tabs
+                                    activeKey={aggActiveTab}
+                                    onChange={setAggActiveTab}
+                                    items={[
+                                        {
+                                            key: "page-category",
+                                            label: "Page − Category",
+                                            children: (
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div>
+                                                        <Table
+                                                            loading={isLoading}
+                                                            rowKey="id"
+                                                            dataSource={pages}
+                                                            pagination={{
+                                                                current: pagesPage + 1,
+                                                                pageSize: pagesSize,
+                                                                total: pagesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setPagesPage(p - 1);
+                                                                    setPagesSize(s);
+                                                                },
+                                                            }}
+                                                            onRow={(record) => ({
+                                                                onClick: async () => {
+                                                                    setSelectedPageId(record.id);
+                                                                    setLoadingPageCategories(true);
+                                                                    try {
+                                                                        const linkedData = await getPageCategories(record.id);
+                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                        setLinkedPageCategories(linkedIds);
+                                                                    } catch (error) {
+                                                                        message.error("Failed to load page categories");
+                                                                        setLinkedPageCategories(new Set());
+                                                                    } finally {
+                                                                        setLoadingPageCategories(false);
+                                                                    }
+                                                                },
+                                                                style: { cursor: "pointer" },
+                                                            })}
+                                                            rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
+                                                            columns={[
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                                { title: "Slug", dataIndex: "slug" },
+                                                            ]}
+                                                            title={() => <span className="font-semibold">Pages</span>}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingPageCategories || loadingCategories || loadingSelectedPageCategories}
+                                                            rowKey="id"
+                                                            dataSource={filteredPageCategories}
+                                                            pagination={showOnlySelectedPageCategories ? false : {
+                                                                current: categoriesPage + 1,
+                                                                pageSize: categoriesSize,
+                                                                total: categoriesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setCategoriesPage(p - 1);
+                                                                    setCategoriesSize(s);
+                                                                },
+                                                            }}
+                                                            columns={[
+                                                                {
+                                                                    title: "",
+                                                                    width: 60,
+                                                                    render: (_: any, record: any) => (
+                                                                        <Checkbox
+                                                                            checked={showOnlySelectedPageCategories
+                                                                                ? selectedPageCategoriesData.some(item => item.id === record.id)
+                                                                                : linkedPageCategories.has(record.id)}
+                                                                            disabled={!selectedPageId}
+                                                                            onChange={async (e) => {
+                                                                                if (!selectedPageId) return;
+                                                                                const isChecked = e.target.checked;
+                                                                                try {
+                                                                                    if (isChecked) {
+                                                                                        await linkPageCategory({ page_id: selectedPageId, category_id: record.id });
+                                                                                        setLinkedPageCategories(prev => new Set([...prev, record.id]));
+                                                                                        message.success("Linked successfully");
+                                                                                    } else {
+                                                                                        await unlinkPageCategory({ page_id: selectedPageId, category_id: record.id });
+                                                                                        setLinkedPageCategories(prev => {
+                                                                                            const newSet = new Set(prev);
+                                                                                            newSet.delete(record.id);
+                                                                                            return newSet;
+                                                                                        });
+                                                                                        message.success("Unlinked successfully");
+                                                                                    }
+                                                                                    // Refresh selected data if switch is ON
+                                                                                    if (showOnlySelectedPageCategories) {
+                                                                                        const data = await getPageCategories(selectedPageId);
+                                                                                        setSelectedPageCategoriesData(data);
+                                                                                    }
+                                                                                } catch (error) {
+                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                },
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                            ]}
+                                                            title={() => (
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="font-semibold">Categories</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm">Show selected only</span>
+                                                                        <Switch
+                                                                            checked={showOnlySelectedPageCategories}
+                                                                            onChange={setShowOnlySelectedPageCategories}
+                                                                            disabled={!selectedPageId}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            locale={{ emptyText: selectedPageId ? "No categories found" : "Select a page to view categories" }}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                        />
-                                        <Button
-                                            type="primary"
-                                            disabled={!bannerPageId}
-                                            onClick={async () => {
-                                                const cat = aggSelectedCategoryForPage;
-                                                if (!bannerPageId || !cat) return;
-                                                await linkPageCategory({ page_id: bannerPageId, category_id: Number(cat) });
-                                                message.success("Linked page-category");
-                                            }}
-                                        >
-                                            Link
-                                        </Button>
-                                        <Button
-                                            danger
-                                            onClick={async () => {
-                                                const cat = aggSelectedCategoryForPage;
-                                                if (!bannerPageId || !cat) return;
-                                                await unlinkPageCategory({ page_id: bannerPageId, category_id: Number(cat) });
-                                                message.success("Unlinked page-category");
-                                            }}
-                                        >
-                                            Unlink
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
-                                    <div className="font-semibold">Category − Content</div>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Category"
-                                            id="agg-category-content-category"
-                                            value={aggSelectedCategoryForContent ?? undefined}
-                                            onChange={(v) => setAggSelectedCategoryForContent(v ?? null)}
-                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
-                                                        </div>
+                                            ),
+                                        },
+                                        {
+                                            key: "page-content",
+                                            label: "Page − Content",
+                                            children: (
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div>
+                                                        <Table
+                                                            loading={isLoading}
+                                                            rowKey="id"
+                                                            dataSource={pages}
+                                                            pagination={{
+                                                                current: pagesPage + 1,
+                                                                pageSize: pagesSize,
+                                                                total: pagesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setPagesPage(p - 1);
+                                                                    setPagesSize(s);
+                                                                },
+                                                            }}
+                                                            onRow={(record) => ({
+                                                                onClick: async () => {
+                                                                    setSelectedPageId(record.id);
+                                                                    setLoadingPageContents(true);
+                                                                    try {
+                                                                        const linkedData = await getPageContents(record.id);
+                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                        setLinkedPageContents(linkedIds);
+                                                                    } catch (error) {
+                                                                        message.error("Failed to load page contents");
+                                                                        setLinkedPageContents(new Set());
+                                                                    } finally {
+                                                                        setLoadingPageContents(false);
+                                                                    }
+                                                                },
+                                                                style: { cursor: "pointer" },
+                                                            })}
+                                                            rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
+                                                            columns={[
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                                { title: "Slug", dataIndex: "slug" },
+                                                            ]}
+                                                            title={() => <span className="font-semibold">Pages</span>}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingPageContents || loadingContents || loadingSelectedPageContents}
+                                                            rowKey="id"
+                                                            dataSource={filteredPageContents}
+                                                            pagination={showOnlySelectedPageContents ? false : {
+                                                                current: contentsPage,
+                                                                pageSize: contentsSize,
+                                                                total: contentsData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setContentsPage(p);
+                                                                    setContentsSize(s);
+                                                                },
+                                                            }}
+                                                            columns={[
+                                                                {
+                                                                    title: "",
+                                                                    width: 60,
+                                                                    render: (_: any, record: any) => (
+                                                                        <Checkbox
+                                                                            checked={showOnlySelectedPageContents
+                                                                                ? selectedPageContentsData.some(item => item.id === record.id)
+                                                                                : linkedPageContents.has(record.id)}
+                                                                            disabled={!selectedPageId}
+                                                                            onChange={async (e) => {
+                                                                                if (!selectedPageId) return;
+                                                                                const isChecked = e.target.checked;
+                                                                                try {
+                                                                                    if (isChecked) {
+                                                                                        await linkPageContent({ page_id: selectedPageId, content_id: record.id });
+                                                                                        setLinkedPageContents(prev => new Set([...prev, record.id]));
+                                                                                        message.success("Linked successfully");
+                                                                                    } else {
+                                                                                        await unlinkPageContent({ page_id: selectedPageId, content_id: record.id });
+                                                                                        setLinkedPageContents(prev => {
+                                                                                            const newSet = new Set(prev);
+                                                                                            newSet.delete(record.id);
+                                                                                            return newSet;
+                                                                                        });
+                                                                                        message.success("Unlinked successfully");
+                                                                                    }
+                                                                                    // Refresh selected data if switch is ON
+                                                                                    if (showOnlySelectedPageContents) {
+                                                                                        const data = await getPageContents(selectedPageId);
+                                                                                        setSelectedPageContentsData(data);
+                                                                                    }
+                                                                                } catch (error) {
+                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                },
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                            ]}
+                                                            title={() => (
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="font-semibold">Contents</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm">Show selected only</span>
+                                                                        <Switch
+                                                                            checked={showOnlySelectedPageContents}
+                                                                            onChange={setShowOnlySelectedPageContents}
+                                                                            disabled={!selectedPageId}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            locale={{ emptyText: selectedPageId ? "No contents found" : "Select a page to view contents" }}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                        />
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Content"
-                                            id="agg-category-content-content"
-                                            value={aggSelectedContent ?? undefined}
-                                            onChange={(v) => setAggSelectedContent(v ?? null)}
-                                            options={(aggContents || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggContentsPage === 1} onClick={() => setAggContentsPage(Math.max(1, aggContentsPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggContentsPage} / {Math.max(1, aggContentsData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggContentsData?.totalPages || 1) <= aggContentsPage} onClick={() => setAggContentsPage(aggContentsPage + 1)}>Next</Button>
-                                                        </div>
+                                            ),
+                                        },
+                                        {
+                                            key: "category-content",
+                                            label: "Category − Content",
+                                            children: (
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingCategories}
+                                                            rowKey="id"
+                                                            dataSource={categories}
+                                                            pagination={{
+                                                                current: categoriesPage + 1,
+                                                                pageSize: categoriesSize,
+                                                                total: categoriesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setCategoriesPage(p - 1);
+                                                                    setCategoriesSize(s);
+                                                                },
+                                                            }}
+                                                            onRow={(record) => ({
+                                                                onClick: async () => {
+                                                                    setSelectedCategoryId(record.id);
+                                                                    setLoadingCategoryContents(true);
+                                                                    try {
+                                                                        const linkedData = await getCategoryContents(record.id);
+                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                        setLinkedCategoryContents(linkedIds);
+                                                                    } catch (error) {
+                                                                        message.error("Failed to load category contents");
+                                                                        setLinkedCategoryContents(new Set());
+                                                                    } finally {
+                                                                        setLoadingCategoryContents(false);
+                                                                    }
+                                                                },
+                                                                style: { cursor: "pointer" },
+                                                            })}
+                                                            rowClassName={(record) => (selectedCategoryId === record.id ? "bg-blue-50" : "")}
+                                                            columns={[
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                                { title: "Slug", dataIndex: "slug" },
+                                                            ]}
+                                                            title={() => <span className="font-semibold">Categories</span>}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingCategoryContents || loadingContents || loadingSelectedCategoryContents}
+                                                            rowKey="id"
+                                                            dataSource={filteredCategoryContents}
+                                                            pagination={showOnlySelectedCategoryContents ? false : {
+                                                                current: contentsPage,
+                                                                pageSize: contentsSize,
+                                                                total: contentsData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setContentsPage(p);
+                                                                    setContentsSize(s);
+                                                                },
+                                                            }}
+                                                            columns={[
+                                                                {
+                                                                    title: "",
+                                                                    width: 60,
+                                                                    render: (_: any, record: any) => (
+                                                                        <Checkbox
+                                                                            checked={showOnlySelectedCategoryContents
+                                                                                ? selectedCategoryContentsData.some(item => item.id === record.id)
+                                                                                : linkedCategoryContents.has(record.id)}
+                                                                            disabled={!selectedCategoryId}
+                                                                            onChange={async (e) => {
+                                                                                if (!selectedCategoryId) return;
+                                                                                const isChecked = e.target.checked;
+                                                                                try {
+                                                                                    if (isChecked) {
+                                                                                        await linkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
+                                                                                        setLinkedCategoryContents(prev => new Set([...prev, record.id]));
+                                                                                        message.success("Linked successfully");
+                                                                                    } else {
+                                                                                        await unlinkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
+                                                                                        setLinkedCategoryContents(prev => {
+                                                                                            const newSet = new Set(prev);
+                                                                                            newSet.delete(record.id);
+                                                                                            return newSet;
+                                                                                        });
+                                                                                        message.success("Unlinked successfully");
+                                                                                    }
+                                                                                    // Refresh selected data if switch is ON
+                                                                                    if (showOnlySelectedCategoryContents) {
+                                                                                        const data = await getCategoryContents(selectedCategoryId);
+                                                                                        setSelectedCategoryContentsData(data);
+                                                                                    }
+                                                                                } catch (error) {
+                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                },
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                            ]}
+                                                            title={() => (
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="font-semibold">Contents</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm">Show selected only</span>
+                                                                        <Switch
+                                                                            checked={showOnlySelectedCategoryContents}
+                                                                            onChange={setShowOnlySelectedCategoryContents}
+                                                                            disabled={!selectedCategoryId}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            locale={{ emptyText: selectedCategoryId ? "No contents found" : "Select a category to view contents" }}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                        />
-                                        <Button
-                                            type="primary"
-                                            onClick={async () => {
-                                                const cid = aggSelectedCategoryForContent;
-                                                const tid = aggSelectedContent;
-                                                if (!cid || !tid) return;
-                                                await linkCategoryContent({ category_id: Number(cid), content_id: Number(tid) });
-                                                message.success("Linked category-content");
-                                            }}
-                                        >
-                                            Link
-                                        </Button>
-                                        <Button
-                                            danger
-                                            onClick={async () => {
-                                                const cid = aggSelectedCategoryForContent;
-                                                const tid = aggSelectedContent;
-                                                if (!cid || !tid) return;
-                                                await unlinkCategoryContent({ category_id: Number(cid), content_id: Number(tid) });
-                                                message.success("Unlinked category-content");
-                                            }}
-                                        >
-                                            Unlink
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
-                                    <div className="font-semibold">Page − Content</div>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Page"
-                                            id="agg-page-content-page"
-                                            value={bannerPageId ?? undefined}
-                                            onChange={(v) => setBannerPageId(v || null)}
-                                            allowClear
-                                            options={(aggPages || []).map((p: any) => ({ value: p.id, label: `${p.title} (#${p.id})` }))}
-        
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggPagesPage === 0} onClick={() => setAggPagesPage(Math.max(0, aggPagesPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggPagesPage + 1} / {Math.max(1, aggPagesData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggPagesData?.totalPages || 1) <= (aggPagesPage + 1)} onClick={() => setAggPagesPage(aggPagesPage + 1)}>Next</Button>
-                                                        </div>
+                                            ),
+                                        },
+                                        {
+                                            key: "category-relation",
+                                            label: "Category − Relation (Parent → Child)",
+                                            children: (
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingCategories}
+                                                            rowKey="id"
+                                                            dataSource={categories}
+                                                            pagination={{
+                                                                current: categoriesPage + 1,
+                                                                pageSize: categoriesSize,
+                                                                total: categoriesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setCategoriesPage(p - 1);
+                                                                    setCategoriesSize(s);
+                                                                },
+                                                            }}
+                                                            onRow={(record) => ({
+                                                                onClick: async () => {
+                                                                    setSelectedParentCategoryId(record.id);
+                                                                    setLoadingCategoryRelations(true);
+                                                                    try {
+                                                                        const linkedData = await getCategoryRelations(record.id);
+                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                        setLinkedCategoryRelations(linkedIds);
+                                                                    } catch (error) {
+                                                                        message.error("Failed to load category relations");
+                                                                        setLinkedCategoryRelations(new Set());
+                                                                    } finally {
+                                                                        setLoadingCategoryRelations(false);
+                                                                    }
+                                                                },
+                                                                style: { cursor: "pointer" },
+                                                            })}
+                                                            rowClassName={(record) => (selectedParentCategoryId === record.id ? "bg-blue-50" : "")}
+                                                            columns={[
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                                { title: "Slug", dataIndex: "slug" },
+                                                            ]}
+                                                            title={() => <span className="font-semibold">Parent Categories</span>}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Table
+                                                            loading={loadingCategoryRelations || loadingCategories || loadingSelectedCategoryRelations}
+                                                            rowKey="id"
+                                                            dataSource={filteredCategoryRelations}
+                                                            pagination={showOnlySelectedCategoryRelations ? false : {
+                                                                current: categoriesPage + 1,
+                                                                pageSize: categoriesSize,
+                                                                total: categoriesData?.totalElements,
+                                                                onChange: (p, s) => {
+                                                                    setCategoriesPage(p - 1);
+                                                                    setCategoriesSize(s);
+                                                                },
+                                                            }}
+                                                            columns={[
+                                                                {
+                                                                    title: "",
+                                                                    width: 60,
+                                                                    render: (_: any, record: any) => (
+                                                                        <Checkbox
+                                                                            checked={showOnlySelectedCategoryRelations
+                                                                                ? selectedCategoryRelationsData.some(item => item.id === record.id)
+                                                                                : linkedCategoryRelations.has(record.id)}
+                                                                            disabled={!selectedParentCategoryId || record.id === selectedParentCategoryId}
+                                                                            onChange={async (e) => {
+                                                                                if (!selectedParentCategoryId) return;
+                                                                                const isChecked = e.target.checked;
+                                                                                try {
+                                                                                    if (isChecked) {
+                                                                                        await linkCategoryRelation({ parent_id: selectedParentCategoryId, child_id: record.id });
+                                                                                        setLinkedCategoryRelations(prev => new Set([...prev, record.id]));
+                                                                                        message.success("Linked successfully");
+                                                                                    } else {
+                                                                                        await unlinkCategoryRelation({ parent_id: selectedParentCategoryId, child_id: record.id });
+                                                                                        setLinkedCategoryRelations(prev => {
+                                                                                            const newSet = new Set(prev);
+                                                                                            newSet.delete(record.id);
+                                                                                            return newSet;
+                                                                                        });
+                                                                                        message.success("Unlinked successfully");
+                                                                                    }
+                                                                                    // Refresh selected data if switch is ON
+                                                                                    if (showOnlySelectedCategoryRelations) {
+                                                                                        const data = await getCategoryRelations(selectedParentCategoryId);
+                                                                                        setSelectedCategoryRelationsData(data);
+                                                                                    }
+                                                                                } catch (error) {
+                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                },
+                                                                { title: "ID", dataIndex: "id", width: 80 },
+                                                                { title: "Title", dataIndex: "title" },
+                                                            ]}
+                                                            title={() => (
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="font-semibold">Child Categories</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm">Show selected only</span>
+                                                                        <Switch
+                                                                            checked={showOnlySelectedCategoryRelations}
+                                                                            onChange={setShowOnlySelectedCategoryRelations}
+                                                                            disabled={!selectedParentCategoryId}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            locale={{ emptyText: selectedParentCategoryId ? "No categories found" : "Select a parent category to view children" }}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                        />
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Content"
-                                            id="agg-page-content-content"
-                                            value={aggSelectedContentForPage ?? undefined}
-                                            onChange={(v) => setAggSelectedContentForPage(v ?? null)}
-                                            options={(aggContents || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggContentsPage === 1} onClick={() => setAggContentsPage(Math.max(1, aggContentsPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggContentsPage} / {Math.max(1, aggContentsData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggContentsData?.totalPages || 1) <= aggContentsPage} onClick={() => setAggContentsPage(aggContentsPage + 1)}>Next</Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        />
-                                        <Button
-                                            type="primary"
-                                            disabled={!bannerPageId}
-                                            onClick={async () => {
-                                                const tid = aggSelectedContentForPage;
-                                                if (!bannerPageId || !tid) return;
-                                                await linkPageContent({ page_id: bannerPageId, content_id: Number(tid) });
-                                                message.success("Linked page-content");
-                                            }}
-                                        >
-                                            Link
-                                        </Button>
-                                        <Button
-                                            danger
-                                            onClick={async () => {
-                                                const tid = aggSelectedContentForPage;
-                                                if (!bannerPageId || !tid) return;
-                                                await unlinkPageContent({ page_id: bannerPageId, content_id: Number(tid) });
-                                                message.success("Unlinked page-content");
-                                            }}
-                                        >
-                                            Unlink
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
-                                    <div className="font-semibold">Category − Relation (Parent → Child)</div>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Parent"
-                                            id="agg-category-relation-parent"
-                                            value={aggParentCategoryId ?? undefined}
-                                            onChange={(v) => setAggParentCategoryId(v ?? null)}
-                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        />
-                                        <Select
-                                            style={{ width: 280 }}
-                                            showSearch
-                                            placeholder="Select Child"
-                                            id="agg-category-relation-child"
-                                            value={aggChildCategoryId ?? undefined}
-                                            onChange={(v) => setAggChildCategoryId(v ?? null)}
-                                            options={(aggCategories || []).map((c: any) => ({ value: c.id, label: `${c.title} (#${c.id})` }))}
-                                            dropdownRender={(menu) => (
-                                                <div>
-                                                    {menu}
-                                                    <div className="px-2 py-2 border-t border-gray-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <Button size="small" disabled={aggCategoriesPage === 0} onClick={() => setAggCategoriesPage(Math.max(0, aggCategoriesPage - 1))}>Prev</Button>
-                                                            <span className="text-xs">Page {aggCategoriesPage + 1} / {Math.max(1, aggCategoriesData?.totalPages || 1)}</span>
-                                                            <Button size="small" disabled={(aggCategoriesData?.totalPages || 1) <= (aggCategoriesPage + 1)} onClick={() => setAggCategoriesPage(aggCategoriesPage + 1)}>Next</Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        />
-                                        <Button
-                                            type="primary"
-                                            onClick={async () => {
-                                                const pid = aggParentCategoryId;
-                                                const cid = aggChildCategoryId;
-                                                if (!pid || !cid) return;
-                                                await linkCategoryRelation({ parent_id: Number(pid), child_id: Number(cid) });
-                                                message.success("Linked category-relation");
-                                            }}
-                                        >
-                                            Link
-                                        </Button>
-                                        <Button
-                                            danger
-                                            onClick={async () => {
-                                                const pid = aggParentCategoryId;
-                                                const cid = aggChildCategoryId;
-                                                if (!pid || !cid) return;
-                                                await unlinkCategoryRelation({ parent_id: Number(pid), child_id: Number(cid) });
-                                                message.success("Unlinked category-relation");
-                                            }}
-                                        >
-                                            Unlink
-                                        </Button>
-                                    </div>
-                                </div>
+                                            ),
+                                        },
+                                    ]}
+                                />
                             </div>
                         )}
                         {activeKey !== "pages" && activeKey !== "categories" && activeKey !== "contents" && activeKey !== "settings" && activeKey !== "banners" && activeKey !== "aggregate" && <div>Hello World</div>}

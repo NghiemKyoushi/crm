@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Form, Input, Modal, Select, Upload, message } from "antd";
+import React from "react";
+import { Form, Input, Modal, message } from "antd";
 import { CmsPage, CreateCmsPageBody, UpdateCmsPageBody, createCmsPage, updateCmsPage } from "../apis/pages";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
-import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
-import { uploadImage } from "@/features/user-profile/hooks/user-profile";
-import { VIEW_IMAGE } from "@/constants/api-type";
 
 type CreatePageModalProps = {
     open: boolean;
@@ -19,14 +16,8 @@ type CreatePageModalProps = {
 const { TextArea } = Input;
 
 export default function CreatePageModal({ open, onClose, onSuccess, page }: CreatePageModalProps) {
-    const [form] = Form.useForm<CreateCmsPageBody>();
-    const [uploading, setUploading] = useState(false);
-    const imageId = Form.useWatch("image_id", form);
-    const thumbUrl = useMemo(() => {
-        if (!imageId) return undefined;
-        const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-        return `${base}/${VIEW_IMAGE}${imageId}`;
-    }, [imageId]);
+    const [form] = Form.useForm<CreateCmsPageBody & { image_url?: string }>();
+    const imageUrl = Form.useWatch("image_url", form);
 
     const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsPageBody | UpdateCmsPageBody) => {
@@ -49,7 +40,27 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
 
     const handleOk = async () => {
         const values = await form.validateFields();
-        const payload = { ...values, status: "active" } as CreateCmsPageBody;
+        // Extract image_id from URL if it's a system URL, otherwise set to null
+        let imageId: number | null = null;
+        if (values.image_url) {
+            // Try to extract image_id from URL patterns:
+            // - /view-image/{id}
+            // - /medias/v1/files/view/thumb/{id}
+            const match1 = values.image_url.match(/\/view-image\/(\d+)/);
+            const match2 = values.image_url.match(/\/view\/thumb\/(\d+)/);
+            if (match1) {
+                imageId = parseInt(match1[1], 10);
+            } else if (match2) {
+                imageId = parseInt(match2[1], 10);
+            } else {
+                imageId = null;
+            }
+        }
+        const payload = { 
+            ...values, 
+            image_id: imageId ?? values.image_id ?? null,
+            status: "active" 
+        } as CreateCmsPageBody;
         await mutateAsync(payload);
     };
 
@@ -72,45 +83,25 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
                     description: page?.description,
                     short_desc: page?.short_desc,
                     image_id: page?.image_id,
+                    image_url: page?.image_id 
+                        ? `${process.env.NEXT_PUBLIC_ROOT_STATIC_URL || ""}/features/v1/admin/view-image/${page.image_id}`
+                        : undefined,
                 }}
             >
-                <Form.Item label="Cover Image">
-                    <Upload.Dragger
-                        accept="image/*"
-                        multiple={false}
-                        showUploadList={false}
-                        customRequest={async (options: RcCustomRequestOptions) => {
-                            const { file, onSuccess, onError } = options;
-                            try {
-                                setUploading(true);
-                                const id = await uploadImage(file as File);
-                                form.setFieldValue("image_id", id);
-                                message.success("Image uploaded");
-                                onSuccess && onSuccess({ id } as any);
-                            } catch (e) {
-                                message.error("Upload failed");
-                                onError && onError(e as any);
-                            } finally {
-                                setUploading(false);
-                            }
-                        }}
-                        disabled={uploading}
-                    >
-                        {thumbUrl ? (
-                            <div className="flex flex-col items-center gap-2 py-3">
-                                <img src={thumbUrl} alt="preview" className="max-h-32 rounded" />
-                                <div className="text-xs text-gray-500">Image ID: {imageId}</div>
-                                <div className="text-xs text-gray-400">Drag & drop to replace</div>
-                            </div>
-                        ) : (
-                            <div className="py-6">
-                                <p className="ant-upload-drag-icon">📷</p>
-                                <p className="ant-upload-text">Click or drag image to upload</p>
-                                <p className="ant-upload-hint text-xs">PNG, JPG...</p>
-                            </div>
-                        )}
-                    </Upload.Dragger>
+                <Form.Item 
+                    name="image_url" 
+                    label="Image URL"
+                    rules={[{ type: "url", message: "Please enter a valid URL" }]}
+                >
+                    <Input placeholder="https://example.com/image.jpg" />
                 </Form.Item>
+                {imageUrl && (
+                    <div className="mb-4 flex flex-col items-center gap-2">
+                        <img src={imageUrl} alt="preview" className="max-h-32 rounded" onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                        }} />
+                    </div>
+                )}
                 <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
                     <Input placeholder="home" />
                 </Form.Item>
@@ -123,7 +114,10 @@ export default function CreatePageModal({ open, onClose, onSuccess, page }: Crea
                 <Form.Item name="description" label="Description" rules={[{ required: true }]}>
                     <TextArea rows={4} placeholder="Trang hiển thị nội dung chính của hệ thống" />
                 </Form.Item>
-                <Form.Item name="image_id" rules={[{ required: true, message: "Please upload image" }]} hidden>
+                <Form.Item name="image_id" hidden>
+                    <Input />
+                </Form.Item>
+                <Form.Item name="image_url" hidden>
                     <Input />
                 </Form.Item>
                 <Form.Item name="status" hidden>
