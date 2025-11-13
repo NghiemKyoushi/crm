@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Tag, Button, Modal } from "antd";
+import React, { useMemo, useState } from "react";
+import { Tag, Button, Modal, Tooltip } from "antd";
+import { ReloadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faExclamationCircle,
@@ -19,7 +20,8 @@ import {
   createDebt,
 } from "@/features/finance-manage/apis";
 import { toast } from "react-toastify";
-import dayjs from "dayjs";
+import { usePermission } from "@/components/layout/PermissionContext";
+import { DebtHistoryScreen } from "./debt_history_screen";
 
 const ConfirmActionModal = ({ visible, onOk, onCancel, record }: any) => {
   const [note, setNote] = useState<string>("");
@@ -66,6 +68,7 @@ const PartnerDebtTable = () => {
 
   const [pendingConfirmVisible, setPendingConfirmVisible] = useState(false);
   const [pendingRejectVisible, setPendingRejectVisible] = useState(false);
+  const { hasPermission } = usePermission();
 
   const [params, setParams] = useState<BankDepositRequest>({
     page: 0,
@@ -76,7 +79,7 @@ const PartnerDebtTable = () => {
   const handleReturnConfirm = async () => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id, {bank_account_id: null});
+      await createDebt(selectedDebt.id, { bank_account_id: null });
       toast.success("Tạo hoàn trả thành công!");
       setConfirmReturnVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -90,12 +93,17 @@ const PartnerDebtTable = () => {
     }
   };
 
+  const isAdmin = useMemo(() => {
+    const isAdmin = hasPermission("system.admin");
+    return isAdmin;
+  }, [hasPermission]);
+
   // Xử lý xác nhận công nợ
   const handlePendingConfirm = async (note: string) => {
     if (!selectedDebt?.id) return;
     try {
       if (selectedDebt && selectedDebt.user_id) {
-        await approveDebt(selectedDebt.user_id,{note: note});
+        await approveDebt(selectedDebt.user_id, { note: note });
         toast.success("Xác nhận giao dịch thành công!");
         setPendingConfirmVisible(false);
         setTimeout(() => setSelectedDebt(undefined), 300);
@@ -140,7 +148,7 @@ const PartnerDebtTable = () => {
   const handleConfirmDebt = async (id: string) => {
     if (!selectedDebt?.user_id) return;
     try {
-      await createDebt(selectedDebt.id,{bank_account_id: id});
+      await createDebt(selectedDebt.id, { bank_account_id: id });
       toast.success("Tạo tất toán thành công!");
       setModalVisible(false);
       setTimeout(() => setSelectedDebt(undefined), 300);
@@ -254,8 +262,8 @@ const PartnerDebtTable = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-y-1 gap-x-3 text-[14px] leading-[1.4]">
-                <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Tổng nợ:</span>
+                {/* <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Tổng nợ phát sinh:</span>
                   <b className="text-[#222] text-[14px]">
                     {(typeof record.total_debts === "number"
                       ? record.total_debts.toLocaleString()
@@ -264,11 +272,29 @@ const PartnerDebtTable = () => {
                   </b>
                 </div>
                 <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Điều chỉnh:</span>
+                  <b className={`text-[14px] ${record.total_adjustments < 0 ? 'text-red-600' : record.total_adjustments > 0 ? 'text-green-600' : 'text-[#262626]'}`}>
+                    {(typeof record.total_adjustments === "number"
+                      ? record.total_adjustments.toLocaleString()
+                      : record.total_adjustments) || 0}{" "}
+                    ₫
+                  </b>
+                </div>
+                <div>
+                  <span className="text-[#5a5959] mr-1 text-[14px]">Đã thanh toán:</span>
+                  <b className="text-[#262626] text-[14px]">
+                    {(typeof record.total_paid_debts === "number"
+                      ? record.total_paid_debts.toLocaleString()
+                      : record.total_paid_debts) || 0}{" "}
+                    ₫
+                  </b>
+                </div> */}
+                <div>
                   {isNo ? (
                     <>
-                      <span className="text-[#5a5959] mr-1 text-[14px]">Nợ:</span>
+                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
                       <b className="text-[#ff4d4f] font-semibold text-[14px]">
-                        {(typeof record.total_debts === "number"
+                        {(typeof record.total_remaining_debts === "number"
                           ? record.total_remaining_debts.toLocaleString()
                           : record.total_remaining_debts) || 0}{" "}
                         ₫
@@ -276,63 +302,33 @@ const PartnerDebtTable = () => {
                     </>
                   ) : isBalanced ? (
                     <>
-                      <span className="text-[#5a5959] mr-1 text-[14px]">Cân bằng:</span>
+                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
                       <b className="text-[#595959] font-medium text-[14px]">0 ₫</b>
                     </>
                   ) : (
                     <>
-                      <span
-                        className={`mr-1 ${
-                          status === "PENDING"
-                            ? "text-[#d48806] font-semibold text-[14px]"
-                            : "text-[#389e0d] font-semibold text-[14px]"
-                        }`}
-                      >
-                        Thừa:
-                      </span>
+                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
                       <b
                         className={
                           status === "PENDING"
                             ? "text-[#d48806] font-semibold text-[14px]"
                             : "text-[#389e0d] font-semibold text-[14px]"
                         }
-                      >
+                      >Thừa{" "}
                         {(typeof record.total_remaining_debts === "number"
-                          ? Math.abs(
-                              record.total_remaining_debts
-                            ).toLocaleString()
-                          : Math.abs(Number(record.total_remaining_debts)) ||
-                            0) || 0}{" "}
-                        ₫
+                          ? Math.abs(record.total_remaining_debts).toLocaleString()
+                          : Math.abs(Number(record.total_remaining_debts)) || 0) || 0} ₫
+
                       </b>
                     </>
                   )}
-                </div>
-                <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Đã nạp:</span>
-                  <b className="text-[#262626] text-[14px]">
-                    {(typeof record.total_paid_debts === "number"
-                      ? record.total_paid_debts.toLocaleString()
-                      : record.total_paid_debts) || 0}{" "}
-                    ₫
-                  </b>
-                </div>
-                <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Ngày gần nhất:</span>
-                  <b className="text-[#262626] text-[14px]">
-                    {record.transaction_date
-                      ? dayjs(record.transaction_date).format(
-                          "DD-MM-YYYY HH:mm"
-                        )
-                      : "--"}
-                  </b>
                 </div>
               </div>
             </div>
             <div className="flex flex-col gap-1 items-end ml-4">
               {status === "NEW" && (
                 <>
-                  {isNo ? (
+                  {isNo && isAdmin ? (
                     <Button
                       type="primary"
                       size="small"
@@ -344,7 +340,7 @@ const PartnerDebtTable = () => {
                     >
                       Tạo tất toán
                     </Button>
-                  ) : !isBalanced ? (
+                  ) : !isBalanced && isAdmin ? (
                     <Button
                       type="primary"
                       size="small"
@@ -357,32 +353,6 @@ const PartnerDebtTable = () => {
                       Yêu cầu hoàn trả
                     </Button>
                   ) : null}
-                </>
-              )}
-              {status === "PENDING" && (
-                <>
-                  <Button
-                    type="primary"
-                    size="small"
-                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
-                    onClick={() => {
-                      setSelectedDebt(record);
-                      setPendingConfirmVisible(true);
-                    }}
-                  >
-                    Xác nhận
-                  </Button>
-                  <Button
-                    danger
-                    size="small"
-                    className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
-                    onClick={() => {
-                      setSelectedDebt(record);
-                      setPendingRejectVisible(true);
-                    }}
-                  >
-                    Từ chối
-                  </Button>
                 </>
               )}
               {status === "COMPLETED" && (
@@ -420,19 +390,61 @@ const PartnerDebtTable = () => {
     },
   ];
 
+  // Decision: If admin, show as-is, else show DebtHistoryTable with first data item
+  if (!isAdmin) {
+    // data?.contents.data is an array, pick first element (if any)
+    const firstItem = data?.contents?.data?.[0];
+    return (
+      <DebtHistoryScreen
+        record={firstItem}
+        onRefresh={() => refetch?.()}
+      />
+    );
+  }
+
   return (
     <div>
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-          Tình trạng Công nợ với Đối tác
-        </h3>
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Tình trạng Công nợ với Đối tác
+            </h3>
+            <Tooltip
+              title={
+                <div className="text-xs">
+                  <div className="font-semibold mb-2">CÔNG THỨC TÍNH:</div>
+                  <div className="mb-2">
+                    <span className="font-medium">Số dư thực tế</span> = Tổng nợ phát sinh + Điều chỉnh - Đã thanh toán
+                  </div>
+                  <div className="text-gray-300">
+                    <div>• Số dương (+): Đối tác đang nợ công ty</div>
+                    <div>• Số âm (-): Công ty đang nợ đối tác (Thừa)</div>
+                    <div>• Số 0: Đã cân bằng</div>
+                  </div>
+                </div>
+              }
+              overlayStyle={{ maxWidth: 400 }}
+            >
+              <InfoCircleOutlined className="text-gray-400 cursor-help text-base" />
+            </Tooltip>
+          </div>
+          <Button
+            type="default"
+            icon={<ReloadOutlined />}
+            onClick={() => refetch?.()}
+            loading={isPending}
+          >
+            Làm mới
+          </Button>
+        </div>
         {data?.items && (
           <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
             <div
               className={`bg-red-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
               style={{
                 minHeight: 56,
-                borderLeft: `6px solid #f87171`,
+                border: `1px solid #f87171`,
               }}
             >
               <div>
@@ -454,7 +466,7 @@ const PartnerDebtTable = () => {
               className={`bg-green-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
               style={{
                 minHeight: 56,
-                borderLeft: `6px solid #22c55e`,
+                border: `1px solid #22c55e`,
               }}
             >
               <div>
@@ -486,7 +498,6 @@ const PartnerDebtTable = () => {
         fontSize={13}
         headerHeight={0}
         loading={isPending}
-    
       />
       {selectedDebt?.user_id && (
         <SettlementBankModal

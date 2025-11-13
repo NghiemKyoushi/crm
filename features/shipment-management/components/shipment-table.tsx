@@ -582,7 +582,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
       case OrderStatusType.SHIPPING_REQUEST_CLIENT:
         return "magenta";
       case OrderStatusType.PACKED:
-        return "magenta";
+        return "green";
       default:
         return "default";
     }
@@ -747,23 +747,23 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         </div>
       ),
     },
-    {
-      title: "Tổng tiền sp",
-      key: "deposit",
-      width: 100,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-green-600 font-medium">
-          {record.deposit_fee
-            ? `${record.deposit_fee.toLocaleString("en-US")}đ`
-            : "-"}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Cọc",
+    //   key: "deposit",
+    //   width: 100,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="text-xs text-green-600 font-medium">
+    //       {record.deposit_fee
+    //         ? `${record.deposit_fee.toLocaleString("en-US")}đ`
+    //         : "-"}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Ghi chú",
       key: "description",
@@ -829,6 +829,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
             break;
           case OrderStatusType.CANCELED:
             text = t("status.cancelled");
+            break;
+            case OrderStatusType.PACKED:
+            text = t("status.packed");
             break;
           default:
         }

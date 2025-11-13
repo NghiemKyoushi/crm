@@ -78,27 +78,6 @@ const ImportCustomerModal = ({
           </Button>
         </Upload>
       </div>
-
-      {/* Hướng dẫn định dạng file */}
-      <div className="bg-blue-50 rounded-md p-4 text-sm mb-4">
-        <p className="font-semibold mb-2">Định dạng file Excel yêu cầu:</p>
-        <ul className="space-y-1 text-blue-600">
-          <li>• Cột A: Họ tên</li>
-          <li>• Cột B: Giới tính (Nam/Nữ)</li>
-          <li>• Cột C: Ngày sinh (DD/MM/YYYY)</li>
-          <li>• Cột D: Địa chỉ</li>
-          <li>• Cột E: Số điện thoại</li>
-          <li>• Cột F: Email (tùy chọn)</li>
-          <li>• Cột G: Nguồn khách hàng (tùy chọn)</li>
-          <li>• Cột H: Ghi chú (tùy chọn)</li>
-        </ul>
-       
-      </div>
-      <a href="/sample.xlsx" download className="text-blue-600 text-sm underline mt-2 inline-block">
-           <FontAwesomeIcon icon={faDownload}/> Tải file mẫu
-        </a>
-
-      {/* Footer buttons */}
       <div className="flex justify-end gap-2">
         <Button onClick={onClose}>Hủy</Button>
         <Button type="primary" loading={loading} onClick={handleImport}>

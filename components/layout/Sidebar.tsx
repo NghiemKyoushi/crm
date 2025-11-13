@@ -98,7 +98,7 @@ export const menuPermissions: Record<string, string[]> = {
   "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
 
   // CRM - open access initially
-  "/cms": []
+  "/cms": ["cms.view_screen", "cms.edit_screen"]
 };
 
 export const menuItems = [
@@ -106,16 +106,15 @@ export const menuItems = [
   { key: "/orderhub", icon: faShoppingCart, label: "orders" },
   { key: "/shipment-management", icon: faWarehouse, label: "operation" },
   { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
-  { key: "/cms", icon: faTags, label: "cms" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
-  // { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
+  { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
   // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
   { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
-
+    { key: "/cms", icon: faTags, label: "cms" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {

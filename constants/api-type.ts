@@ -136,5 +136,20 @@ export const API_TYPE_CONST = {
   CANCEL_DEBTS:`${FEATURE}/admin/debts/canceled`,
   EXPORT_DATA_DEBT: `${FEATURE}/admin/debts/export-excel`,
   DOWNLOAD_EXAMPLE_DEBT: `${FEATURE}/admin/debts/export-template`,
-  IMPORT_FILE_DEBT:`${FEATURE}/admin/debts/import-excel`
+  IMPORT_FILE_DEBT:`${FEATURE}/admin/debts/import-excel`,
+  TELESALES_LIST:`${FEATURE}/admin/telesales`,
+  TELESALES_IMPORT:`${FEATURE}/admin/telesales/import`,
+  TELESALES_DOWNLOAD_EXAMPLE:`${FEATURE}/admin/telesales/template`,
+  TELESSALE_ADD_NOTE: `${FEATURE}/admin/telesales/notes`,
+  TELESSALE_ADD_TAG:`${FEATURE}/admin/telesales/add-tags`,
+  TELESSALE_UPDATE_TAG:`${FEATURE}/admin/telesales/update-tags/`,
+  TELESSALE_DELETE_TAG:`${FEATURE}/admin/telesales/delete-tags/`,
+  TELESSALE_DELETE:`${FEATURE}/admin/telesales/delete-tags/`,
+  TELESSALE_ASSIGN :`${FEATURE}/admin/telesales/assign-prospect-telesale`,
+  TELESSALE_ASSIGN_TAG:`${FEATURE}/admin/telesales/contacts/{contact_id}/tags`,
+  TELESSALE_CHANGE_STATUS:`${FEATURE}/admin/telesales/contacts/{contact_id}/status`,
+  TELESALE_ACCOUNT:`${FEATURE}/admin/telesales/accounts`,
+  TAG_LIST:`${FEATURE}/admin/telesales/tags`,
+  DASHBOARD_TELESALE: `${FEATURE}/admin/telesales/dashboard`,
+  MANUAL_PARTNER:`/v1/admin/topups/debt`
 } as const;

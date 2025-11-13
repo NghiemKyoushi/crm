@@ -1,14 +1,21 @@
 import { Modal, Input, Button } from "antd";
 import { useState, useEffect } from "react";
 
+// Chuẩn hóa type - dùng giống với TagType ở tag-modal.tsx
+export interface TagType {
+  id: string | number;
+  name: string;
+  color: string;
+}
+
 interface TagEditModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (tag: { id?: string; name: string; color: string }) => void;
-  initialTag?: { id?: string; name: string; color: string };
+  onSave: (tag: TagType) => void;
+  initialTag?: Partial<TagType>;
 }
 
-const colors = [
+const colors: TagType["color"][] = [
   "red",
   "green",
   "blue",
@@ -26,13 +33,13 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
   onSave,
   initialTag,
 }) => {
-  const [name, setName] = useState("");
-  const [color, setColor] = useState("red");
+  const [name, setName] = useState<string>("");
+  const [color, setColor] = useState<TagType["color"]>("red");
 
   useEffect(() => {
     if (initialTag) {
-      setName(initialTag.name);
-      setColor(initialTag.color);
+      setName(initialTag.name ?? "");
+      setColor(initialTag.color ?? "red");
     } else {
       setName("");
       setColor("red");
@@ -41,7 +48,12 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
 
   const handleSave = () => {
     if (!name.trim()) return;
-    onSave({ ...initialTag, name: name.trim(), color });
+    const tag: TagType = {
+      id: initialTag?.id ?? "",
+      name: name.trim(),
+      color,
+    };
+    onSave(tag);
   };
 
   return (

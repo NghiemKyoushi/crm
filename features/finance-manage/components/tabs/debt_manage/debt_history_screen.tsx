@@ -1,11 +1,11 @@
-import { Modal, Button, DatePicker, Upload, message, Tooltip } from "antd";
+import { Button, DatePicker, Upload, message, Tooltip } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoryDebt, downloadExampleDebt, exportDebt, importDataDebt } from "@/features/finance-manage/apis";
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { Dayjs } from "dayjs";
 import TableComponent from "@/components/TableComponent";
-import { DownloadOutlined, UploadOutlined, FileExcelOutlined, CopyOutlined } from "@ant-design/icons";
+import { DownloadOutlined, UploadOutlined, FileExcelOutlined, CopyOutlined, ReloadOutlined } from "@ant-design/icons";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
 import { toast } from "react-toastify";
@@ -80,17 +80,13 @@ function downloadFileFromUrl(urlOrBase64: string, filename: string) {
 // Used in disabledDate
 const MAX_RANGE_DAYS = 90;
 
-export const DebtDetailModal = ({
-  visible,
-  onClose,
-  record,
-}: {
-  visible: boolean;
-  onClose: () => void;
+interface DebtHistoryScreenProps {
   record: any;
-}) => {
+  onRefresh?: () => void;
+}
+
+export const DebtHistoryScreen: React.FC<DebtHistoryScreenProps> = ({ record, onRefresh }) => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(getDefaultDateRange());
-  // Use plain object for params since BankDepositRequest likely does not include these props
   const [params, setParams] = useState<any>({
     page: 0,
     size: 10,
@@ -105,17 +101,17 @@ export const DebtDetailModal = ({
     isPending,
     refetch,
   } = useQuery({
-    enabled: !!record.user_id && visible,
-    queryKey: ["debt-history", record.user_id, params],
+    enabled: !!record?.user_id,
+    queryKey: ["debt-history", record?.user_id, params],
     queryFn: () => getHistoryDebt(record.user_id, params),
   });
 
   useEffect(() => {
-    if (visible && !!record.user_id) {
+    if (!!record?.user_id) {
       refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, record.user_id, params]);
+  }, [record?.user_id, params]);
 
   // Date range change handler
   const handleRangeChange = (range: [Dayjs | null, Dayjs | null]) => {
@@ -424,40 +420,36 @@ export const DebtDetailModal = ({
     }
   };
 
+  // Thêm hàm xử lý refresh gọi props.onRefresh nếu có
+  const handleRefresh = () => {
+    if (typeof onRefresh === "function") {
+      onRefresh();
+    }
+  };
+
   return (
-    <Modal
-      open={visible}
-      onCancel={onClose}
-      width={1500}
-      footer={null}
-      title={
-        <div className="flex items-center gap-2 flex-wrap">
-          <span>
-            Lịch sử giao dịch công nợ:{" "}
-            <span className="text-base font-semibold">
-              {Array.isArray(record)
-                ? record.map((r: any) => r?.full_name || r?.name).join(", ")
-                : record?.full_name || record?.name}
-            </span>
-          </span>
-          <div className="flex-1" />
-        </div>
-      }
+    <div
       style={{
-        maxHeight: "99vh",
-        overflowY: "auto",
+        maxWidth: 1500,
+        margin: "0 auto",
         paddingTop: 10,
+        paddingBottom: 20,
       }}
-      centered
-      destroyOnClose
     >
-      <div
-        style={{
-          height: "87vh",
-          overflowY: "auto",
-          paddingTop: 10,
-        }}
-      >
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        <span>
+          Lịch sử giao dịch công nợ:{" "}
+          <span className="text-base font-semibold">
+            {Array.isArray(record)
+              ? record.map((r: any) => r?.full_name || r?.name).join(", ")
+              : record?.full_name || record?.name}
+          </span>
+        </span>
+        <div className="flex-1" />
+        {/* Button làm mới */}
+      
+      </div>
+      <div style={{ minHeight: 550, overflowY: "auto" }}>
         <div className="flex flex-wrap gap-3 items-end mb-3 justify-end">
           <RangePicker
             className="min-w-[250px]"
@@ -518,8 +510,14 @@ export const DebtDetailModal = ({
           >
             Export
           </Button>
+          <Button
+          icon={<ReloadOutlined />}
+          type="default"
+          onClick={handleRefresh}
+        >
+          Làm mới
+        </Button>
         </div>
-
         {/* Summary Row */}
         {histories?.totals && (
           <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
@@ -551,7 +549,6 @@ export const DebtDetailModal = ({
             </div>
           </div>
         )}
-
         <TableComponent
           columns={columns}
           dataSource={histories?.data || []}
@@ -563,6 +560,6 @@ export const DebtDetailModal = ({
           loading={isPending}
         />
       </div>
-    </Modal>
+    </div>
   );
 };
