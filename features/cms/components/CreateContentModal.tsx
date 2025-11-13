@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Form, Input, InputNumber, Modal, Select, Upload, message } from "antd";
-import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
-import { VIEW_IMAGE } from "@/constants/api-type";
-import { uploadImage } from "@/features/user-profile/hooks/user-profile";
-import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent } from "../apis/contents";
+import React, { useState } from "react";
+import { Form, Input, InputNumber, Modal, Select, message } from "antd";
+import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent, getCmsContentImageUrl } from "../apis/contents";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
 import CmsTiptapEditor from "./CmsTiptapEditor";
@@ -19,15 +16,9 @@ type Props = {
 
 export default function CreateContentModal({ open, onClose, onSuccess, content }: Props) {
     const [form] = Form.useForm<CreateCmsContentBody>();
-    const [uploading, setUploading] = useState(false);
     const [bodyValue, setBodyValue] = useState<string>("");
-    const imageId = Form.useWatch("image_id", form);
+    const imageUrl = Form.useWatch("image_url", form);
     const contentType = Form.useWatch("type", form);
-    const thumbUrl = useMemo(() => {
-        if (!imageId) return undefined;
-        const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-        return `${base}/${VIEW_IMAGE}${imageId}`;
-    }, [imageId]);
 
     // Sync bodyValue with form and initial content
     React.useEffect(() => {
@@ -107,10 +98,27 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                 }
             }
             
+            // Extract image_id from URL if it's a system URL
+            let imageId: number | null = null;
+            if (values.image_url) {
+                // Try to extract image_id from URL patterns:
+                // - /view-image/{id}
+                // - /medias/v1/files/view/thumb/{id}
+                const match1 = values.image_url.match(/\/view-image\/(\d+)/);
+                const match2 = values.image_url.match(/\/view\/thumb\/(\d+)/);
+                if (match1) {
+                    imageId = parseInt(match1[1], 10);
+                } else if (match2) {
+                    imageId = parseInt(match2[1], 10);
+                } else {
+                    imageId = null;
+                }
+            }
             const payload = {
                 ...values,
                 body: finalBody,
                 status: "active",
+                image_id: imageId ?? values.image_id ?? null,
             } as CreateCmsContentBody;
             await mutateAsync(payload);
         } catch (error) {
@@ -139,46 +147,25 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                     body: content?.body,
                     type: content?.type ?? "html",
                     image_id: content?.image_id ?? null,
+                    image_url: content?.image_url ?? null,
                     position: content?.position ?? "hero",
                     order_index: content?.order_index ?? 1,
                 }}
             >
-                <Form.Item label="Image">
-                    <Upload.Dragger
-                        accept="image/*"
-                        multiple={false}
-                        showUploadList={false}
-                        customRequest={async (options: RcCustomRequestOptions) => {
-                            const { file, onSuccess, onError } = options;
-                            try {
-                                setUploading(true);
-                                const id = await uploadImage(file as File);
-                                form.setFieldValue("image_id", id);
-                                message.success("Image uploaded");
-                                onSuccess && onSuccess({ id } as any);
-                            } catch (e) {
-                                message.error("Upload failed");
-                                onError && onError(e as any);
-                            } finally {
-                                setUploading(false);
-                            }
-                        }}
-                        disabled={uploading}
-                    >
-                        {thumbUrl ? (
-                            <div className="flex flex-col items-center gap-2 py-3">
-                                <img src={thumbUrl} alt="preview" className="max-h-32 rounded" />
-                                <div className="text-xs text-gray-500">Image ID: {imageId}</div>
-                                <div className="text-xs text-gray-400">Drag & drop to replace</div>
-                            </div>
-                        ) : (
-                            <div className="py-6">
-                                <p className="ant-upload-drag-icon">📷</p>
-                                <p className="ant-upload-text">Click or drag image to upload</p>
-                            </div>
-                        )}
-                    </Upload.Dragger>
+                <Form.Item 
+                    name="image_url" 
+                    label="Image URL"
+                    rules={[{ type: "url", message: "Please enter a valid URL" }]}
+                >
+                    <Input placeholder="https://example.com/image.jpg" />
                 </Form.Item>
+                {imageUrl && (
+                    <div className="mb-4 flex flex-col items-center gap-2">
+                        <img src={imageUrl} alt="preview" className="max-h-32 rounded" onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                        }} />
+                    </div>
+                )}
 
                 <Form.Item name="title" label="Title" rules={[{ required: true }]}>
                     <Input />
@@ -239,6 +226,9 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                     </Form.Item>
                 )}
                 <Form.Item name="image_id" hidden>
+                    <Input />
+                </Form.Item>
+                <Form.Item name="image_url" hidden>
                     <Input />
                 </Form.Item>
                 <Form.Item name="status" hidden>

@@ -3,8 +3,6 @@
 import { JSX, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { storage } from '@/lib/storage';
-import { KEY_STORAGE } from '@/constants/storage';
 import Cookies from "js-cookie";
 
 export function WithAuth<P extends JSX.IntrinsicAttributes>(

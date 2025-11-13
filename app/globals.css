@@ -1,6 +1,151 @@
 @import "tailwindcss";
 @import 'antd/dist/reset.css';
 
+/* SF Pro Display Font Faces */
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Thin.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-ThinItalic.otf') format('opentype');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Ultralight.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-UltralightItalic.otf') format('opentype');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-LightItalic.otf') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-RegularItalic.otf') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-MediumItalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Semibold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-SemiboldItalic.otf') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-BoldItalic.otf') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Heavy.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-HeavyItalic.otf') format('opentype');
+    font-weight: 800;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('/font/SF-Pro-Display/SF-Pro-Display-BlackItalic.otf') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
 :root {
     --background: #ffffff;
     /* Font Tokens */
@@ -23,12 +168,53 @@
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
 
-/* Allow TipTap editor to use custom fonts from inline styles */
-.tiptap-editor span[style*="font-family"],
-.tiptap-editor [style*="font-family"],
-.ProseMirror span[style*="font-family"],
-.ProseMirror [style*="font-family"] {
-    font-family: unset !important;
+/* Exception: Allow inline color styles in TipTap editor */
+.tiptap-editor [style*="color"],
+.ProseMirror [style*="color"] {
+    /* Inline styles have highest specificity - color will work automatically */
+}
+
+/* TipTap editor - Force SF Pro Display font but allow inline color styles */
+.tiptap-editor .ProseMirror,
+.tiptap-editor .ProseMirror p,
+.tiptap-editor .ProseMirror h1,
+.tiptap-editor .ProseMirror h2,
+.tiptap-editor .ProseMirror h3,
+.tiptap-editor .ProseMirror h4,
+.tiptap-editor .ProseMirror h5,
+.tiptap-editor .ProseMirror h6,
+.tiptap-editor .ProseMirror div,
+.tiptap-editor .ProseMirror li,
+.tiptap-editor .ProseMirror td,
+.tiptap-editor .ProseMirror th,
+.ProseMirror,
+.ProseMirror p,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6,
+.ProseMirror div,
+.ProseMirror li,
+.ProseMirror td,
+.ProseMirror th {
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Force SF Pro Display for spans but allow inline color styles */
+.tiptap-editor .ProseMirror span,
+.ProseMirror span {
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    /* Color will be applied via inline style - inline styles have highest specificity */
+}
+
+/* Code blocks should still use monospace */
+.tiptap-editor .ProseMirror code,
+.tiptap-editor .ProseMirror pre,
+.ProseMirror code,
+.ProseMirror pre {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
 }
 
 body {

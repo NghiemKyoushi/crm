@@ -164,50 +164,6 @@ const Column = Node.create({
   },
 });
 
-// Custom FontFamily Extension - extends TextStyle to add fontFamily attribute
-const FontFamily = TextStyleKit.extend({
-  addAttributes() {
-    return {
-      fontFamily: {
-        default: null,
-        parseHTML: (element: HTMLElement) => {
-          const fontFamily = element.style.fontFamily;
-          if (!fontFamily) return null;
-          // Remove quotes and return font name
-          return fontFamily.replace(/['"]+/g, '').split(',')[0].trim();
-        },
-        renderHTML: (attributes: any) => {
-          if (!attributes.fontFamily) {
-            return {};
-          }
-          // Add fallback fonts and handle font names with spaces
-          const fontName = attributes.fontFamily.includes(' ')
-            ? `"${attributes.fontFamily}"`
-            : attributes.fontFamily;
-          return {
-            style: `font-family: ${fontName}, sans-serif`,
-          };
-        },
-      },
-    };
-  },
-  addCommands() {
-    return {
-      setFontFamily: (fontFamily: string) => ({ chain }: any) => {
-        return chain()
-          .setMark('textStyle', { fontFamily })
-          .run();
-      },
-      unsetFontFamily: () => ({ chain }: any) => {
-        return chain()
-          .setMark('textStyle', { fontFamily: null })
-          .removeEmptyTextStyle()
-          .run();
-      },
-    };
-  },
-});
-
 // Enhanced Image Extension with size and layout controls
 const EnhancedImage = ImageBase.extend({
   name: 'image',
@@ -428,29 +384,6 @@ export default function CmsTiptapEditor({
     handle: string;
   } | null>(null);
 
-  // Google Fonts list
-  const googleFonts = [
-    { value: '', label: 'Default' },
-    { value: 'Roboto', label: 'Roboto' },
-    { value: 'Open Sans', label: 'Open Sans' },
-    { value: 'Lato', label: 'Lato' },
-    { value: 'Montserrat', label: 'Montserrat' },
-    { value: 'Poppins', label: 'Poppins' },
-    { value: 'Raleway', label: 'Raleway' },
-    { value: 'Ubuntu', label: 'Ubuntu' },
-    { value: 'Playfair Display', label: 'Playfair Display' },
-    { value: 'Merriweather', label: 'Merriweather' },
-    { value: 'Oswald', label: 'Oswald' },
-    { value: 'Source Sans Pro', label: 'Source Sans Pro' },
-    { value: 'Lora', label: 'Lora' },
-    { value: 'Nunito', label: 'Nunito' },
-    { value: 'PT Sans', label: 'PT Sans' },
-    { value: 'Dancing Script', label: 'Dancing Script' },
-    { value: 'Pacifico', label: 'Pacifico' },
-    { value: 'Comfortaa', label: 'Comfortaa' },
-    { value: 'Crimson Text', label: 'Crimson Text' },
-    { value: 'Libre Baskerville', label: 'Libre Baskerville' },
-  ];
 
   const editor = useEditor({
     extensions: [
@@ -475,6 +408,7 @@ export default function CmsTiptapEditor({
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      TextStyleKit,
       FontSize,
       Color,
       Highlight.configure({
@@ -511,7 +445,6 @@ export default function CmsTiptapEditor({
       }),
       Subscript,
       Superscript,
-      FontFamily,
       Columns,
       Column,
       Button,
@@ -1032,47 +965,6 @@ export default function CmsTiptapEditor({
               { value: "36px", label: "36px" },
               { value: "48px", label: "48px" },
             ]}
-          />
-        </div>
-
-        {/* Font Family */}
-        <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
-          <Select
-            size="small"
-            style={{ width: 140 }}
-            placeholder="Font"
-            value={editor.getAttributes('textStyle').fontFamily || ""}
-            onChange={(value) => {
-              if (value) {
-                console.log('[FontFamily] Setting font:', value);
-                // @ts-ignore
-                const result = editor.chain().focus().setFontFamily(value).run();
-                console.log('[FontFamily] Command result:', result);
-                // Force update to see the change
-                setTimeout(() => {
-                  const attrs = editor.getAttributes('textStyle');
-                  console.log('[FontFamily] Current attributes:', attrs);
-                  // Check HTML output
-                  const html = editor.getHTML();
-                  console.log('[FontFamily] HTML output:', html);
-                  // Check if font is in the HTML
-                  if (html.includes(value)) {
-                    console.log('[FontFamily] ✓ Font found in HTML');
-                  } else {
-                    console.warn('[FontFamily] ✗ Font NOT found in HTML');
-                  }
-                }, 100);
-              } else {
-                // @ts-ignore
-                editor.chain().focus().unsetFontFamily().run();
-              }
-            }}
-            options={googleFonts.map(font => ({
-              value: font.value,
-              label: <span style={{ fontFamily: font.value ? `${font.value}, sans-serif` : undefined }}>
-                {font.label}
-              </span>
-            }))}
           />
         </div>
 
@@ -1704,10 +1596,44 @@ export default function CmsTiptapEditor({
           min-height: 160px;
           outline: none;
           width: 100%;
+          font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
         }
 
         .tiptap-editor .ProseMirror:focus {
           outline: none;
+        }
+
+        /* Force SF Pro Display for all editor content - but allow inline color styles */
+        .tiptap-editor .ProseMirror p,
+        .tiptap-editor .ProseMirror h1,
+        .tiptap-editor .ProseMirror h2,
+        .tiptap-editor .ProseMirror h3,
+        .tiptap-editor .ProseMirror h4,
+        .tiptap-editor .ProseMirror h5,
+        .tiptap-editor .ProseMirror h6,
+        .tiptap-editor .ProseMirror div,
+        .tiptap-editor .ProseMirror li,
+        .tiptap-editor .ProseMirror td,
+        .tiptap-editor .ProseMirror th {
+          font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        /* Force SF Pro Display for spans without inline styles */
+        .tiptap-editor .ProseMirror span:not([style*="color"]) {
+          font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        /* Allow inline color styles to work - don't override color */
+        .tiptap-editor .ProseMirror span[style*="color"],
+        .tiptap-editor .ProseMirror [style*="color"] {
+          font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif !important;
+          /* Color will be applied via inline style - don't override */
+        }
+        
+        /* Code blocks should still use monospace */
+        .tiptap-editor .ProseMirror code,
+        .tiptap-editor .ProseMirror pre {
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
         }
 
         .tiptap-editor p {

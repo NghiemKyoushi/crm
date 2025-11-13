@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Form, Input, InputNumber, Select, Upload, message, Button } from "antd";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
 import { VIEW_IMAGE } from "@/constants/api-type";
 import { uploadImage } from "@/features/user-profile/hooks/user-profile";
@@ -20,14 +21,21 @@ export default function CreateContentPage() {
     const [bodyValue, setBodyValue] = useState<string>("");
     const [saving, setSaving] = useState(false);
     
+    const imageUrl = Form.useWatch("image_url", form);
     const imageId = Form.useWatch("image_id", form);
     const contentType = Form.useWatch("type", form);
     
     const thumbUrl = useMemo(() => {
-        if (!imageId) return undefined;
-        const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-        return `${base}/${VIEW_IMAGE}${imageId}`;
-    }, [imageId]);
+        // Check image_url first, then fallback to image_id
+        if (imageUrl) {
+            return imageUrl;
+        }
+        if (imageId) {
+            const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
+            return `${base}/${VIEW_IMAGE}${imageId}`;
+        }
+        return undefined;
+    }, [imageUrl, imageId]);
 
     // Sync body when type changes
     React.useEffect(() => {
@@ -88,6 +96,8 @@ export default function CreateContentPage() {
                 ...values,
                 body: finalBody,
                 status: "active",
+                // Use image_url instead of image_id when creating/updating
+                image_id: null, // Don't send image_id anymore
             } as CreateCmsContentBody;
             
             setSaving(true);
@@ -126,6 +136,7 @@ export default function CreateContentPage() {
                         status: "active",
                         type: "html",
                         image_id: null,
+                        image_url: null,
                         position: "hero",
                         order_index: 1,
                     }}
@@ -140,12 +151,16 @@ export default function CreateContentPage() {
                                 try {
                                     setUploading(true);
                                     const id = await uploadImage(file as File);
+                                    const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
+                                    const url = `${base}/${VIEW_IMAGE}${id}`;
+                                    // Set both image_id and image_url for backward compatibility
                                     form.setFieldValue("image_id", id);
+                                    form.setFieldValue("image_url", url);
                                     message.success("Image uploaded");
-                                    onSuccess && onSuccess({ id } as any);
+                                    onSuccess?.({ id } as any);
                                 } catch (e) {
                                     message.error("Upload failed");
-                                    onError && onError(e as any);
+                                    onError?.(e as any);
                                 } finally {
                                     setUploading(false);
                                 }
@@ -154,8 +169,10 @@ export default function CreateContentPage() {
                         >
                             {thumbUrl ? (
                                 <div className="flex flex-col items-center gap-2 py-3">
-                                    <img src={thumbUrl} alt="preview" className="max-h-32 rounded" />
-                                    <div className="text-xs text-gray-500">Image ID: {imageId}</div>
+                                    <Image src={thumbUrl} alt="preview" width={128} height={128} className="max-h-32 rounded object-contain" />
+                                    <div className="text-xs text-gray-500">
+                                        {imageUrl ? `Image URL: ${imageUrl}` : imageId ? `Image ID: ${imageId}` : ''}
+                                    </div>
                                     <div className="text-xs text-gray-400">Drag & drop to replace</div>
                                 </div>
                             ) : (
@@ -226,6 +243,9 @@ export default function CreateContentPage() {
                         </Form.Item>
                     )}
                     <Form.Item name="image_id" hidden>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="image_url" hidden>
                         <Input />
                     </Form.Item>
                     <Form.Item name="status" hidden>

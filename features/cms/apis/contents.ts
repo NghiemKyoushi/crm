@@ -1,4 +1,5 @@
 import api from "@/api/axiosClient";
+import { VIEW_IMAGE } from "@/constants/api-type";
 
 export type CmsContent = {
     id: number;
@@ -8,6 +9,7 @@ export type CmsContent = {
     short_desc: string;
     status: string;
     image_id: number | null;
+    image_url: string | null;
     order_index: number;
     position?: string;
 };
@@ -67,6 +69,7 @@ export type CreateCmsContentBody = {
     body: string;
     type: string; // e.g. html, markdown
     image_id: number | null;
+    image_url: string | null;
     position: string; // e.g. main, sidebar
     order_index: number;
     status: string; // active/inactive
@@ -96,6 +99,27 @@ export const getCmsContentDetail = async (id: number): Promise<CmsContent> => {
         return payload.data;
     }
     return payload;
+};
+
+/**
+ * Helper function to get image URL from CMS content
+ * Checks image_url first, if null then falls back to image_id
+ */
+export const getCmsContentImageUrl = (content: CmsContent | null | undefined): string | undefined => {
+    if (!content) return undefined;
+    
+    // Check image_url first
+    if (content.image_url) {
+        return content.image_url;
+    }
+    
+    // Fallback to image_id
+    if (content.image_id) {
+        const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
+        return `${base}/${VIEW_IMAGE}${content.image_id}`;
+    }
+    
+    return undefined;
 };
 
 
