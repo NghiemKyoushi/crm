@@ -168,47 +168,51 @@ const TelesalesPage: React.FC = () => {
   };
 
   const columns: ColumnsType<TelesaleCustomer> = [
-    {
-      title: (
-        <Checkbox
-          checked={
-            !!data?.data &&
-            data.data.length > 0 &&
-            selectedRowKeys.length === data.data.length
+    ...(isAdmin
+      ? [
+          {
+            title: (
+              <Checkbox
+                checked={
+                  !!data?.data &&
+                  data.data.length > 0 &&
+                  selectedRowKeys.length === data.data.length
+                }
+                indeterminate={
+                  !!data?.data &&
+                  selectedRowKeys.length > 0 &&
+                  selectedRowKeys.length < data.data.length
+                }
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    if (data?.data) {
+                      setSelectedRowKeys(data.data.map((d) => d.id));
+                    }
+                  } else {
+                    setSelectedRowKeys([]);
+                  }
+                }}
+              />
+            ),
+            dataIndex: "select",
+            key: "select",
+            width: 48,
+            render: (_: any, record: TelesaleCustomer) => (
+              <Checkbox
+                checked={selectedRowKeys.includes(record.id)}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  if (checked) {
+                    setSelectedRowKeys((prev) => [...prev, record.id]);
+                  } else {
+                    setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
+                  }
+                }}
+              />
+            ),
           }
-          indeterminate={
-            !!data?.data &&
-            selectedRowKeys.length > 0 &&
-            selectedRowKeys.length < data.data.length
-          }
-          onChange={(e) => {
-            if (e.target.checked) {
-              if (data?.data) {
-                setSelectedRowKeys(data.data.map((d) => d.id));
-              }
-            } else {
-              setSelectedRowKeys([]);
-            }
-          }}
-        />
-      ),
-      dataIndex: "select",
-      key: "select",
-      width: 48,
-      render: (_: any, record: TelesaleCustomer) => (
-        <Checkbox
-          checked={selectedRowKeys.includes(record.id)}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            if (checked) {
-              setSelectedRowKeys((prev) => [...prev, record.id]);
-            } else {
-              setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
-            }
-          }}
-        />
-      ),
-    },
+        ]
+      : []),
     {
       title: "Khách hàng",
       dataIndex: "name",
@@ -217,7 +221,7 @@ const TelesalesPage: React.FC = () => {
         <div className="flex flex-col">
           <span className="font-xs">{record.name}</span>
           <span className="text-gray-400 text-xs">
-            {record.date_of_birth ? `${record.date_of_birth}` : "Ngày sinh: --"}
+            {record.dateOfBirth ? `${record.dateOfBirth}` : "Ngày sinh: --"}
           </span>
         </div>
       ),
@@ -229,7 +233,7 @@ const TelesalesPage: React.FC = () => {
       render: (_: any, record: TelesaleCustomer) => (
         <div className="whitespace-pre-line text-gray-600 text-xs">
           <div>
-            <span className="font-semibold">Ngày sinh:</span>{" "}
+            <span className="font-semibold">Số dt:</span>{" "}
             {record.phone || "--"}
           </div>
           <div>

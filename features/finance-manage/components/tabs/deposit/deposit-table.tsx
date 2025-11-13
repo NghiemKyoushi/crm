@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import {
   cancelTopup,
   confirmTopup,
+  createManualPartner,
   createMinusTopupManual,
   createTopupManual,
   getDetailHistoryTopups,
@@ -47,6 +48,8 @@ const DepositTable = (props: DepositTableProps) => {
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
   const [isOpenMinusManual, setIsOpenMinusManual] = useState(false);
+  const [isOpenPartnerManual, setIsOpenPartnerManual] = useState(false);
+
   const [isOpenHistory, setIsOpenHistory] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
@@ -371,6 +374,16 @@ const DepositTable = (props: DepositTableProps) => {
       toast.error(err.response?.data?.localizedMessage || t("common.error")),
   });
 
+  const createPartnerManualMutation = useMutation({
+    mutationFn: (data: DepositRequest) => createManualPartner(data),
+    onSuccess: () => {
+      toast.success(t("toast.createDepositSuccess"));
+      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+    },
+    onError: (err: any) =>
+      toast.error(err.response?.data?.localizedMessage || t("common.error")),
+  });
+
   const handleCreateTopupManual = (value: DepositRequest) => {
     createTopupManualMutation.mutate(value);
     setIsOpen(false);
@@ -380,7 +393,11 @@ const DepositTable = (props: DepositTableProps) => {
     createMinusTopupManualMutation.mutate(value);
     setIsOpenMinusManual(false);
   };
-
+  
+  const handleCreatePartnerManual = (value: DepositRequest) => {
+    createPartnerManualMutation.mutate(value);
+    setIsOpenPartnerManual(false);
+  };
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex items-center justify-between mb-4">
@@ -388,10 +405,10 @@ const DepositTable = (props: DepositTableProps) => {
           {t("deposit.approveDeposit")}
         </h2>
         <div className="flex items-center gap-3">
-        {/* {hasPermission("finance.manual_topup") && (
+        {hasPermission("finance.manual_topup") && (
             <>
               <Button
-                onClick={() => setIsOpen(true)}
+                onClick={() => setIsOpenPartnerManual(true)}
                 type="primary"
                 className="!h-9 !bg-blue-500 hover:!bg-blue-600 !border-blue-500 hover:!border-blue-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
               >
@@ -399,7 +416,7 @@ const DepositTable = (props: DepositTableProps) => {
                 <span>Nạp tiền cho đối tác</span>
               </Button>
             </>
-          )} */}
+          )}
           {hasPermission("finance.manual_topup") && (
             <>
               <Button
@@ -494,11 +511,11 @@ const DepositTable = (props: DepositTableProps) => {
         selectId={selectedId}
         typeDetail={typeDetail}
       />
-      {/* <ManualPartnerModal
-       onClose={() => console.log('') }
-       onConfirm={(value) => console.log('value', value)}
-       open={true}
-      /> */}
+      <ManualPartnerModal
+       onClose={() => setIsOpenPartnerManual(false) }
+       onConfirm={handleCreatePartnerManual}
+       open={isOpenPartnerManual}
+      />
     </div>
   );  
 };

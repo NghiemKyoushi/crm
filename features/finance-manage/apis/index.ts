@@ -208,6 +208,13 @@ export const createDebt = async (
   return res.data.data;
 };
 
+export const createManualPartner = async (
+  body: DepositRequest
+) => {
+  const res = await api.post(`${API_TYPE_CONST.MANUAL_PARTNER}`, body);
+  return res.data.data;
+};
+
 export const getHistoryDebt = async (
   id: number,
   params: BankDepositRequest
@@ -251,5 +258,9 @@ export const importDataDebt = async (formData: FormData) => {
       }
     }
   );
+  return res.data.data;
+};
+export const getPartnerList = async (params: BankDepositRequest) => {
+  const res = await api.get(`${API_TYPE_CONST.GET_ALL_PARTNER}`, { params });
   return res.data.data;
 };

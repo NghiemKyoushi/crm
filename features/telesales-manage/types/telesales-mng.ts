@@ -15,7 +15,7 @@ export interface TelesaleCustomer {
     saleId: string | null;
     phone: string;
     gender: string;
-    date_of_birth: string;
+    dateOfBirth: string;
     saleGender: string | null;
     dateOfBirthSale: string | null;
     emailSale: string | null;
