@@ -276,14 +276,39 @@ export const getSourceWebsiteByDomain = async (domain: string) => {
 
 // Get website accounts by website ID
 export const getWebsiteAccounts = async (websiteId: number) => {
-  const res = await api.get(`${API_TYPE_CONST.GET_WEBSITE_ACCOUNTS}/${websiteId}`);
+  const res = await api.get(
+    `${API_TYPE_CONST.GET_WEBSITE_ACCOUNTS}/${websiteId}`
+  );
   return res.data.data;
 };
 
 // Update order source account
-export const updateOrderSourceAccount = async (orderId: number, sourceAccountId: number) => {
-  const res = await api.put(`${API_TYPE_CONST.ORDER_SOURCE_ACCOUNT}/${orderId}`, {
-    sourceAccountId,
-  });
+export const updateOrderSourceAccount = async (
+  orderId: number,
+  sourceAccountId: number
+) => {
+  const res = await api.put(
+    `${API_TYPE_CONST.ORDER_SOURCE_ACCOUNT}/${orderId}`,
+    {
+      sourceAccountId,
+    }
+  );
+  return res.data.data;
+};
+
+export const cancelOrderAfterApprove = async (
+  id: number,
+  body: {
+    amount: number;
+    note: string;
+    isFullBack: boolean;
+  }
+) => {
+  const bodySend = {
+    note: body.note,
+    is_full_back: body.isFullBack,
+    amount: body.amount
+  }
+  const res = await api.post(`${API_TYPE_CONST.CANCEL_ORDER}/${id}`, bodySend);
   return res.data.data;
 };

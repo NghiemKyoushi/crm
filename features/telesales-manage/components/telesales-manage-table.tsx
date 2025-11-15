@@ -3,23 +3,22 @@ import React, { useState, useRef, useMemo } from "react";
 import {
   Button,
   Input,
-  Select,
   Tag,
   Modal,
   Checkbox,
   Tooltip,
   message,
+  Form,
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckCircle,
   faDownload,
   faFileExcel,
-  faFilter,
   faTimesCircle,
   faTrash,
+  faUserPlus,
   faUsers,
-  faUserTag,
 } from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
 import TelesaleDetailModal from "./telesale-detail-modal";
@@ -42,6 +41,7 @@ import {
 import { EditOutlined } from "@ant-design/icons";
 import AddMultiCustomerModal from "./modal/add-multi-customer";
 import {
+  addTelesaleCustomer,
   assignTelesale,
   deleteTelesaleContactTags,
   downloadTelesaleExample,
@@ -52,38 +52,44 @@ import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { NoteModal } from "./modal/note-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
-
-const { Option } = Select;
+import { FilterForm } from "./modal/filter-telesale-modal";
+import { CustomerAddModal } from "./modal/customer-add-modal";
 
 const TelesalesPage: React.FC = () => {
   const { hasPermission } = usePermission();
   const [page, setPage] = useState(0);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isOpenAssign, setIsOpenAssign] = useState(false);
-  const [isOpenImport, setIsOpenImport] = useState(false);
   const [selectedCustomer, setSelectedCustomer] =
     useState<TelesaleCustomer | null>(null);
   const [isOpenTagModal, setIsOpenTagModal] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
+  const [isOpenAddCustomerModalOpen, setIsOpenAddCustomerModalOpen] = useState(false);
+
   const [noteAssign, setNoteAssign] = useState<string>("");
   const [bulkAssignCustomers, setBulkAssignCustomers] = useState<
     TelesaleCustomer[]
   >([]);
   const [downloading, setDownloading] = useState(false);
+
+  // note modal (ghi chú customer)
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [editingNoteCustomer, setEditingNoteCustomer] =
     useState<TelesaleCustomer | null>(null);
+
+  // for call confirm modal (gọi/thất bại)
   const [confirmCallModal, setConfirmCallModal] = useState<{
     open: boolean;
     customer: TelesaleCustomer | null;
     status: "CALLED" | "FAILED" | null;
+    note?: string;
   }>({
     open: false,
     customer: null,
     status: null,
+    note: "",
   });
-  // Popup confirm for deleting tag per tag
   const [deleteTagModal, setDeleteTagModal] = useState<{
     open: boolean;
     tag?: { tagId: number; customerId: number };
@@ -107,9 +113,6 @@ const TelesalesPage: React.FC = () => {
     page: 0,
     pageSize: 10,
   });
-  const [filterSearch, setFilterSearch] = useState("");
-  const [filterSaleId, setFilterSaleId] = useState<string | undefined>("");
-  const [filterStatus, setFilterStatus] = useState<string | undefined>("");
 
   const { data, isPending, refetch } = useTelesalesList(params);
   const { data: telesaleUserList, isLoading: isLoadingTelesaleUsers } =
@@ -205,14 +208,17 @@ const TelesalesPage: React.FC = () => {
                   if (checked) {
                     setSelectedRowKeys((prev) => [...prev, record.id]);
                   } else {
-                    setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
+                    setSelectedRowKeys((prev) =>
+                      prev.filter((k) => k !== record.id)
+                    );
                   }
                 }}
               />
             ),
-          }
+          },
         ]
       : []),
+    // ... rest unchanged
     {
       title: "Khách hàng",
       dataIndex: "name",
@@ -221,7 +227,7 @@ const TelesalesPage: React.FC = () => {
         <div className="flex flex-col">
           <span className="font-xs">{record.name}</span>
           <span className="text-gray-400 text-xs">
-            {record.dateOfBirth ? `${record.dateOfBirth}` : "Ngày sinh: --"}
+            {record.email ? `${record.email}` : "--"}
           </span>
         </div>
       ),
@@ -233,12 +239,23 @@ const TelesalesPage: React.FC = () => {
       render: (_: any, record: TelesaleCustomer) => (
         <div className="whitespace-pre-line text-gray-600 text-xs">
           <div>
-            <span className="font-semibold">Số dt:</span>{" "}
-            {record.phone || "--"}
+            <span className="font-semibold">Số dt:</span> {record.phone || "--"}
           </div>
           <div>
             <span className="font-semibold">Địa chỉ:</span>{" "}
             {record.address || "--"}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Lĩnh vực kinh doanh",
+      dataIndex: "info",
+      key: "info",
+      render: (_: any, record: TelesaleCustomer) => (
+        <div className="whitespace-pre-line text-gray-600 text-xs">
+          <div>
+            {record.businessField || "--"}
           </div>
         </div>
       ),
@@ -250,12 +267,8 @@ const TelesalesPage: React.FC = () => {
       render: (_: any, record: any) => (
         <div className="whitespace-pre-line text-gray-600 text-xs">
           <div>
-            <span className="font-semibold">Giới tính:</span>{" "}
-            {record.gender || "--"}
-          </div>
-          <div>
             <span className="font-semibold">Nguồn:</span>{" "}
-            {record.source || "--"}
+            {record.customerInfo || "--"}
           </div>
         </div>
       ),
@@ -366,28 +379,72 @@ const TelesalesPage: React.FC = () => {
       },
     },
     {
-      title: "Ghi chú",
+      title: "Ghi chú yc khách hàng",
       dataIndex: "note",
       key: "note",
+      width: 150,
+      render: (_: any, record: any) => {
+        const note = record.note || "--";
+        const isLong = typeof note === "string" && note.length > 30;
+        return (
+          <div className="whitespace-pre-line text-gray-600 text-xs">
+            <div>
+              {isLong ? (
+                <Tooltip title={note}>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      display: "inline-block",
+                      maxWidth: 120,
+                      verticalAlign: "bottom",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {note}
+                  </span>
+                </Tooltip>
+              ) : (
+                <span>{note}</span>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Ghi chú",
+      dataIndex: "notes",
+      key: "notes",
       width: 200,
       render: (_: any, record: TelesaleCustomer) => (
         <div className="flex items-start gap-2">
-          <div style={{ maxWidth: 100, overflow: "hidden" }}>
+          <div style={{ maxWidth: 200, overflow: "hidden" }}>
             {record.notes && record.notes.length > 0 ? (
               <div className="flex flex-col gap-1">
                 {record.notes.map((noteObj: any, idx: number) =>
-                  noteObj.note && noteObj.note.trim().length > 0 ? (
-                    <span
+                  noteObj && noteObj.trim().length > 0 ? (
+                    <Tooltip
                       key={idx}
-                      style={{
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                      title={
+                        noteObj.length > 30 ? noteObj : undefined
+                      }
+                      placement="topLeft"
                     >
-                      {noteObj.note}
-                    </span>
+                      <span
+                        style={{
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                          display: "block",
+                          cursor:
+                            noteObj.length > 30 ? "pointer" : "default",
+                        }}
+                      >
+                        {noteObj}
+                      </span>
+                    </Tooltip>
                   ) : null
                 )}
               </div>
@@ -438,6 +495,7 @@ const TelesalesPage: React.FC = () => {
                   open: true,
                   customer: record,
                   status: "CALLED",
+                  note: "",
                 });
               }}
             >
@@ -453,18 +511,12 @@ const TelesalesPage: React.FC = () => {
                   open: true,
                   customer: record,
                   status: "FAILED",
+                  note: "",
                 });
               }}
             >
               Thất bại
             </Button>
-            {/* <Button
-              size="small"
-              onClick={() => setIsOpenDetail(true)}
-              className="!bg-blue-500 !text-white !text-xs"
-            >
-              Chi tiết
-            </Button> */}
           </div>
         );
       },
@@ -485,7 +537,7 @@ const TelesalesPage: React.FC = () => {
       const url = window.URL.createObjectURL(new Blob([blob]));
       const a = document.createElement("a");
       a.href = url;
-      a.download = "sample.xlsx";
+      a.download = "file_telesale_sample.xlsx";
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
@@ -499,41 +551,67 @@ const TelesalesPage: React.FC = () => {
     }
   };
 
+  // State and handler for call note form inside Modal
+  const [callNoteForm] = Form.useForm();
+  const [callNoteError, setCallNoteError] = useState<string | null>(null);
+
   // 👉 handleConfirmUpdateStatus: call statistic refresh after status update
-  const handleConfirmUpdateStatus = () => {
+  const handleConfirmUpdateStatus = async () => {
     if (
       confirmCallModal.customer &&
       (confirmCallModal.status === "CALLED" ||
         confirmCallModal.status === "FAILED")
     ) {
-      updateTelesaleStatus(
-        {
-          contactId: String(confirmCallModal.customer.id),
-          status: confirmCallModal.status,
-        },
-        {
-          onSuccess: () => {
-            message.success(
-              confirmCallModal.status === "CALLED"
-                ? "Cập nhật trạng thái thành công!"
-                : "Cập nhật trạng thái thất bại thành công!"
-            );
-            setConfirmCallModal({ open: false, customer: null, status: null });
-            // Refresh telesale statistics after status updates
-            reloadTelesaleStat();
-            refetch();
+      try {
+        const values = await callNoteForm.validateFields();
+        updateTelesaleStatus(
+          {
+            contactId: String(confirmCallModal.customer.id),
+            status: confirmCallModal.status,
+            note: values.note,
           },
-          onError: () => {
-            message.error("Cập nhật trạng thái thất bại!");
-            setConfirmCallModal({ open: false, customer: null, status: null });
-          },
-        }
-      );
+          {
+            onSuccess: () => {
+              toast.success(
+                confirmCallModal.status === "CALLED"
+                  ? "Cập nhật trạng thái thành công!"
+                  : "Cập nhật trạng thái thất bại thành công!"
+              );
+              setConfirmCallModal({
+                open: false,
+                customer: null,
+                status: null,
+                note: "",
+              });
+              reloadTelesaleStat();
+              refetch();
+            },
+            onError: () => {
+              toast.error("Cập nhật trạng thái thất bại!");
+              setConfirmCallModal({
+                open: false,
+                customer: null,
+                status: null,
+                note: "",
+              });
+            },
+          }
+        );
+      } catch (err) {
+        setCallNoteError("Vui lòng nhập ghi chú!");
+      }
     }
   };
 
   const handleCancelUpdateStatus = () => {
-    setConfirmCallModal({ open: false, customer: null, status: null });
+    setConfirmCallModal({
+      open: false,
+      customer: null,
+      status: null,
+      note: "",
+    });
+    callNoteForm.resetFields();
+    setCallNoteError(null);
   };
 
   const handleImportClick = () => {
@@ -555,13 +633,10 @@ const TelesalesPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       await importTelesaleCustomers(formData);
-
       toast.success("Import thành công!");
-      setIsOpenImport(false);
       refetch();
-      reloadTelesaleStat(); // refresh statistic after import
+      reloadTelesaleStat();
     } catch (error) {
       toast.error("Import thất bại. Vui lòng thử lại!");
     } finally {
@@ -569,16 +644,39 @@ const TelesalesPage: React.FC = () => {
     }
   };
 
-  // Handler for filtering
-  const handleFilter = () => {
+  // Handler for filtering: always trigger refetch, even if the filters have not changed
+  const handleFilter = ({
+    search,
+    business_field,
+    saleId,
+    status,
+    service_tagId,
+    source_tagId,
+    status_tag_id,
+  }: {
+    search: string;
+    business_field: string | null;
+    saleId: string | null;
+    status: string | null;
+    service_tagId: string | null;
+    source_tagId: string | null;
+    status_tag_id: string | null;
+  }) => {
     setParams((prev) => ({
       ...prev,
       page: 0,
-      search: filterSearch || undefined,
-      saleId: filterSaleId || undefined,
-      status: filterStatus || undefined,
+      search: search || undefined,
+      business_field: business_field ?? undefined,
+      saleId: saleId ?? undefined,
+      status: status ?? undefined,
+      service_tagId: service_tagId ?? undefined,
+      source_tagId: source_tagId ?? undefined,
+      status_tag_id: status_tag_id ?? undefined,
     }));
     setPage(0);
+
+    // Always call refetch, regardless of whether the params actually changed
+    refetch();
   };
 
   // Confirm logic for tag deletion
@@ -644,6 +742,14 @@ const TelesalesPage: React.FC = () => {
             >
               Tải file mẫu
             </Button>
+            <Button
+              className="!bg-blue-500 !text-white !h-10"
+              icon={<FontAwesomeIcon icon={faUserPlus} />}
+              onClick={()=> setIsOpenAddCustomerModalOpen(true)}
+              // loading={downloading}
+            >
+              Thêm khách hàng
+            </Button>
           </div>
         </div>
       </div>
@@ -699,71 +805,16 @@ const TelesalesPage: React.FC = () => {
         </div>
       </div>
       <div>
-        <div className="flex gap-2 mb-4">
-          <Input
-            placeholder="Tìm theo tên, SĐT..."
-            className="!w-full !h-10"
-            value={filterSearch}
-            onChange={(e) => setFilterSearch(e.target.value)}
-            allowClear
-          />
-          <Select
-            value={filterSaleId}
-            className="!w-full !h-10"
-            loading={isLoadingTelesaleUsers}
-            onChange={(val) => setFilterSaleId(val === "" ? undefined : val)}
-            allowClear
-          >
-            <Option value="">-- Tất cả Telesale --</Option>
-            {Array.isArray(telesaleUserList) &&
-              telesaleUserList.map((telesale: any) => (
-                <Option value={telesale.id} key={telesale.id}>
-                  {telesale.fullname}- {telesale.email}
-                </Option>
-              ))}
-          </Select>
-          <Select
-            value={filterStatus}
-            className="!w-full !h-10"
-            onChange={(val) => setFilterStatus(val === "" ? undefined : val)}
-            allowClear
-          >
-            <Option value="">-- Tất cả trạng thái --</Option>
-            <Option value="CALLED">Thành công</Option>
-            <Option value="NOT_CALLED">Chưa gọi</Option>
-            <Option value="FAILED">Thất bại</Option>
-            <Option value="UNASSIGNED">Chưa gán</Option>
-          </Select>
-          <Button
-            type="primary"
-            icon={
-              <FontAwesomeIcon
-                icon={faFilter}
-                className=" text-white !h-6 !w-4"
-              />
-            }
-            className="!w-48 !h-10"
-            onClick={handleFilter}
-          >
-            Lọc
-          </Button>
-          <Button
-            icon={
-              <FontAwesomeIcon
-                icon={faUserTag}
-                className=" text-white !h-6 !w-4"
-              />
-            }
-            className="!w-50 !bg-purple-600 !text-white !h-10"
-            disabled={selectedRowKeys.length === 0}
-            onClick={() => {
-              setBulkAssignCustomers(selectedCustomers || []);
-              setIsBulkAssignModalOpen(true);
-            }}
-          >
-            Gán Hàng Loạt
-          </Button>
-        </div>
+        <FilterForm
+          telesaleUserList={telesaleUserList || []}
+          loadingUsers={isLoadingTelesaleUsers}
+          onFilter={handleFilter}
+          onBulkAssign={() => {
+            setBulkAssignCustomers(selectedCustomers || []);
+            setIsBulkAssignModalOpen(true);
+          }}
+          selectedRowKeys={selectedRowKeys}
+        />
       </div>
 
       {/* Table */}
@@ -779,7 +830,25 @@ const TelesalesPage: React.FC = () => {
         headerHeight={48}
         loading={isPending}
       />
-
+      <CustomerAddModal
+        onCancel={() => setIsOpenAddCustomerModalOpen(false)}
+        onSubmit={async (data) => {
+          try {
+            await addTelesaleCustomer(data);
+            setIsOpenAddCustomerModalOpen(false);
+            refetch(); 
+            reloadTelesaleStat()
+            toast.success("Tạo khách hàng thành công");
+          }  catch (error: any) {
+            toast.error(
+              error?.response?.data?.message ||
+                error?.message ||
+                "Có lỗi xảy ra khi tạo khách hàng"
+            );
+          }
+        }}
+        open={isOpenAddCustomerModalOpen}
+      />
       <AddMultiCustomerModal
         customers={bulkAssignCustomers}
         isOpen={isBulkAssignModalOpen}
@@ -892,6 +961,7 @@ const TelesalesPage: React.FC = () => {
         </p>
       </Modal>
 
+      {/* Modal xác nhận gọi/failed có thêm field Note và validate */}
       <Modal
         open={confirmCallModal.open}
         title={
@@ -908,20 +978,50 @@ const TelesalesPage: React.FC = () => {
         confirmLoading={isStatusUpdating}
         maskClosable={false}
         centered
+        afterClose={() => {
+          callNoteForm.resetFields();
+          setCallNoteError(null);
+        }}
       >
-        <p>
-          Bạn có chắc muốn chuyển trạng thái khách hàng
-          <span className="font-semibold ml-1">
-            {confirmCallModal.customer?.name
-              ? confirmCallModal.customer.name
+        <div className="mb-2">
+          <p>
+            Bạn có chắc muốn chuyển trạng thái khách hàng
+            <span className="font-semibold ml-1">
+              {confirmCallModal.customer?.name
+                ? confirmCallModal.customer.name
+                : ""}
+            </span>
+            {confirmCallModal.status === "CALLED"
+              ? " sang Đã gọi?"
+              : confirmCallModal.status === "FAILED"
+              ? " sang Thất bại?"
               : ""}
-          </span>
-          {confirmCallModal.status === "CALLED"
-            ? " sang Đã gọi?"
-            : confirmCallModal.status === "FAILED"
-            ? " sang Thất bại?"
-            : ""}
-        </p>
+          </p>
+        </div>
+        <Form
+          form={callNoteForm}
+          layout="vertical"
+          initialValues={{ note: "" }}
+        >
+          <Form.Item
+            name="note"
+            label="Ghi chú"
+            rules={[
+              {
+                required: true,
+                message: "Ghi chú là bắt buộc",
+              },
+              {
+                min: 5,
+                message: "Ghi chú phải tối thiểu 5 ký tự!",
+              },
+            ]}
+            validateStatus={callNoteError ? "error" : undefined}
+            help={callNoteError}
+          >
+            <Input.TextArea placeholder="Nhập ghi chú..." rows={3} />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

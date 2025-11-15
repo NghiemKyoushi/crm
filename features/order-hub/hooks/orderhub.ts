@@ -2,6 +2,7 @@ import { useMutation, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import {
   aproveOrder,
   cancelOrder,
+  cancelOrderAfterApprove,
   checkOrder,
   completeOrder,
   completeShippingOrder,
@@ -225,3 +226,20 @@ export const useListDataGeneral = (params?: { customerGroupId?: number }) => {
     queryFn: () => getDataGeneral(params),
   });
 };
+
+export const useCancelOrderAfterApprove = () => {
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: number;
+      body: {
+        amount: number;
+        note: string;
+        isFullBack: boolean;
+      };
+    }) => cancelOrderAfterApprove(id, body),
+  });
+};
+
