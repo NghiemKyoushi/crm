@@ -19,6 +19,7 @@ import {
 import {
   getListBankCreateAccount,
   getListBankPermission,
+  getPartnerList,
 } from "@/features/finance-manage/apis";
 
 interface AdminUserCheck {
@@ -54,10 +55,10 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
   const fetchUsers = async (searchValue = "") => {
     setLoadingUser(true);
     try {
-      const resp: AdminUserCheck[] = await getListBankPermission(0, 2);
+      const resp = await getPartnerList({page: 0, size: 20});
       setUserOptions(
-        (resp || []).map((user) => ({
-          value: user.admin_user_id,
+        (resp.data || []).map((user: any) => ({
+          value: user.id,
           label: user.email,
         }))
       );
@@ -161,7 +162,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       onConfirm({
         amount_vnd: +values.amount,
         company_bank_account_id: values.company_bank_account_id,
-        note: values.reason,
+        // note: values.reason,
         user_id: +values.userId,
         reason: values.reason,
       });

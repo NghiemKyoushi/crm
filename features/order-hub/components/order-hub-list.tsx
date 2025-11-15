@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Tag, Button, Modal, Tooltip, Form, Input, Select, InputNumber } from "antd";
+import {
+  Tag,
+  Button,
+  Modal,
+  Tooltip,
+  Form,
+  Input,
+  Select,
+  InputNumber,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
@@ -35,8 +44,14 @@ import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
 import NoteModal from "./modal/update-note-modal";
 import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
-import { updateKuponOrder, getSourceWebsiteByDomain, getWebsiteAccounts, updateOrderSourceAccount } from "../apis/orderhub";
+import {
+  updateKuponOrder,
+  getSourceWebsiteByDomain,
+  getWebsiteAccounts,
+  updateOrderSourceAccount,
+} from "../apis/orderhub";
 import dayjs from "dayjs";
+import { CancelOrderModal } from "./modal/cancel-order-modal";
 
 function isEqualObject(obj1: any, obj2: any) {
   // Only compare shallow, including only relevant keys
@@ -98,9 +113,15 @@ export default function OrderHub() {
   const [isKuponLoading, setIsKuponLoading] = useState<boolean>(false);
 
   // Account management states
-  const [orderAccounts, setOrderAccounts] = useState<Record<number, Array<{ id: number; username: string }>>>({});
-  const [loadingAccounts, setLoadingAccounts] = useState<Record<number, boolean>>({});
-  const [orderSourceAccount, setOrderSourceAccount] = useState<Record<number, number | null>>({});
+  const [orderAccounts, setOrderAccounts] = useState<
+    Record<number, Array<{ id: number; username: string }>>
+  >({});
+  const [loadingAccounts, setLoadingAccounts] = useState<
+    Record<number, boolean>
+  >({});
+  const [orderSourceAccount, setOrderSourceAccount] = useState<
+    Record<number, number | null>
+  >({});
 
   const [filters, setFilters] = useState<FilterType>({
     status: undefined,
@@ -124,9 +145,7 @@ export default function OrderHub() {
   // Utility: Remove keys with value undefined
   const removeUndefinedFields = (obj: any) => {
     return Object.fromEntries(
-      Object.entries(obj).filter(
-        ([, value]) => value !== undefined
-      )
+      Object.entries(obj).filter(([, value]) => value !== undefined)
     );
   };
 
@@ -339,30 +358,38 @@ export default function OrderHub() {
 
     if (!domain || orderAccounts[order.id]) return; // Already loaded or no domain
 
-    setLoadingAccounts(prev => ({ ...prev, [order.id]: true }));
+    setLoadingAccounts((prev) => ({ ...prev, [order.id]: true }));
     try {
       // Step 1: Find website by domain
       const websiteResponse = await getSourceWebsiteByDomain(domain);
       const websites = websiteResponse?.data || [];
-      const website = websites.find((w: any) => w.domain === domain || w.domain?.includes(domain));
+      const website = websites.find(
+        (w: any) => w.domain === domain || w.domain?.includes(domain)
+      );
 
       if (!website?.id) {
-        setLoadingAccounts(prev => ({ ...prev, [order.id]: false }));
+        setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
         return;
       }
 
       // Step 2: Get accounts for this website
       const accounts = await getWebsiteAccounts(website.id);
-      setOrderAccounts(prev => ({ ...prev, [order.id]: accounts || [] }));
+      setOrderAccounts((prev) => ({ ...prev, [order.id]: accounts || [] }));
     } catch (error: any) {
       console.error("Failed to load accounts:", error);
       toast.error("Không thể tải danh sách account");
     } finally {
-      setLoadingAccounts(prev => ({ ...prev, [order.id]: false }));
+      setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
 
       // Step 3: Set current source account if exists (always set, even if no website found)
-      if (order.source_account_id != null && typeof order.source_account_id === 'number') {
-        setOrderSourceAccount(prev => ({ ...prev, [order.id]: order.source_account_id as number }));
+      if (
+        order.source_account_id != null &&
+        typeof order.source_account_id === "number"
+      ) {
+        setOrderSourceAccount((prev) => ({
+          ...prev,
+          [order.id]: order.source_account_id as number,
+        }));
       }
     }
   };
@@ -371,7 +398,7 @@ export default function OrderHub() {
   const handleAccountChange = async (orderId: number, accountId: number) => {
     try {
       await updateOrderSourceAccount(orderId, accountId);
-      setOrderSourceAccount(prev => ({ ...prev, [orderId]: accountId }));
+      setOrderSourceAccount((prev) => ({ ...prev, [orderId]: accountId }));
       toast.success("Cập nhật account thành công");
       queryClient.invalidateQueries({
         queryKey: ["listorder"],
@@ -401,7 +428,9 @@ export default function OrderHub() {
             {record.invoice_no || "Cập nhật sau"}
           </div>
           <div className="text-xs text-gray-400">
-            {record.created_at ? dayjs(record.created_at).format("DD/MM/YYYY") : ""}
+            {record.created_at
+              ? dayjs(record.created_at).format("DD/MM/YYYY")
+              : ""}
           </div>
         </div>
       ),
@@ -550,13 +579,13 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                            "en-US"
-                          )}${isJapanPrice}`
+                              "en-US"
+                            )}${isJapanPrice}`
                           : codeType === 1
-                            ? "Miễn phí"
-                            : codeType === 3
-                              ? "Cập nhật sau"
-                              : "-"}
+                          ? "Miễn phí"
+                          : codeType === 3
+                          ? "Cập nhật sau"
+                          : "-"}
                       </span>
                     )}
                   </div>
@@ -641,8 +670,8 @@ export default function OrderHub() {
             {typeof record.kupon === "number"
               ? record.kupon.toLocaleString("en-US")
               : record.kupon && !isNaN(Number(record.kupon))
-                ? Number(record.kupon).toLocaleString("en-US")
-                : "-"}
+              ? Number(record.kupon).toLocaleString("en-US")
+              : "-"}
           </span>
           {hasPermission("sales.view_assigned_orders") &&
             hasPermission("order.view") && (
@@ -655,14 +684,13 @@ export default function OrderHub() {
                       typeof record.kupon === "number"
                         ? record.kupon
                         : record.kupon && !isNaN(Number(record.kupon))
-                          ? Number(record.kupon)
-                          : null,
+                        ? Number(record.kupon)
+                        : null,
                   });
                   setOrderDetail(record);
                 }}
               />
-            )
-          }
+            )}
         </div>
       ),
     },
@@ -802,7 +830,8 @@ export default function OrderHub() {
       render: (_, record) => {
         const url = record.metadata?.items?.[0]?.product?.url;
         const accounts = orderAccounts[record.id] || [];
-        const currentAccountId = orderSourceAccount[record.id] ?? record.source_account_id;
+        const currentAccountId =
+          orderSourceAccount[record.id] ?? record.source_account_id;
         const isLoading = loadingAccounts[record.id];
 
         // Auto-load accounts when URL exists and not yet loaded
@@ -1020,7 +1049,7 @@ export default function OrderHub() {
                         onError: (err: any) =>
                           toast.error(
                             err.response?.data?.localizedMessage ||
-                            t("common.error")
+                              t("common.error")
                           ),
                       }
                     );
@@ -1076,7 +1105,7 @@ export default function OrderHub() {
 
             {/* Nút hành động chính (nếu có) */}
             {hasPermission("sales.view_assigned_orders") &&
-              hasPermission("order.view")
+            hasPermission("order.view")
               ? actionButton
               : null}
 
@@ -1366,7 +1395,9 @@ export default function OrderHub() {
               key="submit"
               type="primary"
               loading={isKuponLoading}
-              onClick={() => updateOrderKupon(editingKupon.orderId, editingKupon.value)}
+              onClick={() =>
+                updateOrderKupon(editingKupon.orderId, editingKupon.value)
+              }
             >
               Lưu
             </Button>,
@@ -1433,7 +1464,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
@@ -1514,7 +1545,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
@@ -1542,6 +1573,13 @@ export default function OrderHub() {
           </Form>
         </Modal>
       )}
+
+      {/* <CancelOrderModal
+        onCancel={() => console.log("")}
+        onConfirm={(value) => console.log("value", value)}
+        order={1}
+        visible={true}
+      /> */}
     </div>
   );
 }

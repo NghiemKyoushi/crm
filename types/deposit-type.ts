@@ -65,7 +65,7 @@ export interface DepositRequest {
   company_bank_account_id?: number;
   bank_transaction_id?: number;
   reason: string;
-  note: string;
+  note?: string;
 }
 
 export interface BankDepositRequest {

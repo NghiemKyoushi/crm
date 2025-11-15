@@ -153,5 +153,7 @@ export const API_TYPE_CONST = {
   TELESALE_ACCOUNT:`${FEATURE}/admin/telesales/accounts`,
   TAG_LIST:`${FEATURE}/admin/telesales/tags`,
   DASHBOARD_TELESALE: `${FEATURE}/admin/telesales/dashboard`,
-  MANUAL_PARTNER:`/v1/admin/topups/debt`
+  MANUAL_PARTNER:`${FEATURE}/admin/topups/debt`,
+  GET_ALL_PARTNER:`${FEATURE}/admin/users/get-all-partner`,
+  CANCEL_ORDER:`${FEATURE}/cancel/`
 } as const;
