@@ -191,8 +191,8 @@ export default function CategoryTreeManager({ onEditCategory, onDeleteCategory }
 
     // Handle drag and drop
     const onDrop: TreeProps['onDrop'] = async (info) => {
-        const dragNode = info.dragNode as CategoryTreeNode;
-        const dropNode = info.node as CategoryTreeNode;
+        const dragNode = info.dragNode as unknown as CategoryTreeNode;
+        const dropNode = info.node as unknown as CategoryTreeNode;
         const dropPos = info.node.pos.split('-');
         const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
 

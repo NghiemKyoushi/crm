@@ -446,6 +446,8 @@ export default function CMSTreeManager({
     const handleUnlink = async (node: CMSTreeNode) => {
         if (!node.parentId || !node.parentType) return;
 
+        const parentId = node.parentId; // Ensure non-null for TypeScript
+
         Modal.confirm({
             title: `Unlink ${node.nodeType}?`,
             content: `Are you sure you want to unlink "${node.title}" from its parent?`,
@@ -454,13 +456,13 @@ export default function CMSTreeManager({
             onOk: async () => {
                 try {
                     if (node.nodeType === 'category' && node.parentType === 'page') {
-                        await unlinkPageCategory({ page_id: node.parentId, category_id: node.entityId });
+                        await unlinkPageCategory({ page_id: parentId, category_id: node.entityId });
                     } else if (node.nodeType === 'content' && node.parentType === 'page') {
-                        await unlinkPageContent({ page_id: node.parentId, content_id: node.entityId });
+                        await unlinkPageContent({ page_id: parentId, content_id: node.entityId });
                     } else if (node.nodeType === 'content' && node.parentType === 'category') {
-                        await unlinkCategoryContent({ category_id: node.parentId, content_id: node.entityId });
+                        await unlinkCategoryContent({ category_id: parentId, content_id: node.entityId });
                     } else if (node.nodeType === 'category' && node.parentType === 'category') {
-                        await unlinkCategoryRelation({ parent_id: node.parentId, child_id: node.entityId });
+                        await unlinkCategoryRelation({ parent_id: parentId, child_id: node.entityId });
                     }
                     message.success("Unlinked successfully");
                     await handleReload();
