@@ -12,6 +12,7 @@ export const API_TYPE_CONST = {
   VERIFY_OTP: `${ONBOARD}/verify-otp`,
   RESEND_VERIFY_OTP: `${ONBOARD}/resend-verify-otp`,
   CREATE_NEW_PASSWORD: `${ONBOARD}/create-new-password`,
+  CREATE_CUSTOMER: `${ONBOARD}/create-customer`,
   GET_PROFILE: `${PROFILE}/me`,
   UPDATE_AVARTAR: `/users/v1/profile/me/avatar`,
   CHANGE_PASSWORD: `/users/v1/users/change-password`,
