@@ -138,6 +138,7 @@ export const API_TYPE_CONST = {
   EXPORT_DATA_DEBT: `${FEATURE}/admin/debts/export-excel`,
   DOWNLOAD_EXAMPLE_DEBT: `${FEATURE}/admin/debts/export-template`,
   IMPORT_FILE_DEBT:`${FEATURE}/admin/debts/import-excel`,
+  VIP_PACKAGES: `${FEATURE}/admin/vip/packages`,
   TELESALES_LIST:`${FEATURE}/admin/telesales`,
   TELESALES_IMPORT:`${FEATURE}/admin/telesales/import`,
   TELESALES_DOWNLOAD_EXAMPLE:`${FEATURE}/admin/telesales/template`,
