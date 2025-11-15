@@ -8,17 +8,19 @@ import {
   useListCateGoryCus,
   useListCustomer,
   useUpdateCateGoryForEachCus,
+  useCreateCustomer,
 } from "../../hooks/staff-manage";
 import { CustomerModel } from "@/types/customer-type";
 import CategorySelect from "./customer-type-select";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { usePermission } from "@/components/layout/PermissionContext";
-import { getListSaleStaff } from "../../apis/staff-manage";
+import { getListSaleStaff, CreateCustomerParams } from "../../apis/staff-manage";
 import AccountAssignButton from "@/features/user-website-accounts/components/account-assign-button";
+import ModalCreateCustomer from "./modal-create-customer";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -27,6 +29,7 @@ export default function CustomerTable() {
   const { hasPermission, permissions } = usePermission();
 
   const [isOpenDetail, setIsOpenDetail] = useState(false);
+  const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -97,6 +100,7 @@ export default function CustomerTable() {
   }));
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
+  const createCustomerMutation = useCreateCustomer();
 
   // --- API gọi khi search state thay đổi ---
   const { data, isFetching, isPending } = useListCustomer({
@@ -268,12 +272,39 @@ export default function CustomerTable() {
     queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
   };
 
+  const handleCreateCustomer = (data: CreateCustomerParams) => {
+    createCustomerMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Tạo tài khoản khách hàng thành công!");
+        queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+        setIsOpenCreateModal(false);
+      },
+      onError: (err: any) => {
+        toast.error(
+          err?.response?.data?.localizedMessage || 
+          err?.response?.data?.message || 
+          "Có lỗi xảy ra khi tạo tài khoản"
+        );
+      },
+    });
+  };
+
   // Hiển thị filter/inputs
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-lg font-semibold mb-4">
-        {t("customerManage.title")}
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">
+          {t("customerManage.title")}
+        </h2>
+        <Button
+          type="primary"
+          icon={<FontAwesomeIcon icon={faPlus} />}
+          onClick={() => setIsOpenCreateModal(true)}
+          className="bg-blue-500"
+        >
+          Tạo tài khoản
+        </Button>
+      </div>
       <div className="mb-4">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
@@ -364,6 +395,11 @@ export default function CustomerTable() {
           visible={isOpenDetail}
         />
       )}
+      <ModalCreateCustomer
+        open={isOpenCreateModal}
+        onClose={() => setIsOpenCreateModal(false)}
+        handleSubmitData={handleCreateCustomer}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { getListStaffParams, getListStaffResponse, NewUserType, UserData } from "@/types/staff-manage-type";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersAdminSale, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole } from "../apis/staff-manage";
+import { addAddressCustomer, addBankCustomer, addCustomerForSale, addCustomerNote, addDefaultAddress, addDefaultBank, addSaleStaff, createCustomer, createNewCateCustomer, createNewStaff, createRole, deleteCateCustomer, getDetailCustomer, getDetailStaff, getListCateCustomer, getListCustomers, getListCustomersAdminSale, getListCustomersNote, getListRoles, getListSaleStaff, getListStaff, updateCateCustomer, updateCateforCustomer, updateRole, CreateCustomerParams } from "../apis/staff-manage";
 import { CategoryRequest, CategoryResponse, getListCateParams } from "@/types/customer-group";
 import { getPagination } from "@/types/common-type";
 import { AddCustomerTosaleModel, UserSaleResponse } from "@/types/sale-manage";
@@ -179,5 +179,12 @@ export const useGetListNote = (params: CustomerNoteParams, id: string | null) =>
     queryKey: ["customerNotes"], 
     queryFn: () => getListCustomersNote(params, id as string),
     enabled: !!id
+  });
+};
+
+export const useCreateCustomer = () => {
+  return useMutation({
+    mutationFn: (params: CreateCustomerParams) =>
+      createCustomer(params),
   });
 };
