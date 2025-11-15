@@ -18,6 +18,7 @@ import {
   extractPathId,
   useApproveOrder,
   useCancelOrder,
+  useCancelOrderAfterApprove,
   useCheckOrder,
   useCompleteOrder,
   useListOrder,
@@ -80,6 +81,7 @@ export default function OrderHub() {
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
   const [isTrackingJP, setIsTrackingJP] = useState(false);
+  const [isOpenCancelOrder2, setIsOpenCancelOrder2] = useState(false);
 
   const [isEditingTracking, setIsEditingTracking] = useState<{
     orderId: number;
@@ -182,7 +184,7 @@ export default function OrderHub() {
   const useUpdateOrderTracking = useUpdateTrackingOrder();
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
-
+  const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
   // Modified handleFilter: Only set filters and reset to page 1 if something actually changed
   const handleFilter = (newFilters: FilterType) => {
     if (isEqualObject(newFilters, prevFilters.current)) {
@@ -408,6 +410,35 @@ export default function OrderHub() {
         error?.response?.data?.localizedMessage || "Có lỗi khi cập nhật account"
       );
     }
+  };
+
+  const handleCancelOrderAfterApprove = (
+    orderId: number,
+    params: {
+      amount: number;
+      note: string;
+      isFullBack: boolean;
+    }
+  ) => {
+    cancelOrderAfterApproveMutation.mutate(
+      {
+        id: orderId,
+        body: { ...params },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Huỷ đơn hàng thành công");
+          queryClient.invalidateQueries({
+            queryKey: ["listorder"],
+          });
+          setOrderDetail(undefined);
+          setIsOpenCancelOrder2(false);
+        },
+        onError: (error: any) => {
+          toast.error(error?.response?.data?.localizedMessage || "Có lỗi xảy ra");
+        },
+      }
+    );
   };
 
   const columns: ColumnsType<Invoice> = [
@@ -986,97 +1017,149 @@ export default function OrderHub() {
 
           case OrderStatusType.DEPOSIT_PAID:
             actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setOpenConfirmPurchase(true);
-                }}
-                className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-              >
-                🛒 Đã mua
-              </Button>
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setOpenConfirmPurchase(true);
+                  }}
+                  className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  🛒 Đã mua
+                </Button>
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancelOrder2(true);
+                  }}
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  Huỷ đơn
+                </Button>
+              </div>
             );
             break;
 
           case OrderStatusType.PURCHASED:
             actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setIsTrackingJP(true);
-                  setIsEditingTrackingModal(true);
-                  // setIsOpenTrackingOrder()
-                }}
-              >
-                {/* 🏢 Kho JP */}
-                Vận chuyển
-              </Button>
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={record.status}
+                  size="small"
+                  className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsTrackingJP(true);
+                    setIsEditingTrackingModal(true);
+                    // setIsOpenTrackingOrder()
+                  }}
+                >
+                  {/* 🏢 Kho JP */}
+                  Vận chuyển
+                </Button>
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancelOrder2(true);
+                  }}
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  Huỷ đơn
+                </Button>
+              </div>
             );
             break;
 
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                onClick={() => {
-                  setOrderDetail(record);
-                  if (
-                    record.take_photo ||
-                    record.is_repacked ||
-                    record.is_verify_count
-                  ) {
-                    setIsOpenTrackingOrderVN(true);
-                  } else {
-                    trackingVNMutation.mutate(
-                      {
-                        body: {},
-                        id: record.id.toString(),
-                      },
-                      {
-                        onSuccess: () => {
-                          toast.success(t("toast.confirmVnWarehouseSuccess"));
-                          queryClient.invalidateQueries({
-                            queryKey: ["listorder"],
-                          });
-                          setIsOpenTrackingOrder(false);
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    if (
+                      record.take_photo ||
+                      record.is_repacked ||
+                      record.is_verify_count
+                    ) {
+                      setIsOpenTrackingOrderVN(true);
+                    } else {
+                      trackingVNMutation.mutate(
+                        {
+                          body: {},
+                          id: record.id.toString(),
                         },
-                        onError: (err: any) =>
-                          toast.error(
-                            err.response?.data?.localizedMessage ||
-                              t("common.error")
-                          ),
-                      }
-                    );
-                  }
-                }}
-                className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-              >
-                {/* 🏭 Kho VN */}
-                Vc nước ngoài
-              </Button>
+                        {
+                          onSuccess: () => {
+                            toast.success(t("toast.confirmVnWarehouseSuccess"));
+                            queryClient.invalidateQueries({
+                              queryKey: ["listorder"],
+                            });
+                            setIsOpenTrackingOrder(false);
+                          },
+                          onError: (err: any) =>
+                            toast.error(
+                              err.response?.data?.localizedMessage ||
+                                t("common.error")
+                            ),
+                        }
+                      );
+                    }
+                  }}
+                  className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  {/* 🏭 Kho VN */}
+                  Vc nước ngoài
+                </Button>
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancelOrder2(true);
+                  }}
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  Huỷ đơn
+                </Button>
+              </div>
             );
             break;
 
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             actionButton = (
-              <Button
-                key={record.status}
-                size="small"
-                className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                onClick={() => {
-                  setOrderDetail(record);
-                  setIsOpenCheckOrder(true);
-                }}
-              >
-                {/* 📦 Kiểm hàng */}
-                Kho VN
-              </Button>
+              <div className="flex gap-1.5 justify-center w-full">
+                <Button
+                  key={record.status}
+                  size="small"
+                  className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCheckOrder(true);
+                  }}
+                >
+                  {/* 📦 Kiểm hàng */}
+                  Kho VN
+                </Button>
+                <Button
+                  key={record.status}
+                  size="small"
+                  onClick={() => {
+                    setOrderDetail(record);
+                    setIsOpenCancelOrder2(true);
+                  }}
+                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                >
+                  Huỷ đơn
+                </Button>
+              </div>
             );
             break;
 
@@ -1574,12 +1657,16 @@ export default function OrderHub() {
         </Modal>
       )}
 
-      {/* <CancelOrderModal
-        onCancel={() => console.log("")}
-        onConfirm={(value) => console.log("value", value)}
-        order={1}
-        visible={true}
-      /> */}
+      {orderDetail && (
+        <CancelOrderModal
+          onCancel={() => {
+            setIsOpenCancelOrder2(false)
+            setOrderDetail(undefined);
+          } }
+          onConfirm={(value) => handleCancelOrderAfterApprove(orderDetail.id, value)}
+          visible={isOpenCancelOrder2}
+        />
+      )}
     </div>
   );
 }

@@ -117,7 +117,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
         {/* Header */}
 
         {/* Body */}
-        <div className="py-2 space-y-2">
+        <div className="py-2 space-y-2" style={{ maxHeight: "80vh", overflowY: "auto" }}>
           {loading && <div className="text-center text-gray-400 py-4">Đang tải...</div>}
           {!loading &&
             tags.map((tag, i) => (
