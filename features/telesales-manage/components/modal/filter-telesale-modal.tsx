@@ -24,8 +24,8 @@ export const FilterForm: React.FC<{
     business_field: string | null;
     saleId: string | null;
     status: string | null;
-    service_tagId: string | null;
-    source_tagId: string | null;
+    service_tag_id: string | null;
+    source_tag_id: string | null;
     status_tag_id: string | null;
   }) => void;
   onBulkAssign: () => void;
@@ -76,8 +76,8 @@ export const FilterForm: React.FC<{
       business_field: values.business_field !== undefined && values.business_field !== "" ? values.business_field : null,
       saleId: values.saleId !== undefined && values.saleId !== "" ? values.saleId : null,
       status: values.status !== undefined && values.status !== "" ? values.status : null,
-      service_tagId: values.service_tagId !== undefined && values.service_tagId !== "" ? values.service_tagId : null,
-      source_tagId: values.source_tagId !== undefined && values.source_tagId !== "" ? values.source_tagId : null,
+      service_tag_id: values.service_tag_id !== undefined && values.service_tag_id !== "" ? values.service_tag_id : null,
+      source_tag_id: values.source_tag_id !== undefined && values.source_tag_id !== "" ? values.source_tag_id : null,
       status_tag_id: values.status_tag_id !== undefined && values.status_tag_id !== "" ? values.status_tag_id : null,
     });
   };
@@ -92,8 +92,8 @@ export const FilterForm: React.FC<{
         business_field: null,
         saleId: null,
         status: null,
-        service_tagId: null,
-        source_tagId: null,
+        service_tag_id: null,
+        source_tag_id: null,
         status_tag_id: null,
       }}
       onFinish={handleSubmit}
@@ -149,7 +149,7 @@ export const FilterForm: React.FC<{
           </Form.Item>
         </Col>
         <Col xs={24} md={8} lg={6}>
-          <Form.Item name="service_tagId" label="Loại dịch vụ">
+          <Form.Item name="service_tag_id" label="Loại dịch vụ">
             <Select
               className="!h-10"
               loading={loading.service}
@@ -168,7 +168,7 @@ export const FilterForm: React.FC<{
           </Form.Item>
         </Col>
         <Col xs={24} md={8} lg={6}>
-          <Form.Item name="source_tagId" label="Nguồn">
+          <Form.Item name="source_tag_id" label="Nguồn">
             <Select
               className="!h-10"
               loading={loading.source}

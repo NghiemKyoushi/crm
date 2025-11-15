@@ -650,16 +650,16 @@ const TelesalesPage: React.FC = () => {
     business_field,
     saleId,
     status,
-    service_tagId,
-    source_tagId,
+    service_tag_id,
+    source_tag_id,
     status_tag_id,
   }: {
     search: string;
     business_field: string | null;
     saleId: string | null;
     status: string | null;
-    service_tagId: string | null;
-    source_tagId: string | null;
+    service_tag_id: string | null;
+    source_tag_id: string | null;
     status_tag_id: string | null;
   }) => {
     setParams((prev) => ({
@@ -669,8 +669,8 @@ const TelesalesPage: React.FC = () => {
       business_field: business_field ?? undefined,
       saleId: saleId ?? undefined,
       status: status ?? undefined,
-      service_tagId: service_tagId ?? undefined,
-      source_tagId: source_tagId ?? undefined,
+      service_tag_id: service_tag_id ?? undefined,
+      source_tag_id: source_tag_id ?? undefined,
       status_tag_id: status_tag_id ?? undefined,
     }));
     setPage(0);
