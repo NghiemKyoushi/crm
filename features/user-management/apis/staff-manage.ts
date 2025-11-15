@@ -21,7 +21,7 @@ export const createNewStaff = async (params: NewUserType) => {
   return res.data;
 };
 
-export const updateStaff = async (params: NewUserType, id:string) => {
+export const updateStaff = async (params: NewUserType, id: string) => {
   const res = await api.put(`${API_TYPE_CONST.ADD_STAFF}/${id}`, {
     ...params,
     active: params.active ? "true" : "false",
@@ -67,7 +67,7 @@ export const updateCateforCustomer = async (category_id: number, id: number) => 
   return res.data;
 };
 
-export const deleteCateCustomer = async ( id: string) => {
+export const deleteCateCustomer = async (id: string) => {
   const res = await api.delete(`${API_TYPE_CONST.LIST_CATEGORY}/${id}`);
   return res.data;
 };
@@ -77,7 +77,7 @@ export const getListSaleStaff = async (params: getPagination) => {
   return res.data.data;
 };
 
-export const addSaleStaff = async (ids: string[] ) => {
+export const addSaleStaff = async (ids: string[]) => {
   const res = await api.post(API_TYPE_CONST.CREATE_SALE, { ids });
   return res.data.data;
 };
@@ -104,81 +104,97 @@ export const getListRoleGroup = async () => {
 };
 
 export const getListPermiss = async () => {
-  const res = await api.get(API_TYPE_CONST.PERMISSION);  
+  const res = await api.get(API_TYPE_CONST.PERMISSION);
   return res.data.data;
 };
 
-export const addAddressCustomer = async (body: addressModel, id:string) => {
+export const addAddressCustomer = async (body: addressModel, id: string) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_ADDRESS}${id}`, body);
   return res.data.data;
 };
 
-export const addDefaultAddress = async (address_id: number, id:string) => {
-  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_ADDRESS}${id}`, {address_id});
+export const addDefaultAddress = async (address_id: number, id: string) => {
+  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_ADDRESS}${id}`, { address_id });
   return res.data.data;
 };
 
-export const addDefaultBank = async (bank_id: number, id:string) => {
-  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_BANK}${id}`, {bank_id});
+export const addDefaultBank = async (bank_id: number, id: string) => {
+  const res = await api.put(`${API_TYPE_CONST.ADD_DEFAULT_BANK}${id}`, { bank_id });
   return res.data.data;
 };
 
-export const addBankCustomer = async (body: bankAccountModel, id:string) => {
+export const addBankCustomer = async (body: bankAccountModel, id: string) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_ACCOUNT_BANK}${id}`, body);
   return res.data.data;
 };
 
-export const addCustomerNote = async (content: string, id: string ) => {
-  const res = await api.post(`${API_TYPE_CONST.ADD_CUSTOMER_NOTE}${id}`, {content});
+export const addCustomerNote = async (content: string, id: string) => {
+  const res = await api.post(`${API_TYPE_CONST.ADD_CUSTOMER_NOTE}${id}`, { content });
   return res.data.data;
 };
-export const getListCustomersNote= async (params:CustomerNoteParams,id: string) => {
-  const res = await api.get(`${API_TYPE_CONST.CUSTOMER_NOTE}${id}`, {params});
+export const getListCustomersNote = async (params: CustomerNoteParams, id: string) => {
+  const res = await api.get(`${API_TYPE_CONST.CUSTOMER_NOTE}${id}`, { params });
   return res.data.data;
 };
-export const getListCustomers= async (params: CustomerParam) => {
-  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST, {params});
-  return res.data.data;
-};
-
-export const getListCustomersAdminSale= async (params: CustomerParam) => {
-  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST_ADMIN_SALE, {params});
+export const getListCustomers = async (params: CustomerParam) => {
+  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST, { params });
   return res.data.data;
 };
 
-export const getDetailCustomer= async (id: string) => {
+export const getListCustomersAdminSale = async (params: CustomerParam) => {
+  const res = await api.get(API_TYPE_CONST.CUSTOMER_LIST_ADMIN_SALE, { params });
+  return res.data.data;
+};
+
+export const getDetailCustomer = async (id: string) => {
   const res = await api.get(`${API_TYPE_CONST.CUSTOMER_LIST}/${id}`);
   return res.data.data;
 };
 
-export const addCustomerForSale = async (body: AddCustomerTosaleModel ) => {
+export const addCustomerForSale = async (body: AddCustomerTosaleModel) => {
   const res = await api.post(`${API_TYPE_CONST.ADD_SALE_RESPONSIBILITY}`, body);
   return res.data.data;
 };
 
-export const removeAssignCustomerForSale = async (id: string ) => {
+export const removeAssignCustomerForSale = async (id: string) => {
   const res = await api.get(`${API_TYPE_CONST.REMOVE_ASSIGN}${id}`);
   return res.data.data;
 };
 
-export const deleteAcount = async (id: string ) => {
+export const deleteAcount = async (id: string) => {
   const res = await api.delete(`${API_TYPE_CONST.DELETE_ACCOUNT}${id}`);
   return res.data.data;
 };
 
-export const lockAcount = async (id: string ) => {
+export const lockAcount = async (id: string) => {
   const res = await api.put(`${API_TYPE_CONST.LOCK_ACCOUNT}${id}`);
   return res.data.data;
 };
 
-export const unlockAcount = async (id: string ) => {
+export const unlockAcount = async (id: string) => {
   const res = await api.put(`${API_TYPE_CONST.UNLOCK_ACCOUNT}${id}`);
   return res.data.data;
 };
 
-export const resetPassAccount = async (id: string ) => {
+export const resetPassAccount = async (id: string) => {
   const res = await api.put(`${API_TYPE_CONST.RESET_PASSWORD}${id}`);
   return res.data.data;
+};
+
+export interface CreateCustomerParams {
+  full_name: string;
+  email: string;
+  phone_number: string;
+  password: string;
+  auth_type?: number;
+}
+
+export const createCustomer = async (params: CreateCustomerParams) => {
+  const res = await api.post(API_TYPE_CONST.CREATE_CUSTOMER, {
+    ...params,
+    auth_type: 1,
+  });
+  return res.data;
 };
 
 export function groupPermissions(permissions?: Permission[]): PermissionGroup[] {
