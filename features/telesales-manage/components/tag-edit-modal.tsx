@@ -61,46 +61,68 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
       open={open}
       onCancel={onClose}
       footer={null}
-      title={initialTag ? "Sửa thẻ phân loại" : "Thêm mới thẻ phân loại"}
+      title={
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
+          <span className="text-lg font-bold text-gray-800">
+            {initialTag ? "Sửa thẻ phân loại" : "Thêm mới thẻ phân loại"}
+          </span>
+        </div>
+      }
       centered
+      width={500}
     >
-      <div className="space-y-4">
+      <div className="space-y-5 pt-2">
         <div>
-          <div className="flex gap-2 items-center">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Tên thẻ phân loại</label>
+          <div className="flex gap-3 items-center">
             <Input
               placeholder="Nhập tên thẻ phân loại"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="!h-10 !rounded-lg"
+              autoFocus
             />
             <div
-              className="w-8 h-8 rounded cursor-pointer border"
+              className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow flex-shrink-0"
               style={{ backgroundColor: color }}
             />
           </div>
         </div>
         <div>
-          <p className="text-sm text-gray-500 mb-1">Chọn màu</p>
-          <div className="flex gap-2 flex-wrap">
+          <p className="text-sm font-medium text-gray-700 mb-3">Chọn màu sắc</p>
+          <div className="flex gap-3 flex-wrap">
             {colors.map((c) => (
               <div
                 key={c}
-                className={`w-6 h-6 rounded-full cursor-pointer border-2 ${
-                  color === c ? "border-black" : "border-transparent"
+                className={`w-9 h-9 rounded-lg cursor-pointer border-3 shadow-sm hover:shadow-md transition-all transform hover:scale-110 ${
+                  color === c ? "border-gray-800 ring-2 ring-gray-400 ring-offset-2" : "border-gray-200"
                 }`}
                 style={{ backgroundColor: c }}
                 onClick={() => setColor(c)}
+                title={c}
               />
             ))}
           </div>
         </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onClose}>Hủy</Button>
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+          <Button
+            onClick={onClose}
+            className="!h-10 !px-5 !rounded-lg"
+          >
+            Hủy
+          </Button>
           <Button
             type="primary"
             onClick={handleSave}
             disabled={!name.trim()}
+            className="!bg-gradient-to-r !from-purple-500 !to-purple-600 hover:!from-purple-600 hover:!to-purple-700 !h-10 !px-5 !rounded-lg !font-medium !shadow-md hover:!shadow-lg !transition-all"
           >
-            {initialTag ? "Lưu" : "Thêm phân loại"}
+            {initialTag ? "Lưu thay đổi" : "Thêm phân loại"}
           </Button>
         </div>
       </div>

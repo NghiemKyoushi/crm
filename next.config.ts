@@ -14,8 +14,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true,
   },
-  // No special output needed for Electron - it loads from remote server!
-  // output: 'standalone', // Keep normal build for web deployment
 
   // Performance optimizations
   compress: true,
