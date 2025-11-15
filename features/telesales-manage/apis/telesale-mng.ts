@@ -1,6 +1,6 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { AssignSaleModel, TelesaleParamsList } from "../types/telesales-mng";
+import { AssignSaleModel, TelesaleParamsList, TelesaleCustomerFormInput } from "../types/telesales-mng";
 
 // Lấy danh sách account telesale
 export const getTelesaleAccounts = async () => {
@@ -10,9 +10,7 @@ export const getTelesaleAccounts = async () => {
 
 // Lấy danh sách telesale (contact)
 export const getListTelesale = async (params: TelesaleParamsList) => {
-  const res = await api.get(API_TYPE_CONST.TELESALES_LIST, {
-    params,
-  });
+  const res = await api.post(API_TYPE_CONST.TELESALES_LIST, params);
   return res.data.data;
 };
 
@@ -62,7 +60,7 @@ export const addTelesaleTag = async (data: any) => {
 };
 
 // Cập nhật thẻ telesale
-export const updateTelesaleTag = async (id: string, data: {name: string, color: string}) => {
+export const updateTelesaleTag = async (id: string, data: { name: string, color: string }) => {
   const res = await api.put(
     `${API_TYPE_CONST.TELESSALE_UPDATE_TAG}${id}`,
     data
@@ -106,7 +104,7 @@ export const deleteTelesaleContactTags = async (contactId: string, tagIds: numbe
 // Đổi trạng thái telesale contact
 export const changeTelesaleStatus = async (
   contactId: string,
-  params: { status: string }
+  params: { status: string, note: string }
 ) => {
   const url = API_TYPE_CONST.TELESSALE_CHANGE_STATUS.replace(
     "{contact_id}",
@@ -120,6 +118,16 @@ export const changeTelesaleStatus = async (
 export const getTelesaleTagList = async () => {
   const res = await api.get(API_TYPE_CONST.TAG_LIST);
   return res.data.data;
+};
+
+export const getTelesaleTagFilter = async (type: string) => {
+  const res = await api.get(`${API_TYPE_CONST.TELESALE_TAG_FILTER}?type=${type}`);
+  return res.data.data;
+};
+
+export const addTelesaleCustomer = async (data: TelesaleCustomerFormInput) => {
+  const res = await api.post(API_TYPE_CONST.TELESALE_ADD_CUSTOMER, data);
+  return res.data;
 };
 
 export const telesalesMngApi = {
@@ -137,4 +145,5 @@ export const telesalesMngApi = {
   deleteContactTags: deleteTelesaleContactTags,
   changeStatus: changeTelesaleStatus,
   getTagList: getTelesaleTagList,
+  addTelesaleCustomer, 
 };

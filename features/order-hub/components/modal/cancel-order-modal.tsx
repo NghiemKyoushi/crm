@@ -6,13 +6,15 @@ import React, { useEffect, useRef } from "react";
  * - amount: refund amount
  * - note: reason for cancellation
  * - isFullBack: true to refund all, false to refund partial (amount)
+ * 
+ * Now does NOT take `order`, so caller must set initial/maximum values via props or handlers.
  */
 
 export const CancelOrderModal = ({
   visible,
   onCancel,
   onConfirm,
-  order,
+  maxRefundAmount = 0,
   loading,
 }: {
   visible: boolean;
@@ -22,32 +24,26 @@ export const CancelOrderModal = ({
     note: string;
     isFullBack: boolean;
   }) => void;
-  order: any; // expects at least { id, max_refund_amount }
+  maxRefundAmount?: number; // injected from parent (was order.max_refund_amount)
   loading?: boolean;
 }) => {
   const [form] = Form.useForm();
   const [isFullBack, setIsFullBack] = React.useState(true);
 
-  // --- REMOVE redundant state, amount is now form-driven only ---
-  // This tracks if we should reset form fields after close.
   const shouldResetRef = useRef(false);
 
-  // This effect only initializes fields when modal is first opened, not every close
   useEffect(() => {
     if (visible) {
       setIsFullBack(true);
-      // Only setFieldsValue on open, don't reset when closing
       form.setFieldsValue({
-        amount: order?.max_refund_amount ?? 0,
+        amount: maxRefundAmount,
         note: "",
       });
       shouldResetRef.current = true;
     }
-    // no resetFields here
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, order]);
+  }, [visible, maxRefundAmount]);
 
-  // Reset fields only when modal fully closes
   useEffect(() => {
     if (!visible && shouldResetRef.current) {
       form.resetFields();
@@ -59,10 +55,7 @@ export const CancelOrderModal = ({
     const checked = e.target.checked;
     setIsFullBack(checked);
     if (checked) {
-      form.setFieldValue("amount", order?.max_refund_amount ?? 0);
-    } else {
-      // Do not clear user's input, just let it as is (UX: keep value)
-      // form.setFieldValue("amount", undefined); // removed
+      form.setFieldValue("amount", maxRefundAmount);
     }
   };
 
@@ -71,7 +64,7 @@ export const CancelOrderModal = ({
       let values: any = {};
       if (isFullBack) {
         values = await form.validateFields(["note"]);
-        values.amount = order?.max_refund_amount ?? 0;
+        values.amount = maxRefundAmount;
       } else {
         values = await form.validateFields();
       }
@@ -100,35 +93,34 @@ export const CancelOrderModal = ({
       <div>
         <div className="mb-3">
           <Checkbox checked={isFullBack} onChange={handleCheck}>
-            Hoàn tiền toàn bộ ({order?.max_refund_amount?.toLocaleString() ?? 0}{" "}
-            ₫)
+            Hoàn tiền toàn bộ (100%)
           </Checkbox>
         </div>
         <Form form={form} layout="vertical">
           {!isFullBack && (
             <Form.Item
-            label="Số tiền hoàn (₫)"
-            name="amount"
-            rules={[
-              {
-                required: true,
-                message: "Nhập số tiền hoàn!",
-              },
-            ]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: "100%" }}
-              placeholder="Nhập số tiền hoàn"
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }
-              parser={(value: any) =>
-                value.replace(/\$\s?|(,*)/g, "")
-              }
-            />
-          </Form.Item>
-          
+              label="Số tiền hoàn (₫)"
+              name="amount"
+              rules={[
+                {
+                  required: true,
+                  message: "Nhập số tiền hoàn!",
+                },
+              ]}
+            >
+              <InputNumber
+                min={0}
+                max={maxRefundAmount}
+                style={{ width: "100%" }}
+                placeholder="Nhập số tiền hoàn"
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value: any) =>
+                  value.replace(/\$\s?|(,*)/g, "")
+                }
+              />
+            </Form.Item>
           )}
           <Form.Item
             label="Lý do huỷ đơn"

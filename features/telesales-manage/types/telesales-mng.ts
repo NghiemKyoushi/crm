@@ -8,6 +8,7 @@ export interface TelesaleParamsList {
 export interface TelesaleCustomer {
     id: number;
     name: string;
+    email?: string;
     address: string | null;
     source: string;
     status: string;
@@ -22,7 +23,7 @@ export interface TelesaleCustomer {
     saleName: string | null;
     notes: Array<any>;
     tags: Array<any>;
-
+    businessField?: string;
 }
 
 export interface TelesaleCustomerListResponse {
@@ -37,4 +38,18 @@ export interface AssignSaleModel {
     note: string;
     prospect_ids: number[];
     sale_id: number;
+}
+
+export interface TelesaleCustomerFormInput {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    business_field: string;
+    customer_info: string;
+    service_tag: string;
+    source_tag: string;
+    status_tag: string;
+    note_request: string;
+    call_note: string;
 }

@@ -138,7 +138,7 @@ export const API_TYPE_CONST = {
   EXPORT_DATA_DEBT: `${FEATURE}/admin/debts/export-excel`,
   DOWNLOAD_EXAMPLE_DEBT: `${FEATURE}/admin/debts/export-template`,
   IMPORT_FILE_DEBT:`${FEATURE}/admin/debts/import-excel`,
-  TELESALES_LIST:`${FEATURE}/admin/telesales`,
+  TELESALES_LIST:`${FEATURE}/admin/telesales/search`,
   TELESALES_IMPORT:`${FEATURE}/admin/telesales/import`,
   TELESALES_DOWNLOAD_EXAMPLE:`${FEATURE}/admin/telesales/template`,
   TELESSALE_ADD_NOTE: `${FEATURE}/admin/telesales/notes`,
@@ -154,5 +154,7 @@ export const API_TYPE_CONST = {
   DASHBOARD_TELESALE: `${FEATURE}/admin/telesales/dashboard`,
   MANUAL_PARTNER:`${FEATURE}/admin/topups/debt`,
   GET_ALL_PARTNER:`${FEATURE}/admin/users/get-all-partner`,
-  CANCEL_ORDER:`${FEATURE}/cancel/`
+  CANCEL_ORDER:`${FEATURE}/admin/orders/cancel`,
+  TELESALE_TAG_FILTER:`${FEATURE}/admin/telesales/tags-dropdown`,
+  TELESALE_ADD_CUSTOMER:`${FEATURE}/admin/telesales/add`
 } as const;

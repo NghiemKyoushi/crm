@@ -15,11 +15,7 @@ import { useEffect, useState } from "react";
 export const useTelesalesList = (params: TelesaleParamsList) => {
   return useQuery<TelesaleCustomerListResponse>({
     queryKey: ["telesalesList", params],
-    queryFn: async () => {
-      const res = await telesalesMngApi.getList(params);
-      return res as TelesaleCustomerListResponse;
-    },
-    // keepPreviousData: true,
+    queryFn: () => telesalesMngApi.getList(params),
   });
 };
 
@@ -40,11 +36,13 @@ export const useUpdateTelesaleStatus = () => {
     mutationFn: async ({
       contactId,
       status,
+      note
     }: {
       contactId: string;
       status: string;
+      note: string;
     }) => {
-      const res = await changeTelesaleStatus(contactId, { status });
+      const res = await changeTelesaleStatus(contactId, { status, note });
       return res;
     },
   });
