@@ -21,6 +21,7 @@ import {
   faChevronLeft,
   faClipboardCheck,
   faHeadset,
+  faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -99,7 +100,10 @@ export const menuPermissions: Record<string, string[]> = {
   "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
 
   // CRM - open access initially
-  "/cms": ["cms.view_screen", "cms.edit_screen"]
+  "/cms": ["cms.view_screen", "cms.edit_screen"],
+
+  // VIP Management - admin and system config
+  "/vip-management": ["system.admin", "vip.manage"],
 };
 
 export const menuItems = [
@@ -115,7 +119,8 @@ export const menuItems = [
   // { key: "/fee-setting", icon: faTags, label: "products" },
   // { key: "/surchange", icon: faTags, label: "surcharge" },
   { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
-    { key: "/cms", icon: faTags, label: "cms" },
+  { key: "/cms", icon: faTags, label: "cms" },
+  { key: "/vip-management", icon: faCrown, label: "vipManagement" },
   { key: "/settings", icon: faCog, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
