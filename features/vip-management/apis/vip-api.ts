@@ -66,7 +66,7 @@ export const deleteVipPackage = async (id: number) => {
 };
 
 export const enableVipPackage = async (id: number, enabled: boolean) => {
-    const res = await api.patch(`${API_TYPE_CONST.VIP_PACKAGES}/${id}/enable?enabled=${enabled}`, null);
+    const res = await api.put(`${API_TYPE_CONST.VIP_PACKAGES}/${id}/enable?enabled=${enabled}`, null);
     return res.data;
 };
 

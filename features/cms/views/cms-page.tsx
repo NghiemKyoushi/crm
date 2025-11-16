@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
 import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch, Modal } from "antd";
 import { useCmsPages } from "../hooks/useCmsPages";
@@ -26,7 +26,35 @@ import CreateContentModal from "../components/CreateContentModal";
 
 export default function CMSFeaturePage() {
     const router = useRouter();
-    const [activeKey, setActiveKey] = useState<string>("pages");
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    
+    // Get initial tab from URL or default to "pages"
+    const getInitialTab = () => {
+        const tab = searchParams.get("tab");
+        const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
+        return tab && validTabs.includes(tab) ? tab : "pages";
+    };
+    
+    const [activeKey, setActiveKey] = useState<string>(getInitialTab());
+    
+    // Update URL when tab changes
+    const handleTabChange = (key: string) => {
+        setActiveKey(key);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("tab", key);
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    };
+    
+    // Sync activeKey with URL on mount or when URL changes
+    useEffect(() => {
+        const tab = searchParams.get("tab");
+        const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
+        const tabFromUrl = tab && validTabs.includes(tab) ? tab : "pages";
+        if (tabFromUrl !== activeKey) {
+            setActiveKey(tabFromUrl);
+        }
+    }, [searchParams, activeKey]);
     // Pagination states
     const [pagesPage, setPagesPage] = useState<number>(0);
     const [pagesSize, setPagesSize] = useState<number>(20);
@@ -296,7 +324,7 @@ export default function CMSFeaturePage() {
         <div className="pt-4 ">
             <div className="p-6">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <CMSTabs activeKey={activeKey} onChange={setActiveKey} />
+                    <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
                     <div className="px-6 pb-6 pt-1">
                         {activeKey === "pages" && (
                             <Table
