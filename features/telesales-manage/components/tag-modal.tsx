@@ -1,4 +1,4 @@
-import { Modal, Tag, Button, message } from "antd";
+import { Modal, Tag, Button, message, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import {
   EditOutlined,
@@ -110,80 +110,105 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
         open={open}
         onCancel={onClose}
         footer={null}
-        title="Quản lý thẻ phân loại"
+        title={
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold text-gray-800">Quản lý thẻ phân loại</span>
+          </div>
+        }
         centered
-        bodyStyle={{ minHeight: 300 }}
+        width={600}
+        styles={{ body: { minHeight: 300, maxHeight: "70vh", overflowY: "auto" } }}
+        className="tag-manager-modal"
       >
-        {/* Header */}
-
         {/* Body */}
-        <div className="py-2 space-y-2" style={{ maxHeight: "80vh", overflowY: "auto" }}>
-          {loading && <div className="text-center text-gray-400 py-4">Đang tải...</div>}
+        <div className="py-3 space-y-2.5">
+          {loading && (
+            <div className="text-center text-gray-400 py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p className="mt-2 text-sm">Đang tải...</p>
+            </div>
+          )}
           {!loading &&
             tags.map((tag, i) => (
               <div
                 key={tag.id}
-                className="group flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100"
+                className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-white hover:to-gray-50 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
                 onMouseEnter={() => setHoveredTagId(tag.id)}
                 onMouseLeave={() => setHoveredTagId(null)}
               >
-                <div className="flex items-center">
-                  <span className="cursor-move text-gray-400 mr-3">☰</span>
-                  <span
-                    className="inline-block w-4 h-4 rounded mr-3"
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="cursor-move text-gray-400 hover:text-gray-600 transition-colors text-lg">☰</span>
+                  <div
+                    className="w-5 h-5 rounded-lg shadow-sm border-2 border-white"
                     style={{ backgroundColor: tag.color }}
-                  ></span>
-                  <span className="text-sm text-gray-800">{tag.name}</span>
+                  ></div>
+                  <span className="text-sm font-medium text-gray-800">{tag.name}</span>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    type="text"
-                    icon={
-                      <CheckCircleTwoTone
-                        className="text-lg"
-                      />
-                    }
-                    title="Chọn thẻ này"
-                    className="!flex !items-center !justify-center !px-1 !py-0.5"
-                    onClick={() => {
-                      if (tag.id) onAssignTag(customer?.id, tag.id.toString());
-                      setHoveredTagId(null);
-                    }}
-                  />
-                  <Button
-                    type="text"
-                    icon={<EditOutlined className="text-lg" />}
-                    className="!flex !items-center !justify-center !px-1 !py-0.5"
-                    title="Sửa thẻ"
-                    onClick={() => {
-                      setEditingTag(tag);
-                      setIsEditOpen(true);
-                    }}
-                  />
-                  <Button
-                    danger
-                    type="text"
-                    icon={<DeleteOutlined className="text-lg" />}
-                    className="!flex !items-center !justify-center !px-1 !py-0.5"
-                    title="Xóa thẻ"
-                    onClick={() => setDeleteTagInfo({ id: tag.id, name: tag.name })}
-                  />
+                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <Tooltip title="Chọn thẻ này">
+                    <Button
+                      type="text"
+                      icon={<CheckCircleTwoTone twoToneColor="#52c41a" className="text-xl" />}
+                      className="!flex !items-center !justify-center !w-8 !h-8 hover:!bg-green-50 !rounded-lg !transition-all"
+                      onClick={() => {
+                        if (tag.id) onAssignTag(customer?.id, tag.id.toString());
+                        setHoveredTagId(null);
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Sửa thẻ">
+                    <Button
+                      type="text"
+                      icon={<EditOutlined className="text-lg text-blue-600" />}
+                      className="!flex !items-center !justify-center !w-8 !h-8 hover:!bg-blue-50 !rounded-lg !transition-all"
+                      onClick={() => {
+                        setEditingTag(tag);
+                        setIsEditOpen(true);
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Xóa thẻ">
+                    <Button
+                      danger
+                      type="text"
+                      icon={<DeleteOutlined className="text-lg text-red-600" />}
+                      className="!flex !items-center !justify-center !w-8 !h-8 hover:!bg-red-50 !rounded-lg !transition-all"
+                      onClick={() => setDeleteTagInfo({ id: tag.id, name: tag.name })}
+                    />
+                  </Tooltip>
                 </div>
               </div>
             ))}
 
-          <div className="flex justify-end">
+          {!loading && tags.length === 0 && (
+            <div className="text-center py-8 text-gray-400">
+              <p className="text-sm">Chưa có thẻ phân loại nào</p>
+              <p className="text-xs mt-1">Nhấn nút bên dưới để thêm mới</p>
+            </div>
+          )}
+
+          <div className="flex justify-center pt-4">
             <Button
               type="primary"
               onClick={() => {
-                setEditingTag(undefined); // Reset editing tag when adding new
+                setEditingTag(undefined);
                 setIsEditOpen(true);
               }}
-              className="text-blue-500 text-sm hover:underline mt-2"
+              className="!bg-gradient-to-r !from-blue-500 !to-blue-600 hover:!from-blue-600 hover:!to-blue-700 !h-10 !px-6 !rounded-lg !font-medium !shadow-md hover:!shadow-lg !transition-all"
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              }
             >
-              Thêm phân loại
+              Thêm phân loại mới
             </Button>
           </div>
         </div>

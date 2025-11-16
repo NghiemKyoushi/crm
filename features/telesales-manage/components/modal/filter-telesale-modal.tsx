@@ -85,8 +85,7 @@ export const FilterForm: React.FC<{
   return (
     <Form
       form={form}
-      layout="vertical"
-      className="mb-4 bg-white px-4 py-3 rounded-lg "
+      className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200"
       initialValues={{
         search: "",
         business_field: null,
@@ -98,67 +97,103 @@ export const FilterForm: React.FC<{
       }}
       onFinish={handleSubmit}
     >
-      <Row gutter={16} style={{ marginBottom: 0 }}>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="search" label="Tìm kiếm">
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search - improved design */}
+          <Form.Item name="search" className="!mb-0">
             <Input
-              placeholder="Tên, SĐT, Email..."
-              className="!h-10"
+              placeholder="Tìm kiếm..."
+              className="!h-9 !text-sm !rounded-md !border-gray-300 hover:!border-blue-400 focus:!border-blue-500 focus:!shadow-lg !transition-all"
+              style={{ width: 200 }}
               allowClear
+              prefix={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              }
             />
           </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="business_field" label="Lĩnh vực kinh doanh">
-            <Input
-              placeholder="Ngành nghề, lĩnh vực kinh doanh..."
-              className="!h-10"
-              allowClear
-            />
-          </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="saleId" label="Telesale phụ trách">
+
+          {/* Telesale */}
+          <Form.Item name="saleId" className="!mb-0">
             <Select
-              className="!h-10"
+              className="custom-select"
+              style={{ width: 150 }}
               loading={loadingUsers}
               allowClear
-              placeholder="-- Tất cả Telesale --"
+              placeholder="Telesale"
               showSearch
               optionFilterProp="children"
+              suffixIcon={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              }
             >
-              <Option value={null}>-- Tất cả Telesale --</Option>
               {Array.isArray(telesaleUserList) &&
                 telesaleUserList.map((telesale: any) => (
                   <Option value={telesale.id} key={telesale.id}>
-                    {telesale.fullname} - {telesale.email}
+                    {telesale.fullname}
                   </Option>
                 ))}
             </Select>
           </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="status" label="Trạng thái">
-            <Select className="!h-10" allowClear placeholder="-- Tất cả trạng thái --">
-              <Option value={null}>-- Tất cả trạng thái --</Option>
-              <Option value="CALLED">Thành công</Option>
-              <Option value="NOT_CALLED">Chưa gọi</Option>
-              <Option value="FAILED">Thất bại</Option>
-              <Option value="UNASSIGNED">Chưa gán</Option>
+
+          {/* Status */}
+          <Form.Item name="status" className="!mb-0">
+            <Select
+              className="custom-select"
+              style={{ width: 130 }}
+              allowClear
+              placeholder="Trạng thái"
+              suffixIcon={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            >
+              <Option value="CALLED">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Đã gọi
+                </span>
+              </Option>
+              <Option value="NOT_CALLED">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  Chưa gọi
+                </span>
+              </Option>
+              <Option value="FAILED">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  Thất bại
+                </span>
+              </Option>
+              <Option value="UNASSIGNED">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                  Chưa gán
+                </span>
+              </Option>
             </Select>
           </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="service_tag_id" label="Loại dịch vụ">
+
+          {/* Service Tag */}
+          <Form.Item name="service_tag_id" className="!mb-0">
             <Select
-              className="!h-10"
+              className="custom-select"
+              style={{ width: 130 }}
               loading={loading.service}
               allowClear
-              placeholder="-- Loại dịch vụ --"
+              placeholder="Dịch vụ"
               showSearch
-              optionFilterProp="children"
+              suffixIcon={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              }
             >
-              <Option value={null}>-- Tất cả loại dịch vụ --</Option>
               {serviceTags.map((tag) => (
                 <Option value={tag.id} key={tag.id}>
                   {tag.label ?? tag.name}
@@ -166,18 +201,23 @@ export const FilterForm: React.FC<{
               ))}
             </Select>
           </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="source_tag_id" label="Nguồn">
+
+          {/* Source Tag */}
+          <Form.Item name="source_tag_id" className="!mb-0">
             <Select
-              className="!h-10"
+              className="custom-select"
+              style={{ width: 120 }}
               loading={loading.source}
               allowClear
-              placeholder="-- Nguồn --"
+              placeholder="Nguồn"
               showSearch
-              optionFilterProp="children"
+              suffixIcon={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
             >
-              <Option value={null}>-- Tất cả nguồn --</Option>
               {sourceTags.map((tag) => (
                 <Option value={tag.id} key={tag.id}>
                   {tag.label ?? tag.name}
@@ -185,69 +225,61 @@ export const FilterForm: React.FC<{
               ))}
             </Select>
           </Form.Item>
-        </Col>
-        <Col xs={24} md={8} lg={6}>
-          <Form.Item name="status_tag_id" label="Tình trạng">
-            <Select
-              className="!h-10"
-              loading={loading.situation}
-              allowClear
-              placeholder="-- Tình trạng --"
-              showSearch
-              optionFilterProp="children"
-            >
-              <Option value={null}>-- Tất cả tình trạng --</Option>
-              {situationTags.map((tag) => (
-                <Option value={tag.id} key={tag.id}>
-                  {tag.label ?? tag.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col
-          style={{
-            display: "flex",
-            alignItems: "end",
-            justifyContent: "flex-end",
-            gap: 8,
-            marginTop: 5,
-          }}
-        >
-          <Form.Item >
+
+          {/* Filter Button */}
+          <Form.Item className="!mb-0">
             <Button
               type="primary"
-              icon={
-                <FontAwesomeIcon
-                  icon={faFilter}
-                  className="text-white !h-6 !w-4"
-                />
-              }
-              className="!h-10 !w-[130px]"
+              icon={<FontAwesomeIcon icon={faFilter} className="!h-3.5 !w-3.5" />}
               htmlType="submit"
-              style={{ minWidth: 110, fontWeight: 500 }}
+              className="!h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
             >
               Lọc
             </Button>
           </Form.Item>
-          <Form.Item >
+
+          {/* Spacer */}
+          <div className="flex-1"></div>
+
+          {/* Bulk Assign Button */}
+          <Form.Item className="!mb-0">
             <Button
-              icon={
-                <FontAwesomeIcon
-                  icon={faUserTag}
-                  className="text-white !h-6 !w-4"
-                />
-              }
-              className="!bg-purple-600 !text-white !h-10 !w-[130px]"
-              style={{ minWidth: 110, fontWeight: 500 }}
+              icon={<FontAwesomeIcon icon={faUserTag} className="!h-3.5 !w-3.5" />}
+              className="!bg-gradient-to-r !from-purple-600 !to-purple-700 hover:!from-purple-700 hover:!to-purple-800 !text-white disabled:!opacity-40 disabled:!cursor-not-allowed !h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
               disabled={selectedRowKeys.length === 0}
               onClick={onBulkAssign}
             >
-              Gán hàng Loạt
+              Gán loạt {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
             </Button>
           </Form.Item>
-        </Col>
-      </Row>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .custom-select .ant-select-selector {
+          height: 36px !important;
+          border-radius: 6px !important;
+          border-color: #d1d5db !important;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+          transition: all 0.2s !important;
+        }
+        .custom-select .ant-select-selector:hover {
+          border-color: #60a5fa !important;
+        }
+        .custom-select.ant-select-focused .ant-select-selector {
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+        .custom-select .ant-select-selection-placeholder {
+          line-height: 36px !important;
+          color: #9ca3af !important;
+          font-size: 14px !important;
+        }
+        .custom-select .ant-select-selection-item {
+          line-height: 36px !important;
+          font-size: 14px !important;
+        }
+      `}</style>
     </Form>
   );
 };

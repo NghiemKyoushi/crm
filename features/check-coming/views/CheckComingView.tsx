@@ -37,7 +37,6 @@ import { PackageInfo, CheckComingRecord, OrderInfo, ScanTrackingResponse, Relate
 import { checkComingApi } from "../apis/check-coming.api";
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { useElectronPrinter } from "../hooks/useElectronPrinter";
 
 const { Title, Text } = Typography;
 
@@ -61,9 +60,6 @@ const CheckComingView: React.FC = () => {
   const [currentOrders, setCurrentOrders] = useState<OrderInfo[]>([]);
   const [currentTrackingCode, setCurrentTrackingCode] = useState<string>("");
   const [processingOrders, setProcessingOrders] = useState(false);
-
-  // Electron printer support
-  const { isElectron, printers, preferredPrinter, printDirect } = useElectronPrinter();
 
   // Load history from API on mount
   useEffect(() => {
@@ -330,82 +326,20 @@ const CheckComingView: React.FC = () => {
   const handlePrint = async (packageInfo: PackageInfo) => {
     setLastPrintedPackage(packageInfo);
 
-    if (isElectron && preferredPrinter) {
-      // Electron: Direct print to thermal printer
+    // Browser print: call printed API immediately on click, then open print dialog
+    if (packageInfo.id) {
       try {
-        // Get the print label HTML
-        const printElement = document.querySelector('.print-label');
-        if (!printElement) {
-          toast.error('Print template not found');
-          return;
-        }
-
-        const html = `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                @page {
-                  size: 60mm 40mm; /* Toshiba B-EV4D: 60x40mm */
-                  margin: 0;
-                }
-                body {
-                  margin: 0;
-                  padding: 0;
-                  font-family: "Courier New", monospace;
-                  width: 60mm;
-                  height: 40mm;
-                  overflow: hidden;
-                }
-                ${document.querySelector('style')?.textContent || ''}
-              </style>
-            </head>
-            <body>
-              ${printElement.outerHTML}
-            </body>
-          </html>
-        `;
-
-        const result = await printDirect(html);
-
-        if (result.success) {
-          // Mark printed count on server
-          if (packageInfo.id) {
-            try {
-              await checkComingApi.markPrinted(packageInfo.id);
-              // Optimistically update UI and reload history
-              setScanHistory(prev => prev.map(item => item.id === packageInfo.id ? { ...item, printCount: (item.printCount ?? 0) + 1 } : item));
-              await loadHistory();
-            } catch (e) {
-              console.error('Failed to mark printed:', e);
-            }
-          }
-          toast.success('In nhãn thành công!');
-        } else {
-          toast.error(`Lỗi in: ${result.error || 'Unknown error'}`);
-        }
-      } catch (error: any) {
-        console.error('Print error:', error);
-        toast.error('Lỗi khi in nhãn');
+        await checkComingApi.markPrinted(packageInfo.id);
+        setScanHistory(prev => prev.map(item => item.id === packageInfo.id ? { ...item, printCount: (item.printCount ?? 0) + 1 } : item));
+        // No await here to avoid blocking UI before print dialog
+        loadHistory();
+      } catch (e) {
+        console.error('Failed to mark printed:', e);
       }
-    } else {
-      // Browser: call printed API immediately on click, then open print dialog
-      if (packageInfo.id) {
-        try {
-          await checkComingApi.markPrinted(packageInfo.id);
-          setScanHistory(prev => prev.map(item => item.id === packageInfo.id ? { ...item, printCount: (item.printCount ?? 0) + 1 } : item));
-          // No await here to avoid blocking UI before print dialog
-          loadHistory();
-        } catch (e) {
-          console.error('Failed to mark printed:', e);
-        }
-      }
-      setTimeout(() => {
-        window.print();
-      }, 100);
     }
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const handleDelete = async (id: number) => {

@@ -78,6 +78,15 @@ const TelesalesPage: React.FC = () => {
   const [editingNoteCustomer, setEditingNoteCustomer] =
     useState<TelesaleCustomer | null>(null);
 
+  // for all notes modal
+  const [allNotesModal, setAllNotesModal] = useState<{
+    open: boolean;
+    notes: any[];
+  }>({
+    open: false,
+    notes: [],
+  });
+
   // for call confirm modal (gọi/thất bại)
   const [confirmCallModal, setConfirmCallModal] = useState<{
     open: boolean;
@@ -170,6 +179,10 @@ const TelesalesPage: React.FC = () => {
     }));
   };
 
+  // Filter only unassigned customers for selection
+  const unassignedCustomers = data?.data?.filter((d) => d.status === "UNASSIGNED") || [];
+  const allUnassignedIds = unassignedCustomers.map((d) => d.id);
+
   const columns: ColumnsType<TelesaleCustomer> = [
     ...(isAdmin
       ? [
@@ -177,20 +190,18 @@ const TelesalesPage: React.FC = () => {
             title: (
               <Checkbox
                 checked={
-                  !!data?.data &&
-                  data.data.length > 0 &&
-                  selectedRowKeys.length === data.data.length
+                  unassignedCustomers.length > 0 &&
+                  selectedRowKeys.length === unassignedCustomers.length &&
+                  allUnassignedIds.every((id) => selectedRowKeys.includes(id))
                 }
                 indeterminate={
-                  !!data?.data &&
                   selectedRowKeys.length > 0 &&
-                  selectedRowKeys.length < data.data.length
+                  selectedRowKeys.length < unassignedCustomers.length
                 }
                 onChange={(e) => {
                   if (e.target.checked) {
-                    if (data?.data) {
-                      setSelectedRowKeys(data.data.map((d) => d.id));
-                    }
+                    // Select only unassigned customers
+                    setSelectedRowKeys(allUnassignedIds);
                   } else {
                     setSelectedRowKeys([]);
                   }
@@ -203,6 +214,7 @@ const TelesalesPage: React.FC = () => {
             render: (_: any, record: TelesaleCustomer) => (
               <Checkbox
                 checked={selectedRowKeys.includes(record.id)}
+                disabled={record.status !== "UNASSIGNED"}
                 onChange={(e) => {
                   const checked = e.target.checked;
                   if (checked) {
@@ -218,196 +230,152 @@ const TelesalesPage: React.FC = () => {
           },
         ]
       : []),
-    // ... rest unchanged
+    // Merged: Customer Info + Contact
     {
-      title: "Khách hàng",
+      title: "Thông tin khách hàng",
       dataIndex: "name",
-      key: "name",
+      key: "customerInfo",
+      width: 220,
       render: (_: string, record: TelesaleCustomer) => (
-        <div className="flex flex-col">
-          <span className="font-xs">{record.name}</span>
-          <span className="text-gray-400 text-xs">
-            {record.email ? `${record.email}` : "--"}
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Liên hệ",
-      dataIndex: "info",
-      key: "info",
-      render: (_: any, record: TelesaleCustomer) => (
-        <div className="whitespace-pre-line text-gray-600 text-xs">
-          <div>
-            <span className="font-semibold">Số dt:</span> {record.phone || "--"}
-          </div>
-          <div>
-            <span className="font-semibold">Địa chỉ:</span>{" "}
-            {record.address || "--"}
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.name}</div>
+          <div className="text-gray-600">📞 {record.phone || "--"}</div>
+          <div className="text-gray-500 truncate" title={record.email}>
+            {record.email || "--"}
           </div>
         </div>
       ),
     },
+    // Merged: Business Field + Source Info
     {
-      title: "Lĩnh vực kinh doanh",
-      dataIndex: "info",
-      key: "info",
-      render: (_: any, record: TelesaleCustomer) => (
-        <div className="whitespace-pre-line text-gray-600 text-xs">
-          <div>
-            {record.businessField || "--"}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Thông tin",
-      dataIndex: "info",
-      key: "info",
+      title: "Nghiệp vụ",
+      dataIndex: "business",
+      key: "business",
+      width: 160,
       render: (_: any, record: any) => (
-        <div className="whitespace-pre-line text-gray-600 text-xs">
-          <div>
-            <span className="font-semibold">Nguồn:</span>{" "}
-            {record.customerInfo || "--"}
+        <div className="text-xs text-gray-700">
+          <div className="font-medium mb-1">{record.businessField || "--"}</div>
+          <div className="text-gray-500">
+            {record.customerInfo ? `Nguồn: ${record.customerInfo}` : "--"}
           </div>
         </div>
       ),
     },
+    // Merged: Telesale + Status
     {
-      title: "Telesale",
+      title: "Sale & TT",
       dataIndex: "telesale",
-      key: "telesale",
-      render: (_: any, record: TelesaleCustomer) => (
-        <div className="flex flex-col text-xs">
-          <span className="text-blue-600 font-medium">
-            {record.saleName || "--"}
-          </span>
-          <span className="text-gray-600">
-            Email: {record.emailSale || "--"}
-          </span>
-          <span className="text-gray-400">ID: {record.saleId || "--"}</span>
-        </div>
-      ),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        let displayText = status;
-        let color = "default";
+      key: "telesaleStatus",
+      width: 120,
+      render: (_: any, record: TelesaleCustomer) => {
+        let statusColor = "default";
+        let statusText = record.status;
 
-        if (status === "NOT_CALLED") {
-          displayText = "Chưa gọi";
-          color = "gold";
-        } else if (status === "CALLED") {
-          displayText = "Đã gọi";
-          color = "green";
-        } else if (status === "UNASSIGNED") {
-          displayText = "Chưa gán";
-          color = "orange";
-        } else if (status === "FAILED") {
-          displayText = "Thất bại";
-          color = "red";
+        if (record.status === "NOT_CALLED") {
+          statusText = "Chưa gọi";
+          statusColor = "gold";
+        } else if (record.status === "CALLED") {
+          statusText = "Đã gọi";
+          statusColor = "green";
+        } else if (record.status === "UNASSIGNED") {
+          statusText = "Chưa gán";
+          statusColor = "orange";
+        } else if (record.status === "FAILED") {
+          statusText = "Thất bại";
+          statusColor = "red";
         }
 
-        return <Tag color={color}>{displayText}</Tag>;
+        return (
+          <div
+            className="text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
+            onClick={() => {
+              setSelectedCustomer(record);
+              setIsOpenDetail(true);
+            }}
+          >
+            <div className="font-medium text-blue-600 hover:text-blue-800 mb-1">
+              {record.saleName || "Chưa gán"}
+            </div>
+            <Tag color={statusColor} className="!text-xs !py-0">
+              {statusText}
+            </Tag>
+          </div>
+        );
       },
     },
     {
       title: "Tag",
       dataIndex: "tags",
       key: "tags",
-      width: 180,
+      width: 130,
       render: (_: any, record: TelesaleCustomer) => {
         const hasTags =
           record.tags && record.tags.length > 0 && record.tags.some((t) => t);
 
         return (
-          <div
-            className={`flex gap-1 flex-wrap items-center ${
-              !hasTags ? "justify-end" : ""
-            }`}
-          >
+          <div className="flex flex-col gap-1 px-1">
+            {/* Tags - one per line, arrow style */}
             {record.tags?.map((tag) => {
               if (!tag) return null;
               return (
                 <div
                   key={tag.id}
-                  className="group relative flex items-center"
-                  style={{ lineHeight: 1 }}
+                  className="group relative flex items-center mx-1"
+                  style={{ width: 'calc(100% - 8px)' }}
                 >
-                  <Tag color={tag.color} className="flex items-center !mb-0">
-                    <span>{tag.name}</span>
-                    <span
-                      className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-                      style={{ display: "inline-block" }}
-                      onClick={() => {
-                        setDeleteTagModal({
-                          open: true,
-                          tag: { customerId: record.id, tagId: tag.id },
-                          tagName: tag.name,
-                        });
-                      }}
-                    >
-                      <Tooltip title="Xoá tag">
-                        <span>
+                  {/* Tag with arrow */}
+                  <div
+                    className="relative flex items-center h-5 w-full rounded-l"
+                    style={{ backgroundColor: tag.color || '#3b82f6' }}
+                  >
+                    {/* Main tag body */}
+                    <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                      <span className="truncate">{tag.name}</span>
+                      <span
+                        className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTagModal({
+                            open: true,
+                            tag: { customerId: record.id, tagId: tag.id },
+                            tagName: tag.name,
+                          });
+                        }}
+                      >
+                        <Tooltip title="Xoá tag">
                           <FontAwesomeIcon
                             icon={faTrash}
-                            style={{
-                              fontSize: 12,
-                              verticalAlign: "middle",
-                              color: "red",
-                            }}
+                            className="text-white hover:text-red-200"
+                            style={{ fontSize: 8 }}
                           />
-                        </span>
-                      </Tooltip>
-                    </span>
-                  </Tag>
+                        </Tooltip>
+                      </span>
+                    </div>
+
+                    {/* Triangle arrow on the right */}
+                    <div
+                      className="absolute -right-2 top-0 bottom-0 w-0 h-0"
+                      style={{
+                        borderTop: '10px solid transparent',
+                        borderBottom: '10px solid transparent',
+                        borderLeft: `8px solid ${tag.color || '#3b82f6'}`,
+                      }}
+                    />
+                  </div>
                 </div>
               );
             })}
-            <EditOutlined
-              className="cursor-pointer"
+
+            {/* "Thêm tags" text */}
+            <div
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
               onClick={() => {
                 setSelectedCustomer(record);
                 setIsOpenTagModal(true);
               }}
-            />
-          </div>
-        );
-      },
-    },
-    {
-      title: "Ghi chú yc khách hàng",
-      dataIndex: "note",
-      key: "note",
-      width: 150,
-      render: (_: any, record: any) => {
-        const note = record.note || "--";
-        const isLong = typeof note === "string" && note.length > 30;
-        return (
-          <div className="whitespace-pre-line text-gray-600 text-xs">
-            <div>
-              {isLong ? (
-                <Tooltip title={note}>
-                  <span
-                    style={{
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                      display: "inline-block",
-                      maxWidth: 120,
-                      verticalAlign: "bottom",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {note}
-                  </span>
-                </Tooltip>
-              ) : (
-                <span>{note}</span>
-              )}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Thêm tags</span>
             </div>
           </div>
         );
@@ -416,67 +384,123 @@ const TelesalesPage: React.FC = () => {
     {
       title: "Ghi chú",
       dataIndex: "notes",
-      key: "notes",
+      key: "notesColumn",
       width: 200,
-      render: (_: any, record: TelesaleCustomer) => (
-        <div className="flex items-start gap-2">
-          <div style={{ maxWidth: 200, overflow: "hidden" }}>
-            {record.notes && record.notes.length > 0 ? (
-              <div className="flex flex-col gap-1">
-                {record.notes.map((noteObj: any, idx: number) =>
-                  noteObj && noteObj.trim().length > 0 ? (
-                    <Tooltip
-                      key={idx}
-                      title={
-                        noteObj.length > 30 ? noteObj : undefined
-                      }
-                      placement="topLeft"
-                    >
-                      <span
-                        style={{
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          display: "block",
-                          cursor:
-                            noteObj.length > 30 ? "pointer" : "default",
-                        }}
-                      >
-                        {noteObj}
-                      </span>
-                    </Tooltip>
-                  ) : null
-                )}
+      render: (_: any, record: any) => {
+        const customerNote = record.note || "";
+        const salesNotes = record.notes && record.notes.length > 0
+          ? record.notes.filter((n: any) => {
+              if (!n) return false;
+              if (typeof n === 'string') return n.trim().length > 0;
+              // If it's an object, check if it has content
+              return (n.note && n.note.trim().length > 0) ||
+                     (n.content && n.content.trim().length > 0) ||
+                     Object.keys(n).length > 0;
+            })
+          : [];
+
+        const showAllNotes = (notes: any[]) => {
+          console.log('========== showAllNotes CALLED ==========');
+          console.log('All notes data:', notes);
+          console.log('Notes length:', notes.length);
+          setAllNotesModal({
+            open: true,
+            notes: notes,
+          });
+        };
+
+        return (
+          <div className="text-[11px] space-y-1.5">
+            {/* Customer Request Note - with background and edit button */}
+            {customerNote ? (
+              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
+                <div className="flex items-center justify-between mb-0.5">
+                  <div className="font-semibold text-amber-700 text-[10px]">
+                    Yêu cầu KH:
+                  </div>
+                  <div
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
+                    onClick={() => handleOpenNoteModal(record)}
+                  >
+                    <EditOutlined style={{ fontSize: 9 }} />
+                    <span className="text-[9px] font-medium">Sửa</span>
+                  </div>
+                </div>
+                <Tooltip title={customerNote}>
+                  <div className="text-gray-700 line-clamp-2 leading-tight">
+                    {customerNote}
+                  </div>
+                </Tooltip>
               </div>
             ) : (
-              <span className="text-gray-400 italic">-- Chưa có --</span>
+              /* No customer note - show add button */
+              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-amber-700 text-[10px]">
+                    Yêu cầu KH:
+                  </div>
+                  <div
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
+                    onClick={() => handleOpenNoteModal(record)}
+                  >
+                    <EditOutlined style={{ fontSize: 9 }} />
+                    <span className="text-[9px] font-medium">Thêm</span>
+                  </div>
+                </div>
+                <div className="text-gray-400 italic text-[10px]">Chưa có yêu cầu</div>
+              </div>
+            )}
+
+            {/* Sales Notes - with background */}
+            {salesNotes.length > 0 && (
+              <div className="bg-blue-50 border-l-2 border-blue-400 px-2 py-1 rounded">
+                <div className="font-semibold text-blue-700 mb-0.5 text-[10px]">
+                  Ghi chú Sale:
+                </div>
+                <div className="space-y-0.5">
+                  {salesNotes.slice(0, 2).map((noteObj: any, idx: number) => (
+                    <div key={idx} className="text-gray-700 truncate leading-tight">
+                      • {noteObj}
+                    </div>
+                  ))}
+                  {salesNotes.length > 2 && (
+                    <div
+                      className="text-blue-600 hover:text-blue-800 font-medium text-[10px] cursor-pointer hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('CLICKED! salesNotes:', salesNotes);
+                        console.log('salesNotes length:', salesNotes.length);
+                        console.log('salesNotes type:', typeof salesNotes);
+                        console.log('salesNotes is array?', Array.isArray(salesNotes));
+                        showAllNotes(salesNotes);
+                      }}
+                    >
+                      +{salesNotes.length - 2} ghi chú khác (xem tất cả)
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-          <Tooltip title="Chỉnh sửa ghi chú">
-            <EditOutlined
-              className="cursor-pointer"
-              onClick={() => handleOpenNoteModal(record)}
-            />
-          </Tooltip>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "Hành động",
       key: "action",
-      minWidth: 160,
+      width: 100,
 
       render: (_: any, record: TelesaleCustomer) => {
         if (record.status === "UNASSIGNED") {
           return (
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-col gap-1.5">
               <Button
                 size="small"
                 onClick={() => {
                   setSelectedCustomer(record);
                   setIsOpenAssign(true);
                 }}
-                className="!bg-orange-500 !text-white !text-xs"
+                className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
               >
                 Gán Sale
               </Button>
@@ -484,11 +508,11 @@ const TelesalesPage: React.FC = () => {
           );
         }
         return (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-col gap-1.5">
             {/* Button "Đã gọi" */}
             <Button
               size="small"
-              className="!bg-green-500 !text-white !text-xs"
+              className="!bg-gradient-to-r !from-green-500 !to-green-600 hover:!from-green-600 hover:!to-green-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
               loading={isStatusUpdating}
               onClick={() => {
                 setConfirmCallModal({
@@ -504,7 +528,7 @@ const TelesalesPage: React.FC = () => {
             {/* Button "Thất bại" */}
             <Button
               size="small"
-              className="!bg-red-500 !text-white !text-xs"
+              className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
               loading={isStatusUpdating}
               onClick={() => {
                 setConfirmCallModal({
@@ -710,98 +734,79 @@ const TelesalesPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
-      <div className="flex flex-row justify-between">
-        <h2 className="text-xl font-bold mb-4">Quản Lý Telesales</h2>
-        <div className="flex justify-end mb-4 items-end">
-          <div className="flex gap-2">
-            {isAdmin && (
-              <Button
-                className="!bg-green-500 !text-white !h-10"
-                icon={<FontAwesomeIcon icon={faFileExcel} />}
-                loading={importing}
-                onClick={handleImportClick}
-              >
-                Import Excel
-              </Button>
-            )}
+    <div className="bg-white">
+      {/* Ultra Compact Header - Single Row */}
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-50">
+        <div className="flex items-center gap-6">
+          <h2 className="text-base font-semibold text-gray-800">Telesales</h2>
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              disabled={importing}
-            />
+          {/* Inline Statistics */}
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1.5">
+              <FontAwesomeIcon icon={faUsers} className="text-blue-600 !h-3.5 !w-3.5" />
+              <span className="text-gray-600">Tổng:</span>
+              <span className="font-semibold text-gray-900">
+                {statLoading ? "..." : telesaleStat.total.toLocaleString("vi-VN")}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-gray-300"></div>
+            <div className="flex items-center gap-1.5">
+              <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 !h-3.5 !w-3.5" />
+              <span className="text-gray-600">Gọi:</span>
+              <span className="font-semibold text-green-700">
+                {statLoading ? "..." : telesaleStat.called.toLocaleString("vi-VN")}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-gray-300"></div>
+            <div className="flex items-center gap-1.5">
+              <FontAwesomeIcon icon={faTimesCircle} className="text-red-600 !h-3.5 !w-3.5" />
+              <span className="text-gray-600">Thất bại:</span>
+              <span className="font-semibold text-red-700">
+                {statLoading ? "..." : telesaleStat.failed.toLocaleString("vi-VN")}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {isAdmin && (
             <Button
-              className="!bg-blue-500 !text-white !h-10"
-              icon={<FontAwesomeIcon icon={faDownload} />}
-              onClick={handleDownloadExample}
-              loading={downloading}
+              size="small"
+              className="!bg-green-600 hover:!bg-green-700 !text-white"
+              icon={<FontAwesomeIcon icon={faFileExcel} className="!h-3 !w-3" />}
+              loading={importing}
+              onClick={handleImportClick}
             >
-              Tải file mẫu
+              Import
             </Button>
-            <Button
-              className="!bg-blue-500 !text-white !h-10"
-              icon={<FontAwesomeIcon icon={faUserPlus} />}
-              onClick={()=> setIsOpenAddCustomerModalOpen(true)}
-              // loading={downloading}
-            >
-              Thêm khách hàng
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="border border-blue-200 bg-blue-50 rounded-lg flex items-center justify-start gap-4 py-4">
-          <div className="p-2 bg-blue-500 rounded-lg mb-2 ml-4">
-            <FontAwesomeIcon icon={faUsers} className=" text-white !h-5 !w-4" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-blue-600 !mb-1">
-              Tổng khách hàng
-            </p>
-            {/* Show statistic value */}
-            <p className="text-2xl font-bold text-blue-900 !mb-1">
-              {statLoading ? "..." : telesaleStat.total.toLocaleString("vi-VN")}
-            </p>
-          </div>
-        </div>
+          )}
 
-        <div className="bg-green-50 border border-green-200 rounded-lg flex items-center justify-start gap-4 py-4">
-          <div className="p-2 bg-green-500 rounded-lg mb-2 ml-4">
-            <FontAwesomeIcon
-              icon={faCheckCircle}
-              className=" text-white !h-5 !w-4"
-            />
-          </div>
-          <div>
-            <p className="text-sm text-green-600 !mb-1">Đã gọi</p>
-            <p className="text-2xl font-bold text-green-900 !mb-1">
-              {statLoading
-                ? "..."
-                : telesaleStat.called.toLocaleString("vi-VN")}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-red-50 p-2 rounded-lg flex items-center justify-start gap-4 py-4">
-          <div className="p-2 bg-red-500 rounded-lg mb-2 ml-4">
-            <FontAwesomeIcon
-              icon={faTimesCircle}
-              className=" text-white !h-5 !w-4"
-            />
-          </div>
-
-          <div>
-            <p className="text-sm text-red-600 !mb-1">Thất bại</p>
-            <p className="text-2xl font-bold text-red-900 !mb-1">
-              {statLoading
-                ? "..."
-                : telesaleStat.failed.toLocaleString("vi-VN")}
-            </p>
-          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            accept=".xlsx,.xls"
+            onChange={handleFileChange}
+            disabled={importing}
+          />
+          <Button
+            size="small"
+            className="!bg-blue-600 hover:!bg-blue-700 !text-white"
+            icon={<FontAwesomeIcon icon={faDownload} className="!h-3 !w-3" />}
+            onClick={handleDownloadExample}
+            loading={downloading}
+          >
+            Tải mẫu
+          </Button>
+          <Button
+            size="small"
+            className="!bg-purple-600 hover:!bg-purple-700 !text-white"
+            icon={<FontAwesomeIcon icon={faUserPlus} className="!h-3 !w-3" />}
+            onClick={()=> setIsOpenAddCustomerModalOpen(true)}
+          >
+            Thêm KH
+          </Button>
         </div>
       </div>
       <div>
@@ -1022,6 +1027,44 @@ const TelesalesPage: React.FC = () => {
             <Input.TextArea placeholder="Nhập ghi chú..." rows={3} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* All Sales Notes Modal */}
+      <Modal
+        open={allNotesModal.open}
+        onCancel={() => setAllNotesModal({ open: false, notes: [] })}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setAllNotesModal({ open: false, notes: [] })}>
+            Đóng
+          </Button>
+        ]}
+        centered
+        width={700}
+        title={<span className="font-bold text-lg">Tất cả ghi chú của Sale ({allNotesModal.notes.length} ghi chú)</span>}
+      >
+        <div className="space-y-3 max-h-[500px] overflow-y-auto">
+          {allNotesModal.notes && allNotesModal.notes.length > 0 ? (
+            allNotesModal.notes.map((noteObj: any, idx: number) => {
+              // Handle both string and object formats
+              const noteText = typeof noteObj === 'string' ? noteObj : (noteObj?.note || noteObj?.content || String(noteObj));
+              return (
+                <div
+                  key={idx}
+                  className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold text-blue-600 text-sm min-w-[24px]">
+                      {idx + 1}.
+                    </span>
+                    <p className="text-sm text-gray-700 flex-1">{noteText}</p>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center text-gray-500 py-8">Không có ghi chú nào</div>
+          )}
+        </div>
       </Modal>
     </div>
   );

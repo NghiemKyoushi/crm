@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
-import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch } from "antd";
+import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch, Modal } from "antd";
 import { useCmsPages } from "../hooks/useCmsPages";
 import CreatePageModal from "../components/CreatePageModal";
 import { deleteCmsPage } from "../apis/pages";
@@ -20,6 +20,9 @@ import { deleteCmsSetting } from "../apis/settings";
 import CreateSettingModal from "../components/CreateSettingModal";
 import { linkCategoryContent, linkCategoryRelation, linkPageCategory, linkPageContent, unlinkCategoryContent, unlinkCategoryRelation, unlinkPageCategory, unlinkPageContent, getPageCategories, getPageContents, getCategoryContents, getCategoryRelations, AggregateItem } from "../apis/aggregate";
 import CreateCategoryModal from "../components/CreateCategoryModal";
+import CategoryTreeManager from "../components/CategoryTreeManager";
+import CMSTreeManager from "../components/CMSTreeManager";
+import CreateContentModal from "../components/CreateContentModal";
 
 export default function CMSFeaturePage() {
     const router = useRouter();
@@ -559,6 +562,66 @@ export default function CMSFeaturePage() {
                             />
                         )}
                         {activeKey === "aggregate" && (
+                            <CMSTreeManager
+                                onEditPage={(pageId) => setEditingId(pageId)}
+                                onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
+                                onDeletePage={async (pageId) => {
+                                    Modal.confirm({
+                                        title: "Delete page?",
+                                        content: "This will delete the page and all its relations. Are you sure?",
+                                        okText: "Delete",
+                                        okButtonProps: { danger: true },
+                                        onOk: async () => {
+                                            try {
+                                                await deleteCmsPage(pageId);
+                                                message.success("Deleted");
+                                                refetch();
+                                            } catch (error) {
+                                                message.error("Failed to delete page");
+                                            }
+                                        },
+                                    });
+                                }}
+                                onDeleteCategory={async (categoryId) => {
+                                    Modal.confirm({
+                                        title: "Delete category?",
+                                        content: "This will delete the category and all its relations. Are you sure?",
+                                        okText: "Delete",
+                                        okButtonProps: { danger: true },
+                                        onOk: async () => {
+                                            try {
+                                                await deleteCmsCategory(categoryId);
+                                                message.success("Deleted");
+                                                invalidateCategories();
+                                            } catch (error) {
+                                                message.error("Failed to delete category");
+                                            }
+                                        },
+                                    });
+                                }}
+                                onDeleteContent={async (contentId) => {
+                                    Modal.confirm({
+                                        title: "Delete content?",
+                                        content: "This will delete the content and all its relations. Are you sure?",
+                                        okText: "Delete",
+                                        okButtonProps: { danger: true },
+                                        onOk: async () => {
+                                            try {
+                                                await deleteCmsContent(contentId);
+                                                message.success("Deleted");
+                                                invalidateContents();
+                                            } catch (error) {
+                                                message.error("Failed to delete content");
+                                            }
+                                        },
+                                    });
+                                }}
+                                onCreateCategory={() => setOpenCreateCategory(true)}
+                                onCreateContent={() => router.push('/cms/content/new')}
+                            />
+                        )}
+                        {activeKey === "aggregate-legacy" && (
                             <div className="p-2">
                                 <Tabs
                                     activeKey={aggActiveTab}
@@ -925,123 +988,93 @@ export default function CMSFeaturePage() {
                                             ),
                                         },
                                         {
-                                            key: "category-relation",
-                                            label: "Category − Relation (Parent → Child)",
+                                            key: "cms-tree",
+                                            label: "CMS Tree (Pages → Categories → Contents)",
                                             children: (
-                                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingCategories}
-                                                            rowKey="id"
-                                                            dataSource={categories}
-                                                            pagination={{
-                                                                current: categoriesPage + 1,
-                                                                pageSize: categoriesSize,
-                                                                total: categoriesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setCategoriesPage(p - 1);
-                                                                    setCategoriesSize(s);
-                                                                },
-                                                            }}
-                                                            onRow={(record) => ({
-                                                                onClick: async () => {
-                                                                    setSelectedParentCategoryId(record.id);
-                                                                    setLoadingCategoryRelations(true);
-                                                                    try {
-                                                                        const linkedData = await getCategoryRelations(record.id);
-                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
-                                                                        setLinkedCategoryRelations(linkedIds);
-                                                                    } catch (error) {
-                                                                        message.error("Failed to load category relations");
-                                                                        setLinkedCategoryRelations(new Set());
-                                                                    } finally {
-                                                                        setLoadingCategoryRelations(false);
-                                                                    }
-                                                                },
-                                                                style: { cursor: "pointer" },
-                                                            })}
-                                                            rowClassName={(record) => (selectedParentCategoryId === record.id ? "bg-blue-50" : "")}
-                                                            columns={[
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                                { title: "Slug", dataIndex: "slug" },
-                                                            ]}
-                                                            title={() => <span className="font-semibold">Parent Categories</span>}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingCategoryRelations || loadingCategories || loadingSelectedCategoryRelations}
-                                                            rowKey="id"
-                                                            dataSource={filteredCategoryRelations}
-                                                            pagination={showOnlySelectedCategoryRelations ? false : {
-                                                                current: categoriesPage + 1,
-                                                                pageSize: categoriesSize,
-                                                                total: categoriesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setCategoriesPage(p - 1);
-                                                                    setCategoriesSize(s);
-                                                                },
-                                                            }}
-                                                            columns={[
-                                                                {
-                                                                    title: "",
-                                                                    width: 60,
-                                                                    render: (_: any, record: any) => (
-                                                                        <Checkbox
-                                                                            checked={showOnlySelectedCategoryRelations
-                                                                                ? selectedCategoryRelationsData.some(item => item.id === record.id)
-                                                                                : linkedCategoryRelations.has(record.id)}
-                                                                            disabled={!selectedParentCategoryId || record.id === selectedParentCategoryId}
-                                                                            onChange={async (e) => {
-                                                                                if (!selectedParentCategoryId) return;
-                                                                                const isChecked = e.target.checked;
-                                                                                try {
-                                                                                    if (isChecked) {
-                                                                                        await linkCategoryRelation({ parent_id: selectedParentCategoryId, child_id: record.id });
-                                                                                        setLinkedCategoryRelations(prev => new Set([...prev, record.id]));
-                                                                                        message.success("Linked successfully");
-                                                                                    } else {
-                                                                                        await unlinkCategoryRelation({ parent_id: selectedParentCategoryId, child_id: record.id });
-                                                                                        setLinkedCategoryRelations(prev => {
-                                                                                            const newSet = new Set(prev);
-                                                                                            newSet.delete(record.id);
-                                                                                            return newSet;
-                                                                                        });
-                                                                                        message.success("Unlinked successfully");
-                                                                                    }
-                                                                                    // Refresh selected data if switch is ON
-                                                                                    if (showOnlySelectedCategoryRelations) {
-                                                                                        const data = await getCategoryRelations(selectedParentCategoryId);
-                                                                                        setSelectedCategoryRelationsData(data);
-                                                                                    }
-                                                                                } catch (error) {
-                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    ),
-                                                                },
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                            ]}
-                                                            title={() => (
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="font-semibold">Child Categories</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-sm">Show selected only</span>
-                                                                        <Switch
-                                                                            checked={showOnlySelectedCategoryRelations}
-                                                                            onChange={setShowOnlySelectedCategoryRelations}
-                                                                            disabled={!selectedParentCategoryId}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            locale={{ emptyText: selectedParentCategoryId ? "No categories found" : "Select a parent category to view children" }}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                <CMSTreeManager
+                                                    onEditPage={(pageId) => setEditingId(pageId)}
+                                                    onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                                    onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
+                                                    onDeletePage={async (pageId) => {
+                                                        Modal.confirm({
+                                                            title: "Delete page?",
+                                                            content: "This will delete the page and all its relations. Are you sure?",
+                                                            okText: "Delete",
+                                                            okButtonProps: { danger: true },
+                                                            onOk: async () => {
+                                                                try {
+                                                                    await deleteCmsPage(pageId);
+                                                                    message.success("Deleted");
+                                                                    refetch();
+                                                                } catch (error) {
+                                                                    message.error("Failed to delete page");
+                                                                }
+                                                            },
+                                                        });
+                                                    }}
+                                                    onDeleteCategory={async (categoryId) => {
+                                                        Modal.confirm({
+                                                            title: "Delete category?",
+                                                            content: "This will delete the category and all its relations. Are you sure?",
+                                                            okText: "Delete",
+                                                            okButtonProps: { danger: true },
+                                                            onOk: async () => {
+                                                                try {
+                                                                    await deleteCmsCategory(categoryId);
+                                                                    message.success("Deleted");
+                                                                    invalidateCategories();
+                                                                } catch (error) {
+                                                                    message.error("Failed to delete category");
+                                                                }
+                                                            },
+                                                        });
+                                                    }}
+                                                    onDeleteContent={async (contentId) => {
+                                                        Modal.confirm({
+                                                            title: "Delete content?",
+                                                            content: "This will delete the content and all its relations. Are you sure?",
+                                                            okText: "Delete",
+                                                            okButtonProps: { danger: true },
+                                                            onOk: async () => {
+                                                                try {
+                                                                    await deleteCmsContent(contentId);
+                                                                    message.success("Deleted");
+                                                                    invalidateContents();
+                                                                } catch (error) {
+                                                                    message.error("Failed to delete content");
+                                                                }
+                                                            },
+                                                        });
+                                                    }}
+                                                    onCreateCategory={() => setOpenCreateCategory(true)}
+                                                    onCreateContent={() => router.push('/cms/content/new')}
+                                                />
+                                            ),
+                                        },
+                                        {
+                                            key: "category-tree",
+                                            label: "Category Tree (Legacy)",
+                                            children: (
+                                                <CategoryTreeManager
+                                                    onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                                    onDeleteCategory={async (categoryId) => {
+                                                        Modal.confirm({
+                                                            title: "Delete category?",
+                                                            content: "This will delete the category and all its relations. Are you sure?",
+                                                            okText: "Delete",
+                                                            okButtonProps: { danger: true },
+                                                            onOk: async () => {
+                                                                try {
+                                                                    await deleteCmsCategory(categoryId);
+                                                                    message.success("Deleted");
+                                                                    invalidateCategories();
+                                                                } catch (error) {
+                                                                    message.error("Failed to delete category");
+                                                                }
+                                                            },
+                                                        });
+                                                    }}
+                                                />
                                             ),
                                         },
                                     ]}
