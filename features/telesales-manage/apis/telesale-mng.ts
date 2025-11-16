@@ -89,6 +89,15 @@ export const assignTelesaleTag = async (contactId: string, tagIds: number[]) => 
   const res = await api.post(url, tagIds);
   return res.data;
 };
+// Unassign 
+export const unassignTelesaleTag = async (contactId: string) => {
+  const url = API_TYPE_CONST.TELESALE_UNASSIGN.replace(
+    "{contact_id}",
+    contactId
+  );
+  const res = await api.put(url);
+  return res.data;
+};
 
 // Xoá nhiều tag khỏi telesale contact (API mới)
 export const deleteTelesaleContactTags = async (contactId: string, tagIds: number[]) => {
@@ -114,9 +123,23 @@ export const changeTelesaleStatus = async (
   return res.data;
 };
 
+// Unassign telesale contact
+export const unassignTelesaleContact = async (contactId: string) => {
+  const url = API_TYPE_CONST.TELESALE_UNASSIGN.replace(
+    "{contact_id}",
+    contactId
+  );
+  const res = await api.put(url);
+  return res.data;
+};
+
 // Lấy danh sách tag (thẻ) telesale
-export const getTelesaleTagList = async () => {
-  const res = await api.get(API_TYPE_CONST.TAG_LIST);
+export const getTelesaleTagList = async (page?: number, pageSize?: number) => {
+  // If page or pageSize is undefined, they will be omitted from params
+  const params: any = {};
+  if (page !== undefined) params.page = page;
+  if (pageSize !== undefined) params.pageSize = pageSize;
+  const res = await api.get(API_TYPE_CONST.TAG_LIST, { params });
   return res.data.data;
 };
 
@@ -144,6 +167,7 @@ export const telesalesMngApi = {
   assignTag: assignTelesaleTag,
   deleteContactTags: deleteTelesaleContactTags,
   changeStatus: changeTelesaleStatus,
+  unassign: unassignTelesaleContact,
   getTagList: getTelesaleTagList,
   addTelesaleCustomer, 
 };

@@ -77,6 +77,8 @@ export default function OrderHubFilter({
       label: t("status.shippingRequest"),
     },
     { value: OrderStatusType.CANCELED, label: t("status.canceled") },
+    { value: OrderStatusType.DENIED, label: t("status.denied") },
+
   ];
 
   const handleFinish = (values: any) => {

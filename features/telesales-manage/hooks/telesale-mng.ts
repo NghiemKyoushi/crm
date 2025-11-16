@@ -5,6 +5,7 @@ import {
   getTelesaleAccounts,
   getTelesaleDashboard,
   assignTelesaleTag,
+  unassignTelesaleTag,
 } from "../apis/telesale-mng";
 import { TelesaleParamsList } from "../types/telesales-mng";
 import { useMutation } from "@tanstack/react-query";
@@ -72,6 +73,19 @@ export function useAssignCustomerTag() {
     },
   });
 }
+
+export function useUnAssignCustomerTag() {
+  return useMutation({
+    mutationFn: async ({
+      customerId,
+    }: {
+      customerId: string | number;
+    }) => {
+      return unassignTelesaleTag(String(customerId));
+    },
+  });
+}
+
 
 export function useTelesaleStatistic() {
   const [stat, setStat] = useState({

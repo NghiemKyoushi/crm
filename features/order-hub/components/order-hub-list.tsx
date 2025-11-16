@@ -435,7 +435,9 @@ export default function OrderHub() {
           setIsOpenCancelOrder2(false);
         },
         onError: (error: any) => {
-          toast.error(error?.response?.data?.localizedMessage || "Có lỗi xảy ra");
+          toast.error(
+            error?.response?.data?.localizedMessage || "Có lỗi xảy ra"
+          );
         },
       }
     );
@@ -977,6 +979,10 @@ export default function OrderHub() {
           case OrderStatusType.CANCELED:
             color = "red";
             text = t("status.cancelled");
+            break;
+          case OrderStatusType.DENIED:
+            color = "red";
+            text = t("status.denied");
             break;
           default:
             color = "default";
@@ -1660,10 +1666,12 @@ export default function OrderHub() {
       {orderDetail && (
         <CancelOrderModal
           onCancel={() => {
-            setIsOpenCancelOrder2(false)
+            setIsOpenCancelOrder2(false);
             setOrderDetail(undefined);
-          } }
-          onConfirm={(value) => handleCancelOrderAfterApprove(orderDetail.id, value)}
+          }}
+          onConfirm={(value) =>
+            handleCancelOrderAfterApprove(orderDetail.id, value)
+          }
           visible={isOpenCancelOrder2}
         />
       )}

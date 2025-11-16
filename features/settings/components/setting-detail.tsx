@@ -150,46 +150,9 @@ const SettingsDetail = () => {
         className="relative rounded-lg shadow-sm h-full"
       >
         <div className="pb-16">
-          {/* <div className="text-sm text-gray-600 mb-4">
-            {t("settings.serviceFeesDescription")}
-          </div> */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-              <li>{t("settings.buyingFeeUS")}</li>
-              <li>{t("settings.buyingFeeJP")}</li>
-              <li>{t("settings.internationalShipping")}</li>
-              <li>{t("settings.productSurcharge")}</li>
-            </ul>
-            <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-              <li>{t("settings.reinforcementFee")}</li>
-              <li>{t("settings.insuranceFee")}</li>
-              <li>{t("settings.hanoiDeliveryFee")}</li>
-              <li>{t("settings.storageFee")}</li>
-            </ul>
-          </div> */}
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4">
-          <Button
-            size="large"
-            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            onClick={() => router.push("/fee-setting")}
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
-          >
-            <span className="text-sm">{t("settings.goToFeeManagement")}</span>
-          </Button>
-        </div>
-      </Card>
-
-      <Card
-        title={
-          <div className="text-base font-medium text-gray-800">
-            {t("settings.orderOperationsSettings")}
-          </div>
-        }
-        className="rounded-lg shadow-sm"
-      >
-        <div className="flex flex-col gap-3">
+        <div className="bottom-4 left-4 right-4 flex flex-col gap-3">
           <Button
             size="large"
             onClick={() => router.push("/website-manage")}
@@ -208,18 +171,6 @@ const SettingsDetail = () => {
           >
             <span className="text-sm">{t("settings.productTypesAndFees")}</span>
           </Button>
-        </div>
-      </Card>
-
-      <Card
-        title={
-          <div className="text-base font-medium text-gray-800">
-            {t("settings.userManagementSettings")}
-          </div>
-        }
-        className="rounded-lg shadow-sm"
-      >
-        <div className="flex flex-col gap-3">
           <Button
             size="large"
             onClick={() => router.push("/user-management")}
@@ -238,8 +189,18 @@ const SettingsDetail = () => {
           >
             <span className="text-sm">{t("settings.staffAndPermissions")}</span>
           </Button>
+          <Button
+            size="large"
+            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+            onClick={() => router.push("/fee-setting")}
+            icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
+          >
+            <span className="text-sm">{t("settings.goToFeeManagement")}</span>
+          </Button>
         </div>
       </Card>
+
+  
     </div>
   );
 };

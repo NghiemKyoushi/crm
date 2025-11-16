@@ -328,7 +328,8 @@
     "shippingRequest": "Yêu cầu giao hàng",
     "canceled": "Đã từ chối",
     "completed": "Hoàn thành",
-    "packed": "Đã đóng gói"
+    "packed": "Đã đóng gói",
+    "denied":"Đã huỷ đơn"
   },
   "fromDate": "Từ ngày",
   "toDate": "Đến ngày",

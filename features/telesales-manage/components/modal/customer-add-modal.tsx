@@ -255,7 +255,7 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                 />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="status_tag"
                 label="Tình trạng"
                 rules={[{ required: true, message: "Chọn tình trạng" }]}
@@ -275,7 +275,7 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                       .indexOf(input.toLowerCase()) >= 0
                   }
                 />
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
                 name="note_request"
@@ -290,7 +290,7 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                 />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="call_note"
                 label="Ghi chú cuộc gọi"
                 rules={[{ required: true, message: "Vui lòng nhập ghi chú cuộc gọi" }]}
@@ -301,7 +301,7 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                   className="!h-10"
                   maxLength={200}
                 />
-              </Form.Item>
+              </Form.Item> */}
             </div>
           </div>
         </Form>
