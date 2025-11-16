@@ -37,6 +37,7 @@ import {
   useTelesaleUsers,
   useTelesaleStatistic,
   useAssignCustomerTag,
+  useUnAssignCustomerTag,
 } from "../hooks/telesale-mng";
 import { EditOutlined } from "@ant-design/icons";
 import AddMultiCustomerModal from "./modal/add-multi-customer";
@@ -104,6 +105,15 @@ const TelesalesPage: React.FC = () => {
     tag?: { tagId: number; customerId: number };
     tagName?: string;
   }>({ open: false, tag: undefined, tagName: "" });
+
+  // Popup Hủy gán Sale Modal state/handlers
+  const [unassignSaleModal, setUnassignSaleModal] = useState<{
+    open: boolean;
+    customer: TelesaleCustomer | null;
+  }>({
+    open: false,
+    customer: null,
+  });
 
   const { mutate: addCustomerNote } = useAddCustomerNote();
   const { mutate: updateTelesaleStatus, isPending: isStatusUpdating } =
@@ -400,9 +410,6 @@ const TelesalesPage: React.FC = () => {
           : [];
 
         const showAllNotes = (notes: any[]) => {
-          console.log('========== showAllNotes CALLED ==========');
-          console.log('All notes data:', notes);
-          console.log('Notes length:', notes.length);
           setAllNotesModal({
             open: true,
             notes: notes,
@@ -468,10 +475,6 @@ const TelesalesPage: React.FC = () => {
                       className="text-blue-600 hover:text-blue-800 font-medium text-[10px] cursor-pointer hover:underline"
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('CLICKED! salesNotes:', salesNotes);
-                        console.log('salesNotes length:', salesNotes.length);
-                        console.log('salesNotes type:', typeof salesNotes);
-                        console.log('salesNotes is array?', Array.isArray(salesNotes));
                         showAllNotes(salesNotes);
                       }}
                     >
@@ -541,6 +544,23 @@ const TelesalesPage: React.FC = () => {
             >
               Thất bại
             </Button>
+            {
+              isAdmin &&
+              <div className="flex flex-col gap-1.5">
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setUnassignSaleModal({
+                      open: true,
+                      customer: record,
+                    });
+                  }}
+                  className="!bg-gradient-to-r !from-gray-500 !to-gray-600 hover:!from-gray-600 hover:!to-gray-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                >
+                  Huỷ gán Sale
+                </Button>
+              </div>
+            }
           </div>
         );
       },
@@ -731,6 +751,35 @@ const TelesalesPage: React.FC = () => {
 
   const handleCancelDeleteTag = () => {
     setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
+  };
+
+  // Handler for unassign sale modal (huỷ gán Sale)
+  const { mutate: unassignCustomerTagMutation } = useUnAssignCustomerTag();
+
+  const handleConfirmUnassignSale = async () => {
+    if (!unassignSaleModal.customer) return;
+    unassignCustomerTagMutation(
+      { customerId: unassignSaleModal.customer.id },
+      {
+        onSuccess: () => {
+          toast.success("Huỷ gán Sale thành công!");
+          refetch();
+          reloadTelesaleStat();
+          setUnassignSaleModal({ open: false, customer: null });
+          setSelectedRowKeys((prev) =>
+            prev.filter((id) => id !== unassignSaleModal.customer!.id)
+          );
+        },
+        onError: () => {
+          toast.error("Huỷ gán Sale thất bại. Vui lòng thử lại!");
+          setUnassignSaleModal({ open: false, customer: null });
+        },
+      }
+    );
+  };
+
+  const handleCancelUnassignSale = () => {
+    setUnassignSaleModal({ open: false, customer: null });
   };
 
   return (
@@ -1027,6 +1076,31 @@ const TelesalesPage: React.FC = () => {
             <Input.TextArea placeholder="Nhập ghi chú..." rows={3} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Modal xác nhận huỷ gán Sale */}
+      <Modal
+        open={unassignSaleModal.open}
+        title="Xác nhận huỷ gán Sale"
+        onOk={handleConfirmUnassignSale}
+        onCancel={handleCancelUnassignSale}
+        okText="Xác nhận"
+        cancelText="Huỷ"
+        confirmLoading={assignTelesaleMutation.isPending}
+        centered
+        maskClosable={false}
+      >
+        <div className="mb-2">
+          <p>
+            Bạn có chắc chắn muốn <span className="font-semibold text-red-600">huỷ gán Sale</span> cho khách hàng
+            <span className="font-semibold ml-1">
+              {unassignSaleModal.customer?.name
+                ? unassignSaleModal.customer.name
+                : ""}
+            </span>
+            ?
+          </p>
+        </div>
       </Modal>
 
       {/* All Sales Notes Modal */}

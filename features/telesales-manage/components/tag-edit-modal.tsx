@@ -1,11 +1,14 @@
-import { Modal, Input, Button } from "antd";
+import { Modal, Input, Button, Select } from "antd";
 import { useState, useEffect } from "react";
+
+const { Option } = Select;
 
 // Chuẩn hóa type - dùng giống với TagType ở tag-modal.tsx
 export interface TagType {
   id: string | number;
   name: string;
   color: string;
+  tag_type: "SERVICE" | "SOURCE" | "STATUS";
 }
 
 interface TagEditModalProps {
@@ -27,6 +30,12 @@ const colors: TagType["color"][] = [
   "lime",
 ];
 
+const TAG_TYPES: Array<{ label: string; value: TagType["tag_type"] }> = [
+  { label: "Dịch vụ", value: "SERVICE" },
+  { label: "Nguồn", value: "SOURCE" },
+  { label: "Tình trạng", value: "STATUS" },
+];
+
 const TagEditModal: React.FC<TagEditModalProps> = ({
   open,
   onClose,
@@ -35,14 +44,17 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
 }) => {
   const [name, setName] = useState<string>("");
   const [color, setColor] = useState<TagType["color"]>("red");
+  const [tagType, setTagType] = useState<TagType["tag_type"]>("SERVICE");
 
   useEffect(() => {
     if (initialTag) {
       setName(initialTag.name ?? "");
       setColor(initialTag.color ?? "red");
+      setTagType(initialTag.tag_type ?? "SERVICE");
     } else {
       setName("");
       setColor("red");
+      setTagType("SERVICE");
     }
   }, [initialTag, open]);
 
@@ -52,6 +64,7 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
       id: initialTag?.id ?? "",
       name: name.trim(),
       color,
+      tag_type: tagType,
     };
     onSave(tag);
   };
@@ -77,6 +90,20 @@ const TagEditModal: React.FC<TagEditModalProps> = ({
       width={500}
     >
       <div className="space-y-5 pt-2">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Loại thẻ</label>
+          <Select
+            className="!h-10 !rounded-lg w-full"
+            value={tagType}
+            onChange={(val: TagType["tag_type"]) => setTagType(val)}
+          >
+            {TAG_TYPES.map((item) => (
+              <Option key={item.value} value={item.value}>
+                {item.label}
+              </Option>
+            ))}
+          </Select>
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Tên thẻ phân loại</label>
           <div className="flex gap-3 items-center">
