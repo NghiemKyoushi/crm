@@ -328,7 +328,8 @@
     "shippingRequest": "Shipping Request",
     "canceled": "Canceled",
     "completed": "Completed",
-    "packed": "Packaged"
+    "packed": "Packaged",
+    "denied":"Denied"
   },
   "fromDate": "From date",
   "toDate": "To date",

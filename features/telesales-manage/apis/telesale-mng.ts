@@ -115,8 +115,12 @@ export const changeTelesaleStatus = async (
 };
 
 // Lấy danh sách tag (thẻ) telesale
-export const getTelesaleTagList = async () => {
-  const res = await api.get(API_TYPE_CONST.TAG_LIST);
+export const getTelesaleTagList = async (page?: number, pageSize?: number) => {
+  // If page or pageSize is undefined, they will be omitted from params
+  const params: any = {};
+  if (page !== undefined) params.page = page;
+  if (pageSize !== undefined) params.pageSize = pageSize;
+  const res = await api.get(API_TYPE_CONST.TAG_LIST, { params });
   return res.data.data;
 };
 

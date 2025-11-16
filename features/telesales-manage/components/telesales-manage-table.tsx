@@ -1008,7 +1008,7 @@ const TelesalesPage: React.FC = () => {
             label="Ghi chú"
             rules={[
               {
-                required: true,
+                // required: true,
                 message: "Ghi chú là bắt buộc",
               },
               {

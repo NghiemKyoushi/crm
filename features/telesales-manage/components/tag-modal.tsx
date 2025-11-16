@@ -40,7 +40,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const data = await getTelesaleTagList();
+      const data = await getTelesaleTagList(0, 20);
       // Ensure data is array and items are TagType
       setTags(
         Array.isArray(data)
