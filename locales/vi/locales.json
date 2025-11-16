@@ -51,7 +51,8 @@
     "operation": "Quản lý xuất kho",
     "websiteManagement": "Quản lý Website",
     "crm": "CRM",
-    "cms": "CMS"
+    "cms": "CMS",
+    "vipManagement": "Quản lý Gói VIP"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
