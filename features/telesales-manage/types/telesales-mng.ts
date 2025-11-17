@@ -24,6 +24,9 @@ export interface TelesaleCustomer {
     notes: Array<any>;
     tags: Array<any>;
     businessField?: string;
+    serviceTag: any;
+    statusTag: any;
+    sourceTag: any;
 }
 
 export interface TelesaleCustomerListResponse {

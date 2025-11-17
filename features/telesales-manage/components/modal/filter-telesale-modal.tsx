@@ -104,7 +104,7 @@ export const FilterForm: React.FC<{
             <Input
               placeholder="Tìm kiếm..."
               className="!h-9 !text-sm !rounded-md !border-gray-300 hover:!border-blue-400 focus:!border-blue-500 focus:!shadow-lg !transition-all"
-              style={{ width: 200 }}
+              style={{ width: 190 }}
               allowClear
               prefix={
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,6 +219,29 @@ export const FilterForm: React.FC<{
               }
             >
               {sourceTags.map((tag) => (
+                <Option value={tag.id} key={tag.id}>
+                  {tag.label ?? tag.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+           {/* Source Tag */}
+           <Form.Item name="status_tag_id" className="!mb-0">
+            <Select
+              className="custom-select"
+              style={{ width: 120 }}
+              loading={loading.source}
+              allowClear
+              placeholder="Tình trạng"
+              showSearch
+              suffixIcon={
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
+            >
+              {situationTags.map((tag) => (
                 <Option value={tag.id} key={tag.id}>
                   {tag.label ?? tag.name}
                 </Option>

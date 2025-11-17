@@ -314,69 +314,85 @@ const TelesalesPage: React.FC = () => {
       },
     },
     {
-      title: "Tag",
-      dataIndex: "tags",
-      key: "tags",
-      width: 130,
+      title: "Loại dịch vụ",
+      dataIndex: "serviceTag",
+      key: "serviceTag",
+      width: 120,
       render: (_: any, record: TelesaleCustomer) => {
-        const hasTags =
-          record.tags && record.tags.length > 0 && record.tags.some((t) => t);
-
+        const tag = record.serviceTag;
+        if (!tag) return <span className="text-xs text-gray-400">--</span>;
         return (
           <div className="flex flex-col gap-1 px-1">
-            {/* Tags - one per line, arrow style */}
-            {record.tags?.map((tag) => {
-              if (!tag) return null;
-              return (
+            <div
+              className="group relative flex items-center mx-1"
+              style={{ width: 'calc(100% - 8px)' }}
+            >
+              <div
+                className="relative flex items-center h-5 w-full rounded-l"
+                style={{ backgroundColor: tag.color || '#3b82f6' }}
+              >
+                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                  <span className="truncate">{tag.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      title: "Nguồn",
+      dataIndex: "sourceTag",
+      key: "sourceTag",
+      width: 110,
+      render: (_: any, record: TelesaleCustomer) => {
+        const tag = record.sourceTag;
+        if (!tag) return <span className="text-xs text-gray-400">--</span>;
+        return (
+          <div className="flex flex-col gap-1 px-1">
+            <div
+              className="group relative flex items-center mx-1"
+              style={{ width: 'calc(100% - 8px)' }}
+            >
+              <div
+                className="relative flex items-center h-5 w-full rounded-l"
+                style={{ backgroundColor: tag.color || '#3b82f6' }}
+              >
+                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                  <span className="truncate">{tag.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      title: "Tình trạng",
+      dataIndex: "statusTag",
+      key: "statusTag",
+      width: 110,
+      render: (_: any, record: TelesaleCustomer) => {
+        const tag = record.statusTag;
+        return (
+          <div className="flex flex-col gap-1 px-1">
+            {tag ? (
+              <div
+                className="group relative flex items-center mx-1"
+                style={{ width: 'calc(100% - 8px)' }}
+              >
                 <div
-                  key={tag.id}
-                  className="group relative flex items-center mx-1"
-                  style={{ width: 'calc(100% - 8px)' }}
+                  className="relative flex items-center h-5 w-full rounded-l"
+                  style={{ backgroundColor: tag.color || '#3b82f6' }}
                 >
-                  {/* Tag with arrow */}
-                  <div
-                    className="relative flex items-center h-5 w-full rounded-l"
-                    style={{ backgroundColor: tag.color || '#3b82f6' }}
-                  >
-                    {/* Main tag body */}
-                    <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
-                      <span className="truncate">{tag.name}</span>
-                      <span
-                        className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTagModal({
-                            open: true,
-                            tag: { customerId: record.id, tagId: tag.id },
-                            tagName: tag.name,
-                          });
-                        }}
-                      >
-                        <Tooltip title="Xoá tag">
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="text-white hover:text-red-200"
-                            style={{ fontSize: 8 }}
-                          />
-                        </Tooltip>
-                      </span>
-                    </div>
-
-                    {/* Triangle arrow on the right */}
-                    <div
-                      className="absolute -right-2 top-0 bottom-0 w-0 h-0"
-                      style={{
-                        borderTop: '10px solid transparent',
-                        borderBottom: '10px solid transparent',
-                        borderLeft: `8px solid ${tag.color || '#3b82f6'}`,
-                      }}
-                    />
+                  <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                    <span className="truncate">{tag.name}</span>
                   </div>
                 </div>
-              );
-            })}
-
-            {/* "Thêm tags" text */}
+              </div>
+            ) : (
+              <span className="text-xs text-gray-400">--</span>
+            )}
             <div
               className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
               onClick={() => {
@@ -389,8 +405,86 @@ const TelesalesPage: React.FC = () => {
             </div>
           </div>
         );
-      },
+      }
     },
+    // {
+    //   title: "Tag",
+    //   dataIndex: "tags",
+    //   key: "tags",
+    //   width: 130,
+    //   render: (_: any, record: TelesaleCustomer) => {
+    //     const hasTags =
+    //       record.tags && record.tags.length > 0 && record.tags.some((t) => t);
+
+    //     return (
+    //       <div className="flex flex-col gap-1 px-1">
+    //         {/* Tags - one per line, arrow style */}
+    //         {record.tags?.map((tag) => {
+    //           if (!tag) return null;
+    //           return (
+    //             <div
+    //               key={tag.id}
+    //               className="group relative flex items-center mx-1"
+    //               style={{ width: 'calc(100% - 8px)' }}
+    //             >
+    //               {/* Tag with arrow */}
+    //               <div
+    //                 className="relative flex items-center h-5 w-full rounded-l"
+    //                 style={{ backgroundColor: tag.color || '#3b82f6' }}
+    //               >
+    //                 {/* Main tag body */}
+    //                 <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+    //                   <span className="truncate">{tag.name}</span>
+    //                   <span
+    //                     className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+    //                     onClick={(e) => {
+    //                       e.stopPropagation();
+    //                       setDeleteTagModal({
+    //                         open: true,
+    //                         tag: { customerId: record.id, tagId: tag.id },
+    //                         tagName: tag.name,
+    //                       });
+    //                     }}
+    //                   >
+    //                     <Tooltip title="Xoá tag">
+    //                       <FontAwesomeIcon
+    //                         icon={faTrash}
+    //                         className="text-white hover:text-red-200"
+    //                         style={{ fontSize: 8 }}
+    //                       />
+    //                     </Tooltip>
+    //                   </span>
+    //                 </div>
+
+    //                 {/* Triangle arrow on the right */}
+    //                 <div
+    //                   className="absolute -right-2 top-0 bottom-0 w-0 h-0"
+    //                   style={{
+    //                     borderTop: '10px solid transparent',
+    //                     borderBottom: '10px solid transparent',
+    //                     borderLeft: `8px solid ${tag.color || '#3b82f6'}`,
+    //                   }}
+    //                 />
+    //               </div>
+    //             </div>
+    //           );
+    //         })}
+
+    //         {/* "Thêm tags" text */}
+    //         <div
+    //           className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
+    //           onClick={() => {
+    //             setSelectedCustomer(record);
+    //             setIsOpenTagModal(true);
+    //           }}
+    //         >
+    //           <EditOutlined style={{ fontSize: 9 }} />
+    //           <span>Thêm tags</span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Ghi chú",
       dataIndex: "notes",

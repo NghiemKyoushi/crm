@@ -66,7 +66,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   }, [open]);
 
   // Thêm hoặc sửa tag sử dụng API
-  const handleSaveTag = async (tag: { id?: string | number; name: string; color: string, tag_type: string }) => {
+  const handleSaveTag = async (tag: { id?: string | number; name: string; color: string }) => {
     try {
       setLoading(true);
       if (tag.id) {
@@ -75,7 +75,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
         toast.success("Cập nhật thẻ thành công!");
       } else {
         // Else, add new with add API
-        await addTelesaleTag({ name: tag.name, color: tag.color, tag_type:tag.tag_type });
+        await addTelesaleTag({ name: tag.name, color: tag.color, tag_type: 'STATUS' });
         toast.success("Thêm thẻ thành công!");
       }
       await fetchTags();
