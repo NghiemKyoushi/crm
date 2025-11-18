@@ -157,7 +157,7 @@ const ProductManagement: React.FC = () => {
 
   const columns: ColumnsType<Order> = [
     {
-      title: "Mã VĐ / SL",
+      title: "Mã XK / SL",
       key: "tracking_ship",
       width: 100,
       align: "center",

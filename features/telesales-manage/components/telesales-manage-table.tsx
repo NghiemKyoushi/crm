@@ -242,180 +242,78 @@ const TelesalesPage: React.FC = () => {
       : []),
     // Merged: Customer Info + Contact
     {
-      title: "Thông tin khách hàng",
+      title: "Tên khách",
       dataIndex: "name",
-      key: "customerInfo",
-      width: 220,
+      key: "name",
+      width: 120,
       render: (_: string, record: TelesaleCustomer) => (
         <div className="text-xs">
           <div className="font-medium text-gray-900 mb-1">{record.name}</div>
-          <div className="text-gray-600">📞 {record.phone || "--"}</div>
-          <div className="text-gray-500 truncate" title={record.email}>
-            {record.email || "--"}
-          </div>
         </div>
       ),
     },
-    // Merged: Business Field + Source Info
     {
-      title: "Nghiệp vụ",
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      width: 120,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.phone || "--"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 120,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.email}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 160,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.address}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Lĩnh vực KD",
+      dataIndex: "business",
+      key: "business",
+      width: 120,
+      render: (_: any, record: any) => (
+        <div className="text-xs text-gray-700">
+          <div className="font-medium mb-1">{record.businessField || "--"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Thông tin khách hàng",
       dataIndex: "business",
       key: "business",
       width: 160,
       render: (_: any, record: any) => (
         <div className="text-xs text-gray-700">
-          <div className="font-medium mb-1">{record.businessField || "--"}</div>
-          <div className="text-gray-500">
-            {record.customerInfo ? `Nguồn: ${record.customerInfo}` : "--"}
-          </div>
+          <div className="font-medium mb-1">{record.customerInfo || "--"}</div>
         </div>
       ),
     },
-    // Merged: Telesale + Status
     {
-      title: "Sale & TT",
-      dataIndex: "telesale",
-      key: "telesaleStatus",
-      width: 120,
-      render: (_: any, record: TelesaleCustomer) => {
-        let statusColor = "default";
-        let statusText = record.status;
-
-        if (record.status === "NOT_CALLED") {
-          statusText = "Chưa gọi";
-          statusColor = "gold";
-        } else if (record.status === "CALLED") {
-          statusText = "Đã gọi";
-          statusColor = "green";
-        } else if (record.status === "UNASSIGNED") {
-          statusText = "Chưa gán";
-          statusColor = "orange";
-        } else if (record.status === "FAILED") {
-          statusText = "Thất bại";
-          statusColor = "red";
-        }
-
-        return (
-          <div
-            className="text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
-            onClick={() => {
-              setSelectedCustomer(record);
-              setIsOpenDetail(true);
-            }}
-          >
-            <div className="font-medium text-blue-600 hover:text-blue-800 mb-1">
-              {record.saleName || "Chưa gán"}
-            </div>
-            <Tag color={statusColor} className="!text-xs !py-0">
-              {statusText}
-            </Tag>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tag",
-      dataIndex: "tags",
-      key: "tags",
-      width: 130,
-      render: (_: any, record: TelesaleCustomer) => {
-        const hasTags =
-          record.tags && record.tags.length > 0 && record.tags.some((t) => t);
-
-        return (
-          <div className="flex flex-col gap-1 px-1">
-            {/* Tags - one per line, arrow style */}
-            {record.tags?.map((tag) => {
-              if (!tag) return null;
-              return (
-                <div
-                  key={tag.id}
-                  className="group relative flex items-center mx-1"
-                  style={{ width: 'calc(100% - 8px)' }}
-                >
-                  {/* Tag with arrow */}
-                  <div
-                    className="relative flex items-center h-5 w-full rounded-l"
-                    style={{ backgroundColor: tag.color || '#3b82f6' }}
-                  >
-                    {/* Main tag body */}
-                    <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
-                      <span className="truncate">{tag.name}</span>
-                      <span
-                        className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTagModal({
-                            open: true,
-                            tag: { customerId: record.id, tagId: tag.id },
-                            tagName: tag.name,
-                          });
-                        }}
-                      >
-                        <Tooltip title="Xoá tag">
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="text-white hover:text-red-200"
-                            style={{ fontSize: 8 }}
-                          />
-                        </Tooltip>
-                      </span>
-                    </div>
-
-                    {/* Triangle arrow on the right */}
-                    <div
-                      className="absolute -right-2 top-0 bottom-0 w-0 h-0"
-                      style={{
-                        borderTop: '10px solid transparent',
-                        borderBottom: '10px solid transparent',
-                        borderLeft: `8px solid ${tag.color || '#3b82f6'}`,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* "Thêm tags" text */}
-            <div
-              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
-              onClick={() => {
-                setSelectedCustomer(record);
-                setIsOpenTagModal(true);
-              }}
-            >
-              <EditOutlined style={{ fontSize: 9 }} />
-              <span>Thêm tags</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Ghi chú",
+      title: "Note yêu cầu khách hàng",
       dataIndex: "notes",
       key: "notesColumn",
       width: 200,
       render: (_: any, record: any) => {
         const customerNote = record.note || "";
-        const salesNotes = record.notes && record.notes.length > 0
-          ? record.notes.filter((n: any) => {
-              if (!n) return false;
-              if (typeof n === 'string') return n.trim().length > 0;
-              // If it's an object, check if it has content
-              return (n.note && n.note.trim().length > 0) ||
-                     (n.content && n.content.trim().length > 0) ||
-                     Object.keys(n).length > 0;
-            })
-          : [];
-
-        const showAllNotes = (notes: any[]) => {
-          setAllNotesModal({
-            open: true,
-            notes: notes,
-          });
-        };
-
         return (
           <div className="text-[11px] space-y-1.5">
             {/* Customer Request Note - with background and edit button */}
@@ -457,6 +355,260 @@ const TelesalesPage: React.FC = () => {
                 <div className="text-gray-400 italic text-[10px]">Chưa có yêu cầu</div>
               </div>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Telesale",
+      dataIndex: "business",
+      key: "business",
+      width: 120,
+      render: (_: any, record: any) => (
+        <div className="text-xs text-gray-700">
+          <div className="font-medium mb-1">{record.saleName || "Chưa gán"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "telesale",
+      key: "telesaleStatus",
+      width: 120,
+      render: (_: any, record: TelesaleCustomer) => {
+        let statusColor = "default";
+        let statusText = record.status;
+
+        if (record.status === "NOT_CALLED") {
+          statusText = "Chưa gọi";
+          statusColor = "gold";
+        } else if (record.status === "CALLED") {
+          statusText = "Đã gọi";
+          statusColor = "green";
+        } else if (record.status === "UNASSIGNED") {
+          statusText = "Chưa gán";
+          statusColor = "orange";
+        } else if (record.status === "FAILED") {
+          statusText = "Thất bại";
+          statusColor = "red";
+        }
+
+        return (
+          <div
+            className="text-xs cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
+            onClick={() => {
+              setSelectedCustomer(record);
+              setIsOpenDetail(true);
+            }}
+          >
+            {/* <div className="font-medium text-blue-600 hover:text-blue-800 mb-1">
+              {record.saleName || "Chưa gán"}
+            </div> */}
+            <Tag color={statusColor} className="!text-xs !py-0">
+              {statusText}
+            </Tag>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Loại dịch vụ",
+      dataIndex: "serviceTag",
+      key: "serviceTag",
+      width: 120,
+      render: (_: any, record: TelesaleCustomer) => {
+        const tag = record.serviceTag;
+        if (!tag) return <span className="text-xs text-gray-400">--</span>;
+        return (
+          <div className="flex flex-col gap-1 px-1">
+            <div
+              className="group relative flex items-center mx-1"
+              style={{ width: 'calc(100% - 8px)' }}
+            >
+              <div
+                className="relative flex items-center h-5 w-full rounded-l"
+                style={{ backgroundColor: tag.color || '#3b82f6' }}
+              >
+                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                  <span className="truncate">{tag.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      title: "Nguồn",
+      dataIndex: "sourceTag",
+      key: "sourceTag",
+      width: 110,
+      render: (_: any, record: TelesaleCustomer) => {
+        const tag = record.sourceTag;
+        if (!tag) return <span className="text-xs text-gray-400">--</span>;
+        return (
+          <div className="flex flex-col gap-1 px-1">
+            <div
+              className="group relative flex items-center mx-1"
+              style={{ width: 'calc(100% - 8px)' }}
+            >
+              <div
+                className="relative flex items-center h-5 w-full rounded-l"
+                style={{ backgroundColor: tag.color || '#3b82f6' }}
+              >
+                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                  <span className="truncate">{tag.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      title: "Tình trạng",
+      dataIndex: "statusTag",
+      key: "statusTag",
+      width: 110,
+      render: (_: any, record: TelesaleCustomer) => {
+        const tag = record.statusTag;
+        return (
+          <div className="flex flex-col gap-1 px-1">
+            {tag ? (
+              <div
+                className="group relative flex items-center mx-1"
+                style={{ width: 'calc(100% - 8px)' }}
+              >
+                <div
+                  className="relative flex items-center h-5 w-full rounded-l"
+                  style={{ backgroundColor: tag.color || '#3b82f6' }}
+                >
+                  <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                    <span className="truncate">{tag.name}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <span className="text-xs text-gray-400">--</span>
+            )}
+            <div
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
+              onClick={() => {
+                setSelectedCustomer(record);
+                setIsOpenTagModal(true);
+              }}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Thêm tags</span>
+            </div>
+          </div>
+        );
+      }
+    },
+    // {
+    //   title: "Tag",
+    //   dataIndex: "tags",
+    //   key: "tags",
+    //   width: 130,
+    //   render: (_: any, record: TelesaleCustomer) => {
+    //     const hasTags =
+    //       record.tags && record.tags.length > 0 && record.tags.some((t) => t);
+
+    //     return (
+    //       <div className="flex flex-col gap-1 px-1">
+    //         {/* Tags - one per line, arrow style */}
+    //         {record.tags?.map((tag) => {
+    //           if (!tag) return null;
+    //           return (
+    //             <div
+    //               key={tag.id}
+    //               className="group relative flex items-center mx-1"
+    //               style={{ width: 'calc(100% - 8px)' }}
+    //             >
+    //               {/* Tag with arrow */}
+    //               <div
+    //                 className="relative flex items-center h-5 w-full rounded-l"
+    //                 style={{ backgroundColor: tag.color || '#3b82f6' }}
+    //               >
+    //                 {/* Main tag body */}
+    //                 <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+    //                   <span className="truncate">{tag.name}</span>
+    //                   <span
+    //                     className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+    //                     onClick={(e) => {
+    //                       e.stopPropagation();
+    //                       setDeleteTagModal({
+    //                         open: true,
+    //                         tag: { customerId: record.id, tagId: tag.id },
+    //                         tagName: tag.name,
+    //                       });
+    //                     }}
+    //                   >
+    //                     <Tooltip title="Xoá tag">
+    //                       <FontAwesomeIcon
+    //                         icon={faTrash}
+    //                         className="text-white hover:text-red-200"
+    //                         style={{ fontSize: 8 }}
+    //                       />
+    //                     </Tooltip>
+    //                   </span>
+    //                 </div>
+
+    //                 {/* Triangle arrow on the right */}
+    //                 <div
+    //                   className="absolute -right-2 top-0 bottom-0 w-0 h-0"
+    //                   style={{
+    //                     borderTop: '10px solid transparent',
+    //                     borderBottom: '10px solid transparent',
+    //                     borderLeft: `8px solid ${tag.color || '#3b82f6'}`,
+    //                   }}
+    //                 />
+    //               </div>
+    //             </div>
+    //           );
+    //         })}
+
+    //         {/* "Thêm tags" text */}
+    //         <div
+    //           className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
+    //           onClick={() => {
+    //             setSelectedCustomer(record);
+    //             setIsOpenTagModal(true);
+    //           }}
+    //         >
+    //           <EditOutlined style={{ fontSize: 9 }} />
+    //           <span>Thêm tags</span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      title: "Ghi chú",
+      dataIndex: "notes",
+      key: "notesColumn",
+      width: 200,
+      render: (_: any, record: any) => {
+        const salesNotes = record.notes && record.notes.length > 0
+          ? record.notes.filter((n: any) => {
+              if (!n) return false;
+              if (typeof n === 'string') return n.trim().length > 0;
+              // If it's an object, check if it has content
+              return (n.note && n.note.trim().length > 0) ||
+                     (n.content && n.content.trim().length > 0) ||
+                     Object.keys(n).length > 0;
+            })
+          : [];
+
+        const showAllNotes = (notes: any[]) => {
+          setAllNotesModal({
+            open: true,
+            notes: notes,
+          });
+        };
+
+        return (
+          <div className="text-[11px] space-y-1.5">           
 
             {/* Sales Notes - with background */}
             {salesNotes.length > 0 && (

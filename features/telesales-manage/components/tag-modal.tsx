@@ -9,6 +9,7 @@ import TagEditModal from "./tag-edit-modal";
 import { getTelesaleTagList, addTelesaleTag, deleteTelesaleTag, updateTelesaleTag } from "../apis/telesale-mng";
 import { toast } from "react-toastify";
 import { t } from "i18next";
+import { fetchTagsByType } from "./modal/filter-telesale-modal";
 
 interface TagType {
   id: string | number;
@@ -42,7 +43,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const data = await getTelesaleTagList(0, 20);
+      const data = await fetchTagsByType("STATUS");
       // Ensure data is array and items are TagType
       setTags(
         Array.isArray(data)
@@ -66,7 +67,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   }, [open]);
 
   // Thêm hoặc sửa tag sử dụng API
-  const handleSaveTag = async (tag: { id?: string | number; name: string; color: string, tag_type: string }) => {
+  const handleSaveTag = async (tag: { id?: string | number; name: string; color: string }) => {
     try {
       setLoading(true);
       if (tag.id) {
@@ -75,7 +76,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
         toast.success("Cập nhật thẻ thành công!");
       } else {
         // Else, add new with add API
-        await addTelesaleTag({ name: tag.name, color: tag.color, tag_type:tag.tag_type });
+        await addTelesaleTag({ name: tag.name, color: tag.color, tag_type: 'STATUS' });
         toast.success("Thêm thẻ thành công!");
       }
       await fetchTags();
