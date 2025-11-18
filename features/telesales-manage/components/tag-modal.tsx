@@ -9,6 +9,7 @@ import TagEditModal from "./tag-edit-modal";
 import { getTelesaleTagList, addTelesaleTag, deleteTelesaleTag, updateTelesaleTag } from "../apis/telesale-mng";
 import { toast } from "react-toastify";
 import { t } from "i18next";
+import { fetchTagsByType } from "./modal/filter-telesale-modal";
 
 interface TagType {
   id: string | number;
@@ -42,7 +43,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const data = await getTelesaleTagList(0, 20);
+      const data = await fetchTagsByType("STATUS");
       // Ensure data is array and items are TagType
       setTags(
         Array.isArray(data)

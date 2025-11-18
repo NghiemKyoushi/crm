@@ -242,38 +242,136 @@ const TelesalesPage: React.FC = () => {
       : []),
     // Merged: Customer Info + Contact
     {
-      title: "Thông tin khách hàng",
+      title: "Tên khách",
       dataIndex: "name",
-      key: "customerInfo",
-      width: 220,
+      key: "name",
+      width: 120,
       render: (_: string, record: TelesaleCustomer) => (
         <div className="text-xs">
           <div className="font-medium text-gray-900 mb-1">{record.name}</div>
-          <div className="text-gray-600">📞 {record.phone || "--"}</div>
-          <div className="text-gray-500 truncate" title={record.email}>
-            {record.email || "--"}
-          </div>
         </div>
       ),
     },
-    // Merged: Business Field + Source Info
     {
-      title: "Nghiệp vụ",
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      width: 120,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.phone || "--"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 120,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.email}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 160,
+      render: (_: string, record: TelesaleCustomer) => (
+        <div className="text-xs">
+          <div className="font-medium text-gray-900 mb-1">{record.address}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Lĩnh vực KD",
+      dataIndex: "business",
+      key: "business",
+      width: 120,
+      render: (_: any, record: any) => (
+        <div className="text-xs text-gray-700">
+          <div className="font-medium mb-1">{record.businessField || "--"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Thông tin khách hàng",
       dataIndex: "business",
       key: "business",
       width: 160,
       render: (_: any, record: any) => (
         <div className="text-xs text-gray-700">
-          <div className="font-medium mb-1">{record.businessField || "--"}</div>
-          <div className="text-gray-500">
-            {record.customerInfo ? `Nguồn: ${record.customerInfo}` : "--"}
-          </div>
+          <div className="font-medium mb-1">{record.customerInfo || "--"}</div>
         </div>
       ),
     },
-    // Merged: Telesale + Status
     {
-      title: "Sale & TT",
+      title: "Note yêu cầu khách hàng",
+      dataIndex: "notes",
+      key: "notesColumn",
+      width: 200,
+      render: (_: any, record: any) => {
+        const customerNote = record.note || "";
+        return (
+          <div className="text-[11px] space-y-1.5">
+            {/* Customer Request Note - with background and edit button */}
+            {customerNote ? (
+              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
+                <div className="flex items-center justify-between mb-0.5">
+                  <div className="font-semibold text-amber-700 text-[10px]">
+                    Yêu cầu KH:
+                  </div>
+                  <div
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
+                    onClick={() => handleOpenNoteModal(record)}
+                  >
+                    <EditOutlined style={{ fontSize: 9 }} />
+                    <span className="text-[9px] font-medium">Sửa</span>
+                  </div>
+                </div>
+                <Tooltip title={customerNote}>
+                  <div className="text-gray-700 line-clamp-2 leading-tight">
+                    {customerNote}
+                  </div>
+                </Tooltip>
+              </div>
+            ) : (
+              /* No customer note - show add button */
+              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-amber-700 text-[10px]">
+                    Yêu cầu KH:
+                  </div>
+                  <div
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
+                    onClick={() => handleOpenNoteModal(record)}
+                  >
+                    <EditOutlined style={{ fontSize: 9 }} />
+                    <span className="text-[9px] font-medium">Thêm</span>
+                  </div>
+                </div>
+                <div className="text-gray-400 italic text-[10px]">Chưa có yêu cầu</div>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Telesale",
+      dataIndex: "business",
+      key: "business",
+      width: 120,
+      render: (_: any, record: any) => (
+        <div className="text-xs text-gray-700">
+          <div className="font-medium mb-1">{record.saleName || "Chưa gán"}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Trạng thái",
       dataIndex: "telesale",
       key: "telesaleStatus",
       width: 120,
@@ -303,9 +401,9 @@ const TelesalesPage: React.FC = () => {
               setIsOpenDetail(true);
             }}
           >
-            <div className="font-medium text-blue-600 hover:text-blue-800 mb-1">
+            {/* <div className="font-medium text-blue-600 hover:text-blue-800 mb-1">
               {record.saleName || "Chưa gán"}
-            </div>
+            </div> */}
             <Tag color={statusColor} className="!text-xs !py-0">
               {statusText}
             </Tag>
@@ -491,7 +589,6 @@ const TelesalesPage: React.FC = () => {
       key: "notesColumn",
       width: 200,
       render: (_: any, record: any) => {
-        const customerNote = record.note || "";
         const salesNotes = record.notes && record.notes.length > 0
           ? record.notes.filter((n: any) => {
               if (!n) return false;
@@ -511,46 +608,7 @@ const TelesalesPage: React.FC = () => {
         };
 
         return (
-          <div className="text-[11px] space-y-1.5">
-            {/* Customer Request Note - with background and edit button */}
-            {customerNote ? (
-              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
-                <div className="flex items-center justify-between mb-0.5">
-                  <div className="font-semibold text-amber-700 text-[10px]">
-                    Yêu cầu KH:
-                  </div>
-                  <div
-                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
-                    onClick={() => handleOpenNoteModal(record)}
-                  >
-                    <EditOutlined style={{ fontSize: 9 }} />
-                    <span className="text-[9px] font-medium">Sửa</span>
-                  </div>
-                </div>
-                <Tooltip title={customerNote}>
-                  <div className="text-gray-700 line-clamp-2 leading-tight">
-                    {customerNote}
-                  </div>
-                </Tooltip>
-              </div>
-            ) : (
-              /* No customer note - show add button */
-              <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-amber-700 text-[10px]">
-                    Yêu cầu KH:
-                  </div>
-                  <div
-                    className="text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
-                    onClick={() => handleOpenNoteModal(record)}
-                  >
-                    <EditOutlined style={{ fontSize: 9 }} />
-                    <span className="text-[9px] font-medium">Thêm</span>
-                  </div>
-                </div>
-                <div className="text-gray-400 italic text-[10px]">Chưa có yêu cầu</div>
-              </div>
-            )}
+          <div className="text-[11px] space-y-1.5">           
 
             {/* Sales Notes - with background */}
             {salesNotes.length > 0 && (
