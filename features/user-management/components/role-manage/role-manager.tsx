@@ -109,7 +109,7 @@ export const RoleManager: React.FC = () => {
   }, []);
 
   const isSuperAdmin = selectedRole?.role_name === "ADMIN";
-  const isUserRole = selectedRole?.role_name === "USER"
+  const isUserRole = selectedRole?.role_name === "USER" || selectedRole?.role_name === "PARTNER" || selectedRole?.role_name === "SALES"
 
   return (
     <div className="flex gap-6 w-full">
