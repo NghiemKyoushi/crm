@@ -98,12 +98,27 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                 }
             }
             
+            // Extract image_id from URL if it's a system URL
+            let imageId: number | null = null;
+            if (values.image_url) {
+                // Try to extract image_id from URL patterns:
+                // - /view-image/{id}
+                // - /medias/v1/files/view/thumb/{id}
+                const match1 = values.image_url.match(/\/view-image\/(\d+)/);
+                const match2 = values.image_url.match(/\/view\/thumb\/(\d+)/);
+                if (match1) {
+                    imageId = parseInt(match1[1], 10);
+                } else if (match2) {
+                    imageId = parseInt(match2[1], 10);
+                } else {
+                    imageId = null;
+                }
+            }
             const payload = {
                 ...values,
                 body: finalBody,
                 status: "active",
-                image_url: values.image_url?.trim() || null,
-                image_id: null,
+                image_id: imageId ?? values.image_id ?? null,
             } as CreateCmsContentBody;
             await mutateAsync(payload);
         } catch (error) {
@@ -131,6 +146,7 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                     short_desc: content?.short_desc,
                     body: content?.body,
                     type: content?.type ?? "html",
+                    image_id: content?.image_id ?? null,
                     image_url: content?.image_url ?? null,
                     position: content?.position ?? "hero",
                     order_index: content?.order_index ?? 1,
@@ -209,6 +225,12 @@ export default function CreateContentModal({ open, onClose, onSuccess, content }
                         <Input.TextArea rows={4} placeholder="Enter your content here..." />
                     </Form.Item>
                 )}
+                <Form.Item name="image_id" hidden>
+                    <Input />
+                </Form.Item>
+                <Form.Item name="image_url" hidden>
+                    <Input />
+                </Form.Item>
                 <Form.Item name="status" hidden>
                     <Input />
                 </Form.Item>

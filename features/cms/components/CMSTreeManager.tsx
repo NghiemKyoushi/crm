@@ -1,23 +1,20 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Tree, message, Button, Input, Spin, Select, Space, Tag, Modal, Dropdown } from "antd";
+import { Tree, message, Button, Input, Spin, Space, Tag, Modal, Dropdown, Checkbox, Drawer } from "antd";
 import type { TreeProps, DataNode } from "antd/es/tree";
 import type { MenuProps } from "antd";
 import {
     PlusOutlined,
-    DeleteOutlined,
-    EditOutlined,
     ReloadOutlined,
     SearchOutlined,
     ExpandOutlined,
     CompressOutlined,
-    LinkOutlined,
     DisconnectOutlined,
     MoreOutlined,
     FileTextOutlined,
     FolderOutlined,
-    CopyOutlined
+    HomeOutlined
 } from "@ant-design/icons";
 import { useCmsPages } from "../hooks/useCmsPages";
 import { useCmsCategories, useInvalidateCategories } from "../hooks/useCmsCategories";
@@ -51,6 +48,7 @@ interface CMSTreeNode extends DataNode {
     entityId: number;
     parentId?: number;
     parentType?: NodeType;
+    parentKey?: string;
     isLinked?: boolean; // For many-to-many display
     data?: any;
 }
@@ -93,6 +91,8 @@ export default function CMSTreeManager({
     const { data: contentsData, isLoading: loadingContents } = useCmsContents(contentsPage, contentsSize);
     const contents = Array.isArray(contentsData?.items) ? contentsData?.items : [];
     const invalidateContents = useInvalidateContents();
+    const categoryMap = useMemo(() => new Map(categories.map(cat => [cat.id, cat])), [categories]);
+    const contentMap = useMemo(() => new Map(contents.map(cnt => [cnt.id, cnt])), [contents]);
 
     // Relations state
     const [pageRelations, setPageRelations] = useState<Map<number, { categories: number[], contents: number[] }>>(new Map());
@@ -104,6 +104,60 @@ export default function CMSTreeManager({
     const [searchValue, setSearchValue] = useState<string>("");
     const [autoExpandParent, setAutoExpandParent] = useState(true);
     const [showManyToMany, setShowManyToMany] = useState(false);
+    const [categorySelectionLoadingIds, setCategorySelectionLoadingIds] = useState<number[]>([]);
+    const [contentSelectionLoadingIds, setContentSelectionLoadingIds] = useState<number[]>([]);
+    const [categorySearch, setCategorySearch] = useState("");
+    const [contentSearch, setContentSearch] = useState("");
+    const [categorySelectionModal, setCategorySelectionModal] = useState<{
+        open: boolean;
+        pageId: number | null;
+        selectedIds: number[];
+    }>({
+        open: false,
+        pageId: null,
+        selectedIds: [],
+    });
+
+    const [contentSelectionModal, setContentSelectionModal] = useState<{
+        open: boolean;
+        parentId: number | null;
+        parentType: 'page' | 'category' | null;
+        selectedIds: number[];
+    }>({
+        open: false,
+        parentId: null,
+        parentType: null,
+        selectedIds: [],
+    });
+    const [childCategoryModal, setChildCategoryModal] = useState<{
+        open: boolean;
+        parentId: number | null;
+        selectedIds: number[];
+    }>({
+        open: false,
+        parentId: null,
+        selectedIds: [],
+    });
+    const [childCategorySearch, setChildCategorySearch] = useState("");
+    const [childCategoryLoadingIds, setChildCategoryLoadingIds] = useState<number[]>([]);
+    const [previewContent, setPreviewContent] = useState<any | null>(null);
+    const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false);
+
+    const closeCategorySelectionModal = () => {
+        setCategorySelectionModal({ open: false, pageId: null, selectedIds: [] });
+        setCategorySearch("");
+    };
+
+    const closeContentSelectionModal = () => {
+        setContentSelectionModal({ open: false, parentId: null, parentType: null, selectedIds: [] });
+        setContentSearch("");
+    };
+
+    const closeChildCategoryModal = () => {
+        setChildCategoryModal({ open: false, parentId: null, selectedIds: [] });
+        setChildCategorySearch("");
+    };
+
 
     // Load all relations
     useEffect(() => {
@@ -162,30 +216,36 @@ export default function CMSTreeManager({
 
     // Build tree structure
     const treeData = useMemo(() => {
-        const categoryMap = new Map(categories.map(cat => [cat.id, cat]));
-        const contentMap = new Map(contents.map(cnt => [cnt.id, cnt]));
-
-        const buildContentNode = (content: any, parentId: number, parentType: NodeType): CMSTreeNode => ({
-            key: `${parentType}-${parentId}-content-${content.id}`,
+        const buildContentNode = (content: any, parentId: number, parentType: NodeType, parentKey: string): CMSTreeNode => ({
+            key: `${parentKey}-content-${content.id}`,
             title: content.title,
             nodeType: 'content',
             entityId: content.id,
             parentId,
             parentType,
+            parentKey,
             data: content,
             isLeaf: true,
         });
 
-        const buildCategoryNode = (category: any, pageId: number): CMSTreeNode => {
+        const buildCategoryNode = (category: any, options: { pageId: number; parentId: number; parentType: NodeType; parentKey: string }): CMSTreeNode => {
             const catRelations = categoryRelations.get(category.id);
             const childrenNodes: CMSTreeNode[] = [];
+            const currentKey = `${options.parentKey}-category-${category.id}`;
 
             // Add child categories
             if (catRelations?.children) {
                 catRelations.children.forEach(childId => {
                     const childCat = categoryMap.get(childId);
                     if (childCat) {
-                        childrenNodes.push(buildCategoryNode(childCat, pageId));
+                        childrenNodes.push(
+                            buildCategoryNode(childCat, {
+                                pageId: options.pageId,
+                                parentId: category.id,
+                                parentType: 'category',
+                                parentKey: currentKey
+                            })
+                        );
                     }
                 });
             }
@@ -195,18 +255,19 @@ export default function CMSTreeManager({
                 catRelations.contents.forEach(contentId => {
                     const content = contentMap.get(contentId);
                     if (content) {
-                        childrenNodes.push(buildContentNode(content, category.id, 'category'));
+                        childrenNodes.push(buildContentNode(content, category.id, 'category', currentKey));
                     }
                 });
             }
 
             return {
-                key: `page-${pageId}-category-${category.id}`,
+                key: currentKey,
                 title: category.title,
                 nodeType: 'category',
                 entityId: category.id,
-                parentId: pageId,
-                parentType: 'page',
+                parentId: options.parentId,
+                parentType: options.parentType,
+                parentKey: options.parentKey,
                 data: category,
                 children: childrenNodes.length > 0 ? childrenNodes : undefined,
             };
@@ -221,7 +282,14 @@ export default function CMSTreeManager({
                 pageRels.categories.forEach(catId => {
                     const category = categoryMap.get(catId);
                     if (category) {
-                        childrenNodes.push(buildCategoryNode(category, page.id));
+                        childrenNodes.push(
+                            buildCategoryNode(category, {
+                                pageId: page.id,
+                                parentId: page.id,
+                                parentType: 'page',
+                                parentKey: `page-${page.id}`
+                            })
+                        );
                     }
                 });
             }
@@ -231,7 +299,7 @@ export default function CMSTreeManager({
                 pageRels.contents.forEach(contentId => {
                     const content = contentMap.get(contentId);
                     if (content) {
-                        childrenNodes.push(buildContentNode(content, page.id, 'page'));
+                        childrenNodes.push(buildContentNode(content, page.id, 'page', `page-${page.id}`));
                     }
                 });
             }
@@ -283,195 +351,215 @@ export default function CMSTreeManager({
         }
     };
 
+    const filteredCategoryOptions = useMemo(() => {
+        const term = categorySearch.toLowerCase().trim();
+        return categories.filter(cat => {
+            if (!term) return true;
+            return cat.title?.toLowerCase().includes(term) || String(cat.id).includes(term);
+        });
+    }, [categories, categorySearch]);
+
+    const filteredContentOptions = useMemo(() => {
+        const term = contentSearch.toLowerCase().trim();
+        return contents.filter(cnt => {
+            if (!term) return true;
+            return cnt.title?.toLowerCase().includes(term) || String(cnt.id).includes(term);
+        });
+    }, [contents, contentSearch]);
+
+    const filteredChildCategoryOptions = useMemo(() => {
+        const term = childCategorySearch.toLowerCase().trim();
+        return categories.filter(cat => {
+            if (cat.id === childCategoryModal.parentId) return false;
+            if (!term) return true;
+            return cat.title?.toLowerCase().includes(term) || String(cat.id).includes(term);
+        });
+    }, [categories, childCategorySearch, childCategoryModal.parentId]);
+
     const handleLinkCategory = (pageId: number) => {
-        // Show modal to select category to link
-        const availableCategories = categories.filter(cat => {
-            const pageRels = pageRelations.get(pageId);
-            return !pageRels?.categories.includes(cat.id);
+        const pageRels = pageRelations.get(pageId);
+        const selectedIds = pageRels?.categories ?? [];
+        setCategorySelectionModal({
+            open: true,
+            pageId,
+            selectedIds,
         });
-
-        if (availableCategories.length === 0) {
-            message.warning("All categories are already linked to this page");
-            return;
-        }
-
-        let selectedCategoryId: number | null = null;
-
-        Modal.confirm({
-            title: "Add Category to Page",
-            content: (
-                <div className="py-4">
-                    <Select
-                        style={{ width: "100%" }}
-                        placeholder="Select a category"
-                        onChange={(value) => { selectedCategoryId = value; }}
-                        showSearch
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={availableCategories.map(cat => ({
-                            value: cat.id,
-                            label: `${cat.title} (#${cat.id})`
-                        }))}
-                    />
-                </div>
-            ),
-            onOk: async () => {
-                if (!selectedCategoryId) {
-                    message.warning("Please select a category");
-                    return Promise.reject();
-                }
-                try {
-                    await linkPageCategory({ page_id: pageId, category_id: selectedCategoryId });
-                    message.success("Category added successfully");
-                    await handleReload();
-                } catch (error) {
-                    message.error("Failed to add category");
-                    throw error;
-                }
-            },
-        });
+        setCategorySearch("");
     };
 
-    const handleLinkChildCategory = (parentCategoryId: number) => {
-        // Show modal to select child category to link
-        const availableCategories = categories.filter(cat => {
-            // Exclude self and already linked children
-            if (cat.id === parentCategoryId) return false;
-            const catRels = categoryRelations.get(parentCategoryId);
-            return !catRels?.children.includes(cat.id);
+    const handleLinkChildCategory = (parentCategoryNode: CMSTreeNode) => {
+        const selectedIds = categoryRelations.get(parentCategoryNode.entityId)?.children ?? [];
+        setChildCategoryModal({
+            open: true,
+            parentId: parentCategoryNode.entityId,
+            selectedIds,
         });
-
-        if (availableCategories.length === 0) {
-            message.warning("All categories are already linked");
-            return;
-        }
-
-        let selectedCategoryId: number | null = null;
-
-        Modal.confirm({
-            title: "Add Child Category",
-            content: (
-                <div className="py-4">
-                    <Select
-                        style={{ width: "100%" }}
-                        placeholder="Select a category"
-                        onChange={(value) => { selectedCategoryId = value; }}
-                        showSearch
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={availableCategories.map(cat => ({
-                            value: cat.id,
-                            label: `${cat.title} (#${cat.id})`
-                        }))}
-                    />
-                </div>
-            ),
-            onOk: async () => {
-                if (!selectedCategoryId) {
-                    message.warning("Please select a category");
-                    return Promise.reject();
-                }
-                try {
-                    await linkCategoryRelation({ parent_id: parentCategoryId, child_id: selectedCategoryId });
-                    message.success("Child category added successfully");
-                    await handleReload();
-                } catch (error) {
-                    message.error("Failed to add child category");
-                    throw error;
-                }
-            },
-        });
+        setChildCategorySearch("");
     };
 
     const handleLinkContent = (parentId: number, parentType: 'page' | 'category') => {
-        const availableContents = contents.filter(content => {
-            if (parentType === 'page') {
-                const pageRels = pageRelations.get(parentId);
-                return !pageRels?.contents.includes(content.id);
-            } else {
-                const catRels = categoryRelations.get(parentId);
-                return !catRels?.contents.includes(content.id);
-            }
+        let selectedIds: number[] = [];
+        if (parentType === 'page') {
+            selectedIds = pageRelations.get(parentId)?.contents ?? [];
+        } else if (parentType === 'category') {
+            selectedIds = categoryRelations.get(parentId)?.contents ?? [];
+        }
+        setContentSelectionModal({
+            open: true,
+            parentId,
+            parentType,
+            selectedIds,
         });
+        setContentSearch("");
+    };
 
-        if (availableContents.length === 0) {
-            message.warning("All contents are already assigned");
+    const handleTogglePageCategory = async (
+        categoryId: number,
+        checked: boolean,
+        pageIdOverride?: number
+    ) => {
+        const pageId = pageIdOverride ?? categorySelectionModal.pageId;
+        if (!pageId) return;
+        setCategorySelectionLoadingIds(prev => (prev.includes(categoryId) ? prev : [...prev, categoryId]));
+        try {
+            if (checked) {
+                await linkPageCategory({ page_id: pageId, category_id: categoryId });
+            } else {
+                await unlinkPageCategory({ page_id: pageId, category_id: categoryId });
+            }
+            setCategorySelectionModal(prev => {
+                if (prev.pageId !== pageId) return prev;
+                const nextIds = checked
+                    ? Array.from(new Set([...prev.selectedIds, categoryId]))
+                    : prev.selectedIds.filter(id => id !== categoryId);
+                return { ...prev, selectedIds: nextIds };
+            });
+            setPageRelations(prev => {
+                const next = new Map(prev);
+                const existing = next.get(pageId) ?? { categories: [], contents: [] };
+                const nextCategories = checked
+                    ? Array.from(new Set([...existing.categories, categoryId]))
+                    : existing.categories.filter(id => id !== categoryId);
+                next.set(pageId, { ...existing, categories: nextCategories });
+                return next;
+            });
+        } catch (error) {
+            message.error(checked ? "Failed to add category" : "Failed to unlink category");
+        } finally {
+            setCategorySelectionLoadingIds(prev => prev.filter(id => id !== categoryId));
+        }
+    };
+
+    const handleToggleContentSelection = async (
+        contentId: number,
+        checked: boolean,
+        parentIdOverride?: number | null,
+        parentTypeOverride?: 'page' | 'category' | null
+    ) => {
+        const parentId = parentIdOverride ?? contentSelectionModal.parentId;
+        const parentType = parentTypeOverride ?? contentSelectionModal.parentType;
+        if (!parentId || !parentType) return;
+        setContentSelectionLoadingIds(prev => (prev.includes(contentId) ? prev : [...prev, contentId]));
+        try {
+            if (parentType === 'page') {
+                if (checked) {
+                    await linkPageContent({ page_id: parentId, content_id: contentId });
+                } else {
+                    await unlinkPageContent({ page_id: parentId, content_id: contentId });
+                }
+                setPageRelations(prev => {
+                    const next = new Map(prev);
+                    const existing = next.get(parentId) ?? { categories: [], contents: [] };
+                    const nextContents = checked
+                        ? Array.from(new Set([...existing.contents, contentId]))
+                        : existing.contents.filter(id => id !== contentId);
+                    next.set(parentId, { ...existing, contents: nextContents });
+                    return next;
+                });
+            } else {
+                if (checked) {
+                    await linkCategoryContent({ category_id: parentId, content_id: contentId });
+                } else {
+                    await unlinkCategoryContent({ category_id: parentId, content_id: contentId });
+                }
+                setCategoryRelations(prev => {
+                    const next = new Map(prev);
+                    const existing = next.get(parentId) ?? { children: [], contents: [] };
+                    const nextContents = checked
+                        ? Array.from(new Set([...existing.contents, contentId]))
+                        : existing.contents.filter(id => id !== contentId);
+                    next.set(parentId, { ...existing, contents: nextContents });
+                    return next;
+                });
+            }
+
+            setContentSelectionModal(prev => {
+                if (prev.parentId !== parentId) return prev;
+                const nextIds = checked
+                    ? Array.from(new Set([...prev.selectedIds, contentId]))
+                    : prev.selectedIds.filter(id => id !== contentId);
+                return { ...prev, selectedIds: nextIds };
+            });
+        } catch (error) {
+            message.error(checked ? "Failed to assign content" : "Failed to unlink content");
+        } finally {
+            setContentSelectionLoadingIds(prev => prev.filter(id => id !== contentId));
+        }
+    };
+
+    const handleToggleChildCategory = async (
+        parentId: number,
+        childCategoryId: number,
+        checked: boolean
+    ) => {
+        if (!parentId || childCategoryId === parentId) return;
+        setChildCategoryLoadingIds(prev => (prev.includes(childCategoryId) ? prev : [...prev, childCategoryId]));
+        try {
+            if (checked) {
+                await linkCategoryRelation({ parent_id: parentId, child_id: childCategoryId });
+            } else {
+                await unlinkCategoryRelation({ parent_id: parentId, child_id: childCategoryId });
+            }
+            setCategoryRelations(prev => {
+                const next = new Map(prev);
+                const existing = next.get(parentId) ?? { children: [], contents: [] };
+                const nextChildren = checked
+                    ? Array.from(new Set([...existing.children, childCategoryId]))
+                    : existing.children.filter(id => id !== childCategoryId);
+                next.set(parentId, { ...existing, children: nextChildren });
+                return next;
+            });
+            setChildCategoryModal(prev => {
+                if (prev.parentId !== parentId) return prev;
+                const nextIds = checked
+                    ? Array.from(new Set([...prev.selectedIds, childCategoryId]))
+                    : prev.selectedIds.filter(id => id !== childCategoryId);
+                return { ...prev, selectedIds: nextIds };
+            });
+        } catch (error) {
+            message.error(checked ? "Failed to add child category" : "Failed to unlink child category");
+        } finally {
+            setChildCategoryLoadingIds(prev => prev.filter(id => id !== childCategoryId));
+        }
+    };
+
+    const handlePreviewContent = (contentId: number) => {
+        const content = contentMap.get(contentId);
+        if (!content) {
+            message.warning("Content not found");
             return;
         }
-
-        let selectedContentId: number | null = null;
-
-        Modal.confirm({
-            title: `Assign Content to ${parentType === 'page' ? 'Page' : 'Category'}`,
-            content: (
-                <div className="py-4">
-                    <Select
-                        style={{ width: "100%" }}
-                        placeholder="Select a content"
-                        onChange={(value) => { selectedContentId = value; }}
-                        showSearch
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={availableContents.map(cnt => ({
-                            value: cnt.id,
-                            label: `${cnt.title} (#${cnt.id})`
-                        }))}
-                    />
-                </div>
-            ),
-            onOk: async () => {
-                if (!selectedContentId) {
-                    message.warning("Please select a content");
-                    return Promise.reject();
-                }
-                try {
-                    if (parentType === 'page') {
-                        await linkPageContent({ page_id: parentId, content_id: selectedContentId });
-                    } else {
-                        await linkCategoryContent({ category_id: parentId, content_id: selectedContentId });
-                    }
-                    message.success("Content assigned successfully");
-                    await handleReload();
-                } catch (error) {
-                    message.error("Failed to assign content");
-                    throw error;
-                }
-            },
-        });
+        setPreviewContent(content);
+        setPreviewDrawerOpen(true);
     };
 
-    const handleUnlink = async (node: CMSTreeNode) => {
-        if (!node.parentId || !node.parentType) return;
-
-        const parentId = node.parentId; // Ensure non-null for TypeScript
-
-        Modal.confirm({
-            title: `Unlink ${node.nodeType}?`,
-            content: `Are you sure you want to unlink "${node.title}" from its parent?`,
-            okText: "Unlink",
-            okButtonProps: { danger: true },
-            onOk: async () => {
-                try {
-                    if (node.nodeType === 'category' && node.parentType === 'page') {
-                        await unlinkPageCategory({ page_id: parentId, category_id: node.entityId });
-                    } else if (node.nodeType === 'content' && node.parentType === 'page') {
-                        await unlinkPageContent({ page_id: parentId, content_id: node.entityId });
-                    } else if (node.nodeType === 'content' && node.parentType === 'category') {
-                        await unlinkCategoryContent({ category_id: parentId, content_id: node.entityId });
-                    } else if (node.nodeType === 'category' && node.parentType === 'category') {
-                        await unlinkCategoryRelation({ parent_id: parentId, child_id: node.entityId });
-                    }
-                    message.success("Unlinked successfully");
-                    await handleReload();
-                } catch (error) {
-                    message.error("Failed to unlink");
-                }
-            },
-        });
+    const handleTreeSelect: TreeProps["onSelect"] = (_, info) => {
+        const node = info.node as unknown as CMSTreeNode;
+        if (node.nodeType === 'content') {
+            handlePreviewContent(node.entityId);
+        }
     };
+
 
     if (loadingPages || loadingCategories || loadingContents) {
         return (
@@ -542,6 +630,7 @@ export default function CMSTreeManager({
                     blockNode
                     expandedKeys={expandedKeys}
                     autoExpandParent={autoExpandParent}
+                    onSelect={handleTreeSelect}
                     onExpand={(keys) => {
                         setExpandedKeys(keys);
                         setAutoExpandParent(false);
@@ -556,9 +645,15 @@ export default function CMSTreeManager({
 
                         const getNodeIcon = () => {
                             switch (node.nodeType) {
-                                case 'page': return <FileTextOutlined className="text-blue-500" />;
+                                case 'page': return <HomeOutlined className="text-blue-500" />;
                                 case 'category': return <FolderOutlined className="text-orange-500" />;
                                 case 'content': return <FileTextOutlined className="text-green-500" />;
+                            }
+                        };
+
+                        const handleNodeClick = () => {
+                            if (node.nodeType === 'content') {
+                                handlePreviewContent(node.entityId);
                             }
                         };
 
@@ -571,31 +666,50 @@ export default function CMSTreeManager({
                                     { key: 'assign-content', label: 'Assign Content', icon: <FileTextOutlined />, onClick: () => handleLinkContent(node.entityId, 'page') },
                                     { type: 'divider' }
                                 );
-                                if (onEditPage) actions.push({ key: 'edit', label: 'Edit Page', icon: <EditOutlined />, onClick: () => onEditPage(node.entityId) });
-                                if (onDeletePage) actions.push({ key: 'delete', label: 'Delete Page', icon: <DeleteOutlined />, danger: true, onClick: () => onDeletePage(node.entityId) });
                             } else if (node.nodeType === 'category') {
                                 actions.push(
-                                    { key: 'add-child-category', label: 'Add Child Category', icon: <PlusOutlined />, onClick: () => handleLinkChildCategory(node.entityId) },
+                                    { key: 'add-child-category', label: 'Add Child Category', icon: <PlusOutlined />, onClick: () => handleLinkChildCategory(node) },
                                     { key: 'assign-content', label: 'Assign Content', icon: <FileTextOutlined />, onClick: () => handleLinkContent(node.entityId, 'category') },
-                                    { key: 'unlink', label: 'Unlink from Page', icon: <DisconnectOutlined />, onClick: () => handleUnlink(node) },
+                                    {
+                                        key: 'unlink',
+                                        label: node.parentType === 'category' ? 'Unlink from Parent' : 'Unlink from Page',
+                                        icon: <DisconnectOutlined />,
+                                        onClick: () => {
+                                            if (!node.parentId || !node.parentType) return;
+                                            if (node.parentType === 'page') {
+                                                handleTogglePageCategory(node.entityId, false, node.parentId);
+                                            } else {
+                                                handleToggleChildCategory(node.parentId, node.entityId, false);
+                                            }
+                                        }
+                                    },
                                     { type: 'divider' }
                                 );
-                                if (onEditCategory) actions.push({ key: 'edit', label: 'Edit Category', icon: <EditOutlined />, onClick: () => onEditCategory(node.entityId) });
-                                if (onDeleteCategory) actions.push({ key: 'delete', label: 'Delete Category', icon: <DeleteOutlined />, danger: true, onClick: () => onDeleteCategory(node.entityId) });
                             } else if (node.nodeType === 'content') {
                                 actions.push(
-                                    { key: 'unlink', label: 'Unlink from Parent', icon: <DisconnectOutlined />, onClick: () => handleUnlink(node) },
+                                    {
+                                        key: 'unlink',
+                                        label: 'Unlink from Parent',
+                                        icon: <DisconnectOutlined />,
+                                        onClick: () => {
+                                            if (!node.parentId || !node.parentType) return;
+                                            if (node.parentType === 'page' || node.parentType === 'category') {
+                                                handleToggleContentSelection(node.entityId, false, node.parentId, node.parentType);
+                                            }
+                                        }
+                                    },
                                     { type: 'divider' }
                                 );
-                                if (onEditContent) actions.push({ key: 'edit', label: 'Edit Content', icon: <EditOutlined />, onClick: () => onEditContent(node.entityId) });
-                                if (onDeleteContent) actions.push({ key: 'delete', label: 'Delete Content', icon: <DeleteOutlined />, danger: true, onClick: () => onDeleteContent(node.entityId) });
                             }
 
                             return actions;
                         };
 
                         return (
-                            <div className="flex items-center justify-between group hover:bg-gray-50 px-2 py-1 rounded w-full">
+                            <div
+                                className="flex items-center justify-between group hover:bg-gray-50 px-2 py-1 rounded w-full cursor-pointer"
+                                onClick={handleNodeClick}
+                            >
                                 <div className="flex items-center gap-2 flex-1">
                                     {getNodeIcon()}
                                     <span className={isMatch ? "text-blue-600 font-semibold" : ""}>
@@ -643,6 +757,202 @@ export default function CMSTreeManager({
                     <li>Use "Delete" to permanently delete the entity and all its relations</li>
                 </ul>
             </div>
+
+            <Modal
+                title="Manage Page Categories"
+                open={categorySelectionModal.open}
+                onCancel={closeCategorySelectionModal}
+                footer={null}
+                width={520}
+            >
+                {categorySelectionModal.pageId ? (
+                    categories.length > 0 ? (
+                        <>
+                            <p className="text-sm text-gray-500 mb-3">
+                                Check or uncheck categories to link/unlink immediately.
+                            </p>
+                            <Input
+                                allowClear
+                                placeholder="Search categories..."
+                                value={categorySearch}
+                                onChange={(e) => setCategorySearch(e.target.value)}
+                                className="mb-3"
+                            />
+                            <div className="max-h-72 overflow-auto space-y-2 pr-2">
+                                {filteredCategoryOptions.length === 0 && (
+                                    <p className="text-sm text-gray-400">No categories match your search.</p>
+                                )}
+                                {filteredCategoryOptions.map(cat => {
+                                    const checked = categorySelectionModal.selectedIds.includes(cat.id);
+                                    const loading = categorySelectionLoadingIds.includes(cat.id);
+                                    return (
+                                        <div key={cat.id} className="flex items-center justify-between">
+                                            <Checkbox
+                                                checked={checked}
+                                                disabled={loading}
+                                                onChange={(e) => handleTogglePageCategory(cat.id, e.target.checked, categorySelectionModal.pageId ?? undefined)}
+                                            >
+                                                <span className="font-medium">{cat.title}</span>{" "}
+                                                <span className="text-gray-400 text-xs">#{cat.id}</span>
+                                            </Checkbox>
+                                            {loading && <Spin size="small" />}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm text-gray-500">No categories available.</p>
+                    )
+                ) : (
+                    <p className="text-sm text-gray-500">Select a page to manage categories.</p>
+                )}
+            </Modal>
+
+            <Modal
+                title="Manage Child Categories"
+                open={childCategoryModal.open}
+                onCancel={closeChildCategoryModal}
+                footer={null}
+                width={520}
+            >
+                {childCategoryModal.parentId ? (
+                    categories.length > 0 ? (
+                        <>
+                            <p className="text-sm text-gray-500 mb-3">
+                                Check or uncheck child categories to link/unlink immediately.
+                            </p>
+                            <Input
+                                allowClear
+                                placeholder="Search categories..."
+                                value={childCategorySearch}
+                                onChange={(e) => setChildCategorySearch(e.target.value)}
+                                className="mb-3"
+                            />
+                            <div className="max-h-72 overflow-auto space-y-2 pr-2">
+                                {filteredChildCategoryOptions.length === 0 && (
+                                    <p className="text-sm text-gray-400">No categories match your search.</p>
+                                )}
+                                {filteredChildCategoryOptions.map(cat => {
+                                    const checked = childCategoryModal.selectedIds.includes(cat.id);
+                                    const loading = childCategoryLoadingIds.includes(cat.id);
+                                    return (
+                                        <div key={cat.id} className="flex items-center justify-between">
+                                            <Checkbox
+                                                checked={checked}
+                                                disabled={loading || cat.id === childCategoryModal.parentId}
+                                                onChange={(e) => handleToggleChildCategory(childCategoryModal.parentId!, cat.id, e.target.checked)}
+                                            >
+                                                <span className="font-medium">{cat.title}</span>{" "}
+                                                <span className="text-gray-400 text-xs">#{cat.id}</span>
+                                            </Checkbox>
+                                            {loading && <Spin size="small" />}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm text-gray-500">No categories available.</p>
+                    )
+                ) : (
+                    <p className="text-sm text-gray-500">Select a category to manage child categories.</p>
+                )}
+            </Modal>
+
+            <Modal
+                title={`Manage Contents for ${contentSelectionModal.parentType === 'category' ? 'Category' : 'Page'}`}
+                open={contentSelectionModal.open}
+                onCancel={closeContentSelectionModal}
+                footer={null}
+                width={520}
+            >
+                {contentSelectionModal.parentId ? (
+                    contents.length > 0 ? (
+                        <>
+                            <p className="text-sm text-gray-500 mb-3">
+                                Check or uncheck contents to link/unlink immediately.
+                            </p>
+                            <Input
+                                allowClear
+                                placeholder="Search contents..."
+                                value={contentSearch}
+                                onChange={(e) => setContentSearch(e.target.value)}
+                                className="mb-3"
+                            />
+                            <div className="max-h-72 overflow-auto space-y-2 pr-2">
+                                {filteredContentOptions.length === 0 && (
+                                    <p className="text-sm text-gray-400">No contents match your search.</p>
+                                )}
+                                {filteredContentOptions.map(cnt => {
+                                    const checked = contentSelectionModal.selectedIds.includes(cnt.id);
+                                    const loading = contentSelectionLoadingIds.includes(cnt.id);
+                                    return (
+                                        <div key={cnt.id} className="flex items-center justify-between">
+                                            <Checkbox
+                                                checked={checked}
+                                                disabled={loading}
+                                                onChange={(e) => handleToggleContentSelection(
+                                                    cnt.id,
+                                                    e.target.checked,
+                                                    contentSelectionModal.parentId,
+                                                    contentSelectionModal.parentType
+                                                )}
+                                            >
+                                                <span className="font-medium">{cnt.title}</span>{" "}
+                                                <span className="text-gray-400 text-xs">#{cnt.id}</span>
+                                            </Checkbox>
+                                            {loading && <Spin size="small" />}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm text-gray-500">No contents available.</p>
+                    )
+                ) : (
+                    <p className="text-sm text-gray-500">Select a parent to manage contents.</p>
+                )}
+            </Modal>
+
+            <Drawer
+                title={previewContent ? `${previewContent.title} (#${previewContent.id})` : "Content Preview"}
+                open={previewDrawerOpen}
+                onClose={() => {
+                    setPreviewDrawerOpen(false);
+                    setPreviewContent(null);
+                }}
+                width={720}
+            >
+                {previewContent ? (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Tag color={previewContent.status === "active" ? "green" : "gray"}>
+                                {previewContent.status}
+                            </Tag>
+                            {previewContent.type && <Tag>{previewContent.type}</Tag>}
+                            {previewContent.position && <Tag>{previewContent.position}</Tag>}
+                        </div>
+                        {previewContent.short_desc && (
+                            <p className="text-gray-600">{previewContent.short_desc}</p>
+                        )}
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                            {previewContent.body ? (
+                                <div
+                                    className="prose max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: previewContent.body }}
+                                />
+                            ) : (
+                                <p className="text-gray-500 text-sm">No content body</p>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-gray-500 text-sm">Select a content node to preview.</p>
+                )}
+            </Drawer>
+
         </div>
     );
 }
