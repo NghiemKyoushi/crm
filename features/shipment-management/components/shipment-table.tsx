@@ -43,6 +43,7 @@ function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
 }
 
 import { updateStatusPackaged } from "@/features/order-hub/apis/orderhub";
+import { useRouter } from "next/navigation";
 
 function useConfirmPacked() {
   const [loading, setLoading] = useState(false);
@@ -73,7 +74,6 @@ const ProductManagement: React.FC = () => {
   const [orderDetail, setOrderDetail] = useState<Order>();
   const [packedOrder, setPackedOrder] = useState<Order | null>(null);
   const [isPackedModalOpen, setIsPackedModalOpen] = useState(false);
-
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
@@ -558,6 +558,7 @@ const ProductManagement: React.FC = () => {
 // Component hiển thị chi tiết từng order trong vận đơn
 function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
   const { t } = useTranslation();
+  const router = useRouter()
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -612,11 +613,24 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           borderRight: "1px solid #f0f0f0",
         },
       }),
-      render: (_, record) => (
-        <div className="text-xs font-medium text-blue-600">
-          {record.invoice_no || "-"}
-        </div>
-      ),
+      render: (_, record) => {
+        const handleClick = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (record.invoice_no) {
+            // Remove all # characters from invoice_no before using in URL
+            const sanitizedInvoiceNo = record.invoice_no.replace(/#/g, "");
+            router.push(`/orderhub?invoice_no=${encodeURIComponent(sanitizedInvoiceNo)}`);
+          }
+        };
+        return (
+          <div
+            className="text-xs font-medium text-blue-600 cursor-pointer hover:underline"
+            onClick={handleClick}
+          >
+            {record.invoice_no ? record.invoice_no : "-"}
+          </div>
+        );
+      },
     },
     {
       title: "Mã VN / JP",
@@ -717,36 +731,36 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         </div>
       ),
     },
-    {
-      title: "Số tiền",
-      key: "amount",
-      width: 120,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => (
-        <div className="space-y-1">
-          <div className="text-xs">
-            <span className="text-gray-500">JPY: </span>
-            <span className="text-gray-800 font-medium">
-              {record.amount
-                ? `${record.amount.toLocaleString("en-US")}¥`
-                : "-"}
-            </span>
-          </div>
-          <div className="text-xs">
-            <span className="text-gray-500">VND: </span>
-            <span className="text-blue-600 font-medium">
-              {record.amount_vnd
-                ? `${record.amount_vnd.toLocaleString("en-US")}đ`
-                : "-"}
-            </span>
-          </div>
-        </div>
-      ),
-    },
+    // {
+    //   title: "Số tiền",
+    //   key: "amount",
+    //   width: 120,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="space-y-1">
+    //       <div className="text-xs">
+    //         <span className="text-gray-500">JPY: </span>
+    //         <span className="text-gray-800 font-medium">
+    //           {record.amount
+    //             ? `${record.amount.toLocaleString("en-US")}¥`
+    //             : "-"}
+    //         </span>
+    //       </div>
+    //       <div className="text-xs">
+    //         <span className="text-gray-500">VND: </span>
+    //         <span className="text-blue-600 font-medium">
+    //           {record.amount_vnd
+    //             ? `${record.amount_vnd.toLocaleString("en-US")}đ`
+    //             : "-"}
+    //         </span>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
     // {
     //   title: "Cọc",
     //   key: "deposit",
@@ -764,21 +778,21 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
     //     </div>
     //   ),
     // },
-    {
-      title: "Ghi chú",
-      key: "description",
-      width: 150,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => (
-        <div className="text-xs text-gray-600 line-clamp-2">
-          {record.description || "-"}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Ghi chú",
+    //   key: "description",
+    //   width: 150,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => (
+    //     <div className="text-xs text-gray-600 line-clamp-2">
+    //       {record.description || "-"}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Trạng thái",
       key: "status",

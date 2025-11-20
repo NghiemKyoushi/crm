@@ -153,6 +153,20 @@ export const addTelesaleCustomer = async (data: TelesaleCustomerFormInput) => {
   return res.data;
 };
 
+export const updateTelesaleCustomer = async (
+  id: number,
+  data: {
+    email?: string;
+    address?: string;
+    business_field?: string;
+    customer_info?: string;
+  }
+) => {
+  const url = API_TYPE_CONST.TELESALE_CONTACT_UPDATE.replace("{id}", id.toString());
+  const res = await api.put(url, data);
+  return res.data;
+};
+
 export const telesalesMngApi = {
   getTelesaleAccounts,
   getList: getListTelesale,
@@ -169,5 +183,6 @@ export const telesalesMngApi = {
   changeStatus: changeTelesaleStatus,
   unassign: unassignTelesaleContact,
   getTagList: getTelesaleTagList,
-  addTelesaleCustomer, 
+  addTelesaleCustomer,
+  updateTelesaleCustomer,
 };

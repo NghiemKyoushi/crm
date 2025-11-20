@@ -158,5 +158,6 @@ export const API_TYPE_CONST = {
   CANCEL_ORDER:`${FEATURE}/admin/orders/cancel`,
   TELESALE_TAG_FILTER:`${FEATURE}/admin/telesales/tags-dropdown`,
   TELESALE_ADD_CUSTOMER:`${FEATURE}/admin/telesales/add`,
-  TELESALE_UNASSIGN:`${FEATURE}/admin/telesales/contacts/{contact_id}/unassign`
+  TELESALE_UNASSIGN:`${FEATURE}/admin/telesales/contacts/{contact_id}/unassign`,
+  TELESALE_CONTACT_UPDATE:`${FEATURE}/admin/telesales/contacts/{id}`,
 } as const;

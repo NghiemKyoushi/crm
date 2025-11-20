@@ -46,6 +46,8 @@ import {
   assignTelesale,
   deleteTelesaleContactTags,
   downloadTelesaleExample,
+  updateTelesaleCustomer,
+  // updateTelesaleCustomer,
 } from "../apis/telesale-mng";
 
 import { importTelesaleCustomers } from "../apis/telesale-mng";
@@ -64,6 +66,7 @@ const TelesalesPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] =
     useState<TelesaleCustomer | null>(null);
   const [isOpenTagModal, setIsOpenTagModal] = useState(false);
+  const [tagTypeModal, setTagTypeModal] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
   const [isOpenAddCustomerModalOpen, setIsOpenAddCustomerModalOpen] =
@@ -79,6 +82,21 @@ const TelesalesPage: React.FC = () => {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [editingNoteCustomer, setEditingNoteCustomer] =
     useState<TelesaleCustomer | null>(null);
+
+  // --- Contact Info Edit Modal ---
+  const [isEditContactInfoModalOpen, setIsEditContactInfoModalOpen] =
+    useState(false);
+  const [editingContactCustomer, setEditingContactCustomer] =
+    useState<TelesaleCustomer | null>(null);
+  const [editContactForm] = Form.useForm();
+  const [editContactLoading, setEditContactLoading] = useState(false);
+
+  // --- Email Edit Modal ---
+  const [isEditEmailModalOpen, setIsEditEmailModalOpen] = useState(false);
+  const [editingEmailCustomer, setEditingEmailCustomer] =
+    useState<TelesaleCustomer | null>(null);
+  const [editEmailForm] = Form.useForm();
+  const [editEmailLoading, setEditEmailLoading] = useState(false);
 
   // for all notes modal
   const [allNotesModal, setAllNotesModal] = useState<{
@@ -127,6 +145,21 @@ const TelesalesPage: React.FC = () => {
       deleteTelesaleContactTags(data.customerId.toString(), data.tagId),
   });
 
+  const updateTelesaleCustomerMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: {
+        email: string;
+        address?: string;
+        business_field?: string;
+        customer_info?: string;
+      };
+    }) => updateTelesaleCustomer(id, data),
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [params, setParams] = useState<TelesaleParamsList>({
@@ -148,6 +181,30 @@ const TelesalesPage: React.FC = () => {
   const handleOpenNoteModal = (customer: TelesaleCustomer) => {
     setEditingNoteCustomer(customer);
     setIsNoteModalOpen(true);
+  };
+
+  // Handle open modal to edit contact info
+  const handleOpenEditContactModal = (customer: TelesaleCustomer) => {
+    setEditingContactCustomer(customer);
+    setIsEditContactInfoModalOpen(true);
+    setTimeout(() => {
+      editContactForm.setFieldsValue({
+        address: customer.address || "",
+        businessField: customer.businessField || "",
+        customerInfo: customer.customerInfo || "",
+      });
+    }, 0);
+  };
+
+  // Handle open modal to edit email
+  const handleOpenEditEmailModal = (customer: TelesaleCustomer) => {
+    setEditingEmailCustomer(customer);
+    setIsEditEmailModalOpen(true);
+    setTimeout(() => {
+      editEmailForm.setFieldsValue({
+        email: customer.email || "",
+      });
+    }, 0);
   };
 
   const isAdmin = useMemo(() => {
@@ -180,6 +237,66 @@ const TelesalesPage: React.FC = () => {
   const handleCancelNote = () => {
     setIsNoteModalOpen(false);
     setEditingNoteCustomer(null);
+  };
+
+  // Handle save update contact info
+  const handleSaveContactEdit = async () => {
+    if (!editingContactCustomer) return;
+    try {
+      const values = await editContactForm.validateFields();
+      setEditContactLoading(true);
+      await updateTelesaleCustomer(editingContactCustomer.id, {
+        address: values.address,
+        business_field: values.businessField,
+        customer_info: values.customerInfo,
+        email: editingContactCustomer.email,
+      });
+      toast.success("Cập nhật thông tin liên hệ thành công!");
+      setIsEditContactInfoModalOpen(false);
+      setEditingContactCustomer(null);
+      refetch();
+    } catch (err: any) {
+      toast.error("Cập nhật thông tin liên hệ thất bại!");
+    } finally {
+      setEditContactLoading(false);
+    }
+  };
+  const handleCancelContactEdit = () => {
+    setIsEditContactInfoModalOpen(false);
+    setEditingContactCustomer(null);
+    editContactForm.resetFields();
+  };
+
+  // --- Handle save update email ---
+  const handleSaveEmailEdit = async () => {
+    if (!editingEmailCustomer) return;
+    try {
+      const values = await editEmailForm.validateFields();
+      setEditEmailLoading(true);
+      await updateTelesaleCustomerMutation.mutateAsync({
+        id: editingEmailCustomer.id,
+        data: {
+          email: values.email,
+          address: editingEmailCustomer.address ?? undefined,
+          business_field: editingEmailCustomer.businessField ?? undefined,
+          customer_info: editingEmailCustomer.customerInfo ?? undefined,
+        },
+      });
+      toast.success("Cập nhật email thành công!");
+      setIsEditEmailModalOpen(false);
+      setEditingEmailCustomer(null);
+      refetch();
+    } catch (err: any) {
+      toast.error("Cập nhật email thất bại!");
+    } finally {
+      setEditEmailLoading(false);
+    }
+  };
+
+  const handleCancelEmailEdit = () => {
+    setIsEditEmailModalOpen(false);
+    setEditingEmailCustomer(null);
+    editEmailForm.resetFields();
   };
 
   const handleChangePage = (pageNumber: number) => {
@@ -254,8 +371,18 @@ const TelesalesPage: React.FC = () => {
           <div className="text-gray-700 mb-1">
             <span className="font-medium">{record.phone || "--"}</span>
           </div>
-          <div className="text-gray-700">
+          <div className="flex items-center text-gray-700">
             <span className="font-medium">{record.email || "--"}</span>
+            <span
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 ml-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenEditEmailModal(record);
+              }}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Sửa</span>
+            </span>
           </div>
         </div>
       ),
@@ -266,7 +393,7 @@ const TelesalesPage: React.FC = () => {
       key: "contactInfo",
       width: 160,
       render: (_: any, record: any) => (
-        <div className="text-xs text-gray-700 space-y-1">
+        <div className="text-xs text-gray-700 space-y-1 relative">
           <div>
             <span className="font-semibold text-gray-800">Địa chỉ: </span>
             <span className="font-medium text-gray-900">
@@ -277,13 +404,28 @@ const TelesalesPage: React.FC = () => {
             <span className="font-semibold text-gray-800">Lĩnh vực KD: </span>
             <span className="font-medium">{record.businessField || "--"}</span>
           </div>
-          <div>
-            <span className="font-semibold text-gray-800">Khác: </span>
-            <span className="font-medium">{record.customerInfo || "--"}</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-gray-800">Khác: </span>
+              <span className="font-medium">{record.customerInfo || "--"}</span>
+            </div>
+            <div
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5"
+              style={{ zIndex: 2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenEditContactModal(record);
+              }}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Sửa</span>
+            </div>
           </div>
         </div>
       ),
     },
+    // ... (rest columns unchanged!)
+    // The rest of columns definition is unchanged below
     {
       title: "Note yêu cầu khách hàng",
       dataIndex: "notes",
@@ -392,6 +534,7 @@ const TelesalesPage: React.FC = () => {
         );
       },
     },
+    // ... Other columns remain unchanged ...
     {
       title: "Loại dịch vụ",
       dataIndex: "serviceTag",
@@ -399,30 +542,69 @@ const TelesalesPage: React.FC = () => {
       width: 120,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.serviceTag;
-        if (!tag) return <span className="text-xs text-gray-400">--</span>;
+        if (!Array.isArray(tag) || tag.length === 0) {
+          return <span className="text-xs text-gray-400">--</span>;
+        }
         return (
           <div className="flex flex-col gap-1 px-1">
-            <div
-              key={tag.id}
-              className="group relative flex items-center mx-1"
-              style={{ width: "calc(100% - 8px)" }}
-            >
-              <div
-                className="relative flex items-center h-5 w-full rounded-l"
-                style={{ backgroundColor: tag.color || "#3b82f6" }}
-              >
-                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
-                  <span className="truncate">{tag.name}</span>
-                </div>
+            {Array.isArray(tag) && tag.length > 0 ? (
+              tag.map((t, idx) => (
                 <div
-                  className="absolute -right-2 top-0 bottom-0 w-0 h-0"
-                  style={{
-                    borderTop: "10px solid transparent",
-                    borderBottom: "10px solid transparent",
-                    borderLeft: `8px solid ${tag.color || "#3b82f6"}`,
-                  }}
-                />
-              </div>
+                  key={t.id || idx}
+                  className="group relative flex items-center mx-1"
+                  style={{ width: "calc(100% - 8px)" }}
+                >
+                  <div
+                    className="relative flex items-center h-5 w-full rounded-l"
+                    style={{ backgroundColor: t.color || "#3b82f6" }}
+                  >
+                    <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                      <span className="truncate">{t.name}</span>
+                      <span
+                        className="ml-1 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTagModal({
+                            open: true,
+                            tag: { customerId: record.id, tagId: t.id },
+                            tagName: t.name,
+                          });
+                        }}
+                      >
+                        <Tooltip title="Xoá tag">
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            className="text-white hover:text-red-200"
+                            style={{ fontSize: 8 }}
+                          />
+                        </Tooltip>
+                      </span>
+                    </div>
+                    <div
+                      className="absolute -right-2 top-0 bottom-0 w-0 h-0"
+                      style={{
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        borderLeft: `8px solid ${t.color || "#3b82f6"}`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <span className="text-xs text-gray-400">--</span>
+            )}
+
+            <div
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
+              onClick={() => {
+                setSelectedCustomer(record);
+                setIsOpenTagModal(true);
+                setTagTypeModal("SERVICE");
+              }}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Thêm tags</span>
             </div>
           </div>
         );
@@ -521,7 +703,7 @@ const TelesalesPage: React.FC = () => {
             ) : (
               <span className="text-xs text-gray-400">--</span>
             )}
-            
+
             <div
               className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
               onClick={() => {
@@ -1073,6 +1255,89 @@ const TelesalesPage: React.FC = () => {
         onCancel={handleCancelNote}
       />
 
+      {/* --- Edit Contact Info Modal --- */}
+      <Modal
+        open={isEditContactInfoModalOpen}
+        title="Chỉnh sửa thông tin liên hệ"
+        onOk={handleSaveContactEdit}
+        onCancel={handleCancelContactEdit}
+        okText="Lưu"
+        cancelText="Huỷ"
+        confirmLoading={editContactLoading}
+        centered
+        destroyOnClose
+        afterClose={() => {
+          editContactForm.resetFields();
+        }}
+      >
+        <Form
+          form={editContactForm}
+          layout="vertical"
+          initialValues={{
+            address: "",
+            businessField: "",
+            customerInfo: "",
+          }}
+        >
+          <Form.Item
+            label="Địa chỉ"
+            name="address"
+            rules={[{ required: false }]}
+          >
+            <Input placeholder="Nhập địa chỉ khách hàng" />
+          </Form.Item>
+          <Form.Item
+            label="Lĩnh vực kinh doanh"
+            name="businessField"
+            rules={[{ required: false }]}
+          >
+            <Input placeholder="Nhập lĩnh vực KD" />
+          </Form.Item>
+          <Form.Item
+            label="Khác"
+            name="customerInfo"
+            rules={[{ required: false }]}
+          >
+            <Input placeholder="Thông tin khác..." />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* --- Edit Email Modal --- */}
+      <Modal
+        open={isEditEmailModalOpen}
+        title="Chỉnh sửa Email"
+        onOk={handleSaveEmailEdit}
+        onCancel={handleCancelEmailEdit}
+        okText="Lưu"
+        cancelText="Huỷ"
+        confirmLoading={editEmailLoading}
+        centered
+        destroyOnClose
+        afterClose={() => {
+          editEmailForm.resetFields();
+        }}
+      >
+        <Form
+          form={editEmailForm}
+          layout="vertical"
+          initialValues={{
+            email: "",
+          }}
+        >
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Vui lòng nhập email" },
+              { type: "email", message: "Email không hợp lệ!" },
+            ]}
+          >
+            <Input placeholder="Nhập email khách hàng" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
       <TelesaleDetailModal
         open={isOpenDetail}
         onCancel={() => setIsOpenDetail(false)}
@@ -1110,6 +1375,7 @@ const TelesalesPage: React.FC = () => {
         open={isOpenTagModal}
         onClose={() => setIsOpenTagModal(false)}
         customer={selectedCustomer}
+        tagTypeModal={tagTypeModal}
         onAssignTag={(customerId, tagId) => {
           assignTagMutate(
             { customerId, tagId },

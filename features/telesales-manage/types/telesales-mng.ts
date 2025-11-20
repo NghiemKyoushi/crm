@@ -27,6 +27,7 @@ export interface TelesaleCustomer {
     serviceTag: any;
     statusTag: any;
     sourceTag: any;
+    customerInfo?: string;
 }
 
 export interface TelesaleCustomerListResponse {
