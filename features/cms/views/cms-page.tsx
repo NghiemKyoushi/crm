@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
 import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch, Modal, ConfigProvider } from "antd";
@@ -37,24 +37,30 @@ export default function CMSFeaturePage() {
     };
     
     const [activeKey, setActiveKey] = useState<string>(getInitialTab());
+    const isInternalUpdate = useRef(false);
     
     // Update URL when tab changes
     const handleTabChange = (key: string) => {
+        isInternalUpdate.current = true;
         setActiveKey(key);
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", key);
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     };
     
-    // Sync activeKey with URL on mount or when URL changes
+    // Sync activeKey with URL on mount or when URL changes (e.g., browser back/forward)
     useEffect(() => {
+        // Skip if we're updating from internal user action (handleTabChange)
+        if (isInternalUpdate.current) {
+            isInternalUpdate.current = false;
+            return;
+        }
+        
         const tab = searchParams.get("tab");
         const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
         const tabFromUrl = tab && validTabs.includes(tab) ? tab : "pages";
-        if (tabFromUrl !== activeKey) {
-            setActiveKey(tabFromUrl);
-        }
-    }, [searchParams, activeKey]);
+        setActiveKey(tabFromUrl);
+    }, [searchParams, pathname]);
     // Pagination states
     const [pagesPage, setPagesPage] = useState<number>(0);
     const [pagesSize, setPagesSize] = useState<number>(20);
@@ -325,7 +331,7 @@ export default function CMSFeaturePage() {
             <div className="pt-4 ">
                 <div className="p-6">
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <CMSTabs activeKey={activeKey} onChange={setActiveKey} />
+                        <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
                         <div className="px-6 pb-6 pt-1">
                             {activeKey === "pages" && (
                                 <Table
