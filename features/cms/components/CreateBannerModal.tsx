@@ -15,9 +15,8 @@ type Props = {
 };
 
 export default function CreateBannerModal({ open, onClose, onSuccess, defaultPageId, banner }: Props) {
-    const [form] = Form.useForm<CreateCmsBannerBody & { image_url?: string }>();
+    const [form] = Form.useForm<CreateCmsBannerBody>();
     const imageUrl = Form.useWatch("image_url", form);
-    const pageIdWatch = Form.useWatch("page_id", form);
 
     const { mutateAsync, isPending } = useMutation({
         mutationFn: async (payload: CreateCmsBannerBody | UpdateCmsBannerBody) => {
@@ -38,28 +37,11 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
 
     const handleOk = async () => {
         const values = await form.validateFields();
-        // Extract image_id from URL if it's a system URL
-        let imageId: number | null = null;
-        if (values.image_url) {
-            // Try to extract image_id from URL patterns:
-            // - /view-image/{id}
-            // - /medias/v1/files/view/thumb/{id}
-            const match1 = values.image_url.match(/\/view-image\/(\d+)/);
-            const match2 = values.image_url.match(/\/view\/thumb\/(\d+)/);
-            if (match1) {
-                imageId = parseInt(match1[1], 10);
-            } else if (match2) {
-                imageId = parseInt(match2[1], 10);
-            } else {
-                // If external URL, set to 0 (backend should handle)
-                imageId = 0;
-            }
-        }
-        const payload = { 
-            ...values, 
-            image_id: imageId ?? values.image_id ?? 0,
-            status: "active" 
-        } as CreateCmsBannerBody;
+        const payload: CreateCmsBannerBody = {
+            ...values,
+            image_url: values.image_url?.trim() || null,
+            status: "active",
+        };
         await mutateAsync(payload);
     };
 
@@ -83,10 +65,10 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
                     link: banner?.link,
                     section: banner?.section ?? "carousel",
                     order_index: banner?.order_index ?? 1,
-                    image_id: banner?.image_id,
-                    image_url: banner?.image_id 
-                        ? `${process.env.NEXT_PUBLIC_ROOT_STATIC_URL || ""}/features/v1/admin/view-image/${banner.image_id}`
-                        : undefined,
+                    image_url: banner?.image_url
+                        ?? (banner?.image_id
+                            ? `${process.env.NEXT_PUBLIC_ROOT_STATIC_URL || ""}/features/v1/admin/view-image/${banner.image_id}`
+                            : undefined),
                 }}
             >
                 <Form.Item name="page_id" label="Page" rules={[{ required: true, message: "Please choose page" }]}>
@@ -117,12 +99,6 @@ export default function CreateBannerModal({ open, onClose, onSuccess, defaultPag
                 </Form.Item>
                 <Form.Item name="order_index" label="Order" rules={[{ required: true }]}>
                     <InputNumber min={0} style={{ width: "100%" }} />
-                </Form.Item>
-                <Form.Item name="image_id" hidden>
-                    <Input />
-                </Form.Item>
-                <Form.Item name="image_url" hidden>
-                    <Input />
                 </Form.Item>
                 <Form.Item name="status" hidden>
                     <Input />

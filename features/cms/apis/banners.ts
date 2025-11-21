@@ -3,7 +3,8 @@ import api from "@/api/axiosClient";
 export type CmsBanner = {
     id: number;
     page_id: number;
-    image_id: number;
+    image_id: number | null;
+    image_url?: string | null;
     title: string;
     link: string;
     section: string;
@@ -37,7 +38,7 @@ export const getCmsBanners = async (pageId: number): Promise<CmsBanner[]> => {
 
 export type CreateCmsBannerBody = {
     page_id: number;
-    image_id: number;
+    image_url: string | null;
     title: string;
     link: string;
     section: string;
