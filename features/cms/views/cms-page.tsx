@@ -28,33 +28,29 @@ export default function CMSFeaturePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    
+
     // Get initial tab from URL or default to "pages"
-    const getInitialTab = () => {
+    const getTabFromUrl = () => {
         const tab = searchParams.get("tab");
         const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
         return tab && validTabs.includes(tab) ? tab : "pages";
     };
-    
-    const [activeKey, setActiveKey] = useState<string>(getInitialTab());
-    
-    // Update URL when tab changes
+
+    const [activeKey, setActiveKey] = useState<string>(getTabFromUrl());
+
+    // Update URL when tab changes - use full page reload to avoid state conflicts
     const handleTabChange = (key: string) => {
-        setActiveKey(key);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("tab", key);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        if (key === activeKey) return;
+        // Use window.location to trigger full page reload, same as direct URL change
+        // This ensures clean state initialization, avoiding crashes
+        window.location.href = `${pathname}?tab=${key}`;
     };
-    
-    // Sync activeKey with URL on mount or when URL changes
+
+    // Sync activeKey with URL when URL changes (e.g., browser back/forward)
     useEffect(() => {
-        const tab = searchParams.get("tab");
-        const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
-        const tabFromUrl = tab && validTabs.includes(tab) ? tab : "pages";
-        if (tabFromUrl !== activeKey) {
-            setActiveKey(tabFromUrl);
-        }
-    }, [searchParams, activeKey]);
+        const tabFromUrl = getTabFromUrl();
+        setActiveKey(prev => prev !== tabFromUrl ? tabFromUrl : prev);
+    }, [searchParams]);
     // Pagination states
     const [pagesPage, setPagesPage] = useState<number>(0);
     const [pagesSize, setPagesSize] = useState<number>(20);
@@ -325,7 +321,7 @@ export default function CMSFeaturePage() {
             <div className="pt-4 ">
                 <div className="p-6">
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <CMSTabs activeKey={activeKey} onChange={setActiveKey} />
+                        <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
                         <div className="px-6 pb-6 pt-1">
                             {activeKey === "pages" && (
                                 <Table
