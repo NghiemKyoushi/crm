@@ -141,7 +141,7 @@ export default function TransactionDetailModal({
               </p>
               <p>
                 <span className="font-medium">Chủ tài khoản:</span>
-                {withdrawDetail?.userName}
+                {withdrawDetail?.accountHolderName}
               </p>
             </div>
           </div>
