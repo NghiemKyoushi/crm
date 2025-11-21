@@ -20,6 +20,8 @@ import { useCmsPages } from "../hooks/useCmsPages";
 import { useCmsCategories, useInvalidateCategories } from "../hooks/useCmsCategories";
 import { useCmsContents, useInvalidateContents } from "../hooks/useCmsContents";
 import { CmsCategory } from "../apis/categories";
+import CmsContentPreview from "./CmsContentPreview";
+import { CmsContent, getCmsContentImageUrl } from "../apis/contents";
 import {
     getPageCategories,
     getPageContents,
@@ -159,60 +161,76 @@ export default function CMSTreeManager({
     };
 
 
-    // Load all relations
-    useEffect(() => {
-        const loadAllRelations = async () => {
-            if (pages.length === 0 && categories.length === 0) return;
+    // Modal states for linking
+    const [linkCategoryModalOpen, setLinkCategoryModalOpen] = useState(false);
+    const [linkContentModalOpen, setLinkContentModalOpen] = useState(false);
+    const [linkChildCategoryModalOpen, setLinkChildCategoryModalOpen] = useState(false);
+    const [selectedPageId, setSelectedPageId] = useState<number | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [selectedParentType, setSelectedParentType] = useState<'page' | 'category' | null>(null);
+    const [selectedLinkCategoryId, setSelectedLinkCategoryId] = useState<number | null>(null);
+    const [selectedLinkContentId, setSelectedLinkContentId] = useState<number | null>(null);
+    const [selectedLinkChildCategoryId, setSelectedLinkChildCategoryId] = useState<number | null>(null);
 
-            setLoadingRelations(true);
-            try {
-                const pageRels = new Map<number, { categories: number[], contents: number[] }>();
-                const categoryRels = new Map<number, { children: number[], contents: number[] }>();
+    // Modal state for unlink
+    const [unlinkModalOpen, setUnlinkModalOpen] = useState(false);
+    const [nodeToUnlink, setNodeToUnlink] = useState<CMSTreeNode | null>(null);
 
-                // Load page relations
-                const pagePromises = pages.map(async (page) => {
-                    try {
-                        const [linkedCategories, linkedContents] = await Promise.all([
-                            getPageCategories(page.id),
-                            getPageContents(page.id)
-                        ]);
-                        pageRels.set(page.id, {
-                            categories: linkedCategories.map(c => c.id),
-                            contents: linkedContents.map(c => c.id)
-                        });
-                    } catch (error) {
-                        console.error(`Failed to load relations for page ${page.id}:`, error);
-                    }
-                });
+    // Load all relations function
+    const loadAllRelations = useCallback(async () => {
+        if (pages.length === 0 && categories.length === 0) return;
 
-                // Load category relations
-                const categoryPromises = categories.map(async (cat) => {
-                    try {
-                        const [children, linkedContents] = await Promise.all([
-                            getCategoryRelations(cat.id),
-                            getCategoryContents(cat.id)
-                        ]);
-                        categoryRels.set(cat.id, {
-                            children: children.map(c => c.id),
-                            contents: linkedContents.map(c => c.id)
-                        });
-                    } catch (error) {
-                        console.error(`Failed to load relations for category ${cat.id}:`, error);
-                    }
-                });
+        setLoadingRelations(true);
+        try {
+            const pageRels = new Map<number, { categories: number[], contents: number[] }>();
+            const categoryRels = new Map<number, { children: number[], contents: number[] }>();
 
-                await Promise.all([...pagePromises, ...categoryPromises]);
-                setPageRelations(pageRels);
-                setCategoryRelations(categoryRels);
-            } catch (error) {
-                message.error("Failed to load relations");
-            } finally {
-                setLoadingRelations(false);
-            }
-        };
+            // Load page relations
+            const pagePromises = pages.map(async (page) => {
+                try {
+                    const [linkedCategories, linkedContents] = await Promise.all([
+                        getPageCategories(page.id),
+                        getPageContents(page.id)
+                    ]);
+                    pageRels.set(page.id, {
+                        categories: linkedCategories.map(c => c.id),
+                        contents: linkedContents.map(c => c.id)
+                    });
+                } catch (error) {
+                    console.error(`Failed to load relations for page ${page.id}:`, error);
+                }
+            });
 
-        loadAllRelations();
+            // Load category relations
+            const categoryPromises = categories.map(async (cat) => {
+                try {
+                    const [children, linkedContents] = await Promise.all([
+                        getCategoryRelations(cat.id),
+                        getCategoryContents(cat.id)
+                    ]);
+                    categoryRels.set(cat.id, {
+                        children: children.map(c => c.id),
+                        contents: linkedContents.map(c => c.id)
+                    });
+                } catch (error) {
+                    console.error(`Failed to load relations for category ${cat.id}:`, error);
+                }
+            });
+
+            await Promise.all([...pagePromises, ...categoryPromises]);
+            setPageRelations(pageRels);
+            setCategoryRelations(categoryRels);
+        } catch (error) {
+            message.error("Failed to load relations");
+        } finally {
+            setLoadingRelations(false);
+        }
     }, [pages, categories]);
+
+    // Load all relations on mount and when pages/categories change
+    useEffect(() => {
+        loadAllRelations();
+    }, [loadAllRelations]);
 
     // Build tree structure
     const treeData = useMemo(() => {
@@ -232,6 +250,9 @@ export default function CMSTreeManager({
             const catRelations = categoryRelations.get(category.id);
             const childrenNodes: CMSTreeNode[] = [];
             const currentKey = `${options.parentKey}-category-${category.id}`;
+
+            // Determine if this is a child category
+            const isChildCategory = parentCategoryId !== undefined;
 
             // Add child categories
             if (catRelations?.children) {
@@ -338,15 +359,19 @@ export default function CMSTreeManager({
     const handleReload = async () => {
         setLoadingRelations(true);
         try {
+            // Refetch all data
             await Promise.all([
                 refetchPages(),
                 invalidateCategories(),
                 invalidateContents()
             ]);
-            message.success("Reloaded successfully");
+            // Wait a bit for data to be refetched, then reload relations
+            setTimeout(async () => {
+                await loadAllRelations();
+                message.success("Reloaded successfully");
+            }, 300);
         } catch (error) {
             message.error("Failed to reload");
-        } finally {
             setLoadingRelations(false);
         }
     };
@@ -663,8 +688,7 @@ export default function CMSTreeManager({
                             if (node.nodeType === 'page') {
                                 actions.push(
                                     { key: 'add-category', label: 'Add Category', icon: <PlusOutlined />, onClick: () => handleLinkCategory(node.entityId) },
-                                    { key: 'assign-content', label: 'Assign Content', icon: <FileTextOutlined />, onClick: () => handleLinkContent(node.entityId, 'page') },
-                                    { type: 'divider' }
+                                    { key: 'assign-content', label: 'Assign Content', icon: <FileTextOutlined />, onClick: () => handleLinkContent(node.entityId, 'page') }
                                 );
                             } else if (node.nodeType === 'category') {
                                 actions.push(
@@ -749,10 +773,11 @@ export default function CMSTreeManager({
                     <strong>How to use CMS Tree Management:</strong>
                 </p>
                 <ul className="text-sm text-blue-700 list-disc list-inside mt-1 space-y-1">
-                    <li><FileTextOutlined className="text-blue-500" /> <strong>Pages</strong> - Root level nodes. Click <MoreOutlined /> to "Add Category" or "Assign Content"</li>
+                    <li><HomeOutlined className="text-blue-500" /> <strong>Pages</strong> - Root level nodes. Click <MoreOutlined /> to "Add Category" or "Assign Content"</li>
                     <li><FolderOutlined className="text-orange-500" /> <strong>Categories</strong> - Only show when linked to a page. Can have child categories and contents</li>
                     <li><FileTextOutlined className="text-green-500" /> <strong>Contents</strong> - Can be assigned to multiple pages and categories (many-to-many)</li>
                     <li>Click <MoreOutlined /> on category to "Add Child Category" or "Assign Content"</li>
+                    <li>Click <MoreOutlined /> on content to "Preview" the content</li>
                     <li>Use "Unlink" to remove a category/content from its parent (doesn't delete the entity)</li>
                     <li>Use "Delete" to permanently delete the entity and all its relations</li>
                 </ul>

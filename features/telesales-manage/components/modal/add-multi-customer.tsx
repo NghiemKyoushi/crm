@@ -35,6 +35,9 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
     }
   }, [isOpen]);
 
+  // Ẩn trường note nếu chọn nhiều hơn 1 khách hàng
+  const shouldShowNote = customers.length === 1;
+
   return (
     <Modal
       title={
@@ -120,19 +123,21 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
             </Select>
           </div>
 
-          {/* Thêm ô input ghi chú */}
-          <div>
-            <label className="block mb-2 font-semibold text-gray-700 text-sm">
-              Ghi chú <span className="text-gray-400 text-xs font-normal">(Tùy chọn)</span>
-            </label>
-            <Input.TextArea
-              placeholder="Nhập ghi chú cho lần gán sale này..."
-              rows={4}
-              value={note}
-              onChange={(e) => onNoteChange(e.target.value)}
-              className="!rounded-lg"
-            />
-          </div>
+          {/* Thêm ô input ghi chú - Ẩn nếu nhiều hơn 1 KH */}
+          {shouldShowNote && (
+            <div>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm">
+                Ghi chú <span className="text-gray-400 text-xs font-normal">(Tùy chọn)</span>
+              </label>
+              <Input.TextArea
+                placeholder="Nhập ghi chú cho lần gán sale này..."
+                rows={4}
+                value={note}
+                onChange={(e) => onNoteChange(e.target.value)}
+                className="!rounded-lg"
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -148,7 +153,13 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
           type="primary"
           disabled={customers.length === 0 || !saleId}
           onClick={() => {
-            if (saleId) onConfirm(saleId);
+            // Nếu chọn nhiều hơn 1 KH thì truyền note rỗng
+            if (saleId) {
+              if (customers.length > 1) {
+                onNoteChange("");
+              }
+              onConfirm(saleId);
+            }
           }}
           className="!bg-gradient-to-r !from-purple-500 !to-purple-600 hover:!from-purple-600 hover:!to-purple-700 !h-10 !px-6 !rounded-lg !font-medium !shadow-md hover:!shadow-lg !transition-all disabled:!opacity-50"
           icon={

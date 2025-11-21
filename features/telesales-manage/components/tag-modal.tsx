@@ -6,7 +6,10 @@ import {
   CheckCircleTwoTone,
 } from "@ant-design/icons";
 import TagEditModal from "./tag-edit-modal";
-import { getTelesaleTagList, addTelesaleTag, deleteTelesaleTag, updateTelesaleTag } from "../apis/telesale-mng";
+import {addTelesaleTag, deleteTelesaleTag, updateTelesaleTag } from "../apis/telesale-mng";
+import { toast } from "react-toastify";
+import { t } from "i18next";
+import { fetchTagsByType } from "./modal/filter-telesale-modal";
 
 interface TagType {
   id: string | number;
@@ -18,6 +21,7 @@ interface TagManagerModalProps {
   onClose: () => void;
   customer: any;
   onAssignTag: (customerId: string, tagId: string) => void;
+  tagTypeModal: string
 }
 
 const TagManagerModal: React.FC<TagManagerModalProps> = ({
@@ -25,6 +29,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   onClose,
   customer,
   onAssignTag,
+  tagTypeModal
 }) => {
   const [tags, setTags] = useState<TagType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +45,7 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const data = await getTelesaleTagList();
+      const data = await fetchTagsByType(tagTypeModal);
       // Ensure data is array and items are TagType
       setTags(
         Array.isArray(data)
@@ -69,19 +74,19 @@ const TagManagerModal: React.FC<TagManagerModalProps> = ({
       setLoading(true);
       if (tag.id) {
         // If editing, use update API
-        await updateTelesaleTag(String(tag.id), { name: tag.name, color: tag.color });
-        message.success("Cập nhật thẻ thành công!");
+        await updateTelesaleTag(String(tag.id), { name: tag.name, color: tag.color, });
+        toast.success("Cập nhật thẻ thành công!");
       } else {
         // Else, add new with add API
-        await addTelesaleTag({ name: tag.name, color: tag.color });
-        message.success("Thêm thẻ thành công!");
+        await addTelesaleTag({ name: tag.name, color: tag.color, tag_type: tagTypeModal });
+        toast.success("Thêm thẻ thành công!");
       }
       await fetchTags();
-    } catch (err) {
+    } catch (err: any) {
       if (tag.id) {
-        message.error("Cập nhật thẻ thất bại!");
+        toast.error(err.response?.data?.localizedMessage || t("common.error"));
       } else {
-        message.error("Thêm thẻ thất bại!");
+        toast.error(err.response?.data?.localizedMessage || t("common.error"));
       }
     }
     setIsEditOpen(false);

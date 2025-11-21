@@ -22,6 +22,7 @@ import {
   faClipboardCheck,
   faHeadset,
   faCrown,
+  faMoneyBillWave,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -75,6 +76,15 @@ export const menuPermissions: Record<string, string[]> = {
     "sales.manage_assigned_customers"
   ],
 
+  // Sales Salary Management - admin and finance
+  "/sales-salary-management": [
+    "sales.view_own_salary",
+    "sales.view_own_commission",
+    "sales.manage_salaries",
+    "finance.view_all_transactions",
+    "system.admin"
+  ],
+
   // Partner Management - finance and admin
   "/partner-manage": [
     "finance.manage_bank_accounts",
@@ -113,6 +123,7 @@ export const menuItems = [
   { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
   { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
   // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
+  { key: "/sales-salary-management", icon: faMoneyBillWave, label: "salesSalaryManagement" },
   { key: "/finance-management", icon: faWallet, label: "finance" },
   { key: "/user-management", icon: faUsers, label: "userManagement" },
   { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },

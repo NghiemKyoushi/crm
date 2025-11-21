@@ -45,13 +45,15 @@
     "surcharge": "Phí phụ thu",
     "settings": "Cài đặt Hệ thống",
     "saleRecord": "Quản lý lương sale",
+    "salesSalaryManagement": "Quản lý Lương Sale",
     "telesaleManagement": "Quản lý Telesales",
     "partnerManagement": "Quản lý nguyên liệu",
     "checkComing": "Kiểm Tra Hàng Về",
     "operation": "Quản lý xuất kho",
     "websiteManagement": "Quản lý Website",
     "crm": "CRM",
-    "cms": "CMS"
+    "cms": "CMS",
+    "vipManagement": "Quản lý Gói VIP"
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -328,7 +330,8 @@
     "shippingRequest": "Yêu cầu giao hàng",
     "canceled": "Đã từ chối",
     "completed": "Hoàn thành",
-    "packed": "Đã đóng gói"
+    "packed": "Đã đóng gói",
+    "denied":"Đã huỷ đơn"
   },
   "fromDate": "Từ ngày",
   "toDate": "Đến ngày",

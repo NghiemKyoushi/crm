@@ -45,13 +45,15 @@
     "surcharge": "Surcharge Settings",
     "settings": "System Settings",
     "saleRecord": "Sale Records",
+    "salesSalaryManagement": "Sales Salary Management",
     "telesaleManagement": "Telesale management",
     "partnerManagement": "Raw Material Management",
     "operation": "Shipment Management",
     "websiteManagement": "Website Management",
     "checkComing": "Check Coming",
     "crm": "CRM",
-    "cms": "CMS"
+    "cms": "CMS",
+    "vipManagement": "VIP Management"
   },
   "tabs": {
     "customer": "Customer Management",
@@ -328,7 +330,8 @@
     "shippingRequest": "Shipping Request",
     "canceled": "Canceled",
     "completed": "Completed",
-    "packed": "Packaged"
+    "packed": "Packaged",
+    "denied":"Denied"
   },
   "fromDate": "From date",
   "toDate": "To date",

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,9 +7,12 @@ import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
+// Lấy hook lấy params từ URL
+import { useSearchParams } from "next/navigation";
+
 export interface FilterType {
   page?: number;
-  status?: string[]; // Multi search for status: now array of strings
+  status?: string[];
   date?: string;
   type?: number;
   size?: number;
@@ -42,6 +45,32 @@ export default function OrderHubFilter({
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const { RangePicker } = DatePicker;
+
+  // Lấy params từ url
+  const searchParams = useSearchParams();
+  const invoiceNoQuery = searchParams.get("invoice_no");
+
+  // Ref để chỉ set invoice_no từ URL duy nhất lần đầu, sau đó form tự quản lý
+  const didInitByQuery = useRef(false);
+
+  useEffect(() => {
+    if (invoiceNoQuery && !didInitByQuery.current) {
+      // Nếu form chưa được khởi tạo bởi query, set giá trị vào form
+      if (form.getFieldValue("invoice_no") !== invoiceNoQuery) {
+        form.setFieldsValue({
+          ...initialFilters,
+          invoice_no: invoiceNoQuery,
+        });
+      }
+      // Gọi filter với invoice_no, merge các giá trị đang có
+      onFilter({
+        ...initialFilters,
+        invoice_no: invoiceNoQuery,
+      });
+      didInitByQuery.current = true;
+    }
+    // eslint-disable-next-line
+  }, [invoiceNoQuery]);
 
   const orderStatusOptions = [
     {
@@ -77,6 +106,7 @@ export default function OrderHubFilter({
       label: t("status.shippingRequest"),
     },
     { value: OrderStatusType.CANCELED, label: t("status.canceled") },
+    { value: OrderStatusType.DENIED, label: t("status.denied") },
   ];
 
   const handleFinish = (values: any) => {
@@ -90,6 +120,9 @@ export default function OrderHubFilter({
       toDate = values.date[1] ? values.date[1].format("YYYY-MM-DD") : undefined;
     }
 
+    // Giá trị invoice_no lấy trực tiếp từ form (có thể bị xóa lúc search mới)
+    const invoice_no_final = values.invoice_no?.trim() ?? undefined;
+
     const filters: FilterType = {
       status: Array.isArray(values.status) && values.status.length > 0 ? values.status : undefined,
       type: initialFilters?.type || undefined,
@@ -97,7 +130,7 @@ export default function OrderHubFilter({
       customer_code: values.customer_code?.trim() || undefined,
       product_url: values.product_url?.trim() || undefined,
       product_name: values.product_name?.trim() || undefined,
-      invoice_no: values.invoice_no?.trim() || undefined,
+      invoice_no: invoice_no_final,
       tracking_code: values.tracking_code?.trim() || undefined,
       package_code: values.package_code?.trim() || undefined,
       product_id: values.product_id?.trim() || undefined,
@@ -112,7 +145,8 @@ export default function OrderHubFilter({
 
   const handleReset = () => {
     form.resetFields();
-    onFilter({
+    // Sau khi reset, invoice_no sẽ lấy giá trị rỗng (không còn giữ cố định theo query)
+    const filterToPass: FilterType = {
       status: undefined,
       date: undefined,
       type: initialFilters?.type || undefined,
@@ -127,12 +161,19 @@ export default function OrderHubFilter({
       from_date: undefined,
       to_date: undefined,
       customer_code: undefined
-    });
+    };
+    onFilter(filterToPass);
+  };
+
+  // initialValues: invoice_no chỉ lấy từ query lần đầu load, không cố định theo param nữa
+  const mergedInitialValues = {
+    ...initialFilters,
+    ...(invoiceNoQuery && !didInitByQuery.current ? { invoice_no: invoiceNoQuery } : {}),
   };
 
   return (
     <div className="flex flex-col mb-2 gap-1">
-      <Form form={form} onFinish={handleFinish} initialValues={initialFilters}>
+      <Form form={form} onFinish={handleFinish} initialValues={mergedInitialValues}>
         {/* Action Buttons Row */}
         <div className="w-full flex justify-end gap-3 bg-white rounded-lg p-2">
           <Button
@@ -258,7 +299,6 @@ export default function OrderHubFilter({
               <Form.Item name="status" className="!mb-2">
                 <Select
                   mode="multiple"
-                  // Sử dụng !h-10 để set chiều cao, bỏ min-h-10, không dùng h-10 cho Select mà custom bên trong nếu cần
                   className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs 
                     [&_.ant-select-selection-item]:!text-xs 
                     [&_.ant-select-selection-overflow]:!flex-wrap [&_.ant-select-selection-item]:!break-normal

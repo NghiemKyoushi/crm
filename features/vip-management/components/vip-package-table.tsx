@@ -87,6 +87,20 @@ export default function VipPackageTable() {
             dataIndex: "description",
             key: "description",
             width: 200,
+            render: (description: string) => (
+                <div 
+                    className="truncate" 
+                    style={{ 
+                        maxWidth: '200px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}
+                    title={description}
+                >
+                    {description || "-"}
+                </div>
+            ),
         },
         {
             title: "Giá",

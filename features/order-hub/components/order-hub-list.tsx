@@ -139,7 +139,6 @@ export default function OrderHub() {
     from_date: undefined,
     to_date: undefined,
   });
-
   // Track the previous filters to know if filters changed
   const prevFilters = useRef<FilterType>(filters);
 
@@ -185,18 +184,7 @@ export default function OrderHub() {
   const queryClient = useQueryClient();
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
   const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
-  // Modified handleFilter: Only set filters and reset to page 1 if something actually changed
-  const handleFilter = (newFilters: FilterType) => {
-    if (isEqualObject(newFilters, prevFilters.current)) {
-      // Không thay đổi, không làm gì cả để trigger api
-      // Tuy nhiên: Nếu muốn luôn gọi API khi filter, gọi setFilters để tạo state mới nhưng phải force re-render
-      // Ở đây sẽ không làm gì cả để tránh setFilters với giá trị như cũ.
-      return;
-    }
-    prevFilters.current = newFilters;
-    setFilters(newFilters);
-    setPage(0);
-  };
+
 
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
@@ -312,17 +300,37 @@ export default function OrderHub() {
     }
   };
 
+  // We use a 'didSetInitialType' to only set filter.type once.
+  const didSetInitialType = useRef(false);
+
   useEffect(() => {
-    if (
-      hasPermission("sales.view_assigned_orders") &&
-      hasPermission("order.view")
-    ) {
-      setFilters({ ...filters, type: 1 });
-    } else {
-      setFilters({ ...filters, type: 2 });
+    if (!didSetInitialType.current) {
+      if (
+        hasPermission("sales.view_assigned_orders") &&
+        hasPermission("order.view")
+      ) {
+        setFilters((prev) => ({ ...prev, type: 1 }));
+      } else {
+        setFilters((prev) => ({ ...prev, type: 2 }));
+      }
+      didSetInitialType.current = true;
     }
+    // eslint-disable-next-line
   }, [permissions]);
 
+  // handleFilter: Only set filters and reset to page 1 if something actually changed
+  const handleFilter = (newFilters: FilterType) => {
+    console.log('handleFilter', newFilters);
+    
+    if (isEqualObject(newFilters, prevFilters.current)) {
+      return;
+    }
+    prevFilters.current = newFilters;
+    setFilters(newFilters);
+    setPage(0);
+  };
+
+    
   // Function to call for updating kupon (with toast and loading)
   const updateOrderKupon = async (orderId: number, value: number | null) => {
     setIsKuponLoading(true);
@@ -435,7 +443,9 @@ export default function OrderHub() {
           setIsOpenCancelOrder2(false);
         },
         onError: (error: any) => {
-          toast.error(error?.response?.data?.localizedMessage || "Có lỗi xảy ra");
+          toast.error(
+            error?.response?.data?.localizedMessage || "Có lỗi xảy ra"
+          );
         },
       }
     );
@@ -977,6 +987,10 @@ export default function OrderHub() {
           case OrderStatusType.CANCELED:
             color = "red";
             text = t("status.cancelled");
+            break;
+          case OrderStatusType.DENIED:
+            color = "red";
+            text = t("status.denied");
             break;
           default:
             color = "default";
@@ -1660,10 +1674,12 @@ export default function OrderHub() {
       {orderDetail && (
         <CancelOrderModal
           onCancel={() => {
-            setIsOpenCancelOrder2(false)
+            setIsOpenCancelOrder2(false);
             setOrderDetail(undefined);
-          } }
-          onConfirm={(value) => handleCancelOrderAfterApprove(orderDetail.id, value)}
+          }}
+          onConfirm={(value) =>
+            handleCancelOrderAfterApprove(orderDetail.id, value)
+          }
           visible={isOpenCancelOrder2}
         />
       )}
