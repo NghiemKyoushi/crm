@@ -28,39 +28,29 @@ export default function CMSFeaturePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    
+
     // Get initial tab from URL or default to "pages"
-    const getInitialTab = () => {
+    const getTabFromUrl = () => {
         const tab = searchParams.get("tab");
         const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
         return tab && validTabs.includes(tab) ? tab : "pages";
     };
-    
-    const [activeKey, setActiveKey] = useState<string>(getInitialTab());
-    const isInternalUpdate = useRef(false);
-    
-    // Update URL when tab changes
+
+    const [activeKey, setActiveKey] = useState<string>(getTabFromUrl());
+
+    // Update URL when tab changes - use full page reload to avoid state conflicts
     const handleTabChange = (key: string) => {
-        isInternalUpdate.current = true;
-        setActiveKey(key);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("tab", key);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        if (key === activeKey) return;
+        // Use window.location to trigger full page reload, same as direct URL change
+        // This ensures clean state initialization, avoiding crashes
+        window.location.href = `${pathname}?tab=${key}`;
     };
-    
-    // Sync activeKey with URL on mount or when URL changes (e.g., browser back/forward)
+
+    // Sync activeKey with URL when URL changes (e.g., browser back/forward)
     useEffect(() => {
-        // Skip if we're updating from internal user action (handleTabChange)
-        if (isInternalUpdate.current) {
-            isInternalUpdate.current = false;
-            return;
-        }
-        
-        const tab = searchParams.get("tab");
-        const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
-        const tabFromUrl = tab && validTabs.includes(tab) ? tab : "pages";
-        setActiveKey(tabFromUrl);
-    }, [searchParams, pathname]);
+        const tabFromUrl = getTabFromUrl();
+        setActiveKey(prev => prev !== tabFromUrl ? tabFromUrl : prev);
+    }, [searchParams]);
     // Pagination states
     const [pagesPage, setPagesPage] = useState<number>(0);
     const [pagesSize, setPagesSize] = useState<number>(20);

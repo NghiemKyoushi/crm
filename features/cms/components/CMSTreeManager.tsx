@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Tree, message, Button, Input, Spin, Space, Tag, Modal, Dropdown, Checkbox, Drawer } from "antd";
 import type { TreeProps, DataNode } from "antd/es/tree";
 import type { MenuProps } from "antd";
@@ -250,9 +250,6 @@ export default function CMSTreeManager({
             const catRelations = categoryRelations.get(category.id);
             const childrenNodes: CMSTreeNode[] = [];
             const currentKey = `${options.parentKey}-category-${category.id}`;
-
-            // Determine if this is a child category
-            const isChildCategory = parentCategoryId !== undefined;
 
             // Add child categories
             if (catRelations?.children) {
