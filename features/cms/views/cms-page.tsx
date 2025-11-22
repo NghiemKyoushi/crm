@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import CMSTabs from "../components/tabs/cms-tabs";
-import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch, Modal } from "antd";
+import { Button, Popconfirm, Table, message, Select, Tabs, Checkbox, Switch, Modal, ConfigProvider } from "antd";
 import { useCmsPages } from "../hooks/useCmsPages";
 import CreatePageModal from "../components/CreatePageModal";
 import { deleteCmsPage } from "../apis/pages";
@@ -28,33 +28,29 @@ export default function CMSFeaturePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    
+
     // Get initial tab from URL or default to "pages"
-    const getInitialTab = () => {
+    const getTabFromUrl = () => {
         const tab = searchParams.get("tab");
         const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
         return tab && validTabs.includes(tab) ? tab : "pages";
     };
-    
-    const [activeKey, setActiveKey] = useState<string>(getInitialTab());
-    
-    // Update URL when tab changes
+
+    const [activeKey, setActiveKey] = useState<string>(getTabFromUrl());
+
+    // Update URL when tab changes - use full page reload to avoid state conflicts
     const handleTabChange = (key: string) => {
-        setActiveKey(key);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("tab", key);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        if (key === activeKey) return;
+        // Use window.location to trigger full page reload, same as direct URL change
+        // This ensures clean state initialization, avoiding crashes
+        window.location.href = `${pathname}?tab=${key}`;
     };
-    
-    // Sync activeKey with URL on mount or when URL changes
+
+    // Sync activeKey with URL when URL changes (e.g., browser back/forward)
     useEffect(() => {
-        const tab = searchParams.get("tab");
-        const validTabs = ["pages", "categories", "contents", "banners", "settings", "aggregate"];
-        const tabFromUrl = tab && validTabs.includes(tab) ? tab : "pages";
-        if (tabFromUrl !== activeKey) {
-            setActiveKey(tabFromUrl);
-        }
-    }, [searchParams, activeKey]);
+        const tabFromUrl = getTabFromUrl();
+        setActiveKey(prev => prev !== tabFromUrl ? tabFromUrl : prev);
+    }, [searchParams]);
     // Pagination states
     const [pagesPage, setPagesPage] = useState<number>(0);
     const [pagesSize, setPagesSize] = useState<number>(20);
@@ -321,214 +317,45 @@ export default function CMSFeaturePage() {
     const [editingSettingId, setEditingSettingId] = useState<number | null>(null);
 
     return (
-        <div className="pt-4 ">
-            <div className="p-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
-                    <div className="px-6 pb-6 pt-1">
-                        {activeKey === "pages" && (
-                            <Table
-                                loading={isLoading}
-                                rowKey="id"
-                                dataSource={pages}
-                                pagination={{
-                                    current: pagesPage + 1,
-                                    pageSize: pagesSize,
-                                    total: pagesData?.totalElements,
-                                    onChange: (p, s) => {
-                                        setPagesPage(p - 1);
-                                        setPagesSize(s);
-                                    },
-                                }}
-                                columns={[
-                                    { title: "ID", dataIndex: "id", width: 80 },
-                                    { title: "Slug", dataIndex: "slug" },
-                                    { title: "Title", dataIndex: "title" },
-                                    { title: "Short Desc", dataIndex: "short_desc" },
-                                    { title: "Status", dataIndex: "status", width: 120 },
-                                    {
-                                        title: "Actions",
-                                        width: 120,
-                                        render: (_: any, record: any) => (
-                                            <div className="flex gap-2">
-                                                <Button size="small" onClick={() => setEditingId(record.id)}>Edit</Button>
-                                                <Popconfirm
-                                                    title="Delete page?"
-                                                    okButtonProps={{ danger: true }}
-                                                    onConfirm={async () => {
-                                                        await deleteCmsPage(record.id);
-                                                        message.success("Deleted");
-                                                        refetch();
-                                                    }}
-                                                >
-                                                    <Button size="small" danger>Delete</Button>
-                                                </Popconfirm>
-                                            </div>
-                                        ),
-                                    },
-                                ]}
-                                title={() => (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold">Pages</span>
-                                        <Button type="primary" onClick={() => setOpenCreate(true)}>Add Page</Button>
-                                    </div>
-                                )}
-                            />
-                        )}
-                        {activeKey === "categories" && (
-                            <Table
-                                loading={loadingCategories}
-                                rowKey="id"
-                                dataSource={categories}
-                                pagination={{
-                                    current: categoriesPage + 1,
-                                    pageSize: categoriesSize,
-                                    total: categoriesData?.totalElements,
-                                    onChange: (p, s) => {
-                                        setCategoriesPage(p - 1);
-                                        setCategoriesSize(s);
-                                    },
-                                }}
-                                columns={[
-                                    { title: "ID", dataIndex: "id", width: 80 },
-                                    { title: "Slug", dataIndex: "slug" },
-                                    { title: "Title", dataIndex: "title" },
-                                    { title: "Short Desc", dataIndex: "short_desc" },
-                                    { title: "Status", dataIndex: "status", width: 120 },
-                                    { title: "Order", dataIndex: "order_index", width: 80 },
-                                    {
-                                        title: "Actions",
-                                        width: 220,
-                                        render: (_: any, record: any) => (
-                                            <div className="flex gap-2">
-                                                <Button size="small" onClick={() => setViewCategoryId(record.id)}>View</Button>
-                                                <Button size="small" onClick={() => setEditingCategoryId(record.id)}>Edit</Button>
-                                                <Popconfirm
-                                                    title="Delete category?"
-                                                    okButtonProps={{ danger: true }}
-                                                    onConfirm={async () => {
-                                                        await deleteCmsCategory(record.id);
-                                                        message.success("Deleted");
-                                                        invalidateCategories();
-                                                    }}
-                                                >
-                                                    <Button size="small" danger>Delete</Button>
-                                                </Popconfirm>
-                                            </div>
-                                        ),
-                                    },
-                                ]}
-                                title={() => (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold">Categories</span>
-                                        <Button type="primary" onClick={() => setOpenCreateCategory(true)}>Add Category</Button>
-                                    </div>
-                                )}
-                            />
-                        )}
-                        {activeKey === "contents" && (
-                            <Table
-                                loading={loadingContents}
-                                rowKey="id"
-                                dataSource={contents}
-                                pagination={{
-                                    current: contentsPage,
-                                    pageSize: contentsSize,
-                                    total: contentsData?.totalElements,
-                                    onChange: (p, s) => {
-                                        setContentsPage(p);
-                                        setContentsSize(s);
-                                    },
-                                }}
-                                columns={[
-                                    { title: "ID", dataIndex: "id", width: 70 },
-                                    { title: "Title", dataIndex: "title" },
-                                    { title: "Type", dataIndex: "type", width: 100 },
-                                    { title: "Position", dataIndex: "position", width: 120 },
-                                    { title: "Order", dataIndex: "order_index", width: 80 },
-                                    { title: "Status", dataIndex: "status", width: 100 },
-                                    {
-                                        title: "Actions",
-                                        width: 160,
-                                        render: (_: any, record: any) => (
-                                            <div className="flex gap-2">
-                                                <Button size="small" onClick={() => router.push(`/cms/content/${record.id}`)}>Edit</Button>
-                                                <Popconfirm
-                                                    title="Delete content?"
-                                                    okButtonProps={{ danger: true }}
-                                                    onConfirm={async () => {
-                                                        await deleteCmsContent(record.id);
-                                                        message.success("Deleted");
-                                                        invalidateContents();
-                                                    }}
-                                                >
-                                                    <Button size="small" danger>Delete</Button>
-                                                </Popconfirm>
-                                            </div>
-                                        ),
-                                    },
-                                ]}
-                                title={() => (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold">Contents</span>
-                                        <Button type="primary" onClick={() => router.push('/cms/content/new')}>Add Content</Button>
-                                    </div>
-                                )}
-                            />
-                        )}
-                        {activeKey === "banners" && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm">Page:</span>
-                                    <Select
-                                        style={{ width: 280 }}
-                                        showSearch
-                                        placeholder="Select Page"
-                                        value={bannerPageId ?? undefined}
-                                        onChange={(v) => setBannerPageId(v || null)}
-                                        allowClear
-                                        options={(aggPages || []).map((p: any) => ({ value: p.id, label: `${p.title} (#${p.id})` }))}
-                                        dropdownRender={(menu) => (
-                                            <div>
-                                                {menu}
-                                                <div className="px-2 py-2 border-t border-gray-100">
-                                                    <div className="flex items-center justify-between">
-                                                        <Button size="small" disabled={aggPagesPage === 0} onClick={() => setAggPagesPage(Math.max(0, aggPagesPage - 1))}>Prev</Button>
-                                                        <span className="text-xs">Page {aggPagesPage + 1} / {Math.max(1, aggPagesData?.totalPages || 1)}</span>
-                                                        <Button size="small" disabled={(aggPagesData?.totalPages || 1) <= (aggPagesPage + 1)} onClick={() => setAggPagesPage(aggPagesPage + 1)}>Next</Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    />
-                                    <Button type="primary" disabled={!bannerPageId} onClick={() => setOpenCreateBanner(true)}>Add Banner</Button>
-                                </div>
-
+        <ConfigProvider wave={{ disabled: true }}>
+            <div className="pt-4 ">
+                <div className="p-6">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
+                        <div className="px-6 pb-6 pt-1">
+                            {activeKey === "pages" && (
                                 <Table
-                                    loading={loadingBanners}
+                                    loading={isLoading}
                                     rowKey="id"
-                                    dataSource={banners}
-                                    pagination={false}
+                                    dataSource={pages}
+                                    pagination={{
+                                        current: pagesPage + 1,
+                                        pageSize: pagesSize,
+                                        total: pagesData?.totalElements,
+                                        onChange: (p, s) => {
+                                            setPagesPage(p - 1);
+                                            setPagesSize(s);
+                                        },
+                                    }}
                                     columns={[
-                                        { title: "ID", dataIndex: "id", width: 70 },
+                                        { title: "ID", dataIndex: "id", width: 80 },
+                                        { title: "Slug", dataIndex: "slug" },
                                         { title: "Title", dataIndex: "title" },
-                                        { title: "Link", dataIndex: "link" },
-                                        { title: "Section", dataIndex: "section", width: 120 },
-                                        { title: "Order", dataIndex: "order_index", width: 80 },
-                                        { title: "Status", dataIndex: "status", width: 100 },
+                                        { title: "Short Desc", dataIndex: "short_desc" },
+                                        { title: "Status", dataIndex: "status", width: 120 },
                                         {
                                             title: "Actions",
-                                            width: 160,
+                                            width: 120,
                                             render: (_: any, record: any) => (
                                                 <div className="flex gap-2">
-                                                    <Button size="small" onClick={() => setEditingBannerId(record.id)}>Edit</Button>
+                                                    <Button size="small" onClick={() => setEditingId(record.id)}>Edit</Button>
                                                     <Popconfirm
-                                                        title="Delete banner?"
+                                                        title="Delete page?"
                                                         okButtonProps={{ danger: true }}
                                                         onConfirm={async () => {
-                                                            await deleteCmsBanner(record.id);
+                                                            await deleteCmsPage(record.id);
                                                             message.success("Deleted");
-                                                            if (bannerPageId) invalidateBanners(bannerPageId);
+                                                            refetch();
                                                         }}
                                                     >
                                                         <Button size="small" danger>Delete</Button>
@@ -537,655 +364,826 @@ export default function CMSFeaturePage() {
                                             ),
                                         },
                                     ]}
+                                    title={() => (
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold">Pages</span>
+                                            <Button type="primary" onClick={() => setOpenCreate(true)}>Add Page</Button>
+                                        </div>
+                                    )}
                                 />
-                            </div>
-                        )}
-                        {activeKey === "settings" && (
-                            <Table
-                                loading={loadingSettings}
-                                rowKey="id"
-                                dataSource={settings}
-                                pagination={{
-                                    current: settingsPage + 1,
-                                    pageSize: settingsSize,
-                                    total: settingsData?.totalElements,
-                                    onChange: (p, s) => {
-                                        setSettingsPage(p - 1);
-                                        setSettingsSize(s);
-                                    },
-                                }}
-                                columns={[
-                                    { title: "ID", dataIndex: "id", width: 70 },
-                                    { title: "Key", dataIndex: "key" },
-                                    { title: "Value", dataIndex: "value" },
-                                    { title: "Description", dataIndex: "description" },
-                                    { title: "Enabled", dataIndex: "is_enabled", width: 100, render: (v: boolean) => v ? "Yes" : "No" },
-                                    {
-                                        title: "Actions",
-                                        width: 160,
-                                        render: (_: any, record: any) => (
-                                            <div className="flex gap-2">
-                                                <Button size="small" onClick={() => setEditingSettingId(record.id)}>Edit</Button>
-                                                <Popconfirm
-                                                    title="Delete setting?"
-                                                    okButtonProps={{ danger: true }}
-                                                    onConfirm={async () => {
-                                                        await deleteCmsSetting(record.id);
-                                                        message.success("Deleted");
-                                                        invalidateSettings();
-                                                    }}
-                                                >
-                                                    <Button size="small" danger>Delete</Button>
-                                                </Popconfirm>
-                                            </div>
-                                        ),
-                                    },
-                                ]}
-                                title={() => (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold">Settings</span>
-                                        <Button type="primary" onClick={() => setOpenCreateSetting(true)}>Add Setting</Button>
-                                    </div>
-                                )}
-                            />
-                        )}
-                        {activeKey === "aggregate" && (
-                            <CMSTreeManager
-                                onEditPage={(pageId) => setEditingId(pageId)}
-                                onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
-                                onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
-                                onDeletePage={async (pageId) => {
-                                    Modal.confirm({
-                                        title: "Delete page?",
-                                        content: "This will delete the page and all its relations. Are you sure?",
-                                        okText: "Delete",
-                                        okButtonProps: { danger: true },
-                                        onOk: async () => {
-                                            try {
-                                                await deleteCmsPage(pageId);
-                                                message.success("Deleted");
-                                                refetch();
-                                            } catch (error) {
-                                                message.error("Failed to delete page");
-                                            }
+                            )}
+                            {activeKey === "categories" && (
+                                <Table
+                                    loading={loadingCategories}
+                                    rowKey="id"
+                                    dataSource={categories}
+                                    pagination={{
+                                        current: categoriesPage + 1,
+                                        pageSize: categoriesSize,
+                                        total: categoriesData?.totalElements,
+                                        onChange: (p, s) => {
+                                            setCategoriesPage(p - 1);
+                                            setCategoriesSize(s);
                                         },
-                                    });
-                                }}
-                                onDeleteCategory={async (categoryId) => {
-                                    Modal.confirm({
-                                        title: "Delete category?",
-                                        content: "This will delete the category and all its relations. Are you sure?",
-                                        okText: "Delete",
-                                        okButtonProps: { danger: true },
-                                        onOk: async () => {
-                                            try {
-                                                await deleteCmsCategory(categoryId);
-                                                message.success("Deleted");
-                                                invalidateCategories();
-                                            } catch (error) {
-                                                message.error("Failed to delete category");
-                                            }
-                                        },
-                                    });
-                                }}
-                                onDeleteContent={async (contentId) => {
-                                    Modal.confirm({
-                                        title: "Delete content?",
-                                        content: "This will delete the content and all its relations. Are you sure?",
-                                        okText: "Delete",
-                                        okButtonProps: { danger: true },
-                                        onOk: async () => {
-                                            try {
-                                                await deleteCmsContent(contentId);
-                                                message.success("Deleted");
-                                                invalidateContents();
-                                            } catch (error) {
-                                                message.error("Failed to delete content");
-                                            }
-                                        },
-                                    });
-                                }}
-                                onCreateCategory={() => setOpenCreateCategory(true)}
-                                onCreateContent={() => router.push('/cms/content/new')}
-                            />
-                        )}
-                        {activeKey === "aggregate-legacy" && (
-                            <div className="p-2">
-                                <Tabs
-                                    activeKey={aggActiveTab}
-                                    onChange={setAggActiveTab}
-                                    items={[
+                                    }}
+                                    columns={[
+                                        { title: "ID", dataIndex: "id", width: 80 },
+                                        { title: "Slug", dataIndex: "slug" },
+                                        { title: "Title", dataIndex: "title" },
+                                        { title: "Short Desc", dataIndex: "short_desc" },
+                                        { title: "Status", dataIndex: "status", width: 120 },
+                                        { title: "Order", dataIndex: "order_index", width: 80 },
                                         {
-                                            key: "page-category",
-                                            label: "Page − Category",
-                                            children: (
-                                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                                    <div>
-                                                        <Table
-                                                            loading={isLoading}
-                                                            rowKey="id"
-                                                            dataSource={pages}
-                                                            pagination={{
-                                                                current: pagesPage + 1,
-                                                                pageSize: pagesSize,
-                                                                total: pagesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setPagesPage(p - 1);
-                                                                    setPagesSize(s);
-                                                                },
-                                                            }}
-                                                            onRow={(record) => ({
-                                                                onClick: async () => {
-                                                                    setSelectedPageId(record.id);
-                                                                    setLoadingPageCategories(true);
-                                                                    try {
-                                                                        const linkedData = await getPageCategories(record.id);
-                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
-                                                                        setLinkedPageCategories(linkedIds);
-                                                                    } catch (error) {
-                                                                        message.error("Failed to load page categories");
-                                                                        setLinkedPageCategories(new Set());
-                                                                    } finally {
-                                                                        setLoadingPageCategories(false);
-                                                                    }
-                                                                },
-                                                                style: { cursor: "pointer" },
-                                                            })}
-                                                            rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
-                                                            columns={[
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                                { title: "Slug", dataIndex: "slug" },
-                                                            ]}
-                                                            title={() => <span className="font-semibold">Pages</span>}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingPageCategories || loadingCategories || loadingSelectedPageCategories}
-                                                            rowKey="id"
-                                                            dataSource={filteredPageCategories}
-                                                            pagination={showOnlySelectedPageCategories ? false : {
-                                                                current: categoriesPage + 1,
-                                                                pageSize: categoriesSize,
-                                                                total: categoriesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setCategoriesPage(p - 1);
-                                                                    setCategoriesSize(s);
-                                                                },
-                                                            }}
-                                                            columns={[
-                                                                {
-                                                                    title: "",
-                                                                    width: 60,
-                                                                    render: (_: any, record: any) => (
-                                                                        <Checkbox
-                                                                            checked={showOnlySelectedPageCategories
-                                                                                ? selectedPageCategoriesData.some(item => item.id === record.id)
-                                                                                : linkedPageCategories.has(record.id)}
-                                                                            disabled={!selectedPageId}
-                                                                            onChange={async (e) => {
-                                                                                if (!selectedPageId) return;
-                                                                                const isChecked = e.target.checked;
-                                                                                try {
-                                                                                    if (isChecked) {
-                                                                                        await linkPageCategory({ page_id: selectedPageId, category_id: record.id });
-                                                                                        setLinkedPageCategories(prev => new Set([...prev, record.id]));
-                                                                                        message.success("Linked successfully");
-                                                                                    } else {
-                                                                                        await unlinkPageCategory({ page_id: selectedPageId, category_id: record.id });
-                                                                                        setLinkedPageCategories(prev => {
-                                                                                            const newSet = new Set(prev);
-                                                                                            newSet.delete(record.id);
-                                                                                            return newSet;
-                                                                                        });
-                                                                                        message.success("Unlinked successfully");
-                                                                                    }
-                                                                                    // Refresh selected data if switch is ON
-                                                                                    if (showOnlySelectedPageCategories) {
-                                                                                        const data = await getPageCategories(selectedPageId);
-                                                                                        setSelectedPageCategoriesData(data);
-                                                                                    }
-                                                                                } catch (error) {
-                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    ),
-                                                                },
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                            ]}
-                                                            title={() => (
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="font-semibold">Categories</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-sm">Show selected only</span>
-                                                                        <Switch
-                                                                            checked={showOnlySelectedPageCategories}
-                                                                            onChange={setShowOnlySelectedPageCategories}
-                                                                            disabled={!selectedPageId}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            locale={{ emptyText: selectedPageId ? "No categories found" : "Select a page to view categories" }}
-                                                        />
-                                                    </div>
+                                            title: "Actions",
+                                            width: 220,
+                                            render: (_: any, record: any) => (
+                                                <div className="flex gap-2">
+                                                    <Button size="small" onClick={() => setViewCategoryId(record.id)}>View</Button>
+                                                    <Button size="small" onClick={() => setEditingCategoryId(record.id)}>Edit</Button>
+                                                    <Popconfirm
+                                                        title="Delete category?"
+                                                        okButtonProps={{ danger: true }}
+                                                        onConfirm={async () => {
+                                                            await deleteCmsCategory(record.id);
+                                                            message.success("Deleted");
+                                                            invalidateCategories();
+                                                        }}
+                                                    >
+                                                        <Button size="small" danger>Delete</Button>
+                                                    </Popconfirm>
                                                 </div>
-                                            ),
-                                        },
-                                        {
-                                            key: "page-content",
-                                            label: "Page − Content",
-                                            children: (
-                                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                                    <div>
-                                                        <Table
-                                                            loading={isLoading}
-                                                            rowKey="id"
-                                                            dataSource={pages}
-                                                            pagination={{
-                                                                current: pagesPage + 1,
-                                                                pageSize: pagesSize,
-                                                                total: pagesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setPagesPage(p - 1);
-                                                                    setPagesSize(s);
-                                                                },
-                                                            }}
-                                                            onRow={(record) => ({
-                                                                onClick: async () => {
-                                                                    setSelectedPageId(record.id);
-                                                                    setLoadingPageContents(true);
-                                                                    try {
-                                                                        const linkedData = await getPageContents(record.id);
-                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
-                                                                        setLinkedPageContents(linkedIds);
-                                                                    } catch (error) {
-                                                                        message.error("Failed to load page contents");
-                                                                        setLinkedPageContents(new Set());
-                                                                    } finally {
-                                                                        setLoadingPageContents(false);
-                                                                    }
-                                                                },
-                                                                style: { cursor: "pointer" },
-                                                            })}
-                                                            rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
-                                                            columns={[
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                                { title: "Slug", dataIndex: "slug" },
-                                                            ]}
-                                                            title={() => <span className="font-semibold">Pages</span>}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingPageContents || loadingContents || loadingSelectedPageContents}
-                                                            rowKey="id"
-                                                            dataSource={filteredPageContents}
-                                                            pagination={showOnlySelectedPageContents ? false : {
-                                                                current: contentsPage,
-                                                                pageSize: contentsSize,
-                                                                total: contentsData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setContentsPage(p);
-                                                                    setContentsSize(s);
-                                                                },
-                                                            }}
-                                                            columns={[
-                                                                {
-                                                                    title: "",
-                                                                    width: 60,
-                                                                    render: (_: any, record: any) => (
-                                                                        <Checkbox
-                                                                            checked={showOnlySelectedPageContents
-                                                                                ? selectedPageContentsData.some(item => item.id === record.id)
-                                                                                : linkedPageContents.has(record.id)}
-                                                                            disabled={!selectedPageId}
-                                                                            onChange={async (e) => {
-                                                                                if (!selectedPageId) return;
-                                                                                const isChecked = e.target.checked;
-                                                                                try {
-                                                                                    if (isChecked) {
-                                                                                        await linkPageContent({ page_id: selectedPageId, content_id: record.id });
-                                                                                        setLinkedPageContents(prev => new Set([...prev, record.id]));
-                                                                                        message.success("Linked successfully");
-                                                                                    } else {
-                                                                                        await unlinkPageContent({ page_id: selectedPageId, content_id: record.id });
-                                                                                        setLinkedPageContents(prev => {
-                                                                                            const newSet = new Set(prev);
-                                                                                            newSet.delete(record.id);
-                                                                                            return newSet;
-                                                                                        });
-                                                                                        message.success("Unlinked successfully");
-                                                                                    }
-                                                                                    // Refresh selected data if switch is ON
-                                                                                    if (showOnlySelectedPageContents) {
-                                                                                        const data = await getPageContents(selectedPageId);
-                                                                                        setSelectedPageContentsData(data);
-                                                                                    }
-                                                                                } catch (error) {
-                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    ),
-                                                                },
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                            ]}
-                                                            title={() => (
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="font-semibold">Contents</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-sm">Show selected only</span>
-                                                                        <Switch
-                                                                            checked={showOnlySelectedPageContents}
-                                                                            onChange={setShowOnlySelectedPageContents}
-                                                                            disabled={!selectedPageId}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            locale={{ emptyText: selectedPageId ? "No contents found" : "Select a page to view contents" }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ),
-                                        },
-                                        {
-                                            key: "category-content",
-                                            label: "Category − Content",
-                                            children: (
-                                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingCategories}
-                                                            rowKey="id"
-                                                            dataSource={categories}
-                                                            pagination={{
-                                                                current: categoriesPage + 1,
-                                                                pageSize: categoriesSize,
-                                                                total: categoriesData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setCategoriesPage(p - 1);
-                                                                    setCategoriesSize(s);
-                                                                },
-                                                            }}
-                                                            onRow={(record) => ({
-                                                                onClick: async () => {
-                                                                    setSelectedCategoryId(record.id);
-                                                                    setLoadingCategoryContents(true);
-                                                                    try {
-                                                                        const linkedData = await getCategoryContents(record.id);
-                                                                        const linkedIds = new Set(linkedData.map(item => item.id));
-                                                                        setLinkedCategoryContents(linkedIds);
-                                                                    } catch (error) {
-                                                                        message.error("Failed to load category contents");
-                                                                        setLinkedCategoryContents(new Set());
-                                                                    } finally {
-                                                                        setLoadingCategoryContents(false);
-                                                                    }
-                                                                },
-                                                                style: { cursor: "pointer" },
-                                                            })}
-                                                            rowClassName={(record) => (selectedCategoryId === record.id ? "bg-blue-50" : "")}
-                                                            columns={[
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                                { title: "Slug", dataIndex: "slug" },
-                                                            ]}
-                                                            title={() => <span className="font-semibold">Categories</span>}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <Table
-                                                            loading={loadingCategoryContents || loadingContents || loadingSelectedCategoryContents}
-                                                            rowKey="id"
-                                                            dataSource={filteredCategoryContents}
-                                                            pagination={showOnlySelectedCategoryContents ? false : {
-                                                                current: contentsPage,
-                                                                pageSize: contentsSize,
-                                                                total: contentsData?.totalElements,
-                                                                onChange: (p, s) => {
-                                                                    setContentsPage(p);
-                                                                    setContentsSize(s);
-                                                                },
-                                                            }}
-                                                            columns={[
-                                                                {
-                                                                    title: "",
-                                                                    width: 60,
-                                                                    render: (_: any, record: any) => (
-                                                                        <Checkbox
-                                                                            checked={showOnlySelectedCategoryContents
-                                                                                ? selectedCategoryContentsData.some(item => item.id === record.id)
-                                                                                : linkedCategoryContents.has(record.id)}
-                                                                            disabled={!selectedCategoryId}
-                                                                            onChange={async (e) => {
-                                                                                if (!selectedCategoryId) return;
-                                                                                const isChecked = e.target.checked;
-                                                                                try {
-                                                                                    if (isChecked) {
-                                                                                        await linkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
-                                                                                        setLinkedCategoryContents(prev => new Set([...prev, record.id]));
-                                                                                        message.success("Linked successfully");
-                                                                                    } else {
-                                                                                        await unlinkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
-                                                                                        setLinkedCategoryContents(prev => {
-                                                                                            const newSet = new Set(prev);
-                                                                                            newSet.delete(record.id);
-                                                                                            return newSet;
-                                                                                        });
-                                                                                        message.success("Unlinked successfully");
-                                                                                    }
-                                                                                    // Refresh selected data if switch is ON
-                                                                                    if (showOnlySelectedCategoryContents) {
-                                                                                        const data = await getCategoryContents(selectedCategoryId);
-                                                                                        setSelectedCategoryContentsData(data);
-                                                                                    }
-                                                                                } catch (error) {
-                                                                                    message.error(isChecked ? "Failed to link" : "Failed to unlink");
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    ),
-                                                                },
-                                                                { title: "ID", dataIndex: "id", width: 80 },
-                                                                { title: "Title", dataIndex: "title" },
-                                                            ]}
-                                                            title={() => (
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="font-semibold">Contents</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-sm">Show selected only</span>
-                                                                        <Switch
-                                                                            checked={showOnlySelectedCategoryContents}
-                                                                            onChange={setShowOnlySelectedCategoryContents}
-                                                                            disabled={!selectedCategoryId}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            locale={{ emptyText: selectedCategoryId ? "No contents found" : "Select a category to view contents" }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ),
-                                        },
-                                        {
-                                            key: "cms-tree",
-                                            label: "CMS Tree (Pages → Categories → Contents)",
-                                            children: (
-                                                <CMSTreeManager
-                                                    onEditPage={(pageId) => setEditingId(pageId)}
-                                                    onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
-                                                    onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
-                                                    onDeletePage={async (pageId) => {
-                                                        Modal.confirm({
-                                                            title: "Delete page?",
-                                                            content: "This will delete the page and all its relations. Are you sure?",
-                                                            okText: "Delete",
-                                                            okButtonProps: { danger: true },
-                                                            onOk: async () => {
-                                                                try {
-                                                                    await deleteCmsPage(pageId);
-                                                                    message.success("Deleted");
-                                                                    refetch();
-                                                                } catch (error) {
-                                                                    message.error("Failed to delete page");
-                                                                }
-                                                            },
-                                                        });
-                                                    }}
-                                                    onDeleteCategory={async (categoryId) => {
-                                                        Modal.confirm({
-                                                            title: "Delete category?",
-                                                            content: "This will delete the category and all its relations. Are you sure?",
-                                                            okText: "Delete",
-                                                            okButtonProps: { danger: true },
-                                                            onOk: async () => {
-                                                                try {
-                                                                    await deleteCmsCategory(categoryId);
-                                                                    message.success("Deleted");
-                                                                    invalidateCategories();
-                                                                } catch (error) {
-                                                                    message.error("Failed to delete category");
-                                                                }
-                                                            },
-                                                        });
-                                                    }}
-                                                    onDeleteContent={async (contentId) => {
-                                                        Modal.confirm({
-                                                            title: "Delete content?",
-                                                            content: "This will delete the content and all its relations. Are you sure?",
-                                                            okText: "Delete",
-                                                            okButtonProps: { danger: true },
-                                                            onOk: async () => {
-                                                                try {
-                                                                    await deleteCmsContent(contentId);
-                                                                    message.success("Deleted");
-                                                                    invalidateContents();
-                                                                } catch (error) {
-                                                                    message.error("Failed to delete content");
-                                                                }
-                                                            },
-                                                        });
-                                                    }}
-                                                    onCreateCategory={() => setOpenCreateCategory(true)}
-                                                    onCreateContent={() => router.push('/cms/content/new')}
-                                                />
-                                            ),
-                                        },
-                                        {
-                                            key: "category-tree",
-                                            label: "Category Tree (Legacy)",
-                                            children: (
-                                                <CategoryTreeManager
-                                                    onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
-                                                    onDeleteCategory={async (categoryId) => {
-                                                        Modal.confirm({
-                                                            title: "Delete category?",
-                                                            content: "This will delete the category and all its relations. Are you sure?",
-                                                            okText: "Delete",
-                                                            okButtonProps: { danger: true },
-                                                            onOk: async () => {
-                                                                try {
-                                                                    await deleteCmsCategory(categoryId);
-                                                                    message.success("Deleted");
-                                                                    invalidateCategories();
-                                                                } catch (error) {
-                                                                    message.error("Failed to delete category");
-                                                                }
-                                                            },
-                                                        });
-                                                    }}
-                                                />
                                             ),
                                         },
                                     ]}
+                                    title={() => (
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold">Categories</span>
+                                            <Button type="primary" onClick={() => setOpenCreateCategory(true)}>Add Category</Button>
+                                        </div>
+                                    )}
                                 />
-                            </div>
-                        )}
-                        {activeKey !== "pages" && activeKey !== "categories" && activeKey !== "contents" && activeKey !== "settings" && activeKey !== "banners" && activeKey !== "aggregate" && <div>Hello World</div>}
+                            )}
+                            {activeKey === "contents" && (
+                                <Table
+                                    loading={loadingContents}
+                                    rowKey="id"
+                                    dataSource={contents}
+                                    pagination={{
+                                        current: contentsPage,
+                                        pageSize: contentsSize,
+                                        total: contentsData?.totalElements,
+                                        onChange: (p, s) => {
+                                            setContentsPage(p);
+                                            setContentsSize(s);
+                                        },
+                                    }}
+                                    columns={[
+                                        { title: "ID", dataIndex: "id", width: 70 },
+                                        { title: "Title", dataIndex: "title" },
+                                        { title: "Type", dataIndex: "type", width: 100 },
+                                        { title: "Position", dataIndex: "position", width: 120 },
+                                        { title: "Order", dataIndex: "order_index", width: 80 },
+                                        { title: "Status", dataIndex: "status", width: 100 },
+                                        {
+                                            title: "Actions",
+                                            width: 160,
+                                            render: (_: any, record: any) => (
+                                                <div className="flex gap-2">
+                                                    <Button size="small" onClick={() => router.push(`/cms/content/${record.id}`)}>Edit</Button>
+                                                    <Popconfirm
+                                                        title="Delete content?"
+                                                        okButtonProps={{ danger: true }}
+                                                        onConfirm={async () => {
+                                                            await deleteCmsContent(record.id);
+                                                            message.success("Deleted");
+                                                            invalidateContents();
+                                                        }}
+                                                    >
+                                                        <Button size="small" danger>Delete</Button>
+                                                    </Popconfirm>
+                                                </div>
+                                            ),
+                                        },
+                                    ]}
+                                    title={() => (
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold">Contents</span>
+                                            <Button type="primary" onClick={() => router.push('/cms/content/new')}>Add Content</Button>
+                                        </div>
+                                    )}
+                                />
+                            )}
+                            {activeKey === "banners" && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm">Page:</span>
+                                        <Select
+                                            style={{ width: 280 }}
+                                            showSearch
+                                            placeholder="Select Page"
+                                            value={bannerPageId ?? undefined}
+                                            onChange={(v) => setBannerPageId(v || null)}
+                                            allowClear
+                                            options={(aggPages || []).map((p: any) => ({ value: p.id, label: `${p.title} (#${p.id})` }))}
+                                            dropdownRender={(menu) => (
+                                                <div>
+                                                    {menu}
+                                                    <div className="px-2 py-2 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <Button size="small" disabled={aggPagesPage === 0} onClick={() => setAggPagesPage(Math.max(0, aggPagesPage - 1))}>Prev</Button>
+                                                            <span className="text-xs">Page {aggPagesPage + 1} / {Math.max(1, aggPagesData?.totalPages || 1)}</span>
+                                                            <Button size="small" disabled={(aggPagesData?.totalPages || 1) <= (aggPagesPage + 1)} onClick={() => setAggPagesPage(aggPagesPage + 1)}>Next</Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                        <Button type="primary" disabled={!bannerPageId} onClick={() => setOpenCreateBanner(true)}>Add Banner</Button>
+                                    </div>
+
+                                    <Table
+                                        loading={loadingBanners}
+                                        rowKey="id"
+                                        dataSource={banners}
+                                        pagination={false}
+                                        columns={[
+                                            { title: "ID", dataIndex: "id", width: 70 },
+                                            { title: "Title", dataIndex: "title" },
+                                            { title: "Link", dataIndex: "link" },
+                                            { title: "Section", dataIndex: "section", width: 120 },
+                                            { title: "Order", dataIndex: "order_index", width: 80 },
+                                            { title: "Status", dataIndex: "status", width: 100 },
+                                            {
+                                                title: "Actions",
+                                                width: 160,
+                                                render: (_: any, record: any) => (
+                                                    <div className="flex gap-2">
+                                                        <Button size="small" onClick={() => setEditingBannerId(record.id)}>Edit</Button>
+                                                        <Popconfirm
+                                                            title="Delete banner?"
+                                                            okButtonProps={{ danger: true }}
+                                                            onConfirm={async () => {
+                                                                await deleteCmsBanner(record.id);
+                                                                message.success("Deleted");
+                                                                if (bannerPageId) invalidateBanners(bannerPageId);
+                                                            }}
+                                                        >
+                                                            <Button size="small" danger>Delete</Button>
+                                                        </Popconfirm>
+                                                    </div>
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                </div>
+                            )}
+                            {activeKey === "settings" && (
+                                <Table
+                                    loading={loadingSettings}
+                                    rowKey="id"
+                                    dataSource={settings}
+                                    pagination={{
+                                        current: settingsPage + 1,
+                                        pageSize: settingsSize,
+                                        total: settingsData?.totalElements,
+                                        onChange: (p, s) => {
+                                            setSettingsPage(p - 1);
+                                            setSettingsSize(s);
+                                        },
+                                    }}
+                                    columns={[
+                                        { title: "ID", dataIndex: "id", width: 70 },
+                                        { title: "Key", dataIndex: "key" },
+                                        { title: "Value", dataIndex: "value" },
+                                        { title: "Description", dataIndex: "description" },
+                                        { title: "Enabled", dataIndex: "is_enabled", width: 100, render: (v: boolean) => v ? "Yes" : "No" },
+                                        {
+                                            title: "Actions",
+                                            width: 160,
+                                            render: (_: any, record: any) => (
+                                                <div className="flex gap-2">
+                                                    <Button size="small" onClick={() => setEditingSettingId(record.id)}>Edit</Button>
+                                                    <Popconfirm
+                                                        title="Delete setting?"
+                                                        okButtonProps={{ danger: true }}
+                                                        onConfirm={async () => {
+                                                            await deleteCmsSetting(record.id);
+                                                            message.success("Deleted");
+                                                            invalidateSettings();
+                                                        }}
+                                                    >
+                                                        <Button size="small" danger>Delete</Button>
+                                                    </Popconfirm>
+                                                </div>
+                                            ),
+                                        },
+                                    ]}
+                                    title={() => (
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold">Settings</span>
+                                            <Button type="primary" onClick={() => setOpenCreateSetting(true)}>Add Setting</Button>
+                                        </div>
+                                    )}
+                                />
+                            )}
+                            {activeKey === "aggregate" && (
+                                <CMSTreeManager
+                                    onEditPage={(pageId) => setEditingId(pageId)}
+                                    onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                    onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
+                                    onDeletePage={async (pageId) => {
+                                        Modal.confirm({
+                                            title: "Delete page?",
+                                            content: "This will delete the page and all its relations. Are you sure?",
+                                            okText: "Delete",
+                                            okButtonProps: { danger: true },
+                                            onOk: async () => {
+                                                try {
+                                                    await deleteCmsPage(pageId);
+                                                    message.success("Deleted");
+                                                    refetch();
+                                                } catch (error) {
+                                                    message.error("Failed to delete page");
+                                                }
+                                            },
+                                        });
+                                    }}
+                                    onDeleteCategory={async (categoryId) => {
+                                        Modal.confirm({
+                                            title: "Delete category?",
+                                            content: "This will delete the category and all its relations. Are you sure?",
+                                            okText: "Delete",
+                                            okButtonProps: { danger: true },
+                                            onOk: async () => {
+                                                try {
+                                                    await deleteCmsCategory(categoryId);
+                                                    message.success("Deleted");
+                                                    invalidateCategories();
+                                                } catch (error) {
+                                                    message.error("Failed to delete category");
+                                                }
+                                            },
+                                        });
+                                    }}
+                                    onDeleteContent={async (contentId) => {
+                                        Modal.confirm({
+                                            title: "Delete content?",
+                                            content: "This will delete the content and all its relations. Are you sure?",
+                                            okText: "Delete",
+                                            okButtonProps: { danger: true },
+                                            onOk: async () => {
+                                                try {
+                                                    await deleteCmsContent(contentId);
+                                                    message.success("Deleted");
+                                                    invalidateContents();
+                                                } catch (error) {
+                                                    message.error("Failed to delete content");
+                                                }
+                                            },
+                                        });
+                                    }}
+                                    onCreateCategory={() => setOpenCreateCategory(true)}
+                                    onCreateContent={() => router.push('/cms/content/new')}
+                                />
+                            )}
+                            {activeKey === "aggregate-legacy" && (
+                                <div className="p-2">
+                                    <Tabs
+                                        activeKey={aggActiveTab}
+                                        onChange={setAggActiveTab}
+                                        items={[
+                                            {
+                                                key: "page-category",
+                                                label: "Page − Category",
+                                                children: (
+                                                    <div className="grid grid-cols-2 gap-4 mt-4">
+                                                        <div>
+                                                            <Table
+                                                                loading={isLoading}
+                                                                rowKey="id"
+                                                                dataSource={pages}
+                                                                pagination={{
+                                                                    current: pagesPage + 1,
+                                                                    pageSize: pagesSize,
+                                                                    total: pagesData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setPagesPage(p - 1);
+                                                                        setPagesSize(s);
+                                                                    },
+                                                                }}
+                                                                onRow={(record) => ({
+                                                                    onClick: async () => {
+                                                                        setSelectedPageId(record.id);
+                                                                        setLoadingPageCategories(true);
+                                                                        try {
+                                                                            const linkedData = await getPageCategories(record.id);
+                                                                            const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                            setLinkedPageCategories(linkedIds);
+                                                                        } catch (error) {
+                                                                            message.error("Failed to load page categories");
+                                                                            setLinkedPageCategories(new Set());
+                                                                        } finally {
+                                                                            setLoadingPageCategories(false);
+                                                                        }
+                                                                    },
+                                                                    style: { cursor: "pointer" },
+                                                                })}
+                                                                rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
+                                                                columns={[
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                    { title: "Slug", dataIndex: "slug" },
+                                                                ]}
+                                                                title={() => <span className="font-semibold">Pages</span>}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Table
+                                                                loading={loadingPageCategories || loadingCategories || loadingSelectedPageCategories}
+                                                                rowKey="id"
+                                                                dataSource={filteredPageCategories}
+                                                                pagination={showOnlySelectedPageCategories ? false : {
+                                                                    current: categoriesPage + 1,
+                                                                    pageSize: categoriesSize,
+                                                                    total: categoriesData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setCategoriesPage(p - 1);
+                                                                        setCategoriesSize(s);
+                                                                    },
+                                                                }}
+                                                                columns={[
+                                                                    {
+                                                                        title: "",
+                                                                        width: 60,
+                                                                        render: (_: any, record: any) => (
+                                                                            <Checkbox
+                                                                                checked={showOnlySelectedPageCategories
+                                                                                    ? selectedPageCategoriesData.some(item => item.id === record.id)
+                                                                                    : linkedPageCategories.has(record.id)}
+                                                                                disabled={!selectedPageId}
+                                                                                onChange={async (e) => {
+                                                                                    if (!selectedPageId) return;
+                                                                                    const isChecked = e.target.checked;
+                                                                                    try {
+                                                                                        if (isChecked) {
+                                                                                            await linkPageCategory({ page_id: selectedPageId, category_id: record.id });
+                                                                                            setLinkedPageCategories(prev => new Set([...prev, record.id]));
+                                                                                            message.success("Linked successfully");
+                                                                                        } else {
+                                                                                            await unlinkPageCategory({ page_id: selectedPageId, category_id: record.id });
+                                                                                            setLinkedPageCategories(prev => {
+                                                                                                const newSet = new Set(prev);
+                                                                                                newSet.delete(record.id);
+                                                                                                return newSet;
+                                                                                            });
+                                                                                            message.success("Unlinked successfully");
+                                                                                        }
+                                                                                        // Refresh selected data if switch is ON
+                                                                                        if (showOnlySelectedPageCategories) {
+                                                                                            const data = await getPageCategories(selectedPageId);
+                                                                                            setSelectedPageCategoriesData(data);
+                                                                                        }
+                                                                                    } catch (error) {
+                                                                                        message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                        ),
+                                                                    },
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                ]}
+                                                                title={() => (
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className="font-semibold">Categories</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-sm">Show selected only</span>
+                                                                            <Switch
+                                                                                checked={showOnlySelectedPageCategories}
+                                                                                onChange={setShowOnlySelectedPageCategories}
+                                                                                disabled={!selectedPageId}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                locale={{ emptyText: selectedPageId ? "No categories found" : "Select a page to view categories" }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            },
+                                            {
+                                                key: "page-content",
+                                                label: "Page − Content",
+                                                children: (
+                                                    <div className="grid grid-cols-2 gap-4 mt-4">
+                                                        <div>
+                                                            <Table
+                                                                loading={isLoading}
+                                                                rowKey="id"
+                                                                dataSource={pages}
+                                                                pagination={{
+                                                                    current: pagesPage + 1,
+                                                                    pageSize: pagesSize,
+                                                                    total: pagesData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setPagesPage(p - 1);
+                                                                        setPagesSize(s);
+                                                                    },
+                                                                }}
+                                                                onRow={(record) => ({
+                                                                    onClick: async () => {
+                                                                        setSelectedPageId(record.id);
+                                                                        setLoadingPageContents(true);
+                                                                        try {
+                                                                            const linkedData = await getPageContents(record.id);
+                                                                            const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                            setLinkedPageContents(linkedIds);
+                                                                        } catch (error) {
+                                                                            message.error("Failed to load page contents");
+                                                                            setLinkedPageContents(new Set());
+                                                                        } finally {
+                                                                            setLoadingPageContents(false);
+                                                                        }
+                                                                    },
+                                                                    style: { cursor: "pointer" },
+                                                                })}
+                                                                rowClassName={(record) => (selectedPageId === record.id ? "bg-blue-50" : "")}
+                                                                columns={[
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                    { title: "Slug", dataIndex: "slug" },
+                                                                ]}
+                                                                title={() => <span className="font-semibold">Pages</span>}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Table
+                                                                loading={loadingPageContents || loadingContents || loadingSelectedPageContents}
+                                                                rowKey="id"
+                                                                dataSource={filteredPageContents}
+                                                                pagination={showOnlySelectedPageContents ? false : {
+                                                                    current: contentsPage,
+                                                                    pageSize: contentsSize,
+                                                                    total: contentsData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setContentsPage(p);
+                                                                        setContentsSize(s);
+                                                                    },
+                                                                }}
+                                                                columns={[
+                                                                    {
+                                                                        title: "",
+                                                                        width: 60,
+                                                                        render: (_: any, record: any) => (
+                                                                            <Checkbox
+                                                                                checked={showOnlySelectedPageContents
+                                                                                    ? selectedPageContentsData.some(item => item.id === record.id)
+                                                                                    : linkedPageContents.has(record.id)}
+                                                                                disabled={!selectedPageId}
+                                                                                onChange={async (e) => {
+                                                                                    if (!selectedPageId) return;
+                                                                                    const isChecked = e.target.checked;
+                                                                                    try {
+                                                                                        if (isChecked) {
+                                                                                            await linkPageContent({ page_id: selectedPageId, content_id: record.id });
+                                                                                            setLinkedPageContents(prev => new Set([...prev, record.id]));
+                                                                                            message.success("Linked successfully");
+                                                                                        } else {
+                                                                                            await unlinkPageContent({ page_id: selectedPageId, content_id: record.id });
+                                                                                            setLinkedPageContents(prev => {
+                                                                                                const newSet = new Set(prev);
+                                                                                                newSet.delete(record.id);
+                                                                                                return newSet;
+                                                                                            });
+                                                                                            message.success("Unlinked successfully");
+                                                                                        }
+                                                                                        // Refresh selected data if switch is ON
+                                                                                        if (showOnlySelectedPageContents) {
+                                                                                            const data = await getPageContents(selectedPageId);
+                                                                                            setSelectedPageContentsData(data);
+                                                                                        }
+                                                                                    } catch (error) {
+                                                                                        message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                        ),
+                                                                    },
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                ]}
+                                                                title={() => (
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className="font-semibold">Contents</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-sm">Show selected only</span>
+                                                                            <Switch
+                                                                                checked={showOnlySelectedPageContents}
+                                                                                onChange={setShowOnlySelectedPageContents}
+                                                                                disabled={!selectedPageId}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                locale={{ emptyText: selectedPageId ? "No contents found" : "Select a page to view contents" }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            },
+                                            {
+                                                key: "category-content",
+                                                label: "Category − Content",
+                                                children: (
+                                                    <div className="grid grid-cols-2 gap-4 mt-4">
+                                                        <div>
+                                                            <Table
+                                                                loading={loadingCategories}
+                                                                rowKey="id"
+                                                                dataSource={categories}
+                                                                pagination={{
+                                                                    current: categoriesPage + 1,
+                                                                    pageSize: categoriesSize,
+                                                                    total: categoriesData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setCategoriesPage(p - 1);
+                                                                        setCategoriesSize(s);
+                                                                    },
+                                                                }}
+                                                                onRow={(record) => ({
+                                                                    onClick: async () => {
+                                                                        setSelectedCategoryId(record.id);
+                                                                        setLoadingCategoryContents(true);
+                                                                        try {
+                                                                            const linkedData = await getCategoryContents(record.id);
+                                                                            const linkedIds = new Set(linkedData.map(item => item.id));
+                                                                            setLinkedCategoryContents(linkedIds);
+                                                                        } catch (error) {
+                                                                            message.error("Failed to load category contents");
+                                                                            setLinkedCategoryContents(new Set());
+                                                                        } finally {
+                                                                            setLoadingCategoryContents(false);
+                                                                        }
+                                                                    },
+                                                                    style: { cursor: "pointer" },
+                                                                })}
+                                                                rowClassName={(record) => (selectedCategoryId === record.id ? "bg-blue-50" : "")}
+                                                                columns={[
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                    { title: "Slug", dataIndex: "slug" },
+                                                                ]}
+                                                                title={() => <span className="font-semibold">Categories</span>}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Table
+                                                                loading={loadingCategoryContents || loadingContents || loadingSelectedCategoryContents}
+                                                                rowKey="id"
+                                                                dataSource={filteredCategoryContents}
+                                                                pagination={showOnlySelectedCategoryContents ? false : {
+                                                                    current: contentsPage,
+                                                                    pageSize: contentsSize,
+                                                                    total: contentsData?.totalElements,
+                                                                    onChange: (p, s) => {
+                                                                        setContentsPage(p);
+                                                                        setContentsSize(s);
+                                                                    },
+                                                                }}
+                                                                columns={[
+                                                                    {
+                                                                        title: "",
+                                                                        width: 60,
+                                                                        render: (_: any, record: any) => (
+                                                                            <Checkbox
+                                                                                checked={showOnlySelectedCategoryContents
+                                                                                    ? selectedCategoryContentsData.some(item => item.id === record.id)
+                                                                                    : linkedCategoryContents.has(record.id)}
+                                                                                disabled={!selectedCategoryId}
+                                                                                onChange={async (e) => {
+                                                                                    if (!selectedCategoryId) return;
+                                                                                    const isChecked = e.target.checked;
+                                                                                    try {
+                                                                                        if (isChecked) {
+                                                                                            await linkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
+                                                                                            setLinkedCategoryContents(prev => new Set([...prev, record.id]));
+                                                                                            message.success("Linked successfully");
+                                                                                        } else {
+                                                                                            await unlinkCategoryContent({ category_id: selectedCategoryId, content_id: record.id });
+                                                                                            setLinkedCategoryContents(prev => {
+                                                                                                const newSet = new Set(prev);
+                                                                                                newSet.delete(record.id);
+                                                                                                return newSet;
+                                                                                            });
+                                                                                            message.success("Unlinked successfully");
+                                                                                        }
+                                                                                        // Refresh selected data if switch is ON
+                                                                                        if (showOnlySelectedCategoryContents) {
+                                                                                            const data = await getCategoryContents(selectedCategoryId);
+                                                                                            setSelectedCategoryContentsData(data);
+                                                                                        }
+                                                                                    } catch (error) {
+                                                                                        message.error(isChecked ? "Failed to link" : "Failed to unlink");
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                        ),
+                                                                    },
+                                                                    { title: "ID", dataIndex: "id", width: 80 },
+                                                                    { title: "Title", dataIndex: "title" },
+                                                                ]}
+                                                                title={() => (
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className="font-semibold">Contents</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-sm">Show selected only</span>
+                                                                            <Switch
+                                                                                checked={showOnlySelectedCategoryContents}
+                                                                                onChange={setShowOnlySelectedCategoryContents}
+                                                                                disabled={!selectedCategoryId}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                locale={{ emptyText: selectedCategoryId ? "No contents found" : "Select a category to view contents" }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            },
+                                            {
+                                                key: "cms-tree",
+                                                label: "CMS Tree (Pages → Categories → Contents)",
+                                                children: (
+                                                    <CMSTreeManager
+                                                        onEditPage={(pageId) => setEditingId(pageId)}
+                                                        onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                                        onEditContent={(contentId) => router.push(`/cms/content/${contentId}`)}
+                                                        onDeletePage={async (pageId) => {
+                                                            Modal.confirm({
+                                                                title: "Delete page?",
+                                                                content: "This will delete the page and all its relations. Are you sure?",
+                                                                okText: "Delete",
+                                                                okButtonProps: { danger: true },
+                                                                onOk: async () => {
+                                                                    try {
+                                                                        await deleteCmsPage(pageId);
+                                                                        message.success("Deleted");
+                                                                        refetch();
+                                                                    } catch (error) {
+                                                                        message.error("Failed to delete page");
+                                                                    }
+                                                                },
+                                                            });
+                                                        }}
+                                                        onDeleteCategory={async (categoryId) => {
+                                                            Modal.confirm({
+                                                                title: "Delete category?",
+                                                                content: "This will delete the category and all its relations. Are you sure?",
+                                                                okText: "Delete",
+                                                                okButtonProps: { danger: true },
+                                                                onOk: async () => {
+                                                                    try {
+                                                                        await deleteCmsCategory(categoryId);
+                                                                        message.success("Deleted");
+                                                                        invalidateCategories();
+                                                                    } catch (error) {
+                                                                        message.error("Failed to delete category");
+                                                                    }
+                                                                },
+                                                            });
+                                                        }}
+                                                        onDeleteContent={async (contentId) => {
+                                                            Modal.confirm({
+                                                                title: "Delete content?",
+                                                                content: "This will delete the content and all its relations. Are you sure?",
+                                                                okText: "Delete",
+                                                                okButtonProps: { danger: true },
+                                                                onOk: async () => {
+                                                                    try {
+                                                                        await deleteCmsContent(contentId);
+                                                                        message.success("Deleted");
+                                                                        invalidateContents();
+                                                                    } catch (error) {
+                                                                        message.error("Failed to delete content");
+                                                                    }
+                                                                },
+                                                            });
+                                                        }}
+                                                        onCreateCategory={() => setOpenCreateCategory(true)}
+                                                        onCreateContent={() => router.push('/cms/content/new')}
+                                                    />
+                                                ),
+                                            },
+                                            {
+                                                key: "category-tree",
+                                                label: "Category Tree (Legacy)",
+                                                children: (
+                                                    <CategoryTreeManager
+                                                        onEditCategory={(categoryId) => setEditingCategoryId(categoryId)}
+                                                        onDeleteCategory={async (categoryId) => {
+                                                            Modal.confirm({
+                                                                title: "Delete category?",
+                                                                content: "This will delete the category and all its relations. Are you sure?",
+                                                                okText: "Delete",
+                                                                okButtonProps: { danger: true },
+                                                                onOk: async () => {
+                                                                    try {
+                                                                        await deleteCmsCategory(categoryId);
+                                                                        message.success("Deleted");
+                                                                        invalidateCategories();
+                                                                    } catch (error) {
+                                                                        message.error("Failed to delete category");
+                                                                    }
+                                                                },
+                                                            });
+                                                        }}
+                                                    />
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                </div>
+                            )}
+                            {activeKey !== "pages" && activeKey !== "categories" && activeKey !== "contents" && activeKey !== "settings" && activeKey !== "banners" && activeKey !== "aggregate" && <div>Hello World</div>}
+                        </div>
                     </div>
                 </div>
+                <CreatePageModal
+                    open={openCreate}
+                    onClose={() => setOpenCreate(false)}
+                    onSuccess={() => refetch()}
+                />
+                <CreatePageModal
+                    open={editingId !== null}
+                    page={(pages || []).find((p: any) => p.id === editingId)}
+                    onClose={() => setEditingId(null)}
+                    onSuccess={() => {
+                        setEditingId(null);
+                        refetch();
+                    }}
+                />
+                <CategoryDetailDrawer
+                    open={viewCategoryId !== null}
+                    onClose={() => setViewCategoryId(null)}
+                    data={categoryDetail}
+                />
+                <CreateCategoryModal
+                    open={openCreateCategory}
+                    onClose={() => setOpenCreateCategory(false)}
+                    onSuccess={() => {
+                        setOpenCreateCategory(false);
+                        invalidateCategories();
+                    }}
+                />
+                <CreateCategoryModal
+                    open={editingCategoryId !== null}
+                    category={(categories || []).find((c: any) => c.id === editingCategoryId)}
+                    onClose={() => setEditingCategoryId(null)}
+                    onSuccess={() => {
+                        setEditingCategoryId(null);
+                        invalidateCategories();
+                    }}
+                />
+                <CreateBannerModal
+                    open={openCreateBanner}
+                    defaultPageId={bannerPageId}
+                    onClose={() => setOpenCreateBanner(false)}
+                    onSuccess={() => {
+                        setOpenCreateBanner(false);
+                        if (bannerPageId) invalidateBanners(bannerPageId);
+                    }}
+                />
+                <CreateBannerModal
+                    open={editingBannerId !== null}
+                    defaultPageId={bannerPageId}
+                    banner={(banners || []).find((b: any) => b.id === editingBannerId)}
+                    onClose={() => setEditingBannerId(null)}
+                    onSuccess={() => {
+                        setEditingBannerId(null);
+                        if (bannerPageId) invalidateBanners(bannerPageId);
+                    }}
+                />
+                <CreateSettingModal
+                    open={openCreateSetting}
+                    onClose={() => setOpenCreateSetting(false)}
+                    onSuccess={() => {
+                        setOpenCreateSetting(false);
+                        invalidateSettings();
+                    }}
+                />
+                <CreateSettingModal
+                    open={editingSettingId !== null}
+                    setting={(settings || []).find((s: any) => s.id === editingSettingId)}
+                    onClose={() => setEditingSettingId(null)}
+                    onSuccess={() => {
+                        setEditingSettingId(null);
+                        invalidateSettings();
+                    }}
+                />
             </div>
-            <CreatePageModal
-                open={openCreate}
-                onClose={() => setOpenCreate(false)}
-                onSuccess={() => refetch()}
-            />
-            <CreatePageModal
-                open={editingId !== null}
-                page={(pages || []).find((p: any) => p.id === editingId)}
-                onClose={() => setEditingId(null)}
-                onSuccess={() => {
-                    setEditingId(null);
-                    refetch();
-                }}
-            />
-            <CategoryDetailDrawer
-                open={viewCategoryId !== null}
-                onClose={() => setViewCategoryId(null)}
-                data={categoryDetail}
-            />
-            <CreateCategoryModal
-                open={openCreateCategory}
-                onClose={() => setOpenCreateCategory(false)}
-                onSuccess={() => {
-                    setOpenCreateCategory(false);
-                    invalidateCategories();
-                }}
-            />
-            <CreateCategoryModal
-                open={editingCategoryId !== null}
-                category={(categories || []).find((c: any) => c.id === editingCategoryId)}
-                onClose={() => setEditingCategoryId(null)}
-                onSuccess={() => {
-                    setEditingCategoryId(null);
-                    invalidateCategories();
-                }}
-            />
-            <CreateBannerModal
-                open={openCreateBanner}
-                defaultPageId={bannerPageId}
-                onClose={() => setOpenCreateBanner(false)}
-                onSuccess={() => {
-                    setOpenCreateBanner(false);
-                    if (bannerPageId) invalidateBanners(bannerPageId);
-                }}
-            />
-            <CreateBannerModal
-                open={editingBannerId !== null}
-                defaultPageId={bannerPageId}
-                banner={(banners || []).find((b: any) => b.id === editingBannerId)}
-                onClose={() => setEditingBannerId(null)}
-                onSuccess={() => {
-                    setEditingBannerId(null);
-                    if (bannerPageId) invalidateBanners(bannerPageId);
-                }}
-            />
-            <CreateSettingModal
-                open={openCreateSetting}
-                onClose={() => setOpenCreateSetting(false)}
-                onSuccess={() => {
-                    setOpenCreateSetting(false);
-                    invalidateSettings();
-                }}
-            />
-            <CreateSettingModal
-                open={editingSettingId !== null}
-                setting={(settings || []).find((s: any) => s.id === editingSettingId)}
-                onClose={() => setEditingSettingId(null)}
-                onSuccess={() => {
-                    setEditingSettingId(null);
-                    invalidateSettings();
-                }}
-            />
-        </div>
+        </ConfigProvider>
     );
 }
 
