@@ -14,9 +14,15 @@ import {
   faMapMarked,
   faTeletype,
   faUser,
+  faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { getListExchangRate, updateListExchangRate } from "../apis/setting";
+import {
+  getListExchangRate,
+  updateListExchangRate,
+  getTelegramSetting,
+  setTelegramSetting,
+} from "../apis/setting";
 import { CurrencyRate } from "@/types/setting";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -29,6 +35,9 @@ const SettingsDetail = () => {
   const { t } = useTranslation();
   const [rateList, setRateList] = useState<CurrencyRate[]>([]);
   const [rates, setRates] = useState<CurrencyRate[]>(rateList);
+  // Thêm state cho TelegramId
+  const [telegramId, setTelegramId] = useState<string>("");
+  const [telegramIdLoading, setTelegramIdLoading] = useState<boolean>(false);
 
   const handleGetListRate = async () => {
     const listRateExchange = await getListExchangRate();
@@ -36,8 +45,23 @@ const SettingsDetail = () => {
     setRates(listRateExchange);
   };
 
+  // Thêm hàm lấy TelegramId từ API
+  const handleGetTelegramSetting = async () => {
+    try {
+      const data = await getTelegramSetting();
+      if (data[0]?.key) {
+        setTelegramId(data[0]?.value);
+      } else {
+        setTelegramId("");
+      }
+    } catch (e) {
+      setTelegramId("");
+    }
+  };
+
   useEffect(() => {
     handleGetListRate();
+    handleGetTelegramSetting();
   }, []);
 
   const handleChangeRate = (value: number | null, index: number) => {
@@ -55,7 +79,7 @@ const SettingsDetail = () => {
     try {
       await updateListExchangRate({
         data: rates.map((r) => ({
-          id: r.id, // cần id
+          id: r.id,
           rate_to_vnd: r.rate_to_vnd,
           currency_code: r.currency_code,
         })),
@@ -64,6 +88,18 @@ const SettingsDetail = () => {
     } catch (e) {
       console.error("Update failed", e);
     }
+  };
+
+  // Cập nhật lại lưu TelegramId dùng API setTelegramSetting
+  const handleSaveTelegramId = async () => {
+    setTelegramIdLoading(true);
+    try {
+      await setTelegramSetting(telegramId);
+      toast.success("Lưu TelegramId thành công!");
+    } catch (e) {
+      toast.error("Lưu TelegramId thất bại!");
+    }
+    setTelegramIdLoading(false);
   };
 
   return (
@@ -76,69 +112,94 @@ const SettingsDetail = () => {
         }
         className="rounded-lg shadow-sm"
       >
-        <div className="flex gap-3 mb-6 w-full">
-          {rates &&
-            rates.map((item: CurrencyRate, index) => {
-              return (
-                <div
-                  key={item.currency_code}
-                  className="flex items-start flex-col gap-1 flex-1"
-                >
-                  <label className="text-xs text-gray-600 mb-1">
-                    1 {item.currency_code} = (VND)
-                  </label>
-                  <InputNumber
-                    size="large"
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => value?.replace(/,/g, "") as any}
-                    value={item.rate_to_vnd}
-                    onChange={(value) => handleChangeRate(value, index)}
-                    className="!w-full"
-                  />
+        {/* PHẦN 1: Cập nhật tỷ giá quy đổi */}
+        <div className="mb-8">
+          <div className="text-sm font-semibold text-gray-700 mb-4">
+            {"Cập nhật tỷ giá quy đổi"}
+          </div>
+          <div className="flex gap-3 mb-6 w-full">
+            {rates &&
+              rates.map((item: CurrencyRate, index) => {
+                return (
+                  <div
+                    key={item.currency_code}
+                    className="flex items-start flex-col gap-1 flex-1"
+                  >
+                    <label className="text-xs text-gray-600 mb-1">
+                      1 {item.currency_code} = (VND)
+                    </label>
+                    <InputNumber
+                      size="large"
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value?.replace(/,/g, "") as any}
+                      value={item.rate_to_vnd}
+                      onChange={(value) => handleChangeRate(value, index)}
+                      className="!w-full"
+                    />
 
-                  <div className="text-xs text-gray-500 mt-2 space-y-1">
-                    <p>
-                      <FontAwesomeIcon
-                        icon={faClock}
-                        className="w-4 h-4 text-gray-500"
-                      />
-                      Cập nhật lần cuối:{" "}
-                      {item.updated_at
-                        ? dayjs(item.updated_at).format("DD/MM/YY")
-                        : "-"}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        icon={faUser}
-                        className="w-4 h-4 text-gray-500"
-                      />
-                      Được cập nhật bởi:
-                      <span className="font-semibold">{item.full_name}</span>
-                    </p>
+                    <div className="text-xs text-gray-500 mt-2 space-y-1">
+                      <p>
+                        <FontAwesomeIcon
+                          icon={faClock}
+                          className="w-4 h-4 text-gray-500"
+                        />
+                        Cập nhật lần cuối:{" "}
+                        {item.updated_at
+                          ? dayjs(item.updated_at).format("DD/MM/YY")
+                          : "-"}
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          icon={faUser}
+                          className="w-4 h-4 text-gray-500"
+                        />
+                        Được cập nhật bởi:
+                        <span className="font-semibold">{item.full_name}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+          </div>
+          <div className="w-full flex justify-end">
+            <Button type="primary" size="large" onClick={() => handleSave()}>
+              {t("settings.saveExchangeRate")}
+            </Button>
+          </div>
         </div>
 
-        <div className="w-full mb-4">
-          <Button
-            size="large"
-            onClick={() => router.push("/finance-management")}
-            className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faUniversity} />}
-          >
-            <span className="text-sm">
-              {t("settings.bankAccountManagement")}
-            </span>
-          </Button>
-        </div>
-        <div className="w-full flex justify-end">
-          <Button type="primary" size="large" onClick={() => handleSave()}>
-            {t("settings.saveExchangeRate")}
-          </Button>
+        {/* PHẦN 2: Cấu hình TelegramId nhận cảnh báo */}
+        <div className="border-t border-dashed border-gray-200 pt-7">
+          <div className="text-sm font-semibold text-gray-700 mb-4">
+            {"Cấu hình TelegramId nhận thông báo"}
+          </div>
+          <div className="flex items-end gap-3 mb-6 w-full">
+            <div className="flex flex-col flex-1">
+              {/* <label className="text-xs text-gray-600 mb-1" htmlFor="telegramId">
+                TelegramId
+              </label> */}
+              <Input
+                id="telegramId"
+                size="large"
+                placeholder="Nhập TelegramId"
+                value={telegramId}
+                onChange={(e) => setTelegramId(e.target.value)}
+                className="!w-full"
+                disabled={telegramIdLoading}
+              />
+            </div>
+            <Button
+              type="primary"
+              size="large"
+              onClick={handleSaveTelegramId}
+              loading={telegramIdLoading}
+              icon={<FontAwesomeIcon icon={faPaperPlane} />}
+            >
+              Lưu
+            </Button>
+          </div>
         </div>
       </Card>
       <Card
@@ -149,10 +210,19 @@ const SettingsDetail = () => {
         }
         className="relative rounded-lg shadow-sm h-full"
       >
-        <div className="pb-16">
-        </div>
-
         <div className="bottom-4 left-4 right-4 flex flex-col gap-3">
+          <div className="w-full">
+            <Button
+              size="large"
+              onClick={() => router.push("/finance-management")}
+              className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
+              icon={<FontAwesomeIcon className="w-4 h-4" icon={faUniversity} />}
+            >
+              <span className="text-sm">
+                {t("settings.bankAccountManagement")}
+              </span>
+            </Button>
+          </div>
           <Button
             size="large"
             onClick={() => router.push("/website-manage")}
@@ -199,8 +269,6 @@ const SettingsDetail = () => {
           </Button>
         </div>
       </Card>
-
-  
     </div>
   );
 };

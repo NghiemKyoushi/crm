@@ -23,3 +23,12 @@ export const updateListExchangRateCategory = async (params: UpdateListRateParams
   const res = await api.post(`${API_TYPE_CONST.UPDATE_EXCHANGE_RATE}`, params);
   return res.data.data;
 };
+
+export const getTelegramSetting = async () => {
+  const res = await api.get(`${API_TYPE_CONST.SETTING_TELEGRAM}?key=TELEGRAM`);
+  return res.data.data;
+};
+export const setTelegramSetting = async (telegram: string) => {
+  const res = await api.post(API_TYPE_CONST.SETTING_TELEGRAM, { telegram });
+  return res.data.data;
+};

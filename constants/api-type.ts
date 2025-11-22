@@ -160,4 +160,5 @@ export const API_TYPE_CONST = {
   TELESALE_ADD_CUSTOMER:`${FEATURE}/admin/telesales/add`,
   TELESALE_UNASSIGN:`${FEATURE}/admin/telesales/contacts/{contact_id}/unassign`,
   TELESALE_CONTACT_UPDATE:`${FEATURE}/admin/telesales/contacts/{id}`,
+  SETTING_TELEGRAM:`${FEATURE}/admin/web-setting`,
 } as const;
