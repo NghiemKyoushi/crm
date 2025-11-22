@@ -97,6 +97,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
       const params: BankDepositRequest = {
         page: page,
         size: PAGE_SIZE,
+        type: 2,
       };
       const data: BankAccountListResponse = await getListBankCreateAccount(params);
       const opts = data.content.map((acc: BankAccount) => ({
