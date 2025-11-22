@@ -138,7 +138,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             price: priceY,
             name: form.getFieldValue("productName"),
             item_quantity: form.getFieldValue("item_quantity"),
-            images: [...uploadedIds,...productImages],
+            images: [...uploadedIds, ...productImages],
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
           },
           description: form.getFieldValue("note"),
@@ -429,7 +429,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setRouteId(undefined);
     queryClient.removeQueries({ queryKey: ["listServiceAdmin"] });
     setListInsurancesMap([]);
-    setProductImages([]); 
+    setProductImages([]);
     setFileList([]);
     onCancel();
   };
@@ -443,7 +443,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       order?.status !== OrderStatusType.SHIPPING_REQUEST_CLIENT;
     return isAdmin && isNotInSpecialStatus;
   }, [hasPermission, order?.status]);
-  
+
 
   const [fileList, setFileList] = useState<any[]>([]);
   const [uploadedIds, setUploadedIds] = useState<number[]>([]);
@@ -560,7 +560,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               }
               size="large"
               className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
-              // disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
+            // disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
             >
               Lưu thay đổi
             </Button>
@@ -600,7 +600,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   </h4>
                 </div>
                 <div className="bg-white rounded-lg border border-gray-200 p-5">
-                
+
                   <Form.Item
                     label={
                       <span className="text-sm font-medium text-gray-700">
@@ -670,8 +670,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                   >
                     <TiptapEditor isDisable={isCheckDisableInput && !isAdminOrCheckStatusAfterPending} />
                   </Form.Item>
-                    {/* -------- IMAGE GALLERY PREVIEW -------- */}
-                    {productImages && productImages.length > 0 && (
+                  {/* -------- IMAGE GALLERY PREVIEW -------- */}
+                  {productImages && productImages.length > 0 && (
                     <div className="mb-5">
                       <div className="flex space-x-2 overflow-x-auto pb-2">
                         {productImages.map((src, idx) => (
@@ -707,7 +707,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       </div>
                     </div>
                   )}
-                  
+
                   <Form.Item label={"Tải ảnh sản phẩm"}>
                     <Upload
                       listType="picture-card"
@@ -903,7 +903,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                             order?.status === OrderStatusType.PENDING_PAYMENT ||
                             order?.status === OrderStatusType.READY_TO_SHIP ||
                             order?.status ===
-                              OrderStatusType.SHIPPING_REQUEST_CLIENT
+                            OrderStatusType.SHIPPING_REQUEST_CLIENT
                           }
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
@@ -951,7 +951,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           order?.status === OrderStatusType.PENDING_PAYMENT ||
                           order?.status === OrderStatusType.READY_TO_SHIP ||
                           order?.status ===
-                            OrderStatusType.SHIPPING_REQUEST_CLIENT
+                          OrderStatusType.SHIPPING_REQUEST_CLIENT
                         }
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -1004,11 +1004,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                             return (
                               <div
                                 key={item.id}
-                                className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
-                                  item.is_checked
+                                className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${item.is_checked
                                     ? "border-blue-400 shadow-md"
                                     : "border-gray-200 hover:border-blue-200"
-                                }`}
+                                  }`}
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
@@ -1038,8 +1037,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                 <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
                                   {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
-                                        "en-US"
-                                      )}đ`
+                                      "en-US"
+                                    )}đ`
                                     : 0}
                                 </div>
                               </div>
@@ -1087,11 +1086,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                 return (
                                   <div
                                     key={item.id}
-                                    className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
-                                      isChecked
+                                    className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${isChecked
                                         ? "border-amber-400 shadow-md"
                                         : "border-gray-200 hover:border-amber-200"
-                                    }`}
+                                      }`}
                                   >
                                     <div className="flex-1 pr-3">
                                       <Checkbox
@@ -1395,8 +1393,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
-                                "en-US"
-                              )}đ`
+                              "en-US"
+                            )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1407,8 +1405,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
-                                "en-US"
-                              )}đ`
+                              "en-US"
+                            )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1420,8 +1418,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           {insurance?.id == 1
                             ? "0đ"
                             : fees.INSURANCE_FEE !== -1
-                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
-                            : "Cập nhật sau"}
+                              ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
+                              : "Cập nhật sau"}
                         </span>
                       </div>
 
