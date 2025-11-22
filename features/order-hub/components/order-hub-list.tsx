@@ -124,6 +124,8 @@ export default function OrderHub() {
   const [orderSourceAccount, setOrderSourceAccount] = useState<
     Record<number, number | null>
   >({});
+  // Track which orders are being loaded to prevent duplicate calls
+  const loadingOrdersRef = useRef<Set<number>>(new Set());
 
   const [filters, setFilters] = useState<FilterType>({
     status: undefined,
@@ -366,8 +368,12 @@ export default function OrderHub() {
     const url = order.metadata?.items?.[0]?.product?.url;
     const domain = extractDomain(url);
 
-    if (!domain || orderAccounts[order.id]) return; // Already loaded or no domain
+    // Prevent duplicate calls
+    if (!domain || orderAccounts[order.id] || loadingOrdersRef.current.has(order.id)) {
+      return; // Already loaded, no domain, or currently loading
+    }
 
+    loadingOrdersRef.current.add(order.id);
     setLoadingAccounts((prev) => ({ ...prev, [order.id]: true }));
     try {
       // Step 1: Find website by domain
@@ -379,6 +385,7 @@ export default function OrderHub() {
 
       if (!website?.id) {
         setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+        loadingOrdersRef.current.delete(order.id);
         return;
       }
 
@@ -390,6 +397,7 @@ export default function OrderHub() {
       toast.error("Không thể tải danh sách account");
     } finally {
       setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+      loadingOrdersRef.current.delete(order.id);
 
       // Step 3: Set current source account if exists (always set, even if no website found)
       if (
@@ -403,6 +411,29 @@ export default function OrderHub() {
       }
     }
   };
+
+  // Load accounts for all orders when listOrder changes
+  useEffect(() => {
+    if (!listOrder?.data) return;
+
+    const orders = listOrder.data;
+    orders.forEach((order: Invoice) => {
+      const url = order.metadata?.items?.[0]?.product?.url;
+      const domain = extractDomain(url);
+      
+      // Only load if: has domain, not already loaded, and not currently loading
+      if (
+        domain &&
+        !orderAccounts[order.id] &&
+        !loadingOrdersRef.current.has(order.id)
+      ) {
+        loadAccountsForOrder(order);
+      }
+    });
+    // Only depend on listOrder?.data to avoid infinite loops
+    // orderAccounts is checked inside but not in deps to prevent re-runs when accounts are loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listOrder?.data]);
 
   // Handle account selection
   const handleAccountChange = async (orderId: number, accountId: number) => {
@@ -874,14 +905,6 @@ export default function OrderHub() {
         const currentAccountId =
           orderSourceAccount[record.id] ?? record.source_account_id;
         const isLoading = loadingAccounts[record.id];
-
-        // Auto-load accounts when URL exists and not yet loaded
-        if (url && !orderAccounts[record.id] && !isLoading) {
-          // Use setTimeout to avoid calling during render
-          setTimeout(() => {
-            loadAccountsForOrder(record);
-          }, 0);
-        }
 
         if (!url) {
           return <div className="text-xs text-gray-400">-</div>;
