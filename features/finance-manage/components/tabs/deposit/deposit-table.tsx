@@ -167,7 +167,7 @@ const DepositTable = (props: DepositTableProps) => {
               <span className="text-blue-600 text-sm">{displayCode}</span>
             </Tooltip>
             <div className="text-xs text-gray-500">
-              {dayjs(record.created_at).format("DD/MM HH:mm")}
+              {record.created_at ? dayjs(record.created_at).add(7, "hour").format("DD/MM HH:mm") : '-' }
             </div>
           </div>
         );
