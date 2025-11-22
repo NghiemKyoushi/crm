@@ -77,6 +77,7 @@ export interface Invoice {
   note_admin: string;
   kupon?: number;
   source_account_id?: number;
+  final_tracking?: string;
 }
 
 export interface InvoiceMetadata {

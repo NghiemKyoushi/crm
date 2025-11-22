@@ -824,7 +824,7 @@ export default function OrderHub() {
           <div className="space-y-1">
             <div className="text-xs">
               <span className="text-gray-500">Mã: </span>
-              <span className="text-gray-800">{shippingCode}</span>
+              <span className="text-gray-800">{record?.final_tracking}</span>
             </div>
             <div className="text-xs">
               <span className="text-gray-500">Giá: </span>

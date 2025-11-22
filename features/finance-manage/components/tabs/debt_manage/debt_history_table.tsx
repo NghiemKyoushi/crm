@@ -177,7 +177,9 @@ export const DebtDetailModal = ({
       key: "transaction_date",
       width: 150,
       render: (transaction_date: string) =>
-        transaction_date ? dayjs(transaction_date).format("DD/MM/YYYY HH:mm") : "",
+        transaction_date
+          ? dayjs(transaction_date).add(7, "hour").format("DD/MM/YYYY HH:mm")
+          : "",
     },
     {
       title: "CN (Đối tác)",

@@ -230,7 +230,7 @@ const ProductManagement: React.FC = () => {
           <div className="space-y-1">
             <div className="text-xs truncate">
               <span className="text-gray-500">Mã VN: </span>
-              <span className="text-gray-800">{firstTrackingVn}</span>
+              <span className="text-gray-800">{record.final_tracking}</span>
             </div>
             {remainingCount > 0 && (
               <div className="text-xs text-blue-600">
@@ -645,7 +645,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         <div className="space-y-1">
           <div className="text-xs">
             <span className="text-gray-500">VN: </span>
-            <span className="text-gray-800">{record.tracking_vn || "-"}</span>
+            <span className="text-gray-800">{record.tracking_final || "-"}</span>
           </div>
           <div className="text-xs">
             <span className="text-gray-500">JP: </span>
