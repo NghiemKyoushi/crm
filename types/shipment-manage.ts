@@ -10,6 +10,8 @@ export interface ShipmentPackage {
   quantity: number; // Số lượng orders trong vận đơn
   created_at?: string;
   final_tracking?: string;
+  shipping_fee?: number;
+  shipping_type?: string;
 }
 
 export interface OrderItem {
@@ -47,6 +49,7 @@ export interface OrderItem {
   is_repacked?: boolean;
   is_verify_count?: boolean;
   tracking_final?: string;
+  tracking_japans?: Array<string>;
 }
 
 // For backward compatibility

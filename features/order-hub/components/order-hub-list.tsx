@@ -802,48 +802,48 @@ export default function OrderHub() {
         );
       },
     },
-    {
-      title: "COD (Việt)",
-      key: "transfer_fee",
-      width: 180,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => {
-        const shippingCode = record.tracking_vn || "-";
-        const codShippingPrice = record.shipping_fee || 0;
-        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
+    // {
+    //   title: "COD (Việt)",
+    //   key: "transfer_fee",
+    //   width: 180,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const shippingCode = record.tracking_vn || "-";
+    //     const codShippingPrice = record.shipping_fee || 0;
+    //     const shippingPrice = codShippingPrice || record.shipping_fee || 0;
 
-        const isCOD = codShippingPrice > 0;
-        const shippingTypeText = isCOD ? "COD" : "-";
-        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
+    //     const isCOD = codShippingPrice > 0;
+    //     const shippingTypeText = isCOD ? "COD" : "-";
+    //     const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Mã: </span>
-              <span className="text-gray-800">{record?.final_tracking}</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Giá: </span>
-              <span className="text-gray-800 font-medium">
-                {shippingPrice > 0
-                  ? `${shippingPrice.toLocaleString("en-US")}đ`
-                  : "Cập nhật sau"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">HT: </span>
-              <span className={`font-medium ${shippingTypeColor}`}>
-                {shippingTypeText}
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Mã: </span>
+    //           <span className="text-gray-800">{record?.final_tracking}</span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Giá: </span>
+    //           <span className="text-gray-800 font-medium">
+    //             {shippingPrice > 0
+    //               ? `${shippingPrice.toLocaleString("en-US")}đ`
+    //               : "Cập nhật sau"}
+    //           </span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">HT: </span>
+    //           <span className={`font-medium ${shippingTypeColor}`}>
+    //             {shippingTypeText}
+    //           </span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Tổng chi phí",
       key: "total",
