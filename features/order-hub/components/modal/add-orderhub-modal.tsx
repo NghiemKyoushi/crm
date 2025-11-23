@@ -48,6 +48,7 @@ import TiptapEditor from "../TiptapEditor";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { uploadImage } from "@/features/user-profile/hooks/user-profile";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { useListRoutes } from "@/features/web-management/hooks/web-manage";
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -95,6 +96,44 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
   // const [userId, setUserId] = useState<number | undefined>(undefined);
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
+  const [isRouteIdNull, setIsRouteIdNull] = useState(false);
+
+  // Fetch routes when route_id is null
+  const { data: routesData } = useListRoutes();
+  const routes = routesData?.data || [];
+
+  // Helper function to determine currency from route
+  const getCurrencyFromRoute = (route: any): string => {
+    if (!route) return "";
+    const codeOrName = (route.code || route.name || "").toString().toUpperCase();
+    if (codeOrName.includes("JP") || codeOrName.includes("JAPAN")) {
+      return CURRENCY_CODE.JPY;
+    }
+    if (codeOrName.includes("US") || codeOrName.includes("USA")) {
+      return CURRENCY_CODE.USD;
+    }
+    return "";
+  };
+
+  // Auto-select first route when route_id is null and routes are loaded
+  useEffect(() => {
+    if (isRouteIdNull && routes.length > 0 && routeId === undefined) {
+      setRouteId(routes[0].id);
+    }
+  }, [isRouteIdNull, routes.length]);
+
+  // Update currency when routeId changes
+  useEffect(() => {
+    if (routeId && routes.length > 0) {
+      const selectedRoute = routes.find((r: any) => r.id === routeId);
+      if (selectedRoute) {
+        const newCurrency = getCurrencyFromRoute(selectedRoute);
+        if (newCurrency) {
+          setCurrencyCode(newCurrency);
+        }
+      }
+    }
+  }, [routeId, routes]);
 
   const { data: listServices } = useListServiceAdmin(
     { userId: customer, routeId },
@@ -143,6 +182,12 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             is_checked: services?.includes(item.code),
           }));
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
+        // Validate route_id is required when route_id was null from Get info
+        if (isRouteIdNull && !routeId) {
+          toast.error("Vui lòng chọn tuyến đường!");
+          return;
+        }
+
         const bodyNewOrder: OrderFeeRequest = {
           data: {
             product_id: idProduct,
@@ -151,8 +196,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
             price: form.getFieldValue("priceY"),
             name: form.getFieldValue("productName"),
             item_quantity: form.getFieldValue("item_quantity"),
-            images: [...uploadedIds,...productImages],
+            images: [...uploadedIds, ...productImages],
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
+            ...(isRouteIdNull && routeId && { route_id: routeId }),
           },
           description: form.getFieldValue("note"),
           fees: [...serviceOption],
@@ -248,7 +294,16 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
         });
         setCurrencyCode(data.currency_code);
         setIdProduct(data.id);
-        setRouteId(data.route_id);
+
+        // Check if route_id is null
+        if (data.route_id === null || data.route_id === undefined) {
+          setIsRouteIdNull(true);
+          setRouteId(undefined); // Reset to undefined so useEffect can auto-select first route
+        } else {
+          setIsRouteIdNull(false);
+          setRouteId(data.route_id);
+        }
+
         form.setFieldValue("priceY", data.price);
         // Handle images
         if (Array.isArray(data.images)) {
@@ -421,6 +476,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setInsurance(null);
     setPrice(0);
     setRouteId(undefined);
+    setIsRouteIdNull(false);
     setIdProduct(null);
     setSearchValue("");
     setCustomerPage(0);
@@ -866,6 +922,63 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                     </Col>
                   </Row>
 
+                  {/* Route Select - Only show when route_id from Get info is null */}
+                  {isRouteIdNull && (
+                    <Row gutter={12}>
+                      <Col span={24}>
+                        <Form.Item
+                          label={
+                            <span className="text-sm font-medium text-gray-700">
+                              Tuyến đường <span className="text-red-500">*</span>
+                            </span>
+                          }
+                          rules={[
+                            { required: true, message: "Vui lòng chọn tuyến đường!" },
+                          ]}
+                          className="!mb-4 [&_.ant-form-item-explain]:!mt-2"
+                        >
+                          <Select
+                            value={routeId}
+                            onChange={(value) => {
+                              setRouteId(value);
+                              // Update currency when route changes
+                              const selectedRoute = routes.find((r: any) => r.id === value);
+                              if (selectedRoute) {
+                                const newCurrency = getCurrencyFromRoute(selectedRoute);
+                                if (newCurrency) {
+                                  setCurrencyCode(newCurrency);
+                                }
+                              }
+                            }}
+                            className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!leading-[44px] [&_.ant-select-selector]:!rounded-lg"
+                            placeholder="-- Chọn tuyến đường --"
+                            suffixIcon={
+                              <svg
+                                className="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            }
+                          >
+                            {routes.map((route: any) => (
+                              <Option key={route.id} value={route.id}>
+                                {route.name || route.code}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )}
+
                   <Row gutter={12}>
                     <Col span={12}>
                       <Form.Item
@@ -1013,11 +1126,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                             return (
                               <div
                                 key={item.id}
-                                className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
-                                  isChecked
-                                    ? "border-blue-400 shadow-md"
-                                    : "border-gray-200 hover:border-blue-200"
-                                }`}
+                                className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${isChecked
+                                  ? "border-blue-400 shadow-md"
+                                  : "border-gray-200 hover:border-blue-200"
+                                  }`}
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
@@ -1040,8 +1152,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                 <div className="text-blue-600 font-semibold text-sm whitespace-nowrap">
                                   {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
-                                        "en-US"
-                                      )}đ`
+                                      "en-US"
+                                    )}đ`
                                     : `0đ`}
                                 </div>
                               </div>
@@ -1089,11 +1201,10 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                 return (
                                   <div
                                     key={item.id}
-                                    className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${
-                                      isChecked
-                                        ? "border-amber-400 shadow-md"
-                                        : "border-gray-200 hover:border-amber-200"
-                                    }`}
+                                    className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${isChecked
+                                      ? "border-amber-400 shadow-md"
+                                      : "border-gray-200 hover:border-amber-200"
+                                      }`}
                                   >
                                     <div className="flex-1 pr-3">
                                       <Checkbox
@@ -1376,8 +1487,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.DOMESTIC_SHIPPING_FEE !== -1
                             ? `${fees.DOMESTIC_SHIPPING_FEE.toLocaleString(
-                                "en-US"
-                              )}đ`
+                              "en-US"
+                            )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1388,8 +1499,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {fees.SHIPPING_SURCHARGE_FEE !== -1
                             ? `${fees.SHIPPING_SURCHARGE_FEE.toLocaleString(
-                                "en-US"
-                              )}đ`
+                              "en-US"
+                            )}đ`
                             : "Cập nhật sau"}
                         </span>
                       </div>
@@ -1402,8 +1513,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                             ? "0đ"
                             : fees.INSURANCE_FEE !== null &&
                               fees.INSURANCE_FEE !== -1
-                            ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
-                            : "Cập nhật sau"}
+                              ? `${fees.INSURANCE_FEE.toLocaleString("en-US")}đ`
+                              : "Cập nhật sau"}
                         </span>
                       </div>
 
@@ -1445,8 +1556,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                                 <span className="text-sm font-medium text-gray-900">
                                   {item.amount_vnd
                                     ? `${item.amount_vnd.toLocaleString(
-                                        "en-US"
-                                      )}đ`
+                                      "en-US"
+                                    )}đ`
                                     : `0đ`}
                                 </span>
                               </div>

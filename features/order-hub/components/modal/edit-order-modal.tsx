@@ -47,6 +47,7 @@ import { Fee } from "./orderhub-detail-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { uploadImage } from "@/features/user-profile/hooks/user-profile";
+import { useListRoutes } from "@/features/web-management/hooks/web-manage";
 
 
 const { Option } = Select;
@@ -95,6 +96,51 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
 
+  // Check if source_website is null to show route select
+  const isSourceWebsiteNull = !order?.source_website;
+  const { data: routesData } = useListRoutes();
+  const routes = routesData?.data || [];
+
+  // Helper function to determine currency from route
+  const getCurrencyFromRoute = (route: any): string => {
+    if (!route) return "";
+    const codeOrName = (route.code || route.name || "").toString().toUpperCase();
+    if (codeOrName.includes("JP") || codeOrName.includes("JAPAN")) {
+      return CURRENCY_CODE.JPY;
+    }
+    if (codeOrName.includes("US") || codeOrName.includes("USA")) {
+      return CURRENCY_CODE.USD;
+    }
+    return "";
+  };
+
+  // Set route_id from product when source_website is null, or fallback to first route
+  useEffect(() => {
+    if (isSourceWebsiteNull && routes.length > 0 && routeId === undefined) {
+      // Priority 1: Get route_id from metadata.items[0].product.route_id
+      const productRouteId = order?.metadata?.items?.[0]?.product?.route_id;
+      if (productRouteId) {
+        setRouteId(productRouteId);
+      } else {
+        // Priority 2: Fallback to first route if no route_id in product
+        setRouteId(routes[0].id);
+      }
+    }
+  }, [isSourceWebsiteNull, routes.length, order?.metadata?.items]);
+
+  // Update currency when routeId changes
+  useEffect(() => {
+    if (routeId && routes.length > 0) {
+      const selectedRoute = routes.find((r: any) => r.id === routeId);
+      if (selectedRoute) {
+        const newCurrency = getCurrencyFromRoute(selectedRoute);
+        if (newCurrency) {
+          setCurrencyCode(newCurrency);
+        }
+      }
+    }
+  }, [routeId, routes]);
+
   const { data: listService } = useListServiceAdmin(
     { userId: customer, routeId },
     {
@@ -128,6 +174,13 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const handleOk = async () => {
     try {
       await form.validateFields();
+
+      // Validate route_id is required when source_website is null
+      if (isSourceWebsiteNull && !routeId) {
+        toast.error("Vui lòng chọn tuyến đường!");
+        return;
+      }
+
       if (idProduct && insurance) {
         const itemsPerUnit = form.getFieldValue("itemsPerUnit");
         const bodyNewOrder: OrderFeeRequest = {
@@ -140,6 +193,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             item_quantity: form.getFieldValue("item_quantity"),
             images: [...uploadedIds, ...productImages],
             ...(itemsPerUnit && { items_per_unit: itemsPerUnit }),
+            ...(isSourceWebsiteNull && routeId && { route_id: routeId }),
           },
           description: form.getFieldValue("note"),
           fees: [...listServiceInOrder],
@@ -383,7 +437,17 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
       setIsCheckDisableInput(
         order?.status !== OrderStatusType.PENDING_APPROVAL
       );
-      setRouteId(order.metadata.items?.[0]?.product?.route_id ?? null);
+      // Set routeId from product route_id
+      // If source_website exists, set directly
+      // If source_website is null, set from product.route_id (useEffect will handle fallback if needed)
+      const productRouteId = order.metadata.items?.[0]?.product?.route_id;
+      if (order.source_website) {
+        setRouteId(productRouteId ?? null);
+      } else if (productRouteId) {
+        // If source_website is null but product has route_id, set it directly
+        setRouteId(productRouteId);
+      }
+      // If source_website is null and no product.route_id, useEffect will set first route
       setRateValueForPrice(order.rate ?? 0);
       setCurrencyCode(
         order.metadata.items?.[0]?.product?.currency_code ?? "VND"
@@ -792,6 +856,63 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     </Col>
                   </Row>
 
+                  {/* Route Select - Only show when source_website is null */}
+                  {isSourceWebsiteNull && (
+                    <Row gutter={12}>
+                      <Col span={24}>
+                        <Form.Item
+                          label={
+                            <span className="text-sm font-medium text-gray-700">
+                              Tuyến đường <span className="text-red-500">*</span>
+                            </span>
+                          }
+                          rules={[
+                            { required: true, message: "Vui lòng chọn tuyến đường!" },
+                          ]}
+                          className="!mb-4 [&_.ant-form-item-explain]:!mt-2"
+                        >
+                          <Select
+                            value={routeId}
+                            onChange={(value) => {
+                              setRouteId(value);
+                              // Update currency when route changes
+                              const selectedRoute = routes.find((r: any) => r.id === value);
+                              if (selectedRoute) {
+                                const newCurrency = getCurrencyFromRoute(selectedRoute);
+                                if (newCurrency) {
+                                  setCurrencyCode(newCurrency);
+                                }
+                              }
+                            }}
+                            className="[&_.ant-select-selector]:!h-11 [&_.ant-select-selector]:!leading-[44px] [&_.ant-select-selector]:!rounded-lg"
+                            placeholder="-- Chọn tuyến đường --"
+                            suffixIcon={
+                              <svg
+                                className="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            }
+                          >
+                            {routes.map((route: any) => (
+                              <Option key={route.id} value={route.id}>
+                                {route.name || route.code}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )}
+
                   <Row gutter={12}>
                     <Col span={24}>
                       <Form.Item
@@ -1005,8 +1126,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                               <div
                                 key={item.id}
                                 className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${item.is_checked
-                                    ? "border-blue-400 shadow-md"
-                                    : "border-gray-200 hover:border-blue-200"
+                                  ? "border-blue-400 shadow-md"
+                                  : "border-gray-200 hover:border-blue-200"
                                   }`}
                               >
                                 <div className="flex-1 pr-3">
@@ -1087,8 +1208,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                   <div
                                     key={item.id}
                                     className={`flex items-start justify-between bg-white rounded-lg p-3 border-2 transition-all ${isChecked
-                                        ? "border-amber-400 shadow-md"
-                                        : "border-gray-200 hover:border-amber-200"
+                                      ? "border-amber-400 shadow-md"
+                                      : "border-gray-200 hover:border-amber-200"
                                       }`}
                                   >
                                     <div className="flex-1 pr-3">
