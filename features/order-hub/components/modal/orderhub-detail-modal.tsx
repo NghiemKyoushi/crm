@@ -86,6 +86,7 @@ export interface OrderDetail {
   approved_by_name: string | null;
   is_user_created: boolean | null;
   fee_list: any;
+  source_website: any | null;
 }
 interface OrderDetailModalProps {
   open: boolean;

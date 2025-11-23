@@ -45,7 +45,7 @@ const CheckComingView: React.FC = () => {
   const [packageCode, setPackageCode] = useState<string>("");
   const [trackingCode, setTrackingCode] = useState<string>("");
   const [scanHistory, setScanHistory] = useState<PackageInfo[]>([]);
-  const [isScanning, setIsScanning] = useState(true);
+  const [isScanning, setIsScanning] = useState(false);
   const [lastPrintedPackage, setLastPrintedPackage] = useState<PackageInfo | null>(null);
   const [showSuccessEffect, setShowSuccessEffect] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,7 @@ const CheckComingView: React.FC = () => {
   const packageCodeRef = useRef<string>("");
   const isSubmittingRef = useRef<boolean>(false);
   const isCodeInViewRef = useRef<boolean>(false);
+  const uploadQueueRef = useRef<Map<number, File[]>>(new Map());
 
   // Order list management
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -411,29 +412,66 @@ const CheckComingView: React.FC = () => {
 
   // Handle upload image - update metadata.inspection_photo_ids
   const handleUploadImage = async (orderId: number, file: File) => {
-    setProcessingOrders(true);
-    try {
-      // Upload image
-      const uploadResult = await checkComingApi.uploadImage(file, 1);
-      const imageId = uploadResult.id;
-
-      console.log(`✅ Uploaded image ID: ${imageId} for order ${orderId}`);
-
-      // Get current images from metadata
-      const currentOrder = currentOrders.find((o) => o.id === orderId);
-      const currentImages = currentOrder?.metadata?.inspection_photo_ids || [];
-      const newImages = [...currentImages, imageId];
-
-      // Update order with new image ID in metadata.inspection_photo_ids
-      await handleOrderFieldUpdate(orderId, "inspection_photo_ids", newImages);
-
-      toast.success("Upload ảnh thành công!");
-    } catch (error: any) {
-      console.error("Failed to upload image:", error);
-      toast.error("Lỗi khi upload ảnh");
-    } finally {
-      setProcessingOrders(false);
+    // Add file to queue for this order
+    const queue = uploadQueueRef.current;
+    if (!queue.has(orderId)) {
+      queue.set(orderId, []);
     }
+    queue.get(orderId)!.push(file);
+
+    // Process upload queue for this order
+    const processQueue = async () => {
+      const filesToUpload = queue.get(orderId) || [];
+      if (filesToUpload.length === 0) return;
+
+      // Clear queue for this order before processing
+      queue.delete(orderId);
+
+      setProcessingOrders(true);
+      const uploadedIds: number[] = [];
+
+      try {
+        // Upload all files sequentially
+        for (const file of filesToUpload) {
+          const uploadResult = await checkComingApi.uploadImage(file, 1);
+          uploadedIds.push(uploadResult.id);
+          console.log(`✅ Uploaded image ID: ${uploadResult.id} for order ${orderId}`);
+        }
+
+        // Update order with all new image IDs using functional update
+        setCurrentOrders((prevOrders) => {
+          return prevOrders.map((order) => {
+            if (order.id === orderId) {
+              const currentImages = order.metadata?.inspection_photo_ids || [];
+              const newImages = [...currentImages, ...uploadedIds];
+              return {
+                ...order,
+                metadata: {
+                  ...order.metadata,
+                  inspection_photo_ids: newImages,
+                },
+              };
+            }
+            return order;
+          });
+        });
+
+        toast.success(`Upload ${uploadedIds.length} ảnh thành công!`);
+      } catch (error: any) {
+        console.error("Failed to upload image:", error);
+        toast.error("Lỗi khi upload ảnh");
+      } finally {
+        setProcessingOrders(false);
+        // Process any remaining files in queue
+        const remainingFiles = queue.get(orderId);
+        if (remainingFiles && remainingFiles.length > 0) {
+          setTimeout(() => processQueue(), 100);
+        }
+      }
+    };
+
+    // Use setTimeout to batch multiple files together
+    setTimeout(() => processQueue(), 50);
   };
 
   // Check if order has any requirements at all
@@ -1112,6 +1150,7 @@ const CheckComingView: React.FC = () => {
                     <Space direction="vertical" size={4} style={{ width: "100%" }}>
                       <Text type="secondary" style={{ fontSize: 11 }}>Yêu cầu</Text>
                       <Upload
+                        multiple
                         beforeUpload={(file) => {
                           handleUploadImage(record.id, file);
                           return false;
