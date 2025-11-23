@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Form, Input, Button, Radio, InputNumber, Select } from "antd";
 import { TruckOutlined } from "@ant-design/icons";
 
@@ -21,15 +21,32 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
   const [form] = Form.useForm();
   const [paymentType, setPaymentType] = useState(1);
 
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!open) {
+      form.resetFields();
+      setPaymentType(1);
+    }
+  }, [open, form]);
+
   const handleFinish = (values: any) => {
     onSubmit(values);
+    // Reset form after successful submit
+    form.resetFields();
+    setPaymentType(1);
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setPaymentType(1);
+    onCancel();
   };
 
   return (
     <Modal
       title="Xác nhận vận chuyển"
       open={open}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       footer={null}
       width={600}
       centered
@@ -107,7 +124,7 @@ const TrackingModalShip: React.FC<TrackingModalProps> = ({
           </Form.Item>
         )}
         <div className="flex justify-end gap-3">
-          <Button onClick={onCancel}>Hủy</Button>
+          <Button onClick={handleCancel}>Hủy</Button>
           <Button
             type="primary"
             htmlType="submit"
