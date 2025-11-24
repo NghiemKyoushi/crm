@@ -19,17 +19,25 @@ interface OrderProfitLossTableData {
   costRate: number;
 }
 
-export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
+export const OrderProfitLossTable: React.FC<{ code?: string; dateRange?: [any, any] }> = ({ code, dateRange }) => {
   const { t } = useTranslation();
   const [currencyCode, setCurrencyCode] = useState<string | undefined>("JPY");
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(20);
 
-  const { data, isLoading } = useOrderProfitLoss({
+  // Build query params with date range
+  const queryParams: any = {
     currency_code: currencyCode,
     page,
     size: pageSize,
-  });
+  };
+
+  if (dateRange && dateRange[0] && dateRange[1]) {
+    queryParams.from_date = dateRange[0].format("YYYY-MM-DD");
+    queryParams.to_date = dateRange[1].format("YYYY-MM-DD");
+  }
+
+  const { data, isLoading } = useOrderProfitLoss(queryParams);
 
   useEffect(()=>{
     if(code){
@@ -76,7 +84,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 80,
       fixed: "left",
       render: (id: number) => (
-        <span className="font-mono text-gray-600">#{id}</span>
+        <span className="font-mono text-sm text-gray-600">#{id}</span>
       ),
     },
     {
@@ -86,7 +94,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 150,
       fixed: "left",
       render: (invoiceNo: string, record) => (
-        <span className="text-blue-600 font-semibold">{invoiceNo}</span>
+        <span className="text-sm text-blue-600">{invoiceNo}</span>
       ),
     },
     {
@@ -96,7 +104,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 80,
       align: "center",
       render: (code: string) => (
-        <Tag color="blue" className="font-semibold">
+        <Tag color="blue">
           {code}
         </Tag>
       ),
@@ -108,7 +116,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 150,
       align: "right",
       render: (value: number, record) => (
-        <span className="font-semibold text-gray-700">
+        <span className="text-sm text-gray-700">
           {formatNumber(value)} {record.currencyCode}
         </span>
       ),
@@ -124,7 +132,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
         const isProfit = value > 0;
         return (
           <span
-            className="font-bold"
+            className="text-sm"
             style={{ color: isProfit ? "#52c41a" : "#ff4d4f" }}
           >
             {isProfit ? "+" : ""}
@@ -140,7 +148,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 120,
       align: "right",
       render: (value: number) => (
-        <span className="text-gray-700">{formatNumber(value)}</span>
+        <span className="text-sm text-gray-700">{formatNumber(value)}</span>
       ),
     },
     {
@@ -150,7 +158,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
       width: 120,
       align: "right",
       render: (value: number) => (
-        <span className="text-gray-700">{formatNumber(value)}</span>
+        <span className="text-sm text-gray-700">{formatNumber(value)}</span>
       ),
     },
     {
@@ -162,7 +170,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
         const margin = calculateProfitMargin(record.sellRate, record.costRate);
         const isProfit = margin > 0;
         return (
-          <Tag color={isProfit ? "success" : "error"} className="font-semibold">
+          <Tag color={isProfit ? "success" : "error"}>
             {margin > 0 ? "+" : ""}
             {margin.toFixed(2)}%
           </Tag>
@@ -172,9 +180,9 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
   ];
 
   return (
-    <div className="mb-6 w-full">
-      <div className="flex justify-between items-center mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold m-0">
+    <div className="mb-3 w-full">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("partnerManage.orderProfitLossTitle")}
         </h3>
         <Select
@@ -197,12 +205,13 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
         </Select>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div>
         <Table
           columns={columns}
           dataSource={tableData}
           loading={isLoading}
           rowKey="orderId"
+          size="small"
           pagination={{
             current: page + 1,
             pageSize: pageSize,
@@ -234,21 +243,21 @@ export const OrderProfitLossTable: React.FC<{ code?: string }> = ({ code }) => {
 
             return (
               <Table.Summary fixed>
-                <Table.Summary.Row className="bg-gray-50 font-semibold">
+                <Table.Summary.Row className="bg-gray-50">
                   <Table.Summary.Cell index={0} colSpan={3} align="right">
-                    <span className="text-gray-700">
+                    <span className="text-sm text-gray-700">
                       {t("partnerManage.page")}{" "}
                       {t("partnerManage.totalConsumed")}:
                     </span>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={1} align="right">
-                    <span className="text-gray-800">
+                    <span className="text-sm text-gray-800">
                       {formatNumber(totalConsumed)} {currencyCode || ""}
                     </span>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={2} align="right">
                     <span
-                      className="font-bold"
+                      className="text-sm"
                       style={{
                         color: totalProfit >= 0 ? "#52c41a" : "#ff4d4f",
                       }}
