@@ -80,7 +80,7 @@ export default function SalesDetail({
         <Tag
           style={{
             backgroundColor: record.color ? record.color : '#000000',
-            color: record.color ? getContrastColor(record.color): "#ffffff",
+            color: record.color ? getContrastColor(record.color) : "#ffffff",
           }}
           className="text-xs"
         >
@@ -122,26 +122,64 @@ export default function SalesDetail({
     setPage(pageNumber - 1);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleAddCustomerForSale = (ids: any[]) => {
-    if (ids.length === 0) return;
-    const getIds = ids.map((item) => item?.key).filter(Boolean);
-    if (getIds.length === 0) return;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    salesId &&
+  const handleAddCustomerForSale = (ids: string[]) => {
+    if (ids.length === 0 || !salesId) {
+      return;
+    }
+
+    // Convert string IDs to numbers and filter out invalid ones
+    const customerIds = ids
+      .map((id) => {
+        const numId = Number(id);
+        return isNaN(numId) ? null : numId;
+      })
+      .filter((id): id is number => id !== null);
+
+    if (customerIds.length === 0) {
+      toast.error(t('customerManage.assignFailed'));
+      return;
+    }
+
+    // Assign the first customer (API supports one at a time)
+    // If multiple customers are selected, assign them sequentially
+    let successCount = 0;
+    let errorCount = 0;
+
+    const assignCustomer = (index: number) => {
+      if (index >= customerIds.length) {
+        // All customers processed
+        if (errorCount === 0) {
+          toast.success(t('customerManage.assignSuccess'));
+        } else if (successCount > 0) {
+          toast.warning(`${t('customerManage.assignSuccess')} (${successCount}/${customerIds.length})`);
+        } else {
+          toast.error(t('customerManage.assignFailed'));
+        }
+        queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+        // Note: Don't call refetchSales() here as it resets the saler list to page 0
+        // The customer list will be refreshed via query invalidation above
+        return;
+      }
+
       customerForSaleMutation.mutate(
-        { customer_id: getIds[0], sale_id: salesId },
+        { customer_id: customerIds[index], sale_id: salesId },
         {
           onSuccess: () => {
-            toast.success(t('customerManage.assignSuccess'));
-            queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
-            refetchSales();
+            successCount++;
+            // Assign next customer
+            assignCustomer(index + 1);
           },
           onError: () => {
-            toast.error(t('customerManage.assignFailed'));
+            errorCount++;
+            // Continue with next customer even if one fails
+            assignCustomer(index + 1);
           },
         }
       );
+    };
+
+    // Start assigning from the first customer
+    assignCustomer(0);
   };
 
   return (
