@@ -505,7 +505,9 @@
       "users": "Quản lý Người dùng",
       "system": "Quản trị Hệ thống",
       "telesales": "Telesales",
-      "sales": "Quản lý Bán hàng"
+      "sales": "Quản lý Bán hàng",
+      "material":"Quản lý nguyên liệu",
+      "stockManager":"Quản lý kho"
     },
     "items": {
       "superAdmin": "Quyền quản trị toàn bộ hệ thống",

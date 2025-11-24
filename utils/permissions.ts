@@ -204,9 +204,9 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
   // Partner Management (Banking)
   '/partner-manage': {
     required: [
-      'finance.manage_bank_accounts',
-      'finance.manage_bank_permissions',
-      'finance.view_bank_usage_stats',
+      // 'finance.manage_bank_accounts',
+      // 'finance.manage_bank_permissions',
+      'material.partner_manage',
       'system.admin'
     ],
     requireAll: false,

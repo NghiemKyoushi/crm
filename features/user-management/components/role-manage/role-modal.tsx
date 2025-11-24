@@ -29,6 +29,8 @@ const CATEGORY_I18N_KEYS: Record<string, string> = {
   SYSTEM_SETTINGS: "system",
   TELESALES: "telesales",
   SALES_MANAGEMENT: "sales",
+  WAREHOUSE_MANAGEMENT:"stockManager",
+  MATERIAL_MANAGEMENT:"material"
 };
 
 export function renderCategoryName(code: string, t: (key: string) => string) {
