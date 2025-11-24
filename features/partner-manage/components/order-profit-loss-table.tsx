@@ -228,7 +228,6 @@ export const OrderProfitLossTable: React.FC<{ code?: string; dateRange?: [any, a
             pageSizeOptions: ["10", "20", "50", "100"],
           }}
           scroll={{ x: 1000 }}
-          size="middle"
           summary={(pageData) => {
             if (pageData.length === 0) return null;
 
