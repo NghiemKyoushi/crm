@@ -1,6 +1,10 @@
 import api from "@/api/axiosClient";
 import { API_TYPE_CONST } from "@/constants/api-type";
-import { AssignSaleModel, TelesaleParamsList, TelesaleCustomerFormInput } from "../types/telesales-mng";
+import {
+  AssignSaleModel,
+  TelesaleParamsList,
+  TelesaleCustomerFormInput,
+} from "../types/telesales-mng";
 
 // Lấy danh sách account telesale
 export const getTelesaleAccounts = async () => {
@@ -60,7 +64,10 @@ export const addTelesaleTag = async (data: any) => {
 };
 
 // Cập nhật thẻ telesale
-export const updateTelesaleTag = async (id: string, data: { name: string, color: string }) => {
+export const updateTelesaleTag = async (
+  id: string,
+  data: { name: string; color: string }
+) => {
   const res = await api.put(
     `${API_TYPE_CONST.TELESSALE_UPDATE_TAG}${id}`,
     data
@@ -81,7 +88,10 @@ export const assignTelesale = async (body: AssignSaleModel) => {
 };
 
 // Gán thẻ cho telesale contact
-export const assignTelesaleTag = async (contactId: string, tagIds: number[]) => {
+export const assignTelesaleTag = async (
+  contactId: string,
+  tagIds: number[]
+) => {
   const url = API_TYPE_CONST.TELESSALE_ASSIGN_TAG.replace(
     "{contact_id}",
     contactId
@@ -89,7 +99,7 @@ export const assignTelesaleTag = async (contactId: string, tagIds: number[]) => 
   const res = await api.post(url, tagIds);
   return res.data;
 };
-// Unassign 
+// Unassign
 export const unassignTelesaleTag = async (contactId: string) => {
   const url = API_TYPE_CONST.TELESALE_UNASSIGN.replace(
     "{contact_id}",
@@ -100,7 +110,10 @@ export const unassignTelesaleTag = async (contactId: string) => {
 };
 
 // Xoá nhiều tag khỏi telesale contact (API mới)
-export const deleteTelesaleContactTags = async (contactId: string, tagIds: number[]) => {
+export const deleteTelesaleContactTags = async (
+  contactId: string,
+  tagIds: number[]
+) => {
   const url = API_TYPE_CONST.TELESSALE_ASSIGN_TAG.replace(
     "{contact_id}",
     contactId
@@ -113,7 +126,7 @@ export const deleteTelesaleContactTags = async (contactId: string, tagIds: numbe
 // Đổi trạng thái telesale contact
 export const changeTelesaleStatus = async (
   contactId: string,
-  params: { status: string, note: string }
+  params: { status: string; note: string }
 ) => {
   const url = API_TYPE_CONST.TELESSALE_CHANGE_STATUS.replace(
     "{contact_id}",
@@ -144,12 +157,27 @@ export const getTelesaleTagList = async (page?: number, pageSize?: number) => {
 };
 
 export const getTelesaleTagFilter = async (type: string) => {
-  const res = await api.get(`${API_TYPE_CONST.TELESALE_TAG_FILTER}?type=${type}`);
+  const res = await api.get(
+    `${API_TYPE_CONST.TELESALE_TAG_FILTER}?type=${type}`
+  );
   return res.data.data;
 };
 
 export const addTelesaleCustomer = async (data: TelesaleCustomerFormInput) => {
-  const res = await api.post(API_TYPE_CONST.TELESALE_ADD_CUSTOMER, data);
+  const dataCheck = {
+    name: data.name,
+    phone: data.phone,
+    email: data.email,
+    address: data.address,
+    business_field: data.business_field,
+    customer_info: data.customer_info,
+    service_tag_id: data.service_tag,
+    source_tag_id: data.source_tag,
+    status_tag_id: null,
+    note_request: data.note_request,
+    call_note: data.call_note,
+  };
+  const res = await api.post(API_TYPE_CONST.TELESALE_ADD_CUSTOMER, dataCheck);
   return res.data;
 };
 
@@ -162,7 +190,10 @@ export const updateTelesaleCustomer = async (
     customer_info?: string;
   }
 ) => {
-  const url = API_TYPE_CONST.TELESALE_CONTACT_UPDATE.replace("{id}", id.toString());
+  const url = API_TYPE_CONST.TELESALE_CONTACT_UPDATE.replace(
+    "{id}",
+    id.toString()
+  );
   const res = await api.put(url, data);
   return res.data;
 };
