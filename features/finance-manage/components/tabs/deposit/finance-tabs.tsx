@@ -9,6 +9,7 @@ import BankAccountSetting from "@/features/finance-manage/components/tabs/bank-c
 import {useSearchParams } from "next/navigation";
 import BankPartnerSetting from "../bank-partner/bank-partner";
 import PartnerDebtTable from "../debt_manage/debt_manage";
+import { useQueryClient } from "@tanstack/react-query";
 
 const FinanceDepositApprovalPage = () => {
   const searchParams = useSearchParams();
@@ -16,6 +17,7 @@ const FinanceDepositApprovalPage = () => {
   const code = searchParams.get("code");
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const { hasPermission, loading } = usePermission();
+  const queryClient = useQueryClient();
   // const router = useRouter();
   // const pathname = usePathname();
   const allowedTabs = [ 
@@ -63,6 +65,12 @@ const FinanceDepositApprovalPage = () => {
           <FinanceTabs
             activeKey={activeTab || ""}
             onChange={(key: string) => {
+              // Clear cache cho tất cả các tab khi chuyển tab
+              queryClient.removeQueries({ queryKey: ["listTopup"] });
+              queryClient.removeQueries({ queryKey: ["listwithdraw"] });
+              queryClient.removeQueries({ queryKey: ["bankAccounts"] });
+              queryClient.removeQueries({ queryKey: ["bankAccountsPartner"] });
+              queryClient.removeQueries({ queryKey: ["debtList"] });
               setActiveTab(key);
             }}
             allowedTabs={allowedTabs}

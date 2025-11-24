@@ -44,12 +44,12 @@ const DepositDetailModal = ({ open, onClose, record }: Props) => {
         </Descriptions.Item>
         <Descriptions.Item label="Ngày tạo">
           {record.created_at
-            ? dayjs(record.created_at).format("DD/MM/YYYY HH:mm")
+            ? dayjs(record.created_at).add(7, "hour").format("DD/MM/YYYY HH:mm")
             : "-"}
         </Descriptions.Item>
         <Descriptions.Item label="Ngày xử lý">
           {record.handler_time
-            ? dayjs(record.handler_time).format("DD/MM/YYYY HH:mm")
+            ? dayjs(record.handler_time).add(7, "hour").format("DD/MM/YYYY HH:mm")
             : "-"}
         </Descriptions.Item>
       </Descriptions>

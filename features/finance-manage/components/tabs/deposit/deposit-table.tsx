@@ -242,7 +242,7 @@ const DepositTable = (props: DepositTableProps) => {
             </Tooltip>
             {record.handler_time && (
               <div className="text-xs text-gray-500">
-                {dayjs(record.handler_time).format("DD/MM HH:mm")}
+                {dayjs(record.handler_time).add(7, "hour").format("DD/MM HH:mm")}
               </div>
             )}
           </div>
