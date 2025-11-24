@@ -87,8 +87,9 @@ export const menuPermissions: Record<string, string[]> = {
 
   // Partner Management - finance and admin
   "/partner-manage": [
-    "finance.manage_bank_accounts",
-    "finance.manage_bank_permissions",
+    // "finance.manage_bank_accounts",
+    // "finance.manage_bank_permissions",
+    'material.partner_manage',
     "system.admin"
   ],
 

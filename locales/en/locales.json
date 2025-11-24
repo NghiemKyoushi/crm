@@ -505,7 +505,9 @@
       "users": "User Management",
       "system": "System Administration",
       "telesales": "Telesales",
-      "sales": "Sales Management"
+      "sales": "Sales Management",
+      "material":"Material Manager",
+      "stockManager":"Stock manager"
     },
     "items": {
       "superAdmin": "Full system administration rights",
