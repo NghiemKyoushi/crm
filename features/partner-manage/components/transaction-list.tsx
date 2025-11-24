@@ -361,7 +361,6 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               pageSizeOptions: ["10", "20", "50", "100"],
             }}
             scroll={{ x: 1300 }}
-            size="middle"
             bordered
           />
         </div>
