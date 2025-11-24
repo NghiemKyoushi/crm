@@ -187,7 +187,6 @@ export default function OrderHub() {
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
   const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
 
-
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
@@ -1015,6 +1014,10 @@ export default function OrderHub() {
             color = "red";
             text = t("status.denied");
             break;
+          case OrderStatusType.PACKED:
+            color = "green";
+            text = t("status.packed");
+            break;
           default:
             color = "default";
             text = status;
@@ -1201,6 +1204,9 @@ export default function OrderHub() {
             break;
 
           case OrderStatusType.READY_TO_SHIP:
+            break;
+
+          case OrderStatusType.PACKED:
             break;
         }
 
