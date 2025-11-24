@@ -109,8 +109,6 @@ export const CancelOrderModal = ({
               ]}
             >
               <InputNumber
-                min={0}
-                max={maxRefundAmount}
                 style={{ width: "100%" }}
                 placeholder="Nhập số tiền hoàn"
                 formatter={(value) =>
