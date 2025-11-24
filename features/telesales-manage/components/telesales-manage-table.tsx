@@ -709,6 +709,7 @@ const TelesalesPage: React.FC = () => {
               onClick={() => {
                 setSelectedCustomer(record);
                 setIsOpenTagModal(true);
+                setTagTypeModal("STATUS");
               }}
             >
               <EditOutlined style={{ fontSize: 9 }} />
