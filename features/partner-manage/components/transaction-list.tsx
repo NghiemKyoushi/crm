@@ -148,7 +148,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       ),
     },
     {
-      title: t("partnerManage.partner"),
+      title: "Nguồn",
       dataIndex: "partnerName",
       key: "partnerName",
       width: 180,
