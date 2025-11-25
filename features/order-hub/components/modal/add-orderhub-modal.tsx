@@ -168,6 +168,9 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     TOTAL_COD_SHIPPING_FEE_JP: 0,
   });
 
+  // Add loading state for create order button
+  const [creatingOrder, setCreatingOrder] = useState(false);
+
   const handleOk = async () => {
     try {
       await form.validateFields();
@@ -208,6 +211,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
           cod_shipping_price: paymentAmount ? paymentAmount : 0,
           cod_type: paymentTypeForm,
         };
+
+        setCreatingOrder(true);
         createNewOrderMutation.mutate(
           {
             ...bodyNewOrder,
@@ -220,16 +225,20 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               });
               handleCancel();
               form.resetFields();
+              setCreatingOrder(false);
             },
-            onError: (err: any) =>
+            onError: (err: any) => {
               toast.error(
                 err.response?.data?.localizedMessage || t("common.error")
-              ),
+              );
+              setCreatingOrder(false);
+            },
           }
         );
       }
     } catch (err) {
       console.log("err", err);
+      setCreatingOrder(false);
     }
   };
 
@@ -507,6 +516,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
     setProductImages([]);
     setFileList([]);
     onCancel();
+    setCreatingOrder(false); // reset loading state just in case
   };
 
   useEffect(() => {
@@ -608,6 +618,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               onClick={handleCancel}
               size="large"
               className="!h-11 !px-6"
+              disabled={creatingOrder}
             >
               Hủy bỏ
             </Button>
@@ -615,6 +626,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
               key="submit"
               type="primary"
               onClick={handleOk}
+              loading={creatingOrder}
               size="large"
               className="!bg-gradient-to-r !from-green-500 !to-green-600 !h-11 !px-6 !border-0 hover:!from-green-600 hover:!to-green-700"
             >
