@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Form, Input, InputNumber, Modal, Select, message } from "antd";
-import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent, getCmsContentImageUrl } from "../apis/contents";
+import { CmsContent, CreateCmsContentBody, UpdateCmsContentBody, createCmsContent, updateCmsContent } from "../apis/contents";
 import { useMutation } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
 import CmsTiptapEditor from "./CmsTiptapEditor";

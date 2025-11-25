@@ -1,12 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Form, Input, InputNumber, Select, Upload, message, Button } from "antd";
+import { Form, Input, InputNumber, Select, message, Button } from "antd";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
-import { VIEW_IMAGE } from "@/constants/api-type";
-import { uploadImage } from "@/features/user-profile/hooks/user-profile";
 import { CreateCmsContentBody, createCmsContent } from "@/features/cms/apis/contents";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getResponseMessage } from "@/api/axiosClient";
@@ -17,32 +13,34 @@ export default function CreateContentPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const [form] = Form.useForm<CreateCmsContentBody>();
-    const [uploading, setUploading] = useState(false);
     const [bodyValue, setBodyValue] = useState<string>("");
     const [saving, setSaving] = useState(false);
-    
+
     const imageUrl = Form.useWatch("image_url", form);
-    const imageId = Form.useWatch("image_id", form);
     const contentType = Form.useWatch("type", form);
-    
+
     const thumbUrl = useMemo(() => {
-        // Check image_url first, then fallback to image_id
         if (imageUrl) {
             return imageUrl;
         }
-        if (imageId) {
-            const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-            return `${base}/${VIEW_IMAGE}${imageId}`;
-        }
         return undefined;
-    }, [imageUrl, imageId]);
+    }, [imageUrl]);
+
+    const extractImageIdFromUrl = (url?: string | null) => {
+        if (!url) return null;
+        const match1 = url.match(/\/view-image\/(\d+)/);
+        const match2 = url.match(/\/view\/thumb\/(\d+)/);
+        if (match1) return parseInt(match1[1], 10);
+        if (match2) return parseInt(match2[1], 10);
+        return null;
+    };
 
     // Sync body when type changes
     React.useEffect(() => {
         if (!contentType) return;
-        
+
         const currentBody = form.getFieldValue("body") || "";
-        
+
         if (contentType === "html" || contentType === "text") {
             // Switching to html/text - move from form field to bodyValue if needed
             if (!bodyValue && currentBody) {
@@ -73,7 +71,7 @@ export default function CreateContentPage() {
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
-            
+
             // Get body value based on type
             let finalBody = "";
             if (contentType === "html" || contentType === "text" || !contentType) {
@@ -91,15 +89,16 @@ export default function CreateContentPage() {
                     return;
                 }
             }
-            
-            const payload = {
+
+            const derivedImageId = extractImageIdFromUrl(values.image_url);
+
+            const payload: CreateCmsContentBody = {
                 ...values,
                 body: finalBody,
                 status: "active",
-                // Use image_url instead of image_id when creating/updating
-                image_id: null, // Don't send image_id anymore
-            } as CreateCmsContentBody;
-            
+                image_id: derivedImageId,
+            };
+
             setSaving(true);
             await mutateAsync(payload);
         } catch (error) {
@@ -118,9 +117,9 @@ export default function CreateContentPage() {
                     </Button>
                     <h1 className="text-2xl font-bold">Create Content</h1>
                 </div>
-                <Button 
-                    type="primary" 
-                    size="large" 
+                <Button
+                    type="primary"
+                    size="large"
                     onClick={handleSave}
                     loading={saving}
                 >
@@ -141,48 +140,28 @@ export default function CreateContentPage() {
                         order_index: 1,
                     }}
                 >
-                    <Form.Item label="Image">
-                        <Upload.Dragger
-                            accept="image/*"
-                            multiple={false}
-                            showUploadList={false}
-                            customRequest={async (options: RcCustomRequestOptions) => {
-                                const { file, onSuccess, onError } = options;
-                                try {
-                                    setUploading(true);
-                                    const id = await uploadImage(file as File);
-                                    const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-                                    const url = `${base}/${VIEW_IMAGE}${id}`;
-                                    // Set both image_id and image_url for backward compatibility
-                                    form.setFieldValue("image_id", id);
-                                    form.setFieldValue("image_url", url);
-                                    message.success("Image uploaded");
-                                    onSuccess?.({ id } as any);
-                                } catch (e) {
-                                    message.error("Upload failed");
-                                    onError?.(e as any);
-                                } finally {
-                                    setUploading(false);
-                                }
-                            }}
-                            disabled={uploading}
-                        >
-                            {thumbUrl ? (
-                                <div className="flex flex-col items-center gap-2 py-3">
-                                    <Image src={thumbUrl} alt="preview" width={128} height={128} className="max-h-32 rounded object-contain" />
-                                    <div className="text-xs text-gray-500">
-                                        {imageUrl ? `Image URL: ${imageUrl}` : imageId ? `Image ID: ${imageId}` : ''}
-                                    </div>
-                                    <div className="text-xs text-gray-400">Drag & drop to replace</div>
-                                </div>
-                            ) : (
-                                <div className="py-6">
-                                    <p className="ant-upload-drag-icon">📷</p>
-                                    <p className="ant-upload-text">Click or drag image to upload</p>
-                                </div>
-                            )}
-                        </Upload.Dragger>
+                    <Form.Item
+                        name="image_url"
+                        label="Image URL"
+                        rules={[{ type: "url", message: "Please enter a valid URL" }]}
+                    >
+                        <Input placeholder="https://example.com/image.jpg" />
                     </Form.Item>
+                    {thumbUrl && (
+                        <div className="mb-4 flex flex-col items-center gap-2">
+                            <img
+                                src={thumbUrl}
+                                alt="preview"
+                                className="max-h-32 rounded object-contain"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                            />
+                            <div className="text-xs text-gray-500 break-all text-center">
+                                {thumbUrl}
+                            </div>
+                        </div>
+                    )}
 
                     <Form.Item name="title" label="Title" rules={[{ required: true }]}>
                         <Input />
@@ -191,7 +170,7 @@ export default function CreateContentPage() {
                         <Input />
                     </Form.Item>
                     <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-                        <Select 
+                        <Select
                             options={[
                                 { value: "text", label: "Text" },
                                 { value: "html", label: "HTML" },
@@ -200,26 +179,26 @@ export default function CreateContentPage() {
                                 { value: "link", label: "Link" },
                                 { value: "embed", label: "Embed" },
                                 { value: "custom", label: "Custom" },
-                            ]} 
+                            ]}
                         />
                     </Form.Item>
                     <Form.Item name="position" label="Position" rules={[{ required: true }]}>
-                        <Select 
+                        <Select
                             options={[
                                 { value: "hero", label: "Banner đầu trang" },
                                 { value: "section_1", label: "Vùng giới thiệu" },
                                 { value: "section_2", label: "Vùng dịch vụ" },
                                 { value: "footer", label: "Dưới chân trang" },
                                 { value: "sidebar", label: "Thanh bên" },
-                            ]} 
+                            ]}
                         />
                     </Form.Item>
                     <Form.Item name="order_index" label="Order" rules={[{ required: true }]}>
                         <InputNumber min={0} style={{ width: "100%" }} />
                     </Form.Item>
-                    <Form.Item 
-                        name="body" 
-                        label="Body" 
+                    <Form.Item
+                        name="body"
+                        label="Body"
                         rules={[{ required: true, message: "Please enter content body" }]}
                         hidden
                     >
@@ -243,9 +222,6 @@ export default function CreateContentPage() {
                         </Form.Item>
                     )}
                     <Form.Item name="image_id" hidden>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="image_url" hidden>
                         <Input />
                     </Form.Item>
                     <Form.Item name="status" hidden>
