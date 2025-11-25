@@ -19,7 +19,7 @@ import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import { Node, Mark, mergeAttributes } from "@tiptap/core";
-import { Input, Modal, Select, Upload, message, Form, ColorPicker, InputNumber, Button as AntButton } from "antd";
+import { Input, Modal, Select, message, Form, ColorPicker, InputNumber, Button as AntButton } from "antd";
 import {
   BoldOutlined,
   ItalicOutlined,
@@ -43,8 +43,6 @@ import {
   VerticalAlignMiddleOutlined,
   VerticalAlignBottomOutlined,
 } from "@ant-design/icons";
-import { uploadImage } from "@/features/user-profile/hooks/user-profile";
-import { VIEW_IMAGE } from "@/constants/api-type";
 
 // Custom Columns Extension with customizable column count
 const Columns = Node.create({
@@ -374,7 +372,6 @@ export default function CmsTiptapEditor({
   const [columnsVerticalAlign, setColumnsVerticalAlign] = useState<'top' | 'middle' | 'bottom'>('top');
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageForm] = Form.useForm();
-  const [selectedImageNode, setSelectedImageNode] = useState<any>(null);
   const [resizing, setResizing] = useState(false);
   const [resizeData, setResizeData] = useState<{
     startX: number;
@@ -502,25 +499,15 @@ export default function CmsTiptapEditor({
     }
   };
 
-  const handleImageUpload = async (file: File) => {
-    try {
-      const imageId = await uploadImage(file);
-      const base = process.env.NEXT_PUBLIC_ROOT_STATIC_URL || "";
-      const imageUrl = `${base}/${VIEW_IMAGE}${imageId}`;
-
-      // Open image configuration modal
-      imageForm.setFieldsValue({
-        src: imageUrl,
-        alt: '',
-        width: '',
-        height: '',
-        align: 'inline',
-      });
-      setSelectedImageNode(null);
-      setImageModalOpen(true);
-    } catch (error) {
-      message.error("Failed to upload image");
-    }
+  const openImageModal = () => {
+    imageForm.setFieldsValue({
+      src: '',
+      alt: '',
+      width: '',
+      height: '',
+      align: 'inline',
+    });
+    setImageModalOpen(true);
   };
 
   const handleImageConfigSave = () => {
@@ -540,17 +527,11 @@ export default function CmsTiptapEditor({
         attrs.align = values.align;
       }
 
-      if (selectedImageNode !== null) {
-        // Update existing image
-        editor?.chain().focus().setNodeSelection(selectedImageNode).updateAttributes('image', attrs).run();
-      } else {
-        // Insert new image
-        editor?.chain().focus().setImage(attrs).run();
-      }
+      // Insert new image using provided URL
+      editor?.chain().focus().setImage(attrs).run();
 
       setImageModalOpen(false);
       imageForm.resetFields();
-      setSelectedImageNode(null);
       message.success("Image configured");
     });
   };
@@ -1149,22 +1130,14 @@ export default function CmsTiptapEditor({
           >
             <LinkOutlined />
           </button>
-          <Upload
-            showUploadList={false}
-            beforeUpload={(file) => {
-              handleImageUpload(file);
-              return false;
-            }}
-            accept="image/*"
+          <button
+            type="button"
+            onClick={openImageModal}
+            className="px-2 py-1 rounded hover:bg-gray-200 transition"
+            title="Insert Image"
           >
-            <button
-              type="button"
-              className="px-2 py-1 rounded hover:bg-gray-200 transition"
-              title="Insert Image"
-            >
-              <PictureOutlined />
-            </button>
-          </Upload>
+            <PictureOutlined />
+          </button>
           <button
             type="button"
             onClick={() => setYoutubeModalOpen(true)}
@@ -1505,7 +1478,6 @@ export default function CmsTiptapEditor({
         onCancel={() => {
           setImageModalOpen(false);
           imageForm.resetFields();
-          setSelectedImageNode(null);
         }}
         width={600}
       >
