@@ -157,7 +157,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
                   {customer?.user_profile.full_name}
                 </h2>
                 <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                  <span>ID: {customer?.user_profile.id}</span>
+                  <span>ID: {customer?.user_profile.customer_code}</span>
                   {/* <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium">
                     VIP
                   </span> */}

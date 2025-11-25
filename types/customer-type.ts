@@ -56,7 +56,8 @@ export interface Profile {
   email: string | null;
   phone: string | null;
   user_id: number;
-  birthday: string | null;
+  birthday: string | null; 
+  customer_code: string | null; 
 }
 
 export interface CustomerDetail {
