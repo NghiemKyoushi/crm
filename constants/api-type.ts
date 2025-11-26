@@ -161,4 +161,17 @@ export const API_TYPE_CONST = {
   TELESALE_UNASSIGN:`${FEATURE}/admin/telesales/contacts/{contact_id}/unassign`,
   TELESALE_CONTACT_UPDATE:`${FEATURE}/admin/telesales/contacts/{id}`,
   SETTING_TELEGRAM:`${FEATURE}/admin/web-setting`,
+
+  // Analytics API
+  ANALYTICS_CUSTOMERS_TOP_DEBT: `${FEATURE}/admin/analytics/customers/top-debt`,
+  ANALYTICS_CUSTOMERS_TOP_ORDERS: `${FEATURE}/admin/analytics/customers/top-orders`,
+  ANALYTICS_CUSTOMERS_TOP_SPENDING: `${FEATURE}/admin/analytics/customers/top-spending`,
+  ANALYTICS_CUSTOMERS_NEW: `${FEATURE}/admin/analytics/customers/new`,
+  ANALYTICS_CUSTOMERS_INCOMPLETE_ORDERS: `${FEATURE}/admin/analytics/customers/incomplete-orders`,
+  ANALYTICS_PRODUCTS_TOP_ORDERED: `${FEATURE}/admin/analytics/products/top-ordered`,
+  ANALYTICS_SALES_PERFORMANCE: `${FEATURE}/admin/analytics/sales/performance`,
+  ANALYTICS_ORDERS_TIMELINE: `${FEATURE}/admin/analytics/orders/timeline`,
+  ANALYTICS_ORDERS_PENDING: `${FEATURE}/admin/analytics/orders/pending`,
+  ANALYTICS_MATERIALS_PROFIT_LOSS: `${FEATURE}/admin/analytics/materials/profit-loss`,
+  ANALYTICS_SUMMARY: `${FEATURE}/admin/analytics/summary`,
 } as const;
