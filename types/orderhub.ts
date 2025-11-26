@@ -80,6 +80,8 @@ export interface Invoice {
   source_account_username?: string | null;
   source_website_name?: string | null;
   source_website_id?: number | null;
+  final_tracking?: string;
+
 }
 
 export interface InvoiceMetadata {

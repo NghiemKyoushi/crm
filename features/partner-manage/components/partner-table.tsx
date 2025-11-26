@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Tabs,
   Card,
   Form,
   Input,
@@ -16,17 +15,22 @@ import {
   Radio,
   Spin,
   DatePicker,
+  Statistic,
+  Progress,
+  Tabs,
+  Space,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, ArrowUpOutlined, ArrowDownOutlined, CalendarOutlined } from "@ant-design/icons";
+
+const { TabPane } = Tabs;
+const { RangePicker } = DatePicker;
 import { useTranslation } from "react-i18next";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   useCreateNewMaterial,
   useFifoBalance,
+  useProfitLossSummary,
 } from "../hooks/partner-manage-hook";
-import { FifoBalanceCards } from "./fifo-balance-cards";
-import { ProfitLossSummaryComponent } from "./profit-loss-summary";
-import { ProfitLossChart } from "./profit-loss-chart";
 import { OrderProfitLossTable } from "./order-profit-loss-table";
 import { TransactionList } from "./transaction-list";
 import { getListPartner } from "@/features/finance-manage/apis";
@@ -35,16 +39,9 @@ import { Partner } from "@/features/finance-manage/components/tabs/bank-partner/
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
-const { TabPane } = Tabs;
 const { Option } = Select;
 
 type TransactionType = "incoming" | "outgoing";
-
-type CurrencyTab = "JPY" | "USD"; // Only "JPY" or "USD" for the main tab
-type SubTab = "JPY" | "KG-JP" | "PT-JP" | "USD" | "KG-USD" | "PT-USD"; // Detailed sub-tabs based on main tab
-
-// Section tabs within subTab panel (the "bộ ba" as per instruction)
-type SectionTabKey = "transactions" | "profitloss" | "reports";
 
 export default function FIFOMaterialManagement() {
   const { t } = useTranslation();
@@ -52,15 +49,14 @@ export default function FIFOMaterialManagement() {
   const [form] = Form.useForm();
 
   // State
-  // mainTabKey = "JPY" or "USD"
-  const [mainTabKey, setMainTabKey] = useState<CurrencyTab>("JPY");
-  // subTabKey = "JPY", "KG-JP", "PT-JP", "USD", "KG-USD", "PT-USD"
-  const [subTabKey, setSubTabKey] = useState<SubTab>("JPY");
-
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("JPY");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [transactionType, setTransactionType] =
     useState<TransactionType>("incoming");
   const [page, setPage] = useState<number>(0);
+
+  // Date range filter
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
 
   // Date default state for modal
   const [defaultDate, setDefaultDate] = useState<dayjs.Dayjs | null>(null);
@@ -78,23 +74,6 @@ export default function FIFOMaterialManagement() {
     }
   }, [modalVisible, form]);
 
-  const defaultSectionTab: SectionTabKey = "transactions";
-  const [sectionTabs, setSectionTabs] = useState<Record<SubTab, SectionTabKey>>({
-    "JPY": defaultSectionTab,
-    "KG-JP": defaultSectionTab,
-    "PT-JP": defaultSectionTab,
-    "USD": defaultSectionTab,
-    "KG-USD": defaultSectionTab,
-    "PT-USD": defaultSectionTab,
-  });
-
-  // Section tab list for each subTab (always show 3)
-  const sectionTabList = [
-    { key: "transactions" as SectionTabKey, label: t("partnerManage.transactionsTab") },
-    { key: "profitloss" as SectionTabKey, label: t("partnerManage.profitLossTab") },
-    { key: "reports" as SectionTabKey, label: t("partnerManage.reportsTab") },
-  ];
-
   // Partner data using API call
   const {
     data: partnerData,
@@ -107,33 +86,48 @@ export default function FIFOMaterialManagement() {
 
   // Queries
   const { data: fifoBalanceData } = useFifoBalance();
+  const { data: profitLossData } = useProfitLossSummary(selectedCurrency);
   const createMutation = useCreateNewMaterial();
-  let currencyCode: string = "JPY";
-  if (subTabKey === "JPY" && mainTabKey === "JPY") currencyCode = "JPY";
-  else if (subTabKey === "KG-JP" && mainTabKey === "JPY") currencyCode = "KG-JP";
-  else if (subTabKey === "PT-JP" && mainTabKey === "JPY") currencyCode = "PT-JP";
-  else if (subTabKey === "USD" && mainTabKey === "USD") currencyCode = "USD";
-  else if (subTabKey === "KG-USD" && mainTabKey === "USD") currencyCode = "KG-US";
-  else if (subTabKey === "PT-USD" && mainTabKey === "USD") currencyCode = "PT-US";
 
   // Get balance for current selected currency
   const currentBalance = fifoBalanceData?.data?.find(
-    (b) => b.currencyCode === currencyCode
+    (b) => b.currencyCode === selectedCurrency
   );
+
+  // Get profit/loss summary for current currency
+  const currentProfitLoss = profitLossData?.data?.find(
+    (p) => p.currencyCode === selectedCurrency
+  );
+
+  // Format helper functions
+  const formatNumber = (num: number, decimals: number = 2): string => {
+    return new Intl.NumberFormat("vi-VN", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(num);
+  };
+
+  const formatCurrency = (num: number): string => {
+    return new Intl.NumberFormat("vi-VN").format(Math.round(num));
+  };
+
+  const calculateProgress = (balance: any): number => {
+    if (!balance || balance.totalIncoming === 0) return 0;
+    return Math.round((balance.fifoBalance / balance.totalIncoming) * 100);
+  };
 
   // Handle form submission
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
 
-      // Use the currently mapped currencyCode:
       const payload = {
         partnerId: values.partnerId,
         amount:
           transactionType === "incoming"
             ? values.amount
             : -Math.abs(values.amount),
-        currencyCode: currencyCode,
+        currencyCode: selectedCurrency,
         exchangeRate: values.exchangeRate,
         note: values.note || undefined,
         date: values.date ? dayjs(values.date).format("YYYY-MM-DD HH:mm:ss") : undefined,
@@ -169,7 +163,7 @@ export default function FIFOMaterialManagement() {
           <div>
             <p>
               {t("partnerManage.fifoBalance")}:{" "}
-              {currentBalance.fifoBalance.toLocaleString()} {currencyCode}
+              {currentBalance.fifoBalance.toLocaleString()} {selectedCurrency}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               {t("partnerManage.note")}: {t("partnerManage.amountNegative")}
@@ -189,215 +183,127 @@ export default function FIFOMaterialManagement() {
         }))
       : []) || [];
 
-  // Build sub tab list for each main tab
-  const getSubTabs = (main: CurrencyTab) => {
-    if (main === "JPY") {
-      return [
-        { key: "JPY", label: t("partnerManage.manageJPY") },
-        { key: "KG-JP", label: t("partnerManage.manageKG") },
-        { key: "PT-JP", label: t("partnerManage.manageSucharge") },
-      ];
-    }
-    if (main === "USD") {
-      return [
-        { key: "USD", label: t("partnerManage.manageUSD") },
-        { key: "KG-USD", label: t("partnerManage.manageKG") },
-        { key: "PT-USD", label: t("partnerManage.manageSucharge") },
-      ];
-    }
-    return [];
-  };
-
-  // Render content for each section tab (transactions, profitloss, reports)
-  const renderSectionTabContent = (sectionKey: SectionTabKey, sectionTabKey: any) => {
-    console.log('sectionTabKey', sectionTabKey);
-    
-    switch (sectionKey) {
-      case "transactions":
-        return (
-          <div className="fifo-content-area">
-            <TransactionList
-              currencyCode={currencyCode}
-              onAddTransaction={() => setModalVisible(true)}
-            />
-          </div>
-        );
-      case "profitloss":
-        return (
-          <div className="fifo-content-area">
-            <ProfitLossSummaryComponent code = {sectionTabKey} />
-            <OrderProfitLossTable code = {sectionTabKey}/>
-          </div>
-        );
-      case "reports":
-        return (
-          <div className="fifo-content-area">
-            <ProfitLossChart code={sectionTabKey} />
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  // Render each sub tab with its internal "bộ ba" section tabs
-  const renderSubTabPanelWithSectionTabs = (subTab: SubTab) => {    
-    const sectionTabKey = sectionTabs[subTab];
-    return (
-      <Tabs
-        activeKey={sectionTabKey}
-        onChange={(sectionKey) => {          
-          setSectionTabs((prev) => ({
-            ...prev,
-            [subTab]: sectionKey as SectionTabKey,
-          }));
-        }}
-        className="fifo-section-tabs"
-        tabBarGutter={32}
-      >
-        {sectionTabList.map((section) => (
-          <TabPane tab={section.label} key={section.key}>
-            {renderSectionTabContent(section.key, subTab)}
-          </TabPane>
-        ))}
-      </Tabs>
-    );
-  };
+  // Available currencies
+  const currencyTabs = [
+    { key: "JPY", label: "JPY" },
+    { key: "KG-JP", label: "KG-JP" },
+    { key: "PT-JP", label: "PT-JP" },
+    { key: "USD", label: "USD" },
+    { key: "KG-US", label: "KG-US" },
+    { key: "PT-US", label: "PT-US" },
+  ];
 
   return (
     <div className="p-6">
-      {/* Page Header */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-800">
+      {/* Page Header - Compact */}
+      <div className="mb-3">
+        <h2 className="text-base font-bold text-gray-800">
           {t("menu.partnerManagement")}
         </h2>
-        <p className="text-xs text-gray-600 mt-1">
-          {t("partnerManage.fifoBalanceTitle")}
-        </p>
       </div>
 
-      {/* FIFO Balance Cards - Always visible at top */}
+      {/* Main Container Card */}
+      <Card>
+        {/* Currency Tabs */}
+        <style jsx global>{`
+          .partner-currency-tabs .ant-tabs-nav {
+            margin-bottom: 20px;
+          }
+          .partner-currency-tabs .ant-tabs-tab {
+            font-size: 14px;
+          }
+        `}</style>
 
-      {/* Currency Tabs and Section Tab Styling */}
-      <style jsx global>{`
-        .fifo-main-tabs .ant-tabs-nav {
-          width: 100%;
-        }
-        .fifo-main-tabs .ant-tabs-nav-list {
-          width: 100%;
-          display: flex;
-        }
-        .fifo-main-tabs .ant-tabs-tab {
-          flex: 1;
-          justify-content: center;
-          margin: 0 !important;
-        }
-        .fifo-main-tabs .ant-tabs-content-holder {
-          width: 100%;
-          padding: 0 !important;
-        }
-        .fifo-main-tabs .ant-tabs-content {
-          width: 100%;
-        }
-        .fifo-main-tabs .ant-tabs-tabpane {
-          width: 100%;
-          padding: 0 !important;
-        }
-        .fifo-sub-tabs {
-          width: 100%;
-        }
-        .fifo-sub-tabs .ant-tabs-nav {
-          width: 100%;
-        }
-        .fifo-sub-tabs .ant-tabs-nav-list {
-          width: 100%;
-          display: flex;
-        }
-        .fifo-sub-tabs .ant-tabs-tab {
-          flex: 1;
-          justify-content: center;
-        }
-        .fifo-sub-tabs .ant-tabs-content-holder {
-          width: 100%;
-          padding: 24px 0 !important;
-        }
-        .fifo-sub-tabs .ant-tabs-content {
-          width: 100%;
-        }
-        .fifo-sub-tabs .ant-tabs-tabpane {
-          width: 100%;
-          padding: 0 !important;
-        }
-        .fifo-section-tabs {
-          width: 100%;
-        }
-        .fifo-section-tabs .ant-tabs-nav {
-          width: 100%;
-        }
-        .fifo-section-tabs .ant-tabs-nav-list {
-          width: 100%;
-          display: flex;
-        }
-        .fifo-section-tabs .ant-tabs-tab {
-          flex: 1;
-          justify-content: center;
-        }
-        .fifo-section-tabs .ant-tabs-content-holder {
-          width: 100%;
-          padding: 0 !important;
-        }
-        .fifo-section-tabs .ant-tabs-content {
-          width: 100%;
-        }
-        .fifo-section-tabs .ant-tabs-tabpane {
-          width: 100%;
-          padding: 0 !important;
-        }
-        .fifo-main-tabs .ant-card,
-        .fifo-sub-tabs .ant-card,
-        .fifo-section-tabs .ant-card,
-        .fifo-main-tabs > div,
-        .fifo-sub-tabs > div,
-        .fifo-section-tabs > div {
-          width: 100%;
-          max-width: 100%;
-        }
-      `}</style>
+        <Tabs
+          activeKey={selectedCurrency}
+          onChange={setSelectedCurrency}
+          type="line"
+          className="partner-currency-tabs"
+        >
+          {currencyTabs.map((tab) => (
+            <TabPane tab={tab.label} key={tab.key}>
+              {/* Metrics Header */}
+              <Row gutter={[12, 12]} className="mb-4">
+                {/* Tồn kho */}
+                <Col xs={8} sm={6} md={5}>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">Tồn kho</div>
+                    <div className="text-base font-semibold text-gray-800">
+                      {currentBalance ? formatNumber(currentBalance.fifoBalance, 0) : "0"}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {calculateProgress(currentBalance)}%
+                    </div>
+                  </div>
+                </Col>
 
-      {/* Main Currency Tabs */}
-      <Tabs
-        activeKey={mainTabKey}
-        onChange={(key: string) => {
-          setMainTabKey(key as CurrencyTab);          
-          const subTabs = getSubTabs(key as CurrencyTab);
-          setSubTabKey(subTabs.length ? (subTabs[0].key as SubTab) : "JPY");
-        }}
-        type="card"
-        size="large"
-        className="mb-6 fifo-main-tabs"
-      >
-        {(["JPY", "USD"] as CurrencyTab[]).map((mainTab) => (
-          <TabPane tab={mainTab === "JPY" ? "Tuyến VN -> JP" : "Tuyến VN -> US"} key={mainTab}>
-            {/* Sub-tabs */}
-            <FifoBalanceCards JP={mainTab.includes('JP')} US={mainTab.includes('US')} />
-            <Tabs
-              activeKey={subTabKey}
-              onChange={(key: string) => {
-                setSubTabKey(key as SubTab);
-              }}
-              type="card"
-              size="large"
-              className="fifo-sub-tabs"
-            >
-              {getSubTabs(mainTab).map((sub) => (
-                <TabPane tab={sub.label} key={sub.key}>
-                  {renderSubTabPanelWithSectionTabs(sub.key as SubTab)}
-                </TabPane>
-              ))}
-            </Tabs>
-          </TabPane>
-        ))}
-      </Tabs>
+                {/* Nhập */}
+                <Col xs={8} sm={6} md={5}>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">Nhập</div>
+                    <div className="text-base font-semibold text-green-600">
+                      +{currentBalance ? formatNumber(currentBalance.totalIncoming, 0) : "0"}
+                    </div>
+                  </div>
+                </Col>
+
+                {/* Xuất */}
+                <Col xs={8} sm={6} md={4}>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">Xuất</div>
+                    <div className="text-base font-semibold text-red-600">
+                      -{currentBalance ? formatNumber(currentBalance.totalOutgoing, 0) : "0"}
+                    </div>
+                  </div>
+                </Col>
+
+                {/* GD */}
+                <Col xs={8} sm={6} md={3}>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">GD</div>
+                    <div className="text-base font-semibold text-gray-800">
+                      {currentBalance ? currentBalance.transactionCount : 0}
+                    </div>
+                  </div>
+                </Col>
+
+                {/* Tổng Lãi/Lỗ */}
+                <Col xs={16} sm={12} md={7}>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">Tổng Lãi/Lỗ</div>
+                    <div
+                      className="text-base font-semibold"
+                      style={{
+                        color: currentProfitLoss && currentProfitLoss.totalProfitLossVnd > 0 ? "#52c41a" : "#ff4d4f",
+                      }}
+                    >
+                      {currentProfitLoss
+                        ? `${currentProfitLoss.totalProfitLossVnd > 0 ? "+" : ""}${formatCurrency(currentProfitLoss.totalProfitLossVnd)}đ`
+                        : "0đ"}
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+
+              <div className="border-t border-gray-200 mb-4"></div>
+
+              {/* Transaction List */}
+              <TransactionList
+                currencyCode={selectedCurrency}
+                onAddTransaction={() => setModalVisible(true)}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+              />
+
+              {/* Order Profit/Loss Table */}
+              <OrderProfitLossTable
+                code={selectedCurrency}
+                dateRange={dateRange}
+              />
+            </TabPane>
+          ))}
+        </Tabs>
+      </Card>
 
       {/* Add Transaction Modal */}
       <Modal
@@ -434,12 +340,12 @@ export default function FIFOMaterialManagement() {
           {/* Currency (read-only, based on current selection) */}
           <Form.Item
             label={
-              currencyCode === "KG"
+              selectedCurrency.includes("KG")
                 ? t("partnerManage.unit")
                 : t("partnerManage.currencyCode")
             }
           >
-            <Input value={currencyCode} disabled size="large" />
+            <Input value={selectedCurrency} disabled size="large" />
           </Form.Item>
 
           {/* Partner Selection */}
@@ -496,7 +402,7 @@ export default function FIFOMaterialManagement() {
 
           {/* Amount */}
           <Form.Item
-            label={currencyCode.includes("PT") ? t("partnerManage.amountMoney") : t("partnerManage.amount")}
+            label={selectedCurrency.includes("PT") ? t("partnerManage.amountMoney") : t("partnerManage.amount")}
             name="amount"
             rules={[
               {
@@ -508,7 +414,7 @@ export default function FIFOMaterialManagement() {
                 min: 0.01,
                 message: t("partnerManage.amountPositive"),
               },
-              ...(transactionType === "outgoing" && currentBalance && currencyCode !== "PT"
+              ...(transactionType === "outgoing" && currentBalance && !selectedCurrency.includes("PT")
                 ? [
                     {
                       validator: (_: any, value: number) => {
@@ -517,7 +423,7 @@ export default function FIFOMaterialManagement() {
                             new Error(
                               `${t(
                                 "partnerManage.fifoBalance"
-                              )}: ${currentBalance.fifoBalance.toLocaleString()} ${currencyCode}`
+                              )}: ${currentBalance.fifoBalance.toLocaleString()} ${selectedCurrency}`
                             )
                           );
                         }
@@ -528,17 +434,17 @@ export default function FIFOMaterialManagement() {
                 : []),
             ]}
             extra={
-              transactionType === "outgoing" && currentBalance && !currencyCode.includes("PT") ? (
+              transactionType === "outgoing" && currentBalance && !selectedCurrency.includes("PT") ? (
                 <span className="text-sm text-gray-500">
                   {t("partnerManage.fifoBalance")}:{" "}
-                  {currentBalance.fifoBalance.toLocaleString()} {currencyCode}
+                  {currentBalance.fifoBalance.toLocaleString()} {selectedCurrency}
                 </span>
               ) : null
             }
           >
             <InputNumber
               placeholder={
-                currencyCode.includes("PT")
+                selectedCurrency.includes("PT")
                   ? t("partnerManage.amountMoney")
                   : t("partnerManage.enterAmount")
               }
@@ -554,10 +460,10 @@ export default function FIFOMaterialManagement() {
           </Form.Item>
 
           {/* Exchange Rate */}
-          {!currencyCode.includes("PT") && (
+          {!selectedCurrency.includes("PT") && (
             <Form.Item
               label={
-                currencyCode === "KG"
+                selectedCurrency.includes("KG")
                   ? t("partnerManage.feePerKg")
                   : t("partnerManage.exchangeRateLabel")
               }

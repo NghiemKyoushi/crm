@@ -11,13 +11,17 @@ import {
   Tag,
   Space,
   Tooltip,
+  DatePicker,
 } from "antd";
 import {
   DeleteOutlined,
   SearchOutlined,
   ReloadOutlined,
   PlusOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
+
+const { RangePicker } = DatePicker;
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,11 +36,15 @@ import dayjs from "@/utils/dayjs-config";
 interface TransactionListProps {
   currencyCode: string;
   onAddTransaction?: () => void;
+  dateRange?: [any, any];
+  onDateRangeChange?: (dates: [any, any]) => void;
 }
 
 export const TransactionList: React.FC<TransactionListProps> = ({
   currencyCode,
   onAddTransaction,
+  dateRange,
+  onDateRangeChange,
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -48,12 +56,20 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   const [selectedTransaction, setSelectedTransaction] =
     useState<PartnerTransaction | null>(null);
 
-  const { data, isLoading, refetch } = useListMaterial({
+  // Build query params with date range
+  const queryParams: any = {
     page,
     page_size: pageSize,
     search: searchText,
     currency_code: currencyCode,
-  });
+  };
+
+  if (dateRange && dateRange[0] && dateRange[1]) {
+    queryParams.from_date = dateRange[0].format("YYYY-MM-DD");
+    queryParams.to_date = dateRange[1].format("YYYY-MM-DD");
+  }
+
+  const { data, isLoading, refetch } = useListMaterial(queryParams);
 
   const deleteMutation = useDeleteMaterial();
   const recalculateMutation = useRecalculateFifo();
@@ -128,11 +144,11 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       key: "id",
       width: 80,
       render: (id: number) => (
-        <span className="font-mono text-gray-600">#{id}</span>
+        <span className="font-mono text-sm text-gray-600">#{id}</span>
       ),
     },
     {
-      title: t("partnerManage.partner"),
+      title: "Nguồn",
       dataIndex: "partnerName",
       key: "partnerName",
       width: 180,
@@ -150,7 +166,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           placement="topLeft"
         >
           <div className="cursor-pointer">
-            <div className="font-semibold text-gray-800 truncate">{name}</div>
+            <div className="text-sm text-gray-800 truncate">{name}</div>
             {record.bankName && (
               <div className="text-xs text-gray-500 truncate">{record.bankName}</div>
             )}
@@ -184,7 +200,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         const isIncoming = value > 0;
         return (
           <span
-            className="font-semibold text-base"
+            className="text-sm"
             style={{ color: isIncoming ? "#52c41a" : "#ff4d4f" }}
           >
             {isIncoming ? "+" : ""}
@@ -202,7 +218,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       render: (value: number | undefined) => {
         if (value === undefined || value === null) return "-";
         return (
-          <span className="text-gray-700 font-medium">{formatNumber(Math.abs(value))}</span>
+          <span className="text-sm text-gray-700">{formatNumber(Math.abs(value))}</span>
         );
       },
     },
@@ -218,7 +234,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
             width: 130,
             align: "right" as const,
             render: (value: number) => (
-              <span className="text-gray-700">{formatNumber(value)}</span>
+              <span className="text-sm text-gray-700">{formatNumber(value)}</span>
             ),
           },
         ]
@@ -237,7 +253,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
             <span className="text-gray-600 text-sm cursor-pointer">{note}</span>
           </Tooltip>
         ) : (
-          <span className="text-gray-400">-</span>
+          <span className="text-gray-400 text-sm">-</span>
         ),
     },
     {
@@ -248,7 +264,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       sorter: (a, b) =>
         dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
       render: (date: string) => (
-        <span className="text-gray-700">
+        <span className="text-sm text-gray-700">
           {dayjs(date).format("DD/MM/YYYY HH:mm")}
         </span>
       ),
@@ -277,11 +293,20 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <>
       <div className="mb-4 w-full">
         {/* Header with Search and Actions */}
-        <div className="flex justify-between items-center mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold m-0">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-semibold text-gray-800 m-0">
             {t("partnerManage.partnerListTitle")} - {currencyCode}
           </h3>
           <Space>
+            <RangePicker
+              value={dateRange as any}
+              onChange={(dates) => onDateRangeChange && onDateRangeChange(dates as [any, any])}
+              format="DD/MM/YYYY"
+              placeholder={["Từ ngày", "Đến ngày"]}
+              suffixIcon={<CalendarOutlined />}
+              allowClear
+              size="middle"
+            />
             <Input
               placeholder={t("partnerManage.searchPartnerPlaceholder")}
               prefix={<SearchOutlined />}
@@ -290,7 +315,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                 setSearchText(e.target.value);
                 setPage(0);
               }}
-              style={{ width: 250 }}
+              style={{ width: 200 }}
               allowClear
             />
             {onAddTransaction && (
@@ -315,12 +340,13 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         </div>
 
         {/* Full Width Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div>
           <Table
             columns={columns}
             dataSource={data?.data || []}
             loading={isLoading}
             rowKey="id"
+            size="small"
             pagination={{
               current: page + 1,
               pageSize: pageSize,
@@ -335,7 +361,6 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               pageSizeOptions: ["10", "20", "50", "100"],
             }}
             scroll={{ x: 1300 }}
-            size="middle"
             bordered
           />
         </div>

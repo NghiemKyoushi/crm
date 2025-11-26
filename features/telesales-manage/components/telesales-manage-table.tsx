@@ -642,6 +642,7 @@ const TelesalesPage: React.FC = () => {
                 />
               </div>
             </div>
+            <div className="h-4"></div>
           </div>
         );
       },
@@ -709,6 +710,7 @@ const TelesalesPage: React.FC = () => {
               onClick={() => {
                 setSelectedCustomer(record);
                 setIsOpenTagModal(true);
+                setTagTypeModal("STATUS");
               }}
             >
               <EditOutlined style={{ fontSize: 9 }} />

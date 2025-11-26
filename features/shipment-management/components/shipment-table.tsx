@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Form, Button, Tag, Table, Modal } from "antd";
+import { Form, Button, Tag, Table, Modal, Tooltip } from "antd";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -211,26 +211,27 @@ const ProductManagement: React.FC = () => {
       }),
       render: (_, record) => {
         const orderList = record.order_list || [];
-
-        // Tính tổng cân nặng từ tất cả orders
         const totalWeight = orderList.reduce(
           (sum, order) => sum + (order.weight || 0),
           0
         );
-
-        // Lấy tất cả tracking_vn
         const trackingVnList = orderList
           .map((order) => order.tracking_vn)
           .filter(Boolean);
-
-        const firstTrackingVn = trackingVnList[0] || "-";
         const remainingCount = trackingVnList.length - 1;
 
         return (
           <div className="space-y-1">
             <div className="text-xs truncate">
               <span className="text-gray-500">Mã VN: </span>
-              <span className="text-gray-800">{firstTrackingVn}</span>
+              <Tooltip title={record.final_tracking || "-"}>
+                <span
+                  className="text-gray-800 max-w-[110px] inline-block truncate align-bottom"
+                  style={{ verticalAlign: 'bottom' }}
+                >
+                  {record.final_tracking || "-"}
+                </span>
+              </Tooltip>
             </div>
             {remainingCount > 0 && (
               <div className="text-xs text-blue-600">
@@ -244,6 +245,48 @@ const ProductManagement: React.FC = () => {
           </div>
         );
       },
+    },
+    {
+      title: "Phí vận chuyển",
+      key: "shipping_fee",
+      width: 200,
+      onCell: () => ({
+        style: {
+          borderRight: "1px solid #f0f0f0",
+        },
+      }),
+      render: (_, record) => {
+        const shippingTypeMap: Record<string, string> = {
+          "1": "Miễn phí",
+          "2": "Có phí",
+          "4": "Khách hàng trả",
+        };
+        let shippingTypeText = "-";
+        if (record.shipping_type !== undefined && record.shipping_type !== null) {
+          shippingTypeText = shippingTypeMap[record.shipping_type as keyof typeof shippingTypeMap] ?? "-";
+        }
+        const shouldShowFee = record.shipping_type === "2" || record.shipping_type === "4";
+
+        return (
+          <div className="space-y-1">
+            {shouldShowFee && (
+              <div className="text-xs">
+                <span className="text-gray-500">Phí: </span>
+                <span className="text-gray-800 font-medium">
+                  {typeof record.shipping_fee === 'number' ? `${record.shipping_fee.toLocaleString("en-US")}đ` : "-"}
+                </span>
+              </div>
+            )}
+            <div className="text-xs">
+              <span className="text-gray-500">Loại: </span>
+              <span className="text-blue-600 font-medium">
+                {shippingTypeText}
+              </span>
+            </div>
+          </div>
+        );
+      }
+
     },
     {
       title: "Khách Hàng / NTạo",
@@ -424,8 +467,8 @@ const ProductManagement: React.FC = () => {
     },
   ];
   return (
-    <div className="p-6 bg-gray-50">
-      <div className="bg-white rounded-xl shadow p-6">
+    <div className=" bg-gray-50">
+      <div className="bg-white rounded-xl  shadow p-6">
         {/* Header with Filter */}
         <div className="flex flex-col mb-2 gap-4">
           {/* <h2 className="text-lg font-semibold">
@@ -645,12 +688,27 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
         <div className="space-y-1">
           <div className="text-xs">
             <span className="text-gray-500">VN: </span>
-            <span className="text-gray-800">{record.tracking_vn || "-"}</span>
+            <Tooltip title={record.tracking_final || "-"}>
+              <span
+                className="text-gray-800 max-w-[110px] inline-block truncate align-bottom"
+                style={{ verticalAlign: 'bottom' }}
+              >
+                {record.tracking_final || "-"}
+              </span>
+            </Tooltip>
           </div>
+          {/* Xử lý lại phân biệt các mã trong list */}
           <div className="text-xs">
             <span className="text-gray-500">JP: </span>
             <span className="text-gray-800">
-              {record.tracking_other || "-"}
+              {record.tracking_japans && Array.isArray(record.tracking_japans) && record.tracking_japans.length > 0
+                ? record.tracking_japans.map((jp, idx) => (
+                    <span key={jp}>
+                      <span className="px-1 py-[2px] bg-blue-100 rounded text-blue-700 mr-1">{jp}</span>
+                      {record.tracking_japans && idx < record.tracking_japans.length - 1 && <span>, </span>}
+                    </span>
+                  ))
+                : "-"}
             </span>
           </div>
         </div>

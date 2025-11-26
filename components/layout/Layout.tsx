@@ -5,11 +5,14 @@ import { Layout } from "antd";
 import { PermissionProvider } from "./PermissionContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import ContentWrapper from "./Content";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const metadata: Metadata = {
   title: "OrderSystem",
   description: "Dashboard using Next.js & Ant Design",
 };
+
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -17,16 +20,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PermissionProvider>
-      <SidebarProvider>
-        <Layout style={{ minHeight: "100vh" }}>
-          <Sidebar />
-          <Layout>
-            <Header />
-            <ContentWrapper>{children}</ContentWrapper>
+    <QueryClientProvider client={queryClient}>
+      <PermissionProvider>
+        <SidebarProvider>
+          <Layout style={{ minHeight: "100vh" }}>
+            <Sidebar />
+            <Layout>
+              <Header />
+              <ContentWrapper>{children}</ContentWrapper>
+            </Layout>
           </Layout>
-        </Layout>
-      </SidebarProvider>
-    </PermissionProvider>
+        </SidebarProvider>
+      </PermissionProvider>
+    </QueryClientProvider>
   );
 }

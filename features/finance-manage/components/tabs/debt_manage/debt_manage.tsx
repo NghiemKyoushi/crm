@@ -171,211 +171,170 @@ const PartnerDebtTable = () => {
         const isBalanced =
           +record.total_remaining_debts === 0 && status !== "PENDING";
         let statusText = "";
-        let statusColor: "default" | "orange" | "red" | "green" | undefined =
-          "default";
 
-        // Set status text and color
+        // Set status text
         switch (status) {
           case "NEW":
             if (isNo) {
               statusText = "Mình nợ";
-              statusColor = "red";
             } else if (isBalanced) {
               statusText = "Đã cân bằng";
-              statusColor = "default";
             } else {
               statusText = "Đối tác giữ thừa";
-              statusColor = "green";
             }
             break;
           case "PENDING":
             statusText = "Chờ xác nhận";
-            statusColor = "orange";
             break;
           case "COMPLETED":
             statusText = "Hoàn thành";
-            statusColor = "green";
             break;
           case "CANCELED":
             statusText = "Đã từ chối";
-            statusColor = "default";
             break;
           default:
             statusText = "Đã cân bằng";
-            statusColor = "default";
         }
+
+        // Determine background and border styles
+        const getCardStyles = () => {
+          if (status === "PENDING") {
+            return "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200";
+          }
+          if (status === "NEW") {
+            if (isNo) return "bg-gradient-to-r from-red-50 to-rose-50 border-red-200";
+            if (isBalanced) return "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200";
+            return "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200";
+          }
+          if (status === "COMPLETED") {
+            return "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200";
+          }
+          return "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200";
+        };
+
+        // Format balance display
+        const formatBalance = () => {
+          const amount = typeof record.total_remaining_debts === "number"
+            ? record.total_remaining_debts
+            : Number(record.total_remaining_debts) || 0;
+
+          if (isNo) {
+            return {
+              label: "Số dư thực tế",
+              value: `${Math.abs(amount).toLocaleString()} ₫`,
+              colorClass: "text-red-600",
+            };
+          }
+          if (isBalanced) {
+            return {
+              label: "Số dư thực tế",
+              value: "0 ₫",
+              colorClass: "text-gray-600",
+            };
+          }
+          return {
+            label: "Số dư thực tế",
+            value: `Thừa ${Math.abs(amount).toLocaleString()} ₫`,
+            colorClass: status === "PENDING" ? "text-amber-600" : "text-green-600",
+          };
+        };
+
+        const balance = formatBalance();
 
         return (
           <div
-            className={`flex items-center min-h-[100px] text-[15px] rounded-[8px] px-[16px] py-[12px] 
-              ${
-                status === "PENDING"
-                  ? "bg-yellow-50 border border-yellow-300"
-                  : status === "NEW"
-                  ? isNo
-                    ? "bg-red-50 border border-[#ffccc7]"
-                    : isBalanced
-                    ? "bg-[#f0f0f0] border border-[#d9d9d9]"
-                    : "bg-green-50 border border-[#b7eb8f]"
-                  : status === "COMPLETED"
-                  ? "bg-green-50 border border-[#b7eb8f]"
-                  : status === "CANCELED"
-                  ? "bg-[#f0f0f0] border border-[#d9d9d9]"
-                  : "bg-[#f0f0f0] border border-[#d9d9d9]"
-              }
-            `}
+            className={`flex items-center h-[88px] rounded-xl px-5 py-4 border transition-all duration-200 hover:shadow-md ${getCardStyles()}`}
           >
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center mb-2 gap-2">
-                <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-[17px] truncate max-w-[250px] text-[#262626]">
+            {/* Left: Partner Info */}
+            <div className="flex-1 min-w-0 flex items-center gap-4">
+              {/* Avatar */}
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-lg
+                ${status === "PENDING" ? "bg-gradient-to-br from-amber-400 to-orange-500" :
+                  status === "NEW" ? (isNo ? "bg-gradient-to-br from-red-400 to-rose-500" :
+                    isBalanced ? "bg-gradient-to-br from-gray-400 to-slate-500" :
+                    "bg-gradient-to-br from-green-400 to-emerald-500") :
+                  status === "COMPLETED" ? "bg-gradient-to-br from-green-400 to-emerald-500" :
+                  "bg-gradient-to-br from-gray-400 to-slate-500"
+                }`}
+              >
+                {record.full_name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+
+              {/* Name & Email */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-base text-gray-900 truncate max-w-[200px]">
                     {record.full_name}
                   </span>
-                  <span className="text-[#5b5a5a] text-sm truncate max-w-[250px]">
-                    {record.email}
-                  </span>
+                  <Tag
+                    className={`!text-xs !py-0 !px-2 !h-5 !leading-5 !rounded-full !border-0 !font-medium
+                      ${status === "NEW" ? (isNo ? "!bg-red-100 !text-red-700" :
+                          isBalanced ? "!bg-gray-100 !text-gray-600" :
+                          "!bg-green-100 !text-green-700") :
+                        status === "PENDING" ? "!bg-amber-100 !text-amber-700" :
+                        status === "COMPLETED" ? "!bg-green-100 !text-green-700" :
+                        "!bg-gray-100 !text-gray-600"
+                      }`}
+                  >
+                    {statusText}
+                  </Tag>
                 </div>
-                <Tag
-                  className={`
-                    !text-[13px] !py-[1px] !px-[10px] !h-[24px] !leading-[22px] 
-                    !rounded-[16px] 
-                    ${
-                      status === "NEW"
-                        ? isNo
-                          ? "!bg-red-100 !text-red-800 "
-                          : isBalanced
-                          ? "!bg-grey-100 !text-grey-800"
-                          : " !bg-green-100 !text-green-800"
-                        : status === "PENDING"
-                        ? "!bg-[#fffbe6] !border-[#ffe58f] !text-[#d48806]"
-                        : status === "COMPLETED"
-                        ? "!bg-[#f6ffed] !border-[#81d83e] !text-[#237804]"
-                        : status === "CANCELED"
-                        ? "!bg-[#fafafa] !border-[#d9d9d9] !text-[#8c8c8c]"
-                        : "!bg-[#fafafa] !border-[#d9d9d9] !text-[#595959]"
-                    }
-                  `}
-                  bordered={false}
-                >
-                  {statusText}
-                </Tag>
-              </div>
-
-              <div className="grid grid-cols-2 gap-y-1 gap-x-3 text-[14px] leading-[1.4]">
-                {/* <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Tổng nợ phát sinh:</span>
-                  <b className="text-[#222] text-[14px]">
-                    {(typeof record.total_debts === "number"
-                      ? record.total_debts.toLocaleString()
-                      : record.total_debts) || 0}{" "}
-                    ₫
-                  </b>
-                </div>
-                <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Điều chỉnh:</span>
-                  <b className={`text-[14px] ${record.total_adjustments < 0 ? 'text-red-600' : record.total_adjustments > 0 ? 'text-green-600' : 'text-[#262626]'}`}>
-                    {(typeof record.total_adjustments === "number"
-                      ? record.total_adjustments.toLocaleString()
-                      : record.total_adjustments) || 0}{" "}
-                    ₫
-                  </b>
-                </div>
-                <div>
-                  <span className="text-[#5a5959] mr-1 text-[14px]">Đã thanh toán:</span>
-                  <b className="text-[#262626] text-[14px]">
-                    {(typeof record.total_paid_debts === "number"
-                      ? record.total_paid_debts.toLocaleString()
-                      : record.total_paid_debts) || 0}{" "}
-                    ₫
-                  </b>
-                </div> */}
-                <div>
-                  {isNo ? (
-                    <>
-                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
-                      <b className="text-[#ff4d4f] font-semibold text-[14px]">
-                        {(typeof record.total_remaining_debts === "number"
-                          ? record.total_remaining_debts.toLocaleString()
-                          : record.total_remaining_debts) || 0}{" "}
-                        ₫
-                      </b>
-                    </>
-                  ) : isBalanced ? (
-                    <>
-                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
-                      <b className="text-[#595959] font-medium text-[14px]">0 ₫</b>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[#5a5959] mr-1 text-[14px]">Số dư thực tế:</span>
-                      <b
-                        className={
-                          status === "PENDING"
-                            ? "text-[#d48806] font-semibold text-[14px]"
-                            : "text-[#389e0d] font-semibold text-[14px]"
-                        }
-                      >Thừa{" "}
-                        {(typeof record.total_remaining_debts === "number"
-                          ? Math.abs(record.total_remaining_debts).toLocaleString()
-                          : Math.abs(Number(record.total_remaining_debts)) || 0) || 0} ₫
-
-                      </b>
-                    </>
-                  )}
-                </div>
+                <span className="text-gray-500 text-sm truncate block max-w-[250px]">
+                  {record.email}
+                </span>
               </div>
             </div>
-            <div className="flex flex-col gap-1 items-end ml-4">
-              {status === "NEW" && (
-                <>
-                  {isNo && isAdmin ? (
-                    <Button
-                      type="primary"
-                      size="small"
-                      className="!bg-red-600 !h-[28px] !w-[124px] !text-[14px] !px-[12px]"
-                      onClick={() => {
-                        setSelectedDebt(record);
-                        setModalVisible(true);
-                      }}
-                    >
-                      Tạo tất toán
-                    </Button>
-                  ) : !isBalanced && isAdmin ? (
-                    <Button
-                      type="primary"
-                      size="small"
-                      className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-green-600 hover:!bg-[#46bd18] !border-none"
-                      onClick={() => {
-                        setSelectedDebt(record);
-                        setConfirmReturnVisible(true);
-                      }}
-                    >
-                      Yêu cầu hoàn trả
-                    </Button>
-                  ) : null}
-                </>
+
+            {/* Center: Balance */}
+            <div className="px-6 text-center min-w-[180px]">
+              <p className="text-xs text-gray-500 mb-0.5">{balance.label}</p>
+              <p className={`text-lg font-bold ${balance.colorClass}`}>
+                {balance.value}
+              </p>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+              {status === "NEW" && isNo && isAdmin && (
+                <Button
+                  type="primary"
+                  size="small"
+                  danger
+                  className="!h-8 !px-4 !text-sm !font-medium"
+                  onClick={() => {
+                    setSelectedDebt(record);
+                    setModalVisible(true);
+                  }}
+                >
+                  Tạo tất toán
+                </Button>
+              )}
+              {status === "NEW" && !isNo && !isBalanced && isAdmin && (
+                <Button
+                  type="primary"
+                  size="small"
+                  className="!h-8 !px-4 !text-sm !font-medium !bg-green-600 hover:!bg-green-500 !border-green-600"
+                  onClick={() => {
+                    setSelectedDebt(record);
+                    setConfirmReturnVisible(true);
+                  }}
+                >
+                  Yêu cầu hoàn trả
+                </Button>
               )}
               {status === "COMPLETED" && (
-                <Button
-                  size="small"
-                  className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-[#e6fffb] !border-none !text-[#52c41a]"
-                  disabled
-                >
+                <Tag color="success" className="!text-sm !py-1 !px-3 !rounded-full">
                   Hoàn thành
-                </Button>
+                </Tag>
               )}
               {status === "CANCELED" && (
-                <Button
-                  size="small"
-                  className="!h-[28px] !w-[124px] !text-[14px] !px-[12px] !bg-[#f5f5f5] !border-none !text-gray-400"
-                  disabled
-                >
+                <Tag color="default" className="!text-sm !py-1 !px-3 !rounded-full">
                   Đã từ chối
-                </Button>
+                </Tag>
               )}
               <Button
                 size="small"
-                className="!h-[28px] !w-[124px] !text-[14px] !px-[12px]"
+                className="!h-8 !px-4 !text-sm"
                 onClick={() => {
                   setDetailModalVisible(true);
                   setSelectedDebt(record);
@@ -439,50 +398,41 @@ const PartnerDebtTable = () => {
           </Button>
         </div>
         {data?.items && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
-            <div
-              className={`bg-red-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
-              style={{
-                minHeight: 56,
-                border: `1px solid #f87171`,
-              }}
-            >
-              <div>
-                <p className={`text-sm font-semibold text-red-600 mb-0.5`}>
-                  Mình đang nợ
-                </p>
-                <p className={`text-2xl font-bold text-red-600`}>
-                  {(data.items?.Debts?.total_amount ?? 0).toLocaleString()} ₫
-                </p>
-                <p className="text-xs text-gray-500">
-                  {data.items?.Debts?.total_account ?? 0} đối tác
-                </p>
-              </div>
-              <div className="text-2xl text-red-500">
-                <FontAwesomeIcon icon={faExclamationCircle} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between h-full">
+                <div className="flex flex-col justify-center">
+                  <p className="text-sm font-medium text-red-700 mb-1">
+                    Mình đang nợ
+                  </p>
+                  <p className="text-2xl font-bold text-red-600 leading-tight">
+                    {(data.items?.Debts?.total_amount ?? 0).toLocaleString()} ₫
+                  </p>
+                  <p className="text-xs text-red-500/70 mt-1">
+                    {data.items?.Debts?.total_account ?? 0} đối tác
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-red-200/50 flex items-center justify-center flex-shrink-0">
+                  <FontAwesomeIcon icon={faExclamationCircle} className="text-xl text-red-500" />
+                </div>
               </div>
             </div>
-            <div
-              className={`bg-green-50 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center min-h-[70px]`}
-              style={{
-                minHeight: 56,
-                border: `1px solid #22c55e`,
-              }}
-            >
-              <div>
-                <p className={`text-sm font-semibold text-green-600 mb-0.5`}>
-                  Đối tác giữ thừa
-                </p>
-                <p className={`text-2xl font-bold text-green-600`}>
-                  {(data.items?.DebtsPaid?.total_amount ?? 0).toLocaleString()}{" "}
-                  ₫
-                </p>
-                <p className="text-xs text-gray-500">
-                  {data.items?.DebtsPaid?.total_account ?? 0} đối tác
-                </p>
-              </div>
-              <div className="text-2xl text-green-500">
-                <FontAwesomeIcon icon={faDollarSign} />
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between h-full">
+                <div className="flex flex-col justify-center">
+                  <p className="text-sm font-medium text-green-700 mb-1">
+                    Đối tác giữ thừa
+                  </p>
+                  <p className="text-2xl font-bold text-green-600 leading-tight">
+                    {(data.items?.DebtsPaid?.total_amount ?? 0).toLocaleString()} ₫
+                  </p>
+                  <p className="text-xs text-green-500/70 mt-1">
+                    {data.items?.DebtsPaid?.total_account ?? 0} đối tác
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-green-200/50 flex items-center justify-center flex-shrink-0">
+                  <FontAwesomeIcon icon={faDollarSign} className="text-xl text-green-500" />
+                </div>
               </div>
             </div>
           </div>

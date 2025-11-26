@@ -51,11 +51,6 @@ export function getPermissionI18nKey(permissionName: string): string {
     'order.update_status': 'updateOrderStatus',
     'order.cancel': 'cancelOrder',
 
-    // Product Management
-    'product.view': 'viewProducts',
-    'product.create': 'createProduct',
-    'product.edit': 'editProduct',
-    'product.delete': 'deleteProduct',
 
     // Dashboard & General
     'dashboard.view': 'viewDashboard',

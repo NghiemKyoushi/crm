@@ -9,6 +9,9 @@ export interface ShipmentPackage {
   amountvnd: number; // Tổng tiền VND của tất cả orders trong vận đơn
   quantity: number; // Số lượng orders trong vận đơn
   created_at?: string;
+  final_tracking?: string;
+  shipping_fee?: number;
+  shipping_type?: string;
 }
 
 export interface OrderItem {
@@ -45,6 +48,8 @@ export interface OrderItem {
   take_photo?: boolean;
   is_repacked?: boolean;
   is_verify_count?: boolean;
+  tracking_final?: string;
+  tracking_japans?: Array<string>;
 }
 
 // For backward compatibility

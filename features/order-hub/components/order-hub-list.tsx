@@ -191,7 +191,6 @@ export default function OrderHub() {
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
   const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
 
-
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
@@ -553,8 +552,7 @@ export default function OrderHub() {
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
                 record.status !== OrderStatusType.READY_TO_SHIP &&
-                hasPermission("sales.view_assigned_orders") &&
-                hasPermission("order.view") && (
+                hasPermission("order.edit") && (
                   <Button
                     type="text"
                     size="small"
@@ -659,8 +657,7 @@ export default function OrderHub() {
                   </div>
                   {codeType !== 1 &&
                     codeType !== 2 &&
-                    hasPermission("sales.view_assigned_orders") &&
-                    hasPermission("order.view") && (
+                    hasPermission("order.edit") && (
                       <EditOutlined
                         className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                         onClick={() => {
@@ -708,8 +705,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
             {record.note || record.description || "Cập nhật sau"}
           </div>
-          {hasPermission("sales.view_assigned_orders") &&
-            hasPermission("order.view") && (
+          {hasPermission("order.edit") && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
                 onClick={() =>
@@ -741,8 +737,7 @@ export default function OrderHub() {
                 ? Number(record.kupon).toLocaleString("en-US")
                 : "-"}
           </span>
-          {hasPermission("sales.view_assigned_orders") &&
-            hasPermission("order.view") && (
+          {hasPermission("order.edit") && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                 onClick={() => {
@@ -798,48 +793,48 @@ export default function OrderHub() {
         );
       },
     },
-    {
-      title: "COD (Việt)",
-      key: "transfer_fee",
-      width: 180,
-      onCell: () => ({
-        style: {
-          borderRight: "1px solid #f0f0f0",
-        },
-      }),
-      render: (_, record) => {
-        const shippingCode = record.tracking_vn || "-";
-        const codShippingPrice = record.shipping_fee || 0;
-        const shippingPrice = codShippingPrice || record.shipping_fee || 0;
+    // {
+    //   title: "COD (Việt)",
+    //   key: "transfer_fee",
+    //   width: 180,
+    //   onCell: () => ({
+    //     style: {
+    //       borderRight: "1px solid #f0f0f0",
+    //     },
+    //   }),
+    //   render: (_, record) => {
+    //     const shippingCode = record.tracking_vn || "-";
+    //     const codShippingPrice = record.shipping_fee || 0;
+    //     const shippingPrice = codShippingPrice || record.shipping_fee || 0;
 
-        const isCOD = codShippingPrice > 0;
-        const shippingTypeText = isCOD ? "COD" : "-";
-        const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
+    //     const isCOD = codShippingPrice > 0;
+    //     const shippingTypeText = isCOD ? "COD" : "-";
+    //     const shippingTypeColor = isCOD ? "text-blue-600" : "text-gray-600";
 
-        return (
-          <div className="space-y-1">
-            <div className="text-xs">
-              <span className="text-gray-500">Mã: </span>
-              <span className="text-gray-800">{shippingCode}</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">Giá: </span>
-              <span className="text-gray-800 font-medium">
-                {shippingPrice > 0
-                  ? `${shippingPrice.toLocaleString("en-US")}đ`
-                  : "Cập nhật sau"}
-              </span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-500">HT: </span>
-              <span className={`font-medium ${shippingTypeColor}`}>
-                {shippingTypeText}
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className="space-y-1">
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Mã: </span>
+    //           <span className="text-gray-800">{record?.final_tracking}</span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">Giá: </span>
+    //           <span className="text-gray-800 font-medium">
+    //             {shippingPrice > 0
+    //               ? `${shippingPrice.toLocaleString("en-US")}đ`
+    //               : "Cập nhật sau"}
+    //           </span>
+    //         </div>
+    //         <div className="text-xs">
+    //           <span className="text-gray-500">HT: </span>
+    //           <span className={`font-medium ${shippingTypeColor}`}>
+    //             {shippingTypeText}
+    //           </span>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Tổng chi phí",
       key: "total",
@@ -871,8 +866,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 flex-1">
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
-          {hasPermission("sales.view_assigned_orders") &&
-            hasPermission("order.view") && (
+          {hasPermission("order.edit") && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                 onClick={() =>
@@ -1050,6 +1044,10 @@ export default function OrderHub() {
             color = "red";
             text = t("status.denied");
             break;
+          case OrderStatusType.PACKED:
+            color = "green";
+            text = t("status.packed");
+            break;
           default:
             color = "default";
             text = status;
@@ -1057,32 +1055,40 @@ export default function OrderHub() {
 
         let actionButton: React.ReactNode = null;
 
+        // Check permissions for cancel/delete
+        const canCancel = hasPermission("order.cancel") || hasPermission("order.delete");
+        const canUpdateStatus = hasPermission("order.update_status");
+
         switch (record.status) {
           case OrderStatusType.ADMIN_PENDING:
             actionButton = (
               <div className="flex gap-1.5 justify-center w-full">
-                <Button
-                  key={`approve-${record.id}`}
-                  size="small"
-                  className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenApproveOrder(true);
-                  }}
-                >
-                  ✓ Duyệt
-                </Button>
-                <Button
-                  key={`reject-${record.id}`}
-                  size="small"
-                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancel(true);
-                  }}
-                >
-                  ✕ Từ chối
-                </Button>
+                {canUpdateStatus && (
+                  <Button
+                    key={`approve-${record.id}`}
+                    size="small"
+                    className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenApproveOrder(true);
+                    }}
+                  >
+                    ✓ Duyệt
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button
+                    key={`reject-${record.id}`}
+                    size="small"
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded flex-1"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancel(true);
+                    }}
+                  >
+                    ✕ Từ chối
+                  </Button>
+                )}
               </div>
             );
             break;
@@ -1090,28 +1096,32 @@ export default function OrderHub() {
           case OrderStatusType.DEPOSIT_PAID:
             actionButton = (
               <div className="flex gap-1.5 justify-center w-full">
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setOpenConfirmPurchase(true);
-                  }}
-                  className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  🛒 Đã mua
-                </Button>
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancelOrder2(true);
-                  }}
-                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  Huỷ đơn
-                </Button>
+                {canUpdateStatus && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setOpenConfirmPurchase(true);
+                    }}
+                    className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    🛒 Đã mua
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancelOrder2(true);
+                    }}
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    Huỷ đơn
+                  </Button>
+                )}
               </div>
             );
             break;
@@ -1119,31 +1129,35 @@ export default function OrderHub() {
           case OrderStatusType.PURCHASED:
             actionButton = (
               <div className="flex gap-1.5 justify-center w-full">
-                <Button
-                  key={record.status}
-                  size="small"
-                  className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsTrackingJP(true);
-                    setIsEditingTrackingModal(true);
-                    // setIsOpenTrackingOrder()
-                  }}
-                >
-                  {/* 🏢 Kho JP */}
-                  Vận chuyển
-                </Button>
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancelOrder2(true);
-                  }}
-                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  Huỷ đơn
-                </Button>
+                {canUpdateStatus && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    className="!bg-purple-500 hover:!bg-purple-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsTrackingJP(true);
+                      setIsEditingTrackingModal(true);
+                      // setIsOpenTrackingOrder()
+                    }}
+                  >
+                    {/* 🏢 Kho JP */}
+                    Vận chuyển
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancelOrder2(true);
+                    }}
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    Huỷ đơn
+                  </Button>
+                )}
               </div>
             );
             break;
@@ -1151,56 +1165,60 @@ export default function OrderHub() {
           case OrderStatusType.ARRIVED_JP_WAREHOUSE:
             actionButton = (
               <div className="flex gap-1.5 justify-center w-full">
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    if (
-                      record.take_photo ||
-                      record.is_repacked ||
-                      record.is_verify_count
-                    ) {
-                      setIsOpenTrackingOrderVN(true);
-                    } else {
-                      trackingVNMutation.mutate(
-                        {
-                          body: {},
-                          id: record.id.toString(),
-                        },
-                        {
-                          onSuccess: () => {
-                            toast.success(t("toast.confirmVnWarehouseSuccess"));
-                            queryClient.invalidateQueries({
-                              queryKey: ["listorder"],
-                            });
-                            setIsOpenTrackingOrder(false);
+                {canUpdateStatus && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      if (
+                        record.take_photo ||
+                        record.is_repacked ||
+                        record.is_verify_count
+                      ) {
+                        setIsOpenTrackingOrderVN(true);
+                      } else {
+                        trackingVNMutation.mutate(
+                          {
+                            body: {},
+                            id: record.id.toString(),
                           },
-                          onError: (err: any) =>
-                            toast.error(
-                              err.response?.data?.localizedMessage ||
-                              t("common.error")
-                            ),
-                        }
-                      );
-                    }
-                  }}
-                  className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  {/* 🏭 Kho VN */}
-                  Vc nước ngoài
-                </Button>
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancelOrder2(true);
-                  }}
-                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  Huỷ đơn
-                </Button>
+                          {
+                            onSuccess: () => {
+                              toast.success(t("toast.confirmVnWarehouseSuccess"));
+                              queryClient.invalidateQueries({
+                                queryKey: ["listorder"],
+                              });
+                              setIsOpenTrackingOrder(false);
+                            },
+                            onError: (err: any) =>
+                              toast.error(
+                                err.response?.data?.localizedMessage ||
+                                  t("common.error")
+                              ),
+                          }
+                        );
+                      }
+                    }}
+                    className="!bg-indigo-500 hover:!bg-indigo-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    {/* 🏭 Kho VN */}
+                    Vc nước ngoài
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancelOrder2(true);
+                    }}
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    Huỷ đơn
+                  </Button>
+                )}
               </div>
             );
             break;
@@ -1208,34 +1226,41 @@ export default function OrderHub() {
           case OrderStatusType.ARRIVED_VN_WAREHOUSE:
             actionButton = (
               <div className="flex gap-1.5 justify-center w-full">
-                <Button
-                  key={record.status}
-                  size="small"
-                  className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCheckOrder(true);
-                  }}
-                >
-                  {/* 📦 Kiểm hàng */}
-                  Kho VN
-                </Button>
-                <Button
-                  key={record.status}
-                  size="small"
-                  onClick={() => {
-                    setOrderDetail(record);
-                    setIsOpenCancelOrder2(true);
-                  }}
-                  className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                >
-                  Huỷ đơn
-                </Button>
+                {canUpdateStatus && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    className="!bg-cyan-600 hover:!bg-cyan-700 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCheckOrder(true);
+                    }}
+                  >
+                    {/* 📦 Kiểm hàng */}
+                    Kho VN
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancelOrder2(true);
+                    }}
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    Huỷ đơn
+                  </Button>
+                )}
               </div>
             );
             break;
 
           case OrderStatusType.READY_TO_SHIP:
+            break;
+
+          case OrderStatusType.PACKED:
             break;
         }
 
@@ -1283,7 +1308,7 @@ export default function OrderHub() {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 ">
+    <div className=" bg-gray-50 ">
       <div className="bg-white rounded-xl shadow p-6">
         <OrderHubFilter
           onFilter={handleFilter}
