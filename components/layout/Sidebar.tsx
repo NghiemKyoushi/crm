@@ -99,11 +99,11 @@ export const menuPermissions: Record<string, string[]> = {
   // Website Management - admin and system config
   "/website-manage": ["system.admin", "system.config"],
 
-  // Fee Setting - product management permissions
-  "/fee-setting": ["product.view", "product.create", "product.edit", "system.admin"],
+  // Fee Setting - admin only
+  "/fee-setting": ["system.admin"],
 
-  // Surcharge - product and pricing
-  "/surchange": ["product.view", "product.create", "product.edit", "system.admin"],
+  // Surcharge - order and pricing
+  "/surchange": ["order.view", "order.create", "order.edit", "system.admin"],
   //
   "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
 

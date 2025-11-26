@@ -540,7 +540,7 @@
       "viewOrders": "Xem danh sách đơn hàng",
       "viewAllOrders": "Xem tất cả đơn hàng",
       "createOrder": "Tạo đơn hàng mới",
-      "editOrder": "Chỉnh sửa trạng thái đơn hàng",
+      "editOrder": "Chỉnh sửa đơn hàng",
       "deleteOrder": "Hủy/Xóa đơn hàng",
       "updateOrderStatus": "Sửa/Cập nhật trạng thái đơn hàng",
       "cancelOrder": "Hủy đơn hàng",
