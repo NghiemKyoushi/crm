@@ -592,7 +592,7 @@ const ProductManagement: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 bg-gray-50">
+    <div className=" bg-gray-50">
       <div className="bg-white rounded-xl shadow p-6">
         {/* Header with Filter */}
         <div className="flex flex-col mb-2 gap-4">
