@@ -508,6 +508,14 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     return isAdmin && isNotInSpecialStatus;
   }, [hasPermission, order?.status]);
 
+  // Check if user can edit (has order.edit permission or is admin)
+  const canEdit = useMemo(() => {
+    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit");
+  }, [isAdminOrCheckStatusAfterPending, hasPermission]);
+
+  // View only mode - has order.view but no order.edit
+  const isViewOnly = !canEdit;
+
 
   const [fileList, setFileList] = useState<any[]>([]);
   const [uploadedIds, setUploadedIds] = useState<number[]>([]);
@@ -582,10 +590,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                Chỉnh sửa Đơn hàng
+                {isViewOnly ? "Chi tiết Đơn hàng" : "Chỉnh sửa Đơn hàng"}
               </h3>
               <p className="text-sm text-gray-500">
-                Cập nhật thông tin đơn hàng cho khách hàng
+                {isViewOnly ? "Xem thông tin chi tiết đơn hàng" : "Cập nhật thông tin đơn hàng cho khách hàng"}
               </p>
             </div>
           </div>
@@ -601,33 +609,19 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               size="large"
               className="!h-11 !px-6"
             >
-              Hủy bỏ
+              {isViewOnly ? "Đóng" : "Hủy bỏ"}
             </Button>
-            <Button
-              key="submit"
-              type="primary"
-              onClick={() => {
-                if (
-                  isAdminOrCheckStatusAfterPending ||
-                  (hasPermission("sales.view_assigned_orders") &&
-                    hasPermission("order.view"))
-                ) {
-                  handleOk();
-                }
-              }}
-              disabled={
-                !(
-                  isAdminOrCheckStatusAfterPending ||
-                  (hasPermission("sales.view_assigned_orders") &&
-                    hasPermission("order.view"))
-                )
-              }
-              size="large"
-              className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
-            // disabled={order?.status !== OrderStatusType.PENDING_APPROVAL}
-            >
-              Lưu thay đổi
-            </Button>
+            {canEdit && (
+              <Button
+                key="submit"
+                type="primary"
+                onClick={() => handleOk()}
+                size="large"
+                className="!bg-gradient-to-r !from-blue-500 !to-blue-600 !h-11 !px-6 !border-0 hover:!from-blue-600 hover:!to-blue-700"
+              >
+                Lưu thay đổi
+              </Button>
+            )}
           </div>
         }
         width={1000}
@@ -637,6 +631,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           layout="vertical"
           initialValues={{ method: "buy" }}
           className="mt-6"
+          disabled={isViewOnly}
         >
           <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
