@@ -8,9 +8,11 @@ import {
   Input,
   Select,
   InputNumber,
+  Dropdown,
+  Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { EditOutlined, ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderHubFilter, { FilterType } from "./order-hub-filter";
 import { useTranslation } from "react-i18next";
@@ -126,6 +128,8 @@ export default function OrderHub() {
   >({});
   // Track which orders are being loaded to prevent duplicate calls
   const loadingOrdersRef = useRef<Set<number>>(new Set());
+  // Track dropdown open state for each order
+  const [dropdownOpenStates, setDropdownOpenStates] = useState<Record<number, boolean>>({});
 
   const [filters, setFilters] = useState<FilterType>({
     status: undefined,
@@ -322,7 +326,7 @@ export default function OrderHub() {
   // handleFilter: Only set filters and reset to page 1 if something actually changed
   const handleFilter = (newFilters: FilterType) => {
     console.log('handleFilter', newFilters);
-    
+
     if (isEqualObject(newFilters, prevFilters.current)) {
       return;
     }
@@ -331,7 +335,7 @@ export default function OrderHub() {
     setPage(0);
   };
 
-    
+
   // Function to call for updating kupon (with toast and loading)
   const updateOrderKupon = async (orderId: number, value: number | null) => {
     setIsKuponLoading(true);
@@ -362,77 +366,69 @@ export default function OrderHub() {
     }
   };
 
-  // Load accounts for an order
+  // Load accounts for an order when select dropdown is opened
+  // If source_website_id exists, use it directly
+  // If source_website_id is null, extract domain from URL and search for website
   const loadAccountsForOrder = async (order: Invoice) => {
-    const url = order.metadata?.items?.[0]?.product?.url;
-    const domain = extractDomain(url);
-
     // Prevent duplicate calls
-    if (!domain || orderAccounts[order.id] || loadingOrdersRef.current.has(order.id)) {
-      return; // Already loaded, no domain, or currently loading
+    if (loadingOrdersRef.current.has(order.id)) {
+      return; // Currently loading
     }
 
     loadingOrdersRef.current.add(order.id);
     setLoadingAccounts((prev) => ({ ...prev, [order.id]: true }));
     try {
-      // Step 1: Find website by domain
-      const websiteResponse = await getSourceWebsiteByDomain(domain);
-      const websites = websiteResponse?.data || [];
-      const website = websites.find(
-        (w: any) => w.domain === domain || w.domain?.includes(domain)
-      );
+      let websiteId: number;
 
-      if (!website?.id) {
-        setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
-        loadingOrdersRef.current.delete(order.id);
-        return;
+      // If source_website_id exists, use it directly
+      if (order.source_website_id != null) {
+        websiteId = order.source_website_id;
+      } else {
+        // Fallback to old logic: extract domain from URL and search for website
+        const url = order.metadata?.items?.[0]?.product?.url;
+        const domain = extractDomain(url);
+
+        if (!domain) {
+          setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+          loadingOrdersRef.current.delete(order.id);
+          toast.error("Không tìm thấy domain từ URL");
+          return;
+        }
+
+        // Search website by domain
+        const websiteResponse = await getSourceWebsiteByDomain(domain);
+        const websites = websiteResponse?.data || [];
+        const website = websites.find(
+          (w: any) => w.domain === domain || w.domain?.includes(domain)
+        );
+
+        if (!website?.id) {
+          setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+          loadingOrdersRef.current.delete(order.id);
+          toast.error("Không tìm thấy website");
+          return;
+        }
+
+        websiteId = website.id;
       }
 
-      // Step 2: Get accounts for this website
-      const accounts = await getWebsiteAccounts(website.id);
-      setOrderAccounts((prev) => ({ ...prev, [order.id]: accounts || [] }));
+      // Get accounts for this website
+      const accounts = await getWebsiteAccounts(websiteId);
+      console.log(`Loaded accounts for order ${order.id}:`, accounts);
+      // Store accounts in state - will be automatically mapped to Select.Option in render
+      setOrderAccounts((prev) => {
+        const newState = { ...prev, [order.id]: accounts || [] };
+        console.log(`Updated orderAccounts for order ${order.id}:`, newState[order.id]);
+        return newState;
+      });
     } catch (error: any) {
       console.error("Failed to load accounts:", error);
       toast.error("Không thể tải danh sách account");
     } finally {
       setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
       loadingOrdersRef.current.delete(order.id);
-
-      // Step 3: Set current source account if exists (always set, even if no website found)
-      if (
-        order.source_account_id != null &&
-        typeof order.source_account_id === "number"
-      ) {
-        setOrderSourceAccount((prev) => ({
-          ...prev,
-          [order.id]: order.source_account_id as number,
-        }));
-      }
     }
   };
-
-  // Load accounts for all orders when listOrder changes
-  useEffect(() => {
-    if (!listOrder?.data) return;
-
-    const orders = listOrder.data;
-    orders.forEach((order: Invoice) => {
-      const url = order.metadata?.items?.[0]?.product?.url;
-      const domain = extractDomain(url);
-      
-      // Only load if: has domain, not already loaded, and not currently loading
-      if (
-        domain &&
-        !orderAccounts[order.id] &&
-        !loadingOrdersRef.current.has(order.id)
-      ) {
-        loadAccountsForOrder(order);
-      }
-    });
-    // Only depend on listOrder?.data to avoid infinite loops
-    // orderAccounts is checked inside but not in deps to prevent re-runs when accounts are loaded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listOrder?.data]);
 
   // Handle account selection
   const handleAccountChange = async (orderId: number, accountId: number) => {
@@ -649,13 +645,13 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "en-US"
-                            )}${isJapanPrice}`
+                            "en-US"
+                          )}${isJapanPrice}`
                           : codeType === 1
-                          ? "Miễn phí"
-                          : codeType === 3
-                          ? "Cập nhật sau"
-                          : "-"}
+                            ? "Miễn phí"
+                            : codeType === 3
+                              ? "Cập nhật sau"
+                              : "-"}
                       </span>
                     )}
                   </div>
@@ -738,8 +734,8 @@ export default function OrderHub() {
             {typeof record.kupon === "number"
               ? record.kupon.toLocaleString("en-US")
               : record.kupon && !isNaN(Number(record.kupon))
-              ? Number(record.kupon).toLocaleString("en-US")
-              : "-"}
+                ? Number(record.kupon).toLocaleString("en-US")
+                : "-"}
           </span>
           {hasPermission("order.edit") && (
               <EditOutlined
@@ -751,8 +747,8 @@ export default function OrderHub() {
                       typeof record.kupon === "number"
                         ? record.kupon
                         : record.kupon && !isNaN(Number(record.kupon))
-                        ? Number(record.kupon)
-                        : null,
+                          ? Number(record.kupon)
+                          : null,
                   });
                   setOrderDetail(record);
                 }}
@@ -894,40 +890,79 @@ export default function OrderHub() {
         },
       }),
       render: (_, record) => {
-        const url = record.metadata?.items?.[0]?.product?.url;
         const accounts = orderAccounts[record.id] || [];
-        const currentAccountId =
-          orderSourceAccount[record.id] ?? record.source_account_id;
         const isLoading = loadingAccounts[record.id];
 
-        if (!url) {
-          return <div className="text-xs text-gray-400">-</div>;
-        }
+        // Use source_account_id and source_account_username directly from order data
+        const currentAccountId = orderSourceAccount[record.id] ?? record.source_account_id;
+        const currentAccountUsername = record.source_account_username;
 
-        if (isLoading) {
-          return <div className="text-xs text-gray-400">Đang tải...</div>;
-        }
+        const isDropdownOpen = dropdownOpenStates[record.id] || false;
 
-        if (accounts.length === 0) {
-          return <div className="text-xs text-gray-400">Không có account</div>;
-        }
+        // Handle dropdown open - load accounts immediately when clicked
+        const handleDropdownOpen = (open: boolean) => {
+          setDropdownOpenStates((prev) => ({ ...prev, [record.id]: open }));
+
+          if (open && !orderAccounts[record.id] && !loadingOrdersRef.current.has(record.id)) {
+            loadAccountsForOrder(record);
+          }
+        };
 
         return (
-          <Select
-            size="small"
-            value={currentAccountId || undefined}
-            onChange={(value) => handleAccountChange(record.id, value)}
-            placeholder="Chọn account"
-            className="w-full"
-            style={{ fontSize: 12 }}
-            loading={isLoading}
+          <Dropdown
+            open={isDropdownOpen}
+            dropdownRender={() => (
+              <div className="bg-white border border-gray-200 rounded shadow-lg min-w-[150px] max-h-[200px] overflow-y-auto">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Spin size="small" />
+                    <span className="ml-2 text-xs text-gray-400">Đang tải...</span>
+                  </div>
+                ) : accounts.length === 0 ? (
+                  <div className="text-xs text-gray-400 py-4 text-center">Không có account</div>
+                ) : (
+                  <div>
+                    {accounts.map((account) => (
+                      <div
+                        key={account.id}
+                        className={`text-xs py-2 px-3 hover:bg-gray-100 cursor-pointer transition-colors ${currentAccountId === account.id ? "bg-blue-50 font-medium" : ""
+                          }`}
+                        onClick={() => {
+                          handleAccountChange(record.id, account.id);
+                          setDropdownOpenStates((prev) => ({ ...prev, [record.id]: false }));
+                        }}
+                      >
+                        {account.username}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            trigger={["click"]}
+            onOpenChange={handleDropdownOpen}
+            placement="bottomLeft"
           >
-            {accounts.map((account) => (
-              <Select.Option key={account.id} value={account.id}>
-                {account.username}
-              </Select.Option>
-            ))}
-          </Select>
+            <Button
+              size="small"
+              className="w-full !h-auto !text-xs !text-left !flex !items-center !justify-between"
+              style={{
+                fontSize: 12,
+                height: "auto",
+                minHeight: 24,
+                padding: "2px 8px",
+              }}
+            >
+              <span className="truncate flex-1 text-left">
+                {currentAccountUsername || "Chọn account"}
+              </span>
+              {isLoading ? (
+                <Spin size="small" className="ml-2 flex-shrink-0" />
+              ) : (
+                <DownOutlined className="ml-2 text-xs flex-shrink-0" />
+              )}
+            </Button>
+          </Dropdown>
         );
       },
     },
@@ -1249,7 +1284,10 @@ export default function OrderHub() {
             </Tag>
 
             {/* Nút hành động chính (nếu có) */}
-            {actionButton}
+            {hasPermission("sales.view_assigned_orders") &&
+              hasPermission("order.view")
+              ? actionButton
+              : null}
 
             {/* Button chi tiết luôn hiển thị */}
             <Button
@@ -1606,7 +1644,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
@@ -1687,7 +1725,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
