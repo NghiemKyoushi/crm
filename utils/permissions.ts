@@ -110,13 +110,13 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     fallbackAction: 'notFound'
   },
 
-  // Product Management (Surcharge)
+  // Order Management (Surcharge)
   '/surchange': {
     required: [
-      'product.view',
-      'product.create',
-      'product.edit',
-      'product.delete',
+      'order.view',
+      'order.create',
+      'order.edit',
+      'order.delete',
       'system.admin',
       'system.config'
     ],
@@ -127,13 +127,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
   // Fee Setting
   '/fee-setting': {
     required: [
-      'product.view',
-      'product.create',
-      'product.edit',
-      'product.delete',
-      'system.admin',
-      'system.config',
-      'settings.edit'
+      'system.admin'
     ],
     requireAll: false,
     fallbackAction: 'notFound'
