@@ -1,8 +1,9 @@
 import { Dropdown, Button, Spin } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { type UIEvent, useState } from "react";
+import { type UIEvent, useEffect, useState } from "react";
 import { useListCateGoryCus } from "../../hooks/staff-manage";
 import { useTranslation } from "react-i18next";
+import type { Category } from "@/types/customer-group";
 
 export function getContrastColor(hex: string): string {
   if (!hex) return "#000";
@@ -22,13 +23,35 @@ interface CategoryDropdownProps {
 export default function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const { data, isLoading } = useListCateGoryCus({
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { data, isLoading, isFetching } = useListCateGoryCus({
     page,
     page_size: 10,
   });
 
+  useEffect(() => {
+    if (!data) return;
+
+    const { data: pageData = [], total_pages, current_page } = data;
+    setHasMore(current_page < total_pages);
+
+    setCategories((prev) => {
+      if (page === 0) return pageData;
+      const existingIds = new Set(prev.map((item) => item.id));
+      const merged = [...prev];
+      pageData.forEach((item) => {
+        if (!existingIds.has(item.id)) {
+          merged.push(item);
+        }
+      });
+      return merged;
+    });
+  }, [data, page]);
+
   const categoryOptions =
-    data?.data.map((opt: any) => ({
+    categories.map((opt) => ({
       key: String(opt.id),
       value: opt.id,
       label: opt.group_name,
@@ -39,6 +62,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
   const selected = categoryOptions.find((o: any) => o.value === value);
 
   const handleMenuScroll = (e: UIEvent<HTMLDivElement>) => {
+    if (!hasMore || isFetching) return;
     const target = e.currentTarget;
     if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
       setPage((prev) => prev + 1);
@@ -50,7 +74,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     label: (
       <div
         style={{
-          color: getContrastColor(opt.color),
+          color: getContrastColor(opt.color ?? "#1677ff"),
           backgroundColor: opt.color ?? "#1677ff",
           padding: "4px 12px",
           borderRadius: 6,
@@ -78,9 +102,19 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
   return (
     <Dropdown
       trigger={["click"]}
+      open={isDropdownOpen}
+      onOpenChange={(open) => {
+        setIsDropdownOpen(open);
+        if (open && categories.length === 0 && !isLoading) {
+          setPage(0);
+        }
+      }}
       menu={{
         items: menuItems,
-        onClick: ({ key }) => onChange?.(Number(key)),
+        onClick: ({ key }) => {
+          onChange?.(Number(key));
+          setIsDropdownOpen(false);
+        },
       }}
       overlayStyle={{ minWidth: 150 }}
       dropdownRender={(menu) => (
@@ -89,6 +123,16 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
           onScroll={handleMenuScroll}
         >
           {menu}
+          {isFetching && (
+            <div className="flex items-center justify-center py-2 text-xs text-gray-400">
+              <Spin size="small" className="mr-1" /> {t("common.loading")}
+            </div>
+          )}
+          {!hasMore && categories.length > 0 && (
+            <div className="text-xs text-gray-400 py-2 text-center">
+              {t("common.noMoreData") || "Đã tải hết phân loại"}
+            </div>
+          )}
         </div>
       )}
     >
@@ -98,7 +142,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
           height: 30,
           minWidth: 120,
           maxWidth: 160,
-          color: getContrastColor(selected?.color),
+          color: getContrastColor(selected?.color ?? "#1677ff"),
           backgroundColor: selected?.color ?? "#1677ff",
           border: "none",
           borderRadius: 6,
