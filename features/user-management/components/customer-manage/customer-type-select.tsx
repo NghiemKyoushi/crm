@@ -67,6 +67,14 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     ),
   }));
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
+      // cuộn đến cuối -> load thêm
+      setPage((prev) => prev + 1);
+    }
+  };
+
   return (
     <Dropdown
       trigger={["click"]}
