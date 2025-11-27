@@ -21,8 +21,7 @@ interface CategoryDropdownProps {
 
 export default function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
   const { t } = useTranslation();
-  const [page] = useState(0);
-
+  const [page, setPage] = useState(0);
   const { data, isLoading } = useListCateGoryCus({
     page,
     page_size: 10,
@@ -68,7 +67,14 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
         items: menuItems,
         onClick: ({ key }) => onChange?.(Number(key)),
       }}
-      overlayStyle={{ minWidth: 150 }}
+      overlayStyle={{ minWidth: 150, maxHeight: 200, overflowY: "auto" }}
+      onPopupScroll={(e) => {
+        const target = e.target as HTMLDivElement;
+        if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
+          // cuộn đến cuối -> load thêm
+          setPage((prev) => prev + 1);
+        }
+      }}
     >
       <Button
         size="small"
