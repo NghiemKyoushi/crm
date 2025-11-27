@@ -380,7 +380,7 @@ export default function CustomerTable() {
           dataSource={data?.data || []}
           rowHeight={55}
           pageSize={10}
-          page={data?.current_page || 0}
+          page={(data?.current_page && data?.current_page + 1)|| 0}
           onPageChange={handleChangePage}
           response={data}
           fontSize={13}

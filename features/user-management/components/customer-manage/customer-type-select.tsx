@@ -128,11 +128,11 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
               <Spin size="small" className="mr-1" /> {t("common.loading")}
             </div>
           )}
-          {!hasMore && categories.length > 0 && (
+          {/* {!hasMore && categories.length > 0 && (
             <div className="text-xs text-gray-400 py-2 text-center">
-              {t("common.noMoreData") || "Đã tải hết phân loại"}
+              {"Đã tải hết phân loại"}
             </div>
-          )}
+          )} */}
         </div>
       )}
     >
