@@ -191,6 +191,20 @@ export default function OrderHub() {
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
   const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
 
+  // Helper function to check if user can edit order based on permissions and order status
+  const canEditOrder = (orderStatus?: string) => {
+    // If user has order.edit permission, they can edit any order
+    if (hasPermission("order.edit")) {
+      return true;
+    }
+    // If user has order.edit_approving permission, they can only edit when status is ADMIN_PENDING or CLIENT_PENDING
+    const isPendingStatus = orderStatus === OrderStatusType.ADMIN_PENDING
+    if (hasPermission("order.edit_approving") && isPendingStatus) {
+      return true;
+    }
+    return false;
+  };
+
   const handleChangePage = (pageNumber: number) => {
     setPage(pageNumber - 1);
   };
@@ -552,7 +566,7 @@ export default function OrderHub() {
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
                 record.status !== OrderStatusType.READY_TO_SHIP &&
-                hasPermission("order.edit") && (
+                canEditOrder(record.status) && (
                   <Button
                     type="text"
                     size="small"
@@ -657,7 +671,7 @@ export default function OrderHub() {
                   </div>
                   {codeType !== 1 &&
                     codeType !== 2 &&
-                    hasPermission("order.edit") && (
+                    canEditOrder(record.status) && (
                       <EditOutlined
                         className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                         onClick={() => {
@@ -705,7 +719,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
             {record.note || record.description || "Cập nhật sau"}
           </div>
-          {hasPermission("order.edit") && (
+          {canEditOrder(record.status) && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
                 onClick={() =>
@@ -737,7 +751,7 @@ export default function OrderHub() {
                 ? Number(record.kupon).toLocaleString("en-US")
                 : "-"}
           </span>
-          {hasPermission("order.edit") && (
+          {canEditOrder(record.status) && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                 onClick={() => {
@@ -866,7 +880,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 flex-1">
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
-          {hasPermission("order.edit") && (
+          {canEditOrder(record.status) && (
               <EditOutlined
                 className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
                 onClick={() =>
