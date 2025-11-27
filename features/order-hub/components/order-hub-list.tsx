@@ -1055,9 +1055,10 @@ export default function OrderHub() {
 
         let actionButton: React.ReactNode = null;
 
-        // Check permissions for cancel/delete
-        const canCancel = hasPermission("order.cancel") || hasPermission("order.delete");
-        const canUpdateStatus = hasPermission("order.update_status");
+        // Check permissions
+        const canUpdateStatus = hasPermission("order.update_status"); // Duyệt đơn
+        const canReject = hasPermission("order.cancel"); // Từ chối đơn (ADMIN_PENDING)
+        const canDelete = hasPermission("order.delete"); // Huỷ đơn (các status khác)
 
         switch (record.status) {
           case OrderStatusType.ADMIN_PENDING:
@@ -1076,7 +1077,7 @@ export default function OrderHub() {
                     ✓ Duyệt
                   </Button>
                 )}
-                {canCancel && (
+                {canReject && (
                   <Button
                     key={`reject-${record.id}`}
                     size="small"
@@ -1109,7 +1110,7 @@ export default function OrderHub() {
                     🛒 Đã mua
                   </Button>
                 )}
-                {canCancel && (
+                {canDelete && (
                   <Button
                     key={record.status}
                     size="small"
@@ -1145,7 +1146,7 @@ export default function OrderHub() {
                     Vận chuyển
                   </Button>
                 )}
-                {canCancel && (
+                {canDelete && (
                   <Button
                     key={record.status}
                     size="small"
@@ -1206,7 +1207,7 @@ export default function OrderHub() {
                     Vc nước ngoài
                   </Button>
                 )}
-                {canCancel && (
+                {canDelete && (
                   <Button
                     key={record.status}
                     size="small"
@@ -1240,7 +1241,7 @@ export default function OrderHub() {
                     Kho VN
                   </Button>
                 )}
-                {canCancel && (
+                {canDelete && (
                   <Button
                     key={record.status}
                     size="small"
@@ -1284,10 +1285,7 @@ export default function OrderHub() {
             </Tag>
 
             {/* Nút hành động chính (nếu có) */}
-            {hasPermission("sales.view_assigned_orders") &&
-              hasPermission("order.view")
-              ? actionButton
-              : null}
+            {actionButton}
 
             {/* Button chi tiết luôn hiển thị */}
             <Button
@@ -1314,6 +1312,7 @@ export default function OrderHub() {
           onFilter={handleFilter}
           onCreateOrder={() => setOpen(true)}
           initialFilters={filters}
+          canCreate={hasPermission("order.create")}
         />
 
         <EnhancedTableWrapper

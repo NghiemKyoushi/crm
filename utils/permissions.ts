@@ -127,7 +127,8 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
   // Fee Setting
   '/fee-setting': {
     required: [
-      'system.admin'
+      'system.admin',
+      'settings.edit'
     ],
     requireAll: false,
     fallbackAction: 'notFound'
