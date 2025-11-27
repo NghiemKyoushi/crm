@@ -60,6 +60,14 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     ),
   }));
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
+      // cuộn đến cuối -> load thêm
+      setPage((prev) => prev + 1);
+    }
+  };
+
   return (
     <Dropdown
       trigger={["click"]}
@@ -67,14 +75,14 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
         items: menuItems,
         onClick: ({ key }) => onChange?.(Number(key)),
       }}
-      overlayStyle={{ minWidth: 150, maxHeight: 200, overflowY: "auto" }}
-      onPopupScroll={(e) => {
-        const target = e.target as HTMLDivElement;
-        if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
-          // cuộn đến cuối -> load thêm
-          setPage((prev) => prev + 1);
-        }
-      }}
+      dropdownRender={(menu) => (
+        <div
+          onScroll={handleScroll}
+          style={{ maxHeight: 200, overflowY: "auto", minWidth: 150 }}
+        >
+          {menu}
+        </div>
+      )}
     >
       <Button
         size="small"
