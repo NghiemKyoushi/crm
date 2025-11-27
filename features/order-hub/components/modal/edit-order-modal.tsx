@@ -11,6 +11,7 @@ import {
   Col,
   Collapse,
   Upload,
+  Spin,
 } from "antd";
 import {
   getDataFeeService,
@@ -62,7 +63,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermission();
 
-  const { data: order, refetch } = useDetailOrder(props.orderId);
+  const { data: order, refetch, isLoading: isLoadingOrder } = useDetailOrder(props.orderId);
 
   const { isOpen, onCancel, orderId } = props;
   const [form] = Form.useForm();
@@ -508,10 +509,18 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     return isAdmin && isNotInSpecialStatus;
   }, [hasPermission, order?.status]);
 
-  // Check if user can edit (has order.edit permission or is admin)
+  // Check if user has order.edit_approving permission (can only edit when status is ADMIN_PENDING or CLIENT_PENDING)
+  const canEditApproving = useMemo(() => {
+    const hasEditApprovingPermission = hasPermission("order.edit_approving");
+    const isPendingStatus = order?.status === OrderStatusType.ADMIN_PENDING ||
+                            order?.status === OrderStatusType.CLIENT_PENDING;
+    return hasEditApprovingPermission && isPendingStatus;
+  }, [hasPermission, order?.status]);
+
+  // Check if user can edit (has order.edit permission or is admin or has edit_approving with correct status)
   const canEdit = useMemo(() => {
-    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit");
-  }, [isAdminOrCheckStatusAfterPending, hasPermission]);
+    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving;
+  }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving]);
 
   // View only mode - has order.view but no order.edit
   const isViewOnly = !canEdit;
@@ -547,17 +556,19 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
           url: URL.createObjectURL(file),
         },
       ]);
+      toast.success(`Tải ảnh "${file.name}" thành công`);
       return false;
-    } catch (err) {
-      toast.error(t("validation.uploadFailed"));
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || "Không thể tải ảnh lên";
+      toast.error(`Tải ảnh thất bại: ${errorMessage}`);
       return Upload.LIST_IGNORE;
     } finally {
       setUploading(false); // 👉 tắt loading
     }
   };
 
-  const handleChange = ({ fileList }: { fileList: any[] }) => {
-    setFileList(fileList);
+  const handleRemove = (file: any) => {
+    setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
   };
 
   return (
@@ -626,14 +637,15 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
         }
         width={1000}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ method: "buy" }}
-          className="mt-6"
-          disabled={isViewOnly}
-        >
-          <Row gutter={24}>
+        <Spin spinning={isLoadingOrder} tip="Đang tải dữ liệu...">
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={{ method: "buy" }}
+            className="mt-6"
+            disabled={isViewOnly}
+          >
+            <Row gutter={24}>
             {/* Thông tin Sản phẩm */}
             <Col span={14}>
               {/* Product Information Section */}
@@ -771,14 +783,24 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     <Upload
                       listType="picture-card"
                       fileList={fileList}
-                      onChange={handleChange}
+                      onRemove={handleRemove}
                       beforeUpload={beforeUpload}
                       multiple
-                      disabled={uploading} // disable khi upload
+                      disabled={uploading || isViewOnly}
                     >
                       {fileList.length >= 10 ? null : (
-                        <div>
-                          {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                        <div className="flex flex-col items-center justify-center">
+                          {uploading ? (
+                            <>
+                              <LoadingOutlined className="text-blue-500 text-xl" />
+                              <span className="mt-2 text-xs text-gray-500">Đang tải...</span>
+                            </>
+                          ) : (
+                            <>
+                              <PlusOutlined className="text-gray-400 text-xl" />
+                              <span className="mt-2 text-xs text-gray-500">Tải ảnh</span>
+                            </>
+                          )}
                         </div>
                       )}
                     </Upload>
@@ -1616,7 +1638,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
               </div>
             </Col>
           </Row>
-        </Form>
+          </Form>
+        </Spin>
       </Modal>
     </>
   );
