@@ -8,6 +8,7 @@ export interface Category {
     cancellation_fee: number;
     is_delete: boolean;
     color: string;
+    text_color?: string;
   }
   
   export interface CategoryResponse {
