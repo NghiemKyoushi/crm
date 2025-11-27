@@ -312,3 +312,9 @@ export const cancelOrderAfterApprove = async (
   const res = await api.post(`${API_TYPE_CONST.CANCEL_ORDER}/${id}`, bodySend);
   return res.data.data;
 };
+
+export const getOrderHistory = async (orderId: number) => {
+  const res = await api.get(`${API_TYPE_CONST.ORDER_HISTORY}${orderId}`);
+  return res.data.data;
+};
+

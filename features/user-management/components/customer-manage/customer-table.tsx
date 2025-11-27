@@ -2,7 +2,7 @@ import { Button, Input, Typography, Select, Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import TableComponent from "@/components/TableComponent";
 import CustomerDetailModal from "./modal-customer/modal-view-detail-customer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useListCateGoryCus,
@@ -26,6 +26,9 @@ const { Text } = Typography;
 const { Option } = Select;
 
 export default function CustomerTable() {
+  // Avoid double execution in StrictMode (dev) or duplicate mount
+  const didInit = useRef(false);
+
   const { hasPermission, permissions } = usePermission();
 
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -69,6 +72,8 @@ export default function CustomerTable() {
   const [salesLoading, setSalesLoading] = useState(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     let unmounted = false;
     const fetchSales = async () => {
       setSalesLoading(true);
@@ -380,7 +385,7 @@ export default function CustomerTable() {
           dataSource={data?.data || []}
           rowHeight={55}
           pageSize={10}
-          page={data?.current_page || 0}
+          page={(data?.current_page && data?.current_page + 1)|| 0}
           onPageChange={handleChangePage}
           response={data}
           fontSize={13}
