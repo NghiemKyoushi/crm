@@ -1589,11 +1589,6 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         {Number(fees.TOTAL_ORDER) && fees.TOTAL_ORDER !== -1 ? (
                           <>
                             {Number(fees.TOTAL_ORDER).toLocaleString("en-US")}đ
-                            <span className="text-white !font-medium !text-xs !pl-1">
-                              {" "}
-                              {fees.TOTAL_ORDER_JP.toLocaleString("en-US")}
-                              {currencyCheckCode}
-                            </span>
                           </>
                         ) : (
                           "Cập nhật sau"
