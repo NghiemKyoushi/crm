@@ -1,6 +1,6 @@
 import { Dropdown, Button, Spin } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { type UIEvent, useState } from "react";
 import { useListCateGoryCus } from "../../hooks/staff-manage";
 import { useTranslation } from "react-i18next";
 
@@ -37,6 +37,13 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     })) ?? [];
 
   const selected = categoryOptions.find((o: any) => o.value === value);
+
+  const handleMenuScroll = (e: UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 5) {
+      setPage((prev) => prev + 1);
+    }
+  };
 
   const menuItems = categoryOptions.map((opt: any) => ({
     key: opt.key,
@@ -75,10 +82,11 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
         items: menuItems,
         onClick: ({ key }) => onChange?.(Number(key)),
       }}
+      overlayStyle={{ minWidth: 150 }}
       dropdownRender={(menu) => (
         <div
-          onScroll={handleScroll}
-          style={{ maxHeight: 200, overflowY: "auto", minWidth: 150 }}
+          style={{ maxHeight: 200, overflowY: "auto" }}
+          onScroll={handleMenuScroll}
         >
           {menu}
         </div>
