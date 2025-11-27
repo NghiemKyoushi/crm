@@ -707,7 +707,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-4"
                   >
                     <Input
-                      disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                      disabled={isCheckDisableInput && !canEdit}
                       className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Nhập tên sản phẩm"
                     />
@@ -727,7 +727,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     ]}
                     className="!mb-4"
                   >
-                    <TiptapEditor isDisable={isCheckDisableInput && !isAdminOrCheckStatusAfterPending} />
+                    <TiptapEditor isDisable={isCheckDisableInput && !canEdit} />
                   </Form.Item>
                   {/* -------- IMAGE GALLERY PREVIEW -------- */}
                   {productImages && productImages.length > 0 && (
@@ -836,7 +836,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         className="!mb-4"
                       >
                         <InputNumber
-                          disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                          disabled={isCheckDisableInput && !canEdit}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -971,7 +971,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <InputNumber
-                          disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                          disabled={isCheckDisableInput && !canEdit}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -1127,7 +1127,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                               >
                                 <div className="flex-1 pr-3">
                                   <Checkbox
-                                    disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                                    disabled={isCheckDisableInput && !canEdit}
                                     checked={item.is_checked}
                                     onChange={(e) =>
                                       handleServiceChange(e, item.code)
@@ -1209,7 +1209,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                                   >
                                     <div className="flex-1 pr-3">
                                       <Checkbox
-                                        disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                                        disabled={isCheckDisableInput && !canEdit}
                                         checked={isChecked}
                                         onChange={(e) =>
                                           handleInsuranceChange(e, item)
@@ -1348,7 +1348,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-0"
                   >
                     <Input.TextArea
-                      disabled={isCheckDisableInput && !isAdminOrCheckStatusAfterPending}
+                      disabled={isCheckDisableInput && !canEdit}
                       rows={3}
                       className="!rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Ghi chú thêm về đơn hàng..."

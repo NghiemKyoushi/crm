@@ -35,12 +35,14 @@ interface OrderHubFilterProps {
   onFilter: (filters: FilterType) => void;
   onCreateOrder: () => void;
   initialFilters?: FilterType;
+  canCreate?: boolean;
 }
 
 export default function OrderHubFilter({
   onFilter,
   onCreateOrder,
   initialFilters,
+  canCreate = true,
 }: OrderHubFilterProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
@@ -193,15 +195,17 @@ export default function OrderHubFilter({
           >
             {t("filter")}
           </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined className="text-xs" />}
-            className="!h-10 !bg-blue-600 !text-white !font-medium !text-xs !px-6"
-            size="small"
-            onClick={onCreateOrder}
-          >
-            Tạo đơn
-          </Button>
+          {canCreate && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined className="text-xs" />}
+              className="!h-10 !bg-blue-600 !text-white !font-medium !text-xs !px-6"
+              size="small"
+              onClick={onCreateOrder}
+            >
+              Tạo đơn
+            </Button>
+          )}
         </div>
         {/* Advanced Search Row */}
         <div className="w-full bg-gray-50 rounded-lg p-4">

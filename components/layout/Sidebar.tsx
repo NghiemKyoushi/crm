@@ -99,8 +99,8 @@ export const menuPermissions: Record<string, string[]> = {
   // Website Management - admin and system config
   "/website-manage": ["system.admin", "system.config"],
 
-  // Fee Setting - admin only
-  "/fee-setting": ["system.admin"],
+  // Fee Setting - admin or settings.edit
+  "/fee-setting": ["system.admin", "settings.edit"],
 
   // Surcharge - order and pricing
   "/surchange": ["order.view", "order.create", "order.edit", "system.admin"],
