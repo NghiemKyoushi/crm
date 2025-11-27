@@ -183,7 +183,14 @@ export default function ShipmentFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="phone_number" className="!mb-2">
+              <Form.Item name="customer_name" className="!mb-2">
+                <Input
+                  placeholder="Tên khách hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              {/* <Form.Item name="phone_number" className="!mb-2">
                 <InputNumber
                   placeholder="Số điện thoại"
                   className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
@@ -194,7 +201,7 @@ export default function ShipmentFilter({
                   style={{ display: 'flex', alignItems: 'center' }}
                   inputMode="tel"
                 />
-              </Form.Item>
+              </Form.Item> */}
             </div>
             <div className="space-y-1">
               <div className="text-xs font-medium text-gray-600">

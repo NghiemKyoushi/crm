@@ -29,6 +29,7 @@ export interface FilterType {
   email?: string;
   phone_number?: number;
   customer_code?: string;
+  account?: string;
 }
 
 interface OrderHubFilterProps {
@@ -141,6 +142,7 @@ export default function OrderHubFilter({
       from_date: fromDate,
       to_date: toDate,
       phone_number: values.phone_number || undefined,
+      account: values.account || undefined,
     };
     onFilter(filters);
   };
@@ -162,7 +164,8 @@ export default function OrderHubFilter({
       note_admin: undefined,
       from_date: undefined,
       to_date: undefined,
-      customer_code: undefined
+      customer_code: undefined,
+      account: undefined
     };
     onFilter(filterToPass);
   };
@@ -232,6 +235,13 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
+              <Form.Item name="customer_name" className="!mb-2">
+                <Input
+                  placeholder="Tên khách hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
               <Form.Item name="phone_number" className="!mb-2">
                 <InputNumber
                   placeholder="Số điện thoại"
@@ -261,6 +271,13 @@ export default function OrderHubFilter({
               <Form.Item name="product_url" className="!mb-2">
                 <Input
                   placeholder="Link sản phẩm"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="account" className="!mb-2">
+                <Input
+                  placeholder="Account"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />
@@ -347,6 +364,7 @@ export default function OrderHubFilter({
                   }}
                 />
               </Form.Item>
+            
             </div>
           </div>
         </div>
