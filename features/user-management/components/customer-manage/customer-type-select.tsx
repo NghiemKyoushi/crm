@@ -15,12 +15,22 @@ export function getContrastColor(hex: string): string {
   return yiq >= 128 ? "#000" : "#fff";
 }
 
-interface CategoryDropdownProps {
-  value?: number;
-  onChange?: (value: number) => void;
+export interface CategoryOption {
+  key: string;
+  value: number;
+  label: string;
+  color?: string;
+  textColor?: string;
 }
 
-export default function CategoryDropdown({ value, onChange }: CategoryDropdownProps) {
+interface CategoryDropdownProps {
+  value?: number;
+  onChange?: (value: number, option?: CategoryOption) => void;
+  fallbackLabel?: string | null;
+  fallbackColor?: string | null;
+}
+
+export default function CategoryDropdown({ value, onChange, fallbackLabel, fallbackColor }: CategoryDropdownProps) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,7 +60,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     });
   }, [data, page]);
 
-  const categoryOptions =
+  const categoryOptions: CategoryOption[] =
     categories.map((opt) => ({
       key: String(opt.id),
       value: opt.id,
@@ -60,6 +70,8 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
     })) ?? [];
 
   const selected = categoryOptions.find((o: any) => o.value === value);
+  const displayLabel = selected?.label ?? fallbackLabel ?? t('customerTable.selectCategory');
+  const displayColor = selected?.color ?? fallbackColor ?? "#1677ff";
 
   const handleMenuScroll = (e: UIEvent<HTMLDivElement>) => {
     if (!hasMore || isFetching) return;
@@ -112,7 +124,8 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
       menu={{
         items: menuItems,
         onClick: ({ key }) => {
-          onChange?.(Number(key));
+          const selectedOption = categoryOptions.find((opt) => opt.key === key);
+          onChange?.(Number(key), selectedOption);
           setIsDropdownOpen(false);
         },
       }}
@@ -128,11 +141,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
               <Spin size="small" className="mr-1" /> {t("common.loading")}
             </div>
           )}
-          {/* {!hasMore && categories.length > 0 && (
-            <div className="text-xs text-gray-400 py-2 text-center">
-              {"Đã tải hết phân loại"}
-            </div>
-          )} */}
+
         </div>
       )}
     >
@@ -142,8 +151,8 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
           height: 30,
           minWidth: 120,
           maxWidth: 160,
-          color: getContrastColor(selected?.color ?? "#1677ff"),
-          backgroundColor: selected?.color ?? "#1677ff",
+          color: getContrastColor(displayColor),
+          backgroundColor: displayColor,
           border: "none",
           borderRadius: 6,
           display: "flex",
@@ -158,7 +167,7 @@ export default function CategoryDropdown({ value, onChange }: CategoryDropdownPr
         className="hover:opacity-90"
       >
         <span className="truncate flex-1 text-left">
-          {selected ? selected.label : t('customerTable.selectCategory')}
+          {displayLabel}
         </span>
         {isLoading ? <Spin size="small" className="ml-2" /> : <DownOutlined className="ml-2" style={{ fontSize: 10 }} />}
       </Button>
