@@ -22,9 +22,10 @@ import "./print-label.css";
 
 interface PrintLabelProps {
   packageInfo: PackageInfo;
+  printMode?: "full" | "package_only";
 }
 
-const PrintLabel: React.FC<PrintLabelProps> = ({ packageInfo }) => {
+const PrintLabel: React.FC<PrintLabelProps> = ({ packageInfo, printMode = "full" }) => {
   const barcodeRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -51,6 +52,47 @@ const PrintLabel: React.FC<PrintLabelProps> = ({ packageInfo }) => {
     generateBarcode();
   }, [packageInfo]);
 
+  const packageBarcodeRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const generatePackageBarcode = async () => {
+      if (packageBarcodeRef.current && packageInfo.packageCode && printMode === "package_only") {
+        try {
+          const JsBarcode = (await import("jsbarcode")).default;
+          JsBarcode(packageBarcodeRef.current, packageInfo.packageCode, {
+            format: "CODE128",
+            width: 2,
+            height: 40,
+            displayValue: false,
+            margin: 3,
+          });
+        } catch (error) {
+          console.error("Failed to generate package barcode:", error);
+        }
+      }
+    };
+    generatePackageBarcode();
+  }, [packageInfo.packageCode, printMode]);
+
+  // Print only package code with barcode
+  if (printMode === "package_only") {
+    return (
+      <div className="print-label print-label-small">
+        <div className="print-content print-package-only">
+          {/* Package code text */}
+          <div className="print-package-code-only">
+            {packageInfo.packageCode}
+          </div>
+          {/* Barcode */}
+          <div className="print-package-barcode">
+            <svg ref={packageBarcodeRef}></svg>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full print mode
   return (
     <div className="print-label">
       <div className="print-content">
