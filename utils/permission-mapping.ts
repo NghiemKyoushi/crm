@@ -77,11 +77,9 @@ export function getPermissionI18nKey(permissionName: string): string {
     // Sales Management
     'sales.manage_orders': 'manageSalesOrders',
     'sales.view_assigned_orders': 'viewAssignedOrders',
-    'sales.update_order_status': 'updateSalesOrderStatus',
     'sales.create_order_for_customers': 'createOrderForCustomers',
     'sales.manage_auctions': 'manageAuctions',
     'sales.create_auction': 'createAuction',
-    'sales.update_auction': 'updateAuction',
     'sales.view_auction_results': 'viewAuctionResults',
     'sales.manage_bids': 'manageBids',
     'sales.view_own_salary': 'viewOwnSalary',
@@ -89,14 +87,12 @@ export function getPermissionI18nKey(permissionName: string): string {
     'sales.view_own_performance': 'viewOwnPerformance',
     'sales.view_assigned_customers': 'viewAssignedCustomers',
     'sales.manage_assigned_customers': 'manageAssignedCustomers',
-    'sales.update_customer_info': 'updateCustomerInfo',
     'sales.add_customer_notes': 'addCustomerNotes',
     'sales.view_customer_orders': 'viewCustomerOrders',
     'sales.access_dashboard': 'accessSalesDashboard',
     'sales.view_sales_reports': 'viewSalesReports',
     'sales.export_sales_data': 'exportSalesData',
-    'sales.view_assigned_shipments':'viewAssignedShipments',
-    'sales.create_shipments':'createShipments'
+    'sales.view_assigned_shipments':'viewAssignedShipments'
   };
 
   return mapping[permissionName] || permissionName;

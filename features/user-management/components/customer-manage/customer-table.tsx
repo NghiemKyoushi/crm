@@ -11,7 +11,7 @@ import {
   useCreateCustomer,
 } from "../../hooks/staff-manage";
 import { CustomerModel } from "@/types/customer-type";
-import CategorySelect from "./customer-type-select";
+import CategorySelect, { CategoryOption } from "./customer-type-select";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -118,6 +118,14 @@ export default function CustomerTable() {
     sale_id: searchValues.sale || undefined,
   });
 
+  const [tableData, setTableData] = useState<CustomerModel[]>([]);
+
+  useEffect(() => {
+    if (data?.data) {
+      setTableData(data.data);
+    }
+  }, [data]);
+
   const { data: dataSelectCategory, isLoading } = useListCateGoryCus({
     page,
     page_size: 10,
@@ -138,7 +146,7 @@ export default function CustomerTable() {
     setIsOpenDetail(false);
   };
 
-  const handleUpdateColor = (e: number, userId: number) => {
+  const handleUpdateColor = (e: number, userId: number, option?: CategoryOption) => {
     updateCateMutation.mutate(
       {
         category_id: e,
@@ -147,7 +155,21 @@ export default function CustomerTable() {
       {
         onSuccess: () => {
           toast.success(t("customerTable.updateSuccess"));
-          queryClient.invalidateQueries({ queryKey: ["listCustomer"] });
+          const selectedCategory =
+            option || categoryOptions.find((opt: any) => opt.value === e);
+          setTableData((prev) =>
+            prev.map((item) =>
+              item.user_id === userId
+                ? {
+                  ...item,
+                  category_id: e,
+                  group_id: e,
+                  group_name: selectedCategory?.label || item.group_name,
+                  color: selectedCategory?.color || item.color,
+                }
+                : item
+            )
+          );
         },
         onError: (err: any) =>
           toast.error(
@@ -203,7 +225,11 @@ export default function CustomerTable() {
         canShowCategory ? (
           <CategorySelect
             value={record.group_id}
-            onChange={(e: number) => handleUpdateColor(e, record.user_id)}
+            fallbackLabel={record.group_name}
+            fallbackColor={record.color}
+            onChange={(value, option) =>
+              handleUpdateColor(value, record.user_id, option)
+            }
           />
         ) : (
           <span>{record.group_name || "-"}</span>
@@ -286,8 +312,8 @@ export default function CustomerTable() {
       },
       onError: (err: any) => {
         toast.error(
-          err?.response?.data?.localizedMessage || 
-          err?.response?.data?.message || 
+          err?.response?.data?.localizedMessage ||
+          err?.response?.data?.message ||
           "Có lỗi xảy ra khi tạo tài khoản"
         );
       },
@@ -381,10 +407,10 @@ export default function CustomerTable() {
       <div className="overflow-x-auto">
         <TableComponent
           columns={baseColumns}
-          dataSource={data?.data || []}
+          dataSource={tableData}
           rowHeight={55}
           pageSize={10}
-          page={(data?.current_page && data?.current_page + 1)|| 0}
+          page={(data?.current_page ?? page) + 1}
           onPageChange={handleChangePage}
           response={data}
           fontSize={13}

@@ -105,7 +105,17 @@ export const menuPermissions: Record<string, string[]> = {
     // Surcharge - order and pricing
     "/surchange": ["order.view", "order.create", "order.edit", "system.admin"],
     //
-    "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
+    "/shipment-management": [
+        "system.admin",
+        "sales.view_assigned_shipments",
+        "warehouse.check_coming_wh2",
+        "warehouse.management_wh2",
+        "warehouse.packed_view_wh2",
+        "warehouse.pick_and_pack_wh2",
+        "warehouse.shipment_wh2",
+        "warehouse.shipped_view_wh2",
+        "warehouse.view_wh2"
+    ],
 
     // Check Coming - Warehouse
     "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
