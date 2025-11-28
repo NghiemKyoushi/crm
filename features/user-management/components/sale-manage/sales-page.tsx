@@ -47,7 +47,7 @@ export default function SalesPage() {
 
 
   return (
-    <div className="p-4 flex gap-4">
+    <div className="flex gap-4 w-full">
       <div className="w-1/3">
         <SalesList
           data={salesData}

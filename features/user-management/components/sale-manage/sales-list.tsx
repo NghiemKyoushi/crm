@@ -46,9 +46,9 @@ export default function SalesList({ data, loading, hasMore, setPage, selected, o
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div className="border border-gray-200 rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg">{t('salesManage.title')}</h3>
+        <h3 className="font-semibold text-sm text-gray-800">{t('salesManage.title')}</h3>
         <Button type="primary" onClick={() => setOpen(true)}>
           {t('salesManage.addButton')}
         </Button>

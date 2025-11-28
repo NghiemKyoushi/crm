@@ -98,17 +98,17 @@ const NewCustomersCard: React.FC<NewCustomersCardProps> = ({
   }, [data]);
 
   return (
-    <Card className="shadow-md border-0 h-full" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center">
-            <FontAwesomeIcon icon={faUserPlus} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+            <FontAwesomeIcon icon={faUserPlus} className="text-violet-500" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-sm font-semibold text-gray-800 m-0">
               {t("dashboard.new_customers", "Khách hàng mới")}
             </h3>
-            <div className="text-xs text-gray-500 flex gap-3">
+            <p className="text-xs text-gray-500 m-0 flex gap-3">
               <span>
                 {t("dashboard.total", "Tổng")}: {stats.total}
               </span>
@@ -118,7 +118,7 @@ const NewCustomersCard: React.FC<NewCustomersCardProps> = ({
               <span className="text-amber-600">
                 {t("dashboard.without_orders", "Chưa mua")}: {stats.withoutOrders}
               </span>
-            </div>
+            </p>
           </div>
         </div>
         <RangePicker
@@ -131,25 +131,23 @@ const NewCustomersCard: React.FC<NewCustomersCardProps> = ({
           size="small"
         />
       </div>
-      <div className="flex-1 min-h-[280px]">
-        <Skeleton loading={isLoading} active>
-          {!data || data.length === 0 ? (
-            <div className="flex items-center justify-center h-[240px]">
-              <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
-            </div>
-          ) : (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={{ pageSize: 5, size: "small" }}
-              size="small"
-              rowKey="user_id"
-              scroll={{ x: 700 }}
-            />
-          )}
-        </Skeleton>
-      </div>
-    </Card>
+      <Skeleton loading={isLoading} active>
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
+          </div>
+        ) : (
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={{ pageSize: 5, size: "small" }}
+            size="small"
+            rowKey="user_id"
+            scroll={{ x: 700 }}
+          />
+        )}
+      </Skeleton>
+    </div>
   );
 };
 

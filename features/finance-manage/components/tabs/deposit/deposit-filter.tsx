@@ -40,10 +40,10 @@ const FilterSection = (props: FilterSectionProps) => {
   }, [code, form]);
 
   return (
-    <div className="flex flex-col mb-2 gap-4 ">
+    <div className="flex flex-col mb-4 gap-4">
       <Form form={form} onFinish={onFinish}>
         {/* Sử dụng grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] để ô button nhỏ lại */}
-        <div className="w-full grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-center bg-white rounded-lg">
+        <div className="w-full grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-center bg-gray-50 rounded-lg p-4 border border-gray-200">
           <Form.Item name="keyword" className="mb-0">
             <Input placeholder={t("keywordPlaceholder")} className="w-full h-11" />
           </Form.Item>

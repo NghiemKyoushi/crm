@@ -517,9 +517,9 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
   ], [permissions, listRole]);
   
   return (
-    <div className="p-4 bg-white shadow-md rounded-xl w-full">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">{t("staffManage.title")}</h2>
+        <h2 className="text-sm font-semibold text-gray-800">{t("staffManage.title")}</h2>
         <Button
           type="primary"
           onClick={() => {
@@ -532,7 +532,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
           {t("staffManage.addStaff")}
         </Button>
       </div>
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
         <Input
           placeholder={t("staffManage.searchPlaceholder")}
           value={search}

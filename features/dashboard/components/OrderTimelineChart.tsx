@@ -87,9 +87,9 @@ const OrderTimelineChart: React.FC<OrderTimelineChartProps> = ({
   };
 
   return (
-    <Card className="shadow-md border-0">
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-bold text-gray-900">
+        <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.order_timeline", "Biểu đồ đơn hàng theo thời gian")}
         </h3>
         <Segmented
@@ -166,7 +166,7 @@ const OrderTimelineChart: React.FC<OrderTimelineChartProps> = ({
           </ResponsiveContainer>
         )}
       </Skeleton>
-    </Card>
+    </div>
   );
 };
 

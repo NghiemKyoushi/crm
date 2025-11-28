@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import { Space, Typography, Alert, Card } from "antd";
+import { Typography, Alert } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import WebsiteAccountTable from "../components/website-account-table";
@@ -37,8 +37,8 @@ export default function ManagerAccountWebPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-white">
+      <div className="w-full">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -62,13 +62,11 @@ export default function ManagerAccountWebPage() {
           </div>
         </div>
 
-        <Card>
-          <WebsiteAccountTable
-            accounts={accounts}
-            websiteId={websiteId}
-            onRefresh={() => refetch()}
-          />
-        </Card>
+        <WebsiteAccountTable
+          accounts={accounts}
+          websiteId={websiteId}
+          onRefresh={() => refetch()}
+        />
       </div>
     </div>
   );

@@ -134,24 +134,24 @@ const MaterialProfitLossCard: React.FC<MaterialProfitLossCardProps> = ({
   }, [data]);
 
   return (
-    <Card className="shadow-md border-0 h-full" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-            <FontAwesomeIcon icon={faChartLine} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+            <FontAwesomeIcon icon={faChartLine} className="text-teal-500" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-sm font-semibold text-gray-800 m-0">
               {t("dashboard.material_profit_loss", "Lãi/Lỗ nguyên liệu (FIFO)")}
             </h3>
-            <div className="text-xs text-gray-500 flex gap-3">
+            <p className="text-xs text-gray-500 m-0 flex gap-3">
               <span className="text-emerald-600">
                 {t("dashboard.profit", "Lãi")}: +{summary.totalProfit.toLocaleString("vi-VN")}
               </span>
               <span className="text-red-600">
                 {t("dashboard.loss", "Lỗ")}: -{summary.totalLoss.toLocaleString("vi-VN")}
               </span>
-            </div>
+            </p>
           </div>
         </div>
         <RangePicker
@@ -164,25 +164,23 @@ const MaterialProfitLossCard: React.FC<MaterialProfitLossCardProps> = ({
           size="small"
         />
       </div>
-      <div className="flex-1 min-h-[280px]">
-        <Skeleton loading={isLoading} active>
-          {!data || data.length === 0 ? (
-            <div className="flex items-center justify-center h-[240px]">
-              <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
-            </div>
-          ) : (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={false}
-              size="small"
-              rowKey="partner_id"
-              scroll={{ x: 800 }}
-            />
-          )}
-        </Skeleton>
-      </div>
-    </Card>
+      <Skeleton loading={isLoading} active>
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
+          </div>
+        ) : (
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={false}
+            size="small"
+            rowKey="partner_id"
+            scroll={{ x: 800 }}
+          />
+        )}
+      </Skeleton>
+    </div>
   );
 };
 
