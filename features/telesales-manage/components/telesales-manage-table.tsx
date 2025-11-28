@@ -790,16 +790,18 @@ const TelesalesPage: React.FC = () => {
         if (record.status === "UNASSIGNED") {
           return (
             <div className="flex flex-col gap-1.5">
-              <Button
-                size="small"
-                onClick={() => {
-                  setSelectedCustomer(record);
-                  setIsOpenAssign(true);
-                }}
-                className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
-              >
-                Gán Sale
-              </Button>
+              {isTelesaleManager && (
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setSelectedCustomer(record);
+                    setIsOpenAssign(true);
+                  }}
+                  className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                >
+                  Gán Sale
+                </Button>
+              )}
             </div>
           );
         }
