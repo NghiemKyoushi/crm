@@ -207,9 +207,8 @@ const TelesalesPage: React.FC = () => {
     }, 0);
   };
 
-  const isAdmin = useMemo(() => {
-    const isAdmin = hasPermission("system.admin");
-    return isAdmin;
+  const isTelesaleManager = useMemo(() => {
+    return hasPermission("telesales.manager") || hasPermission("system.admin");
   }, [hasPermission]);
 
   const handleSaveNote = async (newNote: string) => {
@@ -313,7 +312,7 @@ const TelesalesPage: React.FC = () => {
   const allUnassignedIds = unassignedCustomers.map((d) => d.id);
 
   const columns: ColumnsType<TelesaleCustomer> = [
-    ...(isAdmin
+    ...(isTelesaleManager
       ? [
           {
             title: (
@@ -791,16 +790,18 @@ const TelesalesPage: React.FC = () => {
         if (record.status === "UNASSIGNED") {
           return (
             <div className="flex flex-col gap-1.5">
-              <Button
-                size="small"
-                onClick={() => {
-                  setSelectedCustomer(record);
-                  setIsOpenAssign(true);
-                }}
-                className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
-              >
-                Gán Sale
-              </Button>
+              {isTelesaleManager && (
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setSelectedCustomer(record);
+                    setIsOpenAssign(true);
+                  }}
+                  className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                >
+                  Gán Sale
+                </Button>
+              )}
             </div>
           );
         }
@@ -838,7 +839,7 @@ const TelesalesPage: React.FC = () => {
             >
               Thất bại
             </Button>
-            {isAdmin && (
+            {isTelesaleManager && (
               <div className="flex flex-col gap-1.5">
                 <Button
                   size="small"
@@ -1127,7 +1128,7 @@ const TelesalesPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {isAdmin && (
+          {isTelesaleManager && (
             <>
               <Button
                 size="small"
@@ -1183,7 +1184,7 @@ const TelesalesPage: React.FC = () => {
             setIsBulkAssignModalOpen(true);
           }}
           selectedRowKeys={selectedRowKeys}
-          isAdmin={isAdmin}
+          isAdmin={isTelesaleManager}
         />
       </div>
 
