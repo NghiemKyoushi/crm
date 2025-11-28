@@ -298,6 +298,7 @@ export const updateOrderSourceAccount = async (
 
 export const cancelOrderAfterApprove = async (
   id: number,
+  status: string,
   body: {
     amount: number;
     note: string;
@@ -307,7 +308,8 @@ export const cancelOrderAfterApprove = async (
   const bodySend = {
     note: body.note,
     is_full_back: body.isFullBack,
-    amount: body.amount
+    amount: body.amount,
+    status: status,
   }
   const res = await api.post(`${API_TYPE_CONST.CANCEL_ORDER}/${id}`, bodySend);
   return res.data.data;

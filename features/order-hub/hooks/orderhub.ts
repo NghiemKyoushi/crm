@@ -231,15 +231,17 @@ export const useCancelOrderAfterApprove = () => {
   return useMutation({
     mutationFn: ({
       id,
+      status,
       body,
     }: {
       id: number;
+      status: string;
       body: {
         amount: number;
         note: string;
         isFullBack: boolean;
       };
-    }) => cancelOrderAfterApprove(id, body),
+    }) => cancelOrderAfterApprove(id, status, body),
   });
 };
 
