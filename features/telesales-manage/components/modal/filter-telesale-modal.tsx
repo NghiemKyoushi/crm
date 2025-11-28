@@ -105,7 +105,7 @@ export const FilterForm: React.FC<{
   return (
     <Form
       form={form}
-      className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200"
+      className="bg-gray-50 border border-gray-200 rounded-lg"
       initialValues={{
         search: "",
         business_field: null,

@@ -2,7 +2,7 @@ import { Button, Input, Typography, Select, Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import TableComponent from "@/components/TableComponent";
 import CustomerDetailModal from "./modal-customer/modal-view-detail-customer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useListCateGoryCus,
@@ -26,6 +26,9 @@ const { Text } = Typography;
 const { Option } = Select;
 
 export default function CustomerTable() {
+  // Avoid double execution in StrictMode (dev) or duplicate mount
+  const didInit = useRef(false);
+
   const { hasPermission, permissions } = usePermission();
 
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -69,6 +72,8 @@ export default function CustomerTable() {
   const [salesLoading, setSalesLoading] = useState(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     let unmounted = false;
     const fetchSales = async () => {
       setSalesLoading(true);
@@ -156,12 +161,12 @@ export default function CustomerTable() {
             prev.map((item) =>
               item.user_id === userId
                 ? {
-                    ...item,
-                    category_id: e,
-                    group_id: e,
-                    group_name: selectedCategory?.label || item.group_name,
-                    color: selectedCategory?.color || item.color,
-                  }
+                  ...item,
+                  category_id: e,
+                  group_id: e,
+                  group_name: selectedCategory?.label || item.group_name,
+                  color: selectedCategory?.color || item.color,
+                }
                 : item
             )
           );
@@ -307,8 +312,8 @@ export default function CustomerTable() {
       },
       onError: (err: any) => {
         toast.error(
-          err?.response?.data?.localizedMessage || 
-          err?.response?.data?.message || 
+          err?.response?.data?.localizedMessage ||
+          err?.response?.data?.message ||
           "Có lỗi xảy ra khi tạo tài khoản"
         );
       },
@@ -317,9 +322,9 @@ export default function CustomerTable() {
 
   // Hiển thị filter/inputs
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-sm font-semibold text-gray-800">
           {t("customerManage.title")}
         </h2>
         <Button
@@ -331,8 +336,7 @@ export default function CustomerTable() {
           Tạo tài khoản
         </Button>
       </div>
-      <div className="mb-4">
-
+      <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
           <Input
             placeholder={t("customerTable.searchPlaceholder")}

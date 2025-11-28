@@ -318,11 +318,11 @@ export default function CMSFeaturePage() {
 
     return (
         <ConfigProvider wave={{ disabled: true }}>
-            <div className="pt-4 ">
-                <div className="p-6">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white min-h-full">
+                <div className="p-4">
+                    <div className="border border-gray-200 rounded-lg">
                         <CMSTabs activeKey={activeKey} onChange={handleTabChange} />
-                        <div className="px-6 pb-6 pt-1">
+                        <div className="p-4">
                             {activeKey === "pages" && (
                                 <Table
                                     loading={isLoading}

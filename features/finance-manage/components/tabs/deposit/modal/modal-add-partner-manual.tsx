@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Modal,
   Input,
@@ -41,10 +41,16 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  // User state
   const [search, setSearch] = useState<string>("");
   const [userOptions, setUserOptions] = useState<SelectProps["options"]>([]);
   const [loadingUser, setLoadingUser] = useState(false);
+  const [userPage, setUserPage] = useState(0);
+  const [userHasMore, setUserHasMore] = useState(true);
+  const userPagesLoaded = useRef<Set<number>>(new Set());
   const [selectedUserId, setSelectedUserId] = useState<number | undefined>(undefined);
+
+  // Bank state
   const [banks, setBanks] = useState<any[]>([]);
   const [bankPage, setBankPage] = useState(0);
   const [bankLoading, setBankLoading] = useState(false);
@@ -52,26 +58,89 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
   const banksFetchedPages = useRef<Set<number>>(new Set());
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const fetchUsers = async (searchValue = "") => {
-    setLoadingUser(true);
-    try {
-      const resp = await getPartnerList({page: 0, size: 20});
-      setUserOptions(
-        (resp.data || []).map((user: any) => ({
+
+  // Sử dụng ref để kiểm soát việc đã fetch users khi mở modal
+  const hasFetchedInitialUsers = useRef<boolean>(false);
+  // Khi đóng modal thì reset biến kiểm soát này
+  useEffect(() => {
+    if (!open) {
+      hasFetchedInitialUsers.current = false;
+    }
+  }, [open]);
+
+  // Fetch users, with paging
+  const fetchUsers = useCallback(
+    async (page: number, searchValue = "") => {
+      if (loadingUser || userPagesLoaded.current.has(page)) return;
+      setLoadingUser(true);
+      try {
+        const resp = await getPartnerList({
+          page,
+          size: PAGE_SIZE,
+        });
+        const dataArr = Array.isArray(resp.data) ? resp.data : resp.items || [];
+        const options = dataArr.map((user: any) => ({
           value: user.id,
           label: user.email,
-        }))
-      );
-    } catch (err) {
+        }));
+        setUserOptions((prev) =>
+          page === 0 ? options : [...(prev || []), ...options]
+        );
+        setUserHasMore(options.length === PAGE_SIZE);
+        userPagesLoaded.current.add(page);
+      } catch (err) {
+        setUserOptions([]);
+        setUserHasMore(false);
+      } finally {
+        setLoadingUser(false);
+      }
+    },
+    [loadingUser]
+  );
+
+  // Handle user select dropdown scroll for load more
+  const handleUserScroll: React.ComponentProps<typeof Select>["onPopupScroll"] = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (
+        !loadingUser &&
+        userHasMore &&
+        target.scrollTop + target.offsetHeight >= target.scrollHeight - 24
+      ) {
+        const nextPage = userPage + 1;
+        setUserPage(nextPage);
+        fetchUsers(nextPage, search);
+      }
+    },
+    [loadingUser, userHasMore, userPage, fetchUsers, search]
+  );
+
+  // Handle user search in select
+  const handleUserSearch = useCallback(
+    (searchVal: string) => {
+      setSearch(searchVal);
       setUserOptions([]);
-    } finally {
-      setLoadingUser(false);
-    }
-  };
+      setUserPage(0);
+      setUserHasMore(true);
+      userPagesLoaded.current = new Set();
+      fetchUsers(0, searchVal);
+    },
+    [fetchUsers]
+  );
+
+  // Chỉ gọi fetchUsers(0, search) 1 lần khi open modal, không gọi liên tục khi search đổi
   useEffect(() => {
-    if (!open) return;
-    fetchUsers(search);
-  }, [open, search]);
+    if (!open || hasFetchedInitialUsers.current) return;
+    setUserOptions([]);
+    setUserPage(0);
+    setUserHasMore(true);
+    userPagesLoaded.current = new Set();
+    fetchUsers(0, search);
+    hasFetchedInitialUsers.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, fetchUsers]); // bỏ "search" khỏi deps để không bị gọi khi search đổi
+
+  // Reset on open
   useEffect(() => {
     if (open) {
       setBanks([]);
@@ -81,7 +150,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       setSelectedUserId(undefined);
       form.resetFields();
     }
-  }, [open]);
+  }, [open, form]);
 
   const fetchBanks = async (page: number, partnerId: number) => {
     if (bankLoading || banksFetchedPages.current.has(page)) return;
@@ -103,7 +172,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
           (acc.partner_id_name ? `-${acc.partner_id_name}` : ""),
         value: acc.id,
       }));
-      if (page === 1) {
+      if (page === 0) {
         setBanks(opts || []);
         if ((opts || []).length > 0) {
           form.setFieldValue("company_bank_account_id", opts[0].value);
@@ -113,16 +182,14 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       } else {
         setBanks((prev) => [...prev, ...(opts || [])]);
       }
-      if ((opts || []).length < PAGE_SIZE) {
-        setBankHasMore(false);
-      } else {
-        setBankHasMore(true);
-      }
+      setBankHasMore((opts || []).length === PAGE_SIZE);
       banksFetchedPages.current.add(page);
     } finally {
       setBankLoading(false);
     }
   };
+
+  // Banks load more scroll handler
   const handleBankScroll: React.ComponentProps<
     typeof Select
   >["onPopupScroll"] = (e) => {
@@ -138,15 +205,17 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       fetchBanks(nextPage, selectedUserId);
     }
   };
+
   useEffect(() => {
-    if (!selectedUserId || bankPage === 1) return;
+    if (!selectedUserId || bankPage === 0) return;
     fetchBanks(bankPage, selectedUserId);
+    // eslint-disable-next-line
   }, [bankPage, selectedUserId]);
 
   const handleUserChange = (val: number) => {
     setSelectedUserId(val);
     setBanks([]);
-    setBankPage(1);
+    setBankPage(0);
     setBankHasMore(true);
     banksFetchedPages.current = new Set();
     form.setFieldValue("company_bank_account_id", undefined);
@@ -162,7 +231,6 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       onConfirm({
         amount_vnd: +values.amount,
         company_bank_account_id: values.company_bank_account_id,
-        // note: values.reason,
         user_id: +values.userId,
         reason: values.reason,
       });
@@ -173,6 +241,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
       message.error("Vui lòng nhập đủ thông tin!");
     }
   };
+
   return (
     <Modal
       open={open}
@@ -191,10 +260,13 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
             placeholder="Chọn đối tác"
             filterOption={false}
             loading={loadingUser}
+            showSearch
             options={userOptions}
             notFoundContent={loadingUser ? <Spin size="small" /> : null}
             allowClear
             onChange={handleUserChange}
+            onPopupScroll={handleUserScroll}
+            onSearch={handleUserSearch}
           />
         </Form.Item>
         <Form.Item
@@ -243,9 +315,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
             className="!w-full "
           />
         </Form.Item>
-
         {/* ĐÃ BỎ Form.Item "Mã giao dịch (từ sao kê)" */}
-
         <Form.Item
           className="!mb-1.5"
           label="Lý do nạp tiền"
@@ -260,7 +330,6 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
             rows={3}
           />
         </Form.Item>
-
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Hủy bỏ</Button>
           <Button type="primary" loading={loading} onClick={handleSubmit}>

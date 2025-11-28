@@ -183,8 +183,8 @@ export default function SalesDetail({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="font-semibold text-lg mb-4">
+    <div className="border border-gray-200 rounded-lg p-4">
+      <h3 className="font-semibold text-sm text-gray-800 mb-4">
         {t('customerManage.detailsTitle')} <span className="text-blue-600">{name}</span>
       </h3>
 
@@ -252,7 +252,7 @@ export default function SalesDetail({
                       dataSource={data?.data || []}
                       rowHeight={55}
                       pageSize={10}
-                      page={data?.current_page || 0}
+                      page={(data?.current_page && data?.current_page + 1)  || 0}
                       onPageChange={handleChangePage}
                       response={data}
                       fontSize={13}

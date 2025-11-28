@@ -44,6 +44,7 @@ function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
 
 import { updateStatusPackaged } from "@/features/order-hub/apis/orderhub";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/components/layout/PermissionContext";
 
 function useConfirmPacked() {
   const [loading, setLoading] = useState(false);
@@ -76,6 +77,23 @@ const ProductManagement: React.FC = () => {
   const [isPackedModalOpen, setIsPackedModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const { hasPermission } = usePermission();
+
+  // Full access permissions
+  const hasFullAccess =
+    hasPermission("warehouse.management_wh2") ||
+    hasPermission("system.admin");
+
+  // Permission checks for actions
+  // Nút "Đã đóng hàng" - warehouse.pick_and_pack_wh2 hoặc toàn quyền
+  const canConfirmPacked =
+    hasFullAccess ||
+    hasPermission("warehouse.pick_and_pack_wh2");
+
+  // Nút "Đã giao hàng" - warehouse.shipment_wh2 hoặc toàn quyền
+  const canConfirmShipped =
+    hasFullAccess ||
+    hasPermission("warehouse.shipment_wh2");
 
   const [filters, setFilters] = useState<FilterTypeShipment>({
     search: undefined,
@@ -436,8 +454,8 @@ const ProductManagement: React.FC = () => {
             >
               {text}
             </Tag>
-            {/* Nút "Đã đóng hàng" sẽ luôn hiện, nhưng có thể condition status nếu cần */}
-            {status === OrderStatusType.SHIPPING_REQUEST_CLIENT && (
+            {/* Nút "Đã đóng hàng" - chỉ hiển thị khi có permission */}
+            {status === OrderStatusType.SHIPPING_REQUEST_CLIENT && canConfirmPacked && (
               <Button
                 size="small"
                 className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
@@ -449,7 +467,8 @@ const ProductManagement: React.FC = () => {
                 Đã đóng hàng
               </Button>
             )}
-            {status === OrderStatusType.PACKED && (
+            {/* Nút "Đã giao hàng" - chỉ hiển thị khi có permission */}
+            {status === OrderStatusType.PACKED && canConfirmShipped && (
               <Button
                 size="small"
                 className="!bg-blue-500 hover:!bg-blue-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
@@ -467,17 +486,13 @@ const ProductManagement: React.FC = () => {
     },
   ];
   return (
-    <div className=" bg-gray-50">
-      <div className="bg-white rounded-xl  shadow p-6">
-        {/* Header with Filter */}
-        <div className="flex flex-col mb-2 gap-4">
-          {/* <h2 className="text-lg font-semibold">
-            {t('page.importedProductList')}
-          </h2> */}
-          <ShipmentFilter onFilter={handleFinish} initialFilters={filters} />
-        </div>
+    <div>
+      {/* Header with Filter */}
+      <div className="flex flex-col mb-4 gap-4">
+        <ShipmentFilter onFilter={handleFinish} initialFilters={filters} />
+      </div>
 
-        <EnhancedTableWrapper className="overflow-x-auto">
+      <EnhancedTableWrapper className="overflow-x-auto">
           <TableComponent
             columns={columns}
             dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
@@ -514,8 +529,7 @@ const ProductManagement: React.FC = () => {
             scroll={{ x: "max-content" }}
             size="small"
           />
-        </EnhancedTableWrapper>
-      </div>
+      </EnhancedTableWrapper>
 
       <Modal
         title="Xác nhận đã đóng hàng"

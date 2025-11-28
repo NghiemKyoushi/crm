@@ -108,16 +108,20 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="bg-white min-h-full">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {t("dashboard.title", "Dashboard")}
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          {t("dashboard.subtitle", "Tổng quan hệ thống Stream Cargo")}
-        </p>
+      <div className="page-header">
+        <div>
+          <h1 className="text-lg font-semibold text-gray-900 m-0">
+            {t("dashboard.title", "Dashboard")}
+          </h1>
+          <p className="text-xs text-gray-500 mt-1 m-0">
+            {t("dashboard.subtitle", "Tổng quan hệ thống Stream Cargo")}
+          </p>
+        </div>
       </div>
+
+      <div className="p-4">
 
       {/* ==================== TỔNG QUAN ==================== */}
       {/* Summary Cards */}
@@ -218,6 +222,7 @@ const DashboardPage: React.FC = () => {
             }
           }}
         />
+      </div>
       </div>
     </div>
   );

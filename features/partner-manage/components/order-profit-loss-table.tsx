@@ -180,7 +180,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string; dateRange?: [any, a
   ];
 
   return (
-    <div className="mb-3 w-full">
+    <div className="mb-3 w-full border border-gray-200 rounded-lg p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("partnerManage.orderProfitLossTitle")}
@@ -205,7 +205,7 @@ export const OrderProfitLossTable: React.FC<{ code?: string; dateRange?: [any, a
         </Select>
       </div>
 
-      <div>
+      <div className="mt-4">
         <Table
           columns={columns}
           dataSource={tableData}

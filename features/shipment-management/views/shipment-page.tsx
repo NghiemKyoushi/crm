@@ -5,7 +5,7 @@ import ProductManagement from "../components/shipment-table";
 
 export default function ShipmentPage() {
   return (
-    <div className="pt-4   mt-6">
+    <div className="bg-white min-h-full p-4">
       <ProductManagement />
     </div>
   );

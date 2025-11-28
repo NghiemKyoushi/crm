@@ -12,7 +12,11 @@ import {
   Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { EditOutlined, ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  ExclamationCircleOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 import CreateOrderModal from "./modal/add-orderhub-modal";
 import OrderHubFilter, { FilterType } from "./order-hub-filter";
 import { useTranslation } from "react-i18next";
@@ -55,6 +59,7 @@ import {
 } from "../apis/orderhub";
 import dayjs from "dayjs";
 import { CancelOrderModal } from "./modal/cancel-order-modal";
+import EditHistoryModal from "./modal/edit-history-modal";
 
 function isEqualObject(obj1: any, obj2: any) {
   // Only compare shallow, including only relevant keys
@@ -79,6 +84,7 @@ export default function OrderHub() {
   const [orderDetail, setOrderDetail] = useState<Invoice>();
   const [openConfirmPurchase, setOpenConfirmPurchase] = useState(false);
   const [openConfirmComplete, setOpenConfirmComplete] = useState(false);
+  const [openOrderHistory, setOpenOrderHistory] = useState(false);
 
   const [isOpenCancel, setIsOpenCancel] = useState(false);
   const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
@@ -129,7 +135,9 @@ export default function OrderHub() {
   // Track which orders are being loaded to prevent duplicate calls
   const loadingOrdersRef = useRef<Set<number>>(new Set());
   // Track dropdown open state for each order
-  const [dropdownOpenStates, setDropdownOpenStates] = useState<Record<number, boolean>>({});
+  const [dropdownOpenStates, setDropdownOpenStates] = useState<
+    Record<number, boolean>
+  >({});
 
   const [filters, setFilters] = useState<FilterType>({
     status: undefined,
@@ -144,6 +152,7 @@ export default function OrderHub() {
     note_admin: undefined,
     from_date: undefined,
     to_date: undefined,
+    account: undefined,
   });
   // Track the previous filters to know if filters changed
   const prevFilters = useRef<FilterType>(filters);
@@ -175,6 +184,7 @@ export default function OrderHub() {
       customer_code: filters.customer_code,
       email: filters.email,
       phone_number: filters.phone_number,
+      account: filters.account,
     })
   );
   const approveMutation = useApproveOrder();
@@ -198,7 +208,7 @@ export default function OrderHub() {
       return true;
     }
     // If user has order.edit_approving permission, they can only edit when status is ADMIN_PENDING or CLIENT_PENDING
-    const isPendingStatus = orderStatus === OrderStatusType.ADMIN_PENDING
+    const isPendingStatus = orderStatus === OrderStatusType.ADMIN_PENDING;
     if (hasPermission("order.edit_approving") && isPendingStatus) {
       return true;
     }
@@ -339,16 +349,16 @@ export default function OrderHub() {
 
   // handleFilter: Only set filters and reset to page 1 if something actually changed
   const handleFilter = (newFilters: FilterType) => {
-    console.log('handleFilter', newFilters);
-
+    
     if (isEqualObject(newFilters, prevFilters.current)) {
       return;
     }
     prevFilters.current = newFilters;
+    console.log('newFilters', newFilters);
+
     setFilters(newFilters);
     setPage(0);
   };
-
 
   // Function to call for updating kupon (with toast and loading)
   const updateOrderKupon = async (orderId: number, value: number | null) => {
@@ -432,7 +442,10 @@ export default function OrderHub() {
       // Store accounts in state - will be automatically mapped to Select.Option in render
       setOrderAccounts((prev) => {
         const newState = { ...prev, [order.id]: accounts || [] };
-        console.log(`Updated orderAccounts for order ${order.id}:`, newState[order.id]);
+        console.log(
+          `Updated orderAccounts for order ${order.id}:`,
+          newState[order.id]
+        );
         return newState;
       });
     } catch (error: any) {
@@ -659,13 +672,13 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                            "en-US"
-                          )}${isJapanPrice}`
+                              "en-US"
+                            )}${isJapanPrice}`
                           : codeType === 1
-                            ? "Miễn phí"
-                            : codeType === 3
-                              ? "Cập nhật sau"
-                              : "-"}
+                          ? "Miễn phí"
+                          : codeType === 3
+                          ? "Cập nhật sau"
+                          : "-"}
                       </span>
                     )}
                   </div>
@@ -706,7 +719,7 @@ export default function OrderHub() {
       },
     },
     {
-      title: "Ghi Chú",
+      title: "Ghi Chú (KH)",
       key: "note",
       width: 140,
       onCell: () => ({
@@ -720,16 +733,16 @@ export default function OrderHub() {
             {record.note || record.description || "Cập nhật sau"}
           </div>
           {canEditOrder(record.status) && (
-              <EditOutlined
-                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
-                onClick={() =>
-                  setEditingNote({
-                    id: record.id,
-                    note: record.note || record.description || "",
-                  })
-                }
-              />
-            )}
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
+              onClick={() =>
+                setEditingNote({
+                  id: record.id,
+                  note: record.note || record.description || "",
+                })
+              }
+            />
+          )}
         </div>
       ),
     },
@@ -748,26 +761,26 @@ export default function OrderHub() {
             {typeof record.kupon === "number"
               ? record.kupon.toLocaleString("en-US")
               : record.kupon && !isNaN(Number(record.kupon))
-                ? Number(record.kupon).toLocaleString("en-US")
-                : "-"}
+              ? Number(record.kupon).toLocaleString("en-US")
+              : "-"}
           </span>
           {canEditOrder(record.status) && (
-              <EditOutlined
-                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                onClick={() => {
-                  setEditingKupon({
-                    orderId: record.id,
-                    value:
-                      typeof record.kupon === "number"
-                        ? record.kupon
-                        : record.kupon && !isNaN(Number(record.kupon))
-                          ? Number(record.kupon)
-                          : null,
-                  });
-                  setOrderDetail(record);
-                }}
-              />
-            )}
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+              onClick={() => {
+                setEditingKupon({
+                  orderId: record.id,
+                  value:
+                    typeof record.kupon === "number"
+                      ? record.kupon
+                      : record.kupon && !isNaN(Number(record.kupon))
+                      ? Number(record.kupon)
+                      : null,
+                });
+                setOrderDetail(record);
+              }}
+            />
+          )}
         </div>
       ),
     },
@@ -881,16 +894,16 @@ export default function OrderHub() {
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
           {canEditOrder(record.status) && (
-              <EditOutlined
-                className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
-                onClick={() =>
-                  setEditingNoteExtra({
-                    orderId: record.id,
-                    value: record?.note_admin,
-                  })
-                }
-              />
-            )}
+            <EditOutlined
+              className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
+              onClick={() =>
+                setEditingNoteExtra({
+                  orderId: record.id,
+                  value: record?.note_admin,
+                })
+              }
+            />
+          )}
         </div>
       ),
     },
@@ -908,7 +921,8 @@ export default function OrderHub() {
         const isLoading = loadingAccounts[record.id];
 
         // Use source_account_id and source_account_username directly from order data
-        const currentAccountId = orderSourceAccount[record.id] ?? record.source_account_id;
+        const currentAccountId =
+          orderSourceAccount[record.id] ?? record.source_account_id;
         const currentAccountUsername = record.source_account_username;
 
         const isDropdownOpen = dropdownOpenStates[record.id] || false;
@@ -917,7 +931,11 @@ export default function OrderHub() {
         const handleDropdownOpen = (open: boolean) => {
           setDropdownOpenStates((prev) => ({ ...prev, [record.id]: open }));
 
-          if (open && !orderAccounts[record.id] && !loadingOrdersRef.current.has(record.id)) {
+          if (
+            open &&
+            !orderAccounts[record.id] &&
+            !loadingOrdersRef.current.has(record.id)
+          ) {
             loadAccountsForOrder(record);
           }
         };
@@ -930,20 +948,30 @@ export default function OrderHub() {
                 {isLoading ? (
                   <div className="flex items-center justify-center py-4">
                     <Spin size="small" />
-                    <span className="ml-2 text-xs text-gray-400">Đang tải...</span>
+                    <span className="ml-2 text-xs text-gray-400">
+                      Đang tải...
+                    </span>
                   </div>
                 ) : accounts.length === 0 ? (
-                  <div className="text-xs text-gray-400 py-4 text-center">Không có account</div>
+                  <div className="text-xs text-gray-400 py-4 text-center">
+                    Không có account
+                  </div>
                 ) : (
                   <div>
                     {accounts.map((account) => (
                       <div
                         key={account.id}
-                        className={`text-xs py-2 px-3 hover:bg-gray-100 cursor-pointer transition-colors ${currentAccountId === account.id ? "bg-blue-50 font-medium" : ""
-                          }`}
+                        className={`text-xs py-2 px-3 hover:bg-gray-100 cursor-pointer transition-colors ${
+                          currentAccountId === account.id
+                            ? "bg-blue-50 font-medium"
+                            : ""
+                        }`}
                         onClick={() => {
                           handleAccountChange(record.id, account.id);
-                          setDropdownOpenStates((prev) => ({ ...prev, [record.id]: false }));
+                          setDropdownOpenStates((prev) => ({
+                            ...prev,
+                            [record.id]: false,
+                          }));
                         }}
                       >
                         {account.username}
@@ -1200,7 +1228,9 @@ export default function OrderHub() {
                           },
                           {
                             onSuccess: () => {
-                              toast.success(t("toast.confirmVnWarehouseSuccess"));
+                              toast.success(
+                                t("toast.confirmVnWarehouseSuccess")
+                              );
                               queryClient.invalidateQueries({
                                 queryKey: ["listorder"],
                               });
@@ -1302,17 +1332,30 @@ export default function OrderHub() {
             {actionButton}
 
             {/* Button chi tiết luôn hiển thị */}
-            <Button
-              size="small"
-              type="link"
-              className="!text-[11px] !p-0 !h-auto !font-medium hover:!text-blue-700"
-              onClick={() => {
-                setOpenDetail(true);
-                setOrderDetail(record);
-              }}
-            >
-              Chi tiết
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                size="small"
+                type="link"
+                className="!text-[11px] !p-0 !h-auto !font-medium hover:!text-blue-700"
+                onClick={() => {
+                  setOpenDetail(true);
+                  setOrderDetail(record);
+                }}
+              >
+                Chi tiết
+              </Button>
+              <Button
+                size="small"
+                type="link"
+                className="!text-[11px] !p-0 !h-auto !font-medium !text-yellow-400 hover:!text-yellow-600"
+                onClick={() => {
+                  setOpenOrderHistory(true);
+                  setOrderDetail(record);
+                }}
+              >
+                Lịch sử
+              </Button>
+            </div>
           </div>
         );
       },
@@ -1320,8 +1363,8 @@ export default function OrderHub() {
   ];
 
   return (
-    <div className=" bg-gray-50 ">
-      <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white">
+      <div className="p-4">
         <OrderHubFilter
           onFilter={handleFilter}
           onCreateOrder={() => setOpen(true)}
@@ -1480,6 +1523,17 @@ export default function OrderHub() {
         confirmText={t("common.confirm")}
         cancelText={t("common.cancel")}
       />
+
+      {orderDetail && (
+        <EditHistoryModal
+          isOpen={openOrderHistory}
+          onCancel={() => {
+            setOpenOrderHistory(false);
+            setOrderDetail(undefined);
+          }}
+          orderId={orderDetail.id}
+        />
+      )}
 
       {orderDetail && (
         <CancelReasonModal
@@ -1657,7 +1711,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );
@@ -1738,7 +1792,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                        t("common.error")
+                          t("common.error")
                       ),
                   }
                 );

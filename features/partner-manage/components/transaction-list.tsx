@@ -291,7 +291,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
   return (
     <>
-      <div className="mb-4 w-full">
+      <div className="mb-4 w-full border border-gray-200 rounded-lg p-4 bg-gray-50">
         {/* Header with Search and Actions */}
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-semibold text-gray-800 m-0">
@@ -340,7 +340,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         </div>
 
         {/* Full Width Table */}
-        <div>
+        <div className="mt-4">
           <Table
             columns={columns}
             dataSource={data?.data || []}

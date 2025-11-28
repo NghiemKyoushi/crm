@@ -106,34 +106,32 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
   ];
 
   return (
-    <Card className="shadow-md border-0 h-full" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-          <FontAwesomeIcon icon={faBoxOpen} className="text-white" />
+        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+          <FontAwesomeIcon icon={faBoxOpen} className="text-orange-500" />
         </div>
-        <h3 className="text-base font-bold text-gray-900">
+        <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.top_products", "Sản phẩm bán chạy")}
         </h3>
       </div>
-      <div className="flex-1 min-h-[280px]">
-        <Skeleton loading={isLoading} active>
-          {!data || data.length === 0 ? (
-            <div className="flex items-center justify-center h-[240px]">
-              <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
-            </div>
-          ) : (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={false}
-              size="small"
-              rowKey="product_url"
-              scroll={{ x: 600 }}
-            />
-          )}
-        </Skeleton>
-      </div>
-    </Card>
+      <Skeleton loading={isLoading} active>
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
+          </div>
+        ) : (
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={false}
+            size="small"
+            rowKey="product_url"
+            scroll={{ x: 600 }}
+          />
+        )}
+      </Skeleton>
+    </div>
   );
 };
 

@@ -161,8 +161,14 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     required: [
       'system.admin',
       'system.config',
-      "sales.view_assigned_shipments", "sales.create_shipments"
-
+      'sales.view_assigned_shipments',
+      'warehouse.check_coming_wh2',
+      'warehouse.management_wh2',
+      'warehouse.packed_view_wh2',
+      'warehouse.pick_and_pack_wh2',
+      'warehouse.shipment_wh2',
+      'warehouse.shipped_view_wh2',
+      'warehouse.view_wh2'
     ],
     requireAll: false,
     fallbackAction: 'notFound'
@@ -173,11 +179,9 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     required: [
       'sales.manage_orders',
       'sales.view_assigned_orders',
-      'sales.update_order_status',
       'sales.create_order_for_customers',
       'sales.manage_auctions',
       'sales.create_auction',
-      'sales.update_auction',
       'sales.view_auction_results',
       'sales.manage_bids',
       'sales.view_own_salary',
@@ -188,7 +192,6 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
       'sales.export_sales_data',
       'sales.view_assigned_customers',
       'sales.manage_assigned_customers',
-      'sales.update_customer_info',
       'sales.add_customer_notes',
       'sales.view_customer_orders'
     ],
@@ -267,7 +270,6 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     required: [
       'sales.manage_orders',
       'sales.view_assigned_orders',
-      'sales.update_order_status',
       'sales.create_order_for_customers',
       'sales.manage_assigned_customers',
       'sales.view_customer_orders',

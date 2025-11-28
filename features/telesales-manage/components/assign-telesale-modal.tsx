@@ -97,86 +97,85 @@ const AssignTelesaleModal: React.FC<AssignCustomerModalProps> = ({
       onCancel={handleCancel}
       footer={null}
       centered
-      width={550}
+      width={480}
+      closable={true}
+      closeIcon={
+        <span className="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </span>
+      }
       title={
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-            <UserAddOutlined className="text-white text-xl" />
+        <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+            <UserAddOutlined className="text-white text-lg" />
           </div>
-          <span className="font-bold text-xl text-gray-800">Gán khách hàng cho Telesale</span>
+          <div>
+            <h3 className="font-semibold text-gray-800 text-base m-0">Gán khách hàng</h3>
+            <p className="text-xs text-gray-500 m-0 mt-0.5">Chọn nhân viên telesale để gán</p>
+          </div>
         </div>
       }
     >
-      {/* Thông báo số khách hàng */}
-      <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl px-5 py-4 mb-5 mt-4">
-        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span className="text-sm text-blue-800 font-semibold">
-          Đã chọn 1 khách hàng để gán
-        </span>
-      </div>
+      <div className="pt-4">
+        {/* Chọn telesale */}
+        <div className="mb-4">
+          <label className="block mb-1.5 font-medium text-gray-700 text-sm">
+            Telesale <span className="text-red-500">*</span>
+          </label>
+          <Spin spinning={loading}>
+            <Select
+              value={telesale}
+              onChange={(val) => setTelesale(val as number)}
+              placeholder="Chọn nhân viên telesale"
+              className="!w-full"
+              size="large"
+              showSearch
+              optionFilterProp="label"
+              options={telesaleOptions}
+            />
+          </Spin>
+        </div>
 
-      {/* Chọn telesale */}
-      <div className="mb-5">
-        <label className="block mb-2 font-semibold text-gray-700 text-sm">
-          Chọn Telesale <span className="text-red-500">*</span>
-        </label>
-        <Spin spinning={loading}>
-          <Select
-            value={telesale}
-            onChange={(val) => setTelesale(val as number)}
-            placeholder="-- Chọn Telesale --"
-            className="!w-full !h-11 !rounded-lg"
-            showSearch
-            options={telesaleOptions}
+        {/* Ghi chú */}
+        <div className="mb-5">
+          <label className="block mb-1.5 font-medium text-gray-700 text-sm">
+            Ghi chú <span className="text-red-500">*</span>
+          </label>
+          <TextArea
+            value={note}
+            onChange={(e) => {
+              setNote(e.target.value);
+              if (e.target.value.trim()) setNoteError("");
+            }}
+            placeholder="Nhập ghi chú..."
+            rows={3}
+            status={noteError ? "error" : undefined}
+            className="!resize-none"
           />
-        </Spin>
-      </div>
+          {noteError && (
+            <p className="text-red-500 text-xs mt-1.5 m-0">{noteError}</p>
+          )}
+        </div>
 
-      {/* Ghi chú */}
-      <div className="mb-6">
-        <label className="block mb-2 font-semibold text-gray-700 text-sm">
-          Ghi chú <span className="text-red-500">*</span>
-        </label>
-        <TextArea
-          value={note}
-          onChange={(e) => {
-            setNote(e.target.value);
-            if (e.target.value.trim()) setNoteError("");
-          }}
-          placeholder="Ghi chú về việc gán khách hàng..."
-          rows={4}
-          status={noteError ? "error" : undefined}
-          className="!rounded-lg"
-        />
-        {noteError && (
-          <div className="text-red-500 text-sm mt-2 flex items-center gap-1">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            {noteError}
-          </div>
-        )}
-      </div>
-
-      {/* Footer buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button
-          onClick={handleCancel}
-          className="!h-10 !px-5 !rounded-lg"
-        >
-          Hủy
-        </Button>
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={handleOk}
-          disabled={typeof telesale !== "number" || loading}
-          className="!bg-gradient-to-r !from-blue-500 !to-blue-600 hover:!from-blue-600 hover:!to-blue-700 !h-10 !px-6 !rounded-lg !font-medium !shadow-md hover:!shadow-lg !transition-all"
-        >
-          Gán khách hàng
-        </Button>
+        {/* Footer buttons */}
+        <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
+          <Button
+            onClick={handleCancel}
+            className="!h-9 !px-4 !text-sm"
+          >
+            Hủy
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleOk}
+            disabled={typeof telesale !== "number" || loading}
+            className="!h-9 !px-4 !text-sm !bg-blue-500 hover:!bg-blue-600 !border-blue-500 hover:!border-blue-600 !text-white"
+          >
+            Xác nhận
+          </Button>
+        </div>
       </div>
     </Modal>
   );

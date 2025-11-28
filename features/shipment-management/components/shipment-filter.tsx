@@ -159,14 +159,14 @@ export default function ShipmentFilter({
           </Button>
         </div>
         {/* Advanced Search Row */}
-        <div className="w-full bg-gray-50 rounded-lg p-4">
-          <div className="text-base font-semibold text-black-700 mb-2">
+        <div className="w-full bg-gray-50 rounded-lg p-4 border border-gray-200 mt-2">
+          <div className="text-sm font-semibold text-gray-800 mb-3">
             Tìm kiếm
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Cột 1: Thông tin khách hàng */}
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-600">
+            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
+              <div className="text-xs font-medium text-gray-600 mb-2">
                 Thông tin khách hàng
               </div>
               <Form.Item name="email" className="!mb-2">
@@ -183,7 +183,14 @@ export default function ShipmentFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="phone_number" className="!mb-2">
+              <Form.Item name="customer_name" className="!mb-2">
+                <Input
+                  placeholder="Tên khách hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              {/* <Form.Item name="phone_number" className="!mb-2">
                 <InputNumber
                   placeholder="Số điện thoại"
                   className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
@@ -194,10 +201,10 @@ export default function ShipmentFilter({
                   style={{ display: 'flex', alignItems: 'center' }}
                   inputMode="tel"
                 />
-              </Form.Item>
+              </Form.Item> */}
             </div>
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-600">
+            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
+              <div className="text-xs font-medium text-gray-600 mb-2">
                 Trạng thái
               </div>
               <Form.Item name="status" className="!mb-2">
@@ -228,8 +235,8 @@ export default function ShipmentFilter({
               </Form.Item>
             </div>
             {/* Cột 2: Mã vận đơn & Tracking */}
-            <div className="space-y-1">
-              <div className="text-xs font-medium text-gray-600">
+            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
+              <div className="text-xs font-medium text-gray-600 mb-2">
                 Mã xuất kho & Tracking
               </div>
               <div className="flex flex-col gap-2">

@@ -116,49 +116,47 @@ const PendingOrdersCard: React.FC<PendingOrdersCardProps> = ({
   }, [data]);
 
   return (
-    <Card className="shadow-md border-0 h-full" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-          <FontAwesomeIcon icon={faClock} className="text-white" />
+        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+          <FontAwesomeIcon icon={faClock} className="text-amber-500" />
         </div>
         <div>
-          <h3 className="text-base font-bold text-gray-900">
+          <h3 className="text-sm font-semibold text-gray-800 m-0">
             {t("dashboard.pending_orders", "Đơn hàng đang chờ xử lý")}
           </h3>
-          <div className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 m-0">
             {data?.length ?? 0} {t("dashboard.orders", "đơn hàng")}
             {urgentCount > 0 && (
-              <span className="text-red-600 ml-2">
+              <span className="text-red-500 ml-2">
                 ({urgentCount} {t("dashboard.need_attention", "cần chú ý")})
               </span>
             )}
-          </div>
+          </p>
         </div>
       </div>
-      <div className="flex-1 min-h-[280px]">
-        <Skeleton loading={isLoading} active>
-          {!data || data.length === 0 ? (
-            <div className="flex items-center justify-center h-[240px]">
-              <Empty
-                description={t(
-                  "dashboard.no_pending_orders",
-                  "Không có đơn hàng chờ xử lý"
-                )}
-              />
-            </div>
-          ) : (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={{ pageSize: 5, size: "small" }}
-              size="small"
-              rowKey="order_id"
-              scroll={{ x: 800 }}
+      <Skeleton loading={isLoading} active>
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Empty
+              description={t(
+                "dashboard.no_pending_orders",
+                "Không có đơn hàng chờ xử lý"
+              )}
             />
-          )}
-        </Skeleton>
-      </div>
-    </Card>
+          </div>
+        ) : (
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={{ pageSize: 5, size: "small" }}
+            size="small"
+            rowKey="order_id"
+            scroll={{ x: 800 }}
+          />
+        )}
+      </Skeleton>
+    </div>
   );
 };
 

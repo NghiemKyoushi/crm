@@ -24,7 +24,7 @@ const FinanceDepositApprovalPage = () => {
     notFound();
   }
   return (
-    <div className="pt-4 ">
+    <div className="bg-white min-h-full p-4">
       <FinanceTabs />
     </div>
   );

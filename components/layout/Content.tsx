@@ -6,16 +6,15 @@ export default function ContentWrapper({ children }: { children: React.ReactNode
   const { collapsed } = useSidebar();
 
   return (
-    <div
+    <main
+      className="transition-all duration-300 bg-white min-h-[calc(100vh-64px)]"
       style={{
-        flex: 1,
-        margin: "24px",
-        padding: "24px 0px 24px 40px",
         marginLeft: collapsed ? 64 : 256,
-        transition: "all 0.3s ease",
+        marginTop: 64,
+        padding: "20px 16px",
       }}
     >
       {children}
-    </div>
+    </main>
   );
 }

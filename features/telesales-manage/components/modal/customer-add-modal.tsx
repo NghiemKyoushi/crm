@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Select, Button, Spin } from "antd";
+import { Modal, Form, Input, Select, Button, Spin, Divider, Space } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import { fetchTagsByType } from "./filter-telesale-modal";
 import { TelesaleCustomerFormInput } from "../../types/telesales-mng";
+import { addTelesaleTag } from "../../apis/telesale-mng";
+import { toast } from "react-toastify";
 
 interface CustomerModalProps {
   open: boolean;
@@ -26,6 +29,103 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
     source: boolean;
     situation: boolean;
   }>({ service: false, source: false, situation: false });
+
+  // State for adding new tags
+  const [newServiceTagName, setNewServiceTagName] = useState("");
+  const [newSourceTagName, setNewSourceTagName] = useState("");
+  const [addingServiceTag, setAddingServiceTag] = useState(false);
+  const [addingSourceTag, setAddingSourceTag] = useState(false);
+
+  // Function to reload tags
+  const reloadServiceTags = async () => {
+    setLoadingTags((prev) => ({ ...prev, service: true }));
+    try {
+      const data = await fetchTagsByType("SERVICE");
+      setServiceOptions(
+        (data || []).map((item: any) => ({
+          label: item.name,
+          value: item.id?.toString(),
+        }))
+      );
+    } catch {
+      setServiceOptions([]);
+    } finally {
+      setLoadingTags((prev) => ({ ...prev, service: false }));
+    }
+  };
+
+  const reloadSourceTags = async () => {
+    setLoadingTags((prev) => ({ ...prev, source: true }));
+    try {
+      const data = await fetchTagsByType("SOURCE");
+      setSourceOptions(
+        (data || []).map((item: any) => ({
+          label: item.name,
+          value: item.id?.toString(),
+        }))
+      );
+    } catch {
+      setSourceOptions([]);
+    } finally {
+      setLoadingTags((prev) => ({ ...prev, source: false }));
+    }
+  };
+
+  // Add new service tag
+  const handleAddServiceTag = async (
+    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    if (!newServiceTagName.trim()) return;
+
+    setAddingServiceTag(true);
+    try {
+      const result = await addTelesaleTag({
+        name: newServiceTagName.trim(),
+        color: "#3b82f6", // default blue color
+        tag_type: "SERVICE",
+      });
+      toast.success("Thêm loại dịch vụ thành công!");
+      setNewServiceTagName("");
+      await reloadServiceTags();
+      // Auto select the new tag
+      if (result?.data?.id) {
+        form.setFieldValue("service_tag", result.data.id.toString());
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Thêm loại dịch vụ thất bại!");
+    } finally {
+      setAddingServiceTag(false);
+    }
+  };
+
+  // Add new source tag
+  const handleAddSourceTag = async (
+    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    if (!newSourceTagName.trim()) return;
+
+    setAddingSourceTag(true);
+    try {
+      const result = await addTelesaleTag({
+        name: newSourceTagName.trim(),
+        color: "#10b981", // default green color
+        tag_type: "SOURCE",
+      });
+      toast.success("Thêm nguồn thành công!");
+      setNewSourceTagName("");
+      await reloadSourceTags();
+      // Auto select the new tag
+      if (result?.data?.id) {
+        form.setFieldValue("source_tag", result.data.id.toString());
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Thêm nguồn thất bại!");
+    } finally {
+      setAddingSourceTag(false);
+    }
+  };
 
   useEffect(() => {
     setLoadingTags((prev) => ({ ...prev, service: true }));
@@ -219,9 +319,9 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               >
                 <Select
                   options={serviceOptions}
-                  placeholder="Chọn dịch vụ"
+                  placeholder="Chọn hoặc thêm dịch vụ"
                   className="!h-10"
-                  dropdownClassName="h-48"
+                  popupClassName="h-48"
                   style={{ width: "100%" }}
                   loading={loadingTags.service}
                   showSearch
@@ -230,6 +330,30 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                       ?.toLowerCase()
                       .indexOf(input.toLowerCase()) >= 0
                   }
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 8px" }}>
+                        <Input
+                          placeholder="Nhập tên dịch vụ mới"
+                          value={newServiceTagName}
+                          onChange={(e) => setNewServiceTagName(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          style={{ width: 180 }}
+                        />
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={handleAddServiceTag}
+                          loading={addingServiceTag}
+                          disabled={!newServiceTagName.trim()}
+                        >
+                          Thêm
+                        </Button>
+                      </Space>
+                    </>
+                  )}
                 />
               </Form.Item>
 
@@ -241,9 +365,9 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               >
                 <Select
                   options={sourceOptions}
-                  placeholder="Chọn nguồn khách hàng"
+                  placeholder="Chọn hoặc thêm nguồn"
                   className="!h-10"
-                  dropdownClassName="h-48"
+                  popupClassName="h-48"
                   style={{ width: "100%" }}
                   loading={loadingTags.source}
                   showSearch
@@ -252,6 +376,30 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
                       ?.toLowerCase()
                       .indexOf(input.toLowerCase()) >= 0
                   }
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 8px" }}>
+                        <Input
+                          placeholder="Nhập tên nguồn mới"
+                          value={newSourceTagName}
+                          onChange={(e) => setNewSourceTagName(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          style={{ width: 180 }}
+                        />
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={handleAddSourceTag}
+                          loading={addingSourceTag}
+                          disabled={!newSourceTagName.trim()}
+                        >
+                          Thêm
+                        </Button>
+                      </Space>
+                    </>
+                  )}
                 />
               </Form.Item>
 

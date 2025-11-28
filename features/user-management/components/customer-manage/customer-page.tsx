@@ -119,15 +119,13 @@ export default function CustomerPage() {
     ? allTabs.filter((tab) => tab.key === "1")
     : allTabs.filter((tab) => hasPermission(tab.perm));
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <Tabs
-          defaultActiveKey={allowedTabs[0]?.key}
-          destroyInactiveTabPane
-          items={allowedTabs}
-          className="user-management-tabs"
-        />
-      </div>
+    <div>
+      <Tabs
+        defaultActiveKey={allowedTabs[0]?.key}
+        destroyInactiveTabPane
+        items={allowedTabs}
+        className="user-management-tabs"
+      />
     </div>
   );
 }

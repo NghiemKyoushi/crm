@@ -2,25 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Card,
   Form,
   Input,
-  Button,
   Select,
   InputNumber,
   Modal,
-  message,
   Row,
   Col,
   Radio,
   Spin,
   DatePicker,
-  Statistic,
-  Progress,
   Tabs,
-  Space,
 } from "antd";
-import { PlusOutlined, ArrowUpOutlined, ArrowDownOutlined, CalendarOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
@@ -194,27 +187,18 @@ export default function FIFOMaterialManagement() {
   ];
 
   return (
-    <div className="p-6">
-      {/* Page Header - Compact */}
-      <div className="mb-3">
-        <h2 className="text-base font-bold text-gray-800">
-          {t("menu.partnerManagement")}
-        </h2>
-      </div>
+    <div>
+      {/* Currency Tabs */}
+      <style jsx global>{`
+        .partner-currency-tabs .ant-tabs-nav {
+          margin-bottom: 16px;
+        }
+        .partner-currency-tabs .ant-tabs-tab {
+          font-size: 13px;
+        }
+      `}</style>
 
-      {/* Main Container Card */}
-      <Card>
-        {/* Currency Tabs */}
-        <style jsx global>{`
-          .partner-currency-tabs .ant-tabs-nav {
-            margin-bottom: 20px;
-          }
-          .partner-currency-tabs .ant-tabs-tab {
-            font-size: 14px;
-          }
-        `}</style>
-
-        <Tabs
+      <Tabs
           activeKey={selectedCurrency}
           onChange={setSelectedCurrency}
           type="line"
@@ -223,7 +207,7 @@ export default function FIFOMaterialManagement() {
           {currencyTabs.map((tab) => (
             <TabPane tab={tab.label} key={tab.key}>
               {/* Metrics Header */}
-              <Row gutter={[12, 12]} className="mb-4">
+              <Row gutter={[12, 12]} className="mb-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
                 {/* Tồn kho */}
                 <Col xs={8} sm={6} md={5}>
                   <div className="text-center">
@@ -285,8 +269,6 @@ export default function FIFOMaterialManagement() {
                 </Col>
               </Row>
 
-              <div className="border-t border-gray-200 mb-4"></div>
-
               {/* Transaction List */}
               <TransactionList
                 currencyCode={selectedCurrency}
@@ -302,8 +284,7 @@ export default function FIFOMaterialManagement() {
               />
             </TabPane>
           ))}
-        </Tabs>
-      </Card>
+      </Tabs>
 
       {/* Add Transaction Modal */}
       <Modal

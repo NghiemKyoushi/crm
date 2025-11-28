@@ -128,7 +128,7 @@ export default function TableComponent<RecordType extends object>({
         };
 
   return (
-    <div>
+    <div className="table-wrapper">
       <Table<RecordType>
         columns={columns}
         dataSource={dataSource || []}

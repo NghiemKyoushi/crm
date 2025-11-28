@@ -113,7 +113,7 @@ export const RoleManager: React.FC = () => {
 
   return (
     <div className="flex gap-6 w-full">
-      <div className="w-1/3 bg-white shadow rounded p-3">
+      <div className="w-1/3 border border-gray-200 rounded p-3">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold">{t("roles.list.title")}</h3>
           <Button
@@ -147,7 +147,7 @@ export const RoleManager: React.FC = () => {
             ))}
         </div>
       </div>
-      <div className="w-3/4 bg-white shadow rounded p-4">
+      <div className="w-3/4 border border-gray-200 rounded p-4">
         {selectedRole ? (
           <>
             <div className="flex justify-between items-center mb-4">

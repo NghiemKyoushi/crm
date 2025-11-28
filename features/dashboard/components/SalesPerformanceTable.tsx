@@ -116,34 +116,32 @@ const SalesPerformanceTable: React.FC<SalesPerformanceTableProps> = ({
   ];
 
   return (
-    <Card className="shadow-md border-0 h-full" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-          <FontAwesomeIcon icon={faUsers} className="text-white" />
+        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+          <FontAwesomeIcon icon={faUsers} className="text-purple-500" />
         </div>
-        <h3 className="text-base font-bold text-gray-900">
+        <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.sales_performance", "Hiệu suất nhân viên bán hàng")}
         </h3>
       </div>
-      <div className="flex-1 min-h-[300px]">
-        <Skeleton loading={isLoading} active>
-          {!data || data.length === 0 ? (
-            <div className="flex items-center justify-center h-[260px]">
-              <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
-            </div>
-          ) : (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={false}
-              size="small"
-              rowKey="sales_id"
-              scroll={{ x: 800 }}
-            />
-          )}
-        </Skeleton>
-      </div>
-    </Card>
+      <Skeleton loading={isLoading} active>
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Empty description={t("dashboard.no_data", "Không có dữ liệu")} />
+          </div>
+        ) : (
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={false}
+            size="small"
+            rowKey="sales_id"
+            scroll={{ x: 800 }}
+          />
+        )}
+      </Skeleton>
+    </div>
   );
 };
 

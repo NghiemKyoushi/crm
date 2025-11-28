@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Modal,
   Input,
@@ -46,36 +46,67 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
   type,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState<SelectProps["options"]>([]);
-  const [search, setSearch] = useState("");
+
+  // Banks state
   const [banks, setBanks] = useState<any[]>([]);
   const [bankPage, setBankPage] = useState(0);
   const [bankLoading, setBankLoading] = useState(false);
   const [bankHasMore, setBankHasMore] = useState(true);
+  const banksLoadedRef = useRef<Set<number>>(new Set());
+
+  // Customers (users) state
+  const [customerOptions, setCustomerOptions] = useState<SelectProps["options"]>([]);
+  const [customerPage, setCustomerPage] = useState(0);
+  const [customerHasMore, setCustomerHasMore] = useState(true);
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const customersLoadedRef = useRef<Set<number>>(new Set());
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<string>("");
 
   const [form] = Form.useForm();
 
-  const banksLoadedRef = useRef<Set<number>>(new Set());
-
-  const [customerPage, setCustomerPage] = useState(0);
-
-  const { data } = useListCustomer({
-    page: customerPage,
-    page_size: 10,
-    category_id: undefined,
-    search: search || undefined,
-  });
-
-  useEffect(() => {
-    if (data?.data) {
-      setOptions(
-        data.data.map((user: any) => ({
-          value: user.user_id,
-          label: `${user.email}`,
-        }))
-      );
+  // BANKS API - paginated
+  const fetchBanks = async (page: number) => {
+    if (bankLoading || banksLoadedRef.current.has(page)) return;
+    setBankLoading(true);
+    try {
+      const params: BankDepositRequest = {
+        page: page,
+        size: PAGE_SIZE,
+      };
+      const data: BankAccountListResponse = await getListBankCreateAccount(params);
+      const opts = data.content.map((acc: BankAccount) => ({
+        label:
+          `${acc.account_holder}-${acc.account_number}-${acc.bank_code}` +
+          (acc.partner_id_name ? `-${acc.partner_id_name}` : ""),
+        value: acc.id,
+      }));
+      if (page === 0) {
+        setBanks(opts || []);
+        // Nếu có ít nhất 1 bank, set mặc định bank đầu tiên vào form
+        if ((opts || []).length > 0) {
+          form.setFieldValue("company_bank_account_id", opts[0].value);
+        }
+      } else {
+        setBanks(prev => [...prev, ...(opts || [])]);
+      }
+      setBankHasMore((opts || []).length === PAGE_SIZE);
+      banksLoadedRef.current.add(page);
+    } catch (err) {
+      console.error("Failed to fetch bank list:", err);
+    } finally {
+      setBankLoading(false);
     }
-  }, [data]);
+  };
+
+  // CUSTOMERS API - paginated, with search
+  // This uses useListCustomer hook for automatic fetching
+  const { data: customerData, isFetching: customerBackendLoading } = useListCustomer({
+    page: customerPage,
+    page_size: PAGE_SIZE,
+    category_id: undefined,
+    search: searchRef.current || undefined,
+  });
 
   // Load first page for banks when modal opens
   useEffect(() => {
@@ -89,40 +120,62 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Load banks by page
-  const fetchBanks = async (page: number) => {
-    if (bankLoading || banksLoadedRef.current.has(page)) return;
-    setBankLoading(true);
-    try {
-      const params: BankDepositRequest = {
-        page: page,
-        size: PAGE_SIZE,
-        // type: 2,
-      };
-      const data: BankAccountListResponse = await getListBankCreateAccount(params);
-      const opts = data.content.map((acc: BankAccount) => ({
-        label:
-          `${acc.account_holder}-${acc.account_number}-${acc.bank_code}` +
-          (acc.partner_id_name ? `-${acc.partner_id_name}` : ""),
-        value: acc.id, 
-      }));
-      if (page === 0) {
-        setBanks(opts || []);
-        // Nếu có ít nhất 1 bank, set mặc định bank đầu tiên vào form
-        if ((opts || []).length > 0) {
-          form.setFieldValue('company_bank_account_id', opts[0].value);
-        }
-      } else {
-        setBanks(prev => [...prev, ...(opts || [])]);
+
+  // Handling customer search and reload when search changes
+  useEffect(() => {
+    if (!open) return;
+    setCustomerOptions([]);
+    setCustomerPage(0);
+    setCustomerHasMore(true);
+    customersLoadedRef.current = new Set();
+    // will trigger customerData useEffect for page 0
+  }, [search, open]);
+
+  // Handle update customer option when page or data changes
+  useEffect(() => {
+    if (!customerData || !open) return;
+    const list = (customerData?.data || []).map((user: any) => ({
+      value: user.user_id,
+      label: `${user.email}`,
+    }));
+    setCustomerOptions(prev =>
+      customerPage === 0 ? list : [...(prev || []), ...list]
+    );
+    setCustomerHasMore(list.length === PAGE_SIZE);
+    customersLoadedRef.current.add(customerPage);
+    // eslint-disable-next-line
+  }, [customerData, customerPage, open]);
+
+  // Handler for load more customer list on scroll
+  const handleCustomerScroll: React.ComponentProps<typeof Select>["onPopupScroll"] = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (
+        !customerBackendLoading &&
+        !customerLoading &&
+        customerHasMore &&
+        target.scrollTop + target.offsetHeight >= target.scrollHeight - 24 // threshold
+      ) {
+        const nextPage = customerPage + 1;
+        setCustomerLoading(true);
+        setCustomerPage(nextPage);
+        setTimeout(() => setCustomerLoading(false), 100); // prevent double-triggering
       }
-      setBankHasMore((opts || []).length === PAGE_SIZE);
-      banksLoadedRef.current.add(page);
-    } catch (err) {
-      console.error("Failed to fetch bank list:", err);
-    } finally {
-      setBankLoading(false);
-    }
-  };
+    },
+    [customerBackendLoading, customerLoading, customerHasMore, customerPage]
+  );
+
+  // Handler for searching users
+  const handleCustomerSearch = useCallback(
+    (searchVal: string) => {
+      setSearch(searchVal);
+      searchRef.current = searchVal;
+      setCustomerOptions([]);
+      setCustomerPage(0);
+      setCustomerHasMore(true);
+    },
+    []
+  );
 
   // Handler for scroll on Select dropdown for banks
   const handleBankScroll: React.ComponentProps<typeof Select>["onPopupScroll"] =
@@ -173,7 +226,6 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
         note: values.reason,
         user_id: +values.userId,
         reason: values.reason,
-        
       });
       setLoading(false);
       form.resetFields();
@@ -205,8 +257,30 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
             showSearch
             placeholder="Nhập UserID, Tên, hoặc Email..."
             filterOption={false}
-            onSearch={e => setSearch(e)}
-            options={options}
+            onSearch={handleCustomerSearch}
+            options={customerOptions}
+            loading={customerBackendLoading || customerLoading}
+            onPopupScroll={handleCustomerScroll}
+            notFoundContent={
+              customerBackendLoading || customerLoading ? (
+                <Spin size="small" />
+              ) : null
+            }
+            dropdownRender={menu => (
+              <>
+                {menu}
+                {customerHasMore && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: 8,
+                    }}
+                  >
+                    {(customerBackendLoading || customerLoading) ? <Spin size="small" /> : ""}
+                  </div>
+                )}
+              </>
+            )}
           />
         </Form.Item>
 

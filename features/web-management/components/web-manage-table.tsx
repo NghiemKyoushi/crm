@@ -313,9 +313,9 @@ const WebsiteManageTable: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow mt-4">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">{t("websiteManage.page.title")}</h2>
+        <h2 className="text-sm font-semibold text-gray-800">{t("websiteManage.page.title")}</h2>
         <Button type="primary" onClick={() => handleOpenModal()}>
           + {t("websiteManage.page.add")}
         </Button>
