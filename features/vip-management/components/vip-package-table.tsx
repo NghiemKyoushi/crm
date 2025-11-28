@@ -176,9 +176,9 @@ export default function VipPackageTable() {
     ];
 
     return (
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="w-full">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Danh sách gói VIP</h2>
+                <h2 className="text-sm font-semibold text-gray-800">Danh sách gói VIP</h2>
                 <Button
                     type="primary"
                     icon={<FontAwesomeIcon icon={faPlus} />}

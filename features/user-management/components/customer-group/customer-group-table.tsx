@@ -219,9 +219,9 @@ export default function CategoryCustomerTable() {
   ];
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-xl w-full">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-sm font-semibold text-gray-800">
           {t('categoryCustomer.title')}
         </h2>
         <Button
@@ -233,7 +233,7 @@ export default function CategoryCustomerTable() {
         </Button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
         <Input
           placeholder={t('categoryCustomer.searchPlaceholder')}
           value={search}

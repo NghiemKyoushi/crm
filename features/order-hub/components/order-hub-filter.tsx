@@ -180,21 +180,19 @@ export default function OrderHubFilter({
     <div className="flex flex-col mb-2 gap-1">
       <Form form={form} onFinish={handleFinish} initialValues={mergedInitialValues}>
         {/* Action Buttons Row */}
-        <div className="w-full flex justify-end gap-3 bg-white rounded-lg p-2">
+        <div className="w-full flex justify-end gap-2 py-3 border-b border-gray-100">
           <Button
             type="default"
             onClick={handleReset}
-            className="!h-10 !text-gray-600 !font-medium !text-xs !px-6"
-            size="small"
+            className="!h-9 !text-gray-600 !font-medium !text-xs !px-4"
           >
             Reset
           </Button>
           <Button
-            type="primary"
+            type="default"
             htmlType="submit"
             icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-            className="!h-10 !bg-gray-700 !text-white !font-medium !text-xs !px-6"
-            size="small"
+            className="!h-9 !font-medium !text-xs !px-4"
           >
             {t("filter")}
           </Button>
@@ -202,8 +200,7 @@ export default function OrderHubFilter({
             <Button
               type="primary"
               icon={<PlusOutlined className="text-xs" />}
-              className="!h-10 !bg-blue-600 !text-white !font-medium !text-xs !px-6"
-              size="small"
+              className="!h-9 !bg-blue-500 hover:!bg-blue-600 !text-white !font-medium !text-xs !px-4"
               onClick={onCreateOrder}
             >
               Tạo đơn
@@ -211,8 +208,8 @@ export default function OrderHubFilter({
           )}
         </div>
         {/* Advanced Search Row */}
-        <div className="w-full bg-gray-50 rounded-lg p-4">
-          <div className="text-base  font-semibold text-black-700 mb-2">
+        <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 mt-2">
+          <div className="text-sm font-semibold text-gray-800 mb-3">
             Tìm kiếm
           </div>
           <div className="grid grid-cols-4 gap-3">

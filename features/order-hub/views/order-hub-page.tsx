@@ -5,7 +5,7 @@ import OrderHub from "../components/order-hub-list";
 
 export default function OrderhubPage() {
   return (
-    <div className="pt-4 ">
+    <div className="bg-white min-h-full">
       <OrderHub />
     </div>
   );

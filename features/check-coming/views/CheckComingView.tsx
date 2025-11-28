@@ -615,7 +615,7 @@ const CheckComingView: React.FC = () => {
   }, [isScanning, packageCode]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+    <div className="min-h-full bg-white p-4">
       <div className="max-w-7xl mx-auto">
         {/* Success Effect Overlay */}
         {showSuccessEffect && (

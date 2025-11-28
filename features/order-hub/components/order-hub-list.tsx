@@ -1363,8 +1363,8 @@ export default function OrderHub() {
   ];
 
   return (
-    <div className=" bg-gray-50 ">
-      <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white">
+      <div className="p-4">
         <OrderHubFilter
           onFilter={handleFilter}
           onCreateOrder={() => setOpen(true)}

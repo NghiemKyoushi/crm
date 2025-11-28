@@ -96,18 +96,18 @@ const FinanceDepositApprovalPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       {activeTab !== null ? (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <>
           <FinanceTabs
             activeKey={activeTab || ""}
             onChange={handleTabChange}
             allowedTabs={allowedTabs}
           />
-          <div className="px-6 pb-6 pt-1">
+          <div className="mt-4">
             {renderTabContent()}
           </div>
-        </div>
+        </>
       ) : (
         <Spin />
       )}

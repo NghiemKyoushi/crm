@@ -327,9 +327,9 @@ const WithdrawTable = ({}) => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-semibold text-gray-800">{t("withdraw.title")}</h2>
+        <h2 className="text-sm font-semibold text-gray-800">{t("withdraw.title")}</h2>
       </div>
       <DepositFilter onFilter={handleSearch} action={action ?? undefined} code={code ?? undefined}  />
 

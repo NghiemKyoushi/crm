@@ -467,17 +467,13 @@ const ProductManagement: React.FC = () => {
     },
   ];
   return (
-    <div className=" bg-gray-50">
-      <div className="bg-white rounded-xl  shadow p-6">
-        {/* Header with Filter */}
-        <div className="flex flex-col mb-2 gap-4">
-          {/* <h2 className="text-lg font-semibold">
-            {t('page.importedProductList')}
-          </h2> */}
-          <ShipmentFilter onFilter={handleFinish} initialFilters={filters} />
-        </div>
+    <div>
+      {/* Header with Filter */}
+      <div className="flex flex-col mb-4 gap-4">
+        <ShipmentFilter onFilter={handleFinish} initialFilters={filters} />
+      </div>
 
-        <EnhancedTableWrapper className="overflow-x-auto">
+      <EnhancedTableWrapper className="overflow-x-auto">
           <TableComponent
             columns={columns}
             dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
@@ -514,8 +510,7 @@ const ProductManagement: React.FC = () => {
             scroll={{ x: "max-content" }}
             size="small"
           />
-        </EnhancedTableWrapper>
-      </div>
+      </EnhancedTableWrapper>
 
       <Modal
         title="Xác nhận đã đóng hàng"

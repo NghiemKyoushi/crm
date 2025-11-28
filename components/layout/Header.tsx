@@ -81,19 +81,18 @@ export const Header: React.FC = () => {
 
   return (
     <AntHeader
-      className="!fixed !top-0  !right-0 !h-16 
-             !bg-white !p-6 flex justify-between items-center 
-             z-40 gap-4 border-b border-gray-200 shadow-sm"
+      className="!fixed !top-0 !right-0 !h-16 !bg-white !px-5 flex justify-between items-center z-40 border-b border-gray-200 transition-all duration-300"
       style={{ left: collapsed ? 64 : 256 }}
     >
-      <div className="text-lg font-semibold text-left">
+      <h1 className="text-base font-semibold text-gray-800 m-0">
         {loading
           ? t("system.loading")
           : currentMenu
           ? t(`menu.${currentMenu.label}`)
           : "OrderSystem"}
-      </div>
-      <div className="flex items-center justify-center align-middle content-center">
+      </h1>
+      <div className="flex items-center gap-2">
+        <LanguageSwitcher />
         <Dropdown
           menu={{ items: menuItem }}
           trigger={["click"]}
@@ -101,11 +100,10 @@ export const Header: React.FC = () => {
         >
           <Avatar
             icon={<FontAwesomeIcon className="text-gray-500" icon={faUser} />}
-            className="cursor-pointer"
-            style={{ backgroundColor: "rgb(219 234 254)" }}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: "#e0e7ff" }}
           />
         </Dropdown>
-        <LanguageSwitcher />
       </div>
     </AntHeader>
   );

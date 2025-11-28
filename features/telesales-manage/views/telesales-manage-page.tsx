@@ -5,7 +5,7 @@ import TelesalesPage from "../components/telesales-manage-table";
 
 export default function TelesaleManagePage() {
   return (
-    <div className="pt-4  ">
+    <div className="bg-white min-h-full p-4">
       <TelesalesPage />
     </div>
   );

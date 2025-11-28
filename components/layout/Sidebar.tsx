@@ -1,228 +1,236 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Layout, Menu } from "antd";
+import React, {useMemo} from "react";
+import {Layout, Menu} from "antd";
 import Link from "next/link";
 import Image from "next/image";
 import logoCRM from "@/assets/login/logo_crm.jpg";
-import { usePathname } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {usePathname} from "next/navigation";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-  faTachometerAlt,
-  faShoppingCart,
-  faWallet,
-  faUsers,
-  faGavel,
-  faTags,
-  faCog,
-  faYenSign,
-  faWarehouse,
-  faBars,
-  faChevronLeft,
-  faClipboardCheck,
-  faHeadset,
-  faCrown,
-  faMoneyBillWave,
+    faTachometerAlt,
+    faShoppingCart,
+    faWallet,
+    faUsers,
+    faGavel,
+    faTags,
+    faCog,
+    faYenSign,
+    faWarehouse,
+    faBars,
+    faChevronLeft,
+    faClipboardCheck,
+    faHeadset,
+    faCrown,
+    faMoneyBillWave,
 } from "@fortawesome/free-solid-svg-icons";
-import { useTranslation } from "react-i18next";
-import { usePermission } from "./PermissionContext";
-import { useSidebar } from "@/contexts/SidebarContext";
+import {useTranslation} from "react-i18next";
+import {usePermission} from "./PermissionContext";
+import {useSidebar} from "@/contexts/SidebarContext";
 
-const { Sider } = Layout;
+const {Sider} = Layout;
 
 export const menuPermissions: Record<string, string[]> = {
-  // Dashboard - accessible to most users
-  "/dashboard": ["dashboard.view"],
+    // Dashboard - accessible to most users
+    "/dashboard": ["dashboard.view"],
 
-  // Order Management - view permissions for most, edit for operations
-  "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create", "sales.view_assigned_orders", "sales.create_order_for_customers"],
+    // Order Management - view permissions for most, edit for operations
+    "/orderhub": ["order.view", "order.view_all", "order.update_status", "order.create", "sales.view_assigned_orders", "sales.create_order_for_customers"],
 
-  // Finance Management - restricted to finance roles
-  "/finance-management": [
-    "finance.approve_topup",
-    "finance.process_withdrawal",
-    "finance.view_all_transactions",
-    "finance.manage_debt",
-    "finance.approve_topup_requests",
-    "finance.process_withdrawal_requests",
-    "finance.manual_topup",
-    "finance.manage_bank_accounts",
-    "finance.view_transaction_history",
-    "finance.manage_bank_permissions"
-  ],
+    // Finance Management - restricted to finance roles
+    "/finance-management": [
+        "finance.approve_topup",
+        "finance.process_withdrawal",
+        "finance.view_all_transactions",
+        "finance.manage_debt",
+        "finance.approve_topup_requests",
+        "finance.process_withdrawal_requests",
+        "finance.manual_topup",
+        "finance.manage_bank_accounts",
+        "finance.view_transaction_history",
+        "finance.manage_bank_permissions"
+    ],
 
-  // User Management - HR and admin functions
-  "/user-management": [
-    "user.view_list",
-    "user.categorize_customers",
-    "user.manage_staff_roles",
-    "user.view",
-    "role.view",
-    "permission.view",
-    "sales.manage_assigned_customers"
-  ],
+    // User Management - HR and admin functions
+    "/user-management": [
+        "user.view_list",
+        "user.categorize_customers",
+        "user.manage_staff_roles",
+        "user.view",
+        "role.view",
+        "permission.view",
+        "sales.manage_assigned_customers"
+    ],
 
-  // Telesales - manager or member access
-  "/telesales-manage": ["telesales.manager", "telesales.member"],
+    // Telesales - manager or member access
+    "/telesales-manage": ["telesales.manager", "telesales.member"],
 
-  // Sales Management - sales team access
-  "/sales-management": [
-    "sales.manage_orders",
-    "sales.view_assigned_orders",
-    "sales.view_own_salary",
-    "sales.view_own_commission",
-    "sales.access_dashboard",
-    "sales.view_sales_reports",
-    "sales.manage_assigned_customers"
-  ],
+    // Sales Management - sales team access
+    "/sales-management": [
+        "sales.manage_orders",
+        "sales.view_assigned_orders",
+        "sales.view_own_salary",
+        "sales.view_own_commission",
+        "sales.access_dashboard",
+        "sales.view_sales_reports",
+        "sales.manage_assigned_customers"
+    ],
 
-  // Sales Salary Management - admin and finance
-  "/sales-salary-management": [
-    "sales.view_own_salary",
-    "sales.view_own_commission",
-    "sales.manage_salaries",
-    "finance.view_all_transactions",
-    "system.admin"
-  ],
+    // Sales Salary Management - admin and finance
+    "/sales-salary-management": [
+        "sales.view_own_salary",
+        "sales.view_own_commission",
+        "sales.manage_salaries",
+        "finance.view_all_transactions",
+        "system.admin"
+    ],
 
-  // Partner Management - finance and admin
-  "/partner-manage": [
-    // "finance.manage_bank_accounts",
-    // "finance.manage_bank_permissions",
-    'material.partner_manage',
-    "system.admin"
-  ],
+    // Partner Management - finance and admin
+    "/partner-manage": [
+        // "finance.manage_bank_accounts",
+        // "finance.manage_bank_permissions",
+        'material.partner_manage',
+        "system.admin"
+    ],
 
-  // System Settings - admin only
-  "/settings": ["system.admin", "settings.edit"],
+    // System Settings - admin only
+    "/settings": ["system.admin", "settings.edit"],
 
-  // Website Management - admin and system config
-  "/website-manage": ["system.admin", "system.config"],
+    // Website Management - admin and system config
+    "/website-manage": ["system.admin", "system.config"],
 
-  // Fee Setting - admin or settings.edit
-  "/fee-setting": ["system.admin", "settings.edit"],
+    // Fee Setting - admin or settings.edit
+    "/fee-setting": ["system.admin", "settings.edit"],
 
-  // Surcharge - order and pricing
-  "/surchange": ["order.view", "order.create", "order.edit", "system.admin"],
-  //
-  "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
+    // Surcharge - order and pricing
+    "/surchange": ["order.view", "order.create", "order.edit", "system.admin"],
+    //
+    "/shipment-management": ["system.admin", "sales.view_assigned_shipments", "sales.create_shipments"],
 
-  // Check Coming - Warehouse
-  "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
+    // Check Coming - Warehouse
+    "/check-coming": ["warehouse.check_coming_wh1", "system.admin"],
 
-  // CRM - open access initially
-  "/cms": ["cms.view_screen", "cms.edit_screen"],
+    // CRM - open access initially
+    "/cms": ["cms.view_screen", "cms.edit_screen"],
 
-  // VIP Management - admin and system config
-  "/vip-management": ["system.admin", "vip.manage"],
+    // VIP Management - admin and system config
+    "/vip-management": ["system.admin", "vip.manage"],
 };
 
 export const menuItems = [
-  { key: "/dashboard", icon: faTachometerAlt, label: "dashboard" },
-  { key: "/orderhub", icon: faShoppingCart, label: "orders" },
-  { key: "/shipment-management", icon: faWarehouse, label: "operation" },
-  { key: "/check-coming", icon: faClipboardCheck, label: "checkComing" },
-  { key: "/partner-manage", icon: faYenSign, label: "partnerManagement" },
-  // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
-  { key: "/sales-salary-management", icon: faMoneyBillWave, label: "salesSalaryManagement" },
-  { key: "/finance-management", icon: faWallet, label: "finance" },
-  { key: "/user-management", icon: faUsers, label: "userManagement" },
-  { key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement" },
-  // { key: "/fee-setting", icon: faTags, label: "products" },
-  // { key: "/surchange", icon: faTags, label: "surcharge" },
-  { key: "/website-manage", icon: faGavel, label: "websiteManagement" },
-  { key: "/cms", icon: faTags, label: "cms" },
-  { key: "/vip-management", icon: faCrown, label: "vipManagement" },
-  { key: "/settings", icon: faCog, label: "settings" },
+    {key: "/dashboard", icon: faTachometerAlt, label: "dashboard"},
+    {key: "/orderhub", icon: faShoppingCart, label: "orders"},
+    {key: "/shipment-management", icon: faWarehouse, label: "operation"},
+    {key: "/check-coming", icon: faClipboardCheck, label: "checkComing"},
+    {key: "/partner-manage", icon: faYenSign, label: "partnerManagement"},
+    // { key: "/sales-management", icon: faMoneyBill, label: "saleRecord" },
+    {key: "/finance-management", icon: faWallet, label: "finance"},
+    {key: "/user-management", icon: faUsers, label: "userManagement"},
+    {key: "/telesales-manage", icon: faHeadset, label: "telesaleManagement"},
+    {key: "/sales-salary-management", icon: faMoneyBillWave, label: "salesSalaryManagement"},
+
+    // { key: "/fee-setting", icon: faTags, label: "products" },
+    // { key: "/surchange", icon: faTags, label: "surcharge" },
+    {key: "/cms", icon: faTags, label: "cms"},
+    {key: "/website-manage", icon: faGavel, label: "websiteManagement"},
+    {key: "/vip-management", icon: faCrown, label: "vipManagement"},
+    {key: "/settings", icon: faCog, label: "settings"},
 ];
 export const Sidebar: React.FC = () => {
-  const { collapsed, toggle } = useSidebar();
+    const {collapsed, toggle} = useSidebar();
 
-  const pathname = usePathname();
-  const { t } = useTranslation();
+    const pathname = usePathname();
+    const {t} = useTranslation();
 
-  const { hasPermission } = usePermission();
+    const {hasPermission} = usePermission();
 
-  // chỉ render menu khi có quyền
-  const filteredMenu = useMemo(() => {
-    return menuItems.filter((item) => {
-      const required = menuPermissions[item.key] || [];
-      if (required.length === 0) return true;
-      return required.some((perm) => hasPermission(perm));
-    });
-  }, [hasPermission]);
+    // chỉ render menu khi có quyền
+    const filteredMenu = useMemo(() => {
+        return menuItems.filter((item) => {
+            const required = menuPermissions[item.key] || [];
+            if (required.length === 0) return true;
+            return required.some((perm) => hasPermission(perm));
+        });
+    }, [hasPermission]);
 
-  return (
-    // <Sider
-    //   width={256}
-    //   //   collapsedWidth={256}
-    //   className="!fixed !top-0 !left-0 !h-screen shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] z-50"
-    //   theme="light"
-    //   //   breakpoint="lg"
-    //   collapsible={false}
-    // >
-    //   <div className="text-gray-800 font-bold p-4 shadow-md flex justify-starts items-center gap-4">
-    //     <div className=" z-50">
-    //       <Image
-    //         src={logoCRM}
-    //         alt="CRM Logo"
-    //         width={45}
-    //         height={45}
-    //         className="rounded-full shadow-sm"
-    //       />
-    //     </div>
-    //     <span>OrderSystem</span>
-    //   </div>
-    //   <Menu
-    //     style={{ border: "none" }}
-    //     theme="light"
-    //     mode="inline"
-    //     items={filteredMenu.map((item) => ({
-    //       key: item.key,
-    //       icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
-    //       label: <Link href={item.key}>{t(`menu.${item.label}`)}</Link>,
-    //     }))}
-    //     selectedKeys={[pathname]}
-    //   />
-    // </Sider>
-    <Sider
-      width={256}
-      collapsedWidth={64}
-      collapsed={collapsed}
-      trigger={null}
-      className="!fixed !top-0 !left-0 !h-screen shadow-md z-50"
-      theme="light"
-    >
-      {/* Logo + toggle */}
-      <div className={`flex items-center  p-4 shadow-md ${collapsed ? "justify-center" : "justify-between"}`}>
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <Image
-              src={logoCRM}
-              alt="CRM Logo"
-              width={40}
-              height={40}
-              className="rounded-full shadow-sm"
-            />
-            <span className="font-bold text-gray-800">OrderSystem</span>
-          </div>
-        )}
-        <button onClick={toggle} className="text-gray-600 hover:text-black">
-          <FontAwesomeIcon icon={collapsed ? faBars : faChevronLeft} />
-        </button>
-      </div>
+    return (
+        // <Sider
+        //   width={256}
+        //   //   collapsedWidth={256}
+        //   className="!fixed !top-0 !left-0 !h-screen shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] z-50"
+        //   theme="light"
+        //   //   breakpoint="lg"
+        //   collapsible={false}
+        // >
+        //   <div className="text-gray-800 font-bold p-4 shadow-md flex justify-starts items-center gap-4">
+        //     <div className=" z-50">
+        //       <Image
+        //         src={logoCRM}
+        //         alt="CRM Logo"
+        //         width={45}
+        //         height={45}
+        //         className="rounded-full shadow-sm"
+        //       />
+        //     </div>
+        //     <span>OrderSystem</span>
+        //   </div>
+        //   <Menu
+        //     style={{ border: "none" }}
+        //     theme="light"
+        //     mode="inline"
+        //     items={filteredMenu.map((item) => ({
+        //       key: item.key,
+        //       icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
+        //       label: <Link href={item.key}>{t(`menu.${item.label}`)}</Link>,
+        //     }))}
+        //     selectedKeys={[pathname]}
+        //   />
+        // </Sider>
+        <Sider
+            width={256}
+            collapsedWidth={64}
+            collapsed={collapsed}
+            trigger={null}
+            className="!fixed !top-0 !left-0 !h-screen !bg-white border-r border-gray-200 z-50 transition-all duration-300"
+            theme="light"
+        >
+            {/* Logo + toggle */}
+            <div
+                className={`flex items-center h-16 px-4 border-b border-gray-200 ${collapsed ? "justify-center" : "justify-between"}`}>
+                {!collapsed && (
+                    <div className="flex items-center gap-3">
+                        <Image
+                            src={logoCRM}
+                            alt="CRM Logo"
+                            width={36}
+                            height={36}
+                            className="rounded-full"
+                        />
+                        <span className="font-semibold text-gray-800 text-sm">OrderSystem</span>
+                    </div>
+                )}
+                <button
+                    onClick={toggle}
+                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                >
+                    <FontAwesomeIcon icon={collapsed ? faBars : faChevronLeft} className="text-sm"/>
+                </button>
+            </div>
 
-      <Menu
-        style={{ border: "none" }}
-        theme="light"
-        mode="inline"
-        items={filteredMenu.map((item) => ({
-          key: item.key,
-          icon: <FontAwesomeIcon className="w-4 h-4" icon={item.icon} />,
-          label: <Link passHref shallow href={item.key}>{t(`menu.${item.label}`)}</Link>,
-        }))}
-        selectedKeys={[pathname]}
-      />
-    </Sider>
-  );
+            {/* Menu */}
+            <div className="py-2">
+                <Menu
+                    style={{border: "none"}}
+                    theme="light"
+                    mode="inline"
+                    items={filteredMenu.map((item) => ({
+                        key: item.key,
+                        icon: <FontAwesomeIcon className="!w-4 !h-4" icon={item.icon}/>,
+                        label: <Link passHref shallow href={item.key}>{t(`menu.${item.label}`)}</Link>,
+                    }))}
+                    selectedKeys={[pathname]}
+                />
+            </div>
+        </Sider>
+    );
 };

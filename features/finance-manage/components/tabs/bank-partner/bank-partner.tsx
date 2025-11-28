@@ -252,9 +252,9 @@ export default function BankPartnerSetting() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-sm font-semibold text-gray-800">
           {t('bankPartner.title')}
         </h2>
         <Button

@@ -1189,18 +1189,20 @@ const TelesalesPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <TableComponent
-        columns={columns}
-        dataSource={data?.data || []}
-        rowHeight={100}
-        pageSize={10}
-        page={(data && data.current_page + 1) || 0}
-        onPageChange={handleChangePage}
-        response={data}
-        fontSize={12}
-        headerHeight={48}
-        loading={isPending}
-      />
+      <div className="mt-4">
+        <TableComponent
+          columns={columns}
+          dataSource={data?.data || []}
+          rowHeight={100}
+          pageSize={10}
+          page={(data && data.current_page + 1) || 0}
+          onPageChange={handleChangePage}
+          response={data}
+          fontSize={12}
+          headerHeight={48}
+          loading={isPending}
+        />
+      </div>
       <CustomerAddModal
         onCancel={() => setIsOpenAddCustomerModalOpen(false)}
         onSubmit={async (data) => {
