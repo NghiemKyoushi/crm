@@ -125,4 +125,38 @@
     color: black;
     line-height: 1.2;
   }
+
+  /* Package only mode - smaller label with barcode */
+  .print-label-small {
+    width: 50mm;
+    height: 30mm;
+    padding: 1mm;
+  }
+
+  .print-package-only {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    gap: 1mm;
+  }
+
+  .print-package-code-only {
+    font-size: 10pt;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .print-package-barcode {
+    text-align: center;
+  }
+
+  .print-package-barcode svg {
+    width: auto;
+    height: 12mm;
+    max-width: 100%;
+  }
 }
