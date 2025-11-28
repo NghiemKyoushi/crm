@@ -1192,7 +1192,7 @@ const TelesalesPage: React.FC = () => {
         columns={columns}
         dataSource={data?.data || []}
         rowHeight={100}
-        pageSize={20}
+        pageSize={10}
         page={(data && data.current_page + 1) || 0}
         onPageChange={handleChangePage}
         response={data}
