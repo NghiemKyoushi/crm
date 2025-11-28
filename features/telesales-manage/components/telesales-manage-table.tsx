@@ -207,9 +207,8 @@ const TelesalesPage: React.FC = () => {
     }, 0);
   };
 
-  const isAdmin = useMemo(() => {
-    const isAdmin = hasPermission("system.admin");
-    return isAdmin;
+  const isTelesaleManager = useMemo(() => {
+    return hasPermission("telesales.manager") || hasPermission("system.admin");
   }, [hasPermission]);
 
   const handleSaveNote = async (newNote: string) => {
@@ -313,7 +312,7 @@ const TelesalesPage: React.FC = () => {
   const allUnassignedIds = unassignedCustomers.map((d) => d.id);
 
   const columns: ColumnsType<TelesaleCustomer> = [
-    ...(isAdmin
+    ...(isTelesaleManager
       ? [
           {
             title: (
@@ -838,7 +837,7 @@ const TelesalesPage: React.FC = () => {
             >
               Thất bại
             </Button>
-            {isAdmin && (
+            {isTelesaleManager && (
               <div className="flex flex-col gap-1.5">
                 <Button
                   size="small"
@@ -1127,7 +1126,7 @@ const TelesalesPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {isAdmin && (
+          {isTelesaleManager && (
             <>
               <Button
                 size="small"
@@ -1183,7 +1182,7 @@ const TelesalesPage: React.FC = () => {
             setIsBulkAssignModalOpen(true);
           }}
           selectedRowKeys={selectedRowKeys}
-          isAdmin={isAdmin}
+          isAdmin={isTelesaleManager}
         />
       </div>
 
