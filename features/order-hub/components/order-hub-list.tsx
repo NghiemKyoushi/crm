@@ -60,6 +60,7 @@ import {
 import dayjs from "dayjs";
 import { CancelOrderModal } from "./modal/cancel-order-modal";
 import EditHistoryModal from "./modal/edit-history-modal";
+import { getResponseMessage } from "@/api/axiosClient";
 
 function isEqualObject(obj1: any, obj2: any) {
   // Only compare shallow, including only relevant keys
@@ -475,6 +476,7 @@ export default function OrderHub() {
 
   const handleCancelOrderAfterApprove = (
     orderId: number,
+    status: string,
     params: {
       amount: number;
       note: string;
@@ -484,6 +486,7 @@ export default function OrderHub() {
     cancelOrderAfterApproveMutation.mutate(
       {
         id: orderId,
+        status: status,
         body: { ...params },
       },
       {
@@ -495,11 +498,8 @@ export default function OrderHub() {
           setOrderDetail(undefined);
           setIsOpenCancelOrder2(false);
         },
-        onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.localizedMessage || "Có lỗi xảy ra"
-          );
-        },
+        onError: (err: any) => toast.error(getResponseMessage(err.response)),
+
       }
     );
   };
@@ -1304,7 +1304,25 @@ export default function OrderHub() {
 
           case OrderStatusType.READY_TO_SHIP:
             break;
-
+          case OrderStatusType.PENDING_DEPOSIT:
+            actionButton =  (
+              <div>
+                {canDelete && (
+                  <Button
+                    key={record.status}
+                    size="small"
+                    onClick={() => {
+                      setOrderDetail(record);
+                      setIsOpenCancelOrder2(true);
+                    }}
+                    className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  >
+                    Huỷ đơn
+                  </Button>
+                )}
+              </div>
+            )
+            break;
           case OrderStatusType.PACKED:
             break;
         }
@@ -1828,7 +1846,7 @@ export default function OrderHub() {
             setOrderDetail(undefined);
           }}
           onConfirm={(value) =>
-            handleCancelOrderAfterApprove(orderDetail.id, value)
+            handleCancelOrderAfterApprove(orderDetail.id,orderDetail.status, value)
           }
           visible={isOpenCancelOrder2}
         />
