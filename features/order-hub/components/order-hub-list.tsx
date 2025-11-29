@@ -166,7 +166,7 @@ export default function OrderHub() {
     );
   };
 
-  const { data: listOrder, isPending } = useListOrder(
+  const { data: listOrder, isPending,refetch } = useListOrder(
     removeUndefinedFields({
       page,
       size: 10,
@@ -474,6 +474,8 @@ export default function OrderHub() {
     }
   };
 
+  const [isCancelOrderLoading, setIsCancelOrderLoading] = useState(false);
+
   const handleCancelOrderAfterApprove = (
     orderId: number,
     status: string,
@@ -483,6 +485,7 @@ export default function OrderHub() {
       isFullBack: boolean;
     }
   ) => {
+    setIsCancelOrderLoading(true);
     cancelOrderAfterApproveMutation.mutate(
       {
         id: orderId,
@@ -492,14 +495,33 @@ export default function OrderHub() {
       {
         onSuccess: () => {
           toast.success("Huỷ đơn hàng thành công");
-          queryClient.invalidateQueries({
-            queryKey: ["listorder"],
-          });
+          refetch();
           setOrderDetail(undefined);
           setIsOpenCancelOrder2(false);
         },
-        onError: (err: any) => toast.error(getResponseMessage(err.response)),
-
+        onError: (err: any) => {
+          const currentStatus =
+            err?.response?.data?.currentStatus ||
+            err?.response?.data?.data?.currentStatus;
+          
+          if (err?.response?.status === 400) {
+            if (currentStatus) {
+              toast.error("Trạng thái không khớp");
+            } else {
+              toast.error(
+                err?.response?.data?.messageKey ||
+                "Có lỗi xảy ra"
+              );
+            }
+            refetch();
+            setIsOpenCancelOrder2(false);
+          } else {
+            toast.error(getResponseMessage(err?.response));
+          }
+        },
+        onSettled: () => {
+          setIsCancelOrderLoading(false);
+        },
       }
     );
   };
@@ -1849,6 +1871,7 @@ export default function OrderHub() {
             handleCancelOrderAfterApprove(orderDetail.id,orderDetail.status, value)
           }
           visible={isOpenCancelOrder2}
+          loading={isCancelOrderLoading}
         />
       )}
     </div>
