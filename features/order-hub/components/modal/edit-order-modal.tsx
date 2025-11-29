@@ -1041,7 +1041,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                             order?.status === OrderStatusType.PENDING_PAYMENT ||
                             order?.status === OrderStatusType.READY_TO_SHIP ||
                             order?.status ===
-                            OrderStatusType.SHIPPING_REQUEST_CLIENT
+                            OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                            !hasPermission("order.update_shipping_fee")
                           }
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
@@ -1089,7 +1090,8 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                           order?.status === OrderStatusType.PENDING_PAYMENT ||
                           order?.status === OrderStatusType.READY_TO_SHIP ||
                           order?.status ===
-                          OrderStatusType.SHIPPING_REQUEST_CLIENT
+                          OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                          !hasPermission("order.update_shipping_fee")
                         }
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
