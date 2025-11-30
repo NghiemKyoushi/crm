@@ -2,10 +2,9 @@ import { Button, Input, Typography, Select, Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import TableComponent from "@/components/TableComponent";
 import CustomerDetailModal from "./modal-customer/modal-view-detail-customer";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  useListCateGoryCus,
   useListCustomer,
   useUpdateCateGoryForEachCus,
   useCreateCustomer,
@@ -18,12 +17,9 @@ import { faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { usePermission } from "@/components/layout/PermissionContext";
-import { getListSaleStaff, CreateCustomerParams } from "../../apis/staff-manage";
+import { getListSaleStaff, CreateCustomerParams, getListCateCustomer } from "../../apis/staff-manage";
 import AccountAssignButton from "@/features/user-website-accounts/components/account-assign-button";
 import ModalCreateCustomer from "./modal-create-customer";
-
-const { Text } = Typography;
-const { Option } = Select;
 
 export default function CustomerTable() {
   // Avoid double execution in StrictMode (dev) or duplicate mount
@@ -67,37 +63,78 @@ export default function CustomerTable() {
   // Quyền hiển thị cột loại KH
   const canShowCategory = hasPermission("user.categorize_customers");
 
-  // Lấy danh sách sale phụ trách, copy logic từ sales-page.tsx
+  // Sale phụ trách: Paging/Loadmore Setup
+  const SALE_PAGE_SIZE = 10;
   const [salesData, setSalesData] = useState<any[]>([]);
   const [salesLoading, setSalesLoading] = useState(false);
+  const [salesPage, setSalesPage] = useState(0);
+  const [salesHasMore, setSalesHasMore] = useState(true);
 
+  // Fetch sales page
+  const fetchSales = useCallback(
+    async (pageToFetch = salesPage) => {
+      setSalesLoading(true);
+      try {
+        const res = await getListSaleStaff({
+          page: pageToFetch,
+          page_size: SALE_PAGE_SIZE,
+          search: undefined,
+        });
+        const dataArr =
+          res?.data?.data ??
+          res?.data ??
+          res?.result?.data ??
+          [];
+        setSalesData((current) => {
+          // Avoid duplicates
+          const alreadyIds = new Set(current.map((x: any) => x.user_id));
+          const newOpts = dataArr.filter((item: any) => !alreadyIds.has(item.user_id));
+          return [...current, ...newOpts];
+        });
+        if (dataArr.length < SALE_PAGE_SIZE) setSalesHasMore(false);
+        else setSalesHasMore(true);
+      } catch (error) {
+        setSalesHasMore(false);
+      } finally {
+        setSalesLoading(false);
+      }
+    },
+    [salesPage]
+  );
+
+  // Reset Sale state on mount
+  useEffect(() => {
+    setSalesPage(0);
+    setSalesData([]);
+    setSalesHasMore(true);
+  }, []);
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
-    let unmounted = false;
-    const fetchSales = async () => {
-      setSalesLoading(true);
-      try {
-        // import getListSaleStaff from apis/staff-manage
-        const res = await getListSaleStaff({
-          page: 0,
-          page_size: 10, // large enough for select dropdown
-          search: undefined,
-        });
-        if (!unmounted) {
-          setSalesData(res.data || []);
-        }
-      } catch (error) {
-        if (!unmounted) setSalesData([]);
-      } finally {
-        if (!unmounted) setSalesLoading(false);
-      }
-    };
-    fetchSales();
-    return () => {
-      unmounted = true;
-    };
+    fetchSales(0);
+    // eslint-disable-next-line
   }, []);
+
+  const handleSalePopupScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const target = e.target as HTMLDivElement;
+    if (
+      target.scrollTop + target.offsetHeight + 30 >= target.scrollHeight &&
+      !salesLoading &&
+      salesHasMore
+    ) {
+      const nextPage = salesPage + 1;
+      setSalesPage(nextPage);
+      fetchSales(nextPage);
+    }
+  };
+  const handleSaleDropdownVisibleChange = (open: boolean) => {
+    if (open && salesData.length === 0) {
+      setSalesPage(0);
+      setSalesData([]);
+      setSalesHasMore(true);
+      fetchSales(0);
+    }
+  };
 
   const saleOptions = salesData.map((sale: any) => ({
     value: sale.user_id,
@@ -106,8 +143,6 @@ export default function CustomerTable() {
 
   const updateCateMutation = useUpdateCateGoryForEachCus();
   const createCustomerMutation = useCreateCustomer();
-
-  // --- API gọi khi search state thay đổi ---
   const { data, isFetching, isPending } = useListCustomer({
     page,
     page_size: 10,
@@ -126,20 +161,87 @@ export default function CustomerTable() {
     }
   }, [data]);
 
-  const { data: dataSelectCategory, isLoading } = useListCateGoryCus({
-    page,
-    page_size: 10,
-  });
+  const CATEGORY_PAGE_SIZE = 10;
+  const [categoryPage, setCategoryPage] = useState(0);
+  const [categoryOptions, setCategoryOptions] = useState<any[]>([]);
+  const [categoryHasMore, setCategoryHasMore] = useState(true);
+  const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 
-  const categoryOptions =
-    dataSelectCategory?.data.map((opt: any) => ({
-      key: String(opt.id),
-      value: opt.id,
-      label: opt.group_name,
-      color: opt.color,
-      textColor: opt.text_color ?? "#000",
-    })) ?? [];
-  // console.log('categoryOptions', categoryOptions);
+  const fetchCategoryData = useCallback(
+    async (pageToFetch = categoryPage) => {
+      setIsLoadingCategory(true);
+      try {
+        const res = await getListCateCustomer({
+          page: pageToFetch,
+          page_size: CATEGORY_PAGE_SIZE,
+        });
+        const dataArr =
+          res?.data?.data ??
+          res?.data ??
+          res?.result?.data ??
+          [];
+        setCategoryOptions((current) => {
+          // Avoid duplicates
+          const alreadyIds = new Set(current.map((x: any) => x.value));
+          const newOpts = dataArr
+            .map((opt: any) => ({
+              key: String(opt.id),
+              value: opt.id,
+              label: opt.group_name,
+              color: opt.color,
+              textColor: opt.text_color ?? "#000",
+            }))
+            .filter((it: any) => !alreadyIds.has(it.value));
+          return [...current, ...newOpts];
+        });
+        if (dataArr.length < CATEGORY_PAGE_SIZE) setCategoryHasMore(false);
+        else setCategoryHasMore(true);
+      } catch (error) {
+        setCategoryHasMore(false);
+      } finally {
+        setIsLoadingCategory(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [categoryPage]
+  );
+
+  // Init first category page
+  useEffect(() => {
+    setCategoryPage(0);
+    setCategoryOptions([]);
+    setCategoryHasMore(true);
+  }, []);
+
+  useEffect(() => {
+    fetchCategoryData(0);
+    // eslint-disable-next-line
+  }, []);
+
+  const handleCategoryDropdownVisibleChange = (open: boolean) => {
+    if (open && categoryOptions.length === 0) {
+      setCategoryPage(0);
+      setCategoryOptions([]);
+      setCategoryHasMore(true);
+      fetchCategoryData(0);
+    }
+  };
+
+  // Trigger loadmore when scroll to bottom
+  const handleCategoryPopupScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const target = e.target as HTMLDivElement;
+    if (
+      target.scrollTop + target.offsetHeight + 30 >= target.scrollHeight &&
+      !isLoadingCategory &&
+      categoryHasMore
+    ) {
+      const nextPage = categoryPage + 1;
+      setCategoryPage(nextPage);
+      fetchCategoryData(nextPage);
+    }
+  };
+
+  // ------------CATEGORY LOAD MORE LOGIC END-------------------
 
   const handleClosePopupdetail = () => {
     setSelectedId(null);
@@ -161,12 +263,12 @@ export default function CustomerTable() {
             prev.map((item) =>
               item.user_id === userId
                 ? {
-                  ...item,
-                  category_id: e,
-                  group_id: e,
-                  group_name: selectedCategory?.label || item.group_name,
-                  color: selectedCategory?.color || item.color,
-                }
+                    ...item,
+                    category_id: e,
+                    group_id: e,
+                    group_name: selectedCategory?.label || item.group_name,
+                    color: selectedCategory?.color || item.color,
+                  }
                 : item
             )
           );
@@ -313,8 +415,8 @@ export default function CustomerTable() {
       onError: (err: any) => {
         toast.error(
           err?.response?.data?.localizedMessage ||
-          err?.response?.data?.message ||
-          "Có lỗi xảy ra khi tạo tài khoản"
+            err?.response?.data?.message ||
+            "Có lỗi xảy ra khi tạo tài khoản"
         );
       },
     });
@@ -367,7 +469,7 @@ export default function CustomerTable() {
             style={{ minWidth: 180, height: 40 }}
             value={searchCategory}
             onChange={setSearchCategory}
-            loading={isLoading}
+            loading={isLoadingCategory}
             className="!h-10"
             options={
               categoryOptions?.map((cat: any) => ({
@@ -375,6 +477,18 @@ export default function CustomerTable() {
                 label: cat.label,
               })) || []
             }
+            dropdownRender={menu => (
+              <>
+                {menu}
+                {isLoadingCategory && (
+                  <div style={{ textAlign: "center", padding: 10 }}>
+                    <Spin size="small" />
+                  </div>
+                )}
+              </>
+            )}
+            onPopupScroll={handleCategoryPopupScroll}
+            onDropdownVisibleChange={handleCategoryDropdownVisibleChange}
           />
           <Select
             placeholder={"Sale phụ trách"}
@@ -390,6 +504,18 @@ export default function CustomerTable() {
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }
+            dropdownRender={menu => (
+              <>
+                {menu}
+                {salesLoading && (
+                  <div style={{ textAlign: "center", padding: 10 }}>
+                    <Spin size="small" />
+                  </div>
+                )}
+              </>
+            )}
+            onPopupScroll={handleSalePopupScroll}
+            onDropdownVisibleChange={handleSaleDropdownVisibleChange}
           />
           <div className="flex justify-end">
             <Button
