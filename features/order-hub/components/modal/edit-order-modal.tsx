@@ -496,6 +496,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     setListInsurancesMap([]);
     setProductImages([]);
     setFileList([]);
+    setUploadedIds([]);
     onCancel();
   };
 
