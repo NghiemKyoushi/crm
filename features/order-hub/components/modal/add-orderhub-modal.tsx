@@ -514,6 +514,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
       TOTAL_COD_SHIPPING_FEE_JP: 0,
     });
     setProductImages([]);
+    setUploadedIds([0]);
     setFileList([]);
     onCancel();
     setCreatingOrder(false); // reset loading state just in case
