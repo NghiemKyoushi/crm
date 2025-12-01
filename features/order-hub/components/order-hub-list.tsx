@@ -269,6 +269,7 @@ export default function OrderHub() {
       useCancelMutation.mutate(
         {
           reason: reason,
+          status: orderDetail.status,
           id: orderDetail.id.toString(),
         },
         {
@@ -279,10 +280,26 @@ export default function OrderHub() {
             });
             setIsOpenCancel(false);
           },
-          onError: (err: any) =>
-            toast.error(
-              err.response?.data?.localizedMessage || t("common.error")
-            ),
+          onError: (err: any) => {
+            const currentStatus =
+              err?.response?.data?.currentStatus ||
+              err?.response?.data?.data?.currentStatus;
+            
+            if (err?.response?.status === 400) {
+              if (currentStatus) {
+                toast.error("Trạng thái không khớp");
+              } else {
+                toast.error(
+                  err?.response?.data?.messageKey ||
+                  "Có lỗi xảy ra"
+                );
+              }
+              refetch();
+              setIsOpenCancelOrder2(false);
+            } else {
+              toast.error(getResponseMessage(err?.response));
+            }
+          },
         }
       );
   };

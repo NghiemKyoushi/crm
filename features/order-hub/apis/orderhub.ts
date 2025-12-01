@@ -116,10 +116,10 @@ export const aproveOrder = async (id: string, body: ApproveOrderModel) => {
   return res.data.data;
 };
 
-export const cancelOrder = async (id: string, reason: string) => {
+export const cancelOrder = async (id: string, reason: string, status: string) => {
   const res = await api.put(
     `${API_TYPE_CONST.CREATE_ORDER}/reject-order/${id}`,
-    { reason }
+    { reason: reason, status: status  }
   );
   return res.data.data;
 };
