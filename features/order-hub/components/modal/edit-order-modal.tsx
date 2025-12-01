@@ -520,9 +520,12 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   // Check if user can edit (has order.edit permission or is admin or has edit_approving with correct status)
   const canEdit = useMemo(() => {
-    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving;
+    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving ;
   }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving]);
 
+  const canEditShipfee = useMemo(() => {
+    return  hasPermission("order.edit") || hasPermission("system.admin") || hasPermission("order.update_shipping_fee")  ;
+  }, [hasPermission]);
   // View only mode - has order.view but no order.edit
   const isViewOnly = !canEdit;
 
@@ -1039,11 +1042,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       >
                         <Select
                           disabled={
-                            order?.status === OrderStatusType.PENDING_PAYMENT ||
+                            // order?.status === OrderStatusType.PENDING_PAYMENT ||
                             order?.status === OrderStatusType.READY_TO_SHIP ||
-                            order?.status ===
-                            OrderStatusType.SHIPPING_REQUEST_CLIENT ||
-                            !hasPermission("order.update_shipping_fee")
+                            // order?.status ===
+                            // OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                            !canEditShipfee
                           }
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
@@ -1088,11 +1091,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     >
                       <InputNumber
                         disabled={
-                          order?.status === OrderStatusType.PENDING_PAYMENT ||
-                          order?.status === OrderStatusType.READY_TO_SHIP ||
-                          order?.status ===
-                          OrderStatusType.SHIPPING_REQUEST_CLIENT ||
-                          !hasPermission("order.update_shipping_fee")
+                           // order?.status === OrderStatusType.PENDING_PAYMENT ||
+                           order?.status === OrderStatusType.READY_TO_SHIP ||
+                           // order?.status ===
+                           // OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                           !canEditShipfee
                         }
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
