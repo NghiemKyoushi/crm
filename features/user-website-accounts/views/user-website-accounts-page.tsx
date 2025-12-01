@@ -6,6 +6,7 @@ import { useListWebsite } from "@/features/web-management/hooks/web-manage";
 import { useAssignUserWebsiteAccounts, useUserWebsiteAccounts } from "../hooks";
 import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getWebsiteAccounts, WebsiteAccountResponse } from "@/features/web-account-management/apis/website-account";
+import type { UserWebsiteAccountItem } from "../apis/index";
 
 const { Title, Text } = Typography;
 
@@ -15,7 +16,15 @@ export default function UserWebsiteAccountsPage() {
   const userIdParam = searchParams.get("userId");
   const userId = userIdParam ? Number(userIdParam) : NaN;
 
-  const { data: assignedAccounts = [] } = useUserWebsiteAccounts(userId);
+  const { data: assignedAccountsRaw } = useUserWebsiteAccounts(userId);
+
+  // Chuẩn hoá dữ liệu assignedAccounts về dạng mảng, tránh lỗi khi API trả về object khác cấu trúc
+  const assignedAccounts: UserWebsiteAccountItem[] = useMemo(() => {
+    const data: any = assignedAccountsRaw;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  }, [assignedAccountsRaw]);
   const assignMutation = useAssignUserWebsiteAccounts(userId);
 
   const [selectModalOpen, setSelectModalOpen] = useState(false);
