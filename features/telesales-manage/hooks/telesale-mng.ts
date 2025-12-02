@@ -50,11 +50,11 @@ export const useUpdateTelesaleStatus = () => {
 };
 
 // Hook to get telesale users/accounts (API: getTelesaleAccounts)
-export const useTelesaleUsers = () => {
+export const useTelesaleUsers = (page: number = 1, size: number = 10) => {
   return useQuery({
-    queryKey: ["telesale-users-list"],
+    queryKey: ["telesale-users-list", page, size],
     queryFn: async () => {
-      const data = await getTelesaleAccounts();
+      const data = await getTelesaleAccounts(page, size);
       return data; // Array of telesale users
     },
   });

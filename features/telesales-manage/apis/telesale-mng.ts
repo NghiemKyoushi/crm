@@ -7,8 +7,13 @@ import {
 } from "../types/telesales-mng";
 
 // Lấy danh sách account telesale
-export const getTelesaleAccounts = async () => {
-  const res = await api.get(API_TYPE_CONST.TELESALE_ACCOUNT);
+export const getTelesaleAccounts = async (page: number = 1, size: number = 100) => {
+  const res = await api.get(API_TYPE_CONST.TELESALE_ACCOUNT, {
+    params: {
+      page,
+      size,
+    },
+  });
   return res.data.data;
 };
 

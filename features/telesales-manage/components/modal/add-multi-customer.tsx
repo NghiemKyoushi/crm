@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Modal, Button, Input, Select, Spin } from "antd";
 import { TelesaleCustomer } from "../../types/telesales-mng";
 import { useTelesaleUsers } from "../../hooks/telesale-mng";
@@ -11,8 +11,10 @@ type AddMultiCustomerModalProps = {
   note: string;
   onNoteChange: (value: string) => void;
   onClose: () => void;
-  onConfirm: (saleId: number) => void; // now passes saleId
+  onConfirm: (saleId: number) => void;
 };
+
+const PAGE_SIZE = 10;
 
 const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
   isOpen,
@@ -23,21 +25,87 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
   onConfirm,
 }) => {
   const [saleId, setSaleId] = useState<number | undefined>(undefined);
+  const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState<string>(""); 
+  
+  const telesaleUsersArrayRef = useRef<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Lấy danh sách telesale (sales) từ hook
-  const { data: telesaleUsers, isLoading: telesaleUsersLoading } =
-    useTelesaleUsers();
+  const {
+    data: telesaleUsersData,
+    isLoading: telesaleUsersLoading,
+    isFetching,
+  } = useTelesaleUsers(page, PAGE_SIZE); 
 
-  // Reset saleId when modal opens/closes
+  React.useEffect(() => {
+    const resultData = Array.isArray(telesaleUsersData)
+      ? telesaleUsersData
+      : telesaleUsersData && Array.isArray(telesaleUsersData.data)
+      ? telesaleUsersData.data
+      : [];
+    const totalItems = telesaleUsersData?.total_items;
+
+    if (page === 0) {
+      telesaleUsersArrayRef.current = resultData || []; 
+    } else {
+      const existingIds = new Set(telesaleUsersArrayRef.current.map((u) => u.id));
+      const newUniqueUsers = resultData.filter((u: any) => !existingIds.has(u.id));
+      telesaleUsersArrayRef.current = [
+        ...telesaleUsersArrayRef.current,
+        ...newUniqueUsers,
+      ];
+    }
+    
+    if (totalItems !== undefined) {
+      setHasMore(telesaleUsersArrayRef.current.length < totalItems);
+    } else {
+      setHasMore(resultData.length === PAGE_SIZE);
+    }
+
+    if (page === 0 && (!resultData || resultData.length === 0)) {
+      setHasMore(false);
+    }
+    
+  }, [telesaleUsersData, page, searchTerm]); 
+  
   React.useEffect(() => {
     if (isOpen) {
       setSaleId(undefined);
+      setPage(0);
+      setSearchTerm("");
     }
   }, [isOpen]);
 
-  // Ẩn trường note nếu chọn nhiều hơn 1 khách hàng
   const shouldShowNote = customers.length === 1;
 
+  const handlePopupScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLDivElement;
+      if (
+        hasMore &&
+        !telesaleUsersLoading &&
+        !isFetching &&
+        target.scrollTop + target.offsetHeight >= target.scrollHeight - 50
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    },
+    [hasMore, telesaleUsersLoading, isFetching]
+  );
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      if (value !== searchTerm) {
+        setPage(0);
+        setSearchTerm(value);
+        telesaleUsersArrayRef.current = [];
+      }
+    },
+    [searchTerm]
+  );
+
+  const isListEmpty = telesaleUsersArrayRef.current.length === 0;
+  
   return (
     <Modal
       title={
@@ -65,7 +133,6 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
         </div>
       ) : (
         <div className="space-y-5 pt-3">
-          {/* Customer list section */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,8 +157,6 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
               </ul>
             </div>
           </div>
-
-          {/* Field chọn sale */}
           <div>
             <label className="block mb-2 font-semibold text-gray-700 text-sm">
               Chọn Sale để gán <span className="text-red-500">*</span>
@@ -102,28 +167,34 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
               value={saleId}
               onChange={setSaleId}
               allowClear
-              loading={telesaleUsersLoading}
+              loading={telesaleUsersLoading && page === 0}
               showSearch
+              filterOption={false}
+              onPopupScroll={handlePopupScroll}
+              onSearch={handleSearch}
+              notFoundContent={
+                (isListEmpty && !telesaleUsersLoading) ? (
+                  <div className="flex justify-center py-2">Không có sale nào</div>
+                ) : (
+                  null
+                )
+              }
               optionFilterProp="children"
             >
-              {telesaleUsersLoading ? (
-                <Option key="loading" value="" disabled>
-                  <Spin size="small" /> Đang tải danh sách sale...
+              {telesaleUsersArrayRef.current.map((user: any) => (
+                <Option value={user.id} key={user.id}>
+                  {user.fullname
+                    ? `${user.fullname} (${user.phonenumber}) - ${user.email || ""}`
+                    : user.name || user.email || user.id}
                 </Option>
-              ) : (
-                Array.isArray(telesaleUsers) &&
-                telesaleUsers.map((user: any) => (
-                  <Option value={user.id} key={user.id}>
-                    {user.fullname
-                      ? `${user.fullname} (${user.phonenumber}) - ${user.email || ""}`
-                      : user.name || user.email || user.id}
-                  </Option>
-                ))
+              ))}
+              {hasMore && (isFetching || telesaleUsersLoading) && (
+                <Option key="loading-more" disabled value="loading-more">
+                  <div className="flex justify-center py-2"><Spin size="small" /> Đang tải thêm...</div>
+                </Option>
               )}
             </Select>
           </div>
-
-          {/* Thêm ô input ghi chú - Ẩn nếu nhiều hơn 1 KH */}
           {shouldShowNote && (
             <div>
               <label className="block mb-2 font-semibold text-gray-700 text-sm">
@@ -140,8 +211,6 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
           )}
         </div>
       )}
-
-      {/* Nút xác nhận mở modal gán sale thực sự */}
       <div className="flex justify-end gap-3 pt-5 mt-2 border-t">
         <Button
           onClick={onClose}
@@ -153,10 +222,9 @@ const AddMultiCustomerModal: React.FC<AddMultiCustomerModalProps> = ({
           type="primary"
           disabled={customers.length === 0 || !saleId}
           onClick={() => {
-            // Nếu chọn nhiều hơn 1 KH thì truyền note rỗng
             if (saleId) {
               if (customers.length > 1) {
-                onNoteChange("");
+                onNoteChange(""); 
               }
               onConfirm(saleId);
             }
