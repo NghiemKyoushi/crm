@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import { Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faConciergeBell,
-  faPallet,
-  faShield,
-  faTag,
-} from "@fortawesome/free-solid-svg-icons";
+  BellOutlined,
+  ContainerOutlined,
+  SafetyOutlined,
+  TagOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 // Import các component con
@@ -72,7 +71,7 @@ const FeeSettingsPage: React.FC = () => {
             key: "1",
             label: (
               <span className="flex items-center gap-2 text-sm">
-                <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+                <ContainerOutlined className="w-4 h-4" />
                 {t('feeSettings.shippingAndSurcharge')}
               </span>
             ),
@@ -82,7 +81,7 @@ const FeeSettingsPage: React.FC = () => {
             key: "2",
             label: (
               <span className="flex items-center gap-2 text-sm">
-                <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+                <BellOutlined className="w-4 h-4" />
                 {t('feeSettings.serviceAndDelivery')}
               </span>
             ),
@@ -92,7 +91,7 @@ const FeeSettingsPage: React.FC = () => {
             key: "3",
             label: (
               <span className="flex items-center gap-2 text-sm">
-                <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+                <SafetyOutlined className="w-4 h-4" />
                 {t('feeSettings.insuranceAndRegulations')}
               </span>
             ),
@@ -102,7 +101,7 @@ const FeeSettingsPage: React.FC = () => {
             key: "4",
             label: (
               <span className="flex items-center gap-2 text-sm">
-                <FontAwesomeIcon className="w-4 h-4" icon={faTag} />
+                <TagOutlined className="w-4 h-4" />
                 {t('feeSettings.productTypes')}
               </span>
             ),

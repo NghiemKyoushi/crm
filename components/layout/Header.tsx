@@ -2,12 +2,10 @@
 
 import React, { useMemo } from "react";
 import { Layout, Avatar, Button, Dropdown } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import LanguageSwitcher from "../LanguageSwitcher";
 import { storage } from "@/lib/storage";
 import { usePathname, useRouter } from "next/navigation";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logout } from "@/services/auth";
 import { menuItems, menuPermissions } from "./Sidebar";
 import { useTranslation } from "react-i18next";
@@ -56,7 +54,7 @@ export const Header: React.FC = () => {
       label: (
         <Button
           type="primary"
-          icon={<FontAwesomeIcon icon={faUser} />}
+          icon={<UserOutlined />}
           onClick={() => router.push("/user-profile")}
           style={{ width: "100%" }}
         >
@@ -99,7 +97,7 @@ export const Header: React.FC = () => {
           placement="bottomRight"
         >
           <Avatar
-            icon={<FontAwesomeIcon className="text-gray-500" icon={faUser} />}
+            icon={<UserOutlined className="text-gray-500" />}
             className="cursor-pointer hover:opacity-80 transition-opacity"
             style={{ backgroundColor: "#e0e7ff" }}
           />

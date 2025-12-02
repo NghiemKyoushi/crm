@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { UserOutlined } from "@ant-design/icons";
 import { Modal, Tabs, Button, Spin } from "antd"; // import Spin
 
 import {
@@ -24,8 +25,6 @@ import {
 } from "@/types/customer-type";
 import { Employee } from "../components/sale-manage/modal-sales-add";
 import Notes from "../components/customer-manage/modal-customer/tab/internal-note";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
 
 export interface CustomerDetailProps {
   selectedId: string;
@@ -148,10 +147,7 @@ export default function CustomerDetailPages(props: CustomerDetailProps) {
           {/* Header */}
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-3">
-              <FontAwesomeIcon
-                icon={faUserCircle}
-                className="text-5xl text-blue-500"
-              />
+              <UserOutlined className="text-5xl text-blue-500" />
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
                   {customer?.user_profile.full_name}

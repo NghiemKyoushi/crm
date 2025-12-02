@@ -1,12 +1,6 @@
 import React from "react";
 import { Modal, Form, Input, Select, Button } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faLaptop,
-  faMobileAlt,
-  faShirt,
-  faCartShopping,
-} from "@fortawesome/free-solid-svg-icons";
+import { LaptopOutlined, MobileOutlined, ShoppingCartOutlined, SkinOutlined } from "@ant-design/icons";
 
 interface AddProductTypeModalProps {
   visible: boolean;
@@ -61,16 +55,16 @@ const AddProductTypeModal: React.FC<AddProductTypeModalProps> = ({
         >
           <Select placeholder="Chọn icon">
             <Option value="laptop">
-              <FontAwesomeIcon icon={faLaptop} className="mr-2" /> Laptop
+              <LaptopOutlined className="mr-2" /> Laptop
             </Option>
             <Option value="mobile">
-              <FontAwesomeIcon icon={faMobileAlt} className="mr-2" /> Mobile
+              <MobileOutlined className="mr-2" /> Mobile
             </Option>
             <Option value="fashion">
-              <FontAwesomeIcon icon={faShirt} className="mr-2" /> Thời trang
+              <SkinOutlined className="mr-2" /> Thời trang
             </Option>
             <Option value="shopping">
-              <FontAwesomeIcon icon={faCartShopping} className="mr-2" /> Hàng tiêu dùng
+              <ShoppingCartOutlined className="mr-2" /> Hàng tiêu dùng
             </Option>
           </Select>
         </Form.Item>

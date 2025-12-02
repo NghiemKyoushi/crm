@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
@@ -138,35 +137,15 @@ export default function ShipmentFilter({
         onFinish={handleFinish}
         initialValues={selectInitialValues}
       >
-        {/* Action Buttons Row */}
-        <div className="w-full flex justify-end gap-3 bg-white rounded-lg p-2">
-          <Button
-            type="default"
-            onClick={handleReset}
-            className="!h-10 !text-gray-600 !font-medium !text-xs !px-6"
-            size="small"
-          >
-            Reset
-          </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-            className="!h-10 !bg-gray-700 !text-white !font-medium !text-xs !px-6"
-            size="small"
-          >
-            {t("filter")}
-          </Button>
-        </div>
         {/* Advanced Search Row */}
-        <div className="w-full bg-gray-50 rounded-lg p-4 border border-gray-200 mt-2">
+        <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="text-sm font-semibold text-gray-800 mb-3">
             Tìm kiếm
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {/* Cột 1: Thông tin khách hàng */}
-            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
-              <div className="text-xs font-medium text-gray-600 mb-2">
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-600">
                 Thông tin khách hàng
               </div>
               <Form.Item name="email" className="!mb-2">
@@ -183,35 +162,53 @@ export default function ShipmentFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="customer_name" className="!mb-2">
+              <Form.Item name="customer_name" className="!mb-0">
                 <Input
                   placeholder="Tên khách hàng"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />
               </Form.Item>
-              {/* <Form.Item name="phone_number" className="!mb-2">
-                <InputNumber
-                  placeholder="Số điện thoại"
-                  className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
-                  size="small"
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, "")
-                  }
-                  style={{ display: 'flex', alignItems: 'center' }}
-                  inputMode="tel"
-                />
-              </Form.Item> */}
             </div>
-            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
-              <div className="text-xs font-medium text-gray-600 mb-2">
+
+            {/* Cột 2: Mã xuất kho & Tracking */}
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-600">
+                Mã xuất kho & Tracking
+              </div>
+              <Form.Item name="tracking_ship" className="!mb-2">
+                <Input
+                  placeholder="Mã xuất kho"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="tracking_code" className="!mb-2">
+                <Input
+                  placeholder="Mã tracking"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="invoice_no" className="!mb-0">
+                <Input
+                  placeholder="Mã đơn hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Cột 3: Trạng thái */}
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-600">
                 Trạng thái
               </div>
-              <Form.Item name="status" className="!mb-2">
+              <Form.Item name="status" className="!mb-0">
                 <Select
                   mode="multiple"
-                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs 
-                    [&_.ant-select-selection-item]:!text-xs 
+                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs
+                    [&_.ant-select-selection-item]:!text-xs
                     [&_.ant-select-selection-overflow]:!flex-wrap [&_.ant-select-selection-item]:!break-normal
                     [&_.ant-select-selector]:!min-h-[40px]"
                   placeholder={<span className="text-xs">Trạng thái</span>}
@@ -234,35 +231,25 @@ export default function ShipmentFilter({
                 </Select>
               </Form.Item>
             </div>
-            {/* Cột 2: Mã vận đơn & Tracking */}
-            <div className="space-y-1 border border-gray-200 rounded-lg p-3 bg-white">
-              <div className="text-xs font-medium text-gray-600 mb-2">
-                Mã xuất kho & Tracking
-              </div>
-              <div className="flex flex-col gap-2">
-                <Form.Item name="tracking_ship" className="!mb-0">
-                  <Input
-                    placeholder="Mã xuất kho"
-                    className="!w-full !h-10 !text-xs"
-                    size="small"
-                  />
-                </Form.Item>
-                <Form.Item name="tracking_code" className="!mb-0">
-                  <Input
-                    placeholder="Mã tracking"
-                    className="!w-full !h-10 !text-xs"
-                    size="small"
-                  />
-                </Form.Item>
-                <Form.Item name="invoice_no" className="!mb-0">
-                  <Input
-                    placeholder="Mã đơn hàng"
-                    className="!w-full !h-10 !text-xs"
-                    size="small"
-                  />
-                </Form.Item>
-              </div>
-            </div>
+          </div>
+          {/* Action Buttons Row */}
+          <div className="flex justify-end gap-2 pt-3 mt-3 border-t border-gray-200">
+            <Button
+              type="default"
+              onClick={handleReset}
+              icon={<ReloadOutlined className="text-xs" />}
+              className="!h-9 !text-gray-600 !font-medium !text-xs !px-4"
+            >
+              Làm mới
+            </Button>
+            <Button
+              type="default"
+              htmlType="submit"
+              icon={<FilterOutlined style={{ fontSize: 12 }} />}
+              className="!h-9 !font-medium !text-xs !px-4"
+            >
+              {t("filter")}
+            </Button>
           </div>
         </div>
       </Form>

@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined, ReloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
@@ -179,36 +177,8 @@ export default function OrderHubFilter({
   return (
     <div className="flex flex-col mb-2 gap-1">
       <Form form={form} onFinish={handleFinish} initialValues={mergedInitialValues}>
-        {/* Action Buttons Row */}
-        <div className="w-full flex justify-end gap-2 py-3 border-b border-gray-100">
-          <Button
-            type="default"
-            onClick={handleReset}
-            className="!h-9 !text-gray-600 !font-medium !text-xs !px-4"
-          >
-            Reset
-          </Button>
-          <Button
-            type="default"
-            htmlType="submit"
-            icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
-            className="!h-9 !font-medium !text-xs !px-4"
-          >
-            {t("filter")}
-          </Button>
-          {canCreate && (
-            <Button
-              type="primary"
-              icon={<PlusOutlined className="text-xs" />}
-              className="!h-9 !bg-blue-500 hover:!bg-blue-600 !text-white !font-medium !text-xs !px-4"
-              onClick={onCreateOrder}
-            >
-              Tạo đơn
-            </Button>
-          )}
-        </div>
         {/* Advanced Search Row */}
-        <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 mt-2">
+        <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="text-sm font-semibold text-gray-800 mb-3">
             Tìm kiếm
           </div>
@@ -239,7 +209,7 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="phone_number" className="!mb-2">
+              <Form.Item name="phone_number" className="!mb-0">
                 <InputNumber
                   placeholder="Số điện thoại"
                   className="!w-full !h-10 !text-xs placeholder:!flex placeholder:!items-center placeholder:!h-full"
@@ -272,7 +242,7 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="account" className="!mb-2">
+              <Form.Item name="account" className="!mb-0">
                 <Input
                   placeholder="Account"
                   className="!w-full !h-10 !text-xs"
@@ -317,8 +287,8 @@ export default function OrderHubFilter({
               <Form.Item name="status" className="!mb-2">
                 <Select
                   mode="multiple"
-                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs 
-                    [&_.ant-select-selection-item]:!text-xs 
+                  className="!w-full !text-xs [&_.ant-select-selection-placeholder]:!text-xs
+                    [&_.ant-select-selection-item]:!text-xs
                     [&_.ant-select-selection-overflow]:!flex-wrap [&_.ant-select-selection-item]:!break-normal
                     [&_.ant-select-selector]:!min-h-[40px]"
                   placeholder={<span className="text-xs">Trạng thái</span>}
@@ -348,7 +318,7 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="note_admin">
+              <Form.Item name="note_admin" className="!mb-0">
                 <Input.TextArea
                   placeholder="Ghi chú admin"
                   className="!w-full !text-xs !h-10 flex items-center pl-3 placeholder:text-left"
@@ -361,8 +331,36 @@ export default function OrderHubFilter({
                   }}
                 />
               </Form.Item>
-            
             </div>
+          </div>
+          {/* Action Buttons Row */}
+          <div className="flex justify-end gap-2 pt-3 mt-3 border-t border-gray-200">
+            <Button
+              type="default"
+              onClick={handleReset}
+              icon={<ReloadOutlined className="text-xs" />}
+              className="!h-9 !text-gray-600 !font-medium !text-xs !px-4"
+            >
+              Làm mới
+            </Button>
+            <Button
+              type="default"
+              htmlType="submit"
+              icon={<FilterOutlined style={{ fontSize: 12 }} />}
+              className="!h-9 !font-medium !text-xs !px-4"
+            >
+              {t("filter")}
+            </Button>
+            {canCreate && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined className="text-xs" />}
+                className="!h-9 !bg-blue-500 hover:!bg-blue-600 !text-white !font-medium !text-xs !px-4"
+                onClick={onCreateOrder}
+              >
+                Tạo đơn
+              </Button>
+            )}
           </div>
         </div>
       </Form>

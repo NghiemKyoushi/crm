@@ -2,15 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Form, InputNumber, Button, Card, Alert, message } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faClock,
-  faDollarSign,
-  faExchangeAlt,
-  faSave,
-  faUser,
-  faYenSign,
-} from "@fortawesome/free-solid-svg-icons";
+import { ClockCircleOutlined, DollarOutlined, PayCircleOutlined, SaveOutlined, SwapOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { CurrencyRate } from "@/types/setting";
@@ -85,7 +77,7 @@ const ExchangeRateSettings: React.FC = () => {
         className="!p-5 !rounded-lg !border !border-gray-200 !bg-blue-50"
         title={
           <div className="flex items-center gap-2 font-bold text-lg">
-            <FontAwesomeIcon icon={faExchangeAlt} />
+            <SwapOutlined />
             {t("categoryCustomer.exchangeRateSettingsTitle")}
           </div>
         }
@@ -95,7 +87,7 @@ const ExchangeRateSettings: React.FC = () => {
             onClick={() => handleSave()}
             className="!bg-green-600 hover:!bg-green-700"
           >
-            <FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />
+            <SaveOutlined className="mr-2 w-4 h-4" />
             {t("categoryCustomer.saveExchangeRate")}
           </Button>
         }
@@ -124,14 +116,11 @@ const ExchangeRateSettings: React.FC = () => {
                   <>
                     <Card className="!bg-white !rounded-lg !border !shadow-sm">
                       <div className="font-semibold text-gray-800 mb-4 flex items-center text-base">
-                        <FontAwesomeIcon
-                          icon={
-                            item.currency_code === "USD"
-                              ? faDollarSign
-                              : faYenSign
-                          }
-                          className="w-4 h-4 text-green-600"
-                        />
+                        {item.currency_code === "USD" ? (
+                          <DollarOutlined className="text-green-600" style={{ fontSize: 16 }} />
+                        ) : (
+                          <PayCircleOutlined className="text-green-600" style={{ fontSize: 16 }} />
+                        )}
                         Tỷ giá {item.currency_code}
                       </div>
                       <p className="block text-gray-600 text-sm font-medium">
@@ -150,20 +139,14 @@ const ExchangeRateSettings: React.FC = () => {
 
                       <div className="text-xs text-gray-500 mt-2 space-y-1">
                         <p>
-                          <FontAwesomeIcon
-                            icon={faClock}
-                            className="w-4 h-4 text-gray-500"
-                          />
+                          <ClockCircleOutlined className="w-4 h-4 text-gray-500" />
                           Cập nhật lần cuối:{" "}
                           {item.updated_at
                             ? dayjs(item.updated_at).format("DD/MM/YY")
                             : "-"}
                         </p>
                         <p>
-                          <FontAwesomeIcon
-                            icon={faUser}
-                            className="w-4 h-4 text-gray-500"
-                          />
+                          <UserOutlined className="w-4 h-4 text-gray-500" />
                           Được cập nhật bởi:
                           <span className="font-semibold">
                             {item.full_name}

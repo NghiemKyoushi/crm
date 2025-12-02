@@ -125,8 +125,8 @@ export const useUpdateOrder = () => {
 
 export const useCancelOrder = () => {
   return useMutation({
-    mutationFn: ({ reason, id }: { reason: string; id: string }) =>
-      cancelOrder(id, reason),
+    mutationFn: ({ reason,status, id, }: { reason: string;status: string; id: string,  }) =>
+      cancelOrder(id, reason, status),
   });
 };
 

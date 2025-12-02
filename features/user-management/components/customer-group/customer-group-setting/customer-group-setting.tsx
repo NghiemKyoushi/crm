@@ -2,14 +2,7 @@
 
 import React from "react";
 import { Button, Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowLeft,
-  faConciergeBell,
-  faExchangeAlt,
-  faPallet,
-  faShield,
-} from "@fortawesome/free-solid-svg-icons";
+import { ArrowLeftOutlined, ContainerOutlined, SafetyOutlined, SwapOutlined, CustomerServiceOutlined } from "@ant-design/icons";
 import InsuranceSettings from "@/features/fee-settting/components/insurance-settings";
 import ShippingServiceForm from "@/features/fee-settting/components/shipping-service-form";
 import ShippingSurchangeTable from "@/features/fee-settting/components/shipping-surchange";
@@ -27,7 +20,7 @@ const CategorySettingsPage: React.FC = () => {
       key: "1",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon className="w-4 h-4" icon={faExchangeAlt} />
+          <SwapOutlined style={{ fontSize: 16 }} />
           {t("categoryCustomer.exchangeRate")}
         </span>
       ),
@@ -39,7 +32,7 @@ const CategorySettingsPage: React.FC = () => {
             key: "2",
             label: (
               <span className="flex items-center gap-2">
-                <FontAwesomeIcon className="w-4 h-4" icon={faPallet} />
+                <ContainerOutlined style={{ fontSize: 16 }} />
                 {t("categoryCustomer.shippingAndSurcharge")}
               </span>
             ),
@@ -49,7 +42,7 @@ const CategorySettingsPage: React.FC = () => {
             key: "3",
             label: (
               <span className="flex items-center gap-2">
-                <FontAwesomeIcon className="w-4 h-4" icon={faConciergeBell} />
+                <CustomerServiceOutlined style={{ fontSize: 16 }} />
                 {t("categoryCustomer.servicesAndDelivery")}
               </span>
             ),
@@ -59,7 +52,7 @@ const CategorySettingsPage: React.FC = () => {
             key: "4",
             label: (
               <span className="flex items-center gap-2">
-                <FontAwesomeIcon className="w-4 h-4" icon={faShield} />
+                <SafetyOutlined style={{ fontSize: 16 }} />
                 {t("categoryCustomer.insuranceAndRegulations")}
               </span>
             ),
@@ -72,7 +65,7 @@ const CategorySettingsPage: React.FC = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm mt-5">
       <button className="cursor-pointer" onClick={() => router.back()}>
-        <FontAwesomeIcon icon={faArrowLeft} />
+        <ArrowLeftOutlined />
       </button>
 
       <div className="flex items-center justify-between mb-2 mt-4">

@@ -1,21 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Input, Button, List, Typography, InputNumber } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUniversity,
-  faGlobe,
-  faTags,
-  faUsers,
-  faLayerGroup,
-  faCog,
-  faClock,
-  faBan,
-  faPhone,
-  faMapMarked,
-  faTeletype,
-  faUser,
-  faPaperPlane,
-} from "@fortawesome/free-solid-svg-icons";
+import { AppstoreOutlined, BankOutlined, ClockCircleOutlined, EnvironmentOutlined, GlobalOutlined, PhoneOutlined, SendOutlined, SettingOutlined, StopOutlined, TagsOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import {
   getListExchangRate,
@@ -141,20 +126,14 @@ const SettingsDetail = () => {
 
                     <div className="text-xs text-gray-500 mt-2 space-y-1">
                       <p>
-                        <FontAwesomeIcon
-                          icon={faClock}
-                          className="w-4 h-4 text-gray-500"
-                        />
+                        <ClockCircleOutlined className="w-4 h-4 text-gray-500" />
                         Cập nhật lần cuối:{" "}
                         {item.updated_at
                           ? dayjs(item.updated_at).format("DD/MM/YY")
                           : "-"}
                       </p>
                       <p>
-                        <FontAwesomeIcon
-                          icon={faUser}
-                          className="w-4 h-4 text-gray-500"
-                        />
+                        <UserOutlined className="w-4 h-4 text-gray-500" />
                         Được cập nhật bởi:
                         <span className="font-semibold">{item.full_name}</span>
                       </p>
@@ -195,7 +174,7 @@ const SettingsDetail = () => {
               size="large"
               onClick={handleSaveTelegramId}
               loading={telegramIdLoading}
-              icon={<FontAwesomeIcon icon={faPaperPlane} />}
+              icon={<SendOutlined />}
             >
               Lưu
             </Button>
@@ -216,7 +195,7 @@ const SettingsDetail = () => {
               size="large"
               onClick={() => router.push("/finance-management")}
               className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-              icon={<FontAwesomeIcon className="w-4 h-4" icon={faUniversity} />}
+              icon={<BankOutlined style={{ fontSize: 16 }} />}
             >
               <span className="text-sm">
                 {t("settings.bankAccountManagement")}
@@ -227,7 +206,7 @@ const SettingsDetail = () => {
             size="large"
             onClick={() => router.push("/website-manage")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faGlobe} />}
+            icon={<GlobalOutlined style={{ fontSize: 16 }} />}
           >
             <span className="text-sm">
               {t("settings.supportedWebsiteManagement")}
@@ -237,7 +216,7 @@ const SettingsDetail = () => {
             size="large"
             onClick={() => router.push("/fee-setting")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faTags} />}
+            icon={<TagsOutlined style={{ fontSize: 16 }} />}
           >
             <span className="text-sm">{t("settings.productTypesAndFees")}</span>
           </Button>
@@ -245,7 +224,7 @@ const SettingsDetail = () => {
             size="large"
             onClick={() => router.push("/user-management")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faLayerGroup} />}
+            icon={<AppstoreOutlined style={{ fontSize: 16 }} />}
           >
             <span className="text-sm">
               {t("settings.customerCategoriesAndPolicies")}
@@ -255,7 +234,7 @@ const SettingsDetail = () => {
             size="large"
             onClick={() => router.push("/user-management")}
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faUsers} />}
+            icon={<TeamOutlined style={{ fontSize: 16 }} />}
           >
             <span className="text-sm">{t("settings.staffAndPermissions")}</span>
           </Button>
@@ -263,7 +242,7 @@ const SettingsDetail = () => {
             size="large"
             className="!w-full !justify-start !border-0 !bg-gray-50 !hover:bg-gray-100 !text-gray-800 !h-12"
             onClick={() => router.push("/fee-setting")}
-            icon={<FontAwesomeIcon className="w-4 h-4" icon={faCog} />}
+            icon={<SettingOutlined style={{ fontSize: 16 }} />}
           >
             <span className="text-sm">{t("settings.goToFeeManagement")}</span>
           </Button>

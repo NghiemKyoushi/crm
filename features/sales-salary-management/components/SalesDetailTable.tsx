@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faTable,
-    faFileExcel,
-    faCalculator,
-} from "@fortawesome/free-solid-svg-icons";
+import { CalculatorOutlined, FileExcelOutlined, TableOutlined } from "@ant-design/icons";
 
 interface CustomerDetail {
     customerId: string;
@@ -122,16 +117,16 @@ export default function SalesDetailTable() {
             <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold text-gray-800">
-                        <FontAwesomeIcon icon={faTable} className="mr-2" />
+                        <TableOutlined className="mr-2" />
                         Chi tiết Doanh số theo Khách hàng
                     </h3>
                     <div className="flex space-x-2 gap-2">
                         <button className="bg-green-600 hover:bg-green-700 !text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                            <FileExcelOutlined className="mr-2" />
                             Xuất Excel
                         </button>
                         <button className="bg-blue-600 hover:bg-blue-700 !text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                            <FontAwesomeIcon icon={faCalculator} className="mr-2" />
+                            <CalculatorOutlined className="mr-2" />
                             Tính lương
                         </button>
                     </div>

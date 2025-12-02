@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Form, Input, Button, Tag, DatePicker, Select, Modal, Tooltip } from "antd";
+import { FilterOutlined } from "@ant-design/icons";
 import TableComponent from "@/components/TableComponent";
 import {
   useCompleteShippingOrder,
@@ -16,8 +17,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 // import { Order } from "@/types/operation-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { EyeOutlined, EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 
 const ProductManagement: React.FC = () => {
@@ -632,7 +631,7 @@ const ProductManagement: React.FC = () => {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
+                  icon={<FilterOutlined className="text-xs" />}
                   className="!w-full !h-11 !bg-gray-700 !text-white !font-medium !text-xs"
                   size="small"
                 >

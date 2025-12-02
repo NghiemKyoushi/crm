@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faMoneyBillWave,
-    faExchangeAlt,
-    faWeight,
-    faPercentage,
-} from "@fortawesome/free-solid-svg-icons";
+import { DashboardOutlined, DollarOutlined, PercentageOutlined, SwapOutlined } from "@ant-design/icons";
 
 export default function SalaryMetrics() {
     return (
@@ -23,10 +17,7 @@ export default function SalaryMetrics() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex items-center">
-                        <FontAwesomeIcon
-                            icon={faMoneyBillWave}
-                            className="text-blue-600 text-2xl mr-3"
-                        />
+                        <DollarOutlined className="text-blue-600 text-2xl mr-3" />
                         <div>
                             <p className="text-sm text-gray-600">Lương cơ bản</p>
                             <p className="text-xl font-bold text-blue-600">6,700,000 ₫</p>
@@ -36,10 +27,7 @@ export default function SalaryMetrics() {
 
                 <div className="bg-green-50 p-4 rounded-lg">
                     <div className="flex items-center">
-                        <FontAwesomeIcon
-                            icon={faExchangeAlt}
-                            className="text-green-600 text-2xl mr-3"
-                        />
+                        <SwapOutlined className="text-green-600 text-2xl mr-3" />
                         <div>
                             <p className="text-sm text-gray-600">Tỷ giá bình quân</p>
                             <p className="text-xl font-bold text-green-600">186 ₫/¥</p>
@@ -49,10 +37,7 @@ export default function SalaryMetrics() {
 
                 <div className="bg-purple-50 p-4 rounded-lg">
                     <div className="flex items-center">
-                        <FontAwesomeIcon
-                            icon={faWeight}
-                            className="text-purple-600 text-2xl mr-3"
-                        />
+                        <DashboardOutlined className="text-purple-600 text-2xl mr-3" />
                         <div>
                             <p className="text-sm text-gray-600">Lợi nhuận/kg</p>
                             <p className="text-xl font-bold text-purple-600">9,000 ₫</p>
@@ -62,10 +47,7 @@ export default function SalaryMetrics() {
 
                 <div className="bg-orange-50 p-4 rounded-lg">
                     <div className="flex items-center">
-                        <FontAwesomeIcon
-                            icon={faPercentage}
-                            className="text-orange-600 text-2xl mr-3"
-                        />
+                        <PercentageOutlined className="text-orange-600 text-2xl mr-3" />
                         <div>
                             <p className="text-sm text-gray-600">Hoa hồng tối đa</p>
                             <p className="text-xl font-bold text-orange-600">20%</p>

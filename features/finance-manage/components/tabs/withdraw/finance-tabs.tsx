@@ -1,14 +1,7 @@
 "use client";
 import React from "react";
 import { Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowDown,
-  faArrowUp,
-  faUniversity,
-  faBalanceScale,
-  faHandshake,
-} from "@fortawesome/free-solid-svg-icons";
+import { ArrowDownOutlined, ArrowUpOutlined, AuditOutlined, BankOutlined, TeamOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 interface FinanceTabsProps {
@@ -28,7 +21,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       key: "deposit",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faArrowDown} />
+          <ArrowDownOutlined />
           {t("deposit.depositTitle")}
         </span>
       ),
@@ -37,7 +30,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       key: "withdraw",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faArrowUp} />
+          <ArrowUpOutlined />
           {t("deposit.withdraw")} 
         </span>
       ),
@@ -46,7 +39,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       key: "bank-settings",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUniversity} />
+          <BankOutlined />
           {t("deposit.bankSettings")}
         </span>
       ),
@@ -55,7 +48,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       key: "bank-partner",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faHandshake} />
+          <TeamOutlined />
           {t("deposit.bankPartner")}
         </span>
       ),
@@ -64,7 +57,7 @@ const FinanceTabs: React.FC<FinanceTabsProps> = ({
       key: "manage_debt",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faBalanceScale} />
+          <AuditOutlined />
           {t("deposit.reconciliation")}
         </span>
       ),

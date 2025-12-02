@@ -322,6 +322,17 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionConfig> = {
     ],
     requireAll: false,
     fallbackAction: 'notFound'
+  },
+
+  // System Logs
+  '/system-logs': {
+    required: [
+      'system.admin',
+      'system.logs',
+      'audit.view'
+    ],
+    requireAll: false,
+    fallbackAction: 'notFound'
   }
 };
 

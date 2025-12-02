@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
+import { SafetyOutlined, SettingOutlined } from "@ant-design/icons";
 import {
   Modal,
   Form,
@@ -40,8 +41,6 @@ import {
 } from "../../hooks/orderhub";
 import { useListCustomerWithSearch } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TiptapEditor from "../TiptapEditor";
 import { CURRENCY_CODE } from "./add-orderhub-modal";
 import { Fee } from "./orderhub-detail-modal";
@@ -520,9 +519,12 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   // Check if user can edit (has order.edit permission or is admin or has edit_approving with correct status)
   const canEdit = useMemo(() => {
-    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving;
+    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving || hasPermission("order.update_shipping_fee")  ;
   }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving]);
 
+  const canEditShipfee = useMemo(() => {
+    return  hasPermission("order.edit") || hasPermission("system.admin") || hasPermission("order.update_shipping_fee")  ;
+  }, [hasPermission]);
   // View only mode - has order.view but no order.edit
   const isViewOnly = !canEdit;
 
@@ -1039,11 +1041,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                       >
                         <Select
                           disabled={
-                            order?.status === OrderStatusType.PENDING_PAYMENT ||
+                            // order?.status === OrderStatusType.PENDING_PAYMENT ||
                             order?.status === OrderStatusType.READY_TO_SHIP ||
-                            order?.status ===
-                            OrderStatusType.SHIPPING_REQUEST_CLIENT ||
-                            !hasPermission("order.update_shipping_fee")
+                            // order?.status ===
+                            // OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                            !canEditShipfee
                           }
                           placeholder="Chọn hình thức"
                           onChange={(value) => setPaymentType(value)}
@@ -1088,11 +1090,11 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     >
                       <InputNumber
                         disabled={
-                          order?.status === OrderStatusType.PENDING_PAYMENT ||
-                          order?.status === OrderStatusType.READY_TO_SHIP ||
-                          order?.status ===
-                          OrderStatusType.SHIPPING_REQUEST_CLIENT ||
-                          !hasPermission("order.update_shipping_fee")
+                           // order?.status === OrderStatusType.PENDING_PAYMENT ||
+                           order?.status === OrderStatusType.READY_TO_SHIP ||
+                           // order?.status ===
+                           // OrderStatusType.SHIPPING_REQUEST_CLIENT ||
+                           !canEditShipfee
                         }
                         formatter={(value) =>
                           `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -1122,10 +1124,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         header={
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                              <FontAwesomeIcon
-                                icon={faCog}
-                                className="text-white text-sm"
-                              />
+                              <SettingOutlined className="text-white text-sm" />
                             </div>
                             <div>
                               <div className="font-semibold text-blue-900 text-sm">
@@ -1202,10 +1201,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         header={
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-                              <FontAwesomeIcon
-                                icon={faShield}
-                                className="text-white text-sm"
-                              />
+                              <SafetyOutlined className="text-white text-sm" />
                             </div>
                             <div>
                               <div className="font-semibold text-amber-900 text-sm">

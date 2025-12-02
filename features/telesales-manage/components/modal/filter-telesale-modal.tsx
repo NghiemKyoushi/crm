@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Select, Button, Row, Col } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter, faUserTag } from "@fortawesome/free-solid-svg-icons";
+import { FilterOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -344,7 +343,7 @@ export const FilterForm: React.FC<{
             <Button
               type="primary"
               icon={
-                <FontAwesomeIcon icon={faFilter} className="!h-3.5 !w-3.5" />
+                <FilterOutlined className="!h-3.5 !w-3.5" />
               }
               htmlType="submit"
               className="!h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
@@ -361,7 +360,7 @@ export const FilterForm: React.FC<{
             <Form.Item className="!mb-0">
               <Button
                 icon={
-                  <FontAwesomeIcon icon={faUserTag} className="!h-3.5 !w-3.5" />
+                  <UserOutlined className="!h-3.5 !w-3.5" />
                 }
                 className="!bg-gradient-to-r !from-purple-600 !to-purple-700 hover:!from-purple-700 hover:!to-purple-800 !text-white disabled:!opacity-40 disabled:!cursor-not-allowed !h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
                 disabled={selectedRowKeys.length === 0}

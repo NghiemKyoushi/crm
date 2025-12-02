@@ -2,13 +2,12 @@
 
 import React from "react";
 import { Card, Skeleton } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClipboardList,
-  faExclamationTriangle,
-  faCreditCard,
-  faTrophy,
-} from "@fortawesome/free-solid-svg-icons";
+  FileTextOutlined,
+  WarningOutlined,
+  CreditCardOutlined,
+  TrophyOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { AnalyticsSummary } from "@/types/analytics";
 
@@ -24,14 +23,14 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ data, isLoading }) => {
     {
       title: t("dashboard.pending_orders", "Đơn hàng chờ xử lý"),
       value: data?.pending_order_count ?? 0,
-      icon: faClipboardList,
+      icon: FileTextOutlined,
       gradient: "from-blue-500 to-blue-600",
       textColor: "text-blue-600",
     },
     {
       title: t("dashboard.incomplete_orders", "Đơn hàng chưa hoàn thành"),
       value: data?.incomplete_order_count ?? 0,
-      icon: faExclamationTriangle,
+      icon: WarningOutlined,
       gradient: "from-amber-500 to-amber-600",
       textColor: "text-amber-600",
     },
@@ -39,7 +38,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ data, isLoading }) => {
       title: t("dashboard.highest_debt", "Công nợ cao nhất"),
       value: data?.highest_debt_customer?.remaining_debt ?? 0,
       subtitle: data?.highest_debt_customer?.customer_name,
-      icon: faCreditCard,
+      icon: CreditCardOutlined,
       gradient: "from-red-500 to-red-600",
       textColor: "text-red-600",
       isCurrency: true,
@@ -48,7 +47,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ data, isLoading }) => {
       title: t("dashboard.top_spender", "Chi tiêu nhiều nhất"),
       value: data?.top_spending_customer?.total_spent ?? 0,
       subtitle: data?.top_spending_customer?.customer_name,
-      icon: faTrophy,
+      icon: TrophyOutlined,
       gradient: "from-emerald-500 to-emerald-600",
       textColor: "text-emerald-600",
       isCurrency: true,
@@ -91,7 +90,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ data, isLoading }) => {
                 )}
               </div>
               <div className={`w-10 h-10 rounded-lg ${card.textColor} bg-gray-50 flex items-center justify-center`}>
-                <FontAwesomeIcon icon={card.icon} className="text-base" />
+                <card.icon className="text-base" />
               </div>
             </div>
           </Skeleton>

@@ -2,13 +2,12 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Tag, Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTrophy,
-  faShoppingCart,
-  faMoneyBillWave,
-  faCreditCard,
-} from "@fortawesome/free-solid-svg-icons";
+  TrophyOutlined,
+  ShoppingCartOutlined,
+  DollarOutlined,
+  CreditCardOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import {
   TopCustomer,
@@ -215,7 +214,7 @@ const TopCustomersTable: React.FC<TopCustomersTableProps> = ({
       key: "spending",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faMoneyBillWave} className="text-emerald-500" />
+          <DollarOutlined className="text-emerald-500" />
           {t("dashboard.top_spending", "Chi tiêu cao")}
         </span>
       ),
@@ -241,7 +240,7 @@ const TopCustomersTable: React.FC<TopCustomersTableProps> = ({
       key: "orders",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faShoppingCart} className="text-blue-500" />
+          <ShoppingCartOutlined className="text-blue-500" />
           {t("dashboard.top_orders", "Đặt hàng nhiều")}
         </span>
       ),
@@ -267,7 +266,7 @@ const TopCustomersTable: React.FC<TopCustomersTableProps> = ({
       key: "debt",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faCreditCard} className="text-red-500" />
+          <CreditCardOutlined className="text-red-500" />
           {t("dashboard.top_debt", "Công nợ cao")}
         </span>
       ),
@@ -295,7 +294,7 @@ const TopCustomersTable: React.FC<TopCustomersTableProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center">
-          <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+          <TrophyOutlined className="text-yellow-500" />
         </div>
         <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.top_customers", "Top khách hàng")}

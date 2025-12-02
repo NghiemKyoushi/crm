@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import { Table, Button, Select, Card } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUsers,
-  faWeight,
-  faYenSign,
-  faChartLine,
-  faFileExcel,
-  faCalculator,
-  faTable,
-} from "@fortawesome/free-solid-svg-icons";
+import { CalculatorOutlined, DashboardOutlined, FileExcelOutlined, LineChartOutlined, PayCircleOutlined, TableOutlined, TeamOutlined } from "@ant-design/icons";
 import TableComponent, {
   ExtendedColumnsType,
 } from "@/components/TableComponent";
@@ -165,10 +156,7 @@ export default function SaleDetail(props: SaleDetailProps) {
         <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-blue-100 rounded-full">
-              <FontAwesomeIcon
-                icon={faUsers}
-                className="text-blue-500 text-xl"
-              />
+              <TeamOutlined className="text-blue-500 text-xl" />
             </div>
             <div className="flex flex-col gap-0">
               <p className="text-gray-600 text-sm !mb-1">Tổng khách hàng</p>
@@ -180,10 +168,7 @@ export default function SaleDetail(props: SaleDetailProps) {
         <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-green-100 rounded-full">
-              <FontAwesomeIcon
-                icon={faWeight}
-                className="text-green-500 text-xl"
-              />
+              <DashboardOutlined className="text-green-500 text-xl" />
             </div>
             <div className="flex flex-col gap-0">
               <p className="text-gray-600 text-sm !mb-1">Tổng KG</p>
@@ -195,10 +180,7 @@ export default function SaleDetail(props: SaleDetailProps) {
         <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-yellow-100 rounded-full">
-              <FontAwesomeIcon
-                icon={faYenSign}
-                className="text-yellow-500 text-xl"
-              />
+              <PayCircleOutlined className="text-yellow-500 text-xl" />
             </div>
             <div className="flex flex-col gap-0">
               <p className="text-gray-600 text-sm !mb-1">Tổng doanh thu (¥)</p>
@@ -210,10 +192,7 @@ export default function SaleDetail(props: SaleDetailProps) {
         <Card className="shadow-sm !h-[100px]">
           <div className="flex items-start gap-3">
             <div className="p-3 bg-purple-100 rounded-full">
-              <FontAwesomeIcon
-                icon={faChartLine}
-                className="text-purple-500 text-xl"
-              />
+              <LineChartOutlined className="text-purple-500 text-xl" />
             </div>
             <div className="flex flex-col gap-0">
               <p className="text-gray-600 text-sm !mb-1">Hoa hồng ước tính</p>
@@ -227,7 +206,7 @@ export default function SaleDetail(props: SaleDetailProps) {
       <div className="bg-white mt-6 rounded-xl shadow p-4">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold text-gray-800 text-xl">
-            <FontAwesomeIcon icon={faTable} className="text-black" />
+            <TableOutlined className="text-black" />
             Chi tiết Doanh số theo Khách hàng
           </h3>
           <div className="flex gap-2">
@@ -235,14 +214,14 @@ export default function SaleDetail(props: SaleDetailProps) {
               type="primary"
               className="!bg-green-500 !hover:!bg-green-600 flex items-center gap-2"
             >
-              <FontAwesomeIcon icon={faFileExcel} className="text-white" />
+              <FileExcelOutlined className="text-white" />
               Xuất Excel
             </Button>
             <Button
               type="primary"
               className="!bg-blue-500 !hover:!bg-blue-600 flex items-center gap-2"
             >
-              <FontAwesomeIcon icon={faCalculator} className="text-white" />
+              <CalculatorOutlined className="text-white" />
               Tính lương
             </Button>
           </div>

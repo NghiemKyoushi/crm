@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
+import { PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 interface SalesPerson {
     id: string;
@@ -72,11 +71,11 @@ export default function SalesPerformance() {
         <div className="p-6 bg-white rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">
-                    <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                    <TeamOutlined className="mr-2" />
                     Theo dõi Hiệu suất Sale
                 </h3>
                 <button className="bg-blue-600 hover:bg-blue-700 !text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                    <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                    <PlusOutlined className="mr-2" />
                     Thêm Sale
                 </button>
             </div>

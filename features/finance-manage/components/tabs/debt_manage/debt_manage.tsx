@@ -1,11 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Tag, Button, Modal, Tooltip } from "antd";
+import { DollarOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { ReloadOutlined, InfoCircleOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faExclamationCircle,
-  faDollarSign,
-} from "@fortawesome/free-solid-svg-icons";
 import { DebtDetailModal } from "./debt_history_table";
 import { ConfirmReturnModal } from "./conrfirm_return_modal";
 import { RejectActionModal } from "./cancel_modal";
@@ -413,7 +409,7 @@ const PartnerDebtTable = () => {
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-red-200/50 flex items-center justify-center flex-shrink-0">
-                  <FontAwesomeIcon icon={faExclamationCircle} className="text-xl text-red-500" />
+                  <ExclamationCircleOutlined className="text-xl text-red-500" />
                 </div>
               </div>
             </div>
@@ -431,7 +427,7 @@ const PartnerDebtTable = () => {
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-green-200/50 flex items-center justify-center flex-shrink-0">
-                  <FontAwesomeIcon icon={faDollarSign} className="text-xl text-green-500" />
+                  <DollarOutlined className="text-xl text-green-500" />
                 </div>
               </div>
             </div>

@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import { Button, Select, DatePicker, Form, Input } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { FilterOutlined } from "@ant-design/icons";
 import { DepositParams } from "@/types/deposit-type";
 import { useTranslation } from "react-i18next";
 const { RangePicker } = DatePicker;
@@ -74,7 +73,7 @@ const FilterSection = (props: FilterSectionProps) => {
             <Button
               type="primary"
               htmlType="submit"
-              icon={<FontAwesomeIcon icon={faFilter} />}
+              icon={<FilterOutlined />}
               className="min-w-[90px] !px-3 !bg-gray-700 !text-white !font-medium !h-11 !text-sm"
               // px-3: padding nhỏ, min-w-[40px]: khoá tối thiểu không bị quá nhỏ
             >

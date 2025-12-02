@@ -9,6 +9,7 @@ export interface NoteModalProps {
   note: string | null;
   onCancel: () => void;
   onSave: (note: string) => void;
+  loading?: boolean;
 }
 
 const NoteModal: React.FC<NoteModalProps> = ({
@@ -16,6 +17,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
   note,
   onCancel,
   onSave,
+  loading = false,
 }) => {
   const [text, setText] = useState<string>(note ?? "");
   useEffect(() => {
@@ -44,7 +46,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
         <Button key="cancel" onClick={handleCancel}>
           Hủy
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSave}>
+        <Button key="submit" type="primary" onClick={handleSave} loading={loading}>
           Lưu
         </Button>,
       ]}

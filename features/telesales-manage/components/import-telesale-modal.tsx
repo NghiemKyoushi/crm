@@ -1,9 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Modal, Button, Upload, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faFileExcel, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { DownloadOutlined, FileExcelOutlined, UploadOutlined } from "@ant-design/icons";
 
 interface ImportCustomerModalProps {
   open: boolean;
@@ -66,7 +64,7 @@ const ImportCustomerModal = ({
       width={600}
     >
       <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4">
-        <FontAwesomeIcon className="text-4xl text-green-500 mb-4" icon={faFileExcel}/>
+        <FileExcelOutlined className="text-4xl text-green-500 mb-4" style={{ fontSize: 40 }} />
         <p className="mb-2 font-medium">Chọn file Excel để import</p>
         <p className="text-gray-500 text-sm mb-3">
           Hỗ trợ định dạng <b>.xlsx, .xls</b> (Tối đa 10MB)
@@ -74,7 +72,7 @@ const ImportCustomerModal = ({
 
         <Upload beforeUpload={beforeUpload} maxCount={1} fileList={file ? [file as any] : []} onRemove={() => setFile(null)}>
           <Button type="primary" >
-          <FontAwesomeIcon icon={faUpload}/> Chọn file
+          <UploadOutlined /> Chọn file
           </Button>
         </Upload>
       </div>

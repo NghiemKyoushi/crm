@@ -4,13 +4,11 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Select, InputNumber, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFlag,
-  faFlagUsa,
-  faSave,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+  FlagOutlined,
+  SaveOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getListProductCategory } from "../apis/fee-setting";
 import {
@@ -614,7 +612,7 @@ export default function ShippingSurchangeTable(
               onClick={() => handleDelete(+route, record.id.toString())}
               className="w-8 h-6 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs rounded cursor-pointer flex items-center justify-center"
             >
-              <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+              <DeleteOutlined className="w-4 h-4" />
             </div>
           </div>
         ),
@@ -629,12 +627,7 @@ export default function ShippingSurchangeTable(
           <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-base font-medium text-gray-800">
-                <FontAwesomeIcon
-                  icon={
-                    routeNames[Number(routeId)] === "US -> VN"
-                      ? faFlagUsa
-                      : faFlag
-                  }
+                <FlagOutlined
                   className={`mr-2 w-4 h-4 ${
                     routeNames[Number(routeId)] === "US -> VN"
                       ? "!text-red-600"
@@ -676,7 +669,7 @@ export default function ShippingSurchangeTable(
           type="primary"
           size="large"
           onClick={() => handleSaveAll()}
-          icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+          icon={<SaveOutlined className="mr-2 w-4 h-4" />}
           className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
           {t("button.saveAllChanges")}
