@@ -1,6 +1,5 @@
-import { faChevronLeft, faLeftLong, faQrcode } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Avatar, Button, List, Modal, Spin, message } from "antd";
+import { ArrowLeftOutlined, LeftOutlined, QrcodeOutlined } from "@ant-design/icons";
 import React, { useState, useEffect, useRef } from "react";
 import {
   getListBankCreateAccount,
@@ -131,7 +130,7 @@ export const SettlementBankModal = ({
               onClick={handleBackToBanks}
               style={{ border: "none", background: "transparent", cursor: "pointer" }}
             >
-              <FontAwesomeIcon icon={faChevronLeft} size="sm" />
+              <LeftOutlined />
             </button>
             <span>Thanh toán qua: {getBankData().bank_name}</span>
           </div>
@@ -177,10 +176,7 @@ export const SettlementBankModal = ({
                     </span>
                   }
                 />
-                <FontAwesomeIcon
-                  icon={faQrcode}
-                  className="text-2xl text-green-500"
-                />
+                <QrcodeOutlined className="text-2xl text-green-500" />
               </List.Item>
             )}
           />

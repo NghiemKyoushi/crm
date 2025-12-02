@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, Form, Input, Tag, Tooltip } from "antd";
+import { DeleteOutlined, EditOutlined, SearchOutlined, TagsOutlined } from "@ant-design/icons";
 import AddCustomerTypeModal from "./modal-edit-customer-group";
 import TableComponent from "@/components/TableComponent";
 import {
@@ -12,8 +13,6 @@ import { ColumnsType } from "antd/es/table";
 import { Category, CategoryRequest } from "@/types/customer-group";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faSearch, faTags, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import PopupConfirm from "@/components/PopupConfirm";
 import { getContrastColor } from "../customer-manage/customer-type-select";
@@ -161,10 +160,7 @@ export default function CategoryCustomerTable() {
               type="text"
               size="small"
               icon={
-                <FontAwesomeIcon
-                  icon={faEdit}
-                  className={"text-indigo-600 hover:text-indigo-800 text-sm"}
-                />
+                <EditOutlined />
               }
               onClick={()=>{
                 router.push(`/customer-group/${record.id}`)
@@ -188,10 +184,7 @@ export default function CategoryCustomerTable() {
               size="small"
               disabled={record.id === 1}
               icon={
-                <FontAwesomeIcon
-                  icon={faTags}
-                  className={record.id === 1 ? "text-gray-400 text-sm" : "text-green-600 hover:text-green-800 text-sm"}
-                />
+                <TagsOutlined className={record.id === 1 ? "text-gray-300" : ""} />
               }
             />
           </Tooltip>
@@ -202,10 +195,7 @@ export default function CategoryCustomerTable() {
               danger
               disabled={record.id === 1}
               icon={
-                <FontAwesomeIcon
-                  icon={faTrash}
-                  className={record.id === 1 ? "text-gray-400 transition-colors duration-200" : "text-red-600 hover:text-red-800 transition-colors duration-200"}
-                />
+                <DeleteOutlined className={record.id === 1 ? "text-gray-300" : ""} />
               }
               onClick={() => {
                 setId(record.id.toString());
@@ -242,7 +232,7 @@ export default function CategoryCustomerTable() {
         />
         <Button
           type="primary"
-          icon={<FontAwesomeIcon icon={faSearch} />}
+          icon={<SearchOutlined />}
           onClick={handleSearch}
         >
           {t('common.search')}

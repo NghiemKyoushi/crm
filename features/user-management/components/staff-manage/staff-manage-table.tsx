@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ColumnsType } from "antd/es/table";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEdit,
-  faKey,
-  faLock,
-  faTrash,
-  faUserPlus,
-  faSearch,
-} from "@fortawesome/free-solid-svg-icons";
 import { Tag, Button, Dropdown, Menu, Select, Input } from "antd";
+import { DeleteOutlined, EditOutlined, KeyOutlined, LockOutlined, SearchOutlined, UnlockOutlined, UserAddOutlined } from "@ant-design/icons";
 import TableComponent from "@/components/TableComponent";
 import ModalStaffAdd from "./modal-staff-add";
 import { useMemo, useState } from "react";
@@ -424,8 +416,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
         const isSystemUser = record.user_id === 1;
         return (
           <div className="flex gap-3 text-sm justify-center">
-            <FontAwesomeIcon
-              icon={faEdit}
+            <EditOutlined
               onClick={() => (!isSystemUser && hasPermission("user.edit")) && handleOpenEdit(record.user_id)}
               className={
                 isSystemUser || !hasPermission("user.edit")
@@ -438,8 +429,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
                   : t("staffManage.edit")
               }
             />
-            <FontAwesomeIcon
-              icon={faKey}
+            <KeyOutlined
               className={
                 isSystemUser || !hasPermission("user.edit")
                   ? "text-gray-400 cursor-not-allowed"
@@ -456,8 +446,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
               }
             />
             {record.active ? (
-              <FontAwesomeIcon
-                icon={faLock}
+              <LockOutlined
                 className={
                   isSystemUser || !hasPermission("user.edit")
                     ? "text-gray-400 cursor-not-allowed"
@@ -474,8 +463,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
                 }
               />
             ) : (
-              <FontAwesomeIcon
-                icon={faLock}
+              <UnlockOutlined
                 className={
                   isSystemUser || !hasPermission("user.edit")
                     ? "text-gray-400 cursor-not-allowed"
@@ -492,8 +480,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
                 }
               />
             )}
-            <FontAwesomeIcon
-              icon={faTrash}
+            <DeleteOutlined
               className={
                 isSystemUser || !hasPermission("user.delete")
                   ? "text-gray-400 cursor-not-allowed"
@@ -526,7 +513,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
             setOpen(true);
             setSelectedId(null);
           }}
-          icon={<FontAwesomeIcon icon={faUserPlus} />}
+          icon={<UserAddOutlined />}
           className="!bg-green-500 !hover:bg-green-600 !font-medium"
         >
           {t("staffManage.addStaff")}
@@ -541,7 +528,7 @@ console.log('hasPermission("user.delete")', hasPermission("user.edit"));
         />
         <Button
           type="primary"
-          icon={<FontAwesomeIcon icon={faSearch} />}
+          icon={<SearchOutlined />}
           onClick={handleSearch}
         >
           {t("staffManage.search")}

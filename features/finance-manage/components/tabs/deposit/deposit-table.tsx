@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import TableComponent from "@/components/TableComponent";
 import DepositFilter from "./deposit-filter";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faMinusCircle } from "@fortawesome/free-solid-svg-icons";
 import ManualDepositModal from "./modal/modal-add-manual";
 import { ColumnsType } from "antd/es/table";
 import { Tag, Button, Space, Tooltip } from "antd";
+import { MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import CancelReasonModal from "./modal/modal-cancel-statement";
 import PopupConfirm from "@/components/PopupConfirm";
 import TransactionHistoryModal from "./modal/modal-history";
@@ -412,7 +411,7 @@ const DepositTable = (props: DepositTableProps) => {
                 type="primary"
                 className="!h-9 !bg-blue-500 hover:!bg-blue-600 !border-blue-500 hover:!border-blue-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
               >
-                <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
+                <PlusCircleOutlined className="text-sm" />
                 <span>Nạp tiền cho đối tác</span>
               </Button>
             </>
@@ -424,7 +423,7 @@ const DepositTable = (props: DepositTableProps) => {
                 type="primary"
                 className="!h-9 !bg-green-500 hover:!bg-green-600 !border-green-500 hover:!border-green-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
               >
-                <FontAwesomeIcon icon={faPlusCircle} className="text-sm" />
+                <PlusCircleOutlined className="text-sm" />
                 <span>{t("deposit.manualDeposit")}</span>
               </Button>
             </>
@@ -436,7 +435,7 @@ const DepositTable = (props: DepositTableProps) => {
               type="primary"
               className="!h-9 !bg-red-500 hover:!bg-red-600 !border-red-500 hover:!border-red-600 !text-white !font-normal !px-4 !rounded-md !flex !items-center !gap-2 !shadow-sm transition-all"
             >
-              <FontAwesomeIcon icon={faMinusCircle} className="text-sm" />
+              <MinusCircleOutlined className="text-sm" />
               <span>{t("deposit.manualWithdraw")}</span>
             </Button>
           )}

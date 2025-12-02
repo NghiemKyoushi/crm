@@ -16,34 +16,32 @@ import {
 } from "../hooks/fee-setting";
 import { CategoryItem } from "@/types/fee-setting";
 import {
-  faBaby,
-  faCouch,
-  faFlask,
-  faGamepad,
-  faGolfBallTee,
-  faLaptop,
-  faShoePrints,
-  faShoppingBag,
-  faTshirt,
-  faUtensils,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  SmileOutlined,
+  HomeOutlined,
+  ExperimentOutlined,
+  PlaySquareOutlined,
+  AimOutlined,
+  LaptopOutlined,
+  SkinOutlined,
+  ShoppingOutlined,
+  CoffeeOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 
 const ProductTypeTable: React.FC = () => {
   const { t } = useTranslation();
 
   const iconOptions = [
-    { label: t('productType.categories.clothes'), value: "faTshirt", icon: faTshirt },
-    { label: t('productType.categories.shoes'), value: "faShoePrints", icon: faShoePrints },
-    { label: t('productType.categories.bags'), value: "faShoppingBag", icon: faShoppingBag },
-    { label: t('productType.categories.household'), value: "faCouch", icon: faCouch },
-    { label: t('productType.categories.baby'), value: "faBaby", icon: faBaby },
-    { label: t('productType.categories.food'), value: "faUtensils", icon: faUtensils },
-    { label: t('productType.categories.golf'), value: "faGolfBallTee", icon: faGolfBallTee },
-    { label: t('productType.categories.toys'), value: "faGamepad", icon: faGamepad },
-    { label: t('productType.categories.laptop'), value: "faLaptop", icon: faLaptop },
-    { label: t('productType.categories.cosmetics'), value: "faFlask", icon: faFlask },
+    { label: t('productType.categories.clothes'), value: "faTshirt", icon: SkinOutlined },
+    { label: t('productType.categories.shoes'), value: "faShoePrints", icon: SkinOutlined },
+    { label: t('productType.categories.bags'), value: "faShoppingBag", icon: ShoppingOutlined },
+    { label: t('productType.categories.household'), value: "faCouch", icon: HomeOutlined },
+    { label: t('productType.categories.baby'), value: "faBaby", icon: SmileOutlined },
+    { label: t('productType.categories.food'), value: "faUtensils", icon: CoffeeOutlined },
+    { label: t('productType.categories.golf'), value: "faGolfBallTee", icon: AimOutlined },
+    { label: t('productType.categories.toys'), value: "faGamepad", icon: PlaySquareOutlined },
+    { label: t('productType.categories.laptop'), value: "faLaptop", icon: LaptopOutlined },
+    { label: t('productType.categories.cosmetics'), value: "faFlask", icon: ExperimentOutlined },
   ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -283,7 +281,7 @@ const ProductTypeTable: React.FC = () => {
                   label={opt.label}
                 >
                   <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={opt.icon} />
+                    <opt.icon />
                     <span>{opt.label}</span>
                   </div>
                 </Select.Option>

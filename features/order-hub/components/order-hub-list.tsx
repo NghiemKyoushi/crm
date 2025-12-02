@@ -36,7 +36,7 @@ import {
   useUpdateNoteOrderClient,
   useUpdateTrackingOrder,
 } from "../hooks/orderhub";
-import { ApproveOrderModel, Invoice, OrderStatusType } from "@/types/orderhub";
+import { ApproveOrderModel, Invoice, InvoiceResponse, OrderStatusType } from "@/types/orderhub";
 import TableComponent from "@/components/TableComponent";
 import ApproveOrderModal from "./modal/approve-order-modal";
 import CheckOrderModal from "./modal/check-order-modal";

@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Button, InputNumber } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { CheckOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getListProductCategory } from "@/features/fee-settting/apis/fee-setting";
 import { Invoice } from "@/types/orderhub";
@@ -161,7 +160,7 @@ const ApproveOrderModal: React.FC<ApproveOrderModalProps> = ({
           <Button
             type="primary"
             className="!bg-green-600"
-            icon={<FontAwesomeIcon icon={faCheck} />}
+            icon={<CheckOutlined />}
             onClick={handleOk}
           >
             Duyệt đơn

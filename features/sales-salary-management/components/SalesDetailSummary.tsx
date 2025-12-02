@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUsers,
-  faWeight,
-  faYenSign,
-  faChartLine,
-} from "@fortawesome/free-solid-svg-icons";
+import { DashboardOutlined, LineChartOutlined, PayCircleOutlined, TeamOutlined } from "@ant-design/icons";
 
 interface SalesDetailSummaryProps {
   totalCustomers: number;
@@ -31,7 +25,7 @@ export default function SalesDetailSummary({
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center">
           <div className="p-3 bg-blue-100 rounded-full">
-            <FontAwesomeIcon icon={faUsers} className="text-blue-600 text-xl" />
+            <TeamOutlined className="text-blue-600 text-xl" />
           </div>
           <div className="ml-4">
             <p className="text-sm text-gray-600">Tổng khách hàng</p>
@@ -43,10 +37,7 @@ export default function SalesDetailSummary({
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center">
           <div className="p-3 bg-green-100 rounded-full">
-            <FontAwesomeIcon
-              icon={faWeight}
-              className="text-green-600 text-xl"
-            />
+            <DashboardOutlined className="text-green-600 text-xl" />
           </div>
           <div className="ml-4">
             <p className="text-sm text-gray-600">Tổng KG</p>
@@ -58,10 +49,7 @@ export default function SalesDetailSummary({
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center">
           <div className="p-3 bg-yellow-100 rounded-full">
-            <FontAwesomeIcon
-              icon={faYenSign}
-              className="text-yellow-600 text-xl"
-            />
+            <PayCircleOutlined className="text-yellow-600 text-xl" />
           </div>
           <div className="ml-4">
             <p className="text-sm text-gray-600">Tổng doanh thu (¥)</p>
@@ -75,10 +63,7 @@ export default function SalesDetailSummary({
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center">
           <div className="p-3 bg-purple-100 rounded-full">
-            <FontAwesomeIcon
-              icon={faChartLine}
-              className="text-purple-600 text-xl"
-            />
+            <LineChartOutlined className="text-purple-600 text-xl" />
           </div>
           <div className="ml-4">
             <p className="text-sm text-gray-600">Hoa hồng ước tính</p>

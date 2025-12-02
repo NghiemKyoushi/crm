@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
 interface SalesDetailHeaderProps {
@@ -40,7 +39,7 @@ export default function SalesDetailHeader({
               onClick={() => router.back()}
               className="mr-4 text-gray-600 hover:text-gray-800 transition-colors"
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
+              <ArrowLeftOutlined className="text-xl" />
             </button>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">

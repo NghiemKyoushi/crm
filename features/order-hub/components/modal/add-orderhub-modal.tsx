@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { SafetyOutlined, SettingOutlined } from "@ant-design/icons";
 import {
   Modal,
   Form,
@@ -42,8 +43,6 @@ import {
   useListCustomerSale,
 } from "@/features/user-management/hooks/staff-manage";
 import { useTranslation } from "react-i18next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog, faShield } from "@fortawesome/free-solid-svg-icons";
 import TiptapEditor from "../TiptapEditor";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { uploadImage } from "@/features/user-profile/hooks/user-profile";
@@ -1116,10 +1115,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         header={
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                              <FontAwesomeIcon
-                                icon={faCog}
-                                className="text-white text-sm"
-                              />
+                              <SettingOutlined className="text-white text-sm" />
                             </div>
                             <div>
                               <div className="font-semibold text-blue-900 text-sm">
@@ -1190,10 +1186,7 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
                         header={
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-                              <FontAwesomeIcon
-                                icon={faShield}
-                                className="text-white text-sm"
-                              />
+                              <SafetyOutlined className="text-white text-sm" />
                             </div>
                             <div>
                               <div className="font-semibold text-amber-900 text-sm">

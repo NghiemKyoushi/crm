@@ -1,9 +1,7 @@
 "use client";
 import { Table, Tag, Button, Avatar } from "antd";
+import { TeamOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { UserOutlined, PlusOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faUsers } from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -157,7 +155,7 @@ const SalePerformance = () => {
     <div className="bg-white p-4 rounded-2xl shadow-sm mt-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <FontAwesomeIcon icon={faUsers} /> Theo dõi Hiệu suất Sale
+          <TeamOutlined /> Theo dõi Hiệu suất Sale
         </h2>
         <Button type="primary" icon={<PlusOutlined />}>
           Thêm Sale

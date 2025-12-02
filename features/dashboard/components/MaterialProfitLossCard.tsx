@@ -2,12 +2,11 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Tag, DatePicker } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChartLine,
-  faArrowUp,
-  faArrowDown,
-} from "@fortawesome/free-solid-svg-icons";
+  LineChartOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { Dayjs } from "dayjs";
 import { MaterialProfitLoss } from "@/types/analytics";
@@ -103,10 +102,11 @@ const MaterialProfitLossCard: React.FC<MaterialProfitLossCardProps> = ({
               isProfit ? "text-emerald-600" : "text-red-600"
             }`}
           >
-            <FontAwesomeIcon
-              icon={isProfit ? faArrowUp : faArrowDown}
-              className="text-xs"
-            />
+            {isProfit ? (
+              <ArrowUpOutlined className="text-xs" />
+            ) : (
+              <ArrowDownOutlined className="text-xs" />
+            )}
             {formatAmount(Math.abs(value), record.currency_code)}
           </span>
         );
@@ -138,7 +138,7 @@ const MaterialProfitLossCard: React.FC<MaterialProfitLossCardProps> = ({
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
-            <FontAwesomeIcon icon={faChartLine} className="text-teal-500" />
+            <LineChartOutlined className="text-teal-500" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-800 m-0">

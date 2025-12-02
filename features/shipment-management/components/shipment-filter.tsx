@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
 import { Button, Input, Select, Form, DatePicker, InputNumber } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReloadOutlined, FilterOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { OrderStatusType } from "@/types/orderhub";
 
@@ -247,7 +245,7 @@ export default function ShipmentFilter({
             <Button
               type="default"
               htmlType="submit"
-              icon={<FontAwesomeIcon icon={faFilter} className="text-xs" />}
+              icon={<FilterOutlined style={{ fontSize: 12 }} />}
               className="!h-9 !font-medium !text-xs !px-4"
             >
               {t("filter")}
