@@ -11,6 +11,7 @@ export function EditTrackingModal({
   onSave,
   orderId,
   status,
+  saving = false,
 }: {
   orderId: number;
   open: boolean;
@@ -21,6 +22,7 @@ export function EditTrackingModal({
   };
   onSave: (data: CreateTrackingModel[]) => void;
   status: string;
+  saving?: boolean;
 }) {
   const [records, setRecords] = React.useState<CreateTrackingModel[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -125,6 +127,7 @@ export function EditTrackingModal({
           }
           key="submit"
           type="primary"
+          loading={saving}
           onClick={handleSubmit}
         >
           Lưu

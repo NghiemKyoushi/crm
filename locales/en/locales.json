@@ -10,7 +10,8 @@
     "success": "Login successful!",
     "failed": "Login failed!",
     "pleaseCheckInformation": "Please check information!!",
-    "noPermission": "You don't have permission to access system"
+    "noPermission": "You don't have permission to access system",
+    "redirecting": "Signing in to the system..."
   },
   "validation": {
     "pleaseEnterLink": "Please enter link!",
@@ -53,7 +54,118 @@
     "checkComing": "Check Coming",
     "crm": "CRM",
     "cms": "CMS",
-    "vipManagement": "VIP Management"
+    "vipManagement": "VIP Management",
+    "systemLogs": "System Logs"
+  },
+  "systemLogs": {
+    "title": "System Logs",
+    "subtitle": "Monitor and manage system logs",
+    "searchPlaceholder": "Search URI, message...",
+    "service": "Service",
+    "logType": "Log type",
+    "logLevel": "Level",
+    "statusCode": "Status code",
+    "userId": "User ID",
+    "viewDetail": "View detail",
+    "traceRequest": "Trace request",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "logs": "Logs"
+    },
+    "table": {
+      "time": "Time",
+      "service": "Service",
+      "level": "Level",
+      "type": "Type",
+      "method": "Method",
+      "endpoint": "Endpoint",
+      "status": "Status",
+      "duration": "Duration",
+      "userId": "User",
+      "ip": "IP",
+      "error": "Error"
+    },
+    "stats": {
+      "totalLogs": "Total logs",
+      "totalRequests": "Total requests",
+      "totalErrors": "Total errors",
+      "avgResponseTime": "Avg response",
+      "errors": "Errors",
+      "warnings": "Warnings",
+      "errorRate": "Error rate"
+    },
+    "chart": {
+      "title": "Request Timeline",
+      "requests": "Requests",
+      "errors": "Errors",
+      "avgDuration": "Avg Duration (ms)",
+      "count": "Count",
+      "durationMs": "Duration (ms)",
+      "byHour": "By hour",
+      "byDay": "By day"
+    },
+    "errorSummary": {
+      "title": "Error Summary",
+      "errorClass": "Error Class",
+      "message": "Message",
+      "count": "Count",
+      "service": "Service",
+      "lastSeen": "Last seen",
+      "noErrors": "No errors"
+    },
+    "endpoints": {
+      "title": "Top Endpoints",
+      "method": "Method",
+      "endpoint": "Endpoint",
+      "requests": "Requests",
+      "errors": "Errors",
+      "avgDuration": "Avg (ms)",
+      "minMax": "Min/Max (ms)"
+    },
+    "detail": {
+      "title": "Log Detail",
+      "general": "General Info",
+      "request": "Request",
+      "response": "Response",
+      "error": "Error",
+      "id": "ID",
+      "requestId": "Request ID",
+      "service": "Service",
+      "logType": "Log Type",
+      "logLevel": "Log Level",
+      "status": "Status",
+      "method": "Method",
+      "duration": "Duration",
+      "endpoint": "Endpoint",
+      "userId": "User ID",
+      "ip": "IP",
+      "userAgent": "User Agent",
+      "time": "Time",
+      "headers": "Headers",
+      "body": "Body",
+      "errorClass": "Error Class",
+      "errorMessage": "Error Message",
+      "stackTrace": "Stack Trace",
+      "noError": "No error"
+    },
+    "trace": {
+      "title": "Request Trace",
+      "noData": "No data",
+      "totalSteps": "Total steps:",
+      "totalDuration": "Total duration:",
+      "errors": "Errors:"
+    },
+    "presets": {
+      "last1h": "Last 1 hour",
+      "last24h": "Last 24 hours",
+      "last7d": "Last 7 days",
+      "last30d": "Last 30 days"
+    },
+    "cleanup": {
+      "button": "Cleanup Logs",
+      "success": "Deleted {{count}} logs",
+      "error": "Cannot delete logs"
+    }
   },
   "tabs": {
     "customer": "Customer Management",

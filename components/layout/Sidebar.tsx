@@ -221,9 +221,10 @@ export const Sidebar: React.FC = () => {
                 )}
                 <button
                     onClick={toggle}
-                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                    className="w-8 h-8 min-w-8 min-h-8 shrink-0 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                    aria-label="Toggle sidebar"
                 >
-                    <FontAwesomeIcon icon={collapsed ? faBars : faChevronLeft} className="text-sm"/>
+                    <FontAwesomeIcon icon={collapsed ? faBars : faChevronLeft} fixedWidth style={{ width: 14, height: 14 }}/>
                 </button>
             </div>
 
@@ -235,7 +236,7 @@ export const Sidebar: React.FC = () => {
                     mode="inline"
                     items={filteredMenu.map((item) => ({
                         key: item.key,
-                        icon: <FontAwesomeIcon className="!w-4 !h-4" icon={item.icon}/>,
+                        icon: <FontAwesomeIcon style={{ width: 16, height: 16 }} icon={item.icon}/>,
                         label: <Link passHref shallow href={item.key}>{t(`menu.${item.label}`)}</Link>,
                     }))}
                     selectedKeys={[pathname]}

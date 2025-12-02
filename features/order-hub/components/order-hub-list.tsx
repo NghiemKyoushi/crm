@@ -202,6 +202,22 @@ export default function OrderHub() {
   const updateCodForEarchOrderMutation = useUpdateCodForEarchOrder();
   const cancelOrderAfterApproveMutation = useCancelOrderAfterApprove();
 
+  // Helper function to update order in cache without refetching
+  const updateOrderInCache = (orderId: number, updates: Partial<Invoice>) => {
+    queryClient.setQueriesData<InvoiceResponse>(
+      { queryKey: ["listorder"] },
+      (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map((order) =>
+            order.id === orderId ? { ...order, ...updates } : order
+          ),
+        };
+      }
+    );
+  };
+
   // Helper function to check if user can edit order based on permissions and order status
   const canEditOrder = (orderStatus?: string) => {
     // If user has order.edit permission, they can edit any order
@@ -214,6 +230,26 @@ export default function OrderHub() {
       return true;
     }
     return false;
+  };
+
+  // Helper function to check if user can edit tracking field
+  const canEditTracking = (orderStatus?: string) => {
+    return canEditOrder(orderStatus) || hasPermission("order.fill_tracking");
+  };
+
+  // Helper function to check if user can edit customer note field
+  const canEditCustomerNote = (orderStatus?: string) => {
+    return canEditOrder(orderStatus) || hasPermission("order.edit_customer_note");
+  };
+
+  // Helper function to check if user can edit kupon field
+  const canEditKupon = (orderStatus?: string) => {
+    return canEditOrder(orderStatus) || hasPermission("order.fill_kupon");
+  };
+
+  // Helper function to check if user can edit admin note field
+  const canEditAdminNote = (orderStatus?: string) => {
+    return canEditOrder(orderStatus) || hasPermission("order.edit_admin_note");
   };
 
   const handleChangePage = (pageNumber: number) => {
@@ -382,17 +418,18 @@ export default function OrderHub() {
   const updateOrderKupon = async (orderId: number, value: number | null) => {
     setIsKuponLoading(true);
     try {
-      await updateKuponOrder(orderId, { kupon: value ?? 0 });
-      toast.success("Cập nhật kupon thành công");
+      const kuponValue = value ?? 0;
+      await updateKuponOrder(orderId, { kupon: kuponValue });
+      // Close modal immediately
       setEditingKupon(null);
-      queryClient.invalidateQueries({
-        queryKey: ["listorder"],
-      });
+      setIsKuponLoading(false);
+      // Update cache directly without refetching
+      updateOrderInCache(orderId, { kupon: kuponValue });
+      toast.success("Cập nhật kupon thành công");
     } catch (error: any) {
       toast.error(
         error?.response?.data?.localizedMessage || "Có lỗi khi cập nhật kupon"
       );
-    } finally {
       setIsKuponLoading(false);
     }
   };
@@ -618,7 +655,7 @@ export default function OrderHub() {
               </div>
               {record.status !== OrderStatusType.PENDING_PAYMENT &&
                 record.status !== OrderStatusType.READY_TO_SHIP &&
-                canEditOrder(record.status) && (
+                canEditTracking(record.status) && (
                   <Button
                     type="text"
                     size="small"
@@ -771,7 +808,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 line-clamp-2 flex-1">
             {record.note || record.description || "Cập nhật sau"}
           </div>
-          {canEditOrder(record.status) && (
+          {canEditCustomerNote(record.status) && (
             <EditOutlined
               className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0 self-center"
               onClick={() =>
@@ -803,7 +840,7 @@ export default function OrderHub() {
               ? Number(record.kupon).toLocaleString("en-US")
               : "-"}
           </span>
-          {canEditOrder(record.status) && (
+          {canEditKupon(record.status) && (
             <EditOutlined
               className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
               onClick={() => {
@@ -932,7 +969,7 @@ export default function OrderHub() {
           <div className="text-xs text-gray-600 flex-1">
             {record?.note_admin ? record?.note_admin : "Cập nhật sau"}
           </div>
-          {canEditOrder(record.status) && (
+          {canEditAdminNote(record.status) && (
             <EditOutlined
               className="text-blue-500 hover:text-blue-700 cursor-pointer text-xs flex-shrink-0"
               onClick={() =>
@@ -1404,7 +1441,7 @@ export default function OrderHub() {
               <Button
                 size="small"
                 type="link"
-                className="!text-[11px] !p-0 !h-auto !font-medium !text-yellow-400 hover:!text-yellow-600"
+                className="!text-[11px] !p-0 !h-auto !font-medium !text-green-500 hover:!text-green-700"
                 onClick={() => {
                   setOpenOrderHistory(true);
                   setOrderDetail(record);
@@ -1610,40 +1647,55 @@ export default function OrderHub() {
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
           status={orderDetail.status}
+          saving={useUpdateOrderTracking.isPending || trackingJPMutation.isPending}
           onClose={() => {
             setOrderDetail(undefined);
             setIsTrackingJP(false);
             setIsEditingTrackingModal(false);
           }}
           onSave={async (records) => {
+            const orderId = orderDetail.id;
             const promises = [];
             const updatePromise = useUpdateOrderTracking.mutateAsync({
               body: records,
-              id: orderDetail.id,
+              id: orderId,
             });
             promises.push(updatePromise);
             if (isTrackingJP) {
               const jpPromise = trackingJPMutation.mutateAsync({
-                id: orderDetail.id.toString(),
+                id: orderId.toString(),
               });
               promises.push(jpPromise);
             }
             Promise.all(promises)
-              .then(() => {
-                toast.success("Cập nhật thành công!");
-                queryClient.invalidateQueries({ queryKey: ["listorder"] });
+              .then((results) => {
+                // Close modal immediately
                 setIsEditingTrackingModal(false);
                 setIsOpenTrackingOrder(false);
                 setIsEditingTracking(null);
+                setIsTrackingJP(false);
+                // Update cache with records from modal (user input)
+                // Convert CreateTrackingModel to TrackingRecord format
+                const trackingList = records.map((r, idx) => ({
+                  id: r.id || idx,
+                  order_id: orderId,
+                  tracking_code: r.tracking_code,
+                  package_code: r.package_code,
+                  package_number: r.package_number,
+                  weight: r.weight,
+                  created_at: new Date().toISOString(),
+                  updated_at: null,
+                }));
+                updateOrderInCache(orderId, {
+                  tracking_ship_list: trackingList,
+                });
+                toast.success("Cập nhật thành công!");
               })
               .catch((err) => {
                 toast.error(
                   err.response?.data?.localizedMessage || t("common.error")
                 );
               });
-            setIsEditingTracking(null);
-            setIsTrackingJP(false);
-            queryClient.invalidateQueries({ queryKey: ["listorder"] });
           }}
         />
       )}
@@ -1653,25 +1705,27 @@ export default function OrderHub() {
         <NoteModal
           open={!!editingNote}
           note={editingNote?.note}
+          loading={useAddNoteClient.isPending}
           onCancel={() => {
             setEditingNote(null);
             setOrderDetail(undefined);
           }}
           onSave={(note) => {
+            const orderId = editingNote.id;
             useAddNoteClient.mutate(
               {
-                id: editingNote.id,
+                id: orderId,
                 param: {
                   note: note,
                 },
               },
               {
                 onSuccess: () => {
-                  toast.success("Update ghi chú ADMIN thành công");
-                  queryClient.invalidateQueries({
-                    queryKey: ["listorder"],
-                  });
+                  // Close modal immediately
                   setEditingNote(null);
+                  // Update cache directly without refetching
+                  updateOrderInCache(orderId, { note });
+                  toast.success("Update ghi chú KH thành công");
                 },
                 onError: (err: any) =>
                   toast.error(
@@ -1830,21 +1884,24 @@ export default function OrderHub() {
             <Button
               key="submit"
               type="primary"
+              loading={useAddNote.isPending}
               onClick={() => {
+                const orderId = editingNoteExtra.orderId;
+                const noteValue = editingNoteExtra.value;
                 useAddNote.mutate(
                   {
-                    order_id: editingNoteExtra.orderId,
+                    order_id: orderId,
                     param: {
-                      note: editingNoteExtra.value,
+                      note: noteValue,
                     },
                   },
                   {
                     onSuccess: () => {
+                      // Close modal immediately
+                      setEditingNoteExtra(null);
+                      // Update cache directly without refetching
+                      updateOrderInCache(orderId, { note_admin: noteValue });
                       toast.success("Update ghi chú ADMIN thành công");
-                      queryClient.invalidateQueries({
-                        queryKey: ["listorder"],
-                      });
-                      setEditingNote(null);
                     },
                     onError: (err: any) =>
                       toast.error(
@@ -1853,7 +1910,6 @@ export default function OrderHub() {
                       ),
                   }
                 );
-                setEditingNoteExtra(null);
               }}
             >
               Lưu

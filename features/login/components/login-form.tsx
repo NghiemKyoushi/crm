@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { Form, Input } from "antd";
-import { MailOutlined, LockOutlined } from "@ant-design/icons";
+import React, { useCallback, useState } from "react";
+import { Form, Input, Spin } from "antd";
+import { MailOutlined, LockOutlined, LoadingOutlined } from "@ant-design/icons";
 import "./login.css";
 import { useLogin } from "../hooks";
 import { useTranslation } from "react-i18next";
@@ -28,16 +28,19 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
   const { t } = useTranslation();
   const router = useRouter();
   const loginMutation = useLogin();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const onFinish = useCallback(
     (values: LoginFormValues) => {
       loginMutation.mutate(values, {
-        onSuccess: (dataLogin) => {   
+        onSuccess: (dataLogin) => {
           if(dataLogin.roleUser){
-            toast.warning("Bạn không có quyền truy cập hệ thống", { position: "top-right" });          
+            toast.warning("Bạn không có quyền truy cập hệ thống", { position: "top-right" });
             return
-          }       
-          toast.success(t("login.success"), { position: "top-right" });          
+          }
+          // Show full-screen loading before redirect
+          setIsRedirecting(true);
+
           const params = new URLSearchParams(window.location.search);
           const redirectUrl = params.get("redirect") || "/dashboard";
           const decodedUrl = decodeURIComponent(redirectUrl);
@@ -62,6 +65,20 @@ const LoginForm = ({ onForgot }: LoginFormProps) => {
       position: "top-right",
     });
   }, []);
+
+  // Show full-screen loading overlay when redirecting
+  if (isRedirecting) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
+        <Spin
+          indicator={<LoadingOutlined style={{ fontSize: 48, color: '#0ea5e9' }} spin />}
+        />
+        <p className="mt-6 text-lg text-gray-600 font-medium">
+          {t("login.redirecting")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Form
