@@ -474,7 +474,8 @@ export default function CreateOrderModal(props: CreateOrderModalProps) {
 
   useEffect(() => {
     if (listInsurance) {
-      setInsurance(listInsurance[1]);
+      const insurance = listInsurance.find((item: any) => item.id === 1);
+      setInsurance(insurance);
       setListInsurancesMap(listInsurance);
     }
   }, [listInsurance, isOpen]);
