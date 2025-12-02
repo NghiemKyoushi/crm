@@ -10,7 +10,8 @@
     "success": "Đăng nhập thành công!",
     "failed": "Đăng nhập thất bại!",
     "pleaseCheckInformation": "Vui lòng kiểm tra lại thông tin!",
-    "noPermission": "Bạn không có quyền truy cập hệ thống"
+    "noPermission": "Bạn không có quyền truy cập hệ thống",
+    "redirecting": "Đang đăng nhập vào hệ thống..."
   },
   "validation": {
     "pleaseEnterLink": "Vui lòng nhập link!",
@@ -53,7 +54,118 @@
     "websiteManagement": "Quản lý Website",
     "crm": "CRM",
     "cms": "CMS",
-    "vipManagement": "Quản lý Gói VIP"
+    "vipManagement": "Quản lý Gói VIP",
+    "systemLogs": "System Logs"
+  },
+  "systemLogs": {
+    "title": "System Logs",
+    "subtitle": "Giám sát và quản lý logs hệ thống",
+    "searchPlaceholder": "Tìm kiếm URI, message...",
+    "service": "Service",
+    "logType": "Loại log",
+    "logLevel": "Mức độ",
+    "statusCode": "Status code",
+    "userId": "User ID",
+    "viewDetail": "Xem chi tiết",
+    "traceRequest": "Trace request",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "logs": "Logs"
+    },
+    "table": {
+      "time": "Thời gian",
+      "service": "Service",
+      "level": "Level",
+      "type": "Type",
+      "method": "Method",
+      "endpoint": "Endpoint",
+      "status": "Status",
+      "duration": "Duration",
+      "userId": "User",
+      "ip": "IP",
+      "error": "Error"
+    },
+    "stats": {
+      "totalLogs": "Tổng số logs",
+      "totalRequests": "Tổng requests",
+      "totalErrors": "Tổng lỗi",
+      "avgResponseTime": "Response TB",
+      "errors": "Lỗi",
+      "warnings": "Cảnh báo",
+      "errorRate": "Tỷ lệ lỗi"
+    },
+    "chart": {
+      "title": "Request Timeline",
+      "requests": "Requests",
+      "errors": "Errors",
+      "avgDuration": "Avg Duration (ms)",
+      "count": "Count",
+      "durationMs": "Duration (ms)",
+      "byHour": "Theo giờ",
+      "byDay": "Theo ngày"
+    },
+    "errorSummary": {
+      "title": "Error Summary",
+      "errorClass": "Error Class",
+      "message": "Message",
+      "count": "Count",
+      "service": "Service",
+      "lastSeen": "Lần cuối",
+      "noErrors": "Không có lỗi"
+    },
+    "endpoints": {
+      "title": "Top Endpoints",
+      "method": "Method",
+      "endpoint": "Endpoint",
+      "requests": "Requests",
+      "errors": "Errors",
+      "avgDuration": "Avg (ms)",
+      "minMax": "Min/Max (ms)"
+    },
+    "detail": {
+      "title": "Chi tiết Log",
+      "general": "Thông tin chung",
+      "request": "Request",
+      "response": "Response",
+      "error": "Error",
+      "id": "ID",
+      "requestId": "Request ID",
+      "service": "Service",
+      "logType": "Log Type",
+      "logLevel": "Log Level",
+      "status": "Status",
+      "method": "Method",
+      "duration": "Duration",
+      "endpoint": "Endpoint",
+      "userId": "User ID",
+      "ip": "IP",
+      "userAgent": "User Agent",
+      "time": "Thời gian",
+      "headers": "Headers",
+      "body": "Body",
+      "errorClass": "Error Class",
+      "errorMessage": "Error Message",
+      "stackTrace": "Stack Trace",
+      "noError": "Không có lỗi"
+    },
+    "trace": {
+      "title": "Request Trace",
+      "noData": "Không có dữ liệu",
+      "totalSteps": "Tổng số bước:",
+      "totalDuration": "Tổng thời gian:",
+      "errors": "Lỗi:"
+    },
+    "presets": {
+      "last1h": "1 giờ trước",
+      "last24h": "24 giờ trước",
+      "last7d": "7 ngày trước",
+      "last30d": "30 ngày trước"
+    },
+    "cleanup": {
+      "button": "Cleanup Logs",
+      "success": "Đã xóa {{count}} logs",
+      "error": "Không thể xóa logs"
+    }
   },
   "tabs": {
     "customer": "Quản lý Khách hàng",
@@ -223,7 +335,7 @@
     "delete": "Xoá",
     "lock": "Khoá",
     "unlock": "Mở khoá",
-    "reset": "Reset",
+    "reset": "Làm mới",
     "edit": "Chỉnh sửa",
     "resetPassword": "Reset mật khẩu",
     "cannotEditSystemUser": "Không thể chỉnh sửa tài khoản hệ thống!",
