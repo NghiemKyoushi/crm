@@ -2,11 +2,10 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Tag, Tooltip } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClock,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons";
+  ClockCircleOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { PendingOrder } from "@/types/analytics";
@@ -87,9 +86,9 @@ const PendingOrdersCard: React.FC<PendingOrdersCardProps> = ({
             color={getDaysPendingColor(days)}
             icon={
               days >= 3 ? (
-                <FontAwesomeIcon icon={faExclamationTriangle} className="mr-1" />
+                <WarningOutlined className="mr-1" />
               ) : (
-                <FontAwesomeIcon icon={faClock} className="mr-1" />
+                <ClockCircleOutlined className="mr-1" />
               )
             }
           >
@@ -119,7 +118,7 @@ const PendingOrdersCard: React.FC<PendingOrdersCardProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-          <FontAwesomeIcon icon={faClock} className="text-amber-500" />
+          <ClockCircleOutlined className="text-amber-500" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-gray-800 m-0">

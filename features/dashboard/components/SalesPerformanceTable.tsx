@@ -2,8 +2,7 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Progress, Tag } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { TeamOutlined, MailOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { SalesPerformance } from "@/types/analytics";
 
@@ -53,7 +52,7 @@ const SalesPerformanceTable: React.FC<SalesPerformanceTableProps> = ({
           <div>
             <div className="font-medium text-gray-900">{name}</div>
             <div className="text-xs text-gray-500 flex items-center gap-1">
-              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
+              <MailOutlined className="text-gray-400" />
               {record.email}
             </div>
           </div>
@@ -65,7 +64,7 @@ const SalesPerformanceTable: React.FC<SalesPerformanceTableProps> = ({
       dataIndex: "total_customers",
       key: "total_customers",
       render: (value: number) => (
-        <Tag icon={<FontAwesomeIcon icon={faUsers} className="mr-1" />} color="blue">
+        <Tag icon={<TeamOutlined className="mr-1" />} color="blue">
           {value.toLocaleString("vi-VN")}
         </Tag>
       ),
@@ -119,7 +118,7 @@ const SalesPerformanceTable: React.FC<SalesPerformanceTableProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-          <FontAwesomeIcon icon={faUsers} className="text-purple-500" />
+          <TeamOutlined className="text-purple-500" />
         </div>
         <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.sales_performance", "Hiệu suất nhân viên bán hàng")}

@@ -2,12 +2,11 @@
 
 import React from "react";
 import { Form, InputNumber, Button, Card, message, Spin, Input } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faInfoCircle,
-  faSave,
-  faShield,
-} from "@fortawesome/free-solid-svg-icons";
+  InfoCircleOutlined,
+  SaveOutlined,
+  SafetyOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import {
   useListGeneralPolicy,
@@ -107,7 +106,7 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
         <Card
           title={
             <div className="flex items-center gap-2 text-base font-medium text-gray-800">
-              <FontAwesomeIcon icon={faShield} className="w-4 h-4" />
+              <SafetyOutlined className="w-4 h-4" />
               {t("insuranceSettings.title")}
             </div>
           }
@@ -174,7 +173,7 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
             type="primary"
             size="large"
             htmlType="submit"
-            icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+            icon={<SaveOutlined className="mr-2 w-4 h-4" />}
             className="!bg-blue-600 hover:!bg-blue-700 !px-8"
           >
             {t("insuranceSettings.saveAllChanges")}
@@ -237,7 +236,7 @@ export default function InsuranceSettings(props: InsuranceSettingsProps) {
             type="primary"
             size="large"
             htmlType="submit"
-            icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+            icon={<SaveOutlined className="mr-2 w-4 h-4" />}
             className="!bg-blue-600 hover:!bg-blue-700 !px-8"
           >
             {t("insuranceSettings.saveAllChanges")}

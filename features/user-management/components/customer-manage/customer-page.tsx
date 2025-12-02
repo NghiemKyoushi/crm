@@ -1,13 +1,5 @@
 "use client";
 import { Tabs } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faHeadset,
-  faUsers,
-  faLayerGroup,
-  faUserShield,
-} from "@fortawesome/free-solid-svg-icons";
 import CustomerTable from "./customer-table";
 import SalesPage from "../sale-manage/sales-page";
 import StaffManagePage from "../staff-manage/staff-manage-page";
@@ -16,6 +8,7 @@ import RoleManagerPage from "../role-manage/role-manage-pages";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { Spin } from "antd";
+import { AppstoreOutlined, CustomerServiceOutlined, SafetyOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { notFound } from "next/navigation";
 import { useMemo } from "react";
 
@@ -43,7 +36,7 @@ export default function CustomerPage() {
       key: "1",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUser} />
+          <UserOutlined />
           {t("tabs.customer")}
         </span>
       ),
@@ -54,7 +47,7 @@ export default function CustomerPage() {
       key: "2",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faHeadset} />
+          <CustomerServiceOutlined />
           {t("tabs.sales")}
         </span>
       ),
@@ -65,7 +58,7 @@ export default function CustomerPage() {
       key: "3",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUsers} />
+          <TeamOutlined />
           {t("tabs.staff")}
         </span>
       ),
@@ -76,7 +69,7 @@ export default function CustomerPage() {
       key: "4",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faLayerGroup} />
+          <AppstoreOutlined />
           {t("tabs.categoryCustomer")}
         </span>
       ),
@@ -87,7 +80,7 @@ export default function CustomerPage() {
       key: "5",
       label: (
         <span className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faUserShield} />
+          <SafetyOutlined />
           {t("tabs.role")}
         </span>
       ),

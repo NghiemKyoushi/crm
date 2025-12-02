@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import { Modal, Button, Table, Tag, Card } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCartShopping,
-  faCreditCard,
-  faEdit,
-  faPen,
-  faShieldHalved,
-  faTimesCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { CloseCircleOutlined, CreditCardOutlined, EditOutlined, SafetyCertificateOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 
 interface FeeHistory {
   time: string;
@@ -80,7 +72,7 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
   ];
 
   const FeeBox = ({
-    icon,
+    icon: Icon,
     title,
     bg,
     content,
@@ -96,13 +88,10 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
       {/* Title */}
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2 font-semibold">
-          <FontAwesomeIcon icon={icon} className={`${color}`} />
+          <Icon className={`${color}`} />
           <span className={`${color}`}>{title}</span>
         </div>
-        <FontAwesomeIcon
-          icon={faEdit}
-          className={`cursor-pointer hover:text-blue-600 ${color}`}
-        />
+        <EditOutlined className={`cursor-pointer hover:text-blue-600 ${color}`} />
       </div>
 
       {/* Content */}
@@ -124,7 +113,7 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
         {/* Grid 2x2 cho các phí */}
         <div className="grid grid-cols-2 gap-4">
           <FeeBox
-            icon={faCartShopping}
+            icon={ShoppingCartOutlined}
             title="Phí Mua hộ"
             bg="bg-blue-50"
             color="text-blue-800"
@@ -148,7 +137,7 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
           />
 
           <FeeBox
-            icon={faCreditCard}
+            icon={CreditCardOutlined}
             title="Phí Thanh toán"
             bg="bg-purple-50"
             color="text-purple-800"
@@ -169,7 +158,7 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
           />
 
           <FeeBox
-            icon={faTimesCircle}
+            icon={CloseCircleOutlined}
             title="Phí Hủy đơn"
             bg="bg-red-50"
             color="text-red-800"
@@ -190,7 +179,7 @@ export default function FeeConfigModal(props: FeeConfigModalProps) {
           />
 
           <FeeBox
-            icon={faShieldHalved}
+            icon={SafetyCertificateOutlined}
             title="Bảo hiểm mặc định"
             bg="bg-green-50"
             color="text-green-800"

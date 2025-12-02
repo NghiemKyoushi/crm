@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import { Table, Button, Space, Popconfirm, message, Switch } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { VipPackage, UpdateVipPackageRequest, CreateVipPackageRequest } from "../apis/vip-api";
 import { useVipPackages, useDeleteVipPackage, useUpdateVipPackage, useEnableVipPackage, useCreateVipPackage } from "../hooks/useVipPackages";
 import ModalEditVipPackage from "./modal-edit-vip-package";
@@ -181,7 +180,7 @@ export default function VipPackageTable() {
                 <h2 className="text-sm font-semibold text-gray-800">Danh sách gói VIP</h2>
                 <Button
                     type="primary"
-                    icon={<FontAwesomeIcon icon={faPlus} />}
+                    icon={<PlusOutlined />}
                     onClick={() => setIsCreateModalOpen(true)}
                     className="bg-blue-500"
                 >

@@ -29,8 +29,7 @@ export interface ServiceFee {
 }
 
 import { Form, InputNumber, Button, Card, Select } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faRoute } from "@fortawesome/free-solid-svg-icons";
+import { SaveOutlined, NodeIndexOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import {
   useListDataGeneral,
@@ -180,7 +179,7 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
           key={routeItem.route.id}
           title={
             <div className="flex items-center gap-2 font-bold text-gray-700">
-              <FontAwesomeIcon icon={faRoute} className="w-5 h-5" />
+              <NodeIndexOutlined className="w-5 h-5" />
               {routeItem.route.name ||
                 `${routeItem.route.origin} → ${routeItem.route.destination}`}
             </div>
@@ -247,7 +246,7 @@ export default function ShippingServiceForm(props: ShippingServiceFormProps) {
           type="primary"
           size="large"
           htmlType="submit"
-          icon={<FontAwesomeIcon icon={faSave} className="mr-2 w-4 h-4" />}
+          icon={<SaveOutlined className="mr-2 w-4 h-4" />}
           className="!bg-blue-600 hover:!bg-blue-700 !px-8"
         >
           {t("common.saveAllChanges")}

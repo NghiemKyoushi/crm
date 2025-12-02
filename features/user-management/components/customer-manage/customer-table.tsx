@@ -1,4 +1,5 @@
 import { Button, Input, Typography, Select, Spin } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import TableComponent from "@/components/TableComponent";
 import CustomerDetailModal from "./modal-customer/modal-view-detail-customer";
@@ -13,8 +14,6 @@ import { CustomerModel } from "@/types/customer-type";
 import CategorySelect, { CategoryOption } from "./customer-type-select";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
-import { faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { usePermission } from "@/components/layout/PermissionContext";
 import { getListSaleStaff, CreateCustomerParams, getListCateCustomer } from "../../apis/staff-manage";
@@ -431,7 +430,7 @@ export default function CustomerTable() {
         </h2>
         <Button
           type="primary"
-          icon={<FontAwesomeIcon icon={faPlus} />}
+          icon={<PlusOutlined />}
           onClick={() => setIsOpenCreateModal(true)}
           className="bg-blue-500"
         >
@@ -520,7 +519,7 @@ export default function CustomerTable() {
           <div className="flex justify-end">
             <Button
               type="primary"
-              icon={<FontAwesomeIcon icon={faSearch} />}
+              icon={<SearchOutlined />}
               onClick={handleSearch}
               className="!h-10 px-5"
               loading={isFetching}

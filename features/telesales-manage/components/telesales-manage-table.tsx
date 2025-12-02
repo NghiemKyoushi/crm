@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useMemo } from "react";
+import { CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, DownloadOutlined, FileExcelOutlined, TeamOutlined, UserAddOutlined } from "@ant-design/icons";
 import {
   Button,
   Input,
@@ -10,16 +11,6 @@ import {
   message,
   Form,
 } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheckCircle,
-  faDownload,
-  faFileExcel,
-  faTimesCircle,
-  faTrash,
-  faUserPlus,
-  faUsers,
-} from "@fortawesome/free-solid-svg-icons";
 import TableComponent from "@/components/TableComponent";
 import TelesaleDetailModal from "./telesale-detail-modal";
 import AssignTelesaleModal from "./assign-telesale-modal";
@@ -571,11 +562,7 @@ const TelesalesPage: React.FC = () => {
                         }}
                       >
                         <Tooltip title="Xoá tag">
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="text-white hover:text-red-200"
-                            style={{ fontSize: 8 }}
-                          />
+                          <DeleteOutlined className="text-white hover:text-red-200" style={{ fontSize: 8 }} />
                         </Tooltip>
                       </span>
                     </div>
@@ -681,11 +668,7 @@ const TelesalesPage: React.FC = () => {
                         }}
                       >
                         <Tooltip title="Xoá tag">
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="text-white hover:text-red-200"
-                            style={{ fontSize: 8 }}
-                          />
+                          <DeleteOutlined className="text-white hover:text-red-200" style={{ fontSize: 8 }} />
                         </Tooltip>
                       </span>
                     </div>
@@ -1086,10 +1069,7 @@ const TelesalesPage: React.FC = () => {
           {/* Inline Statistics */}
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5">
-              <FontAwesomeIcon
-                icon={faUsers}
-                className="text-blue-600 !h-3.5 !w-3.5"
-              />
+              <TeamOutlined className="text-blue-600 !h-3.5 !w-3.5" />
               <span className="text-gray-600">Tổng:</span>
               <span className="font-semibold text-gray-900">
                 {statLoading
@@ -1099,10 +1079,7 @@ const TelesalesPage: React.FC = () => {
             </div>
             <div className="h-4 w-px bg-gray-300"></div>
             <div className="flex items-center gap-1.5">
-              <FontAwesomeIcon
-                icon={faCheckCircle}
-                className="text-green-600 !h-3.5 !w-3.5"
-              />
+              <CheckCircleOutlined className="text-green-600 !h-3.5 !w-3.5" />
               <span className="text-gray-600">Gọi:</span>
               <span className="font-semibold text-green-700">
                 {statLoading
@@ -1112,10 +1089,7 @@ const TelesalesPage: React.FC = () => {
             </div>
             <div className="h-4 w-px bg-gray-300"></div>
             <div className="flex items-center gap-1.5">
-              <FontAwesomeIcon
-                icon={faTimesCircle}
-                className="text-red-600 !h-3.5 !w-3.5"
-              />
+              <CloseCircleOutlined className="text-red-600 !h-3.5 !w-3.5" />
               <span className="text-gray-600">Thất bại:</span>
               <span className="font-semibold text-red-700">
                 {statLoading
@@ -1134,7 +1108,7 @@ const TelesalesPage: React.FC = () => {
                 size="small"
                 className="!bg-green-600 hover:!bg-green-700 !text-white"
                 icon={
-                  <FontAwesomeIcon icon={faFileExcel} className="!h-3 !w-3" />
+                  <FileExcelOutlined className="!h-3 !w-3" />
                 }
                 loading={importing}
                 onClick={handleImportClick}
@@ -1153,7 +1127,7 @@ const TelesalesPage: React.FC = () => {
                 size="small"
                 className="!bg-blue-600 hover:!bg-blue-700 !text-white"
                 icon={
-                  <FontAwesomeIcon icon={faDownload} className="!h-3 !w-3" />
+                  <DownloadOutlined className="!h-3 !w-3" />
                 }
                 onClick={handleDownloadExample}
                 loading={downloading}
@@ -1164,7 +1138,7 @@ const TelesalesPage: React.FC = () => {
                 size="small"
                 className="!bg-purple-600 hover:!bg-purple-700 !text-white"
                 icon={
-                  <FontAwesomeIcon icon={faUserPlus} className="!h-3 !w-3" />
+                  <UserAddOutlined className="!h-3 !w-3" />
                 }
                 onClick={() => setIsOpenAddCustomerModalOpen(true)}
               >

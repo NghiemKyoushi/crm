@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Modal, Input, InputNumber, Button, Form, Spin } from "antd";
+import { CheckOutlined } from "@ant-design/icons";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import {
@@ -334,7 +333,7 @@ const CombinedTrackingCheckModal: React.FC<CombinedModalProps> = ({
               <Button
                 type="primary"
                 className="!bg-green-600"
-                icon={<FontAwesomeIcon icon={faCheck} />}
+                icon={<CheckOutlined />}
                 onClick={handleSubmit}
                 disabled={
                   status === OrderStatusType.PENDING_PAYMENT ||

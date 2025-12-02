@@ -2,8 +2,7 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Tag, Tooltip } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBoxOpen, faExternalLink } from "@fortawesome/free-solid-svg-icons";
+import { InboxOutlined, ExportOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { TopProduct } from "@/types/analytics";
 
@@ -77,7 +76,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:text-blue-700 text-xs"
               >
-                <FontAwesomeIcon icon={faExternalLink} className="mr-1" />
+                <ExportOutlined className="mr-1" />
                 Link
               </a>
             )}
@@ -109,7 +108,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
-          <FontAwesomeIcon icon={faBoxOpen} className="text-orange-500" />
+          <InboxOutlined className="text-orange-500" />
         </div>
         <h3 className="text-sm font-semibold text-gray-800 m-0">
           {t("dashboard.top_products", "Sản phẩm bán chạy")}

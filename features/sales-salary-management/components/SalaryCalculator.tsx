@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalculator } from "@fortawesome/free-solid-svg-icons";
+import { CalculatorOutlined } from "@ant-design/icons";
 
 // Define salary levels data
 const salaryLevels = [
@@ -90,7 +89,7 @@ export default function SalaryCalculator() {
     return (
         <div className="p-6 bg-white rounded-lg shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                <FontAwesomeIcon icon={faCalculator} className="mr-2" />
+                <CalculatorOutlined className="mr-2" />
                 Máy tính Lương
             </h3>
 
@@ -125,7 +124,7 @@ export default function SalaryCalculator() {
                     onClick={calculateSalary}
                     className="w-full bg-blue-600 hover:bg-blue-700 !text-white py-3 px-4 rounded-lg font-semibold transition-colors"
                 >
-                    <FontAwesomeIcon icon={faCalculator} className="mr-2" />
+                    <CalculatorOutlined className="mr-2" />
                     Tính Lương
                 </button>
 

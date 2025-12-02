@@ -2,12 +2,11 @@
 
 import React from "react";
 import { Card, Table, Skeleton, Empty, Tag, DatePicker } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faUserPlus,
-  faCheck,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+  UserAddOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import dayjs, { Dayjs } from "dayjs";
 import { NewCustomer } from "@/types/analytics";
@@ -66,11 +65,11 @@ const NewCustomersCard: React.FC<NewCustomersCardProps> = ({
       key: "has_placed_order",
       render: (hasOrdered: boolean) =>
         hasOrdered ? (
-          <Tag color="success" icon={<FontAwesomeIcon icon={faCheck} className="mr-1" />}>
+          <Tag color="success" icon={<CheckOutlined className="mr-1" />}>
             {t("dashboard.yes", "Có")}
           </Tag>
         ) : (
-          <Tag color="default" icon={<FontAwesomeIcon icon={faTimes} className="mr-1" />}>
+          <Tag color="default" icon={<CloseOutlined className="mr-1" />}>
             {t("dashboard.no", "Chưa")}
           </Tag>
         ),
@@ -102,7 +101,7 @@ const NewCustomersCard: React.FC<NewCustomersCardProps> = ({
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <FontAwesomeIcon icon={faUserPlus} className="text-violet-500" />
+            <UserAddOutlined className="text-violet-500" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-800 m-0">

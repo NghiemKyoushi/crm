@@ -3,9 +3,8 @@
 import React from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { Table, Input, Select, Button, Card } from "antd";
+import { CarOutlined, RocketOutlined, TagsOutlined } from "@ant-design/icons";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { faPlane, faShip, faTags } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
 
 type GoodsFee = {
@@ -75,7 +74,7 @@ export default function ShippingFeeConfig() {
         className="!mb-3"
         title={
           <span>
-            <FontAwesomeIcon icon={faTags} className="mr-2 text-blue-800" />
+            <TagsOutlined className="mr-2 text-blue-800" />
             {t("shippingFeeConfig.goodsFeePolicyTitle")}
           </span>
         }
@@ -149,7 +148,7 @@ export default function ShippingFeeConfig() {
       <Card
         title={
           <span>
-            <FontAwesomeIcon icon={faPlane} className="mr-2 text-blue-800" />
+            <RocketOutlined className="mr-2 text-blue-800" />
             {t("shippingFeeConfig.airShippingTitle")}
           </span>
         }
@@ -198,7 +197,7 @@ export default function ShippingFeeConfig() {
       <Card
         title={
           <span>
-            <FontAwesomeIcon icon={faShip} className="mr-2 text-blue-800" />
+            <CarOutlined className="mr-2 text-blue-800" />
             {t("shippingFeeConfig.seaShippingTitle")}
           </span>
         }

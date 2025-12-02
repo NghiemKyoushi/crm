@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { LineChartOutlined } from "@ant-design/icons";
 
 const salaryLevels = [
   {
@@ -80,7 +79,7 @@ export default function SalaryTable() {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
-        <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+        <LineChartOutlined className="mr-2" />
         Bảng Tính Lương Theo Cấp Bậc
       </h3>
 

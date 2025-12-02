@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Form, Input, Button, Modal, Space } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { MailOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -10,8 +11,6 @@ import {
   useForgotPassword,
   useResendOTP,
 } from "../hooks";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import logoCRM from "@/assets/login/logo_crm.jpg";
 interface ForgotPasswordFormValues {
@@ -114,7 +113,7 @@ const ForgotPasswordForm = (props: LoginFormProps) => {
             onClick={props.onBack}
             className="flex items-start gap-2"
           >
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <ArrowLeftOutlined />
           </Button>
           <h2 className="font-bold text-2xl mb-0 bg-gradient-to-r from-sky-300 to-sky-500 bg-clip-text text-transparent">
             {t("login.forgotPassword")}
