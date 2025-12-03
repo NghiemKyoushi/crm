@@ -1,58 +1,172 @@
 import React, { useState } from "react";
-import { Button, Tooltip, Table, Input, Pagination } from "antd";
-import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Tooltip, Table, Input, Pagination, Avatar } from "antd";
+import { ReloadOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 
-interface CustomerLink {
-  product: string;
-  bid: number;
+interface LinkItem {
+  auction_id: number;
+  title: string;
+  url: string;
+  bid_amount: number;
   status: string;
-  reason?: string;
+  reason: string;
+  created_at: string;
 }
 
-interface Customer {
-  name: string;
-  vip: string;
-  slots: { used: number; total: number };
-  violations: { count: number; max: number };
-  active: boolean;
-  links: CustomerLink[];
+interface CustomerItem {
+  user_id: number;
+  full_name: string;
+  avatar: string;
+  vip_level: string;
+  slot_used: number;
+  slot_total: number;
+  violation_count: number;
+  links: {
+    data: LinkItem[];
+    total_pages: number;
+    total_items: number;
+    current_page: number;
+    page_size: number;
+  };
 }
 
-const customers: Customer[] = [
-  {
-    name: "Nguyễn Văn A",
-    vip: "VIP1",
-    slots: { used: 1, total: 2 },
-    violations: { count: 0, max: 3 },
-    active: true,
-    links: [
-      { product: "Nintendo Switch OLED", bid: 52000, status: "Chờ duyệt" },
-      { product: "Leica M6 Camera", bid: 95000, status: "Đã đặt" },
+interface ApiResponse {
+  success: boolean;
+  timestamp: string;
+  code: number;
+  message: string;
+  message_key: string;
+  data: {
+    data: CustomerItem[];
+    total_pages: number;
+    total_items: number;
+    current_page: number;
+    page_size: number;
+  };
+  errors: null;
+}
+
+// Fake API response
+const fakeApiResponse: ApiResponse = {
+  success: true,
+  timestamp: "2024-05-11T10:00:00Z",
+  code: 0,
+  message: "Thành công",
+  message_key: "success",
+  data: {
+    data: [
+      {
+        user_id: 1,
+        full_name: "Nguyễn Văn A77777",
+        avatar: "",
+        vip_level: "VIP1",
+        slot_used: 1,
+        slot_total: 2,
+        violation_count: 0,
+        links: {
+          data: [
+            {
+              auction_id: 101,
+              title: "Nintendo Switch OLED",
+              url: "https://auctionsite.com/item/101",
+              bid_amount: 52000,
+              status: "Chờ duyệt",
+              reason: "",
+              created_at: "2024-05-10 14:00:00"
+            },
+            {
+              auction_id: 102,
+              title: "Leica M6 Camera",
+              url: "https://auctionsite.com/item/102",
+              bid_amount: 95000,
+              status: "Đã đặt",
+              reason: "",
+              created_at: "2024-05-09 11:30:00"
+            }
+          ],
+          total_pages: 1,
+          total_items: 2,
+          current_page: 1,
+          page_size: 10
+        }
+      },
+      {
+        user_id: 2,
+        full_name: "Trần Thị B",
+        avatar: "",
+        vip_level: "VIP2",
+        slot_used: 48,
+        slot_total: 50,
+        violation_count: 0,
+        links: {
+          data: [
+            {
+              auction_id: 103,
+              title: "Leica M6 Camera",
+              url: "https://auctionsite.com/item/103",
+              bid_amount: 90000,
+              status: "Đã đặt",
+              reason: "",
+              created_at: "2024-05-06 16:06:00"
+            },
+            {
+              auction_id: 104,
+              title: "Nintendo Switch OLED",
+              url: "https://auctionsite.com/item/104",
+              bid_amount: 55000,
+              status: "Đã đặt",
+              reason: "",
+              created_at: "2024-05-06 18:21:00"
+            },
+            {
+              auction_id: 105,
+              title: "Canon R5",
+              url: "https://auctionsite.com/item/105",
+              bid_amount: 120000,
+              status: "Chờ duyệt",
+              reason: "",
+              created_at: "2024-05-07 07:50:00"
+            }
+          ],
+          total_pages: 1,
+          total_items: 3,
+          current_page: 1,
+          page_size: 10
+        }
+      },
+      {
+        user_id: 3,
+        full_name: "Phạm Văn D",
+        avatar: "",
+        vip_level: "VIP2",
+        slot_used: 50,
+        slot_total: 50,
+        violation_count: 3,
+        links: {
+          data: [
+            {
+              auction_id: 110,
+              title: "Leica M6 Camera",
+              url: "https://auctionsite.com/item/110",
+              bid_amount: 88000,
+              status: "Từ chối",
+              reason: "Còn <15s",
+              created_at: "2024-05-08 09:15:00"
+            }
+          ],
+          total_pages: 1,
+          total_items: 1,
+          current_page: 1,
+          page_size: 10
+        }
+      }
     ],
+    total_pages: 1,
+    total_items: 3,
+    current_page: 1,
+    page_size: 10
   },
-  {
-    name: "Trần Thị B",
-    vip: "VIP2",
-    slots: { used: 48, total: 50 },
-    violations: { count: 0, max: 3 },
-    active: true,
-    links: [
-      { product: "Leica M6 Camera", bid: 90000, status: "Đã đặt" },
-      { product: "Nintendo Switch OLED", bid: 55000, status: "Đã đặt" },
-      { product: "Canon R5", bid: 120000, status: "Chờ duyệt" },
-    ],
-  },
-  {
-    name: "Phạm Văn D",
-    vip: "VIP2",
-    slots: { used: 50, total: 50 },
-    violations: { count: 3, max: 3 },
-    active: false,
-    links: [
-      { product: "Leica M6 Camera", bid: 88000, status: "Từ chối", reason: "Còn <15s" },
-    ],
-  },
-];
+  errors: null
+};
 
 const StatusTag: React.FC<{ text: string; type?: "warning" | "info" | "error" }> = ({ text, type }) => {
   let colorClass = "bg-gray-100 text-gray-800 border-gray-200";
@@ -68,24 +182,29 @@ const StatusTag: React.FC<{ text: string; type?: "warning" | "info" | "error" }>
 
 const formatBid = (amount: number) => `¥${amount.toLocaleString("en-US")}`;
 
-const LinkTable: React.FC<{ links: CustomerLink[]; active: boolean }> = ({ links, active }) => {
+const LinkTable: React.FC<{
+  links: LinkItem[];
+  active: boolean;
+}> = ({ links, active }) => {
   const columns = [
     {
       title: <span className="text-xs font-medium text-gray-500">Link</span>,
-      dataIndex: "product",
-      key: "product",
-      width: 150,
-      render: (text: string) => (
+      dataIndex: "title",
+      key: "title",
+      width: 180,
+      render: (text: string, record: LinkItem) => (
         <div>
-          <div className="font-medium text-sm">{text}</div>
-          <div className="text-xs text-blue-600">n98765432</div>
+          <div className="font-medium text-sm truncate">{text}</div>
+          <div className="text-xs text-blue-600 truncate">
+            {record?.auction_id ? `n${record.auction_id}` : ""}
+          </div>
         </div>
       ),
     },
     {
       title: <span className="text-xs font-medium text-gray-500">Bid</span>,
-      dataIndex: "bid",
-      key: "bid",
+      dataIndex: "bid_amount",
+      key: "bid_amount",
       width: 100,
       render: (val: number) => <span className="text-green-600 font-semibold text-sm">{formatBid(val)}</span>,
     },
@@ -118,7 +237,7 @@ const LinkTable: React.FC<{ links: CustomerLink[]; active: boolean }> = ({ links
       key: "actions",
       align: "right" as const,
       width: 150,
-      render: (_: any, record: CustomerLink) => (
+      render: (_: any, record: LinkItem) => (
         <div className="flex items-center justify-end gap-2 pr-2">
           {record.status === "Chờ duyệt" && active && (
             <>
@@ -150,16 +269,16 @@ const LinkTable: React.FC<{ links: CustomerLink[]; active: boolean }> = ({ links
     },
   ];
 
-  const rowClassName = (record: CustomerLink) => {
+  const rowClassName = (record: LinkItem) => {
     if (record.status === "Chờ duyệt") return "bg-yellow-50/70";
     if (record.status === "Từ chối") return "bg-red-50/70";
     return "";
   };
 
   return (
-    <div className="rounded-xl ">
+    <div className="rounded-xl">
       <Table
-        dataSource={links.map((link, index) => ({ ...link, key: index.toString() }))}
+        dataSource={(links || []).map((link, index) => ({ ...link, key: index.toString() }))}
         columns={columns}
         pagination={false}
         rowKey="key"
@@ -167,34 +286,69 @@ const LinkTable: React.FC<{ links: CustomerLink[]; active: boolean }> = ({ links
         size="middle"
         className="custom-customer-table !border-none"
         rowClassName={rowClassName}
-        style={{ border: 'none' }}
+        style={{ border: "none" }}
       />
     </div>
   );
 };
 
-const CustomerCard: React.FC<{ customer: Customer }> = ({ customer }) => {
-  const avatarText = customer.name.split(" ").map(w => w[0]).join('');
-  const violationMessage = !customer.active && customer.violations.count === customer.violations.max
-    ? `Không thể tạo phiên đấu giá mới do vi phạm quá số lần cho phép.`
-    : null;
+const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
+  // Determine if user is locked: violation_count >= slot_total => blocked
+  const isBlocked = customer.violation_count >= 3 || customer.slot_used >= customer.slot_total && customer.violation_count === 3;
+  const active = !isBlocked && customer.slot_used < customer.slot_total;
+
+  const getAvatarText = (name: string) => {
+    if (!name) return "";
+    return name
+      .split(" ")
+      .map((w) => w[0])
+      .join("");
+  };
+  const avatarText = getAvatarText(customer.full_name);
+
+  const violationMessage =
+    isBlocked && customer.violation_count >= 3
+      ? "Không thể tạo phiên đấu giá mới do vi phạm quá số lần cho phép."
+      : undefined;
 
   return (
-    <div className={`bg-white rounded-2xl  border border-gray-100 ${!customer.active ? 'border-red-400/50' : 'hover:shadow-lg'} duration-200`}>
+    <div
+      className={`bg-white rounded-2xl border border-gray-100 ${
+        !active ? "border-red-400/50" : "hover:shadow-lg"
+      } duration-200`}
+    >
       <div className="flex items-center justify-between p-3 border-b border-gray-100">
         <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white flex-shrink-0 ${customer.active ? 'bg-blue-500' : 'bg-red-400'}`}>
-            {avatarText}
-          </div>
+          <Avatar
+            className={`w-12 h-12 text-lg font-bold flex-shrink-0 ${
+              active ? "bg-blue-500" : "bg-red-400"
+            }`}
+            style={{
+              width: 48,
+              height: 48,
+              fontSize: 20,
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: active ? "#3b82f6" : "#f87171", // fallback tailwind color
+            }}
+            src={customer.avatar || undefined}
+            icon={!customer.avatar ? <UserOutlined /> : undefined}
+          >
+            {!customer.avatar ? avatarText : null}
+          </Avatar>
           <div className="flex flex-col min-w-0">
-            <div className="font-bold text-lg text-gray-900 truncate">{customer.name}</div>
+            <div className="font-bold text-lg text-gray-900 truncate">
+              {customer.full_name}
+            </div>
             <div className="text-xs text-gray-500 truncate">
-              {customer.vip} • {customer.slots.used}/{customer.slots.total} slot • {customer.violations.count}/{customer.violations.max} vi phạm
+              {customer.vip_level} • {customer.slot_used}/{customer.slot_total} slot • {customer.violation_count}/3 vi phạm
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end flex-shrink-0">
-          {customer.active ? (
+          {active ? (
             <span className="text-green-600 text-sm font-semibold">Hoạt động</span>
           ) : (
             <span className="text-red-600 text-sm font-semibold">Bị khóa</span>
@@ -206,19 +360,25 @@ const CustomerCard: React.FC<{ customer: Customer }> = ({ customer }) => {
           {violationMessage}
         </div>
       )}
-      <LinkTable links={customer.links} active={customer.active} />
+      <LinkTable links={customer.links.data} active={active} />
     </div>
   );
 };
 
 export const TabCustomer: React.FC = () => {
-  const pageSize = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-  const customersToRender = customers;
-  const totalCustomers = customers.length;
-  const totalPages = Math.ceil(totalCustomers / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const pagedCustomers = customers.slice(startIndex, startIndex + pageSize);
+  const { data: apiData } = fakeApiResponse;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = apiData.page_size || 5;
+
+  // paginated customers
+  const totalCustomers = apiData.total_items || apiData.data.length;
+  const totalPages = apiData.total_pages || 1;
+
+  // Get correct page slice (simulate pagination)
+  const customers = apiData.data.slice(
+    (currentPage - 1) * pageSize,
+    (currentPage - 1) * pageSize + pageSize
+  );
 
   return (
     <div className="p-4 bg-white border border-gray-100">
@@ -230,14 +390,14 @@ export const TabCustomer: React.FC = () => {
         />
       </div>
       <div className="space-y-7">
-        {pagedCustomers.map((customer, index) => (
-          <CustomerCard key={index} customer={customer} />
+        {customers.map((customer) => (
+          <CustomerCard key={customer.user_id} customer={customer} />
         ))}
       </div>
       {totalCustomers > pageSize && (
         <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-6">
           <div className="text-gray-500 text-sm">
-            Hiển thị {startIndex + 1}-{Math.min(startIndex + pageSize, totalCustomers)} / <b>{totalCustomers} khách hàng</b>
+            Hiển thị {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalCustomers)} / <b>{totalCustomers} khách hàng</b>
           </div>
           <Pagination
             current={currentPage}
@@ -247,8 +407,8 @@ export const TabCustomer: React.FC = () => {
             showSizeChanger={false}
             className="flex items-center"
             itemRender={(current, type, originalElement) => {
-              if (type === 'prev') return <span className="font-semibold">Trước</span>;
-              if (type === 'next') return <span className="font-semibold">Sau</span>;
+              if (type === "prev") return <span className="font-semibold">Trước</span>;
+              if (type === "next") return <span className="font-semibold">Sau</span>;
               return originalElement;
             }}
           />
