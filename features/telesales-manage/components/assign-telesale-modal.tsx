@@ -7,7 +7,7 @@ import { getTelesaleAccounts } from "../apis/telesale-mng";
 
 const { TextArea } = Input;
 
-type TelesaleAccount = {
+export type TelesaleAccount = {
   phonenumber: string;
   createdat: string;
   isactive: boolean;

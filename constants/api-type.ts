@@ -174,5 +174,6 @@ export const API_TYPE_CONST = {
   ANALYTICS_ORDERS_PENDING: `${FEATURE}/admin/analytics/orders/pending`,
   ANALYTICS_MATERIALS_PROFIT_LOSS: `${FEATURE}/admin/analytics/materials/profit-loss`,
   ANALYTICS_SUMMARY: `${FEATURE}/admin/analytics/summary`,
-  ORDER_HISTORY:`${FEATURE}/order-history/`
+  ORDER_HISTORY:`${FEATURE}/order-history/`,
+  DELETE_TELESALE:`${FEATURE}/admin/telesales/contacts/bulk-delete`,
 } as const;

@@ -35,6 +35,7 @@ import AddMultiCustomerModal from "./modal/add-multi-customer";
 import {
   addTelesaleCustomer,
   assignTelesale,
+  deleteBulkTelesaleContacts,
   deleteTelesaleContactTags,
   downloadTelesaleExample,
   updateTelesaleCustomer,
@@ -67,6 +68,8 @@ const TelesalesPage: React.FC = () => {
   const [bulkAssignCustomers, setBulkAssignCustomers] = useState<
     TelesaleCustomer[]
   >([]);
+  const [isDeleteMultiModalOpen, setIsDeleteMultiModalOpen] = useState(false);
+
   const [downloading, setDownloading] = useState(false);
 
   // note modal (ghi chú customer)
@@ -115,6 +118,11 @@ const TelesalesPage: React.FC = () => {
     tag?: { tagId: number; customerId: number };
     tagName?: string;
   }>({ open: false, tag: undefined, tagName: "" });
+
+  const [deleteCustomerModal, setDeleteCustomerModal] = useState<{
+    open: boolean;
+    record?: TelesaleCustomer
+  }>({ open: false, record: undefined});
 
   // Popup Hủy gán Sale Modal state/handlers
   const [unassignSaleModal, setUnassignSaleModal] = useState<{
@@ -785,6 +793,18 @@ const TelesalesPage: React.FC = () => {
                   Gán Sale
                 </Button>
               )}
+               <Button
+                  size="small"
+                  onClick={() => {
+                    setDeleteCustomerModal({
+                      open: true,
+                      record: record,
+                    });
+                  }}
+                  className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                >
+                  Xoá khách hàng
+                </Button>
             </div>
           );
         }
@@ -835,6 +855,18 @@ const TelesalesPage: React.FC = () => {
                   className="!bg-gradient-to-r !from-gray-500 !to-gray-600 hover:!from-gray-600 hover:!to-gray-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
                 >
                   Huỷ gán Sale
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setDeleteCustomerModal({
+                      open: true,
+                      record: record,
+                    });
+                  }}
+                  className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                >
+                  Xoá khách hàng
                 </Button>
               </div>
             )}
@@ -1026,6 +1058,25 @@ const TelesalesPage: React.FC = () => {
     );
   };
 
+  const handleConfirmDeleteCustomer = () => {
+    if (!deleteCustomerModal.record?.id) {
+      setDeleteCustomerModal({ open: false, record: undefined });
+      return;
+    }
+
+    deleteBulkTelesaleContacts([deleteCustomerModal.record.id])
+      .then(() => {
+        toast.success("Xoá khách hàng thành công!");
+        setDeleteCustomerModal({ open: false, record: undefined });
+        refetch();
+        reloadTelesaleStat();
+      })
+      .catch(() => {
+        toast.error("Xoá khách hàng thất bại, vui lòng thử lại!");
+        setDeleteCustomerModal({ open: false, record: undefined });
+      });
+  };
+
   const handleCancelDeleteTag = () => {
     setDeleteTagModal({ open: false, tag: undefined, tagName: "" });
   };
@@ -1156,6 +1207,10 @@ const TelesalesPage: React.FC = () => {
           onBulkAssign={() => {
             setBulkAssignCustomers(selectedCustomers || []);
             setIsBulkAssignModalOpen(true);
+          }}
+          onDeleteMulti={()=>{
+            setBulkAssignCustomers(selectedCustomers || []);
+            setIsDeleteMultiModalOpen(true)
           }}
           selectedRowKeys={selectedRowKeys}
           isAdmin={isTelesaleManager}
@@ -1392,6 +1447,22 @@ const TelesalesPage: React.FC = () => {
         </p>
       </Modal>
 
+      <Modal
+        open={deleteCustomerModal.open}
+        title="Xác nhận xoá khách hàng"
+        onOk={handleConfirmDeleteCustomer}
+        onCancel={()=> setDeleteCustomerModal({ open: false, record: undefined })}
+        okText="Xoá"
+        cancelText="Huỷ"
+        confirmLoading={deleteCustomerTagMutation.isPending}
+        centered
+        maskClosable={false}
+      >
+        <p>
+          Bạn có chắc chắn muốn xoá khách hàng {deleteCustomerModal.record?.name} ?
+        </p>
+      </Modal>
+
       {/* Modal xác nhận gọi/failed có thêm field Note và validate */}
       <Modal
         open={confirmCallModal.open}
@@ -1532,6 +1603,74 @@ const TelesalesPage: React.FC = () => {
           )}
         </div>
       </Modal>
+
+    {/* Modal xác nhận xoá nhiều khách hàng */}
+    <Modal
+      open={isDeleteMultiModalOpen}
+      onCancel={() => setIsDeleteMultiModalOpen(false)}
+      footer={[
+        <Button key="back" onClick={() => setIsDeleteMultiModalOpen(false)}>
+          Huỷ bỏ
+        </Button>,
+        <Button
+          key="confirm"
+          type="primary"
+          danger
+          onClick={async () => {
+            deleteBulkTelesaleContacts(
+              (bulkAssignCustomers || []).map((customer) => customer.id)
+            )
+            .then(() => {
+              toast.success("Xoá khách hàng thành công!");
+              setIsDeleteMultiModalOpen(false);
+              refetch();
+              reloadTelesaleStat();
+              setBulkAssignCustomers([])
+            })
+            .catch(() => {
+              toast.error("Xoá khách hàng thất bại, vui lòng thử lại!");
+              setIsDeleteMultiModalOpen(false);
+            });
+            setSelectedRowKeys([]);
+            setIsDeleteMultiModalOpen(false);
+          }}
+        >
+          Xác nhận xoá
+        </Button>,
+      ]}
+      centered
+      width={600}
+      title={
+        <span className="font-bold text-lg">
+          Xác nhận xoá {bulkAssignCustomers?.length || 0} khách hàng
+        </span>
+      }
+    >
+      <div className="mb-4">
+        Bạn có chắc chắn muốn xoá những khách hàng sau khỏi danh sách không? <br/>
+        <span className="text-red-600 font-semibold">Hành động này sẽ không thể hoàn tác!</span>
+      </div>
+      <div className="max-h-[320px] overflow-y-auto border border-gray-100 rounded">
+        {bulkAssignCustomers?.length > 0 ? (
+          <ul className="divide-y divide-gray-100">
+            {bulkAssignCustomers.map((customer: any, idx: number) => (
+              <li key={customer.id || idx} className="p-2 flex items-center gap-2">
+                <span className="text-gray-500">{idx + 1}.</span>
+                <span className="font-medium text-gray-800">{customer.fullname || customer.name || "Không tên"}</span>
+                {customer.phonenumber && (
+                  <span className="ml-2 text-gray-500 text-sm">{customer.phonenumber}</span>
+                )}
+                {customer.email && (
+                  <span className="ml-2 text-gray-400 text-xs">{customer.email}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-gray-500 italic text-center py-8">Không có khách hàng nào.</div>
+        )}
+      </div>
+    </Modal>
     </div>
   );
 };
