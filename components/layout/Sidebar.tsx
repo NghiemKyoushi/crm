@@ -158,6 +158,7 @@ export const menuItems = [
   { key: "/cms", icon: TagsOutlined, label: "cms" },
   { key: "/website-manage", icon: GlobalOutlined, label: "websiteManagement" },
   { key: "/vip-management", icon: CrownOutlined, label: "vipManagement" },
+  { key: "/aution-manage", icon: SettingOutlined, label: "aution" },
   { key: "/settings", icon: SettingOutlined, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {
@@ -240,60 +241,34 @@ export const Sidebar: React.FC = () => {
         )}
         <button
           onClick={toggle}
-          className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+          className="w-8 h-8 min-w-8 min-h-8 shrink-0 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+          aria-label="Toggle sidebar"
         >
-          {/* Logo + toggle */}
-          <div
-            className={`flex items-center h-16 px-4 border-b border-gray-200 ${
-              collapsed ? "justify-center" : "justify-between"
-            }`}
-          >
-            {!collapsed && (
-              <div className="flex items-center gap-3">
-                <Image
-                  src={logoCRM}
-                  alt="CRM Logo"
-                  width={36}
-                  height={36}
-                  className="rounded-full"
-                />
-                <span className="font-semibold text-gray-800 text-sm">
-                  OrderSystem
-                </span>
-              </div>
-            )}
-            <button
-              onClick={toggle}
-              className="w-8 h-8 min-w-8 min-h-8 shrink-0 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-              aria-label="Toggle sidebar"
-            >
-              {collapsed ? (
-                <MenuOutlined style={{ fontSize: 14 }} />
-              ) : (
-                <LeftOutlined style={{ fontSize: 14 }} />
-              )}
-            </button>
-          </div>
-
-          {/* Menu */}
-          <div className="py-2">
-            <Menu
-              style={{ border: "none" }}
-              theme="light"
-              mode="inline"
-              items={filteredMenu.map((item) => ({
-                key: item.key,
-                icon: <item.icon style={{ fontSize: 16 }} />,
-                label: (
-                  <Link passHref shallow href={item.key}>
-                    {t(`menu.${item.label}`)}
-                  </Link>
-                ),
-              }))}
-              selectedKeys={[pathname]}
-            />
-          </div>
+          {collapsed ? (
+            <MenuOutlined style={{ fontSize: 14 }} />
+          ) : (
+            <LeftOutlined style={{ fontSize: 14 }} />
+          )}
         </button>
+      </div>
+
+      {/* Menu */}
+      <div className="py-2">
+        <Menu
+          style={{ border: "none" }}
+          theme="light"
+          mode="inline"
+          items={filteredMenu.map((item) => ({
+            key: item.key,
+            icon: <item.icon style={{ fontSize: 16 }} />,
+            label: (
+              <Link passHref shallow href={item.key}>
+                {t(`menu.${item.label}`)}
+              </Link>
+            ),
+          }))}
+          selectedKeys={[pathname]}
+        />
       </div>
     </Sider>
   );

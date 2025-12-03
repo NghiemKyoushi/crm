@@ -332,7 +332,7 @@ export const TabLink = () => {
   const actualEndIndex = Math.min(startIndex + pageSize, actualTotalCount);
 
   return (
-    <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[60vh]">
+    <div className="p-2 bg-white shadow-sm border border-gray-100 min-h-[60vh]">
       <div className="flex justify-end mb-2">
         <div className="relative">
           <input

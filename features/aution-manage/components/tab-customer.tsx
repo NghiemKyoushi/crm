@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Tooltip, Table, Input, Pagination } from "antd";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+
 interface CustomerLink {
   product: string;
   bid: number;
@@ -16,6 +17,7 @@ interface Customer {
   active: boolean;
   links: CustomerLink[];
 }
+
 const customers: Customer[] = [
   {
     name: "Nguyễn Văn A",
@@ -52,7 +54,7 @@ const customers: Customer[] = [
   },
 ];
 
-const StatusTag = ({ text, type }) => {
+const StatusTag: React.FC<{ text: string; type?: "warning" | "info" | "error" }> = ({ text, type }) => {
   let colorClass = "bg-gray-100 text-gray-800 border-gray-200";
   if (type === "warning") colorClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
   if (type === "info") colorClass = "bg-blue-100 text-blue-800 border-blue-200";
@@ -66,7 +68,7 @@ const StatusTag = ({ text, type }) => {
 
 const formatBid = (amount: number) => `¥${amount.toLocaleString("en-US")}`;
 
-const LinkTableComponent = ({ links, active }: { links: CustomerLink[], active: boolean }) => {
+const LinkTable: React.FC<{ links: CustomerLink[]; active: boolean }> = ({ links, active }) => {
   const columns = [
     {
       title: <span className="text-xs font-medium text-gray-500">Link</span>,
@@ -170,10 +172,8 @@ const LinkTableComponent = ({ links, active }: { links: CustomerLink[], active: 
     </div>
   );
 };
-LinkTableComponent.displayName = "LinkTable";
-const LinkTable = React.memo(LinkTableComponent);
 
-const CustomerCard = ({ customer }: { customer: Customer }) => {
+const CustomerCard: React.FC<{ customer: Customer }> = ({ customer }) => {
   const avatarText = customer.name.split(" ").map(w => w[0]).join('');
   const violationMessage = !customer.active && customer.violations.count === customer.violations.max
     ? `Không thể tạo phiên đấu giá mới do vi phạm quá số lần cho phép.`
@@ -211,7 +211,7 @@ const CustomerCard = ({ customer }: { customer: Customer }) => {
   );
 };
 
-export const TabCustomer = () => {
+export const TabCustomer: React.FC = () => {
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const customersToRender = customers;
@@ -221,7 +221,7 @@ export const TabCustomer = () => {
   const pagedCustomers = customers.slice(startIndex, startIndex + pageSize);
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+    <div className="p-4 bg-white border border-gray-100">
       <div className="flex justify-start mb-4">
         <Input
           placeholder="Tìm kiếm khách hàng..."
