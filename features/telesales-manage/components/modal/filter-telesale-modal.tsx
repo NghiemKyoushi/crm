@@ -4,7 +4,6 @@ import { FilterOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
-// Utility function to fetch tags by type
 import {
   getTelesaleAccounts,
   getTelesaleTagFilter,
@@ -33,14 +32,15 @@ export const FilterForm: React.FC<{
     status_tag_id: string | null;
   }) => void;
   onBulkAssign: () => void;
+  onDeleteMulti: () => void;
   selectedRowKeys: React.Key[];
   isAdmin?: boolean;
 }> = ({
-  telesaleUserList,
   loadingUsers,
   onFilter,
   onBulkAssign,
   selectedRowKeys,
+  onDeleteMulti,
   isAdmin,
 }) => {
   const [form] = Form.useForm();
@@ -89,8 +89,6 @@ export const FilterForm: React.FC<{
       .catch(() => setSituationTags([]))
       .finally(() => setLoading((prev) => ({ ...prev, situation: false })));
   }, []);
-
-  //   console.log("check data", serviceTags, sourceTags, situationTags );
 
   const handleSubmit = (values: any) => {
     onFilter({
@@ -438,7 +436,17 @@ export const FilterForm: React.FC<{
                 disabled={selectedRowKeys.length === 0}
                 onClick={onBulkAssign}
               >
-                Gán loạt{" "}
+                Gán loạt
+                {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
+              </Button>
+
+              <Button
+                icon={<UserOutlined className="!h-3.5 !w-3.5" />}
+                className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white disabled:!opacity-40 disabled:!cursor-not-allowed !h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
+                disabled={selectedRowKeys.length === 0}
+                onClick={onDeleteMulti}
+              >
+                Xoá nhiều
                 {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
               </Button>
             </Form.Item>

@@ -222,3 +222,11 @@ export const telesalesMngApi = {
   addTelesaleCustomer,
   updateTelesaleCustomer,
 };
+
+export const deleteBulkTelesaleContacts = async (ids: number[]) => {
+  const res = await api.delete(API_TYPE_CONST.DELETE_TELESALE, {
+    data: { contact_ids: ids },
+  });
+  return res.data;
+};
+
