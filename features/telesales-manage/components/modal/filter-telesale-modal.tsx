@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, Select, Button, Row, Col } from "antd";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Form, Input, Select, Button, Row, Col, Spin, SelectProps } from "antd";
 import { FilterOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
 // Utility function to fetch tags by type
-import { getTelesaleTagFilter } from "../../apis/telesale-mng";
+import {
+  getTelesaleAccounts,
+  getTelesaleTagFilter,
+} from "../../apis/telesale-mng";
+import { TelesaleAccount } from "../assign-telesale-modal";
 
 export async function fetchTagsByType(type: string) {
   try {
@@ -14,6 +18,7 @@ export async function fetchTagsByType(type: string) {
     return [];
   }
 }
+const PAGE_SIZE = 10;
 
 export const FilterForm: React.FC<{
   telesaleUserList: any[];
@@ -39,6 +44,7 @@ export const FilterForm: React.FC<{
   isAdmin,
 }) => {
   const [form] = Form.useForm();
+  const fetchingRef = useRef(false);
 
   const [serviceTags, setServiceTags] = useState<any[]>([]);
   const [sourceTags, setSourceTags] = useState<any[]>([]);
@@ -48,6 +54,21 @@ export const FilterForm: React.FC<{
     source: false,
     situation: false,
   });
+  const [loadingMore, setLoadingMore] = useState<boolean>(false); // load next page
+  const [data, setData] = useState<TelesaleAccount[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [loadingTele, setLoadingTele] = useState<boolean>(false); // load list (initial/search)
+
+  const telesaleOptions: SelectProps["options"] = useMemo(
+    () =>
+      data.map((account) => ({
+        label: `${account.fullname} (${account.phonenumber}) - ${account.email}`,
+        value: account.id,
+      })),
+    [data]
+  );
+  const [telesale, setTelesale] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     setLoading((prev) => ({ ...prev, service: true }));
@@ -101,6 +122,60 @@ export const FilterForm: React.FC<{
     });
   };
 
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchFirstPage = async () => {
+      setLoadingTele(true);
+      fetchingRef.current = true;
+      try {
+        // Giả sử API: getTelesaleAccounts(pageIndex, pageSize, search?)
+        const res = await getTelesaleAccounts(0, PAGE_SIZE);
+        const list: TelesaleAccount[] = res?.data ?? [];
+        setData(list);
+        // Chú ý: nếu API trả thêm total thì nên dùng total để tính hasMore
+        setHasMore(list.length >= PAGE_SIZE);
+        setPage(1); // đang ở page index 0 => page 1 (UI)
+      } catch {
+        setData([]);
+        setHasMore(false);
+      } finally {
+        setLoadingTele(false);
+        fetchingRef.current = false;
+      }
+    };
+
+    fetchFirstPage();
+  }, [open]);
+
+  const handlePopupScroll: React.UIEventHandler<HTMLDivElement> = async (e) => {
+    if (loadingTele || loadingMore || !hasMore || fetchingRef.current) return;
+
+    const target = e.target as HTMLDivElement;
+    const threshold = 48; // px còn lại gần cuối dropdown
+    const isNearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - threshold;
+
+    if (!isNearBottom) return;
+
+    setLoadingMore(true);
+    fetchingRef.current = true;
+    try {
+      // page hiện tại đang là 1 cho index 0, 2 cho index 1 ...
+      const nextIndex = page; // vì index API = page - 1, nên index tiếp theo = page (0-based)
+      const res = await getTelesaleAccounts(nextIndex, PAGE_SIZE);
+      const list: TelesaleAccount[] = res?.data ?? [];
+      setData((prev) => [...prev, ...list]);
+      setHasMore(list.length >= PAGE_SIZE);
+      setPage((p) => p + 1);
+    } catch {
+      // Nếu lỗi, giữ nguyên hasMore (có thể retry bằng cuộn lại)
+    } finally {
+      setLoadingMore(false);
+      fetchingRef.current = false;
+    }
+  };
+
   return (
     <Form
       form={form}
@@ -149,10 +224,14 @@ export const FilterForm: React.FC<{
               className="custom-select"
               style={{ width: 150 }}
               loading={loadingUsers}
-              allowClear
               placeholder="Telesale"
+              value={telesale}
+              onChange={(val) => setTelesale(val as number)}
+              size="large"
               showSearch
-              optionFilterProp="children"
+              filterOption={false} // dùng tìm kiếm server-side
+              options={telesaleOptions}
+              onPopupScroll={handlePopupScroll} // infinite scroll
               suffixIcon={
                 <svg
                   className="w-4 h-4 text-gray-400"
@@ -168,14 +247,11 @@ export const FilterForm: React.FC<{
                   />
                 </svg>
               }
-            >
-              {Array.isArray(telesaleUserList) &&
-                telesaleUserList.map((telesale: any) => (
-                  <Option value={telesale.id} key={telesale.id}>
-                    {telesale.fullname}
-                  </Option>
-                ))}
-            </Select>
+              notFoundContent={
+                loadingTele ? <Spin size="small" /> : "Không có dữ liệu"
+              }
+              dropdownRender={(menu) => <div>{menu}</div>}
+            />
           </Form.Item>
 
           {/* Status */}
@@ -342,9 +418,7 @@ export const FilterForm: React.FC<{
           <Form.Item className="!mb-0">
             <Button
               type="primary"
-              icon={
-                <FilterOutlined className="!h-3.5 !w-3.5" />
-              }
+              icon={<FilterOutlined className="!h-3.5 !w-3.5" />}
               htmlType="submit"
               className="!h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
             >
@@ -359,9 +433,7 @@ export const FilterForm: React.FC<{
           {isAdmin && (
             <Form.Item className="!mb-0">
               <Button
-                icon={
-                  <UserOutlined className="!h-3.5 !w-3.5" />
-                }
+                icon={<UserOutlined className="!h-3.5 !w-3.5" />}
                 className="!bg-gradient-to-r !from-purple-600 !to-purple-700 hover:!from-purple-700 hover:!to-purple-800 !text-white disabled:!opacity-40 disabled:!cursor-not-allowed !h-9 !px-5 !rounded-md !shadow-md hover:!shadow-lg !transition-all !font-medium"
                 disabled={selectedRowKeys.length === 0}
                 onClick={onBulkAssign}
