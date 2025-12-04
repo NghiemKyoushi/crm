@@ -1022,7 +1022,7 @@ const TelesalesPage: React.FC = () => {
       page: 0,
       search: search || undefined,
       business_field: business_field ?? undefined,
-      saleId: saleId ?? undefined,
+      sale_id: saleId ?? undefined,
       status: status ?? undefined,
       service_tag_id: service_tag_id ?? undefined,
       source_tag_id: source_tag_id ?? undefined,

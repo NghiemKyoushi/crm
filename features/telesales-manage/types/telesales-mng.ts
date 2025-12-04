@@ -1,7 +1,7 @@
 export interface TelesaleParamsList {
     page?: number;
     pageSize?: number;
-    saleId?: string;
+    sale_id?: string;
     search?: string;
     status?: string;
 }
