@@ -7,6 +7,8 @@ import {
   LinkOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { BidDecisionModal, DecisionMode } from "./modal/accept-modal";
+import { toast } from "react-toastify";
 
 // Fake data based on provided type:
 const fakeApiResponse = {
@@ -167,10 +169,8 @@ const StatusTag: React.FC<StatusTagProps> = ({ text, type }) => {
   let colorClass = "bg-gray-50 text-gray-700 border-gray-200";
   if (type === "warning")
     colorClass = "bg-yellow-50 text-yellow-800 border-yellow-200";
-  if (type === "info")
-    colorClass = "bg-blue-50 text-blue-700 border-blue-200";
-  if (type === "error")
-    colorClass = "bg-red-50 text-red-700 border-red-100";
+  if (type === "info") colorClass = "bg-blue-50 text-blue-700 border-blue-200";
+  if (type === "error") colorClass = "bg-red-50 text-red-700 border-red-100";
   return (
     <span
       className={`px-3 py-0.5 rounded-2xl text-xs font-semibold border ${colorClass} transition-colors duration-200`}
@@ -193,9 +193,10 @@ type FlatRow = {
   status: string;
   reason: string;
   isGroupStart: boolean;
+  id?: number;
 };
 
-type BidItem = Omit<
+export type BidItem = Omit<
   FlatRow,
   "title" | "url" | "thumbnail" | "end_time" | "auctionId" | "isGroupStart"
 >;
@@ -237,15 +238,15 @@ function flattenBids(data: typeof fakeApiResponse.data.data): FlatRow[] {
 const ProductCard = ({ item }: { item: GroupedRow }) => {
   const columns = [
     {
-      title: (
-        <span className="font-medium text-xs text-gray-500">Khách</span>
-      ),
+      title: <span className="font-medium text-xs text-gray-500">Khách</span>,
       dataIndex: "full_name",
       key: "full_name",
       width: 170,
       render: (text: string, record: BidItem) => (
         <div className="flex items-center gap-2">
-          <span className="font-medium whitespace-nowrap text-gray-900">{text}</span>
+          <span className="font-medium whitespace-nowrap text-gray-900">
+            {text}
+          </span>
           <span className="text-[11px] px-2 py-0.5 rounded-xl bg-violet-50 text-violet-600 border border-violet-100 font-medium">
             {record.vip_level}
           </span>
@@ -253,9 +254,7 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
       ),
     },
     {
-      title: (
-        <span className="font-medium text-xs text-gray-500">Bid</span>
-      ),
+      title: <span className="font-medium text-xs text-gray-500">Bid</span>,
       dataIndex: "bid_amount",
       key: "bid_amount",
       width: 80,
@@ -265,16 +264,14 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
             style: "currency",
             currency: "JPY",
             minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+            maximumFractionDigits: 0,
           })}
         </span>
       ),
     },
     {
       title: (
-        <span className="font-medium text-xs text-gray-500">
-          Trạng thái
-        </span>
+        <span className="font-medium text-xs text-gray-500">Trạng thái</span>
       ),
       dataIndex: "status",
       key: "status",
@@ -283,19 +280,14 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
       render: (status: string) => {
         if (status === "Chờ duyệt")
           return <StatusTag text="Chờ duyệt" type="warning" />;
-        if (status === "Đã đặt")
-          return <StatusTag text="Đã đặt" type="info" />;
+        if (status === "Đã đặt") return <StatusTag text="Đã đặt" type="info" />;
         if (status === "Từ chối")
           return <StatusTag text="Từ chối" type="error" />;
         return null;
       },
     },
     {
-      title: (
-        <span className="font-medium text-xs text-gray-500">
-          Lý do
-        </span>
-      ),
+      title: <span className="font-medium text-xs text-gray-500">Lý do</span>,
       dataIndex: "reason",
       key: "reason",
       width: 120,
@@ -308,9 +300,7 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
     },
     {
       title: (
-        <span className="font-medium text-xs text-gray-500">
-          Thao tác
-        </span>
+        <span className="font-medium text-xs text-gray-500">Thao tác</span>
       ),
       key: "actions",
       width: 112,
@@ -325,6 +315,7 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
                   type="default"
                   shape="circle"
                   icon={<CheckOutlined />}
+                  onClick={() => openModal("accept", b)}
                   className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition"
                 />
               </Tooltip>
@@ -335,6 +326,7 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
                   shape="circle"
                   danger
                   icon={<CloseOutlined />}
+                  onClick={() => openModal("reject", b)}
                   className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition"
                 />
               </Tooltip>
@@ -346,6 +338,7 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
               type="default"
               shape="circle"
               icon={<ReloadOutlined />}
+              onClick={() => onRefreshStatus(b)}
               className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition"
             />
           </Tooltip>
@@ -360,6 +353,62 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
     return "hover:bg-gray-50";
   };
 
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const [decisionMode, setDecisionMode] = useState<DecisionMode>("accept");
+  const [selectedBid, setSelectedBid] = useState<BidItem | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const [tableData, setTableData] = useState<BidItem[]>(item.bids);
+
+  const openModal = (mode: DecisionMode, bid: BidItem) => {
+    setDecisionMode(mode);
+    setSelectedBid(bid);
+    setDecisionOpen(true);
+  };
+
+  const closeModal = () => {
+    setDecisionOpen(false);
+    setSelectedBid(null);
+    setConfirmLoading(false);
+  };
+
+  const handleConfirm = async (payload: { reason?: string }) => {
+    if (!selectedBid) return;
+    try {
+      setConfirmLoading(true);
+
+      // TODO: Gọi API thực tế ở đây
+      // if (decisionMode === "accept") await api.acceptBid({ id: selectedBid.id });
+      // else await api.rejectBid({ id: selectedBid.id, reason: payload.reason });
+
+      // Cập nhật local state
+      // setTableData((prev) =>
+      //   prev.map((b: any) =>
+      //     b?.id === selectedBid?.id
+      //       ? {
+      //           ...b,
+      //           status: decisionMode === "accept" ? "Đã đặt" : "Từ chối",
+      //           reason: decisionMode === "reject" ? payload.reason ?? "" : "",
+      //         }
+      //       : b
+      //   )
+      // );
+
+      toast.success(
+        decisionMode === "accept" ? "Đã chấp nhận bid." : "Đã từ chối bid."
+      );
+      closeModal();
+    } catch (e) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      setConfirmLoading(false);
+    }
+  };
+
+  const onRefreshStatus = async (bid: BidItem) => {
+    // TODO: gọi API để lấy trạng thái mới nhất cho bid này
+    toast.info("Đã làm mới trạng thái (demo).");
+  };
+
   return (
     <div
       key={item.key}
@@ -371,7 +420,9 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
             {item.title.split(" ")[0][0]}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-semibold text-base text-gray-900 truncate">{item.title}</div>
+            <div className="font-semibold text-base text-gray-900 truncate">
+              {item.title}
+            </div>
             <a
               href={`https://${item.url}`}
               target="_blank"
@@ -389,7 +440,9 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
             )} */}
           </div>
           <div className="flex flex-col items-end ml-2 flex-shrink-0">
-            <span className="text-gray-400 text-xs tracking-tight">Kết thúc</span>
+            <span className="text-gray-400 text-xs tracking-tight">
+              Kết thúc
+            </span>
             <span className="bg-gray-50 px-2 py-0.5 rounded text-gray-700 text-xs font-medium border border-gray-200">
               {item.end_time}
             </span>
@@ -398,8 +451,9 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
       )}
 
       <div
-        className={` ${item.isGroupStart ? "" : "rounded-2xl"
-          } overflow-x-auto bg-white`}
+        className={` ${
+          item.isGroupStart ? "" : "rounded-2xl"
+        } overflow-x-auto bg-white`}
         style={{ background: "transparent" }}
       >
         <Table
@@ -412,13 +466,23 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
           rowClassName={rowClassName}
           components={{
             body: {
-              wrapper: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
-                <tbody {...props} style={{ border: "none" }} />
-              ),
+              wrapper: (
+                props: React.HTMLAttributes<HTMLTableSectionElement>
+              ) => <tbody {...props} style={{ border: "none" }} />,
             },
           }}
           style={{ border: "none" }}
         />
+        {selectedBid && (
+          <BidDecisionModal
+            mode={decisionMode}
+            open={decisionOpen}
+            bid={selectedBid}
+            onCancel={closeModal}
+            onConfirm={handleConfirm}
+            confirmLoading={confirmLoading}
+          />
+        )}
       </div>
     </div>
   );
@@ -429,10 +493,7 @@ export const TabLink = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Flatten all bids from all auctions (for pagination by bids)
-  const allRows = useMemo(
-    () => flattenBids(fakeApiResponse.data.data),
-    []
-  );
+  const allRows = useMemo(() => flattenBids(fakeApiResponse.data.data), []);
   const totalBids = allRows.length;
 
   // Group bids for output, similar to old code
@@ -454,7 +515,9 @@ export const TabLink = () => {
 
     for (const row of rowsToRender) {
       const isNewGroup =
-        row.isGroupStart || !currentGroup || currentGroup.auctionId !== row.auctionId;
+        row.isGroupStart ||
+        !currentGroup ||
+        currentGroup.auctionId !== row.auctionId;
 
       if (isNewGroup) {
         currentGroup = {
@@ -508,7 +571,11 @@ export const TabLink = () => {
       <div className="flex justify-between items-center pt-5 border-t border-gray-100 mt-8">
         <div className="text-gray-500 text-sm pl-1">
           <span>
-            Hiển thị <b>{startIndex + 1}-{actualEndIndex}</b> / <b>{actualTotalCount} links</b>
+            Hiển thị{" "}
+            <b>
+              {startIndex + 1}-{actualEndIndex}
+            </b>{" "}
+            / <b>{actualTotalCount} links</b>
           </span>
         </div>
         <Pagination
