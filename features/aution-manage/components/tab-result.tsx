@@ -1,15 +1,60 @@
 import React, { useState } from "react";
-import { Table, Button, Pagination } from "antd";
+import { Table, Button, Pagination, Select, Input } from "antd";
 import { StatusTag } from "./status-tag";
+import { SearchOutlined } from "@ant-design/icons";
+const { Option } = Select;
 
 // Data
 const data = [
-  { product: "Omega Seamaster", code: "o11223344", customer: "Phạm Văn D", price: "¥32,000", status: "Thắng", slotStatus: "-" },
-  { product: "Sony A7R V Body", code: "s22334455", customer: "Lê Văn C", price: "¥285,000", status: "Đã lên đơn", slotStatus: "-" },
-  { product: "Canon EOS R5", code: "c55667788", customer: "Hoàng Văn E", price: "¥320,000", status: "Đã thanh toán", slotStatus: "-" },
-  { product: "MacBook Pro M3", code: "m33445566", customer: "Trần Thị B", price: "¥180,000", status: "Hủy đơn", slotStatus: "Đã hoàn" },
-  { product: "Rolex Submariner", code: "r77889900", customer: "Kiều Văn G", price: "¥800,000", status: "Thua", slotStatus: "Đã hoàn" },
-  { product: "iPhone 15 Pro Max", code: "i99887766", customer: "Phạm Văn D", price: "¥125,000", status: "Bom", reason: "Khách đổi ý", slotStatus: "Đã hoàn" },
+  {
+    product: "Omega Seamaster",
+    code: "o11223344",
+    customer: "Phạm Văn D",
+    price: "¥32,000",
+    status: "Thắng",
+    slotStatus: "-",
+  },
+  {
+    product: "Sony A7R V Body",
+    code: "s22334455",
+    customer: "Lê Văn C",
+    price: "¥285,000",
+    status: "Đã lên đơn",
+    slotStatus: "-",
+  },
+  {
+    product: "Canon EOS R5",
+    code: "c55667788",
+    customer: "Hoàng Văn E",
+    price: "¥320,000",
+    status: "Đã thanh toán",
+    slotStatus: "-",
+  },
+  {
+    product: "MacBook Pro M3",
+    code: "m33445566",
+    customer: "Trần Thị B",
+    price: "¥180,000",
+    status: "Hủy đơn",
+    slotStatus: "Đã hoàn",
+  },
+  {
+    product: "Rolex Submariner",
+    code: "r77889900",
+    customer: "Kiều Văn G",
+    price: "¥800,000",
+    status: "Thua",
+    slotStatus: "Đã hoàn",
+  },
+  {
+    product: "iPhone 15 Pro Max",
+    code: "i99887766",
+    customer: "Phạm Văn D",
+    price: "¥125,000",
+    status: "Bom",
+    reason: "Khách đổi ý",
+    slotStatus: "Đã hoàn",
+  },
 ];
 
 const colorStatus = (s: string) => {
@@ -53,7 +98,9 @@ export const TabResult = () => {
       dataIndex: "price",
       key: "price",
       width: "15%",
-      render: (txt: string) => <span className="text-green-600 font-semibold">{txt}</span>,
+      render: (txt: string) => (
+        <span className="text-green-600 font-semibold">{txt}</span>
+      ),
     },
     {
       title: "TRẠNG THÁI",
@@ -62,7 +109,7 @@ export const TabResult = () => {
       width: "20%",
       render: (_: string, record: any) => (
         <StatusTag
-          text={record.status + (record.reason ? ` · ${record.reason}` : '')}
+          text={record.status + (record.reason ? ` · ${record.reason}` : "")}
           type={colorStatus(record.status)}
         />
       ),
@@ -89,21 +136,55 @@ export const TabResult = () => {
         <div className="flex gap-1">
           {record.status.includes("Thắng") && (
             <>
-              <Button type="primary" size="small" className="h-7 px-3 font-medium rounded-lg">Tạo đơn</Button>
-              <Button danger size="small" className="h-7 px-3 font-medium rounded-lg">Hủy đơn</Button>
-              <Button danger size="small" className="h-7 px-3 font-medium rounded-lg">Bom</Button>
+              <Button
+                type="primary"
+                size="small"
+                className="h-7 px-3 font-medium rounded-lg"
+              >
+                Tạo đơn
+              </Button>
+              <Button
+                danger
+                size="small"
+                className="h-7 px-3 font-medium rounded-lg"
+              >
+                Hủy đơn
+              </Button>
+              <Button
+                danger
+                size="small"
+                className="h-7 px-3 font-medium rounded-lg"
+              >
+                Bom
+              </Button>
             </>
           )}
           {record.status.includes("Đã lên đơn") && (
             <>
-              <Button danger size="small" className="h-7 px-3 font-medium rounded-lg">Hủy đơn</Button>
-              <Button danger size="small" className="h-7 px-3 font-medium rounded-lg">Bom</Button>
+              <Button
+                danger
+                size="small"
+                className="h-7 px-3 font-medium rounded-lg"
+              >
+                Hủy đơn
+              </Button>
+              <Button
+                danger
+                size="small"
+                className="h-7 px-3 font-medium rounded-lg"
+              >
+                Bom
+              </Button>
             </>
           )}
           {record.status.includes("Đã thanh toán") && (
-            <Button size="small" className="h-7 px-3 font-medium rounded-lg">Xem đơn</Button>
+            <Button size="small" className="h-7 px-3 font-medium rounded-lg">
+              Xem đơn
+            </Button>
           )}
-          {(record.status.includes("Hủy") || record.status.includes("Thua") || record.status.includes("Bom")) && (
+          {(record.status.includes("Hủy") ||
+            record.status.includes("Thua") ||
+            record.status.includes("Bom")) && (
             <span className="text-gray-400">—</span>
           )}
         </div>
@@ -115,7 +196,11 @@ export const TabResult = () => {
   const rowClassName = (_: any, idx: number) => {
     const r = data[idx];
     if (!r) return "";
-    if (r.status.includes("Thắng") || r.status.includes("Đã lên đơn") || r.status.includes("Đã thanh toán")) {
+    if (
+      r.status.includes("Thắng") ||
+      r.status.includes("Đã lên đơn") ||
+      r.status.includes("Đã thanh toán")
+    ) {
       return "bg-green-50/50 hover:bg-green-100/50";
     }
     if (r.status.includes("Hủy")) {
@@ -129,6 +214,19 @@ export const TabResult = () => {
 
   return (
     <div className="bg-white rounded-xl shadow p-5 border border-gray-100">
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
+        <Select defaultValue="all-status" className="w-[150px]">
+          <Option value="all-status">Trạng thái</Option>
+          <Option value="active">Hoạt động</Option>
+          <Option value="locked">Bị khóa</Option>
+        </Select>
+
+        <Input
+          placeholder="Tìm khách hàng..."
+          prefix={<SearchOutlined className="text-gray-400" />}
+          className="!w-[300px]"
+        />
+      </div>
       <Table
         columns={columns as any}
         dataSource={data.map((row, idx) => ({ ...row, key: idx }))}

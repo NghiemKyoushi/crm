@@ -161,7 +161,7 @@ export const TabSettings = () => {
                         className="rounded-xl shadow-sm border border-gray-200 flex-1"
                     >
                         <div className="space-y-4">
-                            {getVipPackagesFields().map((vip, idx) => (
+                            {getVipPackagesFields().map((vip: any, idx: number) => (
                                 <Space key={idx} className="flex items-end gap-4 w-full" align="start">
                                     <Item
                                         name={['vipPackages', idx, 'name']}
@@ -214,7 +214,7 @@ export const TabSettings = () => {
                         className="rounded-xl shadow-sm border border-gray-200 flex-1"
                     >
                         <div className="space-y-4">
-                            {getYahooAccountsFields().map((account, idx) => (
+                            {getYahooAccountsFields().map((account: any, idx: number) => (
                                 <Item
                                     key={idx}
                                     name={["yahooAccounts", idx]}

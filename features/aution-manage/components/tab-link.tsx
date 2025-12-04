@@ -313,34 +313,37 @@ const ProductCard = ({ item }: { item: GroupedRow }) => {
                 <Button
                   size="small"
                   type="default"
-                  shape="circle"
-                  icon={<CheckOutlined />}
+                  shape="round"
                   onClick={() => openModal("accept", b)}
-                  className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition"
-                />
+                  className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
+                >
+                  <span className="text-xs">Xác&nbsp;nhận</span>
+                </Button>
               </Tooltip>
               <Tooltip title="Từ chối">
                 <Button
                   size="small"
                   type="default"
-                  shape="circle"
+                  shape="round"
                   danger
-                  icon={<CloseOutlined />}
                   onClick={() => openModal("reject", b)}
-                  className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition"
-                />
+                  className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
+                >
+                  <span className="text-xs">Từ&nbsp;chối</span>
+                </Button>
               </Tooltip>
             </>
           )}
-          <Tooltip title="Làm mới trạng thái">
+          <Tooltip title="Bom trạng thái">
             <Button
               size="small"
               type="default"
-              shape="circle"
-              icon={<ReloadOutlined />}
+              shape="round"
               onClick={() => onRefreshStatus(b)}
-              className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition"
-            />
+              className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+            >
+              <span className="text-xs">bom</span>
+            </Button>
           </Tooltip>
         </div>
       ),

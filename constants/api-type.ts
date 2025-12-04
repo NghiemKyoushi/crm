@@ -174,5 +174,11 @@ export const API_TYPE_CONST = {
   ANALYTICS_ORDERS_PENDING: `${FEATURE}/admin/analytics/orders/pending`,
   ANALYTICS_MATERIALS_PROFIT_LOSS: `${FEATURE}/admin/analytics/materials/profit-loss`,
   ANALYTICS_SUMMARY: `${FEATURE}/admin/analytics/summary`,
-  ORDER_HISTORY:`${FEATURE}/order-history/`
+  ORDER_HISTORY:`${FEATURE}/order-history/`,
+  AUTION_LINKS:`${FEATURE}/admin/auction-links`,
+  AUTION_CUSTOMERS:`${FEATURE}/admin/auction-customers`,
+  AUTION_APPROVE:`${FEATURE}/admin/auction/{id}/approve`,
+  AUTION_REJECT:`${FEATURE}/admin/auction/{auctionId}/reject-pending`,
+  AUTION_FINAL:`${FEATURE}/admin/auction/{id}/finalize`,
+  AUTION_CANCEL:`${FEATURE}/admin/auction/{id}/admin-cancel`
 } as const;

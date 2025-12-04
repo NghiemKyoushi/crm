@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Tooltip, Table, Input, Pagination, Avatar } from "antd";
-import { ReloadOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, ReloadOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 
 interface LinkItem {
   auction_id: number;
@@ -238,31 +238,44 @@ const LinkTable: React.FC<{
       align: "right" as const,
       width: 150,
       render: (_: any, record: LinkItem) => (
-        <div className="flex items-center justify-end gap-2 pr-2">
+        <div className="flex items-center justify-end gap-1.5">
           {record.status === "Chờ duyệt" && active && (
             <>
-              <Button
-                size="small"
-                className="bg-green-500 hover:bg-green-600 border-green-500 hover:border-green-600 text-white rounded-lg px-2 h-7 font-semibold text-xs"
-              >
-                Xác nhận
-              </Button>
-              <Button
-                size="small"
-                danger
-                className="rounded-lg px-2 h-7 font-semibold text-xs"
-              >
-                Từ chối
-              </Button>
+              <Tooltip title="Xác nhận đặt bid">
+                <Button
+                  size="small"
+                  type="default"
+                  shape="round"
+                  // onClick={() => onAccept(record)}
+                  className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
+                >
+                  <span className="text-xs">Xác&nbsp;nhận</span>
+                </Button>
+              </Tooltip>
+              <Tooltip title="Từ chối">
+                <Button
+                  size="small"
+                  type="default"
+                  shape="round"
+                  danger
+                  // onClick={() => onReject(record)}
+                  className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
+                >
+                  <span className="text-xs">Từ&nbsp;chối</span>
+                </Button>
+              </Tooltip>
             </>
           )}
           <Tooltip title="Làm mới trạng thái">
             <Button
               size="small"
-              shape="circle"
-              icon={<ReloadOutlined />}
-              className="border-gray-300 text-gray-500 hover:border-blue-500 hover:text-blue-500"
-            />
+              type="default"
+              shape="round"
+              // onClick={() => onRefreshStatus(record)}
+              className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+            >
+              <span className="text-xs">bom</span>
+            </Button>
           </Tooltip>
         </div>
       ),
