@@ -780,8 +780,9 @@ const TelesalesPage: React.FC = () => {
       render: (_: any, record: TelesaleCustomer) => {
         if (record.status === "UNASSIGNED") {
           return (
-            <div className="flex flex-col gap-1.5">
+            <div>
               {isTelesaleManager && (
+              <div className="flex flex-col gap-1.5">
                 <Button
                   size="small"
                   onClick={() => {
@@ -792,8 +793,7 @@ const TelesalesPage: React.FC = () => {
                 >
                   Gán Sale
                 </Button>
-              )}
-               <Button
+                <Button
                   size="small"
                   onClick={() => {
                     setDeleteCustomerModal({
@@ -805,6 +805,8 @@ const TelesalesPage: React.FC = () => {
                 >
                   Xoá khách hàng
                 </Button>
+              </div>
+              )}
             </div>
           );
         }
