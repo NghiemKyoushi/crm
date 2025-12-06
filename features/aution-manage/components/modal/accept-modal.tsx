@@ -1,11 +1,10 @@
 // src/components/BidDecisionModal.tsx
-import React, { useEffect } from "react";
-import { Modal, Form, Input } from "antd";
+import React, { useEffect, useState } from "react";
+import { Modal, Form, Checkbox } from "antd";
 import { BidItem } from "../tab-link";
+export type BidStatus = "Chờ duyệt" | "Đã đặt" ;
 
-export type BidStatus = "Chờ duyệt" | "Đã đặt" | "Từ chối";
-
-export type DecisionMode = "accept" | "reject";
+export type DecisionMode = "accept" | "reject" | "finish" | "cancel";
 
 type BidDecisionModalProps = {
   mode: DecisionMode;
@@ -15,7 +14,10 @@ type BidDecisionModalProps = {
   cancelText?: string;
   confirmLoading?: boolean;
   onCancel: () => void;
-  onConfirm: (payload: { reason?: string }) => Promise<void> | void;
+  onConfirm: (payload: {
+    reason?: string;
+    activateIfScheduled?: boolean;
+  }) => Promise<void> | void;
 };
 
 export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
@@ -29,10 +31,12 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
   onConfirm,
 }) => {
   const [form] = Form.useForm();
+  const [activateIfScheduled, setActivateIfScheduled] = useState(false);
 
   useEffect(() => {
     if (!open) {
       form.resetFields();
+      setActivateIfScheduled(false); // reset checkbox when modal closed
     }
   }, [open, form]);
 
@@ -46,7 +50,7 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
         await onConfirm({ reason: values.reason });
       } catch {}
     } else {
-      await onConfirm({});
+      await onConfirm({ activateIfScheduled }); // truyền giá trị xử lý phiên đấu giá
     }
   };
 
@@ -69,7 +73,7 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
     >
       {isReject ? (
         <Form form={form} layout="vertical" initialValues={{ reason: "" }}>
-          <Form.Item
+          {/* <Form.Item
             label="Lý do từ chối"
             name="reason"
             rules={[
@@ -83,21 +87,46 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
               maxLength={500}
               showCount
             />
-          </Form.Item>
+          </Form.Item> */}
+          <div>
+            Bạn có chắc muốn <b>từ chối</b> bid của{" "}
+            <b>{bid?.full_name ?? "khách hàng"}</b> với số tiền{" "}
+            <b>
+              {bid?.bid_amount?.toLocaleString("ja-JP", {
+                style: "currency",
+                currency: "JPY",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </b>
+            ?
+          </div>
         </Form>
       ) : (
         <div className="text-sm text-gray-700">
-          Bạn có chắc muốn <b>chấp nhận</b> bid của{" "}
-          <b>{bid?.full_name ?? "khách hàng"}</b> với số tiền{" "}
-          <b>
-            {bid?.bid_amount?.toLocaleString("ja-JP", {
-              style: "currency",
-              currency: "JPY",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
-          </b>
-          ?
+          <div>
+            Bạn có chắc muốn <b>chấp nhận</b> bid của{" "}
+            <b>{bid?.full_name ?? "khách hàng"}</b> với số tiền{" "}
+            <b>
+              {bid?.bid_amount?.toLocaleString("ja-JP", {
+                style: "currency",
+                currency: "JPY",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </b>
+            ?
+          </div>
+          {bid?.auction_type === "SNIPER" && (
+            <div className="mt-4">
+              <Checkbox
+                checked={activateIfScheduled}
+                onChange={(e) => setActivateIfScheduled(e.target.checked)}
+              >
+                Xử lý phiên đấu giá luôn (bỏ chọn để giữ trạng thái lịch)
+              </Checkbox>
+            </div>
+          )}
         </div>
       )}
     </Modal>

@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Button, Tooltip, Table, Input, Pagination, Avatar } from "antd";
-import { CheckOutlined, CloseOutlined, ReloadOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { useAuctionCustomers } from "../hooks/aution-manage";
+import { StatusTag } from "./tab-link"; // BidItem removed because it causes column rendering bug
+import { toast } from "react-toastify";
+import { DecisionMode } from "./modal/accept-modal";
+import { BidDecisionCusModal } from "./modal/accept-customer-modal";
 
-interface LinkItem {
+export interface LinkItem {
   auction_id: number;
   title: string;
   url: string;
@@ -29,163 +34,55 @@ interface CustomerItem {
   };
 }
 
-interface ApiResponse {
-  success: boolean;
-  timestamp: string;
-  code: number;
-  message: string;
-  message_key: string;
-  data: {
-    data: CustomerItem[];
-    total_pages: number;
-    total_items: number;
-    current_page: number;
-    page_size: number;
-  };
-  errors: null;
-}
-
-// Fake API response
-const fakeApiResponse: ApiResponse = {
-  success: true,
-  timestamp: "2024-05-11T10:00:00Z",
-  code: 0,
-  message: "Thành công",
-  message_key: "success",
-  data: {
-    data: [
-      {
-        user_id: 1,
-        full_name: "Nguyễn Văn A77777",
-        avatar: "",
-        vip_level: "VIP1",
-        slot_used: 1,
-        slot_total: 2,
-        violation_count: 0,
-        links: {
-          data: [
-            {
-              auction_id: 101,
-              title: "Nintendo Switch OLED",
-              url: "https://auctionsite.com/item/101",
-              bid_amount: 52000,
-              status: "Chờ duyệt",
-              reason: "",
-              created_at: "2024-05-10 14:00:00"
-            },
-            {
-              auction_id: 102,
-              title: "Leica M6 Camera",
-              url: "https://auctionsite.com/item/102",
-              bid_amount: 95000,
-              status: "Đã đặt",
-              reason: "",
-              created_at: "2024-05-09 11:30:00"
-            }
-          ],
-          total_pages: 1,
-          total_items: 2,
-          current_page: 1,
-          page_size: 10
-        }
-      },
-      {
-        user_id: 2,
-        full_name: "Trần Thị B",
-        avatar: "",
-        vip_level: "VIP2",
-        slot_used: 48,
-        slot_total: 50,
-        violation_count: 0,
-        links: {
-          data: [
-            {
-              auction_id: 103,
-              title: "Leica M6 Camera",
-              url: "https://auctionsite.com/item/103",
-              bid_amount: 90000,
-              status: "Đã đặt",
-              reason: "",
-              created_at: "2024-05-06 16:06:00"
-            },
-            {
-              auction_id: 104,
-              title: "Nintendo Switch OLED",
-              url: "https://auctionsite.com/item/104",
-              bid_amount: 55000,
-              status: "Đã đặt",
-              reason: "",
-              created_at: "2024-05-06 18:21:00"
-            },
-            {
-              auction_id: 105,
-              title: "Canon R5",
-              url: "https://auctionsite.com/item/105",
-              bid_amount: 120000,
-              status: "Chờ duyệt",
-              reason: "",
-              created_at: "2024-05-07 07:50:00"
-            }
-          ],
-          total_pages: 1,
-          total_items: 3,
-          current_page: 1,
-          page_size: 10
-        }
-      },
-      {
-        user_id: 3,
-        full_name: "Phạm Văn D",
-        avatar: "",
-        vip_level: "VIP2",
-        slot_used: 50,
-        slot_total: 50,
-        violation_count: 3,
-        links: {
-          data: [
-            {
-              auction_id: 110,
-              title: "Leica M6 Camera",
-              url: "https://auctionsite.com/item/110",
-              bid_amount: 88000,
-              status: "Từ chối",
-              reason: "Còn <15s",
-              created_at: "2024-05-08 09:15:00"
-            }
-          ],
-          total_pages: 1,
-          total_items: 1,
-          current_page: 1,
-          page_size: 10
-        }
-      }
-    ],
-    total_pages: 1,
-    total_items: 3,
-    current_page: 1,
-    page_size: 10
-  },
-  errors: null
-};
-
-const StatusTag: React.FC<{ text: string; type?: "warning" | "info" | "error" }> = ({ text, type }) => {
-  let colorClass = "bg-gray-100 text-gray-800 border-gray-200";
-  if (type === "warning") colorClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
-  if (type === "info") colorClass = "bg-blue-100 text-blue-800 border-blue-200";
-  if (type === "error") colorClass = "bg-red-100 text-red-800 border-red-200";
-  return (
-    <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${colorClass}`}>
-      {text}
-    </span>
-  );
-};
-
 const formatBid = (amount: number) => `¥${amount.toLocaleString("en-US")}`;
 
 const LinkTable: React.FC<{
   links: LinkItem[];
   active: boolean;
 }> = ({ links, active }) => {
+  // Fix lỗi cột table: openModal và onRefreshStatus phải được khai báo trước khi columns
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const [decisionMode, setDecisionMode] = useState<DecisionMode>("accept");
+  const [selectedBid, setSelectedBid] = useState<LinkItem | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const openModal = (mode: DecisionMode, bid: LinkItem) => {
+    setDecisionMode(mode);
+    setSelectedBid(bid);
+    setDecisionOpen(true);
+  };
+
+  const closeModal = () => {
+    setDecisionOpen(false);
+    setSelectedBid(null);
+    setConfirmLoading(false);
+  };
+
+  const handleConfirm = async (payload: { reason?: string }) => {
+    if (!selectedBid) return;
+    try {
+      setConfirmLoading(true);
+
+      // TODO: Call actual API here
+      // if (decisionMode === "accept") await api.acceptBid({ id: selectedBid.id });
+      // else await api.rejectBid({ id: selectedBid.id, reason: payload.reason });
+
+      toast.success(
+        decisionMode === "accept" ? "Đã chấp nhận bid." : "Đã từ chối bid."
+      );
+      closeModal();
+    } catch (e) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      setConfirmLoading(false);
+    }
+  };
+
+  const onRefreshStatus = async (bid: LinkItem) => {
+    // TODO: call API for new status for this bid
+    toast.info("Đã làm mới trạng thái (demo).");
+  };
+
+  // Đã fix: type record và tham số trong render các cột phải thống nhất dùng LinkItem
   const columns = [
     {
       title: <span className="text-xs font-medium text-gray-500">Link</span>,
@@ -194,7 +91,20 @@ const LinkTable: React.FC<{
       width: 180,
       render: (text: string, record: LinkItem) => (
         <div>
-          <div className="font-medium text-sm truncate">{text}</div>
+          <Tooltip title={text}>
+            <div
+              className="font-medium text-sm truncate max-w-[152px]" // 180px col - paddings
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 160,
+                display: "block",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
           <div className="text-xs text-blue-600 truncate">
             {record?.auction_id ? `n${record.auction_id}` : ""}
           </div>
@@ -206,18 +116,40 @@ const LinkTable: React.FC<{
       dataIndex: "bid_amount",
       key: "bid_amount",
       width: 100,
-      render: (val: number) => <span className="text-green-600 font-semibold text-sm">{formatBid(val)}</span>,
+      render: (val: number) => (
+        <span className="text-green-600 font-semibold text-sm">
+          {formatBid(val)}
+        </span>
+      ),
     },
     {
-      title: <span className="text-xs font-medium text-gray-500">Trạng thái</span>,
+      title: (
+        <span className="text-xs font-medium text-gray-500">Trạng thái</span>
+      ),
       dataIndex: "status",
       key: "status",
       width: 120,
       render: (status: string) => {
-        if (status === "Đã đặt") return <StatusTag text="Đã đặt" type="info" />;
-        if (status === "Chờ duyệt") return <StatusTag text="Chờ duyệt" type="warning" />;
-        if (status === "Từ chối") return <StatusTag text="Từ chối" type="error" />;
-        return <StatusTag text={status} />;
+        switch (status) {
+          case "PENDING":
+            return <StatusTag text="Chờ duyệt" type="warning" />;
+          case "READY":
+            return <StatusTag text="Sẵn sàng Sniper" type="info" />;
+          case "ACTIVE":
+            return <StatusTag text="Đang diễn ra" type="info" />;
+          case "FINISHED_WIN":
+            return <StatusTag text="Thắng đấu giá" type="info" />;
+          case "FINISHED_NO_BIDS":
+            return <StatusTag text="Không có ai tham gia" type="warning" />;
+          case "ADMIN_CANCELLED":
+            return <StatusTag text="Admin đã hủy" type="error" />;
+          case "REJECTED":
+            return <StatusTag text="Admin từ chối" type="error" />;
+          case "USER_CANCELLED":
+            return <StatusTag text="Người dùng hủy" type="error" />;
+          default:
+            return null;
+        }
       },
     },
     {
@@ -233,52 +165,93 @@ const LinkTable: React.FC<{
         ),
     },
     {
-      title: <span className="text-xs font-medium text-gray-500">Thao tác</span>,
+      title: (
+        <span className="text-xs font-medium text-gray-500">Thao tác</span>
+      ),
       key: "actions",
       align: "right" as const,
       width: 150,
-      render: (_: any, record: LinkItem) => (
-        <div className="flex items-center justify-end gap-1.5">
-          {record.status === "Chờ duyệt" && active && (
-            <>
-              <Tooltip title="Xác nhận đặt bid">
-                <Button
-                  size="small"
-                  type="default"
-                  shape="round"
-                  // onClick={() => onAccept(record)}
-                  className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
-                >
-                  <span className="text-xs">Xác&nbsp;nhận</span>
-                </Button>
-              </Tooltip>
-              <Tooltip title="Từ chối">
-                <Button
-                  size="small"
-                  type="default"
-                  shape="round"
-                  danger
-                  // onClick={() => onReject(record)}
-                  className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
-                >
-                  <span className="text-xs">Từ&nbsp;chối</span>
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          <Tooltip title="Làm mới trạng thái">
-            <Button
-              size="small"
-              type="default"
-              shape="round"
-              // onClick={() => onRefreshStatus(record)}
-              className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-            >
-              <span className="text-xs">bom</span>
-            </Button>
-          </Tooltip>
-        </div>
-      ),
+      render: (_: any, b: LinkItem) => {
+        // dùng type LinkItem cho b để tránh lỗi
+        switch (b.status) {
+          case "PENDING":
+            return (
+              <div className="flex items-center justify-center gap-1.5">
+                <Tooltip title="Xác nhận đặt bid">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
+                    onClick={() => openModal("accept", b)}
+                    className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
+                  >
+                    <span className="text-xs">Xác&nbsp;nhận</span>
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Từ chối">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
+                    danger
+                    onClick={() => openModal("reject", b)}
+                    className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
+                  >
+                    <span className="text-xs">Từ&nbsp;chối</span>
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Bom trạng thái">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
+                    onClick={() => onRefreshStatus(b)}
+                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                  >
+                    <span className="text-xs">bom</span>
+                  </Button>
+                </Tooltip>
+              </div>
+            );
+          case "READY":
+          case "ACTIVE":
+          case "FINISHED_WIN":
+          case "FINISHED_NO_BIDS":
+          case "ADMIN_CANCELLED":
+          case "USER_CANCELLED":
+            return (
+              <div className="flex items-center justify-center gap-1.5">
+                <Tooltip title="Bom trạng thái">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
+                    onClick={() => onRefreshStatus(b)}
+                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                  >
+                    <span className="text-xs">bom</span>
+                  </Button>
+                </Tooltip>
+              </div>
+            );
+          default:
+            return (
+              <div className="flex items-center justify-center gap-1.5">
+                <Tooltip title="Bom trạng thái">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
+                    onClick={() => onRefreshStatus(b)}
+                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                  >
+                    <span className="text-xs">bom</span>
+                  </Button>
+                </Tooltip>
+              </div>
+            );
+        }
+      },
     },
   ];
 
@@ -291,7 +264,10 @@ const LinkTable: React.FC<{
   return (
     <div className="rounded-xl">
       <Table
-        dataSource={(links || []).map((link, index) => ({ ...link, key: index.toString() }))}
+        dataSource={(links || []).map((link, index) => ({
+          ...link,
+          key: index.toString(),
+        }))}
         columns={columns}
         pagination={false}
         rowKey="key"
@@ -301,13 +277,26 @@ const LinkTable: React.FC<{
         rowClassName={rowClassName}
         style={{ border: "none" }}
       />
+      {selectedBid && (
+        <BidDecisionCusModal
+          mode={decisionMode}
+          open={decisionOpen}
+          bid={selectedBid}
+          onCancel={closeModal}
+          onConfirm={handleConfirm}
+          confirmLoading={confirmLoading}
+        />
+      )}
     </div>
   );
 };
 
 const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
-  // Determine if user is locked: violation_count >= slot_total => blocked
-  const isBlocked = customer.violation_count >= 3 || customer.slot_used >= customer.slot_total && customer.violation_count === 3;
+  // Blocked nếu violation_count >= 3
+  const isBlocked =
+    customer.violation_count >= 3 ||
+    (customer.slot_used >= customer.slot_total &&
+      customer.violation_count === 3);
   const active = !isBlocked && customer.slot_used < customer.slot_total;
 
   const getAvatarText = (name: string) => {
@@ -344,7 +333,7 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: active ? "#3b82f6" : "#f87171", // fallback tailwind color
+              backgroundColor: active ? "#3b82f6" : "#f87171",
             }}
             src={customer.avatar || undefined}
             icon={!customer.avatar ? <UserOutlined /> : undefined}
@@ -356,13 +345,16 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
               {customer.full_name}
             </div>
             <div className="text-xs text-gray-500 truncate">
-              {customer.vip_level} • {customer.slot_used}/{customer.slot_total} slot • {customer.violation_count}/3 vi phạm
+              {customer.vip_level} • {customer.slot_used}/{customer.slot_total}{" "}
+              slot • {customer.violation_count}/3 vi phạm
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end flex-shrink-0">
           {active ? (
-            <span className="text-green-600 text-sm font-semibold">Hoạt động</span>
+            <span className="text-green-600 text-sm font-semibold">
+              Hoạt động
+            </span>
           ) : (
             <span className="text-red-600 text-sm font-semibold">Bị khóa</span>
           )}
@@ -379,19 +371,14 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
 };
 
 export const TabCustomer: React.FC = () => {
-  const { data: apiData } = fakeApiResponse;
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = apiData.page_size || 5;
+  const [currentPage, setCurrentPage] = useState<number>(0); // fix: pagination current should start at 1
+  const [size] = useState<number>(10);
 
-  // paginated customers
-  const totalCustomers = apiData.total_items || apiData.data.length;
-  const totalPages = apiData.total_pages || 1;
+  // Sử dụng hook để lấy danh sách khách hàng
+  const { data, isLoading } = useAuctionCustomers({ page: currentPage, size });
 
-  // Get correct page slice (simulate pagination)
-  const customers = apiData.data.slice(
-    (currentPage - 1) * pageSize,
-    (currentPage - 1) * pageSize + pageSize
-  );
+  // fix: data structure
+  const customers: CustomerItem[] = data?.data?.data || [];
 
   return (
     <div className="p-4 bg-white border border-gray-100">
@@ -400,33 +387,34 @@ export const TabCustomer: React.FC = () => {
           placeholder="Tìm kiếm khách hàng..."
           prefix={<SearchOutlined />}
           className="w-80 h-10 rounded-lg"
+          // onChange={} // TODO: optional sau nếu có filter/search
         />
       </div>
       <div className="space-y-7">
-        {customers.map((customer) => (
-          <CustomerCard key={customer.user_id} customer={customer} />
-        ))}
-      </div>
-      {totalCustomers > pageSize && (
-        <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-6">
-          <div className="text-gray-500 text-sm">
-            Hiển thị {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalCustomers)} / <b>{totalCustomers} khách hàng</b>
+        {isLoading ? (
+          <div className="text-center text-gray-400 py-12">Đang tải...</div>
+        ) : customers.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">
+            Không có khách hàng nào.
           </div>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={totalCustomers}
-            onChange={setCurrentPage}
-            showSizeChanger={false}
-            className="flex items-center"
-            itemRender={(current, type, originalElement) => {
-              if (type === "prev") return <span className="font-semibold">Trước</span>;
-              if (type === "next") return <span className="font-semibold">Sau</span>;
-              return originalElement;
-            }}
-          />
-        </div>
-      )}
+        ) : (
+          customers.map((customer: CustomerItem) => (
+            <CustomerCard key={customer.user_id} customer={customer} />
+          ))
+        )}
+      </div>
+      <div className="flex justify-between items-center pt-5 border-t border-gray-100 mt-8">
+        <div className="text-gray-500 text-sm pl-1"></div>
+
+        <Pagination
+          current={currentPage}
+          pageSize={data?.data?.page_size}
+          total={data?.data?.total_items}
+          onChange={(page) => setCurrentPage(page)}
+          size="small"
+          showSizeChanger={false}
+        />
+      </div>
     </div>
   );
 };
