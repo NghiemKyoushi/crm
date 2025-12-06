@@ -176,4 +176,5 @@ export const API_TYPE_CONST = {
   ANALYTICS_SUMMARY: `${FEATURE}/admin/analytics/summary`,
   ORDER_HISTORY:`${FEATURE}/order-history/`,
   DELETE_TELESALE:`${FEATURE}/admin/telesales/contacts/bulk-delete`,
+  EXPORT_TRACKING:`${FEATURE}/orders/export-tracking/`
 } as const;
