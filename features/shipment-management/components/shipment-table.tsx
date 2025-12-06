@@ -16,7 +16,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Order, OrderItem } from "@/types/shipment-manage";
 import EnhancedTableWrapper from "@/components/EnhancedTableWrapper";
-import { DownOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  FileExcelOutlined,
+  FilePdfOutlined,
+} from "@ant-design/icons";
 import ShipmentFilter, { FilterTypeShipment } from "./shipment-filter";
 
 function removeUndefinedFields<T extends Record<string, any>>(
@@ -42,7 +46,10 @@ function shallowEqual(objA: Record<string, any>, objB: Record<string, any>) {
   return true;
 }
 
-import { updateStatusPackaged } from "@/features/order-hub/apis/orderhub";
+import {
+  exportTracking,
+  updateStatusPackaged,
+} from "@/features/order-hub/apis/orderhub";
 import { useRouter } from "next/navigation";
 import { usePermission } from "@/components/layout/PermissionContext";
 
@@ -81,19 +88,16 @@ const ProductManagement: React.FC = () => {
 
   // Full access permissions
   const hasFullAccess =
-    hasPermission("warehouse.management_wh2") ||
-    hasPermission("system.admin");
+    hasPermission("warehouse.management_wh2") || hasPermission("system.admin");
 
   // Permission checks for actions
   // Nút "Đã đóng hàng" - warehouse.pick_and_pack_wh2 hoặc toàn quyền
   const canConfirmPacked =
-    hasFullAccess ||
-    hasPermission("warehouse.pick_and_pack_wh2");
+    hasFullAccess || hasPermission("warehouse.pick_and_pack_wh2");
 
   // Nút "Đã giao hàng" - warehouse.shipment_wh2 hoặc toàn quyền
   const canConfirmShipped =
-    hasFullAccess ||
-    hasPermission("warehouse.shipment_wh2");
+    hasFullAccess || hasPermission("warehouse.shipment_wh2");
 
   const [filters, setFilters] = useState<FilterTypeShipment>({
     search: undefined,
@@ -173,6 +177,25 @@ const ProductManagement: React.FC = () => {
   const useCompleteShippingMutation = useCompleteShippingOrder();
   const useConfirmPackedMutation = useConfirmPacked();
 
+  // Thêm biến loading để tránh bấm liên tục vào nút "Xuất Excel" và "Xuất PDF"
+  const [exportLoading, setExportLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  const base64ToUint8Array = (base64: string): Uint8Array => {
+    const cleanedBase64 = base64.split(",").pop() as string;
+
+    // Sử dụng atob() an toàn
+    const byteCharacters = atob(cleanedBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    return new Uint8Array(byteNumbers);
+  };
+
   const columns: ColumnsType<Order> = [
     {
       title: "Mã XK / SL",
@@ -245,7 +268,7 @@ const ProductManagement: React.FC = () => {
               <Tooltip title={record.final_tracking || "-"}>
                 <span
                   className="text-gray-800 max-w-[110px] inline-block truncate align-bottom"
-                  style={{ verticalAlign: 'bottom' }}
+                  style={{ verticalAlign: "bottom" }}
                 >
                   {record.final_tracking || "-"}
                 </span>
@@ -280,10 +303,17 @@ const ProductManagement: React.FC = () => {
           "4": "Khách hàng trả",
         };
         let shippingTypeText = "-";
-        if (record.shipping_type !== undefined && record.shipping_type !== null) {
-          shippingTypeText = shippingTypeMap[record.shipping_type as keyof typeof shippingTypeMap] ?? "-";
+        if (
+          record.shipping_type !== undefined &&
+          record.shipping_type !== null
+        ) {
+          shippingTypeText =
+            shippingTypeMap[
+              record.shipping_type as keyof typeof shippingTypeMap
+            ] ?? "-";
         }
-        const shouldShowFee = record.shipping_type === "2" || record.shipping_type === "4";
+        const shouldShowFee =
+          record.shipping_type === "2" || record.shipping_type === "4";
 
         return (
           <div className="space-y-1">
@@ -291,7 +321,9 @@ const ProductManagement: React.FC = () => {
               <div className="text-xs">
                 <span className="text-gray-500">Phí: </span>
                 <span className="text-gray-800 font-medium">
-                  {typeof record.shipping_fee === 'number' ? `${record.shipping_fee.toLocaleString("en-US")}đ` : "-"}
+                  {typeof record.shipping_fee === "number"
+                    ? `${record.shipping_fee.toLocaleString("en-US")}đ`
+                    : "-"}
                 </span>
               </div>
             )}
@@ -303,8 +335,7 @@ const ProductManagement: React.FC = () => {
             </div>
           </div>
         );
-      }
-
+      },
     },
     {
       title: "Khách Hàng / NTạo",
@@ -455,18 +486,19 @@ const ProductManagement: React.FC = () => {
               {text}
             </Tag>
             {/* Nút "Đã đóng hàng" - chỉ hiển thị khi có permission */}
-            {status === OrderStatusType.SHIPPING_REQUEST_CLIENT && canConfirmPacked && (
-              <Button
-                size="small"
-                className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
-                onClick={() => {
-                  setPackedOrder(record);
-                  setIsPackedModalOpen(true);
-                }}
-              >
-                Đã đóng hàng
-              </Button>
-            )}
+            {status === OrderStatusType.SHIPPING_REQUEST_CLIENT &&
+              canConfirmPacked && (
+                <Button
+                  size="small"
+                  className="!bg-green-500 hover:!bg-green-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                  onClick={() => {
+                    setPackedOrder(record);
+                    setIsPackedModalOpen(true);
+                  }}
+                >
+                  Đã đóng hàng
+                </Button>
+              )}
             {/* Nút "Đã giao hàng" - chỉ hiển thị khi có permission */}
             {status === OrderStatusType.PACKED && canConfirmShipped && (
               <Button
@@ -480,6 +512,187 @@ const ProductManagement: React.FC = () => {
                 {t("button.shipped")}
               </Button>
             )}
+            <div className="flex flex-row gap-2 w-full">
+              {/* {["excel", "pdf"].map((type) => {
+                const isExcel = type === "excel";
+                const isLoading = !!exportLoading[`${type}_${record.tracking_ship}`];
+                const isDisabled =
+                  !!exportLoading[`excel_${record.tracking_ship}`] ||
+                  !!exportLoading[`pdf_${record.tracking_ship}`];
+                const btnProps = {
+                  size: "small" as const,
+                  loading: isLoading,
+                  disabled: isDisabled,
+                  className: `!bg-${isExcel ? "green" : "orange"}-500 hover:!bg-${isExcel ? "green" : "orange"}-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full`,
+                  onClick: async () => {
+                    if (isDisabled) return;
+                    setExportLoading((prev) => ({
+                      ...prev,
+                      [`${type}_${record.tracking_ship}`]: true,
+                    }));
+                    try {
+                      const res = await exportTracking(
+                        record.tracking_ship,
+                        type
+                      );
+                      console.log('res', res);
+
+                      // Check structure: res = { file: string (base64), contentType: string }
+                      if (!res?.file) throw new Error("Không nhận được file để tải xuống");
+
+                      // Decode base64 to binary
+                      const byteCharacters = atob(res.file);
+                      const byteNumbers = new Array(byteCharacters.length);
+                      for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                      }
+                      const byteArray = new Uint8Array(byteNumbers);
+
+                      // chọn MIME type từ response nếu có, nếu không fallback theo loại file
+                      const blobType = res.contentType
+                        ? res.contentType
+                        : (isExcel
+                          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          : "application/pdf");
+                      
+                      const blob = new Blob([byteArray], { type: blobType });
+                      const url = window.URL.createObjectURL(blob);
+
+                      const extension = isExcel ? "xlsx" : "pdf";
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.setAttribute(
+                        "download",
+                        `tracking_${record.tracking_ship || "export"}.${extension}`
+                      );
+                      document.body.appendChild(link);
+                      link.click();
+                      link.parentNode?.removeChild(link);
+                      setTimeout(() => window.URL.revokeObjectURL(url), 2000); // Clean up
+                    } catch (error) {
+                      toast.error(`Xuất file ${isExcel ? "Excel" : "PDF"} thất bại!`);
+                    } finally {
+                      setExportLoading((prev) => ({
+                        ...prev,
+                        [`${type}_${record.tracking_ship}`]: false,
+                      }));
+                    }
+                  },
+                  children: (
+                    <>
+                      {isExcel ? <FileExcelOutlined /> : <FilePdfOutlined />}
+                      {isExcel ? "Xuất Excel" : "Xuất PDF"}
+                    </>
+                  ),
+                };
+                return <Button key={type} {...btnProps} />;
+              })} */}
+              <div className="flex flex-row gap-2 w-full">
+                {/* Khai báo type là 'excel' | 'pdf' để TypeScript biết giá trị hợp lệ */}
+                {(["excel", "pdf"] as const).map((type) => {
+                  const isExcel = type === "excel";
+                  const isLoading =
+                    !!exportLoading[`${type}_${record.tracking_ship}`];
+
+                  // Disabled logic
+                  const isDisabled =
+                    !!exportLoading[`excel_${record.tracking_ship}`] ||
+                    !!exportLoading[`pdf_${record.tracking_ship}`];
+
+                  const btnProps = {
+                    size: "small" as const,
+                    loading: isLoading,
+                    disabled: isDisabled,
+                    // Sử dụng template string và đảm bảo cú pháp Tailwind CSS/CSS-in-JS
+                    className: `!bg-${
+                      isExcel ? "green" : "orange"
+                    }-500 hover:!bg-${
+                      isExcel ? "green" : "orange"
+                    }-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full`,
+                    onClick: async () => {
+                      if (isDisabled) return;
+
+                      setExportLoading((prev) => ({
+                        ...prev,
+                        [`${type}_${record.tracking_ship}`]: true,
+                      }));
+
+                      try {
+                        const res = await exportTracking(
+                          record.tracking_ship,
+                          type
+                        );
+
+                        if (!res) {
+                          throw new Error(
+                            "Không nhận được dữ liệu file để tải xuống."
+                          );
+                        }
+
+                        // ✅ Sử dụng hàm chuyển đổi Base64 an toàn
+                        const byteArray = base64ToUint8Array(res) as Uint8Array;
+
+                        // ✅ Kiểu dữ liệu string cho blobType
+                        const blobType: string = res.contentType
+                          ? res.contentType
+                          : isExcel
+                          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          : "application/pdf";
+
+                        const blob = new Blob([byteArray as unknown as BlobPart], {
+                          type: blobType,
+                        });
+                        const url = window.URL.createObjectURL(blob);
+
+                        const extension = isExcel ? "xlsx" : "pdf";
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.setAttribute(
+                          "download",
+                          `Ma_XK_${
+                            record.tracking_ship || "export"
+                          }.${extension}`
+                        );
+
+                        document.body.appendChild(link);
+                        link.click();
+                        link.parentNode?.removeChild(link);
+
+                        setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+
+                        toast.success(
+                          `Xuất file ${isExcel ? "Excel" : "PDF"} thành công!`
+                        );
+                      } catch (error) {
+                        console.error("Lỗi xuất file:", error);
+                        // Ép kiểu error sang Error nếu cần in ra thông báo chi tiết
+                        const errorMessage =
+                          error instanceof Error
+                            ? error.message
+                            : "Lỗi không xác định";
+                        toast.error(
+                          `Xuất file ${
+                            isExcel ? "Excel" : "PDF"
+                          } thất bại! Chi tiết: ${errorMessage}`
+                        );
+                      } finally {
+                        setExportLoading((prev) => ({
+                          ...prev,
+                          [`${type}_${record.tracking_ship}`]: false,
+                        }));
+                      }
+                    },
+                    children: (
+                      <span className="flex items-center justify-center gap-1">
+                        {isExcel ? <FileExcelOutlined /> : <FilePdfOutlined />}
+                        {isExcel ? "Xuất Excel" : "Xuất PDF"}
+                      </span>
+                    ),
+                  };
+                  return <Button key={type} {...btnProps} />;
+                })}
+              </div>
+            </div>
           </div>
         );
       },
@@ -493,42 +706,43 @@ const ProductManagement: React.FC = () => {
       </div>
 
       <EnhancedTableWrapper className="overflow-x-auto">
-          <TableComponent
-            columns={columns}
-            dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
-            rowKey="tracking_ship"
-            pageSize={10}
-            page={
-              typeof listOrder?.current_page === "number"
-                ? listOrder.current_page + 1
-                : 0
-            }
-            onPageChange={handleChangePage}
-            response={listOrder}
-            loading={isPending}
-            expandable={{
-              expandedRowRender: (record: Order) => (
-                <ExpandedOrderDetails orderList={record.order_list || []} />
-              ),
-              rowExpandable: (record) => (record.order_list || []).length > 0,
-              expandIcon: ({ expanded, onExpand, record }) => (
-                <Button
-                  type="text"
-                  size="small"
-                  icon={
-                    <DownOutlined
-                      className={`text-xs transition-transform ${expanded ? "rotate-180" : ""
-                        }`}
-                    />
-                  }
-                  onClick={(e) => onExpand(record, e)}
-                  className="!p-1"
-                />
-              ),
-            }}
-            scroll={{ x: "max-content" }}
-            size="small"
-          />
+        <TableComponent
+          columns={columns}
+          dataSource={Array.isArray(listOrder?.data) ? listOrder.data : []}
+          rowKey="tracking_ship"
+          pageSize={10}
+          page={
+            typeof listOrder?.current_page === "number"
+              ? listOrder.current_page + 1
+              : 0
+          }
+          onPageChange={handleChangePage}
+          response={listOrder}
+          loading={isPending}
+          expandable={{
+            expandedRowRender: (record: Order) => (
+              <ExpandedOrderDetails orderList={record.order_list || []} />
+            ),
+            rowExpandable: (record) => (record.order_list || []).length > 0,
+            expandIcon: ({ expanded, onExpand, record }) => (
+              <Button
+                type="text"
+                size="small"
+                icon={
+                  <DownOutlined
+                    className={`text-xs transition-transform ${
+                      expanded ? "rotate-180" : ""
+                    }`}
+                  />
+                }
+                onClick={(e) => onExpand(record, e)}
+                className="!p-1"
+              />
+            ),
+          }}
+          scroll={{ x: "max-content" }}
+          size="small"
+        />
       </EnhancedTableWrapper>
 
       <Modal
@@ -550,8 +764,8 @@ const ProductManagement: React.FC = () => {
                 onError: (err: any) =>
                   toast.error(
                     err.response?.data?.localizedMessage ||
-                    t("common.error") ||
-                    "Có lỗi"
+                      t("common.error") ||
+                      "Có lỗi"
                   ),
               }
             );
@@ -615,7 +829,7 @@ const ProductManagement: React.FC = () => {
 // Component hiển thị chi tiết từng order trong vận đơn
 function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
   const { t } = useTranslation();
-  const router = useRouter()
+  const router = useRouter();
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -676,7 +890,9 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           if (record.invoice_no) {
             // Remove all # characters from invoice_no before using in URL
             const sanitizedInvoiceNo = record.invoice_no.replace(/#/g, "");
-            router.push(`/orderhub?invoice_no=${encodeURIComponent(sanitizedInvoiceNo)}`);
+            router.push(
+              `/orderhub?invoice_no=${encodeURIComponent(sanitizedInvoiceNo)}`
+            );
           }
         };
         return (
@@ -705,7 +921,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
             <Tooltip title={record.tracking_final || "-"}>
               <span
                 className="text-gray-800 max-w-[110px] inline-block truncate align-bottom"
-                style={{ verticalAlign: 'bottom' }}
+                style={{ verticalAlign: "bottom" }}
               >
                 {record.tracking_final || "-"}
               </span>
@@ -715,11 +931,18 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           <div className="text-xs">
             <span className="text-gray-500">JP: </span>
             <span className="text-gray-800">
-              {record.tracking_japans && Array.isArray(record.tracking_japans) && record.tracking_japans.length > 0
+              {record.tracking_japans &&
+              Array.isArray(record.tracking_japans) &&
+              record.tracking_japans.length > 0
                 ? record.tracking_japans.map((jp, idx) => (
                     <span key={jp}>
-                      <span className="px-1 py-[2px] bg-blue-100 rounded text-blue-700 mr-1">{jp}</span>
-                      {record.tracking_japans && idx < record.tracking_japans.length - 1 && <span>, </span>}
+                      <span className="px-1 py-[2px] bg-blue-100 rounded text-blue-700 mr-1">
+                        {jp}
+                      </span>
+                      {record.tracking_japans &&
+                        idx < record.tracking_japans.length - 1 && (
+                          <span>, </span>
+                        )}
                     </span>
                   ))
                 : "-"}
@@ -916,7 +1139,7 @@ function ExpandedOrderDetails({ orderList }: { orderList: OrderItem[] }) {
           case OrderStatusType.CANCELED:
             text = t("status.cancelled");
             break;
-            case OrderStatusType.PACKED:
+          case OrderStatusType.PACKED:
             text = t("status.packed");
             break;
           default:

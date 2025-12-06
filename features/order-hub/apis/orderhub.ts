@@ -320,3 +320,15 @@ export const getOrderHistory = async (orderId: number) => {
   return res.data.data;
 };
 
+// API to export tracking with id parameter
+export const exportTracking = async (trackingShip: string, type: string) => {
+  const res = await api.get(
+    `${API_TYPE_CONST.EXPORT_TRACKING}${trackingShip}`,
+    {
+      params: { type },
+      // responseType: 'blob', // không cần thiết vì trả về base64
+    }
+  );
+  return res.data.data;
+};
+
