@@ -513,84 +513,10 @@ const ProductManagement: React.FC = () => {
               </Button>
             )}
             <div className="flex flex-row gap-2 w-full">
-              {/* {["excel", "pdf"].map((type) => {
-                const isExcel = type === "excel";
-                const isLoading = !!exportLoading[`${type}_${record.tracking_ship}`];
-                const isDisabled =
-                  !!exportLoading[`excel_${record.tracking_ship}`] ||
-                  !!exportLoading[`pdf_${record.tracking_ship}`];
-                const btnProps = {
-                  size: "small" as const,
-                  loading: isLoading,
-                  disabled: isDisabled,
-                  className: `!bg-${isExcel ? "green" : "orange"}-500 hover:!bg-${isExcel ? "green" : "orange"}-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full`,
-                  onClick: async () => {
-                    if (isDisabled) return;
-                    setExportLoading((prev) => ({
-                      ...prev,
-                      [`${type}_${record.tracking_ship}`]: true,
-                    }));
-                    try {
-                      const res = await exportTracking(
-                        record.tracking_ship,
-                        type
-                      );
-                      console.log('res', res);
-
-                      // Check structure: res = { file: string (base64), contentType: string }
-                      if (!res?.file) throw new Error("Không nhận được file để tải xuống");
-
-                      // Decode base64 to binary
-                      const byteCharacters = atob(res.file);
-                      const byteNumbers = new Array(byteCharacters.length);
-                      for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                      }
-                      const byteArray = new Uint8Array(byteNumbers);
-
-                      // chọn MIME type từ response nếu có, nếu không fallback theo loại file
-                      const blobType = res.contentType
-                        ? res.contentType
-                        : (isExcel
-                          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                          : "application/pdf");
-                      
-                      const blob = new Blob([byteArray], { type: blobType });
-                      const url = window.URL.createObjectURL(blob);
-
-                      const extension = isExcel ? "xlsx" : "pdf";
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.setAttribute(
-                        "download",
-                        `tracking_${record.tracking_ship || "export"}.${extension}`
-                      );
-                      document.body.appendChild(link);
-                      link.click();
-                      link.parentNode?.removeChild(link);
-                      setTimeout(() => window.URL.revokeObjectURL(url), 2000); // Clean up
-                    } catch (error) {
-                      toast.error(`Xuất file ${isExcel ? "Excel" : "PDF"} thất bại!`);
-                    } finally {
-                      setExportLoading((prev) => ({
-                        ...prev,
-                        [`${type}_${record.tracking_ship}`]: false,
-                      }));
-                    }
-                  },
-                  children: (
-                    <>
-                      {isExcel ? <FileExcelOutlined /> : <FilePdfOutlined />}
-                      {isExcel ? "Xuất Excel" : "Xuất PDF"}
-                    </>
-                  ),
-                };
-                return <Button key={type} {...btnProps} />;
-              })} */}
               <div className="flex flex-row gap-2 w-full">
-                {/* Khai báo type là 'excel' | 'pdf' để TypeScript biết giá trị hợp lệ */}
                 {(["excel", "pdf"] as const).map((type) => {
                   const isExcel = type === "excel";
+                  const isPdf = type === "pdf";
                   const isLoading =
                     !!exportLoading[`${type}_${record.tracking_ship}`];
 
@@ -599,16 +525,20 @@ const ProductManagement: React.FC = () => {
                     !!exportLoading[`excel_${record.tracking_ship}`] ||
                     !!exportLoading[`pdf_${record.tracking_ship}`];
 
+                  // Sửa dải màu sắc cho button PDF để đúng tailwind syntax
+                  let buttonColorClass = "";
+                  if (isExcel) {
+                    buttonColorClass = "!bg-green-500 hover:!bg-green-600";
+                  } else if (isPdf) {
+                    buttonColorClass = "!bg-orange-500 hover:!bg-orange-600";
+                  }
+
                   const btnProps = {
                     size: "small" as const,
                     loading: isLoading,
                     disabled: isDisabled,
                     // Sử dụng template string và đảm bảo cú pháp Tailwind CSS/CSS-in-JS
-                    className: `!bg-${
-                      isExcel ? "green" : "orange"
-                    }-500 hover:!bg-${
-                      isExcel ? "green" : "orange"
-                    }-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full`,
+                    className: `${buttonColorClass} !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full`,
                     onClick: async () => {
                       if (isDisabled) return;
 
