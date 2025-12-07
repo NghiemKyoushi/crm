@@ -2,9 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Checkbox } from "antd";
 import { BidItem } from "../tab-link";
-export type BidStatus = "Chờ duyệt" | "Đã đặt" ;
+export type BidStatus = "Chờ duyệt" | "Đã đặt";
 
-export type DecisionMode = "accept" | "reject" | "finish" | "cancel";
+export type DecisionMode =
+  | "accept"
+  | "reject"
+  | "finish"
+  | "cancel"
+  | "excute-pending";
 
 type BidDecisionModalProps = {
   mode: DecisionMode;
@@ -41,6 +46,7 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
   }, [open, form]);
 
   const isReject = mode === "reject";
+  const isExcute = (mode = "excute-pending");
   const defaultOkText = isReject ? "Xác nhận từ chối" : "Chấp nhận";
 
   const handleOk = async () => {
@@ -102,6 +108,22 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
             ?
           </div>
         </Form>
+      ) : isExcute ? (
+        <div className="text-sm text-gray-700">
+          <div>
+            Bạn có chắc muốn <b>thực hiện xử</b> bid của{" "}
+            <b>{bid?.full_name ?? "khách hàng"}</b> với số tiền{" "}
+            <b>
+              {bid?.bid_amount?.toLocaleString("ja-JP", {
+                style: "currency",
+                currency: "JPY",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </b>
+            ?
+          </div>
+        </div>
       ) : (
         <div className="text-sm text-gray-700">
           <div>

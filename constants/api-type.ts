@@ -180,5 +180,6 @@ export const API_TYPE_CONST = {
   AUTION_APPROVE:`${FEATURE}/admin/auction/{id}/approve`,
   AUTION_REJECT:`${FEATURE}/admin/auction/{auctionId}/reject-pending`,
   AUTION_FINAL:`${FEATURE}/admin/auction/{id}/finalize`,
-  AUTION_CANCEL:`${FEATURE}/admin/auction/{id}/admin-cancel`
+  AUTION_CANCEL:`${FEATURE}/admin/auction/{id}/admin-cancel`,
+  AUTION_EXCUTE_PENDING:`${FEATURE}/admin/auction/{auctionId}/execute-pending`
 } as const;

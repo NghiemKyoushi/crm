@@ -5,7 +5,7 @@ import { LinkItem } from "../tab-customer";
 
 export type BidStatus = "Chờ duyệt" | "Đã đặt" | "";
 
-export type DecisionMode = "accept" | "reject" | "finish" | "cancel";
+export type DecisionMode = "accept" | "reject" | "finish" | "cancel" |"excute-pending";
 
 
 type BidDecisionModalProps = {

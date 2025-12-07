@@ -4,7 +4,7 @@ import { LinkOutlined, SearchOutlined } from "@ant-design/icons";
 import { BidDecisionModal, DecisionMode } from "./modal/accept-modal";
 import { toast } from "react-toastify";
 import { useAuctionLinks } from "../hooks/aution-manage";
-import { approveAuction, rejectAuction } from "../apis/aution-manage";
+import { approveAuction, excuteAuction, rejectAuction } from "../apis/aution-manage";
 import dayjs from "dayjs";
 
 interface StatusTagProps {
@@ -200,6 +200,19 @@ const ProductCard = ({
                     size="small"
                     type="default"
                     shape="round"
+                    onClick={() =>
+                      openModal("excute-pending", b, item.auction_id)
+                    }
+                    className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
+                  >
+                    <span className="text-xs">Thực hiện</span>
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Xác nhận đặt bid">
+                  <Button
+                    size="small"
+                    type="default"
+                    shape="round"
                     onClick={() => openModal("accept", b, item.auction_id)}
                     className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
                   >
@@ -218,7 +231,7 @@ const ProductCard = ({
                     <span className="text-xs">Từ&nbsp;chối</span>
                   </Button>
                 </Tooltip>
-                <Tooltip title="Bom trạng thái">
+                {/* <Tooltip title="Bom trạng thái">
                   <Button
                     size="small"
                     type="default"
@@ -228,7 +241,7 @@ const ProductCard = ({
                   >
                     <span className="text-xs">bom</span>
                   </Button>
-                </Tooltip>
+                </Tooltip> */}
               </div>
             );
           case "READY":
@@ -272,7 +285,6 @@ const ProductCard = ({
                     <span className="text-xs">bom</span>
                   </Button>
                 </Tooltip>
-                
               </div>
             );
           case "FINISHED_WIN":
@@ -376,12 +388,15 @@ const ProductCard = ({
         toast.success("Đã chấp nhận bid.");
       }
       if (decisionMode === "reject") {
-        console.log("selectedBid.bid_id", selectedBid);
-
         await rejectAuction(String(selectedAutionId), {
           pending_bid_id: selectedBid.bid_id,
         });
         toast.success("Đã từ chối bid.");
+      }
+
+      if (decisionMode === "excute-pending" && selectedBid.bid_id) {
+        await excuteAuction(String(selectedAutionId), {pending_bid_id: selectedBid.bid_id , placed_price: selectedBid.bid_amount});
+        toast.success("Đã thực hiện bid");
       }
       refreshData();
       closeModal();
