@@ -113,6 +113,7 @@ const ProductManagement: React.FC = () => {
     note_admin: undefined,
     from_date: undefined,
     to_date: undefined,
+    check_coming_code: undefined,
   });
 
   const prevFiltersRef = useRef<FilterTypeShipment>(filters);
@@ -144,6 +145,7 @@ const ProductManagement: React.FC = () => {
       email: filters.email,
       phone_number: filters.phone_number,
       invoice_no: filters.invoice_no,
+      check_coming_code: filters.check_coming_code,
     }),
   };
 

@@ -21,6 +21,7 @@ export interface CustomerModel {
   group_id:number;
   phone_number: string;
   customer_code: string;
+  count_data?: number;
 }
 
 export interface CustomerResponse {

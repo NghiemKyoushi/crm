@@ -27,6 +27,7 @@ export interface FilterTypeShipment {
   email?: string;
   phone_number?: number;
   customer_code?: string;
+  check_coming_code?: string;
 }
 
 interface ShipmentFilterProps {
@@ -93,7 +94,8 @@ export default function ShipmentFilter({
       customer_code: values.customer_code?.trim() || undefined,
       email: values.email?.trim() || undefined,
       invoice_no: values.invoice_no?.trim() || undefined,
-    };    
+      check_coming_code: values.check_coming_code?.trim() || undefined,
+    };
     onFilter(filters);
   };
 
@@ -118,6 +120,7 @@ export default function ShipmentFilter({
       phone_number: undefined,
       customer_code: undefined,
       invoice_no: undefined,
+      check_coming_code: undefined,
     });
   };
 
@@ -190,9 +193,16 @@ export default function ShipmentFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="invoice_no" className="!mb-0">
+              <Form.Item name="invoice_no" className="!mb-2">
                 <Input
                   placeholder="Mã đơn hàng"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="check_coming_code" className="!mb-0">
+                <Input
+                  placeholder="Mã hàng về"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />

@@ -366,7 +366,10 @@ export default function CustomerTable() {
       fixed: "right",
       render: (_: any, record: CustomerModel) => (
         <div className="flex gap-2 items-center">
-          <AccountAssignButton userId={record.user_id} />
+          <AccountAssignButton
+            userId={record.user_id}
+            countData={record.count_data}
+          />
           <Button
             type="link"
             size="small"
