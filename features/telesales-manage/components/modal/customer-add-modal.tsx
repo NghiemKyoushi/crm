@@ -260,7 +260,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="email"
                 label="Email"
-                rules={[{ required: true, message: "Vui lòng nhập email" }]}
                 className="!mb-1"
               >
                 <Input
@@ -273,7 +272,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="address"
                 label="Địa chỉ"
-                rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
                 className="!mb-1"
               >
                 <Input
@@ -286,7 +284,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="business_field"
                 label="Lĩnh vực kinh doanh"
-                rules={[{ required: true, message: "Vui lòng nhập lĩnh vực kinh doanh" }]}
                 className="!mb-1"
               >
                 <Input
@@ -299,7 +296,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="customer_info"
                 label="Thông tin khách hàng"
-                rules={[{ required: true, message: "Vui lòng nhập thông tin khách hàng" }]}
                 className="!mb-1"
               >
                 <Input
@@ -314,7 +310,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="service_tag"
                 label="Loại dịch vụ"
-                rules={[{ required: true, message: "Chọn loại dịch vụ" }]}
                 className="!mb-1"
               >
                 <Select
@@ -360,7 +355,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="source_tag"
                 label="Nguồn"
-                rules={[{ required: true, message: "Chọn nguồn" }]}
                 className="!mb-1"
               >
                 <Select
@@ -428,7 +422,6 @@ export const CustomerAddModal: React.FC<CustomerModalProps> = ({
               <Form.Item
                 name="note_request"
                 label="Yêu cầu ghi chú"
-                rules={[{ required: true, message: "Vui lòng nhập yêu cầu ghi chú" }]}
                 className="!mb-1"
               >
                 <Input
