@@ -51,28 +51,38 @@ export default function OrderHubFilter({
   // Lấy params từ url
   const searchParams = useSearchParams();
   const invoiceNoQuery = searchParams.get("invoice_no");
+  const trackingCodeQuery = searchParams.get("tracking_code");
+  const packageCodeQuery = searchParams.get("package_code");
+  const checkComingCodeQuery = searchParams.get("check_coming_code");
 
-  // Ref để chỉ set invoice_no từ URL duy nhất lần đầu, sau đó form tự quản lý
+  // Ref để chỉ set params từ URL duy nhất lần đầu, sau đó form tự quản lý
   const didInitByQuery = useRef(false);
 
   useEffect(() => {
-    if (invoiceNoQuery && !didInitByQuery.current) {
-      // Nếu form chưa được khởi tạo bởi query, set giá trị vào form
-      if (form.getFieldValue("invoice_no") !== invoiceNoQuery) {
-        form.setFieldsValue({
-          ...initialFilters,
-          invoice_no: invoiceNoQuery,
-        });
-      }
-      // Gọi filter với invoice_no, merge các giá trị đang có
+    const hasQueryParams = invoiceNoQuery || trackingCodeQuery || packageCodeQuery || checkComingCodeQuery;
+
+    if (hasQueryParams && !didInitByQuery.current) {
+      const queryValues: Record<string, string> = {};
+      if (invoiceNoQuery) queryValues.invoice_no = invoiceNoQuery;
+      if (trackingCodeQuery) queryValues.tracking_code = trackingCodeQuery;
+      if (packageCodeQuery) queryValues.package_code = packageCodeQuery;
+      if (checkComingCodeQuery) queryValues.check_coming_code = checkComingCodeQuery;
+
+      // Set giá trị vào form
+      form.setFieldsValue({
+        ...initialFilters,
+        ...queryValues,
+      });
+
+      // Gọi filter với các giá trị từ URL
       onFilter({
         ...initialFilters,
-        invoice_no: invoiceNoQuery,
+        ...queryValues,
       });
       didInitByQuery.current = true;
     }
     // eslint-disable-next-line
-  }, [invoiceNoQuery]);
+  }, [invoiceNoQuery, trackingCodeQuery, packageCodeQuery, checkComingCodeQuery]);
 
   const orderStatusOptions = [
     {
