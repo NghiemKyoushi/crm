@@ -519,7 +519,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   // Check if user can edit (has order.edit permission or is admin or has edit_approving with correct status)
   const canEdit = useMemo(() => {
-    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving || hasPermission("order.update_shipping_fee")  ;
+    return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving;
   }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving]);
 
   const canEditShipfee = useMemo(() => {
@@ -625,7 +625,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             >
               {isViewOnly ? "Đóng" : "Hủy bỏ"}
             </Button>
-            {canEdit && (
+            {(canEdit || hasPermission("order.update_shipping_fee")) && (
               <Button
                 key="submit"
                 type="primary"

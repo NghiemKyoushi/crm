@@ -28,6 +28,7 @@ import {
 } from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {toast} from "react-toastify";
+import {useRouter} from "next/navigation";
 import BarcodeScanner from "../components/BarcodeScannerV2";
 import PrintLabel from "../components/PrintLabel";
 import {PackageInfo, CheckComingRecord, OrderInfo, ScanTrackingResponse, RelatedOrderInfo} from "../types";
@@ -39,6 +40,7 @@ const {Title, Text} = Typography;
 
 const CheckComingView: React.FC = () => {
     const {t} = useTranslation();
+    const router = useRouter();
     const [packageCode, setPackageCode] = useState<string>("");
     const [trackingCode, setTrackingCode] = useState<string>("");
     const [scanHistory, setScanHistory] = useState<PackageInfo[]>([]);
@@ -849,18 +851,73 @@ const CheckComingView: React.FC = () => {
                         }}
                         columns={[
                             {
+                                title: "Mã Code",
+                                dataIndex: "code",
+                                key: "code",
+                                width: 120,
+                                render: (code: string) => (
+                                    <Text
+                                        strong
+                                        style={{
+                                            fontFamily: "monospace",
+                                            fontSize: 12,
+                                            color: "#1890ff",
+                                            cursor: code ? "pointer" : "default",
+                                        }}
+                                        onClick={() => {
+                                            if (code) {
+                                                router.push(`/orderhub?check_coming_code=${encodeURIComponent(code)}`);
+                                            }
+                                        }}
+                                        title={code ? "Click để tìm kiếm trong Order Hub" : undefined}
+                                    >
+                                        {code || "-"}
+                                    </Text>
+                                ),
+                            },
+                            {
                                 title: "Mã Kiện / Tracking",
                                 key: "codes",
                                 width: 180,
                                 ellipsis: true,
                                 render: (_: any, record: PackageInfo) => (
                                     <Space direction="vertical" size={2} style={{width: "100%"}}>
-                                        <Text strong ellipsis
-                                              style={{fontFamily: "monospace", fontSize: 11, display: "block"}}>
+                                        <Text
+                                            strong
+                                            ellipsis
+                                            style={{
+                                                fontFamily: "monospace",
+                                                fontSize: 11,
+                                                display: "block",
+                                                cursor: record.packageCode ? "pointer" : "default",
+                                                color: record.packageCode ? "#1890ff" : undefined,
+                                            }}
+                                            onClick={() => {
+                                                if (record.packageCode) {
+                                                    router.push(`/orderhub?package_code=${encodeURIComponent(record.packageCode)}`);
+                                                }
+                                            }}
+                                            title={record.packageCode ? "Click để tìm kiếm theo mã kiện" : undefined}
+                                        >
                                             {record.packageCode}
                                         </Text>
-                                        <Text type="secondary" ellipsis
-                                              style={{fontFamily: "monospace", fontSize: 11, display: "block"}}>
+                                        <Text
+                                            type="secondary"
+                                            ellipsis
+                                            style={{
+                                                fontFamily: "monospace",
+                                                fontSize: 11,
+                                                display: "block",
+                                                cursor: record.trackingCode ? "pointer" : "default",
+                                                color: record.trackingCode ? "#722ed1" : undefined,
+                                            }}
+                                            onClick={() => {
+                                                if (record.trackingCode) {
+                                                    router.push(`/orderhub?tracking_code=${encodeURIComponent(record.trackingCode)}`);
+                                                }
+                                            }}
+                                            title={record.trackingCode ? "Click để tìm kiếm theo mã tracking" : undefined}
+                                        >
                                             {record.trackingCode}
                                         </Text>
                                     </Space>
