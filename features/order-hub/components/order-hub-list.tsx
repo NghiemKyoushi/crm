@@ -376,7 +376,6 @@ export default function OrderHub() {
           );
         }),
       ]);
-      // Gọi lại listorder sau khi xong Promise.all
       await queryClient.invalidateQueries({ queryKey: ["listorder"] });
       toast.success("Cập nhật tracking và kiểm tra hàng thành công");
       setIsEditingTrackingModal(false);
