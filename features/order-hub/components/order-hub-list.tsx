@@ -154,6 +154,7 @@ export default function OrderHub() {
     from_date: undefined,
     to_date: undefined,
     account: undefined,
+    check_coming_code: undefined,
   });
   // Track the previous filters to know if filters changed
   const prevFilters = useRef<FilterType>(filters);
@@ -186,6 +187,7 @@ export default function OrderHub() {
       email: filters.email,
       phone_number: filters.phone_number,
       account: filters.account,
+      check_coming_code: filters.check_coming_code,
     })
   );
   const approveMutation = useApproveOrder();

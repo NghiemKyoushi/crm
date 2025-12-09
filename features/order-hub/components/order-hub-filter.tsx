@@ -28,6 +28,7 @@ export interface FilterType {
   phone_number?: number;
   customer_code?: string;
   account?: string;
+  check_coming_code?: string;
 }
 
 interface OrderHubFilterProps {
@@ -141,6 +142,7 @@ export default function OrderHubFilter({
       to_date: toDate,
       phone_number: values.phone_number || undefined,
       account: values.account || undefined,
+      check_coming_code: values.check_coming_code?.trim() || undefined,
     };
     onFilter(filters);
   };
@@ -270,9 +272,16 @@ export default function OrderHubFilter({
                   size="small"
                 />
               </Form.Item>
-              <Form.Item name="package_code" className="!mb-0">
+              <Form.Item name="package_code" className="!mb-2">
                 <Input
                   placeholder="Mã kiện"
+                  className="!w-full !h-10 !text-xs"
+                  size="small"
+                />
+              </Form.Item>
+              <Form.Item name="check_coming_code" className="!mb-0">
+                <Input
+                  placeholder="Mã hàng về"
                   className="!w-full !h-10 !text-xs"
                   size="small"
                 />
