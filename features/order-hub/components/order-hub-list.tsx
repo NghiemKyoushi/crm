@@ -236,7 +236,7 @@ export default function OrderHub() {
 
   // Helper function to check if user can edit tracking field
   const canEditTracking = (orderStatus?: string) => {
-    return canEditOrder(orderStatus) || hasPermission("order.fill_tracking");
+    return canEditOrder(orderStatus) || hasPermission("order.fill_tracking") || hasPermission("system.admin");
   };
 
   // Helper function to check if user can edit customer note field
@@ -376,8 +376,8 @@ export default function OrderHub() {
           );
         }),
       ]);
+      await queryClient.invalidateQueries({ queryKey: ["listorder"] });
       toast.success("Cập nhật tracking và kiểm tra hàng thành công");
-      queryClient.invalidateQueries({ queryKey: ["listorder"] });
       setIsEditingTrackingModal(false);
       setIsOpenCheckOrder(false);
     } catch (err: any) {
@@ -655,8 +655,9 @@ export default function OrderHub() {
                   <div className="text-xs text-gray-400">Cập nhật sau</div>
                 )}
               </div>
-              {record.status !== OrderStatusType.PENDING_PAYMENT &&
-                record.status !== OrderStatusType.READY_TO_SHIP &&
+              {
+              // record.status !== OrderStatusType.PENDING_PAYMENT &&
+              //   record.status !== OrderStatusType.READY_TO_SHIP &&
                 canEditTracking(record.status) && (
                   <Button
                     type="text"
