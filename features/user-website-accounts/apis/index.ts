@@ -26,7 +26,7 @@ export const assignUserWebsiteAccounts = async (
 ) => {
   const res = await api.put(
     `${API_TYPE_CONST.USER_WEBSITE_ACCOUNTS}/${userId}`,
-    accountIds
+    { account_ids: accountIds }
   );
   return res.data;
 };

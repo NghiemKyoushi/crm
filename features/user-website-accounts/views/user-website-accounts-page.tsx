@@ -174,21 +174,7 @@ export default function UserWebsiteAccountsPage() {
             setSelectModalOpen(false);
             setSelectedAccountIds([]);
           }}
-          onOk={() => {
-            // selectedAccountIds đã bao gồm cả IDs cũ và mới (sau khi user chọn/bỏ chọn trong modal pick accounts)
-            // Gửi trực tiếp selectedAccountIds lên API
-            assignMutation.mutate(selectedAccountIds, {
-              onSuccess: () => {
-                message.success("Đã cập nhật danh sách tài khoản thành công");
-                setSelectModalOpen(false);
-                setSelectedAccountIds([]);
-              },
-              onError: (err: any) => {
-                message.error(err?.response?.data?.localizedMessage || "Có lỗi xảy ra khi cập nhật");
-              },
-            });
-          }}
-          okButtonProps={{ loading: assignMutation.isPending }}
+          footer={null}
           width={1200}
         >
           <div className="overflow-x-auto">
@@ -199,8 +185,6 @@ export default function UserWebsiteAccountsPage() {
               columns={[
                 { title: "Tên Website", dataIndex: "name", key: "name", width: 220 },
                 { title: "URL", dataIndex: "domain", key: "domain", width: 260 },
-                { title: "Khu vực", dataIndex: "region_id", key: "region_id", width: 140 },
-                { title: "Đường vận chuyển", dataIndex: "route_id", key: "route_id", width: 180 },
                 {
                   title: "Actions",
                   key: "actions",
@@ -259,9 +243,21 @@ export default function UserWebsiteAccountsPage() {
             setAccountPickerOpen(false);
           }}
           onOk={() => {
-            // Giữ nguyên selectedAccountIds hiện tại (đã được cập nhật qua rowSelection)
-            setAccountPickerOpen(false);
+            assignMutation.mutate(selectedAccountIds, {
+              onSuccess: () => {
+                message.success("Đã cập nhật danh sách tài khoản thành công");
+                setAccountPickerOpen(false);
+                setSelectModalOpen(false);
+                setSelectedAccountIds([]);
+              },
+              onError: (err: any) => {
+                message.error(
+                  err?.response?.data?.localizedMessage || "Có lỗi xảy ra khi cập nhật"
+                );
+              },
+            });
           }}
+          okButtonProps={{ loading: assignMutation.isPending }}
           width={900}
         >
           <div className="overflow-x-auto">
