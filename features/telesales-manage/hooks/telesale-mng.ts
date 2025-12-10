@@ -11,7 +11,7 @@ import { TelesaleParamsList } from "../types/telesales-mng";
 import { useMutation } from "@tanstack/react-query";
 import { addTelesaleNote } from "../apis/telesale-mng";
 import { TelesaleCustomerListResponse } from "../types/telesales-mng";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const useTelesalesList = (params: TelesaleParamsList) => {
   return useQuery<TelesaleCustomerListResponse>({
@@ -87,32 +87,38 @@ export function useUnAssignCustomerTag() {
 }
 
 
-export function useTelesaleStatistic() {
+export function useTelesaleStatistic(params: TelesaleParamsList) {
   const [stat, setStat] = useState({
     total: 0,
     called: 0,
     failed: 0,
   });
   const [loading, setLoading] = useState(false);
-  const fetchStat = async () => {
-    setLoading(true);
-    try {
-      const res = await getTelesaleDashboard();
-      setStat({
-        total: res?.total_contacts ?? 0,
-        called: res?.called ?? 0,
-        failed: res?.failed ?? 0,
-      });
-    } catch (e) {
-      setStat({ total: 0, called: 0, failed: 0 });
-    } finally {
-      setLoading(false);
-    }
-  };
+console.log('checkkkkkkk222');
+
+  const fetchStat = useCallback(
+    async (overrideParams?: TelesaleParamsList) => {
+      setLoading(true);
+      try {
+        const fetchParams = overrideParams || params;
+        const res = await getTelesaleDashboard(fetchParams);
+        setStat({
+          total: res?.total_contacts ?? 0,
+          called: res?.called ?? 0,
+          failed: res?.failed ?? 0,
+        });
+      } catch (e) {
+        setStat({ total: 0, called: 0, failed: 0 });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [params]
+  );
 
   useEffect(() => {
-    fetchStat();
-  }, []);
+    fetchStat(params);
+  }, [params, fetchStat]);
 
   return { stat, reload: fetchStat, loading };
 }

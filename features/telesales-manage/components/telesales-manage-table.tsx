@@ -174,7 +174,7 @@ const TelesalesPage: React.FC = () => {
     stat: telesaleStat,
     reload: reloadTelesaleStat,
     loading: statLoading,
-  } = useTelesaleStatistic();
+  } = useTelesaleStatistic(params);
   const { mutate: assignTagMutate } = useAssignCustomerTag();
 
   const handleOpenNoteModal = (customer: TelesaleCustomer) => {
@@ -341,7 +341,7 @@ const TelesalesPage: React.FC = () => {
             render: (_: any, record: TelesaleCustomer) => (
               <Checkbox
                 checked={selectedRowKeys.includes(record.id)}
-                disabled={record.status !== "UNASSIGNED"}
+                // disabled={record.status !== "UNASSIGNED"}
                 onChange={(e) => {
                   const checked = e.target.checked;
                   if (checked) {
@@ -1029,9 +1029,8 @@ const TelesalesPage: React.FC = () => {
       status_tag_id: status_tag_id ?? undefined,
     }));
     setPage(0);
-
     // Always call refetch, regardless of whether the params actually changed
-    refetch();
+    // refetch();
   };
 
   // Confirm logic for tag deletion
