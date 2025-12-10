@@ -345,20 +345,20 @@ export default function CustomerTable() {
         <div className="text-sm text-gray-700">{record.sale_name || "-"}</div>
       ),
     },
-    {
-      title: t("customerTable.debt"),
-      dataIndex: "debt_amount",
-      key: "debt_amount",
-      width: 140,
-      align: "right",
-      render: (value: number) => (
-        <div
-          className={`text-sm ${value > 0 ? "text-red-600" : "text-gray-700"}`}
-        >
-          {value ? `${value.toLocaleString("vi-VN")}đ` : "0đ"}
-        </div>
-      ),
-    },
+    // {
+    //   title: t("customerTable.debt"),
+    //   dataIndex: "debt_amount",
+    //   key: "debt_amount",
+    //   width: 140,
+    //   align: "right",
+    //   render: (value: number) => (
+    //     <div
+    //       className={`text-sm ${value > 0 ? "text-red-600" : "text-gray-700"}`}
+    //     >
+    //       {value ? `${value.toLocaleString("vi-VN")}đ` : "0đ"}
+    //     </div>
+    //   ),
+    // },
     {
       title: t("customerTable.actions"),
       key: "actions",
