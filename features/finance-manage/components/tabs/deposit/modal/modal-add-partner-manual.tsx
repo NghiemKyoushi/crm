@@ -81,7 +81,7 @@ const ManualPartnerModal: React.FC<ManualPartnerModalProps> = ({
         const dataArr = Array.isArray(resp.data) ? resp.data : resp.items || [];
         const options = dataArr.map((user: any) => ({
           value: user.id,
-          label: user.email,
+          label: `${user.email} - ${user.full_name ? user.full_name : ''}`,
         }));
         setUserOptions((prev) =>
           page === 0 ? options : [...(prev || []), ...options]

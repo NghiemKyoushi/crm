@@ -136,7 +136,7 @@ const ManualDepositModal: React.FC<ManualDepositModalProps> = ({
     if (!customerData || !open) return;
     const list = (customerData?.data || []).map((user: any) => ({
       value: user.user_id,
-      label: `${user.email}`,
+      label: `${user.email} - ${user.full_name ? user.full_name : ''}`,
     }));
     setCustomerOptions(prev =>
       customerPage === 0 ? list : [...(prev || []), ...list]
