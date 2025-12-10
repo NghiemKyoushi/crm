@@ -1692,6 +1692,7 @@ export default function OrderHub() {
                 updateOrderInCache(orderId, {
                   tracking_ship_list: trackingList,
                 });
+                refetch();
                 toast.success("Cập nhật thành công!");
               })
               .catch((err) => {
