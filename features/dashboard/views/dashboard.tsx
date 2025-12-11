@@ -204,14 +204,14 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* ==================== TÀI CHÍNH & NGUYÊN LIỆU ==================== */}
-      <div className="mb-2">
+      {/* <div className="mb-2">
         <h2 className="text-lg font-semibold text-gray-800">
           {t("dashboard.finance_materials", "Tài chính & Nguyên liệu")}
         </h2>
-      </div>
+      </div> */}
 
       {/* Material Profit/Loss - Full Width */}
-      <div>
+      {/* <div>
         <MaterialProfitLossCard
           data={materialData?.data}
           isLoading={materialLoading}
@@ -222,7 +222,7 @@ const DashboardPage: React.FC = () => {
             }
           }}
         />
-      </div>
+      </div> */}
       </div>
     </div>
   );
