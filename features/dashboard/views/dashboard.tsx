@@ -155,12 +155,12 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Top Products - Full Width */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <TopProductsTable
           data={topProductsData?.data}
           isLoading={topProductsLoading}
         />
-      </div>
+      </div> */}
 
       {/* ==================== KHÁCH HÀNG & NHÂN VIÊN ==================== */}
       <div className="mb-2">
