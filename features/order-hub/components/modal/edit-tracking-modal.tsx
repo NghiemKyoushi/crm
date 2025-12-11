@@ -12,7 +12,7 @@ export function EditTrackingModal({
   orderId,
   status,
   saving = false,
-  isDisable,
+  isEdit,
 }: {
   orderId: number;
   open: boolean;
@@ -24,11 +24,16 @@ export function EditTrackingModal({
   onSave: (data: CreateTrackingModel[]) => void;
   status: string;
   saving?: boolean;
-  isDisable: boolean;
+  isEdit?: boolean;
 }) {
   const [records, setRecords] = React.useState<CreateTrackingModel[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [isExisting, setIsExisting] = React.useState(false); // true nếu đã có data từ API
+
+  const checkEdit = isEdit
+    ? !isEdit
+    : status === OrderStatusType.PENDING_PAYMENT ||
+      status === OrderStatusType.READY_TO_SHIP;
 
   // load data khi mở modal
   React.useEffect(() => {
@@ -61,7 +66,7 @@ export function EditTrackingModal({
   }, [open, orderId]);
 
   const handleAddRecord = async () => {
-    if (isDisable) {
+    if (checkEdit) {
       return;
     }
     setRecords((prev) => [
@@ -71,7 +76,7 @@ export function EditTrackingModal({
   };
 
   const handleRemoveRecord = (index: number) => {
-    if (isDisable) {
+    if (checkEdit) {
       return;
     }
     setRecords((prev) => prev.filter((_, i) => i !== index));
@@ -96,7 +101,7 @@ export function EditTrackingModal({
   };
 
   const handleSubmit = () => {
-    if (isDisable) {
+    if (checkEdit) {
       return;
     }
     onSave(records);
@@ -114,7 +119,7 @@ export function EditTrackingModal({
           Hủy
         </Button>,
         <Button
-          disabled={isDisable}
+          disabled={checkEdit}
           key="submit"
           type="primary"
           loading={saving}
@@ -221,7 +226,7 @@ export function EditTrackingModal({
                     onClick={() => handleRemoveRecord(index)}
                     className="!px-2"
                     title="Xóa"
-                    disabled={isDisable}
+                    disabled={checkEdit}
                   >
                     ×
                   </Button>
@@ -237,7 +242,7 @@ export function EditTrackingModal({
               icon={<PlusOutlined />}
               className="w-full"
               size="small"
-              disabled={isDisable}
+              disabled={checkEdit}
             >
               Thêm dòng mới
             </Button>
