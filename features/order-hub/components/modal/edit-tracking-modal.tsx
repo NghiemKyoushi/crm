@@ -12,6 +12,7 @@ export function EditTrackingModal({
   orderId,
   status,
   saving = false,
+  isDisable,
 }: {
   orderId: number;
   open: boolean;
@@ -23,6 +24,7 @@ export function EditTrackingModal({
   onSave: (data: CreateTrackingModel[]) => void;
   status: string;
   saving?: boolean;
+  isDisable: boolean;
 }) {
   const [records, setRecords] = React.useState<CreateTrackingModel[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -59,23 +61,17 @@ export function EditTrackingModal({
   }, [open, orderId]);
 
   const handleAddRecord = async () => {
-    if (
-      status === OrderStatusType.PENDING_PAYMENT ||
-      status === OrderStatusType.READY_TO_SHIP
-    ) {
+    if (isDisable) {
       return;
     }
     setRecords((prev) => [
       ...prev,
-      { tracking_code: "", package_code: '', package_number: 0, weight: 0 },
+      { tracking_code: "", package_code: "", package_number: 0, weight: 0 },
     ]);
   };
 
   const handleRemoveRecord = (index: number) => {
-    if (
-      status === OrderStatusType.PENDING_PAYMENT ||
-      status === OrderStatusType.READY_TO_SHIP
-    ) {
+    if (isDisable) {
       return;
     }
     setRecords((prev) => prev.filter((_, i) => i !== index));
@@ -100,10 +96,7 @@ export function EditTrackingModal({
   };
 
   const handleSubmit = () => {
-    if (
-      status === OrderStatusType.PENDING_PAYMENT ||
-      status === OrderStatusType.READY_TO_SHIP
-    ) {
+    if (isDisable) {
       return;
     }
     onSave(records);
@@ -121,10 +114,7 @@ export function EditTrackingModal({
           Hủy
         </Button>,
         <Button
-          disabled={
-            status === OrderStatusType.PENDING_PAYMENT ||
-            status === OrderStatusType.READY_TO_SHIP
-          }
+          disabled={isDisable}
           key="submit"
           type="primary"
           loading={saving}
@@ -231,10 +221,7 @@ export function EditTrackingModal({
                     onClick={() => handleRemoveRecord(index)}
                     className="!px-2"
                     title="Xóa"
-                    disabled={
-                      status === OrderStatusType.PENDING_PAYMENT ||
-                      status === OrderStatusType.READY_TO_SHIP
-                    }
+                    disabled={isDisable}
                   >
                     ×
                   </Button>
@@ -250,10 +237,7 @@ export function EditTrackingModal({
               icon={<PlusOutlined />}
               className="w-full"
               size="small"
-              disabled={
-                status === OrderStatusType.PENDING_PAYMENT ||
-                status === OrderStatusType.READY_TO_SHIP
-              }
+              disabled={isDisable}
             >
               Thêm dòng mới
             </Button>

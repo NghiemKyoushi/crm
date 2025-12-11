@@ -1647,6 +1647,7 @@ export default function OrderHub() {
       {/* Modal Edit Tracking/Kiện/SL/CN */}
       {orderDetail && (
         <EditTrackingModal
+          isDisable={!canEditTracking(orderDetail.status)}
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
           status={orderDetail.status}
