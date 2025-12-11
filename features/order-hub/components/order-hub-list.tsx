@@ -236,7 +236,8 @@ export default function OrderHub() {
 
   // Helper function to check if user can edit tracking field
   const canEditTracking = (orderStatus?: string) => {
-    return canEditOrder(orderStatus) || hasPermission("order.fill_tracking") || hasPermission("system.admin");
+    return canEditOrder(orderStatus) || hasPermission("order.fill_tracking");
+    // || hasPermission("system.admin")
   };
 
   // Helper function to check if user can edit customer note field
@@ -656,9 +657,9 @@ export default function OrderHub() {
                 )}
               </div>
               {
-              // record.status !== OrderStatusType.PENDING_PAYMENT &&
-              //   record.status !== OrderStatusType.READY_TO_SHIP &&
-                canEditTracking(record.status) && (
+             ((record.status !== OrderStatusType.PENDING_PAYMENT &&
+                record.status !== OrderStatusType.READY_TO_SHIP &&
+                canEditTracking(record.status)) || hasPermission("system.admin")) && (
                   <Button
                     type="text"
                     size="small"
@@ -1647,7 +1648,7 @@ export default function OrderHub() {
       {/* Modal Edit Tracking/Kiện/SL/CN */}
       {orderDetail && (
         <EditTrackingModal
-          isDisable={!canEditTracking(orderDetail.status)}
+          isEdit={hasPermission("system.admin")}
           orderId={orderDetail.id}
           open={isEditingTrackingModal}
           status={orderDetail.status}
