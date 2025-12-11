@@ -23,6 +23,7 @@ export default function UserWebsiteAccountsPage() {
     const data: any = assignedAccountsRaw;
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.data?.data)) return data.data.data;
     return [];
   }, [assignedAccountsRaw]);
   const assignMutation = useAssignUserWebsiteAccounts(userId);
@@ -133,7 +134,7 @@ export default function UserWebsiteAccountsPage() {
               }}
               columns={[
                 { title: "Website", dataIndex: "website_name", key: "website_name", width: 220 },
-                { title: "Username", dataIndex: "username", key: "username", width: 220 },
+                { title: "Username", dataIndex: "user_name", key: "user_name", width: 220 },
                 { title: "Type", dataIndex: "account_type", key: "account_type", render: (t: string) => <Tag>{t}</Tag> },
                 { title: "Note", dataIndex: "note", key: "note", width: 240, ellipsis: true },
                 { title: "Created At", dataIndex: "created_at", key: "created_at", width: 200, render: (d: string) => d ? new Date(d).toLocaleString() : "-" },
@@ -284,7 +285,7 @@ export default function UserWebsiteAccountsPage() {
               }}
               columns={[
                 { title: "ID", dataIndex: "id", key: "id", width: 80 },
-                { title: "Username", dataIndex: "username", key: "username", width: 220 },
+                { title: "Username", dataIndex: "user_name", key: "user_name", width: 220 },
                 { title: "Type", dataIndex: "account_type", key: "account_type", width: 140, render: (t: string) => <Tag>{t}</Tag> },
                 { title: "Note", dataIndex: "note", key: "note", ellipsis: true, width: 300 },
               ]}
