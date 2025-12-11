@@ -226,6 +226,7 @@ export const FilterForm: React.FC<{
               value={telesale}
               onChange={(val) => setTelesale(val as number)}
               size="large"
+              allowClear
               showSearch
               filterOption={false} // dùng tìm kiếm server-side
               options={telesaleOptions}
