@@ -274,12 +274,31 @@ export const getSourceWebsiteByDomain = async (domain: string) => {
   return res.data.data;
 };
 
-// Get website accounts by website ID
-export const getWebsiteAccounts = async (websiteId: number) => {
+// Get website accounts for a user, filtered by website search term (domain/name)
+export const getWebsiteAccounts = async ({
+  userId,
+  search,
+  page = 0,
+  size = 20,
+}: {
+  userId: number;
+  search?: string | null;
+  page?: number;
+  size?: number;
+}) => {
   const res = await api.get(
-    `${API_TYPE_CONST.GET_WEBSITE_ACCOUNTS}/${websiteId}`
+    `${API_TYPE_CONST.GET_WEBSITE_ACCOUNTS}/${userId}`,
+    {
+      params: {
+        page,
+        size,
+        ...(search ? { search } : {}),
+      },
+    }
   );
-  return res.data.data;
+  // Response structure: { data: { data: [...], total_pages: ..., ... } }
+  // Return the accounts array
+  return res.data.data?.data || [];
 };
 
 // Update order source account

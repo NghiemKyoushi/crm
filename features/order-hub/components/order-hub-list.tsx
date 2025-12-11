@@ -53,7 +53,6 @@ import { EditTrackingModal } from "./modal/edit-tracking-modal";
 import { usePermission } from "@/components/layout/PermissionContext";
 import {
   updateKuponOrder,
-  getSourceWebsiteByDomain,
   getWebsiteAccounts,
   updateOrderSourceAccount,
 } from "../apis/orderhub";
@@ -125,7 +124,17 @@ export default function OrderHub() {
 
   // Account management states
   const [orderAccounts, setOrderAccounts] = useState<
-    Record<number, Array<{ id: number; username: string }>>
+    Record<
+      number,
+      Array<{
+        id: number;
+        user_name: string;
+        created_at?: string;
+        note?: string | null;
+        account_type?: string;
+        website_name?: string;
+      }>
+    >
   >({});
   const [loadingAccounts, setLoadingAccounts] = useState<
     Record<number, boolean>
@@ -166,7 +175,7 @@ export default function OrderHub() {
     );
   };
 
-  const { data: listOrder, isPending,refetch } = useListOrder(
+  const { data: listOrder, isPending, refetch } = useListOrder(
     removeUndefinedFields({
       page,
       size: 10,
@@ -350,7 +359,7 @@ export default function OrderHub() {
 
   // handleFilter: Only set filters and reset to page 1 if something actually changed
   const handleFilter = (newFilters: FilterType) => {
-    
+
     if (isEqualObject(newFilters, prevFilters.current)) {
       return;
     }
@@ -392,8 +401,7 @@ export default function OrderHub() {
   };
 
   // Load accounts for an order when select dropdown is opened
-  // If source_website_id exists, use it directly
-  // If source_website_id is null, extract domain from URL and search for website
+  // Uses product URL (domain) to filter accounts for the current user
   const loadAccountsForOrder = async (order: Invoice) => {
     // Prevent duplicate calls
     if (loadingOrdersRef.current.has(order.id)) {
@@ -403,42 +411,32 @@ export default function OrderHub() {
     loadingOrdersRef.current.add(order.id);
     setLoadingAccounts((prev) => ({ ...prev, [order.id]: true }));
     try {
-      let websiteId: number;
+      const searchTerm =
+        extractDomain(order.metadata?.items?.[0]?.product?.url) ??
+        order.source_website_name ??
+        null;
 
-      // If source_website_id exists, use it directly
-      if (order.source_website_id != null) {
-        websiteId = order.source_website_id;
-      } else {
-        // Fallback to old logic: extract domain from URL and search for website
-        const url = order.metadata?.items?.[0]?.product?.url;
-        const domain = extractDomain(url);
-
-        if (!domain) {
-          setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
-          loadingOrdersRef.current.delete(order.id);
-          toast.error("Không tìm thấy domain từ URL");
-          return;
-        }
-
-        // Search website by domain
-        const websiteResponse = await getSourceWebsiteByDomain(domain);
-        const websites = websiteResponse?.data || [];
-        const website = websites.find(
-          (w: any) => w.domain === domain || w.domain?.includes(domain)
-        );
-
-        if (!website?.id) {
-          setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
-          loadingOrdersRef.current.delete(order.id);
-          toast.error("Không tìm thấy website");
-          return;
-        }
-
-        websiteId = website.id;
+      if (!order.user_id) {
+        setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+        loadingOrdersRef.current.delete(order.id);
+        toast.error("Không tìm thấy thông tin người dùng của đơn hàng");
+        return;
       }
 
-      // Get accounts for this website
-      const accounts = await getWebsiteAccounts(websiteId);
+      if (!searchTerm) {
+        setLoadingAccounts((prev) => ({ ...prev, [order.id]: false }));
+        loadingOrdersRef.current.delete(order.id);
+        toast.error("Không tìm thấy domain từ URL");
+        return;
+      }
+
+      // Get accounts for this user filtered by website domain/name
+      const accounts = await getWebsiteAccounts({
+        userId: order.user_id,
+        search: searchTerm,
+        page: 0,
+        size: 20,
+      });
       console.log(`Loaded accounts for order ${order.id}:`, accounts);
       // Store accounts in state - will be automatically mapped to Select.Option in render
       setOrderAccounts((prev) => {
@@ -503,7 +501,7 @@ export default function OrderHub() {
           const currentStatus =
             err?.response?.data?.currentStatus ||
             err?.response?.data?.data?.currentStatus;
-          
+
           if (err?.response?.status === 400) {
             if (currentStatus) {
               toast.error("Trạng thái không khớp");
@@ -694,13 +692,13 @@ export default function OrderHub() {
                       <span className="text-gray-800">
                         {shippingFee
                           ? `${shippingFee.toLocaleString(
-                              "en-US"
-                            )}${isJapanPrice}`
+                            "en-US"
+                          )}${isJapanPrice}`
                           : codeType === 1
-                          ? "Miễn phí"
-                          : codeType === 3
-                          ? "Cập nhật sau"
-                          : "-"}
+                            ? "Miễn phí"
+                            : codeType === 3
+                              ? "Cập nhật sau"
+                              : "-"}
                       </span>
                     )}
                   </div>
@@ -783,8 +781,8 @@ export default function OrderHub() {
             {typeof record.kupon === "number"
               ? record.kupon.toLocaleString("en-US")
               : record.kupon && !isNaN(Number(record.kupon))
-              ? Number(record.kupon).toLocaleString("en-US")
-              : "-"}
+                ? Number(record.kupon).toLocaleString("en-US")
+                : "-"}
           </span>
           {canEditOrder(record.status) && (
             <EditOutlined
@@ -796,8 +794,8 @@ export default function OrderHub() {
                     typeof record.kupon === "number"
                       ? record.kupon
                       : record.kupon && !isNaN(Number(record.kupon))
-                      ? Number(record.kupon)
-                      : null,
+                        ? Number(record.kupon)
+                        : null,
                 });
                 setOrderDetail(record);
               }}
@@ -983,11 +981,10 @@ export default function OrderHub() {
                     {accounts.map((account) => (
                       <div
                         key={account.id}
-                        className={`text-xs py-2 px-3 hover:bg-gray-100 cursor-pointer transition-colors ${
-                          currentAccountId === account.id
-                            ? "bg-blue-50 font-medium"
-                            : ""
-                        }`}
+                        className={`text-xs py-2 px-3 hover:bg-gray-100 cursor-pointer transition-colors ${currentAccountId === account.id
+                          ? "bg-blue-50 font-medium"
+                          : ""
+                          }`}
                         onClick={() => {
                           handleAccountChange(record.id, account.id);
                           setDropdownOpenStates((prev) => ({
@@ -996,7 +993,7 @@ export default function OrderHub() {
                           }));
                         }}
                       >
-                        {account.username}
+                        {account.user_name}
                       </div>
                     ))}
                   </div>
@@ -1261,7 +1258,7 @@ export default function OrderHub() {
                             onError: (err: any) =>
                               toast.error(
                                 err.response?.data?.localizedMessage ||
-                                  t("common.error")
+                                t("common.error")
                               ),
                           }
                         );
@@ -1327,7 +1324,7 @@ export default function OrderHub() {
           case OrderStatusType.READY_TO_SHIP:
             break;
           case OrderStatusType.PENDING_DEPOSIT:
-            actionButton =  (
+            actionButton = (
               <div>
                 {canDelete && (
                   <Button
@@ -1751,7 +1748,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
@@ -1832,7 +1829,7 @@ export default function OrderHub() {
                     onError: (err: any) =>
                       toast.error(
                         err.response?.data?.localizedMessage ||
-                          t("common.error")
+                        t("common.error")
                       ),
                   }
                 );
@@ -1868,7 +1865,7 @@ export default function OrderHub() {
             setOrderDetail(undefined);
           }}
           onConfirm={(value) =>
-            handleCancelOrderAfterApprove(orderDetail.id,orderDetail.status, value)
+            handleCancelOrderAfterApprove(orderDetail.id, orderDetail.status, value)
           }
           visible={isOpenCancelOrder2}
           loading={isCancelOrderLoading}

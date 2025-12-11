@@ -125,7 +125,7 @@ export const API_TYPE_CONST = {
   ORDER_ARRIVED_VN_WAREHOUSE: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
   COMPLETE_ORDER_ARRIVED_VN: `${FEATURE}/admin/orders/arrived-vn-warehouse`,
   ORDER_SOURCE_ACCOUNT: `${FEATURE}/admin/orders/source-account`,
-  GET_WEBSITE_ACCOUNTS: `${FEATURE}/admin/website-account`,
+  GET_WEBSITE_ACCOUNTS: `${FEATURE}/admin/users/website-accounts`,
 
   TRACKING_PACKAGED: `${FEATURE}/admin/orders/packing`,
   MANAGE_DEBTS: `${FEATURE}/admin/debts`,
