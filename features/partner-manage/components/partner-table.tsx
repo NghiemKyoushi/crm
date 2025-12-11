@@ -170,9 +170,9 @@ export default function FIFOMaterialManagement() {
   // Partner select options
   const partnerOptions =
     (!isPartnerLoading && !isPartnerError && Array.isArray(partnerData?.data)
-      ? partnerData.data.map((partner: Partner) => ({
+      ? partnerData.data.map((partner: {email: string, user_id: number}) => ({
           label: `${partner.email}`,
-          value: partner.id,
+          value: partner.user_id,
         }))
       : []) || [];
 
