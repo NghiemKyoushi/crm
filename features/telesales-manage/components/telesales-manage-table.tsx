@@ -307,7 +307,7 @@ const TelesalesPage: React.FC = () => {
 
   // Filter only unassigned customers for selection
   const unassignedCustomers =
-    data?.data?.filter((d) => d.status === "UNASSIGNED") || [];
+    data?.data || [];
   const allUnassignedIds = unassignedCustomers.map((d) => d.id);
 
   const columns: ColumnsType<TelesaleCustomer> = [

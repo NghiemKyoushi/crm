@@ -227,6 +227,7 @@ export const FilterForm: React.FC<{
               onChange={(val) => setTelesale(val as number)}
               size="large"
               showSearch
+              allowClear
               filterOption={false} // dùng tìm kiếm server-side
               options={telesaleOptions}
               onPopupScroll={handlePopupScroll} // infinite scroll
