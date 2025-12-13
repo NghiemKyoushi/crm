@@ -519,6 +519,22 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
 
   // Check if user can edit (has order.edit permission or is admin or has edit_approving with correct status)
   const canEdit = useMemo(() => {
+    if(!order) return false;
+    const isAdmin = hasPermission("system.admin");
+    const isInSpecialStatus =
+    order?.status === OrderStatusType.PENDING_PAYMENT ||
+    order?.status === OrderStatusType.READY_TO_SHIP ||
+    order?.status === OrderStatusType.SHIPPING_REQUEST_CLIENT
+    if(isAdmin){
+      return true;
+    }    
+    if(!isAdmin && !isInSpecialStatus){
+      return hasPermission("order.edit") || canEditApproving || hasPermission("order.update_shipping_fee");
+    }
+    return false;
+  }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving, order?.status]);
+
+  const canShow = useMemo(() => {
     return isAdminOrCheckStatusAfterPending || hasPermission("order.edit") || canEditApproving;
   }, [isAdminOrCheckStatusAfterPending, hasPermission, canEditApproving]);
 
@@ -526,7 +542,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
     return  hasPermission("order.edit") || hasPermission("system.admin") || hasPermission("order.update_shipping_fee")  ;
   }, [hasPermission]);
   // View only mode - has order.view but no order.edit
-  const isViewOnly = !canEdit;
+  const isViewOnly = !canShow;
 
 
   const [fileList, setFileList] = useState<any[]>([]);
@@ -625,7 +641,10 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
             >
               {isViewOnly ? "Đóng" : "Hủy bỏ"}
             </Button>
-            {(canEdit || hasPermission("order.update_shipping_fee")) && (
+            { (canEdit 
+            // || (hasPermission("order.update_shipping_fee") && order?.status !== OrderStatusType.PENDING_PAYMENT)
+          ) 
+            && (
               <Button
                 key="submit"
                 type="primary"
@@ -722,7 +741,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-4"
                   >
                     <Input
-                      disabled={isCheckDisableInput && !canEdit}
+                      disabled={isCheckDisableInput && !canShow}
                       className="!h-11 !rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Nhập tên sản phẩm"
                     />
@@ -742,7 +761,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     ]}
                     className="!mb-4"
                   >
-                    <TiptapEditor isDisable={isCheckDisableInput && !canEdit} />
+                    <TiptapEditor isDisable={isCheckDisableInput && !canShow} />
                   </Form.Item>
                   {/* -------- IMAGE GALLERY PREVIEW -------- */}
                   {productImages && productImages.length > 0 && (
@@ -996,7 +1015,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                         ]}
                       >
                         <InputNumber
-                          disabled={isCheckDisableInput && !canEdit}
+                          disabled={isCheckDisableInput && !canShow}
                           formatter={(value) =>
                             `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           }
@@ -1369,7 +1388,7 @@ export default function EditOrderModal(props: CreateOrderModalProps) {
                     className="!mb-0"
                   >
                     <Input.TextArea
-                      disabled={isCheckDisableInput && !canEdit}
+                      disabled={isCheckDisableInput && !canShow}
                       rows={3}
                       className="!rounded-lg hover:!border-blue-400 focus:!border-blue-500"
                       placeholder="Ghi chú thêm về đơn hàng..."
