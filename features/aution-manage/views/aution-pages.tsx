@@ -21,7 +21,6 @@ import { TabSettings } from "../components/tab-setting";
 import { CustomerViolationTable } from "../components/customer-violation-table";
 import { TabCustomerManagementTable } from "../components/tab-customer-mng-vip";
 
-
 // --- DỮ LIỆU ĐÃ CẬP NHẬT ĐỂ KHỚP VỚI MÀU SẮC VÀ ICON TRONG ẢNH ---
 const statsData = [
   {
@@ -96,14 +95,17 @@ const TabLabel = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
 export const AuctionPage = () => {
   return (
     <div className="p-5 bg-white rounded-xl shadow-lg border border-gray-100">
-      
       {/* KHU VỰC STATS CARDS ĐÃ ĐIỀU CHỈNH ICON VÀ MÀU SẮC */}
       <div className="p-4 bg-gray-50 rounded-lg mb-5">
         <Row gutter={[16, 16]} justify="start">
           {statsData.map((stat, index) => (
             <Col
               key={index}
-              xs={24} sm={12} md={8} lg={6} xl={4}
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              xl={4}
               className="flex-grow"
             >
               <Card
@@ -112,17 +114,16 @@ export const AuctionPage = () => {
                 className={`shadow-none border border-gray-100 transition-all duration-300 hover:shadow-md hover:${stat.bgColor} cursor-pointer min-w-[150px] h-full`}
               >
                 <div className="flex flex-col justify-between h-full">
-                  
                   {/* TIÊU ĐỀ và ICON NHỎ GÓC TRÊN BÊN PHẢI */}
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-medium text-gray-500">
                       {stat.title}
                     </p>
                     <div className={stat.topIconColor}>
-                        {stat.IconTopRight} {/* Icon nhỏ ở góc phải */}
+                      {stat.IconTopRight} {/* Icon nhỏ ở góc phải */}
                     </div>
                   </div>
-                  
+
                   {/* GIÁ TRỊ và ICON LỚN GÓC DƯỚI BÊN PHẢI */}
                   <div className="flex items-center justify-between mt-auto">
                     <h2 className={`text-4xl font-semibold ${stat.valueColor}`}>
@@ -163,35 +164,14 @@ export const AuctionPage = () => {
           {
             key: "4",
             label: <TabLabel icon={<UserOutlined />} text="Khách hàng VIP" />,
-            children: <TabCustomerManagementTable/>,
+            children: <TabCustomerManagementTable />,
           },
           {
             key: "5",
             label: <TabLabel icon={<TrophyOutlined />} text="Vi phạm" />,
             children: (
               <div>
-                <CustomerViolationTable
-                  blockedCount={3}
-                  bomCount={8}
-                  rows={[
-                    {
-                      date: "01/12/2024",
-                      customer: "Phạm Văn D",
-                      count: 3,
-                      link: "iPhone 15 Pro Max",
-                      reason: "Khách đổi ý",
-                      reasonType: "danger",
-                    },
-                    {
-                      date: "28/11/2024",
-                      customer: "Nguyễn Văn A",
-                      count: 1,
-                      link: "Sony WH-1000XM5",
-                      reason: "Shop hết hàng",
-                      reasonType: "normal",
-                    },
-                  ]}
-                />
+                <CustomerViolationTable />
               </div>
             ),
           },

@@ -18,6 +18,7 @@ interface CustomerRow {
   slot: string;
   violation: string;
   status: CustomerStatus;
+  is_blocked: boolean;
   // Keep full original data in record for action
   __raw: any;
 }
@@ -34,7 +35,7 @@ const getStatusTag = (status: CustomerStatus) => {
   }
 };
 
-const mapAPIToCustomerRow = (item: any): CustomerRow => {
+const mapAPIToCustomerRow = (item: any)=> {
   return {
     key: item.user_id,
     name: item.full_name,
@@ -133,7 +134,7 @@ export const TabCustomerManagementTable: React.FC = () => {
       width: 150,
       render: (_: any, record: CustomerRow) => (
         <Space size="middle">
-          {record.status === 'Bị khóa' ? (
+          {record.is_blocked ? (
             <Button 
               type="primary" 
               onClick={() => handleUnlock(record)}

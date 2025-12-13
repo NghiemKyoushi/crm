@@ -1,57 +1,146 @@
 import React, { useState } from "react";
-import { Table, Button, Pagination, Select, Input, Spin } from "antd";
-import { StatusTag } from "./status-tag";
-import { SearchOutlined } from "@ant-design/icons";
+import { Button, Select, Input, Spin, Modal, Radio } from "antd";
+import { SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { useAuctionResultTab } from "../hooks/aution-manage";
 import TableComponent from "@/components/TableComponent";
-
+import { Tooltip } from "antd";
+import { StatusTag } from "./tab-link";
+import { excuteAuction } from "../apis/aution-manage";
+import { toast } from "react-toastify";
 const { Option } = Select;
 
-// Chuyển format loại trạng thái cho StatusTag
-const colorStatus = (s: string) => {
-  if (s?.includes("Thắng") || s?.includes("Đã thanh toán")) return "success";
-  if (s?.includes("Đã lên đơn")) return "info";
-  if (s?.includes("Hủy")) return "warning";
-  if (s?.includes("Thua") || s?.includes("Bom")) return "error";
-  return "info";
+export type AuctionResultItem = {
+  auction_id: number;
+  url: string;
+  title: string;
+  image: string;
+  user_id: number;
+  full_name: string;
+  bid_id: number;
+  bid_price: number;
+  bid_status: string;
+  order_status: string | null;
+  slot_returned: string;
 };
-
 export const TabResult = () => {
   // Trang mặc định của API là 0, nhưng Antd Pagination bắt đầu từ 1
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10; // API default page size là 20
-
-  // State cho filter nếu có (placeholder)
   const [statusFilter] = useState<string>("all-status");
   const [searchCustomer] = useState<string>("");
-
-  // Gọi data từ useAuctionResultTab, truyền paging info
-  const { data, isLoading } = useAuctionResultTab({
+  const [resultModalOpen, setResultModalOpen] = useState<boolean>(false);
+  const [selectedRow, setSelectedRow] = useState<AuctionResultItem | null>(
+    null
+  );
+  const [resultType, setResultType] = useState<"SUCCESS" | "FAILED" | null>(
+    null
+  );
+  const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+  const { data, isLoading, refetch } = useAuctionResultTab({
     page: currentPage - 1,
     size: pageSize,
     // Có thể bổ sung filter khách hàng, trạng thái nếu API hỗ trợ
   });
-console.log('data', data);
-
-  // Lấy danh sách items và paging info
   const items = data?.items || [];
-  const totalItems = data?.total_items || 0;
-  const pageSz = data?.page_size || pageSize;
-  // page index của API là 0-base
-  const startIndex = ((currentPage - 1) * pageSz) + (items.length === 0 ? 0 : 1);
-  const actualEndIndex = items.length > 0 ? (startIndex - 1 + items.length) : 0;
+  const openResultModal = (record: any) => {
+    setSelectedRow(record);
+    setResultType(null);
+    setResultModalOpen(true);
+  };
+  const closeResultModal = () => {
+    setResultModalOpen(false);
+    setSelectedRow(null);
+    setResultType(null);
+  };
 
-  // Tạm thời: Định nghĩa cột mẫu, mapping thử theo "items" trả về thực tế
+  // Dummy handle confirm, bạn thay chỗ này để call API thực tế xác nhận kết quả
+  const handleConfirmResult = async () => {
+    if (!selectedRow || !resultType) return;
+    setConfirmLoading(true);
+    try {
+      await excuteAuction(String(selectedRow.bid_id), {
+        success: resultType === "SUCCESS" ? true : false,
+      });
+      toast.success("Xác định kết quả thành công");
+      closeResultModal();
+      refetch();
+      // Có thể refetch lại data nếu muốn
+    } catch (e) {
+      // Handle error nếu có
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   const columns = [
+    {
+      title: "SẢN PHẨM",
+      key: "auction_info",
+      width: 220,
+      render: (_: any, record: any) => (
+        <div className="flex items-center gap-3">
+          {record.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={record.image}
+              alt={record.title}
+              className="w-14 h-14 object-cover rounded border flex-shrink-0"
+              style={{
+                minWidth: 56,
+                minHeight: 56,
+                maxWidth: 56,
+                maxHeight: 56,
+              }}
+            />
+          ) : (
+            <div
+              className="w-14 h-14 flex items-center justify-center bg-gray-100 text-gray-400 rounded border text-xs flex-shrink-0"
+              style={{ minWidth: 56, minHeight: 56 }}
+            >
+              No Image
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <Tooltip title={record.title}>
+              <div
+                className="font-semibold text-gray-900 truncate"
+                style={{
+                  maxWidth: 135,
+                  display: "block",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {record.title}
+              </div>
+            </Tooltip>
+            <a
+              href={record.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:underline break-words"
+              style={{ wordBreak: "break-all" }}
+            >
+              {record.url}
+            </a>
+          </div>
+        </div>
+      ),
+    },
     {
       title: "KHÁCH",
       dataIndex: "full_name",
       key: "full_name",
-      width: "22%",
+      width: 140,
       render: (name: string, record: any) => (
         <div>
-          <div className="font-semibold text-gray-900">{name}</div>
-          <div className="text-xs text-gray-500">{record.email}</div>
+          <div className="font-semibold text-gray-900 truncate" title={name}>
+            {name}
+          </div>
+          {record.email && (
+            <div className="text-xs text-gray-500 truncate">{record.email}</div>
+          )}
         </div>
       ),
     },
@@ -59,88 +148,105 @@ console.log('data', data);
       title: "VIP",
       dataIndex: "vip_name",
       key: "vip_name",
-      width: "12%",
+      width: 70,
       render: (vip: string) => (
         <span className="text-blue-700 font-medium">{vip}</span>
       ),
     },
     {
-      title: "Slot đã dùng",
-      dataIndex: "slot_used",
-      key: "slot_used",
-      width: "11%",
-      align: "center" as any,
-      render: (used: number, record: any) => (
-        <span>
-          {used}/{record.slot_total}
-        </span>
-      ),
-    },
-    {
-      title: "Vi phạm",
-      dataIndex: "violation_count",
-      key: "violation_count",
-      width: "8%",
-      align: "center" as any,
-      render: (violation: number) =>
-        violation > 0 ? (
-          <span className="text-red-700 font-semibold">{violation}</span>
+      title: "Giá (¥)",
+      dataIndex: "bid_price",
+      key: "bid_price",
+      width: 100,
+      align: "right" as any,
+      render: (bid_price: number) =>
+        bid_price ? (
+          <span className="text-green-700 font-bold">
+            {bid_price.toLocaleString("ja-JP", {
+              style: "currency",
+              currency: "JPY",
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            })}
+          </span>
         ) : (
-          <span>0</span>
+          <span>—</span>
         ),
     },
     {
-      title: "TRẠNG THÁI",
-      dataIndex: "is_blocked",
-      key: "is_blocked",
-      width: "12%",
-      render: (is_blocked: boolean) => (
-        <StatusTag
-          text={is_blocked ? "Bị khóa" : "Hoạt động"}
-          type={is_blocked ? "warning" : "success"}
-        />
+      title: (
+        <span className="font-medium text-xs text-gray-500">Trạng thái</span>
       ),
+      dataIndex: "bid_status",
+      key: "bid_status",
+      width: 150,
+      align: "center" as const,
+      render: (bid_status: string) => {
+        switch (bid_status) {
+          case "PENDING":
+            return <StatusTag text="Chờ duyệt" type="warning" />;
+          case "READY":
+            return <StatusTag text="Sẵn sàng Sniper" type="info" />;
+          case "REJECTED":
+            return <StatusTag text="Từ chối" type="info" />;
+          case "FAILED":
+            return <StatusTag text="Thua" type="error" />;
+          case "APPROVED":
+            return <StatusTag text="Đã duyệt" type="info" />;
+          case "SUCCESS":
+            return <StatusTag text="Thắng" type="success" />;
+          default:
+            return null;
+        }
+      },
+    },
+    {
+      title: "Slot hoàn lại",
+      dataIndex: "slot_returned",
+      key: "slot_returned",
+      width: 80,
+      align: "center" as any,
+      render: (slot: string) => <span>{slot || "-"}</span>,
     },
     {
       title: "THAO TÁC",
       key: "actions",
-      width: "20%",
+      align: "center" as any,
+      width: 110,
       render: (_: any, record: any) => (
-        <div className="flex gap-1">
-          {!record.is_blocked && (
-            <>
+        <div className="flex justify-center items-center gap-2">
+          {record.bid_status === "APPROVED" ? (
+            <Tooltip title="Xác định kết quả đấu giá">
               <Button
+                size="small"
                 type="primary"
-                size="small"
-                className="h-7 px-3 font-medium rounded-lg"
+                className="bg-blue-50 border border-blue-200 text-blue-600 font-medium"
+                style={{ padding: "0 12px" }}
+                icon={<InfoCircleOutlined />}
+                onClick={() => openResultModal(record)}
               >
-                Tạo đơn
+                Xác định&nbsp;kết&nbsp;quả
               </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Hoàn thành">
               <Button
-                danger
                 size="small"
-                className="h-7 px-3 font-medium rounded-lg"
+                type="primary"
+                className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
+                style={{ padding: "0 12px" }}
+                icon={<InfoCircleOutlined />}
+                disabled
               >
-                Hủy đơn
+                Hoàn&nbsp;thành
               </Button>
-              <Button
-                danger
-                size="small"
-                className="h-7 px-3 font-medium rounded-lg"
-              >
-                Bom
-              </Button>
-            </>
-          )}
-          {record.is_blocked && (
-            <span className="text-gray-400">—</span>
+            </Tooltip>
           )}
         </div>
       ),
     },
   ];
 
-  // Khi loading thì hiển thị spiner ở bảng
   return (
     <div className="bg-white rounded-xl shadow p-5 border border-gray-100">
       <div className="flex flex-wrap gap-2 mb-4 items-center">
@@ -160,7 +266,10 @@ console.log('data', data);
       <Spin spinning={isLoading}>
         <TableComponent
           columns={columns as any}
-          dataSource={items.map((item: any) => ({ ...item, key: item.user_id }))}
+          dataSource={items.map((item: any) => ({
+            ...item,
+            key: item.user_id,
+          }))}
           pagination={false}
           rowClassName={(_, idx: number) => {
             const r = items[idx];
@@ -180,28 +289,45 @@ console.log('data', data);
           onPageChange={setCurrentPage}
           page={currentPage - 1}
           response={items}
-
         />
       </Spin>
 
-      {/* <div className="flex justify-end items-center pt-4 mt-2 border-t border-gray-100">
-        <div className="text-gray-500 text-sm mr-4">
-          Hiển thị {startIndex}-{actualEndIndex} / <b>{totalItems} kết quả</b>
+      <Modal
+        open={resultModalOpen}
+        onCancel={closeResultModal}
+        title="Xác nhận kết quả đấu giá"
+        okText="Xác nhận"
+        okButtonProps={{ disabled: !resultType, loading: confirmLoading }}
+        cancelButtonProps={{ disabled: confirmLoading }}
+        onOk={handleConfirmResult}
+        destroyOnClose
+      >
+        <div>
+          <p>
+            Bạn hãy chọn kết quả đấu giá cho khách&nbsp;
+            <b>{selectedRow?.full_name}</b>
+            {selectedRow?.title ? (
+              <>
+                &nbsp;- Sản phẩm:{" "}
+                <span className="font-semibold">{selectedRow?.title}</span>
+              </>
+            ) : null}
+          </p>
+          <Radio.Group
+            className="mt-3 flex flex-col gap-2"
+            value={resultType}
+            onChange={(e) => setResultType(e.target.value)}
+            disabled={confirmLoading}
+          >
+            <Radio value="SUCCESS">
+              Đấu giá <b className="text-green-600">thắng</b>
+            </Radio>
+            <Radio value="FAILED">
+              Đấu giá <b className="text-red-600">thua</b>
+            </Radio>
+          </Radio.Group>
         </div>
-        <Pagination
-          current={currentPage}
-          pageSize={pageSz}
-          total={totalItems}
-          onChange={setCurrentPage}
-          showSizeChanger={false}
-          className="flex items-center"
-          itemRender={(current, type, originalElement) => {
-            if (type === "prev") return <span className="font-semibold">Trước</span>;
-            if (type === "next") return <span className="font-semibold">Sau</span>;
-            return originalElement;
-          }}
-        />
-      </div> */}
+      </Modal>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { StatusTag } from "./tab-link"; // BidItem removed because it causes col
 import { toast } from "react-toastify";
 import { DecisionMode } from "./modal/accept-modal";
 import { BidDecisionCusModal } from "./modal/accept-customer-modal";
+import { approveAuction, rejectAuction } from "../apis/aution-manage";
 
 // Updated types according to new API response
 
@@ -16,6 +17,7 @@ export interface LinkItem {
   bid_price: number;
   bid_status: string;
   reason: string | null;
+  bid_id: number
 }
 
 interface CustomerItem {
@@ -35,7 +37,8 @@ const formatBid = (amount: number) => `¥${amount.toLocaleString("en-US")}`;
 const LinkTable: React.FC<{
   links: LinkItem[];
   active: boolean;
-}> = ({ links, active }) => {
+  refetchData: ()=> void;
+}> = ({ links, active, refetchData }) => {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [decisionMode, setDecisionMode] = useState<DecisionMode>("accept");
   const [selectedBid, setSelectedBid] = useState<LinkItem | null>(null);
@@ -53,18 +56,29 @@ const LinkTable: React.FC<{
     setConfirmLoading(false);
   };
 
-  const handleConfirm = async (payload: { reason?: string }) => {
+  const handleConfirm = async (payload: {
+    reason?: string;
+    activateIfScheduled?: boolean;
+    success?: boolean;
+  }) => {
     if (!selectedBid) return;
+    console.log('selectedBid', selectedBid);
+    
     try {
       setConfirmLoading(true);
-
-      // TODO: Call actual API here
-
-      toast.success(
-        decisionMode === "accept" ? "Đã chấp nhận bid." : "Đã từ chối bid."
-      );
+      if (decisionMode === "accept") {
+        await approveAuction(String(selectedBid.bid_id));
+        toast.success("Đã chấp nhận bid.");
+      }
+      if (decisionMode === "reject") {
+        await rejectAuction(String(selectedBid.bid_id), {
+          reason: payload.reason,
+        });
+        toast.success("Đã từ chối bid.");
+      }
+      refetchData();
       closeModal();
-    } catch (e) {
+    } catch (e: any) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại.");
       setConfirmLoading(false);
     }
@@ -127,18 +141,14 @@ const LinkTable: React.FC<{
             return <StatusTag text="Chờ duyệt" type="warning" />;
           case "READY":
             return <StatusTag text="Sẵn sàng Sniper" type="info" />;
-          case "ACTIVE":
-            return <StatusTag text="Đang diễn ra" type="info" />;
-          case "FINISHED_WIN":
-            return <StatusTag text="Thắng đấu giá" type="info" />;
-          case "FINISHED_NO_BIDS":
-            return <StatusTag text="Không có ai tham gia" type="warning" />;
-          case "ADMIN_CANCELLED":
-            return <StatusTag text="Admin đã hủy" type="error" />;
           case "REJECTED":
-            return <StatusTag text="Admin từ chối" type="error" />;
-          case "USER_CANCELLED":
-            return <StatusTag text="Người dùng hủy" type="error" />;
+            return <StatusTag text="Từ chối" type="info" />;
+          case "FAILED":
+            return <StatusTag text="Thua" type="error" />;
+          case "APPROVED":
+            return <StatusTag text="Đã duyệt" type="info" />;
+          case "SUCCESS":
+            return <StatusTag text="Thắng" type="success" />;
           default:
             return null;
         }
@@ -165,83 +175,67 @@ const LinkTable: React.FC<{
       width: 150,
       render: (_: any, b: LinkItem) => {
         switch (b.bid_status) {
-          case "PENDING":
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Xác nhận đặt bid">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => openModal("accept", b)}
-                    className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
-                  >
-                    <span className="text-xs">Xác&nbsp;nhận</span>
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Từ chối">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    danger
-                    onClick={() => openModal("reject", b)}
-                    className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
-                  >
-                    <span className="text-xs">Từ&nbsp;chối</span>
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          case "READY":
-          case "ACTIVE":
-          case "FINISHED_WIN":
-          case "FINISHED_NO_BIDS":
-          case "ADMIN_CANCELLED":
-          case "USER_CANCELLED":
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          default:
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-        }
+            case "PENDING":
+              return (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Tooltip title="Xác nhận đặt bid">
+                    <Button
+                      size="small"
+                      type="default"
+                      shape="round"
+                      onClick={() => openModal("accept", b)}
+                      className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
+                    >
+                      <span className="text-xs">Xác&nbsp;nhận</span>
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Từ chối">
+                    <Button
+                      size="small"
+                      type="default"
+                      shape="round"
+                      danger
+                      onClick={() => openModal("reject", b)}
+                      className="!bg-red-50 hover:!bg-red-100 !border-red-100 text-red-500 transition flex items-center gap-1 px-2"
+                    >
+                      <span className="text-xs">Từ&nbsp;chối</span>
+                    </Button>
+                  </Tooltip>
+                </div>
+              );
+            case "USER_CANCELLED":
+              return (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Tooltip title="Bom trạng thái">
+                    <Button
+                      size="small"
+                      type="default"
+                      shape="round"
+                      onClick={() => onRefreshStatus(b)}
+                      className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                    >
+                      <span className="text-xs">bom</span>
+                    </Button>
+                  </Tooltip>
+                </div>
+              );
+            default:
+              return (
+                <div className="flex items-center justify-center gap-1.5">
+                  <Tooltip title="Đang xử lý">
+                    <Button
+                      size="small"
+                      type="default"
+                      shape="round"
+                      disabled
+                      className="!border-yellow-300 !bg-yellow-100 text-yellow-700 transition px-3"
+                    >
+                      <span className="text-xs">Đang xử lý</span>
+                    </Button>
+                  </Tooltip>
+                </div>
+              );
+          }
       },
     },
   ];
@@ -283,7 +277,7 @@ const LinkTable: React.FC<{
   );
 };
 
-const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
+const CustomerCard: React.FC<{ customer: CustomerItem , refetchData: ()=> void}> = ({ customer, refetchData }) => {
   // Blocked nếu violation_count >= 3 hoặc is_blocked trả về từ API
   const isBlocked =
     customer.is_blocked ||
@@ -357,7 +351,7 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
           {violationMessage}
         </div>
       )}
-      <LinkTable links={customer.links} active={active} />
+      <LinkTable refetchData={refetchData} links={customer.links} active={active} />
     </div>
   );
 };
@@ -367,7 +361,7 @@ export const TabCustomer: React.FC = () => {
   const [size] = useState<number>(10);
 
   // Sử dụng hook để lấy danh sách khách hàng
-  const { data, isLoading } = useAuctionCustomers({ page: currentPage, size });
+  const { data, isLoading, refetch} = useAuctionCustomers({ page: currentPage, size });
 
   // Adjust mapping for new API response: "items" instead of "data"; page data on root data
   const customers: CustomerItem[] = data?.data?.data.items || [];
@@ -387,7 +381,7 @@ export const TabCustomer: React.FC = () => {
         />
       </div>
       <div className="space-y-7">
-        {isLoading ? (
+        {isLoading ? ( 
           <div className="text-center text-gray-400 py-12">Đang tải...</div>
         ) : customers.length === 0 ? (
           <div className="text-center text-gray-400 py-12">
@@ -395,7 +389,7 @@ export const TabCustomer: React.FC = () => {
           </div>
         ) : (
           customers.map((customer: CustomerItem) => (
-            <CustomerCard key={customer.user_id} customer={customer} />
+            <CustomerCard refetchData ={refetch} key={customer.user_id} customer={customer} />
           ))
         )}
       </div>

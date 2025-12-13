@@ -90,14 +90,14 @@ export const BidDecisionCusModal: React.FC<BidDecisionModalProps> = ({
         <div className="text-sm text-gray-700">
           Bạn có chắc muốn <b>chấp nhận</b> bid của{" "}
           <b>{bid?.title ?? "khách hàng"}</b> với số tiền{" "}
-          <b>
+          {/* <b>
             {bid?.bid_amount?.toLocaleString("ja-JP", {
               style: "currency",
               currency: "JPY",
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             })}
-          </b>
+          </b> */}
           ?
         </div>
       )}

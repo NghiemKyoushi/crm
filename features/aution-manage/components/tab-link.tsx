@@ -4,12 +4,16 @@ import { LinkOutlined, SearchOutlined } from "@ant-design/icons";
 import { BidDecisionModal, DecisionMode } from "./modal/accept-modal";
 import { toast } from "react-toastify";
 import { useAuctionLinks } from "../hooks/aution-manage";
-import { approveAuction, excuteAuction, rejectAuction } from "../apis/aution-manage";
+import {
+  approveAuction,
+  excuteAuction,
+  rejectAuction,
+} from "../apis/aution-manage";
 import dayjs from "dayjs";
 
 interface StatusTagProps {
   text: string;
-  type: "warning" | "info" | "error" | "default";
+  type: "warning" | "info" | "error" | "default" | "success";
 }
 
 export const StatusTag: React.FC<StatusTagProps> = ({ text, type }) => {
@@ -18,6 +22,10 @@ export const StatusTag: React.FC<StatusTagProps> = ({ text, type }) => {
     colorClass = "bg-yellow-50 text-yellow-800 border-yellow-200";
   if (type === "info") colorClass = "bg-blue-50 text-blue-700 border-blue-200";
   if (type === "error") colorClass = "bg-red-50 text-red-700 border-red-100";
+  if (type === "error") colorClass = "bg-red-50 text-red-700 border-red-100";
+  if (type === "success")
+    colorClass = "bg-green-50 text-green-700 border-green-100";
+
   return (
     <span
       className={`px-3 py-0.5 rounded-2xl text-xs font-semibold border ${colorClass} transition-colors duration-200`}
@@ -85,6 +93,7 @@ function flattenBids(data: any[]): FlatRow[] {
         isGroupStart: idx === 0,
         user_id: user.user_id,
         bid_time: user.bid_time,
+        bid_id: user.bid_id,
         // id, bid_id, auction_type not available in sample response but keep assignment for extendability
       });
     });
@@ -146,18 +155,14 @@ const ProductCard = ({
             return <StatusTag text="Chờ duyệt" type="warning" />;
           case "READY":
             return <StatusTag text="Sẵn sàng Sniper" type="info" />;
-          case "ACTIVE":
-            return <StatusTag text="Đang diễn ra" type="info" />;
-          case "FINISHED_WIN":
-            return <StatusTag text="Thắng đấu giá" type="info" />;
-          case "FINISHED_NO_BIDS":
-            return <StatusTag text="Không có ai tham gia" type="default" />;
-          case "ADMIN_CANCELLED":
-            return <StatusTag text="Admin đã hủy" type="error" />;
           case "REJECTED":
-            return <StatusTag text="Admin từ chối" type="error" />;
-          case "USER_CANCELLED":
-            return <StatusTag text="Người dùng hủy" type="error" />;
+            return <StatusTag text="Từ chối" type="info" />;
+          case "FAILED":
+            return <StatusTag text="Thua" type="error" />;
+          case "APPROVED":
+            return <StatusTag text="Đã duyệt" type="info" />;
+          case "SUCCESS":
+            return <StatusTag text="Thắng" type="success" />;
           default:
             return null;
         }
@@ -192,19 +197,6 @@ const ProductCard = ({
                     size="small"
                     type="default"
                     shape="round"
-                    onClick={() =>
-                      openModal("excute-pending", b, item.auction_id)
-                    }
-                    className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
-                  >
-                    <span className="text-xs">Thực hiện</span>
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Xác nhận đặt bid">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
                     onClick={() => openModal("accept", b, item.auction_id)}
                     className="!bg-green-50 hover:!bg-green-100 !border-green-100 text-green-600 transition flex items-center gap-1 px-2"
                   >
@@ -225,67 +217,6 @@ const ProductCard = ({
                 </Tooltip>
               </div>
             );
-          case "READY":
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Hoàn thành">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => openModal("finish", b, item.auction_id)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Hoàn thành">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => openModal("cancel", b, item.auction_id)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          case "ACTIVE":
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          case "FINISHED_WIN":
-            return (
-              <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          case "FINISHED_NO_BIDS":
-          case "ADMIN_CANCELLED":
           case "USER_CANCELLED":
             return (
               <div className="flex items-center justify-center gap-1.5">
@@ -305,15 +236,15 @@ const ProductCard = ({
           default:
             return (
               <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
+                <Tooltip title="Đang xử lý">
                   <Button
                     size="small"
                     type="default"
                     shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                    disabled
+                    className="!border-yellow-300 !bg-yellow-100 text-yellow-700 transition px-3"
                   >
-                    <span className="text-xs">bom</span>
+                    <span className="text-xs">Đang xử lý</span>
                   </Button>
                 </Tooltip>
               </div>
@@ -352,34 +283,20 @@ const ProductCard = ({
   const handleConfirm = async (payload: {
     reason?: string;
     activateIfScheduled?: boolean;
+    success?: boolean;
   }) => {
     if (!selectedBid) return;
     try {
       setConfirmLoading(true);
       if (decisionMode === "accept") {
-        const payloadValue =
-          selectedBid.auction_type === "SNIPER"
-            ? {
-                activateIfScheduled: payload?.activateIfScheduled
-                  ? payload?.activateIfScheduled
-                  : false,
-              }
-            : { activateIfScheduled: false };
-        await approveAuction(String(selectedAutionId), payloadValue);
+        await approveAuction(String(selectedBid.bid_id));
         toast.success("Đã chấp nhận bid.");
       }
       if (decisionMode === "reject") {
-        await rejectAuction(String(selectedAutionId), {
-          pending_bid_id: selectedBid.bid_id,
+        await rejectAuction(String(selectedBid.bid_id), {
+          reason: payload.reason,
         });
         toast.success("Đã từ chối bid.");
-      }
-      if (decisionMode === "excute-pending" && selectedBid.bid_id) {
-        await excuteAuction(String(selectedAutionId), {
-          pending_bid_id: selectedBid.bid_id,
-          placed_price: selectedBid.bid_amount,
-        });
-        toast.success("Đã thực hiện bid");
       }
       refreshData();
       closeModal();
@@ -489,7 +406,7 @@ export const TabLink = () => {
   });
   const rawAuctions = data?.data?.data.items ?? [];
   // log for debug
-  console.log('rawAuctions', data?.data);
+  console.log("rawAuctions", data?.data);
 
   const allRows = useMemo(() => flattenBids(rawAuctions), [rawAuctions]);
   const groupedRows = useMemo(() => {
@@ -562,7 +479,9 @@ export const TabLink = () => {
         </div>
 
         <Pagination
-          current={data?.data?.current_page != null ? data.data.current_page + 1 : 1}
+          current={
+            data?.data?.current_page != null ? data.data.current_page + 1 : 1
+          }
           pageSize={data?.data?.page_size}
           total={data?.data?.total_items}
           onChange={(page) => setCurrentPage(page - 1)}

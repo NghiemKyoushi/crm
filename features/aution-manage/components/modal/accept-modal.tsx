@@ -1,6 +1,6 @@
 // src/components/BidDecisionModal.tsx
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Checkbox } from "antd";
+import { Modal, Form, Checkbox, Input } from "antd";
 import { BidItem } from "../tab-link";
 export type BidStatus = "Chờ duyệt" | "Đã đặt";
 
@@ -79,7 +79,7 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
     >
       {isReject ? (
         <Form form={form} layout="vertical" initialValues={{ reason: "" }}>
-          {/* <Form.Item
+          <Form.Item
             label="Lý do từ chối"
             name="reason"
             rules={[
@@ -93,8 +93,8 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
               maxLength={500}
               showCount
             />
-          </Form.Item> */}
-          <div>
+          </Form.Item>
+          {/* <div>
             Bạn có chắc muốn <b>từ chối</b> bid của{" "}
             <b>{bid?.full_name ?? "khách hàng"}</b> với số tiền{" "}
             <b>
@@ -106,7 +106,7 @@ export const BidDecisionModal: React.FC<BidDecisionModalProps> = ({
               })}
             </b>
             ?
-          </div>
+          </div> */}
         </Form>
       ) : isExcute ? (
         <div className="text-sm text-gray-700">

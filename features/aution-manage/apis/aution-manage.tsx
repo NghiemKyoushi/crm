@@ -19,30 +19,43 @@ export const fetchAuctionVipCustomers = async (params?: any) => {
   });
   return response?.data?.data;
 };
+
+export const fetchListViolate = async (params?: any) => {
+  const response = await api.get(API_TYPE_CONST.AUTION_LIST_VIOLATE, {
+    params,
+  });
+  return response?.data?.data;
+};
+
+export const deleteAuctionViolate = async (penaltyId: number) => {
+  const url = `${API_TYPE_CONST.AUTION_DELETE_VIOLATE}/${penaltyId}`;
+  return api.delete(url);
+};
 // Yêu cầu duyệt đơn đấu giá (approve)
 export const approveAuction = (
   auctionId: string,
   payload?: { activateIfScheduled: boolean }
 ) => {
   const url = API_TYPE_CONST.AUTION_APPROVE.replace("{id}", auctionId);
-  return api.post(url, payload);
+  return api.put(url, payload);
 };
 
 export const excuteAuction = (
   auctionId: string,
-  payload?: { pending_bid_id: number; placed_price: number }
+  payload?: { success: boolean }
 ) => {
   const url = API_TYPE_CONST.AUTION_EXCUTE_PENDING.replace(
-    "{auctionId}",
+    "{bidId}",
     auctionId
   );
-  return api.post(url, payload);
+  const params = { success: payload?.success };
+  return api.put(url, undefined, { params });
 };
 
 // Từ chối đơn đấu giá (reject pending)
 export const rejectAuction = (auctionId: string, payload?: any) => {
-  const url = API_TYPE_CONST.AUTION_REJECT.replace("{auctionId}", auctionId);
-  return api.post(url, payload);
+  const url = API_TYPE_CONST.AUTION_REJECT.replace("{bidId}", auctionId);
+  return api.put(url, payload);
 };
 
 // Hoàn tất/Chốt phiên đấu giá (finalize)
