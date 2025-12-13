@@ -355,9 +355,13 @@ const DepositTable = (props: DepositTableProps) => {
 
   const createTopupManualMutation = useMutation({
     mutationFn: (data: DepositRequest) => createTopupManual(data),
-    onSuccess: () => {
-      toast.success(t("toast.createDepositSuccess"));
-      queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+    onSuccess: (data) => {
+      if (data?.amountVnd) {
+        toast.error(data?.amountVnd);
+      } else {
+        toast.success(t("toast.createDepositSuccess"));
+        queryClient.invalidateQueries({ queryKey: ["listTopup"] });
+      }
     },
     onError: (err: any) =>
       toast.error(err.response?.data?.localizedMessage || t("common.error")),

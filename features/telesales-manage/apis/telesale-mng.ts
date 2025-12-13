@@ -42,8 +42,8 @@ export const downloadTelesaleExample = async () => {
 };
 
 // Lấy dashboard telesale
-export const getTelesaleDashboard = async () => {
-  const res = await api.get(API_TYPE_CONST.DASHBOARD_TELESALE);
+export const getTelesaleDashboard = async (body: TelesaleParamsList) => {
+  const res = await api.post(API_TYPE_CONST.DASHBOARD_TELESALE, body);
   return res.data.data;
 };
 

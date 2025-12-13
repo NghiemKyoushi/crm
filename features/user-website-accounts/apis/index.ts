@@ -3,16 +3,18 @@ import { API_TYPE_CONST } from "@/constants/api-type";
 
 export interface UserWebsiteAccountItem {
   id: number;
-  username: string;
+  user_name: string;
   account_type: string;
   website_name: string;
-  note?: string;
+  note?: string | null;
   created_at?: string;
 }
 
 export const getUserWebsiteAccounts = async (userId: number) => {
   const res = await api.get(`${API_TYPE_CONST.USER_WEBSITE_ACCOUNTS}/${userId}`);
-  return res.data?.data as UserWebsiteAccountItem[];
+  // Response structure: { data: { data: [...], total_pages: ..., ... } }
+  // Return the accounts array
+  return (res.data?.data?.data || []) as UserWebsiteAccountItem[];
 };
 
 export const getUserWebsiteAccountCount = async (userId: number) => {
@@ -26,7 +28,7 @@ export const assignUserWebsiteAccounts = async (
 ) => {
   const res = await api.put(
     `${API_TYPE_CONST.USER_WEBSITE_ACCOUNTS}/${userId}`,
-    accountIds
+    { account_ids: accountIds }
   );
   return res.data;
 };
