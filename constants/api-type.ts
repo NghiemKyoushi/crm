@@ -183,5 +183,7 @@ export const API_TYPE_CONST = {
   AUTION_CANCEL:`${FEATURE}/admin/auction/{id}/admin-cancel`,
   AUTION_EXCUTE_PENDING:`${FEATURE}/admin/auction/{auctionId}/execute-pending`,
   DELETE_TELESALE:`${FEATURE}/admin/telesales/contacts/bulk-delete`,
-  EXPORT_TRACKING:`${FEATURE}/orders/export-tracking/`
+  EXPORT_TRACKING:`${FEATURE}/orders/export-tracking/`,
+  AUTION_RESULT_TAB:`${FEATURE}/admin/auction/results`,
+  AUTION_VIP_CUSTOMER:`${FEATURE}/admin/auction/vip-customers`,
 } as const;

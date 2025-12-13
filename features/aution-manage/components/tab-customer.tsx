@@ -7,31 +7,27 @@ import { toast } from "react-toastify";
 import { DecisionMode } from "./modal/accept-modal";
 import { BidDecisionCusModal } from "./modal/accept-customer-modal";
 
+// Updated types according to new API response
+
 export interface LinkItem {
   auction_id: number;
   title: string;
   url: string;
-  bid_amount: number;
-  status: string;
-  reason: string;
-  created_at: string;
+  bid_price: number;
+  bid_status: string;
+  reason: string | null;
 }
 
 interface CustomerItem {
   user_id: number;
   full_name: string;
-  avatar: string;
-  vip_level: string;
+  vip_name: string;
   slot_used: number;
   slot_total: number;
   violation_count: number;
-  links: {
-    data: LinkItem[];
-    total_pages: number;
-    total_items: number;
-    current_page: number;
-    page_size: number;
-  };
+  is_blocked: boolean;
+  avatar?: string;
+  links: LinkItem[];
 }
 
 const formatBid = (amount: number) => `¥${amount.toLocaleString("en-US")}`;
@@ -40,7 +36,6 @@ const LinkTable: React.FC<{
   links: LinkItem[];
   active: boolean;
 }> = ({ links, active }) => {
-  // Fix lỗi cột table: openModal và onRefreshStatus phải được khai báo trước khi columns
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [decisionMode, setDecisionMode] = useState<DecisionMode>("accept");
   const [selectedBid, setSelectedBid] = useState<LinkItem | null>(null);
@@ -64,8 +59,6 @@ const LinkTable: React.FC<{
       setConfirmLoading(true);
 
       // TODO: Call actual API here
-      // if (decisionMode === "accept") await api.acceptBid({ id: selectedBid.id });
-      // else await api.rejectBid({ id: selectedBid.id, reason: payload.reason });
 
       toast.success(
         decisionMode === "accept" ? "Đã chấp nhận bid." : "Đã từ chối bid."
@@ -82,7 +75,6 @@ const LinkTable: React.FC<{
     toast.info("Đã làm mới trạng thái (demo).");
   };
 
-  // Đã fix: type record và tham số trong render các cột phải thống nhất dùng LinkItem
   const columns = [
     {
       title: <span className="text-xs font-medium text-gray-500">Link</span>,
@@ -93,7 +85,7 @@ const LinkTable: React.FC<{
         <div>
           <Tooltip title={text}>
             <div
-              className="font-medium text-sm truncate max-w-[152px]" // 180px col - paddings
+              className="font-medium text-sm truncate max-w-[152px]"
               style={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -113,8 +105,8 @@ const LinkTable: React.FC<{
     },
     {
       title: <span className="text-xs font-medium text-gray-500">Bid</span>,
-      dataIndex: "bid_amount",
-      key: "bid_amount",
+      dataIndex: "bid_price",
+      key: "bid_price",
       width: 100,
       render: (val: number) => (
         <span className="text-green-600 font-semibold text-sm">
@@ -126,8 +118,8 @@ const LinkTable: React.FC<{
       title: (
         <span className="text-xs font-medium text-gray-500">Trạng thái</span>
       ),
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "bid_status",
+      key: "bid_status",
       width: 120,
       render: (status: string) => {
         switch (status) {
@@ -157,7 +149,7 @@ const LinkTable: React.FC<{
       dataIndex: "reason",
       key: "reason",
       width: 100,
-      render: (reason: string | undefined) =>
+      render: (reason: string | null | undefined) =>
         reason ? (
           <span className="text-red-500 text-sm">{reason}</span>
         ) : (
@@ -172,8 +164,7 @@ const LinkTable: React.FC<{
       align: "right" as const,
       width: 150,
       render: (_: any, b: LinkItem) => {
-        // dùng type LinkItem cho b để tránh lỗi
-        switch (b.status) {
+        switch (b.bid_status) {
           case "PENDING":
             return (
               <div className="flex items-center justify-center gap-1.5">
@@ -256,8 +247,9 @@ const LinkTable: React.FC<{
   ];
 
   const rowClassName = (record: LinkItem) => {
-    if (record.status === "Chờ duyệt") return "bg-yellow-50/70";
-    if (record.status === "Từ chối") return "bg-red-50/70";
+    // Chỉ màu dựa trên bid_status
+    if (record.bid_status === "PENDING") return "bg-yellow-50/70";
+    if (record.bid_status === "REJECTED") return "bg-red-50/70";
     return "";
   };
 
@@ -292,11 +284,11 @@ const LinkTable: React.FC<{
 };
 
 const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
-  // Blocked nếu violation_count >= 3
+  // Blocked nếu violation_count >= 3 hoặc is_blocked trả về từ API
   const isBlocked =
+    customer.is_blocked ||
     customer.violation_count >= 3 ||
-    (customer.slot_used >= customer.slot_total &&
-      customer.violation_count === 3);
+    (customer.slot_used >= customer.slot_total && customer.violation_count === 3);
   const active = !isBlocked && customer.slot_used < customer.slot_total;
 
   const getAvatarText = (name: string) => {
@@ -345,7 +337,7 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
               {customer.full_name}
             </div>
             <div className="text-xs text-gray-500 truncate">
-              {customer.vip_level} • {customer.slot_used}/{customer.slot_total}{" "}
+              {customer.vip_name} • {customer.slot_used}/{customer.slot_total}{" "}
               slot • {customer.violation_count}/3 vi phạm
             </div>
           </div>
@@ -365,20 +357,24 @@ const CustomerCard: React.FC<{ customer: CustomerItem }> = ({ customer }) => {
           {violationMessage}
         </div>
       )}
-      <LinkTable links={customer.links.data} active={active} />
+      <LinkTable links={customer.links} active={active} />
     </div>
   );
 };
 
 export const TabCustomer: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(0); // fix: pagination current should start at 1
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [size] = useState<number>(10);
 
   // Sử dụng hook để lấy danh sách khách hàng
   const { data, isLoading } = useAuctionCustomers({ page: currentPage, size });
 
-  // fix: data structure
-  const customers: CustomerItem[] = data?.data?.data || [];
+  // Adjust mapping for new API response: "items" instead of "data"; page data on root data
+  const customers: CustomerItem[] = data?.data?.data.items || [];
+  console.log('customers', data?.data);
+  
+  const pageSize = data?.data?.page_size || 10;
+  const totalItems = data?.data?.total_items || 0;
 
   return (
     <div className="p-4 bg-white border border-gray-100">
@@ -408,8 +404,8 @@ export const TabCustomer: React.FC = () => {
 
         <Pagination
           current={currentPage}
-          pageSize={data?.data?.page_size}
-          total={data?.data?.total_items}
+          pageSize={pageSize}
+          total={totalItems}
           onChange={(page) => setCurrentPage(page)}
           size="small"
           showSizeChanger={false}

@@ -6,6 +6,8 @@ import {
   rejectAuction,
   finalizeAuction,
   adminCancelAuction,
+  fetchAuctionResultTab,
+  fetchAuctionVipCustomers,
 } from "../apis/aution-manage";
 import { AutionParams } from "../types/aution-manage";
 export const useAuctionLinks = (params?: AutionParams) => {
@@ -19,6 +21,20 @@ export const useAuctionCustomers = (params?: any) => {
   return useQuery({
     queryKey: ["auction-customers", params],
     queryFn: () => fetchAuctionCustomers(params),
+  });
+};
+
+export const useAuctionResultTab = (params?: any) => {
+  return useQuery({
+    queryKey: ["auction-result-tab", params],
+    queryFn: () => fetchAuctionResultTab(params),
+  });
+};
+
+export const useAuctionVipCustomers = (params?: any) => {
+  return useQuery({
+    queryKey: ["auction-vip-customers", params],
+    queryFn: () => fetchAuctionVipCustomers(params),
   });
 };
 

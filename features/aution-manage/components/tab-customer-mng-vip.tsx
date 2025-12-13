@@ -1,57 +1,28 @@
 import React, { useState } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import type { TableRowSelection } from 'antd/es/table/interface';
-import { Table, Input, Select, Button, Tag, Space } from 'antd';
-import type { DefaultOptionType } from 'antd/es/select';
+import { Table, Input, Select, Button, Tag, Space, Spin } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import UnlockCustomerModal from './modal/unlock-customer-modal';
+import { useAuctionVipCustomers } from '../hooks/aution-manage';
+import TableComponent from '@/components/TableComponent';
 
 const { Option } = Select;
 
 type CustomerStatus = 'Hoạt động' | 'Bị khóa' | string;
 
-interface Customer {
-  key: string;
+interface CustomerRow {
+  key: string | number;
   name: string;
   email: string;
   package: string;
   slot: string;
   violation: string;
   status: CustomerStatus;
+  // Keep full original data in record for action
+  __raw: any;
 }
 
-/** Dữ liệu mẫu cho bảng */
-const customerData: Customer[] = [
-  {
-    key: '1',
-    name: 'Trần Thị B',
-    email: 'tranb@email.com',
-    package: 'VIP 2',
-    slot: '48/50',
-    violation: '0/3',
-    status: 'Hoạt động',
-  },
-  {
-    key: '2',
-    name: 'Phạm Văn D',
-    email: 'phamd@email.com',
-    package: 'VIP 2',
-    slot: '50/50',
-    violation: '3/3',
-    status: 'Bị khóa',
-  },
-  {
-    key: '3',
-    name: 'Nguyễn Văn A',
-    email: 'nguyena@email.com',
-    package: 'VIP 1',
-    slot: '1/2',
-    violation: '1/3',
-    status: 'Hoạt động',
-  },
-];
-
-// Hàm lấy Tag màu sắc theo trạng thái
+// Hàm chuyển trạng thái từ API sang text và tag màu
 const getStatusTag = (status: CustomerStatus) => {
   switch (status) {
     case 'Hoạt động':
@@ -63,23 +34,48 @@ const getStatusTag = (status: CustomerStatus) => {
   }
 };
 
+const mapAPIToCustomerRow = (item: any): CustomerRow => {
+  return {
+    key: item.user_id,
+    name: item.full_name,
+    email: item.email,
+    package: item.vip_name,
+    slot: `${item.slot_used}/${item.slot_total}`,
+    violation: `${item.violation_count}/3`,
+    status: item.is_blocked ? 'Bị khóa' : 'Hoạt động',
+    __raw: item
+  };
+};
+
 export const TabCustomerManagementTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerRow | null>(null);
+
+  // PAGINATION state
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  // --- Lấy data từ API ---
+  const { data, isLoading } = useAuctionVipCustomers({ page: currentPage, size: pageSize });
+  const items = data?.items || [];
+  const customerRows: CustomerRow[] = items.map(mapAPIToCustomerRow);
+
+  // Lấy total (nếu có)
+  const totalItems = data?.total || 0;
 
   // Mở Modal Mở khóa
-  const handleUnlock = (customer: Customer) => {
+  const handleUnlock = (customer: CustomerRow) => {
     setSelectedCustomer(customer);
     setIsModalOpen(true);
   };
 
   // Cột của bảng
-  const columns: ColumnsType<Customer> = [
+  const columns: ColumnsType<CustomerRow> = [
     {
       title: 'KHÁCH HÀNG',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string, record: Customer) => (
+      render: (text: string, record: CustomerRow) => (
         <div className="font-semibold text-gray-700">
           {text}
           <div className="text-sm font-normal text-gray-500">{record.email}</div>
@@ -90,7 +86,7 @@ export const TabCustomerManagementTable: React.FC = () => {
       title: 'GÓI',
       dataIndex: 'package',
       key: 'package',
-      width: 100,
+      width: 150,
       render: (text: string) => (
         <Tag color="gold" className="font-semibold text-sm py-0.5 px-2">
           {text}
@@ -101,18 +97,23 @@ export const TabCustomerManagementTable: React.FC = () => {
       title: 'SLOT',
       dataIndex: 'slot',
       key: 'slot',
-      width: 100,
-      render: (text: string) => (
-        <span className={text === '50/50' ? 'text-red-500 font-medium' : 'font-medium'}>
-          {text}
-        </span>
-      ),
+      width: 150,
+      render: (text: string, record: CustomerRow) => {
+        // Đỏ nếu đã full slot
+        const slotUsed = Number(text.split('/')[0]);
+        const slotTotal = Number(text.split('/')[1]);
+        return (
+          <span className={slotUsed === slotTotal ? 'text-red-500 font-medium' : 'font-medium'}>
+            {text}
+          </span>
+        );
+      },
     },
     {
       title: 'VI PHẠM',
       dataIndex: 'violation',
       key: 'violation',
-      width: 100,
+      width: 150,
       render: (text: string) => (
         <span className={text === '3/3' ? 'text-red-500 font-medium' : 'font-medium'}>
           {text}
@@ -130,7 +131,7 @@ export const TabCustomerManagementTable: React.FC = () => {
       title: 'THAO TÁC',
       key: 'action',
       width: 150,
-      render: (_: any, record: Customer) => (
+      render: (_: any, record: CustomerRow) => (
         <Space size="middle">
           {record.status === 'Bị khóa' ? (
             <Button 
@@ -149,10 +150,18 @@ export const TabCustomerManagementTable: React.FC = () => {
       ),
     },
   ];
-  
-  // Custom row className để làm nổi bật hàng Bị khóa (Phạm Văn D)
-  const getRowClassName = (record: Customer) => {
+
+  // Custom row className để làm nổi bật hàng Bị khóa
+  const getRowClassName = (record: CustomerRow) => {
     return record.status === 'Bị khóa' ? 'bg-red-50/50' : 'hover:bg-gray-50';
+  };
+
+  // Handler cho đổi trang
+  const handlePageChange = (page: number, pageSizeParam?: number) => {
+    setCurrentPage(page);
+    if (pageSizeParam && pageSizeParam !== pageSize) {
+      setPageSize(pageSizeParam);
+    }
   };
 
   return (
@@ -178,22 +187,24 @@ export const TabCustomerManagementTable: React.FC = () => {
         />
       </div>
       
-      {/* BẢNG DỮ LIỆU */}
-      <Table
-        columns={columns}
-        dataSource={customerData}
-        pagination={false}
-        scroll={{ x: 'max-content' }}
-        rowClassName={getRowClassName} // Áp dụng style cho hàng
-        className="custom-table-header [&_thead>tr>th]:bg-gray-50 [&_thead>tr>th]:text-gray-500 [&_thead>tr>th]:font-semibold"
-      />
-
+      <Spin spinning={isLoading}>
+        <TableComponent
+          columns={columns}
+          dataSource={customerRows}
+          scroll={{ x: 'max-content' }}
+          rowClassName={getRowClassName}
+          className="custom-table-header [&_thead>tr>th]:bg-gray-50 [&_thead>tr>th]:text-gray-500 [&_thead>tr>th]:font-semibold"
+          onPageChange={handlePageChange}
+          page={currentPage}
+          response={items}
+        />
+      </Spin>
       {/* MODAL MỞ KHÓA */}
-      <UnlockCustomerModal
+      {/* <UnlockCustomerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         customer={selectedCustomer}
-      />
+      /> */}
     </div>
   );
 };

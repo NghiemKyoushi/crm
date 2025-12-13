@@ -27,22 +27,25 @@ export const StatusTag: React.FC<StatusTagProps> = ({ text, type }) => {
   );
 };
 
+// Update FlatRow and related types to match new API response
 type FlatRow = {
   key: string;
   auction_id: number;
   title: string;
   url: string;
   end_time: string;
-  thumbnail: string;
+  thumbnail: string; // from image
   full_name: string;
-  vip_level: string;
-  bid_amount: number;
-  status: string;
+  vip_level: string; // from vip_name
+  bid_amount: number; // from bid_price
+  status: string; // from bid_status
   reason: string;
   isGroupStart: boolean;
   id?: number;
   bid_id?: number;
   auction_type?: string;
+  user_id?: number;
+  bid_time?: string;
 };
 
 export type BidItem = Omit<
@@ -62,36 +65,27 @@ type GroupedRow = {
   bid_id?: number;
 };
 
-// Chuyển hàm flattenBids nhận generic cho compatibility
-function flattenBids<
-  T extends {
-    auction_id: number;
-    title: string;
-    url: string;
-    end_time: string;
-    thumbnail: string;
-    customers: { data: any[] };
-  }
->(data: T[]): FlatRow[] {
+function flattenBids(data: any[]): FlatRow[] {
   const result: FlatRow[] = [];
   data.forEach((auctionItem) => {
-    auctionItem.customers.data.forEach((customer, idx) => {
+    const users = auctionItem.users || [];
+    users.forEach((user: any, idx: number) => {
       result.push({
-        key: `${auctionItem.auction_id}-${customer.user_id}`,
+        key: `${auctionItem.auction_id}-${user.user_id}`,
         auction_id: auctionItem.auction_id,
         title: auctionItem.title,
         url: auctionItem.url,
         end_time: auctionItem.end_time,
-        thumbnail: auctionItem.thumbnail,
-        full_name: customer.full_name,
-        vip_level: customer.vip_level,
-        bid_amount: customer.bid_amount,
-        status: customer.status,
-        reason: customer.reason || "",
+        thumbnail: auctionItem.image, // new field
+        full_name: user.full_name,
+        vip_level: user.vip_name,
+        bid_amount: user.bid_price,
+        status: user.bid_status,
+        reason: user.reason || "",
         isGroupStart: idx === 0,
-        id: customer.id,
-        bid_id: customer.bid_id,
-        auction_type: customer.bid_id,
+        user_id: user.user_id,
+        bid_time: user.bid_time,
+        // id, bid_id, auction_type not available in sample response but keep assignment for extendability
       });
     });
   });
@@ -105,8 +99,6 @@ const ProductCard = ({
   item: GroupedRow;
   refreshData: () => void;
 }) => {
-  console.log("item", item);
-
   const columns = [
     {
       title: <span className="font-medium text-xs text-gray-500">Khách</span>,
@@ -231,17 +223,6 @@ const ProductCard = ({
                     <span className="text-xs">Từ&nbsp;chối</span>
                   </Button>
                 </Tooltip>
-                {/* <Tooltip title="Bom trạng thái">
-                  <Button
-                    size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
-                  >
-                    <span className="text-xs">bom</span>
-                  </Button>
-                </Tooltip> */}
               </div>
             );
           case "READY":
@@ -352,8 +333,8 @@ const ProductCard = ({
   const [decisionMode, setDecisionMode] = useState<DecisionMode>("accept");
   const [selectedBid, setSelectedBid] = useState<BidItem | null>(null);
   const [selectedAutionId, setSelectedAutionId] = useState<number | null>(null);
-
   const [confirmLoading, setConfirmLoading] = useState(false);
+
   const openModal = (mode: DecisionMode, bid: BidItem, autionId: number) => {
     setDecisionMode(mode);
     setSelectedBid(bid);
@@ -393,9 +374,11 @@ const ProductCard = ({
         });
         toast.success("Đã từ chối bid.");
       }
-
       if (decisionMode === "excute-pending" && selectedBid.bid_id) {
-        await excuteAuction(String(selectedAutionId), {pending_bid_id: selectedBid.bid_id , placed_price: selectedBid.bid_amount});
+        await excuteAuction(String(selectedAutionId), {
+          pending_bid_id: selectedBid.bid_id,
+          placed_price: selectedBid.bid_amount,
+        });
         toast.success("Đã thực hiện bid");
       }
       refreshData();
@@ -426,7 +409,7 @@ const ProductCard = ({
               {item.title}
             </div>
             <a
-              href={`https://${item.url}`}
+              href={item.url}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-blue-600 text-xs hover:text-blue-700 transition-colors leading-4 mt-1"
@@ -504,17 +487,19 @@ export const TabLink = () => {
     page: currentPage,
     size: pageSize,
   });
-  const rawAuctions = data?.data?.data ?? [];
+  const rawAuctions = data?.data?.data.items ?? [];
+  // log for debug
+  console.log('rawAuctions', data?.data);
+
   const allRows = useMemo(() => flattenBids(rawAuctions), [rawAuctions]);
   const groupedRows = useMemo(() => {
+    // Now grouping should be much simpler since the data is already normalized!
     const groups: GroupedRow[] = [];
     let prevAuctionId: number | null = null;
     let currentGroup: GroupedRow | null = null;
     for (let i = 0; i < allRows.length; ++i) {
       const row = allRows[i];
       const isNewGroup = row.auction_id !== prevAuctionId;
-      console.log("row", row);
-
       if (isNewGroup) {
         currentGroup = {
           auction_id: row.auction_id,
@@ -539,6 +524,8 @@ export const TabLink = () => {
         reason: row.reason,
         auction_id: row.auction_id,
         bid_id: row.bid_id,
+        user_id: row.user_id,
+        bid_time: row.bid_time,
       });
     }
     return groups;
@@ -571,20 +558,14 @@ export const TabLink = () => {
 
       <div className="flex justify-between items-center pt-5 border-t border-gray-100 mt-8">
         <div className="text-gray-500 text-sm pl-1">
-          {/* <span>
-            Hiển thị{" "}
-            <b>
-              {actualTotalCount === 0 ? 0 : startIndex + 1}-{actualEndIndex}
-            </b>{" "}
-            / <b>{totalAuctions} links</b>
-          </span> */}
+          {/* For future: show pagination info */}
         </div>
 
         <Pagination
-          current={currentPage}
-          pageSize={data?.data.page_size}
-          total={data?.data.total_items}
-          onChange={() => setCurrentPage((prev) => prev + 1)}
+          current={data?.data?.current_page != null ? data.data.current_page + 1 : 1}
+          pageSize={data?.data?.page_size}
+          total={data?.data?.total_items}
+          onChange={(page) => setCurrentPage(page - 1)}
           size="small"
           showSizeChanger={false}
         />

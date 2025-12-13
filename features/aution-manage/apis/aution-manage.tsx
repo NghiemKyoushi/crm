@@ -9,6 +9,16 @@ export const fetchAuctionCustomers = (params?: any) => {
   return api.get(API_TYPE_CONST.AUTION_CUSTOMERS, { params });
 };
 
+export const fetchAuctionResultTab = async (params?: any) => {
+  const response = await api.get(API_TYPE_CONST.AUTION_RESULT_TAB, { params });
+  return response?.data?.data;
+};
+export const fetchAuctionVipCustomers = async (params?: any) => {
+  const response = await api.get(API_TYPE_CONST.AUTION_VIP_CUSTOMER, {
+    params,
+  });
+  return response?.data?.data;
+};
 // Yêu cầu duyệt đơn đấu giá (approve)
 export const approveAuction = (
   auctionId: string,
@@ -22,7 +32,10 @@ export const excuteAuction = (
   auctionId: string,
   payload?: { pending_bid_id: number; placed_price: number }
 ) => {
-  const url = API_TYPE_CONST.AUTION_EXCUTE_PENDING.replace("{auctionId}", auctionId);
+  const url = API_TYPE_CONST.AUTION_EXCUTE_PENDING.replace(
+    "{auctionId}",
+    auctionId
+  );
   return api.post(url, payload);
 };
 
