@@ -13,7 +13,7 @@ const { Option } = Select;
 // Dùng tạm cấu trúc partner: id, name (real API hoặc fake/mock tuỳ hệ thống)
 export interface Partner {
   email: string;
-  id: string
+  user_id: string
 }
 
 export default function AddBankAccountModal({
@@ -280,7 +280,7 @@ export default function AddBankAccountModal({
           ) : (
             <Select placeholder="Chọn đối tác">
               {partnerList.map((partner) => (
-                <Select.Option key={partner.id} value={partner.id}>
+                <Select.Option key={partner.user_id} value={partner.user_id}>
                   {partner.email}
                 </Select.Option>
               ))}
