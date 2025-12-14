@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CloseOutlined } from "@ant-design/icons";
 import { Table, Spin, Modal, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useAuctionViolate } from "../hooks/aution-manage";
 import TableComponent from "@/components/TableComponent";
 import { deleteAuctionViolate } from "../apis/aution-manage";
+import { fetchAuctionViolate } from "../apis/aution-manage";
 
 // API item kiểu dữ liệu
 interface ApiRowItem {
@@ -19,6 +20,12 @@ interface ApiRowItem {
   violation_count: number | null;
 }
 
+// Thêm kiểu cho summary API
+interface ViolationSummary {
+  total_blocked_users: number;
+  total_monthly_violations: number;
+}
+
 export const CustomerViolationTable: React.FC = () => {
   // Thêm state cho phân trang
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -27,6 +34,13 @@ export const CustomerViolationTable: React.FC = () => {
   // State cho modal xác nhận xoá
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+  // State để lưu thông tin tổng quan
+  const [violationSummary, setViolationSummary] = useState<ViolationSummary>({
+    total_blocked_users: 0,
+    total_monthly_violations: 0,
+  });
+  const [summaryLoading, setSummaryLoading] = useState<boolean>(true);
 
   // Lấy data và loading state từ hook
   const {
@@ -38,12 +52,43 @@ export const CustomerViolationTable: React.FC = () => {
     size: pageSize,
   });
   const items: ApiRowItem[] = data?.items || [];
-  const blockedCount = items.filter(
-    (item) => item.violation_count === 3
-  ).length;
-  const bomCount = items.filter((item) =>
-    (item.reason || "").toLowerCase().includes("bom hàng")
-  ).length;
+
+  // Lấy summary
+  useEffect(() => {
+    let ignore = false;
+
+    async function getSummary() {
+      setSummaryLoading(true);
+      try {
+        const response = await fetchAuctionViolate();
+        console.log('response', response);
+        
+        // Response dạng { total_blocked_users, total_monthly_violations }
+        if (!ignore && response) {
+          setViolationSummary({
+            total_blocked_users: response?.total_blocked_users ?? 0,
+            total_monthly_violations: response?.total_monthly_violations ?? 0,
+          });
+        }
+      } catch (e) {
+        if (!ignore) {
+          setViolationSummary({
+            total_blocked_users: 0,
+            total_monthly_violations: 0,
+          });
+        }
+      } finally {
+        if (!ignore) setSummaryLoading(false);
+      }
+    }
+
+    getSummary();
+
+    // Cleanup
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Map API data sang "RowItem" dùng cho bảng
   type TableRow = {
@@ -102,8 +147,17 @@ export const CustomerViolationTable: React.FC = () => {
       setDeletingId(null);
       // Gọi lại data
       refetch();
+      // Gọi lại summary
+      setSummaryLoading(true);
+      const response = await fetchAuctionViolate({});
+      setViolationSummary({
+        total_blocked_users: response?.total_blocked_users ?? 0,
+        total_monthly_violations: response?.total_monthly_violations ?? 0,
+      });
+      setSummaryLoading(false);
     } catch (err) {
       message.error("Xoá thất bại, vui lòng thử lại!");
+      setSummaryLoading(false);
     } finally {
       setDeleteLoading(false);
     }
@@ -179,13 +233,27 @@ export const CustomerViolationTable: React.FC = () => {
         <div className="border border-red-200 bg-red-50 rounded-lg p-4">
           <p className="text-red-600 font-medium">Khách bị khóa</p>
           <p className="text-3xl font-bold text-red-600">
-            {blockedCount} người
+            {summaryLoading ? (
+              <span className="animate-pulse">-- người</span>
+            ) : (
+              <>
+                {violationSummary.total_blocked_users} người
+              </>
+            )}
           </p>
         </div>
         {/* Bom hàng tháng này */}
         <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
           <p className="text-orange-600 font-medium">Bom hàng tháng này</p>
-          <p className="text-3xl font-bold text-orange-600">{bomCount} lượt</p>
+          <p className="text-3xl font-bold text-orange-600">
+            {summaryLoading ? (
+              <span className="animate-pulse">-- lượt</span>
+            ) : (
+              <>
+                {violationSummary.total_monthly_violations} lượt
+              </>
+            )}
+          </p>
         </div>
       </div>
 

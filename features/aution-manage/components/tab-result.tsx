@@ -228,6 +228,49 @@ export const TabResult = () => {
                 Xác định&nbsp;kết&nbsp;quả
               </Button>
             </Tooltip>
+          ) : record.bid_status === "SUCCESS" ? (
+            <div className="flex flex-row gap-2">
+              <Tooltip title="Tạo đơn hàng">
+                <Button
+                  size="small"
+                  type="primary"
+                  className="bg-green-50 border border-green-200 text-green-700 font-medium"
+                  style={{ padding: "0 12px" }}
+                  onClick={() => {
+                    toast.info("Chức năng Tạo đơn chưa được phát triển.");
+                  }}
+                >
+                  Tạo&nbsp;đơn
+                </Button>
+              </Tooltip>
+              <Tooltip title="Huỷ đơn">
+                <Button
+                  size="small"
+                  type="default"
+                  danger
+                  className="font-medium"
+                  style={{ padding: "0 12px" }}
+                  onClick={() => {
+                    toast.info("Chức năng Huỷ đơn chưa được phát triển.");
+                  }}
+                >
+                  Huỷ&nbsp;đơn
+                </Button>
+              </Tooltip>
+              <Tooltip title="Bom">
+                <Button
+                  size="small"
+                  type="default"
+                  className="bg-red-50 border border-red-200 text-red-700 font-medium"
+                  style={{ padding: "0 12px" }}
+                  onClick={() => {
+                    toast.info("Chức năng Bom chưa được phát triển.");
+                  }}
+                >
+                  Bom
+                </Button>
+              </Tooltip>
+            </div>
           ) : (
             <Tooltip title="Hoàn thành">
               <Button

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import { Table, Input, Select, Button, Tag, Space, Spin } from 'antd';
+import { Input, Select, Button, Tag, Space, Spin, Modal, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import UnlockCustomerModal from './modal/unlock-customer-modal';
 import { useAuctionVipCustomers } from '../hooks/aution-manage';
 import TableComponent from '@/components/TableComponent';
+import { blockOrUnblockAuctionVipCustomer } from '../apis/aution-manage';
 
 const { Option } = Select;
 
@@ -44,12 +44,15 @@ const mapAPIToCustomerRow = (item: any)=> {
     slot: `${item.slot_used}/${item.slot_total}`,
     violation: `${item.violation_count}/3`,
     status: item.is_blocked ? 'Bị khóa' : 'Hoạt động',
+    is_blocked: !!item.is_blocked,
     __raw: item
   };
 };
 
 export const TabCustomerManagementTable: React.FC = () => {
+  // Modal state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalLoading, setModalLoading] = useState<boolean>(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRow | null>(null);
 
   // PAGINATION state
@@ -57,17 +60,40 @@ export const TabCustomerManagementTable: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
 
   // --- Lấy data từ API ---
-  const { data, isLoading } = useAuctionVipCustomers({ page: currentPage, size: pageSize });
+  const { data, isLoading, refetch } = useAuctionVipCustomers({ page: currentPage, size: pageSize });
   const items = data?.items || [];
   const customerRows: CustomerRow[] = items.map(mapAPIToCustomerRow);
 
   // Lấy total (nếu có)
   const totalItems = data?.total || 0;
 
-  // Mở Modal Mở khóa
-  const handleUnlock = (customer: CustomerRow) => {
+  // Mở Modal xác nhận khoá/mở khoá
+  const handleLockOrUnlock = (customer: CustomerRow) => {
     setSelectedCustomer(customer);
     setIsModalOpen(true);
+  };
+
+  // Gọi API khi xác nhận
+  const handleConfirmLockOrUnlock = async () => {
+    if (!selectedCustomer) return;
+    setModalLoading(true);
+    try {
+      const userId = selectedCustomer.key;
+      // Nếu đang bị khoá => mở khoá, ngược lại là khoá
+      const blocked = !selectedCustomer.is_blocked ? true : false;
+      await blockOrUnblockAuctionVipCustomer(userId, blocked);
+      message.success(
+        blocked
+          ? `Khoá khách hàng thành công`
+          : `Mở khoá khách hàng thành công`
+      );
+      setIsModalOpen(false);
+      setSelectedCustomer(null);
+      refetch?.();
+    } catch (e: any) {
+      message.error('Thao tác thất bại!');
+    }
+    setModalLoading(false);
   };
 
   // Cột của bảng
@@ -134,19 +160,18 @@ export const TabCustomerManagementTable: React.FC = () => {
       width: 150,
       render: (_: any, record: CustomerRow) => (
         <Space size="middle">
-          {record.is_blocked ? (
-            <Button 
-              type="primary" 
-              onClick={() => handleUnlock(record)}
-              className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600"
-            >
-              Mở khóa
-            </Button>
-          ) : (
-            <Button className="border-gray-300 text-gray-700 hover:border-blue-400 hover:text-blue-500">
-              Chi tiết
-            </Button>
-          )}
+          <Button
+            type={record.is_blocked ? "primary" : "default"}
+            danger={!record.is_blocked}
+            onClick={() => handleLockOrUnlock(record)}
+            className={
+              record.is_blocked
+                ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600"
+                : "border-gray-300 text-gray-700 hover:border-red-500 hover:text-red-500"
+            }
+          >
+            {record.is_blocked ? 'Mở khóa' : 'Khóa'}
+          </Button>
         </Space>
       ),
     },
@@ -187,7 +212,6 @@ export const TabCustomerManagementTable: React.FC = () => {
           className="!w-[300px]"
         />
       </div>
-      
       <Spin spinning={isLoading}>
         <TableComponent
           columns={columns}
@@ -200,12 +224,27 @@ export const TabCustomerManagementTable: React.FC = () => {
           response={items}
         />
       </Spin>
-      {/* MODAL MỞ KHÓA */}
-      {/* <UnlockCustomerModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        customer={selectedCustomer}
-      /> */}
+
+      {/* Modal xác nhận khoá/mở khoá */}
+      <Modal
+        open={isModalOpen}
+        title={selectedCustomer?.is_blocked ? "Xác nhận mở khoá" : "Xác nhận khoá"}
+        okText={selectedCustomer?.is_blocked ? "Mở khoá" : "Khoá"}
+        okType={selectedCustomer?.is_blocked ? "primary" : "danger"}
+        cancelText="Huỷ"
+        onOk={handleConfirmLockOrUnlock}
+        confirmLoading={modalLoading}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setSelectedCustomer(null);
+        }}
+      >
+        <div>
+          {selectedCustomer?.is_blocked
+            ? `Bạn có chắc chắn muốn mở khoá khách hàng "${selectedCustomer?.name}"?`
+            : `Bạn có chắc chắn muốn khoá khách hàng "${selectedCustomer?.name}"?`}
+        </div>
+      </Modal>
     </div>
   );
 };

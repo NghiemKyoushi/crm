@@ -187,5 +187,7 @@ export const API_TYPE_CONST = {
   AUTION_RESULT_TAB:`${FEATURE}/admin/auction/results`,
   AUTION_VIP_CUSTOMER:`${FEATURE}/admin/auction/vip-customers`,
   AUTION_LIST_VIOLATE:`${FEATURE}/admin/auction/list`,
-  AUTION_DELETE_VIOLATE:`${FEATURE}/admin/auction`
+  AUTION_DELETE_VIOLATE:`${FEATURE}/admin/auction`,
+  AUTION_SUMMARY:`${FEATURE}/admin/auction/summary`,
+  AUTION_BLOCK:`/v1/admin/auction/vip-customers/{userId}/block`,
 } as const;

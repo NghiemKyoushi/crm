@@ -26,6 +26,10 @@ export const fetchListViolate = async (params?: any) => {
   });
   return response?.data?.data;
 };
+export const fetchAuctionViolate = async (params?: any) => {
+  const response = await api.get(API_TYPE_CONST.AUTION_SUMMARY, { params });
+  return response?.data?.data;
+};
 
 export const deleteAuctionViolate = async (penaltyId: number) => {
   const url = `${API_TYPE_CONST.AUTION_DELETE_VIOLATE}/${penaltyId}`;
@@ -38,6 +42,14 @@ export const approveAuction = (
 ) => {
   const url = API_TYPE_CONST.AUTION_APPROVE.replace("{id}", auctionId);
   return api.put(url, payload);
+};
+
+export const blockOrUnblockAuctionVipCustomer = (
+  userId: string | number,
+  blocked: boolean
+) => {
+  const url = API_TYPE_CONST.AUTION_BLOCK.replace("{userId}", String(userId));
+  return api.put(`${url}?blocked=${blocked}`);
 };
 
 export const excuteAuction = (
