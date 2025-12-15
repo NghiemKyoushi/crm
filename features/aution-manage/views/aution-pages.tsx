@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, Row, Col, Card } from "antd";
 import {
   LinkOutlined,
@@ -9,7 +9,7 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
   FileTextOutlined,
-  EyeOutlined, // Thay thế cho icon "Thua" (Giống biểu tượng dừng/xem)
+  EyeOutlined,
   CheckOutlined, // Icon check nhỏ hơn cho "Đã thanh toán"
 } from "@ant-design/icons";
 
@@ -92,7 +92,25 @@ const TabLabel = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
   </div>
 );
 
+const TAB_KEYS = [
+  "1", "2", "3", "4", "5", "6"
+];
+
 export const AuctionPage = () => {
+  const [activeKey, setActiveKey] = useState<string>("1");
+  const [tabRenders, setTabRenders] = useState<number[]>([0, 0, 0, 0, 0, 0]);
+
+  // Mỗi lần tab thay đổi thì làm mới bằng cách tăng chỉ số render cho tab đó (force remount)
+  const handleTabChange = (key: string) => {
+    const idx = TAB_KEYS.findIndex(k => k === key);
+    setTabRenders(rs => {
+      const newRenders = [...rs];
+      newRenders[idx] = (newRenders[idx] || 0) + 1;
+      return newRenders;
+    });
+    setActiveKey(key);
+  };
+
   return (
     <div className="p-5 bg-white rounded-xl shadow-lg border border-gray-100">
       {/* KHU VỰC STATS CARDS ĐÃ ĐIỀU CHỈNH ICON VÀ MÀU SẮC */}
@@ -144,33 +162,34 @@ export const AuctionPage = () => {
 
       {/* KHU VỰC TABS */}
       <Tabs
-        defaultActiveKey="1"
+        activeKey={activeKey}
+        onChange={handleTabChange}
         items={[
           {
             key: "1",
             label: <TabLabel icon={<LinkOutlined />} text="Theo link" />,
-            children: <TabLink />,
+            children: <TabLink key={tabRenders[0]} />,
           },
           {
             key: "2",
             label: <TabLabel icon={<UserOutlined />} text="Theo khách" />,
-            children: <TabCustomer />,
+            children: <TabCustomer key={tabRenders[1]} />,
           },
           {
             key: "3",
             label: <TabLabel icon={<TrophyOutlined />} text="Thắng thua" />,
-            children: <TabResult />,
+            children: <TabResult key={tabRenders[2]} />,
           },
           {
             key: "4",
             label: <TabLabel icon={<UserOutlined />} text="Khách hàng VIP" />,
-            children: <TabCustomerManagementTable />,
+            children: <TabCustomerManagementTable key={tabRenders[3]} />,
           },
           {
             key: "5",
             label: <TabLabel icon={<TrophyOutlined />} text="Vi phạm" />,
             children: (
-              <div>
+              <div key={tabRenders[4]}>
                 <CustomerViolationTable />
               </div>
             ),
@@ -178,7 +197,7 @@ export const AuctionPage = () => {
           {
             key: "6",
             label: <TabLabel icon={<LinkOutlined />} text="Cài đặt" />,
-            children: <TabSettings />,
+            children: <TabSettings key={tabRenders[5]} />,
           },
         ]}
         className="custom-tabs-auction [&_.ant-tabs-content-holder]:!p-0"

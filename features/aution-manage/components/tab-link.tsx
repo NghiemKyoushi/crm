@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { Button, Tooltip, Pagination, Table } from "antd";
-import { LinkOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Tooltip, Pagination, Table, Modal, Radio } from "antd";
+import {
+  InfoCircleOutlined,
+  LinkOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { BidDecisionModal, DecisionMode } from "./modal/accept-modal";
 import { toast } from "react-toastify";
 import { useAuctionLinks } from "../hooks/aution-manage";
@@ -108,6 +112,39 @@ const ProductCard = ({
   item: GroupedRow;
   refreshData: () => void;
 }) => {
+  const [resultModalOpen, setResultModalOpen] = useState<boolean>(false);
+  const [selectedRow, setSelectedRow] = useState<GroupedRow | null>(null);
+  const [resultType, setResultType] = useState<"SUCCESS" | "FAILED" | null>(
+    null
+  );
+  const openResultModal = (record: any) => {
+    setSelectedRow(record);
+    setResultType(null);
+    setResultModalOpen(true);
+  };
+  const closeResultModal = () => {
+    setResultModalOpen(false);
+    setSelectedRow(null);
+    setResultType(null);
+  };
+
+  const handleConfirmResult = async () => {
+    if (!selectedRow || !resultType) return;
+    setConfirmLoading(true);
+    try {
+      await excuteAuction(String(selectedRow.bid_id), {
+        success: resultType === "SUCCESS" ? true : false,
+      });
+      toast.success("Xác định kết quả thành công");
+      closeResultModal();
+      refreshData();
+    } catch (e) {
+      // Handle error nếu có
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: <span className="font-medium text-xs text-gray-500">Khách</span>,
@@ -156,7 +193,7 @@ const ProductCard = ({
           case "READY":
             return <StatusTag text="Sẵn sàng Sniper" type="info" />;
           case "REJECTED":
-            return <StatusTag text="Từ chối" type="info" />;
+            return <StatusTag text="Từ chối" type="error" />;
           case "FAILED":
             return <StatusTag text="Thua" type="error" />;
           case "APPROVED":
@@ -217,18 +254,19 @@ const ProductCard = ({
                 </Tooltip>
               </div>
             );
-          case "USER_CANCELLED":
+          case "APPROVED":
             return (
               <div className="flex items-center justify-center gap-1.5">
-                <Tooltip title="Bom trạng thái">
+                <Tooltip title="Xác định kết quả đấu giá">
                   <Button
                     size="small"
-                    type="default"
-                    shape="round"
-                    onClick={() => onRefreshStatus(b)}
-                    className="!border-gray-200 !bg-white hover:!bg-gray-50 text-gray-400 transition px-3"
+                    type="primary"
+                    className="!bg-green-50 !border-green-200 !text-green-600 font-medium"
+                    style={{ padding: "0 12px" }}
+                    icon={<InfoCircleOutlined />}
+                    onClick={() => openResultModal(b)}
                   >
-                    <span className="text-xs">bom</span>
+                    Kết&nbsp;quả
                   </Button>
                 </Tooltip>
               </div>
@@ -393,6 +431,43 @@ const ProductCard = ({
           />
         )}
       </div>
+
+      <Modal
+        open={resultModalOpen}
+        onCancel={closeResultModal}
+        title="Xác nhận kết quả đấu giá"
+        okText="Xác nhận"
+        okButtonProps={{ disabled: !resultType, loading: confirmLoading }}
+        cancelButtonProps={{ disabled: confirmLoading }}
+        onOk={handleConfirmResult}
+        destroyOnClose
+      >
+        <div>
+          <p>
+            Bạn hãy chọn kết quả đấu giá cho khách&nbsp;
+            <b>{selectedRow?.title}</b>
+            {selectedRow?.title ? (
+              <>
+                &nbsp;- Sản phẩm:{" "}
+                <span className="font-semibold">{selectedRow?.title}</span>
+              </>
+            ) : null}
+          </p>
+          <Radio.Group
+            className="mt-3 flex flex-col gap-2"
+            value={resultType}
+            onChange={(e) => setResultType(e.target.value)}
+            disabled={confirmLoading}
+          >
+            <Radio value="SUCCESS">
+              Đấu giá <b className="text-green-600">thắng</b>
+            </Radio>
+            <Radio value="FAILED">
+              Đấu giá <b className="text-red-600">thua</b>
+            </Radio>
+          </Radio.Group>
+        </div>
+      </Modal>
     </div>
   );
 };

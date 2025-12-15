@@ -22,6 +22,9 @@ import {
   CrownOutlined,
   DollarOutlined,
   GlobalOutlined,
+  // icon búa của ant
+  ToolOutlined as GavelOutlined,
+
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { usePermission } from "./PermissionContext";
@@ -158,7 +161,7 @@ export const menuItems = [
   { key: "/cms", icon: TagsOutlined, label: "cms" },
   { key: "/website-manage", icon: GlobalOutlined, label: "websiteManagement" },
   { key: "/vip-management", icon: CrownOutlined, label: "vipManagement" },
-  { key: "/aution-manage", icon: SettingOutlined, label: "aution" },
+  { key: "/aution-manage", icon: GavelOutlined, label: "aution" },
   { key: "/settings", icon: SettingOutlined, label: "settings" },
 ];
 export const Sidebar: React.FC = () => {

@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { Button, Select, Input, Spin, Modal, Radio } from "antd";
-import { SearchOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { Button, Select, Input, Spin, Modal } from "antd";
+import {
+  SearchOutlined,
+  InfoCircleOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import { useAuctionResultTab } from "../hooks/aution-manage";
 import TableComponent from "@/components/TableComponent";
 import { Tooltip } from "antd";
 import { StatusTag } from "./tab-link";
-import { excuteAuction } from "../apis/aution-manage";
 import { toast } from "react-toastify";
+import { createAuctionOrder, updateAuctionBOM } from "../apis/aution-manage";
 const { Option } = Select;
 
 export type AuctionResultItem = {
@@ -22,53 +26,137 @@ export type AuctionResultItem = {
   order_status: string | null;
   slot_returned: string;
 };
+
+interface ConfirmModalProps {
+  open: boolean;
+  title: string;
+  icon?: React.ReactNode;
+  content: React.ReactNode;
+  loading?: boolean;
+  okText?: string;
+  cancelText?: string;
+  okButtonProps?: any;
+  onCancel: () => void;
+  onOk: () => void;
+}
+
+// Use Ant Design Modal instead of the custom modal
+const CustomConfirmModal: React.FC<ConfirmModalProps> = ({
+  open,
+  title,
+  icon,
+  content,
+  loading,
+  okText = "OK",
+  cancelText = "Huỷ",
+  okButtonProps = {},
+  onCancel,
+  onOk,
+}) => {
+  return (
+    <Modal
+      open={open}
+      title={
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {icon}
+          <span>{title}</span>
+        </div>
+      }
+      onOk={onOk}
+      onCancel={onCancel}
+      okText={okText}
+      cancelText={cancelText}
+      okButtonProps={{
+        loading: loading,
+        ...okButtonProps,
+      }}
+      cancelButtonProps={{
+        disabled: loading,
+      }}
+      maskClosable={false}
+      destroyOnClose
+      centered
+      closable={!loading}
+    >
+      {content}
+    </Modal>
+  );
+};
+
 export const TabResult = () => {
-  // Trang mặc định của API là 0, nhưng Antd Pagination bắt đầu từ 1
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10; // API default page size là 20
+  const pageSize = 10;
   const [statusFilter] = useState<string>("all-status");
   const [searchCustomer] = useState<string>("");
-  const [resultModalOpen, setResultModalOpen] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<AuctionResultItem | null>(
-    null
-  );
-  const [resultType, setResultType] = useState<"SUCCESS" | "FAILED" | null>(
-    null
-  );
-  const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const { data, isLoading, refetch } = useAuctionResultTab({
     page: currentPage - 1,
     size: pageSize,
-    // Có thể bổ sung filter khách hàng, trạng thái nếu API hỗ trợ
   });
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingBom, setLoadingBom] = useState(false);
+
+  // Add Reason state
+  const [bomReason, setBomReason] = useState<string>("");
+
+  const [modalState, setModalState] = useState<{
+    open: boolean;
+    type: "createOrder" | "bom" | null;
+    record: any;
+  }>({ open: false, type: null, record: null });
+
   const items = data?.items || [];
-  const openResultModal = (record: any) => {
-    setSelectedRow(record);
-    setResultType(null);
-    setResultModalOpen(true);
-  };
-  const closeResultModal = () => {
-    setResultModalOpen(false);
-    setSelectedRow(null);
-    setResultType(null);
+
+  // Custom handler for creating order using custom modal
+  const handleCreateOrder = (record: any) => {
+    setModalState({ open: true, type: "createOrder", record });
   };
 
-  // Dummy handle confirm, bạn thay chỗ này để call API thực tế xác nhận kết quả
-  const handleConfirmResult = async () => {
-    if (!selectedRow || !resultType) return;
-    setConfirmLoading(true);
-    try {
-      await excuteAuction(String(selectedRow.bid_id), {
-        success: resultType === "SUCCESS" ? true : false,
-      });
-      toast.success("Xác định kết quả thành công");
-      closeResultModal();
-      refetch();
-      // Có thể refetch lại data nếu muốn
-    } catch (e) {
-      // Handle error nếu có
-    } finally {
-      setConfirmLoading(false);
+  // Custom handler for "Bom" action using custom modal
+  const handleBom = (record: any) => {
+    setBomReason(""); // reset when opening
+    setModalState({ open: true, type: "bom", record });
+  };
+
+  const handleModalCancel = () => {
+    if (loadingCreate || loadingBom) return;
+    setModalState({ open: false, type: null, record: null });
+    setBomReason("");
+  };
+
+  const handleModalOk = async () => {
+    if (modalState.type === "createOrder" && modalState.record) {
+      setLoadingCreate(true);
+      try {
+        await createAuctionOrder(String(modalState.record.auction_id));
+        toast.success("Tạo đơn thành công!");
+        setModalState({ open: false, type: null, record: null });
+        refetch?.();
+      } catch (e: any) {
+        toast.error(e?.message || "Tạo đơn thất bại!");
+      } finally {
+        setLoadingCreate(false);
+      }
+    }
+    if (modalState.type === "bom" && modalState.record) {
+      if (!bomReason.trim()) {
+        toast.error("Vui lòng nhập lý do bom.");
+        return;
+      }
+      setLoadingBom(true);
+      try {
+        await updateAuctionBOM(modalState.record.bid_id, {
+          reasontype: "OBJECTIVE",
+          reason: bomReason,
+        });
+        toast.success("Bom thành công!");
+        setModalState({ open: false, type: null, record: null });
+        setBomReason("");
+        refetch?.();
+      } catch (e: any) {
+        toast.error(e?.message || "Bom thất bại!");
+      } finally {
+        setLoadingBom(false);
+      }
     }
   };
 
@@ -195,6 +283,11 @@ export const TabResult = () => {
             return <StatusTag text="Đã duyệt" type="info" />;
           case "SUCCESS":
             return <StatusTag text="Thắng" type="success" />;
+          case "BOM_CANCELLED":
+            return <StatusTag text="Bom" type="error" />;
+            case "USER_CANCELLED":
+            return <StatusTag text="Người dùng huỷ" type="error" />;
+            
           default:
             return null;
         }
@@ -215,46 +308,18 @@ export const TabResult = () => {
       width: 110,
       render: (_: any, record: any) => (
         <div className="flex justify-center items-center gap-2">
-          {record.bid_status === "APPROVED" ? (
-            <Tooltip title="Xác định kết quả đấu giá">
-              <Button
-                size="small"
-                type="primary"
-                className="bg-blue-50 border border-blue-200 text-blue-600 font-medium"
-                style={{ padding: "0 12px" }}
-                icon={<InfoCircleOutlined />}
-                onClick={() => openResultModal(record)}
-              >
-                Xác định&nbsp;kết&nbsp;quả
-              </Button>
-            </Tooltip>
-          ) : record.bid_status === "SUCCESS" ? (
+          {record.bid_status === "SUCCESS" && record.order_status !== "PENDING" ? (
             <div className="flex flex-row gap-2">
               <Tooltip title="Tạo đơn hàng">
                 <Button
                   size="small"
                   type="primary"
-                  className="bg-green-50 border border-green-200 text-green-700 font-medium"
+                  className="!bg-green-50 !border-green-200 !text-green-700 font-medium"
                   style={{ padding: "0 12px" }}
-                  onClick={() => {
-                    toast.info("Chức năng Tạo đơn chưa được phát triển.");
-                  }}
+                  loading={loadingCreate}
+                  onClick={() => handleCreateOrder(record)}
                 >
                   Tạo&nbsp;đơn
-                </Button>
-              </Tooltip>
-              <Tooltip title="Huỷ đơn">
-                <Button
-                  size="small"
-                  type="default"
-                  danger
-                  className="font-medium"
-                  style={{ padding: "0 12px" }}
-                  onClick={() => {
-                    toast.info("Chức năng Huỷ đơn chưa được phát triển.");
-                  }}
-                >
-                  Huỷ&nbsp;đơn
                 </Button>
               </Tooltip>
               <Tooltip title="Bom">
@@ -263,15 +328,14 @@ export const TabResult = () => {
                   type="default"
                   className="bg-red-50 border border-red-200 text-red-700 font-medium"
                   style={{ padding: "0 12px" }}
-                  onClick={() => {
-                    toast.info("Chức năng Bom chưa được phát triển.");
-                  }}
+                  loading={loadingBom}
+                  onClick={() => handleBom(record)}
                 >
                   Bom
                 </Button>
               </Tooltip>
             </div>
-          ) : (
+          ) : record.order_status === "PENDING" ? (
             <Tooltip title="Hoàn thành">
               <Button
                 size="small"
@@ -284,6 +348,19 @@ export const TabResult = () => {
                 Hoàn&nbsp;thành
               </Button>
             </Tooltip>
+          ) : (
+            <Tooltip title="Hoàn thành">
+            <Button
+              size="small"
+              type="primary"
+              className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
+              style={{ padding: "0 12px" }}
+              icon={<InfoCircleOutlined />}
+              disabled
+            >
+              Hoàn&nbsp;thành
+            </Button>
+          </Tooltip>
           )}
         </div>
       ),
@@ -293,7 +370,7 @@ export const TabResult = () => {
   return (
     <div className="bg-white rounded-xl shadow p-5 border border-gray-100">
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <Select value={statusFilter} className="w-[150px]" disabled>
+        <Select value={statusFilter} className="w-[150px]">
           <Option value="all-status">Trạng thái</Option>
           <Option value="active">Hoạt động</Option>
           <Option value="locked">Bị khóa</Option>
@@ -302,7 +379,6 @@ export const TabResult = () => {
           placeholder="Tìm khách hàng..."
           prefix={<SearchOutlined className="text-gray-400" />}
           className="!w-[300px]"
-          disabled
         />
       </div>
 
@@ -335,42 +411,69 @@ export const TabResult = () => {
         />
       </Spin>
 
-      <Modal
-        open={resultModalOpen}
-        onCancel={closeResultModal}
-        title="Xác nhận kết quả đấu giá"
-        okText="Xác nhận"
-        okButtonProps={{ disabled: !resultType, loading: confirmLoading }}
-        cancelButtonProps={{ disabled: confirmLoading }}
-        onOk={handleConfirmResult}
-        destroyOnClose
-      >
-        <div>
-          <p>
-            Bạn hãy chọn kết quả đấu giá cho khách&nbsp;
-            <b>{selectedRow?.full_name}</b>
-            {selectedRow?.title ? (
-              <>
-                &nbsp;- Sản phẩm:{" "}
-                <span className="font-semibold">{selectedRow?.title}</span>
-              </>
-            ) : null}
-          </p>
-          <Radio.Group
-            className="mt-3 flex flex-col gap-2"
-            value={resultType}
-            onChange={(e) => setResultType(e.target.value)}
-            disabled={confirmLoading}
-          >
-            <Radio value="SUCCESS">
-              Đấu giá <b className="text-green-600">thắng</b>
-            </Radio>
-            <Radio value="FAILED">
-              Đấu giá <b className="text-red-600">thua</b>
-            </Radio>
-          </Radio.Group>
-        </div>
-      </Modal>
+      {/* Custom Modal for Tạo đơn/Bom */}
+      <CustomConfirmModal
+        open={modalState.open}
+        title={
+          modalState.type === "createOrder"
+            ? "Xác nhận tạo đơn hàng?"
+            : modalState.type === "bom"
+            ? "Xác nhận Bom đơn hàng?"
+            : ""
+        }
+        icon={<ExclamationCircleOutlined />}
+        content={
+          modalState.record && (
+            <div>
+              <div>
+                {modalState.type === "createOrder"
+                  ? "Bạn có chắc chắn muốn tạo đơn hàng cho:"
+                  : "Bạn có chắc chắn muốn thực hiện thao tác Bom cho đơn này?"}
+              </div>
+              <div className="font-semibold mt-1">
+                {modalState.record.title}
+              </div>
+              <div className="text-xs text-gray-600 break-words">
+                {modalState.record.url}
+              </div>
+              {modalState.type === "bom" && (
+                <div style={{ marginTop: 16 }}>
+                  <label className="block font-medium mb-1">
+                    Lý do bom<span style={{ color: "red" }}>*</span>:
+                  </label>
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Nhập lý do bom (bắt buộc)"
+                    value={bomReason}
+                    onChange={(e) => setBomReason(e.target.value)}
+                    disabled={loadingBom}
+                    maxLength={200}
+                  />
+                </div>
+              )}
+            </div>
+          )
+        }
+        okText={
+          modalState.type === "createOrder"
+            ? "Tạo đơn"
+            : modalState.type === "bom"
+            ? "Bom"
+            : "OK"
+        }
+        cancelText="Huỷ"
+        loading={modalState.type === "createOrder" ? loadingCreate : loadingBom}
+        okButtonProps={{
+          danger: modalState.type === "bom",
+          type: "primary",
+          disabled:
+            modalState.type === "bom"
+              ? loadingBom || !bomReason.trim()
+              : undefined,
+        }}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+      />
     </div>
   );
 };

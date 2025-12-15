@@ -19,7 +19,10 @@ export const fetchAuctionVipCustomers = async (params?: any) => {
   });
   return response?.data?.data;
 };
-
+export const fetchAuctionSettings = async () => {
+  const response = await api.get(API_TYPE_CONST.AUTION_SETTINGS);
+  return response?.data?.data;
+};
 export const fetchListViolate = async (params?: any) => {
   const response = await api.get(API_TYPE_CONST.AUTION_LIST_VIOLATE, {
     params,
@@ -35,6 +38,31 @@ export const deleteAuctionViolate = async (penaltyId: number) => {
   const url = `${API_TYPE_CONST.AUTION_DELETE_VIOLATE}/${penaltyId}`;
   return api.delete(url);
 };
+// API lấy thông tin cài đặt
+export const getAuctionSettings = async () => {
+  const response = await api.get(API_TYPE_CONST.AUTION_SETTINGS);
+  return response?.data?.data;
+};
+
+// API cập nhật cài đặt
+export const updateAuctionSettings = async (body: { live_safe_seconds: number; max_violation_count: number }) => {
+  const response = await api.put(API_TYPE_CONST.AUTION_SETTINGS, body);
+  return response?.data?.data;
+};
+
+// API tạo đơn hàng từ bid
+export const createAuctionOrder = (auctionId: string, payload?: any) => {
+  const url = API_TYPE_CONST.AUTION_CREATE_ORDER.replace("{id}", auctionId);
+  return api.post(url, payload);
+};
+
+// API cập nhật BOM của bid
+export const updateAuctionBOM = (bidId: string | number, payload?: any) => {
+  const url = API_TYPE_CONST.AUTION_BOM.replace("{bidId}", String(bidId));
+  return api.put(url, payload);
+};
+
+
 // Yêu cầu duyệt đơn đấu giá (approve)
 export const approveAuction = (
   auctionId: string,
@@ -44,12 +72,12 @@ export const approveAuction = (
   return api.put(url, payload);
 };
 
-export const blockOrUnblockAuctionVipCustomer = (
+export const blockOrUnblockAuctionVipCustomer = async (
   userId: string | number,
   blocked: boolean
 ) => {
   const url = API_TYPE_CONST.AUTION_BLOCK.replace("{userId}", String(userId));
-  return api.put(`${url}?blocked=${blocked}`);
+  return await api.put(`${url}?blocked=${blocked}`);
 };
 
 export const excuteAuction = (
