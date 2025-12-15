@@ -33,7 +33,7 @@ export enum OrderStatusType {
   CLIENT_PENDING= "CLIENT_PENDING",
   ADMIN_PENDING="ADMIN_PENDING",
   PACKED="PACKED",
-  DENIED="DENIED"
+  DENIED="DENIED",
 }
 
 export interface Invoice {
