@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Button, Tooltip, Pagination, Table, Modal, Radio } from "antd";
+import React, { useState, useMemo, useRef } from "react";
+import { Button, Tooltip, Pagination, Table, Modal, Radio, Select, Spin } from "antd";
 import {
   InfoCircleOutlined,
   LinkOutlined,
@@ -32,7 +32,7 @@ export const StatusTag: React.FC<StatusTagProps> = ({ text, type }) => {
 
   return (
     <span
-      className={`px-3 py-0.5 rounded-2xl text-xs font-semibold border ${colorClass} transition-colors duration-200`}
+      className={`px-3 py-0.5 rounded-2xl text-xs border ${colorClass} transition-colors duration-200`}
     >
       {text}
     </span>
@@ -153,7 +153,7 @@ const ProductCard = ({
       width: 170,
       render: (text: string, record: BidItem) => (
         <div className="flex items-center gap-2">
-          <span className="font-medium whitespace-nowrap text-gray-900">
+          <span className="whitespace-nowrap text-gray-900">
             {text}
           </span>
           <span className="text-[11px] px-2 py-0.5 rounded-xl bg-violet-50 text-violet-600 border border-violet-100 font-medium">
@@ -472,25 +472,88 @@ const ProductCard = ({
   );
 };
 
+const STATUS_FILTERS = [
+  { value: "", label: "Tất cả" },
+  { value: "PENDING", label: "Chờ duyệt" },
+  { value: "REJECTED", label: "Từ chối" },
+  { value: "APPROVED", label: "Đã duyệt" },
+];
+
 export const TabLink = () => {
   const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(0);
+
+  // Thêm state cho search và status filter
+  // Bổ sung debounce state để loading khi search
+  const [search, setSearch] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
+  const [inputSearch, setInputSearch] = useState<string>("");
+  const [searchSpinning, setSearchSpinning] = useState(false);
+
+  // debounce ref
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced search: set search value with 450ms delay
+  const handleInputSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputSearch(value);
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    setSearchSpinning(true);
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setSearch(value);
+      setSearchSpinning(false);
+    }, 450);
+  };
+
+  // Nếu thay đổi status thì search theo status luôn, không cần debounce
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+    setSearch(inputSearch);
+  };
+
+  // Sử dụng param mới khi gọi API (tùy thuộc nếu API có hỗ trợ filter phía backend, nếu không filter ở FE)
   const { data, isLoading, refetch } = useAuctionLinks({
     page: currentPage,
     size: pageSize,
+    search,
+    status,
   });
+
   const rawAuctions = data?.data?.data.items ?? [];
   // log for debug
   console.log("rawAuctions", data?.data);
 
   const allRows = useMemo(() => flattenBids(rawAuctions), [rawAuctions]);
+
+  // Nếu API chưa filter thì filter thêm ở FE
+  const filteredRows = useMemo(() => {
+    return allRows.filter((row) => {
+      let matched = true;
+      if (search.trim() !== "") {
+        const needle = search.toLowerCase();
+        matched =
+          row.title.toLowerCase().includes(needle) ||
+          row.url.toLowerCase().includes(needle) ||
+          row.full_name.toLowerCase().includes(needle);
+      }
+      if (matched && status) {
+        matched = row.status === status;
+      }
+      return matched;
+    });
+  }, [allRows, search, status]);
+
   const groupedRows = useMemo(() => {
     // Now grouping should be much simpler since the data is already normalized!
     const groups: GroupedRow[] = [];
     let prevAuctionId: number | null = null;
     let currentGroup: GroupedRow | null = null;
-    for (let i = 0; i < allRows.length; ++i) {
-      const row = allRows[i];
+    for (let i = 0; i < filteredRows.length; ++i) {
+      const row = filteredRows[i];
       const isNewGroup = row.auction_id !== prevAuctionId;
       if (isNewGroup) {
         currentGroup = {
@@ -521,25 +584,46 @@ export const TabLink = () => {
       });
     }
     return groups;
-  }, [allRows]);
+  }, [filteredRows]);
 
   return (
     <div className="p-2 bg-white shadow-sm border border-gray-100 min-h-[60vh]">
-      <div className="flex justify-end mb-2">
-        <div className="relative">
+      <div className="flex mb-2 gap-2">
+        <div>
+          <Select
+            size="middle"
+            className="w-48 !h-10"
+            value={status}
+            options={STATUS_FILTERS}
+            onChange={handleStatusChange}
+            allowClear={false}
+            style={{ minWidth: 140 }}
+          />
+        </div>
+        <div className="relative !h-11">
           <input
             type="text"
+            value={inputSearch}
+            onChange={handleInputSearch}
             placeholder="Tìm kiếm sản phẩm, link..."
-            className="border border-gray-200 bg-white pl-10 pr-4 py-2 rounded-lg w-72 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 duration-150 transition outline-none"
+            className=" !h-10 border border-gray-200 bg-white pl-10 pr-4 py-2 rounded-lg w-72 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 duration-150 transition outline-none"
           />
           <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          {searchSpinning && (
+            <Spin
+              size="small"
+              className="!absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              spinning={true}
+            />
+          )}
         </div>
       </div>
 
       <div className="space-y-2">
-        {isLoading ? (
+        {isLoading || searchSpinning ? (
           <div className="text-center text-sm text-gray-400 py-8">
-            Đang tải dữ liệu...
+            <Spin size="large" spinning={true} />
+            <div className="mt-2">Đang tải dữ liệu...</div>
           </div>
         ) : (
           groupedRows.map((item) => (
@@ -555,10 +639,10 @@ export const TabLink = () => {
 
         <Pagination
           current={
-            data?.data?.current_page != null ? data.data.current_page + 1 : 1
+            data?.data.data?.current_page != null ? data?.data.data.current_page + 1 : 1
           }
-          pageSize={data?.data?.page_size}
-          total={data?.data?.total_items}
+          pageSize={data?.data.data?.page_size}
+          total={data?.data.data?.total_items}
           onChange={(page) => setCurrentPage(page - 1)}
           size="small"
           showSizeChanger={false}

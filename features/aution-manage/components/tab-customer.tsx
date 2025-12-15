@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Button, Tooltip, Table, Input, Pagination, Avatar, Modal, Radio } from "antd";
-import { InfoCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useRef } from "react";
+import { Button, Tooltip, Table, Input, Pagination, Avatar, Modal, Radio, Spin } from "antd";
+import { InfoCircleOutlined, SearchOutlined, UserOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useAuctionCustomers } from "../hooks/aution-manage";
 import { StatusTag } from "./tab-link"; // BidItem removed because it causes column rendering bug
 import { toast } from "react-toastify";
@@ -447,36 +447,76 @@ export const TabCustomer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [size] = useState<number>(10);
 
-  // Sử dụng hook để lấy danh sách khách hàng
-  const { data, isLoading, refetch} = useAuctionCustomers({ page: currentPage, size });
+  // For search:
+  const [search, setSearch] = useState("");
+  const [searchDebounced, setSearchDebounced] = useState("");
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search term
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchDebounced(search);
+      setCurrentPage(0); // Reset page khi search
+    }, 450);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [search]);
+
+  // Sử dụng hook để lấy danh sách khách hàng, thêm search
+  const { data, isLoading, refetch } = useAuctionCustomers({ page: currentPage, size, search: searchDebounced });
 
   // Adjust mapping for new API response: "items" instead of "data"; page data on root data
   const customers: CustomerItem[] = data?.data?.data.items || [];
-  console.log('customers', data?.data);
+  // console.log('customers', data?.data);
   
-  const pageSize = data?.data?.page_size || 10;
-  const totalItems = data?.data?.total_items || 0;
+  const pageSize = data?.data?.data?.page_size || 10;
+  const totalItems = data?.data?.data?.total_items || 0;
 
   return (
     <div className="p-4 bg-white border border-gray-100">
-      <div className="flex justify-start mb-4">
+      <div className="flex justify-start mb-4 relative w-80">
         <Input
           placeholder="Tìm kiếm khách hàng..."
           prefix={<SearchOutlined />}
           className="w-80 h-10 rounded-lg"
-          // onChange={} // TODO: optional sau nếu có filter/search
+          allowClear
+          value={search}
+          onChange={e => setSearch(e.target.value)}
         />
+        {isLoading && (
+          <span
+            style={{
+              position: "absolute",
+              right: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 2,
+              pointerEvents: "none"
+            }}
+          >
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 18 }} spin />} />
+          </span>
+        )}
       </div>
       <div className="space-y-7">
-        {isLoading ? ( 
-          <div className="text-center text-gray-400 py-12">Đang tải...</div>
+        {isLoading ? (
+          <div className="text-center text-gray-400 py-12">
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} /> Đang tải...
+          </div>
         ) : customers.length === 0 ? (
           <div className="text-center text-gray-400 py-12">
             Không có khách hàng nào.
           </div>
         ) : (
           customers.map((customer: CustomerItem) => (
-            <CustomerCard refetchData ={refetch} key={customer.user_id} customer={customer} />
+            <CustomerCard refetchData={refetch} key={customer.user_id} customer={customer} />
           ))
         )}
       </div>

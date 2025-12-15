@@ -40,6 +40,13 @@ interface ConfirmModalProps {
   onOk: () => void;
 }
 
+// Status filter options according to prompt
+const STATUS_FILTERS = [
+  { value: "", label: "Tất cả" },
+  { value: "FAILED", label: "Thua" },
+  { value: "SUCCESS", label: "Thắng" },
+];
+
 // Use Ant Design Modal instead of the custom modal
 const CustomConfirmModal: React.FC<ConfirmModalProps> = ({
   open,
@@ -86,11 +93,16 @@ const CustomConfirmModal: React.FC<ConfirmModalProps> = ({
 export const TabResult = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10;
-  const [statusFilter] = useState<string>("all-status");
-  const [searchCustomer] = useState<string>("");
+
+  // Use correct value for status filter and input search
+  const [status, setStatus] = useState<string>(""); // value = status, default "", which is "Tất cả"
+  const [search, setSearch] = useState<string>(""); // value search cho input
+
   const { data, isLoading, refetch } = useAuctionResultTab({
     page: currentPage - 1,
     size: pageSize,
+    status,
+    search,
   });
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingBom, setLoadingBom] = useState(false);
@@ -285,9 +297,8 @@ export const TabResult = () => {
             return <StatusTag text="Thắng" type="success" />;
           case "BOM_CANCELLED":
             return <StatusTag text="Bom" type="error" />;
-            case "USER_CANCELLED":
+          case "USER_CANCELLED":
             return <StatusTag text="Người dùng huỷ" type="error" />;
-            
           default:
             return null;
         }
@@ -310,7 +321,7 @@ export const TabResult = () => {
         <div className="flex justify-center items-center gap-2">
           {record.bid_status === "SUCCESS" && record.order_status !== "PENDING" ? (
             <div className="flex flex-row gap-2">
-              <Tooltip title="Tạo đơn hàng">
+              {/* <Tooltip title="Tạo đơn hàng">
                 <Button
                   size="small"
                   type="primary"
@@ -321,7 +332,7 @@ export const TabResult = () => {
                 >
                   Tạo&nbsp;đơn
                 </Button>
-              </Tooltip>
+              </Tooltip> */}
               <Tooltip title="Bom">
                 <Button
                   size="small"
@@ -350,17 +361,17 @@ export const TabResult = () => {
             </Tooltip>
           ) : (
             <Tooltip title="Hoàn thành">
-            <Button
-              size="small"
-              type="primary"
-              className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
-              style={{ padding: "0 12px" }}
-              icon={<InfoCircleOutlined />}
-              disabled
-            >
-              Hoàn&nbsp;thành
-            </Button>
-          </Tooltip>
+              <Button
+                size="small"
+                type="primary"
+                className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
+                style={{ padding: "0 12px" }}
+                icon={<InfoCircleOutlined />}
+                disabled
+              >
+                Hoàn&nbsp;thành
+              </Button>
+            </Tooltip>
           )}
         </div>
       ),
@@ -370,13 +381,27 @@ export const TabResult = () => {
   return (
     <div className="bg-white rounded-xl shadow p-5 border border-gray-100">
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <Select value={statusFilter} className="w-[150px]">
-          <Option value="all-status">Trạng thái</Option>
-          <Option value="active">Hoạt động</Option>
-          <Option value="locked">Bị khóa</Option>
+        <Select
+          value={status}
+          className="w-[150px]"
+          onChange={(value) => {
+            setStatus(value);
+            setCurrentPage(1);
+          }}
+        >
+          {STATUS_FILTERS.map((item) => (
+            <Option key={item.value} value={item.value}>
+              {item.label}
+            </Option>
+          ))}
         </Select>
         <Input
-          placeholder="Tìm khách hàng..."
+          placeholder="Tìm kiếm"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
           prefix={<SearchOutlined className="text-gray-400" />}
           className="!w-[300px]"
         />
@@ -389,7 +414,6 @@ export const TabResult = () => {
             ...item,
             key: item.user_id,
           }))}
-          pagination={false}
           rowClassName={(_, idx: number) => {
             const r = items[idx];
             if (!r) return "";
@@ -406,8 +430,8 @@ export const TabResult = () => {
           }}
           className="mb-0"
           onPageChange={setCurrentPage}
-          page={currentPage - 1}
-          response={items}
+          page={currentPage}
+          response={data}
         />
       </Spin>
 
