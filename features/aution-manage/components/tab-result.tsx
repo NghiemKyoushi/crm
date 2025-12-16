@@ -157,7 +157,7 @@ export const TabResult = () => {
       setLoadingBom(true);
       try {
         await updateAuctionBOM(modalState.record.bid_id, {
-          reasontype: "OBJECTIVE",
+          reasontype: "SUBJECTIVE",
           reason: bomReason,
         });
         toast.success("Bom thành công!");
@@ -319,7 +319,7 @@ export const TabResult = () => {
       width: 110,
       render: (_: any, record: any) => (
         <div className="flex justify-center items-center gap-2">
-          {record.bid_status === "SUCCESS" && record.order_status !== "PENDING" ? (
+          {record.bid_status === "SUCCESS" && record.order_status === "PENDING" ? (
             <div className="flex flex-row gap-2">
               {/* <Tooltip title="Tạo đơn hàng">
                 <Button
@@ -346,20 +346,22 @@ export const TabResult = () => {
                 </Button>
               </Tooltip>
             </div>
-          ) : record.order_status === "PENDING" ? (
-            <Tooltip title="Hoàn thành">
-              <Button
-                size="small"
-                type="primary"
-                className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
-                style={{ padding: "0 12px" }}
-                icon={<InfoCircleOutlined />}
-                disabled
-              >
-                Hoàn&nbsp;thành
-              </Button>
-            </Tooltip>
-          ) : (
+          ) 
+          // : record.order_status === "PENDING" ? (
+          //   <Tooltip title="Hoàn thành">
+          //     <Button
+          //       size="small"
+          //       type="primary"
+          //       className="bg-gray-100 border border-gray-200 text-gray-500 font-medium"
+          //       style={{ padding: "0 12px" }}
+          //       icon={<InfoCircleOutlined />}
+          //       disabled
+          //     >
+          //       Hoàn&nbsp;thành
+          //     </Button>
+          //   </Tooltip>
+          // ) 
+          : (
             <Tooltip title="Hoàn thành">
               <Button
                 size="small"
