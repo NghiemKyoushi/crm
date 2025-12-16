@@ -55,7 +55,8 @@
     "crm": "CRM",
     "cms": "CMS",
     "vipManagement": "Quản lý Gói VIP",
-    "systemLogs": "System Logs"
+    "systemLogs": "System Logs",
+    "aution": "Hệ thống đấu giá"
   },
   "systemLogs": {
     "title": "System Logs",
