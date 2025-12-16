@@ -428,16 +428,16 @@ const TelesalesPage: React.FC = () => {
       title: "Note yêu cầu khách hàng",
       dataIndex: "notes",
       key: "notesColumn",
-      width: 200,
+      width: 250, // giảm width lại
       render: (_: any, record: any) => {
         const customerNote = record.note || "";
         return (
-          <div className="text-[11px] space-y-1.5">
+          <div className="text-[11px] space-y-1.5 max-w-[250px]">
             {/* Customer Request Note - with background and edit button */}
             {customerNote ? (
               <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
                 <div className="flex items-center justify-between mb-0.5">
-                  <div className="font-semibold text-amber-700 text-[10px]">
+                  <div className="font-semibold text-amber-700 text-[10px] whitespace-nowrap">
                     Yêu cầu KH:
                   </div>
                   <div
@@ -449,7 +449,7 @@ const TelesalesPage: React.FC = () => {
                   </div>
                 </div>
                 <Tooltip title={customerNote}>
-                  <div className="text-gray-700 line-clamp-2 leading-tight">
+                  <div className="text-gray-700 line-clamp-2 leading-tight break-words max-w-[110px]">
                     {customerNote}
                   </div>
                 </Tooltip>
@@ -458,7 +458,7 @@ const TelesalesPage: React.FC = () => {
               /* No customer note - show add button */
               <div className="bg-amber-50 border-l-2 border-amber-400 px-2 py-1 rounded">
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold text-amber-700 text-[10px]">
+                  <div className="font-semibold text-amber-700 text-[10px] whitespace-nowrap">
                     Yêu cầu KH:
                   </div>
                   <div
@@ -469,7 +469,7 @@ const TelesalesPage: React.FC = () => {
                     <span className="text-[9px] font-medium">Thêm</span>
                   </div>
                 </div>
-                <div className="text-gray-400 italic text-[10px]">
+                <div className="text-gray-400 italic text-[10px] break-words max-w-[110px]">
                   Chưa có yêu cầu
                 </div>
               </div>
@@ -495,6 +495,7 @@ const TelesalesPage: React.FC = () => {
       title: "Trạng thái",
       dataIndex: "telesale",
       key: "telesaleStatus",
+      fixed: "right",
       width: 120,
       render: (_: any, record: TelesaleCustomer) => {
         let statusColor = "default";
@@ -537,6 +538,7 @@ const TelesalesPage: React.FC = () => {
       title: "Loại dịch vụ",
       dataIndex: "serviceTag",
       key: "serviceTag",
+      fixed: "right",
       width: 120,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.serviceTag;
@@ -608,6 +610,7 @@ const TelesalesPage: React.FC = () => {
       title: "Nguồn",
       dataIndex: "sourceTag",
       key: "sourceTag",
+      fixed: "right",
       width: 110,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.sourceTag;
@@ -645,6 +648,7 @@ const TelesalesPage: React.FC = () => {
       title: "Tình trạng",
       dataIndex: "statusTag",
       key: "statusTag",
+      fixed: "right",
       width: 110,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.statusTag;
@@ -714,6 +718,7 @@ const TelesalesPage: React.FC = () => {
       title: "Ghi chú",
       dataIndex: "notes",
       key: "notesColumn",
+      fixed: "right",
       width: 200,
       render: (_: any, record: any) => {
         const salesNotes =
@@ -776,7 +781,7 @@ const TelesalesPage: React.FC = () => {
       title: "Hành động",
       key: "action",
       width: 100,
-
+      fixed: "right",
       render: (_: any, record: TelesaleCustomer) => {
         if (record.status === "UNASSIGNED") {
           return (
