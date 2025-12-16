@@ -55,7 +55,8 @@
     "crm": "CRM",
     "cms": "CMS",
     "vipManagement": "VIP Management",
-    "systemLogs": "System Logs"
+    "systemLogs": "System Logs",
+    "aution": "System aution"
   },
   "systemLogs": {
     "title": "System Logs",
