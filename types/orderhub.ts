@@ -34,6 +34,7 @@ export enum OrderStatusType {
   ADMIN_PENDING="ADMIN_PENDING",
   PACKED="PACKED",
   DENIED="DENIED",
+  AUCTION_ORDER_PENDING="AUCTION_ORDER_PENDING"
 }
 
 export interface Invoice {

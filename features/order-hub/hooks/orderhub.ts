@@ -240,6 +240,7 @@ export const useCancelOrderAfterApprove = () => {
         amount: number;
         note: string;
         isFullBack: boolean;
+        is_admin_cancel?: boolean;
       };
     }) => cancelOrderAfterApprove(id, status, body),
   });

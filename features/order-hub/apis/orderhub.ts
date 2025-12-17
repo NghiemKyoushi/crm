@@ -322,6 +322,7 @@ export const cancelOrderAfterApprove = async (
     amount: number;
     note: string;
     isFullBack: boolean;
+    is_admin_cancel?: boolean;
   }
 ) => {
   const bodySend = {
@@ -329,6 +330,7 @@ export const cancelOrderAfterApprove = async (
     is_full_back: body.isFullBack,
     amount: body.amount,
     status: status,
+    is_admin_cancel:body.is_admin_cancel
   }
   const res = await api.post(`${API_TYPE_CONST.CANCEL_ORDER}/${id}`, bodySend);
   return res.data.data;

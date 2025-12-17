@@ -60,6 +60,7 @@ import dayjs from "dayjs";
 import { CancelOrderModal } from "./modal/cancel-order-modal";
 import EditHistoryModal from "./modal/edit-history-modal";
 import { getResponseMessage } from "@/api/axiosClient";
+import CancelAuctionModal from "./modal/cancel-aution-modal";
 
 function isEqualObject(obj1: any, obj2: any) {
   // Only compare shallow, including only relevant keys
@@ -90,6 +91,7 @@ export default function OrderHub() {
   const [isEditingTrackingModal, setIsEditingTrackingModal] = useState(false);
   const [isTrackingJP, setIsTrackingJP] = useState(false);
   const [isOpenCancelOrder2, setIsOpenCancelOrder2] = useState(false);
+  const [isOpenCancelAution, setIsOpenCancelAution] = useState(false);
 
   const [isEditingTracking, setIsEditingTracking] = useState<{
     orderId: number;
@@ -581,6 +583,59 @@ export default function OrderHub() {
     );
   };
 
+  const handleCancelAutionAfterApprove = (
+    orderId: number,
+    status: string,
+    params: {
+      note: string;
+      is_admin_cancel: boolean;
+    }
+  ) => {
+    setIsCancelOrderLoading(true);
+    cancelOrderAfterApproveMutation.mutate(
+      {
+        id: orderId,
+        status: status,
+        body: { 
+          amount: 0,
+          isFullBack: false,
+          note: params.note,
+          is_admin_cancel: params.is_admin_cancel
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Huỷ đơn hàng thành công");
+          refetch();
+          setOrderDetail(undefined);
+          setIsOpenCancelOrder2(false);
+        },
+        onError: (err: any) => {
+          const currentStatus =
+            err?.response?.data?.currentStatus ||
+            err?.response?.data?.data?.currentStatus;
+
+          if (err?.response?.status === 400) {
+            if (currentStatus) {
+              toast.error("Trạng thái không khớp");
+            } else {
+              toast.error(
+                err?.response?.data?.messageKey ||
+                "Có lỗi xảy ra"
+              );
+            }
+            refetch();
+            setIsOpenCancelOrder2(false);
+          } else {
+            toast.error(getResponseMessage(err?.response));
+          }
+        },
+        onSettled: () => {
+          setIsCancelOrderLoading(false);
+        },
+      }
+    );
+  };
   const columns: ColumnsType<Invoice> = [
     {
       title: "No",
@@ -1167,6 +1222,10 @@ export default function OrderHub() {
             color = "green";
             text = t("status.packed");
             break;
+          case OrderStatusType.AUCTION_ORDER_PENDING:
+            color = "orange";
+            text = "Đơn hàng đấu giá";
+            break;
           default:
             color = "default";
             text = status;
@@ -1379,7 +1438,24 @@ export default function OrderHub() {
             );
             break;
 
-          case OrderStatusType.READY_TO_SHIP:
+            case OrderStatusType.AUCTION_ORDER_PENDING:
+              actionButton = (
+                <div>
+                  {canDelete && (
+                    <Button
+                      key={record.status}
+                      size="small"
+                      onClick={() => {
+                        setOrderDetail(record);
+                        setIsOpenCancelAution(true);
+                      }}
+                      className="!bg-red-500 hover:!bg-red-600 !text-white !border-0 !text-[11px] !px-2 !h-7 !font-medium !rounded w-full"
+                    >
+                      Huỷ đơn
+                    </Button>
+                  )}
+                </div>
+              )
             break;
           case OrderStatusType.PENDING_DEPOSIT:
             actionButton = (
@@ -1950,6 +2026,20 @@ export default function OrderHub() {
           loading={isCancelOrderLoading}
         />
       )}
+      {orderDetail && (
+        <CancelAuctionModal
+          onCancel={() => {
+            setIsOpenCancelAution(false);
+            setOrderDetail(undefined);
+          }}
+          onConfirm={(value) =>
+            handleCancelAutionAfterApprove(orderDetail.id, orderDetail.status, value)
+          }
+          visible={isOpenCancelAution}
+          loading={isCancelOrderLoading}
+        />
+      )}
+      
     </div>
   );
 }
