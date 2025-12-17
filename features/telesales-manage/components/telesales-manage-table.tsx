@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useRef, useMemo } from "react";
-import { CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, DownloadOutlined, FileExcelOutlined, TeamOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  FileExcelOutlined,
+  TeamOutlined,
+  UserAddOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Input,
@@ -121,8 +129,8 @@ const TelesalesPage: React.FC = () => {
 
   const [deleteCustomerModal, setDeleteCustomerModal] = useState<{
     open: boolean;
-    record?: TelesaleCustomer
-  }>({ open: false, record: undefined});
+    record?: TelesaleCustomer;
+  }>({ open: false, record: undefined });
 
   // Popup Hủy gán Sale Modal state/handlers
   const [unassignSaleModal, setUnassignSaleModal] = useState<{
@@ -306,8 +314,7 @@ const TelesalesPage: React.FC = () => {
   };
 
   // Filter only unassigned customers for selection
-  const unassignedCustomers =
-    data?.data || [];
+  const unassignedCustomers = data?.data || [];
   const allUnassignedIds = unassignedCustomers.map((d) => d.id);
 
   const columns: ColumnsType<TelesaleCustomer> = [
@@ -542,7 +549,7 @@ const TelesalesPage: React.FC = () => {
       width: 120,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.serviceTag;
-        if (!Array.isArray(tag) || tag.length === 0) {
+        if (!Array.isArray(tag)) {
           return <span className="text-xs text-gray-400">--</span>;
         }
         return (
@@ -572,7 +579,10 @@ const TelesalesPage: React.FC = () => {
                         }}
                       >
                         <Tooltip title="Xoá tag">
-                          <DeleteOutlined className="text-white hover:text-red-200" style={{ fontSize: 8 }} />
+                          <DeleteOutlined
+                            className="text-white hover:text-red-200"
+                            style={{ fontSize: 8 }}
+                          />
                         </Tooltip>
                       </span>
                     </div>
@@ -614,32 +624,46 @@ const TelesalesPage: React.FC = () => {
       width: 110,
       render: (_: any, record: TelesaleCustomer) => {
         const tag = record.sourceTag;
-        if (!tag) return <span className="text-xs text-gray-400">--</span>;
+        // if (!tag) return <span className="text-xs text-gray-400">--</span>;
         return (
           <div className="flex flex-col gap-1 px-1">
-            <div
-              key={tag.id}
-              className="group relative flex items-center mx-1"
-              style={{ width: "calc(100% - 8px)" }}
-            >
+            {tag ? (
               <div
-                className="relative flex items-center h-5 w-full rounded-l"
-                style={{ backgroundColor: tag.color || "#3b82f6" }}
+                key={tag.id}
+                className="group relative flex items-center mx-1"
+                style={{ width: "calc(100% - 8px)" }}
               >
-                <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
-                  <span className="truncate">{tag.name}</span>
-                </div>
                 <div
-                  className="absolute -right-2 top-0 bottom-0 w-0 h-0"
-                  style={{
-                    borderTop: "10px solid transparent",
-                    borderBottom: "10px solid transparent",
-                    borderLeft: `8px solid ${tag.color || "#3b82f6"}`,
-                  }}
-                />
+                  className="relative flex items-center h-5 w-full rounded-l"
+                  style={{ backgroundColor: tag.color || "#3b82f6" }}
+                >
+                  <div className="flex-1 flex items-center justify-between px-2 py-0.5 text-white text-[9px] font-medium">
+                    <span className="truncate">{tag.name}</span>
+                  </div>
+                  <div
+                    className="absolute -right-2 top-0 bottom-0 w-0 h-0"
+                    style={{
+                      borderTop: "10px solid transparent",
+                      borderBottom: "10px solid transparent",
+                      borderLeft: `8px solid ${tag.color || "#3b82f6"}`,
+                    }}
+                  />
+                </div>
               </div>
+            ) : (
+              <span className="text-xs text-gray-400">--</span>
+            )}
+            <div
+              className="text-[9px] text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 mt-0.5"
+              onClick={() => {
+                setSelectedCustomer(record);
+                setIsOpenTagModal(true);
+                setTagTypeModal("SOURCE");
+              }}
+            >
+              <EditOutlined style={{ fontSize: 9 }} />
+              <span>Thêm tags</span>
             </div>
-            <div className="h-4"></div>
           </div>
         );
       },
@@ -680,7 +704,10 @@ const TelesalesPage: React.FC = () => {
                         }}
                       >
                         <Tooltip title="Xoá tag">
-                          <DeleteOutlined className="text-white hover:text-red-200" style={{ fontSize: 8 }} />
+                          <DeleteOutlined
+                            className="text-white hover:text-red-200"
+                            style={{ fontSize: 8 }}
+                          />
                         </Tooltip>
                       </span>
                     </div>
@@ -787,30 +814,30 @@ const TelesalesPage: React.FC = () => {
           return (
             <div>
               {isTelesaleManager && (
-              <div className="flex flex-col gap-1.5">
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setSelectedCustomer(record);
-                    setIsOpenAssign(true);
-                  }}
-                  className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
-                >
-                  Gán Sale
-                </Button>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setDeleteCustomerModal({
-                      open: true,
-                      record: record,
-                    });
-                  }}
-                  className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
-                >
-                  Xoá khách hàng
-                </Button>
-              </div>
+                <div className="flex flex-col gap-1.5">
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setSelectedCustomer(record);
+                      setIsOpenAssign(true);
+                    }}
+                    className="!bg-gradient-to-r !from-orange-500 !to-orange-600 hover:!from-orange-600 hover:!to-orange-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                  >
+                    Gán Sale
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setDeleteCustomerModal({
+                        open: true,
+                        record: record,
+                      });
+                    }}
+                    className="!bg-gradient-to-r !from-red-500 !to-red-600 hover:!from-red-600 hover:!to-red-700 !text-white !text-xs !font-medium !rounded-md !shadow-sm hover:!shadow-md !transition-all !w-full"
+                  >
+                    Xoá khách hàng
+                  </Button>
+                </div>
               )}
             </div>
           );
@@ -1013,6 +1040,8 @@ const TelesalesPage: React.FC = () => {
     service_tag_id,
     source_tag_id,
     status_tag_id,
+    note_from_date,
+    note_to_date
   }: {
     search: string;
     business_field: string | null;
@@ -1021,6 +1050,8 @@ const TelesalesPage: React.FC = () => {
     service_tag_id: string | null;
     source_tag_id: string | null;
     status_tag_id: string | null;
+    note_from_date?: string | null;
+    note_to_date?: string | null;
   }) => {
     setParams((prev) => ({
       ...prev,
@@ -1032,6 +1063,8 @@ const TelesalesPage: React.FC = () => {
       service_tag_id: service_tag_id ?? undefined,
       source_tag_id: source_tag_id ?? undefined,
       status_tag_id: status_tag_id ?? undefined,
+      note_from_date: note_from_date ?? undefined,
+      note_to_date: note_to_date ?? undefined
     }));
     setPage(0);
     // Always call refetch, regardless of whether the params actually changed
@@ -1164,9 +1197,7 @@ const TelesalesPage: React.FC = () => {
               <Button
                 size="small"
                 className="!bg-green-600 hover:!bg-green-700 !text-white"
-                icon={
-                  <FileExcelOutlined className="!h-3 !w-3" />
-                }
+                icon={<FileExcelOutlined className="!h-3 !w-3" />}
                 loading={importing}
                 onClick={handleImportClick}
               >
@@ -1183,9 +1214,7 @@ const TelesalesPage: React.FC = () => {
               <Button
                 size="small"
                 className="!bg-blue-600 hover:!bg-blue-700 !text-white"
-                icon={
-                  <DownloadOutlined className="!h-3 !w-3" />
-                }
+                icon={<DownloadOutlined className="!h-3 !w-3" />}
                 onClick={handleDownloadExample}
                 loading={downloading}
               >
@@ -1194,9 +1223,7 @@ const TelesalesPage: React.FC = () => {
               <Button
                 size="small"
                 className="!bg-purple-600 hover:!bg-purple-700 !text-white"
-                icon={
-                  <UserAddOutlined className="!h-3 !w-3" />
-                }
+                icon={<UserAddOutlined className="!h-3 !w-3" />}
                 onClick={() => setIsOpenAddCustomerModalOpen(true)}
               >
                 Thêm KH
@@ -1214,9 +1241,9 @@ const TelesalesPage: React.FC = () => {
             setBulkAssignCustomers(selectedCustomers || []);
             setIsBulkAssignModalOpen(true);
           }}
-          onDeleteMulti={()=>{
+          onDeleteMulti={() => {
             setBulkAssignCustomers(selectedCustomers || []);
-            setIsDeleteMultiModalOpen(true)
+            setIsDeleteMultiModalOpen(true);
           }}
           selectedRowKeys={selectedRowKeys}
           isAdmin={isTelesaleManager}
@@ -1457,7 +1484,9 @@ const TelesalesPage: React.FC = () => {
         open={deleteCustomerModal.open}
         title="Xác nhận xoá khách hàng"
         onOk={handleConfirmDeleteCustomer}
-        onCancel={()=> setDeleteCustomerModal({ open: false, record: undefined })}
+        onCancel={() =>
+          setDeleteCustomerModal({ open: false, record: undefined })
+        }
         okText="Xoá"
         cancelText="Huỷ"
         confirmLoading={deleteCustomerTagMutation.isPending}
@@ -1465,7 +1494,8 @@ const TelesalesPage: React.FC = () => {
         maskClosable={false}
       >
         <p>
-          Bạn có chắc chắn muốn xoá khách hàng {deleteCustomerModal.record?.name} ?
+          Bạn có chắc chắn muốn xoá khách hàng{" "}
+          {deleteCustomerModal.record?.name} ?
         </p>
       </Modal>
 
@@ -1610,73 +1640,87 @@ const TelesalesPage: React.FC = () => {
         </div>
       </Modal>
 
-    {/* Modal xác nhận xoá nhiều khách hàng */}
-    <Modal
-      open={isDeleteMultiModalOpen}
-      onCancel={() => setIsDeleteMultiModalOpen(false)}
-      footer={[
-        <Button key="back" onClick={() => setIsDeleteMultiModalOpen(false)}>
-          Huỷ bỏ
-        </Button>,
-        <Button
-          key="confirm"
-          type="primary"
-          danger
-          onClick={async () => {
-            deleteBulkTelesaleContacts(
-              (bulkAssignCustomers || []).map((customer) => customer.id)
-            )
-            .then(() => {
-              toast.success("Xoá khách hàng thành công!");
+      {/* Modal xác nhận xoá nhiều khách hàng */}
+      <Modal
+        open={isDeleteMultiModalOpen}
+        onCancel={() => setIsDeleteMultiModalOpen(false)}
+        footer={[
+          <Button key="back" onClick={() => setIsDeleteMultiModalOpen(false)}>
+            Huỷ bỏ
+          </Button>,
+          <Button
+            key="confirm"
+            type="primary"
+            danger
+            onClick={async () => {
+              deleteBulkTelesaleContacts(
+                (bulkAssignCustomers || []).map((customer) => customer.id)
+              )
+                .then(() => {
+                  toast.success("Xoá khách hàng thành công!");
+                  setIsDeleteMultiModalOpen(false);
+                  refetch();
+                  reloadTelesaleStat();
+                  setBulkAssignCustomers([]);
+                })
+                .catch(() => {
+                  toast.error("Xoá khách hàng thất bại, vui lòng thử lại!");
+                  setIsDeleteMultiModalOpen(false);
+                });
+              setSelectedRowKeys([]);
               setIsDeleteMultiModalOpen(false);
-              refetch();
-              reloadTelesaleStat();
-              setBulkAssignCustomers([])
-            })
-            .catch(() => {
-              toast.error("Xoá khách hàng thất bại, vui lòng thử lại!");
-              setIsDeleteMultiModalOpen(false);
-            });
-            setSelectedRowKeys([]);
-            setIsDeleteMultiModalOpen(false);
-          }}
-        >
-          Xác nhận xoá
-        </Button>,
-      ]}
-      centered
-      width={600}
-      title={
-        <span className="font-bold text-lg">
-          Xác nhận xoá {bulkAssignCustomers?.length || 0} khách hàng
-        </span>
-      }
-    >
-      <div className="mb-4">
-        Bạn có chắc chắn muốn xoá những khách hàng sau khỏi danh sách không? <br/>
-        <span className="text-red-600 font-semibold">Hành động này sẽ không thể hoàn tác!</span>
-      </div>
-      <div className="max-h-[320px] overflow-y-auto border border-gray-100 rounded">
-        {bulkAssignCustomers?.length > 0 ? (
-          <ul className="divide-y divide-gray-100">
-            {bulkAssignCustomers.map((customer: any, idx: number) => (
-              <li key={customer.id || idx} className="p-2 flex items-center gap-2">
-                <span className="text-gray-500">{idx + 1}.</span>
-                <span className="font-medium text-gray-800">{customer.fullname || customer.name || "Không tên"}</span>
-                {customer.phonenumber && (
-                  <span className="ml-2 text-gray-500 text-sm">{customer.phonenumber}</span>
-                )}
-                {customer.email && (
-                  <span className="ml-2 text-gray-400 text-xs">{customer.email}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-gray-500 italic text-center py-8">Không có khách hàng nào.</div>
-        )}
-      </div>
-    </Modal>
+            }}
+          >
+            Xác nhận xoá
+          </Button>,
+        ]}
+        centered
+        width={600}
+        title={
+          <span className="font-bold text-lg">
+            Xác nhận xoá {bulkAssignCustomers?.length || 0} khách hàng
+          </span>
+        }
+      >
+        <div className="mb-4">
+          Bạn có chắc chắn muốn xoá những khách hàng sau khỏi danh sách không?{" "}
+          <br />
+          <span className="text-red-600 font-semibold">
+            Hành động này sẽ không thể hoàn tác!
+          </span>
+        </div>
+        <div className="max-h-[320px] overflow-y-auto border border-gray-100 rounded">
+          {bulkAssignCustomers?.length > 0 ? (
+            <ul className="divide-y divide-gray-100">
+              {bulkAssignCustomers.map((customer: any, idx: number) => (
+                <li
+                  key={customer.id || idx}
+                  className="p-2 flex items-center gap-2"
+                >
+                  <span className="text-gray-500">{idx + 1}.</span>
+                  <span className="font-medium text-gray-800">
+                    {customer.fullname || customer.name || "Không tên"}
+                  </span>
+                  {customer.phonenumber && (
+                    <span className="ml-2 text-gray-500 text-sm">
+                      {customer.phonenumber}
+                    </span>
+                  )}
+                  {customer.email && (
+                    <span className="ml-2 text-gray-400 text-xs">
+                      {customer.email}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-gray-500 italic text-center py-8">
+              Không có khách hàng nào.
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

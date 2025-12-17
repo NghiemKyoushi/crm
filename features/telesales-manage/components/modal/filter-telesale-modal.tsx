@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Form, Input, Select, Button, Row, Col, Spin, SelectProps } from "antd";
+import { Form, Input, Select, Button, Spin, SelectProps, DatePicker } from "antd";
 import { FilterOutlined, UserOutlined } from "@ant-design/icons";
+import dayjs, { Dayjs } from "dayjs";
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 import {
   getTelesaleAccounts,
@@ -30,6 +32,8 @@ export const FilterForm: React.FC<{
     service_tag_id: string | null;
     source_tag_id: string | null;
     status_tag_id: string | null;
+    note_from_date?: string | null;
+    note_to_date?: string | null;
   }) => void;
   onBulkAssign: () => void;
   onDeleteMulti: () => void;
@@ -91,6 +95,18 @@ export const FilterForm: React.FC<{
   }, []);
 
   const handleSubmit = (values: any) => {
+    // Handle date range for note_from_date, note_to_date
+    let note_from_date: string | null = null;
+    let note_to_date: string | null = null;
+    if (Array.isArray(values.note_date_range) && values.note_date_range.length === 2) {
+      note_from_date = values.note_date_range[0]
+        ? (values.note_date_range[0] as Dayjs).format("YYYY-MM-DD")
+        : null;
+      note_to_date = values.note_date_range[1]
+        ? (values.note_date_range[1] as Dayjs).format("YYYY-MM-DD")
+        : null;
+    }
+
     onFilter({
       search: values.search ?? "",
       business_field:
@@ -117,6 +133,8 @@ export const FilterForm: React.FC<{
         values.status_tag_id !== undefined && values.status_tag_id !== ""
           ? values.status_tag_id
           : null,
+      note_from_date,
+      note_to_date,
     });
   };
 
@@ -186,6 +204,7 @@ export const FilterForm: React.FC<{
         service_tag_id: null,
         source_tag_id: null,
         status_tag_id: null,
+        note_date_range: null,
       }}
       onFinish={handleSubmit}
     >
@@ -213,6 +232,16 @@ export const FilterForm: React.FC<{
                   />
                 </svg>
               }
+            />
+          </Form.Item>
+
+          {/* Date Range Filter */}
+          <Form.Item name="note_date_range" className="!mb-0">
+            <RangePicker
+              style={{ width: 230 }}
+              className="!h-9 !rounded-md"
+              format="YYYY-MM-DD"
+              placeholder={["Note từ ngày", "Note đến ngày"]}
             />
           </Form.Item>
 

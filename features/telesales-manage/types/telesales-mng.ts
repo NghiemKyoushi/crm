@@ -4,6 +4,8 @@ export interface TelesaleParamsList {
     sale_id?: string;
     search?: string;
     status?: string;
+    note_from_date?: string;
+    note_to_date?:string;
 }
 export interface TelesaleCustomer {
     id: number;
